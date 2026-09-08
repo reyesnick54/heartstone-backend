@@ -7,6 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StructuralLifecycleStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum JurisdictionType {
+  NATIONAL
+  SUBNATIONAL
+  MUNICIPAL
+  SPECIAL_ECONOMIC_ZONE
+  REGULATORY
+  SUBJECT_MATTER
+  OTHER
+}
+
+enum InstitutionType {
+  GOVERNMENT
+  MINISTRY
+  AGENCY
+  AUTHORITY
+  REGULATOR
+  STATUTORY_BODY
+  SPECIAL_ECONOMIC_ZONE_AUTHORITY
+  PUBLIC_BODY
+  OTHER
+}
+
 model SystemMetadata {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -50,6 +79,32 @@ model Office {
 
   delegationsAsDelegator Delegation[] @relation("DelegatorOffice")
   delegationsAsRecipient Delegation[] @relation("RecipientOffice")
+enum AppointmentType {
+  PERMANENT
+  FIXED_TERM
+  ACTING
+  INTERIM
+  TEMPORARY
+  EX_OFFICIO
+  OTHER
+}
+
+enum AppointmentStatus {
+  PLANNED
+  ACTIVE
+  SUSPENDED
+  ENDED
+  REVOKED
+}
+
+/// Minimal Office record required for Appointment foreign-key integrity (Phase 2C scope).
+model Office {
+  id            String        @id @default(cuid())
+  referenceCode String        @unique
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointments  Appointment[]
 
   @@map("offices")
 }
@@ -64,6 +119,14 @@ model Officeholder {
 
   delegationsAsDelegator Delegation[] @relation("DelegatorOfficeholder")
   delegationsAsRecipient Delegation[] @relation("RecipientOfficeholder")
+/// Minimal Officeholder record required for Appointment foreign-key integrity (Phase 2C scope).
+model Officeholder {
+  id            String        @id @default(cuid())
+  referenceCode String        @unique
+  displayName   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointments  Appointment[]
 
   @@map("officeholders")
 }
@@ -99,4 +162,56 @@ model Delegation {
   updatedAt DateTime @updatedAt
 
   @@map("delegations")
+model Appointment {
+  id                  String            @id @default(cuid())
+  officeId            String
+  officeholderId      String
+  referenceCode       String            @unique
+  appointmentType     AppointmentType
+  status              AppointmentStatus
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  instrumentReference String?
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  office       Office       @relation(fields: [officeId], references: [id])
+  officeholder Officeholder @relation(fields: [officeholderId], references: [id])
+
+  @@index([officeId])
+  @@index([officeholderId])
+  @@index([status])
+  @@index([appointmentType])
+  @@index([effectiveFrom])
+  @@index([effectiveUntil])
+  @@map("appointments")
+model Jurisdiction {
+  id           String                    @id @default(uuid()) @db.Uuid
+  code         String                    @unique
+  name         String
+  description  String?
+  type         JurisdictionType
+  status       StructuralLifecycleStatus @default(ACTIVE)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  institutions Institution[]
+
+  @@map("jurisdictions")
+}
+
+model Institution {
+  id             String                    @id @default(uuid()) @db.Uuid
+  jurisdictionId String                    @db.Uuid
+  code           String
+  name           String
+  description    String?
+  type           InstitutionType
+  status         StructuralLifecycleStatus @default(ACTIVE)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  jurisdiction   Jurisdiction              @relation(fields: [jurisdictionId], references: [id])
+
+  @@unique([jurisdictionId, code])
+  @@map("institutions")
 }
