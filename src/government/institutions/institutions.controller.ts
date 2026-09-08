@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { InstitutionStructureDto } from '../structure/dto/government-structure.dto';
+import { GovernmentStructureService } from '../structure/government-structure.service';
 import { CreateInstitutionDto } from './dto/create-institution.dto';
 import { InstitutionResponseDto } from './dto/institution-response.dto';
 import { QueryInstitutionsDto } from './dto/query-institutions.dto';
@@ -10,6 +12,10 @@ import { InstitutionsService } from './institutions.service';
 @ApiTags('institutions')
 @Controller('institutions')
 export class InstitutionsController {
+  constructor(
+    private readonly institutionsService: InstitutionsService,
+    private readonly structureService: GovernmentStructureService,
+  ) {}
   constructor(private readonly institutionsService: InstitutionsService) {}
 
   @Post()
@@ -24,6 +30,13 @@ export class InstitutionsController {
   @ApiOkResponse({ type: InstitutionResponseDto, isArray: true })
   findAll(@Query() query: QueryInstitutionsDto): Promise<InstitutionResponseDto[]> {
     return this.institutionsService.findAll(query);
+  }
+
+  @Get(':id/structure')
+  @ApiOperation({ summary: 'Get organizational structure for an institution' })
+  @ApiOkResponse({ type: InstitutionStructureDto })
+  getStructure(@Param('id', ParseUUIDPipe) id: string): Promise<InstitutionStructureDto> {
+    return this.structureService.getInstitutionStructure(id);
   }
 
   @Get(':id')

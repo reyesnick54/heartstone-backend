@@ -8,10 +8,15 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { GovernmentStructureValidationService } from '../common/government-structure-validation.service';
 import { InstitutionsService } from './institutions.service';
 
 describe('InstitutionsService', () => {
   let service: InstitutionsService;
+  let validation: {
+    ensureJurisdictionExists: jest.Mock;
+  };
+  let prisma: {
   let prisma: {
     jurisdiction: {
       findUnique: jest.Mock;
@@ -38,6 +43,11 @@ describe('InstitutionsService', () => {
   };
 
   beforeEach(async () => {
+    validation = {
+      ensureJurisdictionExists: jest.fn(),
+    };
+
+    prisma = {
     prisma = {
       jurisdiction: {
         findUnique: jest.fn(),
@@ -57,6 +67,10 @@ describe('InstitutionsService', () => {
           provide: PrismaService,
           useValue: prisma,
         },
+        {
+          provide: GovernmentStructureValidationService,
+          useValue: validation,
+        },
       ],
     }).compile();
 
@@ -64,6 +78,7 @@ describe('InstitutionsService', () => {
   });
 
   it('rejects institutions referencing a missing jurisdiction', async () => {
+    validation.ensureJurisdictionExists.mockRejectedValue(new NotFoundException());
     prisma.jurisdiction.findUnique.mockResolvedValue(null);
 
     await expect(
@@ -77,6 +92,7 @@ describe('InstitutionsService', () => {
   });
 
   it('creates an institution for an existing jurisdiction', async () => {
+    validation.ensureJurisdictionExists.mockResolvedValue(undefined);
     prisma.jurisdiction.findUnique.mockResolvedValue({ id: jurisdictionId });
     prisma.institution.create.mockResolvedValue(sampleInstitution);
 
@@ -91,6 +107,7 @@ describe('InstitutionsService', () => {
   });
 
   it('rejects duplicate institution codes within the same jurisdiction', async () => {
+    validation.ensureJurisdictionExists.mockResolvedValue(undefined);
     prisma.jurisdiction.findUnique.mockResolvedValue({ id: jurisdictionId });
     prisma.institution.create.mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {

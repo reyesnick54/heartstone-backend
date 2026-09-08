@@ -2,12 +2,20 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Institution, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { GovernmentStructureValidationService } from '../common/government-structure-validation.service';
 import { CreateInstitutionDto } from './dto/create-institution.dto';
 import { QueryInstitutionsDto } from './dto/query-institutions.dto';
 import { UpdateInstitutionDto } from './dto/update-institution.dto';
 
 @Injectable()
 export class InstitutionsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly validation: GovernmentStructureValidationService,
+  ) {}
+
+  async create(dto: CreateInstitutionDto): Promise<Institution> {
+    await this.validation.ensureJurisdictionExists(dto.jurisdictionId);
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInstitutionDto): Promise<Institution> {

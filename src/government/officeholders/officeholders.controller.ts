@@ -10,6 +10,13 @@ import { OfficeholdersService } from './officeholders.service';
 @ApiTags('officeholders')
 @Controller('officeholders')
 export class OfficeholdersController {
+  constructor(private readonly service: OfficeholdersService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a officeholder' })
+  @ApiCreatedResponse({ type: OfficeholderResponseDto })
+  create(@Body() dto: CreateOfficeholderDto): Promise<OfficeholderResponseDto> {
+    return this.service.create(dto);
   constructor(private readonly officeholdersService: OfficeholdersService) {}
 
   @Post()
@@ -23,6 +30,18 @@ export class OfficeholdersController {
   @ApiOperation({ summary: 'List officeholders' })
   @ApiOkResponse({ type: OfficeholderResponseDto, isArray: true })
   findAll(@Query() query: QueryOfficeholdersDto): Promise<OfficeholderResponseDto[]> {
+    return this.service.findAll(query);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a officeholder by id' })
+  @ApiOkResponse({ type: OfficeholderResponseDto })
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<OfficeholderResponseDto> {
+    return this.service.findOne(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a officeholder' })
     return this.officeholdersService.findAll(query);
   }
 
@@ -40,6 +59,7 @@ export class OfficeholdersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateOfficeholderDto,
   ): Promise<OfficeholderResponseDto> {
+    return this.service.update(id, dto);
     return this.officeholdersService.update(id, dto);
   }
 }

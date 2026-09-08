@@ -27,6 +27,14 @@ export async function createIntegrationApp(): Promise<{
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await prisma.delegation.deleteMany();
+  await prisma.appointment.deleteMany();
+  await prisma.institutionExternalAuthority.deleteMany();
+  await prisma.office.deleteMany();
+  await prisma.officeholder.deleteMany();
+  await prisma.department.deleteMany();
+  await prisma.governmentBody.deleteMany();
+  await prisma.externalAuthority.deleteMany();
   await prisma.officeholder.deleteMany();
   await prisma.office.deleteMany();
   await prisma.department.deleteMany();

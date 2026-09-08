@@ -40,6 +40,11 @@ enum InstitutionType {
 }
 
 enum GovernmentBodyType {
+  GOVERNING
+  SUPERVISORY
+  ADVISORY
+  ADMINISTRATIVE
+  DECISION_MAKING
   BOARD
   COUNCIL
   COMMITTEE
@@ -57,6 +62,19 @@ enum AppointmentType {
 }
 
 enum AppointmentStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ENDED
+  REVOKED
+}
+
+enum DelegationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  ENDED
   DRAFT
   PENDING
   ACTIVE
@@ -78,6 +96,7 @@ enum ExternalAuthorityType {
   REGULATORY
   JUDICIAL
   PROFESSIONAL
+  INSTITUTIONAL
   INTERNATIONAL
   PLANNED
   ACTIVE
@@ -166,6 +185,23 @@ model Jurisdiction {
 }
 
 model Institution {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  jurisdictionId             String                        @db.Uuid
+  code                       String
+  name                       String
+  description                String?
+  type                       InstitutionType
+  status                     StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
+  jurisdiction               Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  governmentBodies           GovernmentBody[]
+  departments                Department[]
+  delegations                Delegation[]
+  externalAuthorityRelations InstitutionExternalAuthority[]
+
+  @@unique([jurisdictionId, code])
+  @@index([jurisdictionId])
   id                        String                         @id @default(uuid()) @db.Uuid
   jurisdictionId            String                         @db.Uuid
   code                      String
@@ -209,6 +245,7 @@ model GovernmentBody {
   institution   Institution               @relation(fields: [institutionId], references: [id])
 
   @@unique([institutionId, code])
+  @@index([institutionId])
   @@map("government_bodies")
 }
 
@@ -225,6 +262,7 @@ model Department {
   offices       Office[]
 
   @@unique([institutionId, code])
+  @@index([institutionId])
   @@map("departments")
 }
 
@@ -240,6 +278,11 @@ model Office {
   updatedAt    DateTime                  @updatedAt
   department   Department                @relation(fields: [departmentId], references: [id])
   appointments Appointment[]
+  delegationsAsDelegator Delegation[] @relation("DelegationDelegatorOffice")
+  delegationsAsRecipient Delegation[] @relation("DelegationRecipientOffice")
+
+  @@unique([departmentId, code])
+  @@index([departmentId])
 
   @@unique([departmentId, code])
 
@@ -332,6 +375,16 @@ model Office {
 }
 
 model Officeholder {
+  id           String                    @id @default(uuid()) @db.Uuid
+  code         String                    @unique
+  name         String
+  description  String?
+  status       StructuralLifecycleStatus @default(ACTIVE)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  appointments Appointment[]
+  delegationsAsDelegator Delegation[] @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient Delegation[] @relation("DelegationRecipientOfficeholder")
   id                    String         @id @default(uuid()) @db.Uuid
   code                  String         @unique
   displayName           String
@@ -372,6 +425,9 @@ model Appointment {
   id             String            @id @default(uuid()) @db.Uuid
   officeId       String            @db.Uuid
   officeholderId String            @db.Uuid
+  status         AppointmentStatus @default(PENDING)
+  effectiveFrom  DateTime
+  effectiveUntil DateTime?
   code           String            @unique
   status         AppointmentStatus @default(ACTIVE)
   effectiveFrom  DateTime
@@ -382,6 +438,8 @@ model Appointment {
   office         Office            @relation(fields: [officeId], references: [id])
   officeholder   Officeholder      @relation(fields: [officeholderId], references: [id])
 
+  @@index([officeId])
+  @@index([officeholderId])
   id                  String            @id @default(cuid())
   officeId            String
   officeholderId      String
@@ -408,6 +466,25 @@ model Appointment {
 }
 
 model Delegation {
+  id                       String           @id @default(uuid()) @db.Uuid
+  institutionId            String           @db.Uuid
+  delegatorOfficeId        String?          @db.Uuid
+  delegatorOfficeholderId  String?          @db.Uuid
+  recipientOfficeId        String?          @db.Uuid
+  recipientOfficeholderId  String?          @db.Uuid
+  scopeDescription         String
+  status                   DelegationStatus @default(PENDING)
+  effectiveFrom            DateTime
+  effectiveUntil           DateTime?
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  institution              Institution      @relation(fields: [institutionId], references: [id])
+  delegatorOffice          Office?          @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
+  delegatorOfficeholder    Officeholder?    @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
+  recipientOffice          Office?          @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
+  recipientOfficeholder    Officeholder?    @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
+
+  @@index([institutionId])
   id                     String           @id @default(uuid()) @db.Uuid
   code                   String           @unique
   sourceInstitutionId    String           @db.Uuid
@@ -455,6 +532,15 @@ model Delegation {
 }
 
 model ExternalAuthority {
+  id            String                        @id @default(uuid()) @db.Uuid
+  code          String                        @unique
+  name          String
+  description   String?
+  type          ExternalAuthorityType
+  status        StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt     DateTime                      @default(now())
+  updatedAt     DateTime                      @updatedAt
+  institutionRelations InstitutionExternalAuthority[]
   id            String                         @id @default(uuid()) @db.Uuid
   code          String                         @unique
   name          String
@@ -480,6 +566,19 @@ model ExternalAuthority {
 }
 
 model InstitutionExternalAuthority {
+  id                  String                    @id @default(uuid()) @db.Uuid
+  institutionId       String                    @db.Uuid
+  externalAuthorityId String                    @db.Uuid
+  relationshipLabel   String?
+  status              StructuralLifecycleStatus @default(ACTIVE)
+  effectiveFrom       DateTime?
+  effectiveUntil      DateTime?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  institution         Institution               @relation(fields: [institutionId], references: [id])
+  externalAuthority   ExternalAuthority         @relation(fields: [externalAuthorityId], references: [id])
+
+  @@unique([institutionId, externalAuthorityId])
   id                  String                                       @id @default(uuid()) @db.Uuid
   institutionId       String                                       @db.Uuid
   externalAuthorityId String                                       @db.Uuid

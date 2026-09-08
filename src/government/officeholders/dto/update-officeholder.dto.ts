@@ -1,5 +1,19 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { StructuralLifecycleStatus } from '@prisma/client';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+
+export class UpdateOfficeholderDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
 import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class UpdateOfficeholderDto {

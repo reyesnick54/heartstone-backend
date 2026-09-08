@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { JurisdictionStructureDto } from '../structure/dto/government-structure.dto';
+import { GovernmentStructureService } from '../structure/government-structure.service';
 import { CreateJurisdictionDto } from './dto/create-jurisdiction.dto';
 import { JurisdictionResponseDto } from './dto/jurisdiction-response.dto';
 import { QueryJurisdictionsDto } from './dto/query-jurisdictions.dto';
@@ -10,6 +12,10 @@ import { JurisdictionsService } from './jurisdictions.service';
 @ApiTags('jurisdictions')
 @Controller('jurisdictions')
 export class JurisdictionsController {
+  constructor(
+    private readonly jurisdictionsService: JurisdictionsService,
+    private readonly structureService: GovernmentStructureService,
+  ) {}
   constructor(private readonly jurisdictionsService: JurisdictionsService) {}
 
   @Post()
@@ -24,6 +30,13 @@ export class JurisdictionsController {
   @ApiOkResponse({ type: JurisdictionResponseDto, isArray: true })
   findAll(@Query() query: QueryJurisdictionsDto): Promise<JurisdictionResponseDto[]> {
     return this.jurisdictionsService.findAll(query);
+  }
+
+  @Get(':id/structure')
+  @ApiOperation({ summary: 'Get organizational structure for a jurisdiction' })
+  @ApiOkResponse({ type: JurisdictionStructureDto })
+  getStructure(@Param('id', ParseUUIDPipe) id: string): Promise<JurisdictionStructureDto> {
+    return this.structureService.getJurisdictionStructure(id);
   }
 
   @Get(':id')

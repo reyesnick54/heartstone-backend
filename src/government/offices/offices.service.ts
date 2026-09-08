@@ -2,12 +2,20 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Office, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { GovernmentStructureValidationService } from '../common/government-structure-validation.service';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { QueryOfficesDto } from './dto/query-offices.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 
 @Injectable()
 export class OfficesService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly validation: GovernmentStructureValidationService,
+  ) {}
+
+  async create(dto: CreateOfficeDto): Promise<Office> {
+    await this.validation.ensureDepartmentExists(dto.departmentId);
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateOfficeDto): Promise<Office> {
@@ -18,12 +26,14 @@ export class OfficesService {
         data: {
           departmentId: dto.departmentId,
           code: dto.code,
+          name: dto.name,
           title: dto.title,
           description: dto.description,
           status: dto.status,
         },
       });
     } catch (error) {
+      this.handleWriteError(error, dto.code);
       this.handleWriteError(error, dto.departmentId, dto.code);
     }
   }
@@ -41,11 +51,19 @@ export class OfficesService {
 
     return this.prisma.office.findMany({
       where,
+      orderBy: [{ name: 'asc' }, { code: 'asc' }],
       orderBy: [{ title: 'asc' }, { code: 'asc' }],
     });
   }
 
   async findOne(id: string): Promise<Office> {
+    const record = await this.prisma.office.findUnique({ where: { id } });
+
+    if (!record) {
+      throw new NotFoundException(`Office with id "${id}" was not found`);
+    }
+
+    return record;
     const office = await this.prisma.office.findUnique({
       where: { id },
     });
@@ -66,6 +84,9 @@ export class OfficesService {
     });
   }
 
+  private handleWriteError(error: unknown, code: string): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException(`Office with code "${code}" already exists for the parent scope`);
   private async ensureDepartmentExists(departmentId: string): Promise<void> {
     const department = await this.prisma.department.findUnique({
       where: { id: departmentId },

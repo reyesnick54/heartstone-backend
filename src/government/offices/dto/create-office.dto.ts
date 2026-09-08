@@ -7,12 +7,20 @@ export class CreateOfficeDto {
   @IsUUID()
   departmentId!: string;
 
+  @ApiProperty({ example: 'CODE-01' })
   @ApiProperty({ example: 'DIR-BL' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(64)
   code!: string;
 
+  @ApiProperty({ example: 'Example name' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  name!: string;
+
+  @ApiPropertyOptional()
   @ApiProperty({ example: 'Director of Business Licensing' })
   @IsString()
   @IsNotEmpty()
