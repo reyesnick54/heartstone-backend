@@ -42,9 +42,7 @@ export function redactSensitiveValue(key: string, value: unknown): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item, index) =>
-      redactSensitiveValue(`${key}[${index}]`, item),
-    );
+    return value.map((item, index) => redactSensitiveValue(`${key}[${String(index)}]`, item));
   }
 
   if (typeof value === 'object') {
@@ -54,14 +52,9 @@ export function redactSensitiveValue(key: string, value: unknown): unknown {
   return value;
 }
 
-export function redactSensitiveObject(
-  input: Record<string, unknown>,
-): Record<string, unknown> {
+export function redactSensitiveObject(input: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(input).map(([key, value]) => [
-      key,
-      redactSensitiveValue(key, value),
-    ]),
+    Object.entries(input).map(([key, value]) => [key, redactSensitiveValue(key, value)]),
   );
 }
 

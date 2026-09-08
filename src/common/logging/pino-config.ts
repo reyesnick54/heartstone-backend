@@ -1,4 +1,5 @@
-import { Params } from 'nestjs-pino';
+import { type Params } from 'nestjs-pino';
+
 import { PINO_REDACT_PATHS } from './log-redaction';
 
 export function createPinoConfig(): Params {

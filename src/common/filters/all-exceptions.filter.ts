@@ -1,7 +1,7 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
   HttpStatus,
   Logger,
@@ -13,9 +13,7 @@ interface PayloadTooLargeError extends Error {
   status?: number;
 }
 
-function isPayloadTooLargeError(
-  exception: unknown,
-): exception is PayloadTooLargeError {
+function isPayloadTooLargeError(exception: unknown): exception is PayloadTooLargeError {
   return (
     exception instanceof Error &&
     ((exception as PayloadTooLargeError).type === 'entity.too.large' ||
@@ -35,9 +33,7 @@ interface ErrorResponseBody {
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
-  constructor(
-    private readonly nodeEnv: string = process.env.NODE_ENV ?? 'development',
-  ) {}
+  constructor(private readonly nodeEnv: string = process.env.NODE_ENV ?? 'development') {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -47,18 +43,36 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const status = isPayloadTooLargeError(exception)
       ? HttpStatus.PAYLOAD_TOO_LARGE
       : exception instanceof HttpException
-    const status =
-      exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse =
-      exception instanceof HttpException ? exception.getResponse() : null;
+    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : null;
+
+    if (
+      exception instanceof HttpException &&
+      exceptionResponse &&
+      typeof exceptionResponse === 'object' &&
+      !('statusCode' in exceptionResponse)
+    ) {
+      if (status >= 500) {
+        this.logger.warn(
+          {
+            path: request.url,
+            method: request.method,
+            statusCode: status,
+            response: exceptionResponse,
+          },
+          'Request failed',
+        );
+      }
+
+      response.status(status).json(exceptionResponse);
+      return;
+    }
 
     let message: string | string[] = isPayloadTooLargeError(exception)
       ? 'Request body too large'
       : 'Internal server error';
-    let message: string | string[] = 'Internal server error';
     if (typeof exceptionResponse === 'string') {
       message = exceptionResponse;
     } else if (

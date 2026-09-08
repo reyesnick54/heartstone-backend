@@ -1,8 +1,4 @@
-import {
-  redactSensitiveObject,
-  redactSensitiveValue,
-  REDACTED_VALUE,
-} from './log-redaction';
+import { REDACTED_VALUE, redactSensitiveObject, redactSensitiveValue } from './log-redaction';
 
 describe('log redaction', () => {
   it('redacts sensitive keys', () => {
@@ -21,10 +17,7 @@ describe('log redaction', () => {
 
   it('redacts bearer tokens in values', () => {
     expect(
-      redactSensitiveValue(
-        'authorization',
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-      ),
+      redactSensitiveValue('authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'),
     ).toBe(REDACTED_VALUE);
   });
 

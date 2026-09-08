@@ -1,20 +1,39 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Test, type TestingModule } from '@nestjs/testing';
+
 import appConfig from '../config/app.config';
-import { APP_CONFIG, AppConfig } from '../config/config.constants';
+import { APP_CONFIG, type AppConfig } from '../config/config.constants';
+import { HealthService } from '../health/health.service';
 import { SystemService } from './system.service';
 
 describe('SystemService', () => {
   let service: SystemService;
+  let healthService: jest.Mocked<Pick<HealthService, 'checkReadiness'>>;
 
   beforeEach(async () => {
+    healthService = {
+      checkReadiness: jest.fn().mockResolvedValue({
+        status: 'ready',
+        checks: {
+          database: 'up',
+          redis: 'up',
+        },
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           load: [appConfig],
         }),
       ],
-      providers: [SystemService],
+      providers: [
+        SystemService,
+        {
+          provide: HealthService,
+          useValue: healthService,
+        },
+      ],
     }).compile();
 
     service = module.get<SystemService>(SystemService);
@@ -24,8 +43,14 @@ describe('SystemService', () => {
     expect(service.getHealth()).toEqual({ status: 'ok' });
   });
 
-  it('returns application-ready status', () => {
-    expect(service.getReady()).toEqual({ status: 'ready' });
+  it('returns application-ready status', async () => {
+    await expect(service.getReady()).resolves.toEqual({
+      status: 'ready',
+      checks: {
+        database: 'up',
+        redis: 'up',
+      },
+    });
   });
 
   it('returns version metadata from configuration', () => {
@@ -51,7 +76,15 @@ describe('SystemService with custom config', () => {
           load: [appConfig],
         }),
       ],
-      providers: [SystemService],
+      providers: [
+        SystemService,
+        {
+          provide: HealthService,
+          useValue: {
+            checkReadiness: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     const service = module.get<SystemService>(SystemService);

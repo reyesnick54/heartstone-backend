@@ -12,6 +12,6 @@ export interface RedisConfig {
 export default registerAs(REDIS_CONFIG_KEY, (): RedisConfig => ({
   host: process.env.REDIS_HOST ?? 'localhost',
   port: Number(process.env.REDIS_PORT ?? 6379),
-  password: process.env.REDIS_PASSWORD || undefined,
+  password: process.env.REDIS_PASSWORD?.trim() ? process.env.REDIS_PASSWORD : undefined,
   db: Number(process.env.REDIS_DB ?? 0),
 }));

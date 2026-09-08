@@ -1,10 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  HealthResponseDto,
-  ReadyResponseDto,
-  VersionResponseDto,
-} from './dto/system-response.dto';
+
+import { ReadinessCheckResult } from '../health/health.service';
+import { HealthResponseDto, ReadyResponseDto, VersionResponseDto } from './dto/system-response.dto';
 import { SystemService } from './system.service';
 
 @ApiTags('system')
@@ -20,13 +18,16 @@ export class SystemController {
   }
 
   @Get('ready')
-  @ApiOperation({
-    summary:
-      'Report application readiness (dependency checks reserved for later)',
-  })
+  @ApiOperation({ summary: 'Verify required backend dependencies are available' })
   @ApiOkResponse({ type: ReadyResponseDto })
-  getReady(): ReadyResponseDto {
-    return this.systemService.getReady();
+  async getReady(): Promise<ReadinessCheckResult> {
+    const result = await this.systemService.getReady();
+
+    if (result.status !== 'ready') {
+      throw new ServiceUnavailableException(result);
+    }
+
+    return result;
   }
 
   @Get('version')
