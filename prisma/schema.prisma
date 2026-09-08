@@ -7,6 +7,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StructuralLifecycleStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum JurisdictionType {
+  NATIONAL
+  SUBNATIONAL
+  MUNICIPAL
+  SPECIAL_ECONOMIC_ZONE
+  REGULATORY
+  SUBJECT_MATTER
+  OTHER
+}
+
+enum InstitutionType {
+  GOVERNMENT
+  MINISTRY
+  AGENCY
+  AUTHORITY
+  REGULATOR
+  STATUTORY_BODY
+  SPECIAL_ECONOMIC_ZONE_AUTHORITY
+  PUBLIC_BODY
+  OTHER
+}
+
+enum GovernmentBodyType {
+  BOARD
+  COUNCIL
+  COMMITTEE
+  COMMISSION
+  ADVISORY
+  ADMINISTRATIVE
+  OTHER
+}
+
+enum AppointmentStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+  EXPIRED
+}
+
+enum DelegationStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum ExternalAuthorityType {
+  GOVERNMENT
+  REGULATORY
+  JUDICIAL
+  PROFESSIONAL
+  INTERNATIONAL
+  OTHER
+}
+
+enum InstitutionExternalAuthorityRelationshipType {
+  COORDINATION
+  REFERRAL
+  RECOGNITION
+  OVERSIGHT
+  OTHER
+}
+
 model SystemMetadata {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -15,4 +88,169 @@ model SystemMetadata {
   updatedAt DateTime @updatedAt
 
   @@map("system_metadata")
+}
+
+model Jurisdiction {
+  id           String                    @id @default(uuid()) @db.Uuid
+  code         String                    @unique
+  name         String
+  description  String?
+  type         JurisdictionType
+  status       StructuralLifecycleStatus @default(ACTIVE)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  institutions Institution[]
+
+  @@map("jurisdictions")
+}
+
+model Institution {
+  id                        String                         @id @default(uuid()) @db.Uuid
+  jurisdictionId            String                         @db.Uuid
+  code                      String
+  name                      String
+  description               String?
+  type                      InstitutionType
+  status                    StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  jurisdiction              Jurisdiction                   @relation(fields: [jurisdictionId], references: [id])
+  governmentBodies          GovernmentBody[]
+  departments               Department[]
+  sourceDelegations         Delegation[]                   @relation("DelegationSourceInstitution")
+  externalAuthorityLinks    InstitutionExternalAuthority[]
+
+  @@unique([jurisdictionId, code])
+  @@map("institutions")
+}
+
+model GovernmentBody {
+  id            String                    @id @default(uuid()) @db.Uuid
+  institutionId String                    @db.Uuid
+  code          String
+  name          String
+  description   String?
+  type          GovernmentBodyType
+  status        StructuralLifecycleStatus @default(ACTIVE)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  institution   Institution               @relation(fields: [institutionId], references: [id])
+
+  @@unique([institutionId, code])
+  @@map("government_bodies")
+}
+
+model Department {
+  id            String                    @id @default(uuid()) @db.Uuid
+  institutionId String                    @db.Uuid
+  code          String
+  name          String
+  description   String?
+  status        StructuralLifecycleStatus @default(ACTIVE)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  institution   Institution               @relation(fields: [institutionId], references: [id])
+  offices       Office[]
+
+  @@unique([institutionId, code])
+  @@map("departments")
+}
+
+model Office {
+  id           String                    @id @default(uuid()) @db.Uuid
+  departmentId String                    @db.Uuid
+  code         String
+  name         String
+  description  String?
+  status       StructuralLifecycleStatus @default(ACTIVE)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  department   Department                @relation(fields: [departmentId], references: [id])
+  appointments Appointment[]
+
+  @@unique([departmentId, code])
+  @@map("offices")
+}
+
+model Officeholder {
+  id                    String         @id @default(uuid()) @db.Uuid
+  code                  String         @unique
+  displayName           String
+  description           String?
+  status                StructuralLifecycleStatus @default(ACTIVE)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  appointments          Appointment[]
+  delegationsAsDelegator Delegation[]   @relation("DelegationDelegator")
+  delegationsAsRecipient Delegation[]  @relation("DelegationRecipient")
+
+  @@map("officeholders")
+}
+
+model Appointment {
+  id             String            @id @default(uuid()) @db.Uuid
+  officeId       String            @db.Uuid
+  officeholderId String            @db.Uuid
+  code           String            @unique
+  status         AppointmentStatus @default(ACTIVE)
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  office         Office            @relation(fields: [officeId], references: [id])
+  officeholder   Officeholder      @relation(fields: [officeholderId], references: [id])
+
+  @@map("appointments")
+}
+
+model Delegation {
+  id                     String           @id @default(uuid()) @db.Uuid
+  code                   String           @unique
+  sourceInstitutionId    String           @db.Uuid
+  delegatorOfficeholderId String          @db.Uuid
+  recipientOfficeholderId String          @db.Uuid
+  scopeDescription       String
+  status                 DelegationStatus @default(ACTIVE)
+  effectiveFrom          DateTime
+  effectiveTo            DateTime?
+  notes                  String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  sourceInstitution      Institution      @relation("DelegationSourceInstitution", fields: [sourceInstitutionId], references: [id])
+  delegatorOfficeholder  Officeholder     @relation("DelegationDelegator", fields: [delegatorOfficeholderId], references: [id])
+  recipientOfficeholder  Officeholder     @relation("DelegationRecipient", fields: [recipientOfficeholderId], references: [id])
+
+  @@map("delegations")
+}
+
+model ExternalAuthority {
+  id            String                         @id @default(uuid()) @db.Uuid
+  code          String                         @unique
+  name          String
+  description   String?
+  type          ExternalAuthorityType
+  status        StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime                       @updatedAt
+  institutionLinks InstitutionExternalAuthority[]
+
+  @@map("external_authorities")
+}
+
+model InstitutionExternalAuthority {
+  id                  String                                       @id @default(uuid()) @db.Uuid
+  institutionId       String                                       @db.Uuid
+  externalAuthorityId String                                       @db.Uuid
+  code                String                                       @unique
+  relationshipType    InstitutionExternalAuthorityRelationshipType
+  description         String?
+  status              StructuralLifecycleStatus                    @default(ACTIVE)
+  createdAt           DateTime                                     @default(now())
+  updatedAt           DateTime                                     @updatedAt
+  institution         Institution                                  @relation(fields: [institutionId], references: [id])
+  externalAuthority   ExternalAuthority                            @relation(fields: [externalAuthorityId], references: [id])
+
+  @@unique([institutionId, externalAuthorityId, relationshipType])
+  @@map("institution_external_authorities")
 }
