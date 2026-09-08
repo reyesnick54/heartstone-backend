@@ -1,6 +1,6 @@
 import { type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { DelegationStatus } from '@prisma/client';
+import { DelegationStatus, InstitutionType, JurisdictionType } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
@@ -54,21 +54,35 @@ describe('Delegations (e2e)', () => {
 
     await prisma.delegation.deleteMany();
     await prisma.institution.deleteMany();
+    await prisma.jurisdiction.deleteMany();
     await prisma.office.deleteMany();
     await prisma.officeholder.deleteMany();
 
+    const jurisdiction = await prisma.jurisdiction.create({
+      data: {
+        code: 'NAT-TEST',
+        name: 'Test National Jurisdiction',
+        type: JurisdictionType.NATIONAL,
+      },
+    });
+
     const institution = await prisma.institution.create({
-      data: { code: 'MIN-HEALTH', name: 'Ministry of Health' },
+      data: {
+        jurisdictionId: jurisdiction.id,
+        code: 'MIN-HEALTH',
+        name: 'Ministry of Health',
+        type: InstitutionType.MINISTRY,
+      },
     });
     institutionId = institution.id;
 
     const office = await prisma.office.create({
-      data: { code: 'DIR-PERMITS', title: 'Director of Permits' },
+      data: { referenceCode: 'DIR-PERMITS', name: 'Director of Permits' },
     });
     officeId = office.id;
 
     const officeholder = await prisma.officeholder.create({
-      data: { code: 'OH-001', name: 'Jane Smith' },
+      data: { referenceCode: 'OH-001', displayName: 'Jane Smith' },
     });
     officeholderId = officeholder.id;
   });
@@ -76,6 +90,7 @@ describe('Delegations (e2e)', () => {
   afterAll(async () => {
     await prisma.delegation.deleteMany();
     await prisma.institution.deleteMany();
+    await prisma.jurisdiction.deleteMany();
     await prisma.office.deleteMany();
     await prisma.officeholder.deleteMany();
     await app.close();

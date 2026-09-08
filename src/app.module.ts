@@ -10,8 +10,10 @@ import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
 import { DelegationModule } from './delegation/delegation.module';
+import { ExternalAuthorityModule } from './external-authority/external-authority.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
+import { InstitutionExternalAuthorityModule } from './institution-external-authority/institution-external-authority.module';
 import { RedisModule } from './redis/redis.module';
 import { SystemModule } from './system/system.module';
 
@@ -34,6 +36,8 @@ import { SystemModule } from './system/system.module';
     DelegationModule,
     AppointmentsModule,
     GovernmentModule,
+    ExternalAuthorityModule,
+    InstitutionExternalAuthorityModule,
   ],
 })
 export class AppModule {}
