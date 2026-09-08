@@ -1,3 +1,12 @@
+import { type INestApplication } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
+import type { Server } from 'http';
+import * as request from 'supertest';
+
+import { AppModule } from './../src/app.module';
+
+describe('AppController (e2e)', () => {
+  let app: INestApplication;
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
@@ -41,6 +50,14 @@ describe('System endpoints (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer() as Server)
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
