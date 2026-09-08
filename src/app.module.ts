@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import redisConfig from './config/redis.config';
+import { HealthModule } from './health/health.module';
+import { RedisModule } from './redis/redis.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { LoggerModule } from 'nestjs-pino';
@@ -13,6 +16,9 @@ import { SystemModule } from './system/system.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [redisConfig],
+    }),
+    RedisModule,
       envFilePath: ['.env'],
     }),
     DatabaseModule,

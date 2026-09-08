@@ -1,6 +1,7 @@
 {
   "name": "heartstone-backend",
   "version": "0.0.1",
+  "description": "",
   "description": "HeartStone backend API",
   "version": "0.1.0",
   "description": "HeartStone backend API foundation",
@@ -28,6 +29,10 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^12.0.0",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "ioredis": "^6.0.0",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
@@ -48,6 +53,16 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/express": "^5.0.0",
+    "@types/ioredis": "^4.28.10",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^7.0.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^17.0.0",
+    "jest": "^30.0.0",
+    "prettier": "^3.4.2",
     "@types/jest": "^30.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
@@ -87,6 +102,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@nestjs/config)/)"
+    ]
     "testEnvironment": "node"
   }
 }
