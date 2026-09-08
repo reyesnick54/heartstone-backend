@@ -7,6 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StructuralLifecycleStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum JurisdictionType {
+  NATIONAL
+  SUBNATIONAL
+  MUNICIPAL
+  SPECIAL_ECONOMIC_ZONE
+  REGULATORY
+  SUBJECT_MATTER
+  OTHER
+}
+
+enum InstitutionType {
+  GOVERNMENT
+  MINISTRY
+  AGENCY
+  AUTHORITY
+  REGULATOR
+  STATUTORY_BODY
+  SPECIAL_ECONOMIC_ZONE_AUTHORITY
+  PUBLIC_BODY
+  OTHER
+}
+
 model SystemMetadata {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -15,4 +44,34 @@ model SystemMetadata {
   updatedAt DateTime @updatedAt
 
   @@map("system_metadata")
+}
+
+model Jurisdiction {
+  id           String                    @id @default(uuid()) @db.Uuid
+  code         String                    @unique
+  name         String
+  description  String?
+  type         JurisdictionType
+  status       StructuralLifecycleStatus @default(ACTIVE)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  institutions Institution[]
+
+  @@map("jurisdictions")
+}
+
+model Institution {
+  id             String                    @id @default(uuid()) @db.Uuid
+  jurisdictionId String                    @db.Uuid
+  code           String
+  name           String
+  description    String?
+  type           InstitutionType
+  status         StructuralLifecycleStatus @default(ACTIVE)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  jurisdiction   Jurisdiction              @relation(fields: [jurisdictionId], references: [id])
+
+  @@unique([jurisdictionId, code])
+  @@map("institutions")
 }
