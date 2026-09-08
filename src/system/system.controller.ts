@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ReadinessCheckResult } from '../health/health.service';
-import {
-  HealthResponseDto,
-  ReadyResponseDto,
-  VersionResponseDto,
-} from './dto/system-response.dto';
+import { HealthResponseDto, ReadyResponseDto, VersionResponseDto } from './dto/system-response.dto';
 import { SystemService } from './system.service';
 
 @ApiTags('system')

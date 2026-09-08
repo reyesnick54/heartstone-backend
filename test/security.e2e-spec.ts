@@ -1,7 +1,8 @@
 import { Body, Controller, INestApplication, Post } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { App } from 'supertest/types';
+
 import { AppModule } from '../src/app.module';
 import { configureApplication } from '../src/bootstrap/configure-application';
 
@@ -47,9 +48,7 @@ describe('Phase 1 security baseline (e2e)', () => {
       .get('/api/v1/health')
       .set('Origin', 'http://localhost:3000');
 
-    expect(response.headers['access-control-allow-origin']).toBe(
-      'http://localhost:3000',
-    );
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3000');
   });
 
   it('rejects request bodies above the configured limit', async () => {

@@ -18,10 +18,7 @@ describe('security.config', () => {
     const config = securityConfig();
 
     expect(config.cors.enabled).toBe(true);
-    expect(config.cors.origins).toEqual([
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-    ]);
+    expect(config.cors.origins).toEqual(['http://localhost:3000', 'http://127.0.0.1:3000']);
   });
 
   it('disables swagger by default in production', () => {
@@ -35,14 +32,10 @@ describe('security.config', () => {
 
   it('parses comma-separated CORS origins', () => {
     process.env.NODE_ENV = 'production';
-    process.env.CORS_ORIGINS =
-      'https://app.example.gov, https://admin.example.gov';
+    process.env.CORS_ORIGINS = 'https://app.example.gov, https://admin.example.gov';
 
     const config = securityConfig();
 
-    expect(config.cors.origins).toEqual([
-      'https://app.example.gov',
-      'https://admin.example.gov',
-    ]);
+    expect(config.cors.origins).toEqual(['https://app.example.gov', 'https://admin.example.gov']);
   });
 });

@@ -6,9 +6,9 @@ import { AppModule } from './app.module';
 import { configureApplication } from './bootstrap/configure-application';
 import {
   APP_CONFIG,
-  AppConfig,
+  type AppConfig,
   SECURITY_CONFIG,
-  SecurityConfig,
+  type SecurityConfig,
 } from './config/config.constants';
 
 async function bootstrap(): Promise<void> {
@@ -24,13 +24,12 @@ async function bootstrap(): Promise<void> {
 
   const configService = app.get(ConfigService);
   const appConfig = configService.getOrThrow<AppConfig>(APP_CONFIG);
-  const securityConfig =
-    configService.getOrThrow<SecurityConfig>(SECURITY_CONFIG);
+  const securityConfig = configService.getOrThrow<SecurityConfig>(SECURITY_CONFIG);
 
   await app.listen(appConfig.port, '0.0.0.0');
 
   logger.log(
-    `Application "${appConfig.name}" listening on port ${appConfig.port}`,
+    `Application "${appConfig.name}" listening on port ${String(appConfig.port)}`,
     'Bootstrap',
   );
   logger.log(`API available at /api/${appConfig.apiVersion}`, 'Bootstrap');
