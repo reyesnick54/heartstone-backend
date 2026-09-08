@@ -7,6 +7,7 @@ import type {
   JurisdictionType,
   StructuralLifecycleStatus,
 } from '@prisma/client';
+import type { InstitutionType, JurisdictionType, StructuralLifecycleStatus } from '@prisma/client';
 
 export interface JurisdictionBody {
   id: string;
@@ -48,6 +49,7 @@ export interface OfficeBody {
   departmentId: string;
   code: string;
   name: string;
+  title: string;
   description: string | null;
   status: StructuralLifecycleStatus;
   createdAt: string;
@@ -108,6 +110,12 @@ export interface DepartmentBody {
   code: string;
   name: string;
   description: string | null;
+  referenceCode: string;
+  displayName: string;
+  givenName: string | null;
+  familyName: string | null;
+  titlePrefix: string | null;
+  titleSuffix: string | null;
   status: StructuralLifecycleStatus;
   createdAt: string;
   updatedAt: string;

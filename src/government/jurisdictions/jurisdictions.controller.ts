@@ -16,6 +16,7 @@ export class JurisdictionsController {
     private readonly jurisdictionsService: JurisdictionsService,
     private readonly structureService: GovernmentStructureService,
   ) {}
+  constructor(private readonly jurisdictionsService: JurisdictionsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a jurisdiction' })

@@ -16,6 +16,10 @@ export class InstitutionsService {
 
   async create(dto: CreateInstitutionDto): Promise<Institution> {
     await this.validation.ensureJurisdictionExists(dto.jurisdictionId);
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateInstitutionDto): Promise<Institution> {
+    await this.ensureJurisdictionExists(dto.jurisdictionId);
 
     try {
       return await this.prisma.institution.create({
@@ -73,6 +77,17 @@ export class InstitutionsService {
       where: { id },
       data: dto,
     });
+  }
+
+  private async ensureJurisdictionExists(jurisdictionId: string): Promise<void> {
+    const jurisdiction = await this.prisma.jurisdiction.findUnique({
+      where: { id: jurisdictionId },
+      select: { id: true },
+    });
+
+    if (!jurisdiction) {
+      throw new NotFoundException(`Jurisdiction with id "${jurisdictionId}" was not found`);
+    }
   }
 
   private handleWriteError(error: unknown, jurisdictionId: string, code: string): never {

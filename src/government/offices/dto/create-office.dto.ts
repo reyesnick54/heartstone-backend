@@ -8,6 +8,7 @@ export class CreateOfficeDto {
   departmentId!: string;
 
   @ApiProperty({ example: 'CODE-01' })
+  @ApiProperty({ example: 'DIR-BL' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(64)
@@ -20,6 +21,13 @@ export class CreateOfficeDto {
   name!: string;
 
   @ApiPropertyOptional()
+  @ApiProperty({ example: 'Director of Business Licensing' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  title!: string;
+
+  @ApiPropertyOptional({ example: 'Leads business licensing operations.' })
   @IsOptional()
   @IsString()
   @MaxLength(2000)

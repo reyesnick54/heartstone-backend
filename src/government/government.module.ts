@@ -26,5 +26,11 @@ import { GovernmentStructureModule } from './structure/government-structure.modu
     InstitutionExternalAuthoritiesModule,
     GovernmentStructureModule,
   ],
+
+@Module({
+  imports: [JurisdictionsModule, InstitutionsModule, OfficesModule, OfficeholdersModule],
+
+@Module({
+  imports: [JurisdictionsModule, InstitutionsModule],
 })
 export class GovernmentModule {}

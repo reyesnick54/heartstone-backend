@@ -16,6 +16,10 @@ export class OfficesService {
 
   async create(dto: CreateOfficeDto): Promise<Office> {
     await this.validation.ensureDepartmentExists(dto.departmentId);
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateOfficeDto): Promise<Office> {
+    await this.ensureDepartmentExists(dto.departmentId);
 
     try {
       return await this.prisma.office.create({
@@ -23,12 +27,14 @@ export class OfficesService {
           departmentId: dto.departmentId,
           code: dto.code,
           name: dto.name,
+          title: dto.title,
           description: dto.description,
           status: dto.status,
         },
       });
     } catch (error) {
       this.handleWriteError(error, dto.code);
+      this.handleWriteError(error, dto.departmentId, dto.code);
     }
   }
 
@@ -46,6 +52,7 @@ export class OfficesService {
     return this.prisma.office.findMany({
       where,
       orderBy: [{ name: 'asc' }, { code: 'asc' }],
+      orderBy: [{ title: 'asc' }, { code: 'asc' }],
     });
   }
 
@@ -57,6 +64,15 @@ export class OfficesService {
     }
 
     return record;
+    const office = await this.prisma.office.findUnique({
+      where: { id },
+    });
+
+    if (!office) {
+      throw new NotFoundException(`Office with id "${id}" was not found`);
+    }
+
+    return office;
   }
 
   async update(id: string, dto: UpdateOfficeDto): Promise<Office> {
@@ -71,6 +87,22 @@ export class OfficesService {
   private handleWriteError(error: unknown, code: string): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictException(`Office with code "${code}" already exists for the parent scope`);
+  private async ensureDepartmentExists(departmentId: string): Promise<void> {
+    const department = await this.prisma.department.findUnique({
+      where: { id: departmentId },
+      select: { id: true },
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department with id "${departmentId}" was not found`);
+    }
+  }
+
+  private handleWriteError(error: unknown, departmentId: string, code: string): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException(
+        `Office with code "${code}" already exists in department "${departmentId}"`,
+      );
     }
 
     throw error;

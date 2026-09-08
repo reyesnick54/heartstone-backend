@@ -13,6 +13,7 @@ export class OfficeholdersService {
     private readonly prisma: PrismaService,
     private readonly validation: GovernmentStructureValidationService,
   ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateOfficeholderDto): Promise<Officeholder> {
     try {
@@ -21,11 +22,18 @@ export class OfficeholdersService {
           code: dto.code,
           name: dto.name,
           description: dto.description,
+          referenceCode: dto.referenceCode,
+          displayName: dto.displayName,
+          givenName: dto.givenName,
+          familyName: dto.familyName,
+          titlePrefix: dto.titlePrefix,
+          titleSuffix: dto.titleSuffix,
           status: dto.status,
         },
       });
     } catch (error) {
       this.handleWriteError(error, dto.code);
+      this.handleWriteError(error, dto.referenceCode);
     }
   }
 
@@ -39,6 +47,7 @@ export class OfficeholdersService {
     return this.prisma.officeholder.findMany({
       where,
       orderBy: [{ name: 'asc' }, { code: 'asc' }],
+      orderBy: [{ displayName: 'asc' }, { referenceCode: 'asc' }],
     });
   }
 
@@ -50,6 +59,15 @@ export class OfficeholdersService {
     }
 
     return record;
+    const officeholder = await this.prisma.officeholder.findUnique({
+      where: { id },
+    });
+
+    if (!officeholder) {
+      throw new NotFoundException(`Officeholder with id "${id}" was not found`);
+    }
+
+    return officeholder;
   }
 
   async update(id: string, dto: UpdateOfficeholderDto): Promise<Officeholder> {
@@ -64,6 +82,11 @@ export class OfficeholdersService {
   private handleWriteError(error: unknown, code: string): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictException(`Officeholder with code "${code}" already exists`);
+  private handleWriteError(error: unknown, referenceCode: string): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException(
+        `Officeholder with referenceCode "${referenceCode}" already exists`,
+      );
     }
 
     throw error;

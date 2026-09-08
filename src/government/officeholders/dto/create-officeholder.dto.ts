@@ -20,6 +20,41 @@ export class CreateOfficeholderDto {
   @IsString()
   @MaxLength(2000)
   description?: string;
+  @ApiProperty({ example: 'OH-2026-001' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(64)
+  referenceCode!: string;
+
+  @ApiProperty({ example: 'Jane Q. Public' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  displayName!: string;
+
+  @ApiPropertyOptional({ example: 'Jane' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  givenName?: string;
+
+  @ApiPropertyOptional({ example: 'Public' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  familyName?: string;
+
+  @ApiPropertyOptional({ example: 'Dr.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  titlePrefix?: string;
+
+  @ApiPropertyOptional({ example: 'PhD' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  titleSuffix?: string;
 
   @ApiPropertyOptional({
     enum: StructuralLifecycleStatus,
