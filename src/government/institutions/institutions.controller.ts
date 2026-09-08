@@ -16,7 +16,6 @@ export class InstitutionsController {
     private readonly institutionsService: InstitutionsService,
     private readonly structureService: GovernmentStructureService,
   ) {}
-  constructor(private readonly institutionsService: InstitutionsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create an institution' })
