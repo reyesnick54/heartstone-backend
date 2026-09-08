@@ -16,3 +16,71 @@ model SystemMetadata {
 
   @@map("system_metadata")
 }
+
+enum AppointmentType {
+  PERMANENT
+  FIXED_TERM
+  ACTING
+  INTERIM
+  TEMPORARY
+  EX_OFFICIO
+  OTHER
+}
+
+enum AppointmentStatus {
+  PLANNED
+  ACTIVE
+  SUSPENDED
+  ENDED
+  REVOKED
+}
+
+/// Minimal Office record required for Appointment foreign-key integrity (Phase 2C scope).
+model Office {
+  id            String        @id @default(cuid())
+  referenceCode String        @unique
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointments  Appointment[]
+
+  @@map("offices")
+}
+
+/// Minimal Officeholder record required for Appointment foreign-key integrity (Phase 2C scope).
+model Officeholder {
+  id            String        @id @default(cuid())
+  referenceCode String        @unique
+  displayName   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointments  Appointment[]
+
+  @@map("officeholders")
+}
+
+model Appointment {
+  id                  String            @id @default(cuid())
+  officeId            String
+  officeholderId      String
+  referenceCode       String            @unique
+  appointmentType     AppointmentType
+  status              AppointmentStatus
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  instrumentReference String?
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  office       Office       @relation(fields: [officeId], references: [id])
+  officeholder Officeholder @relation(fields: [officeholderId], references: [id])
+
+  @@index([officeId])
+  @@index([officeholderId])
+  @@index([status])
+  @@index([appointmentType])
+  @@index([effectiveFrom])
+  @@index([effectiveUntil])
+  @@map("appointments")
+}
