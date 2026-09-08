@@ -4,6 +4,38 @@
 /build
 
 # Logs
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+
+# Environment files (never commit credentials)
+.env
+.env.local
+.env.*.local
+
+# Prisma
+*.db
+*.db-journal
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test artifacts
+test-results/
+# compiled output
+/dist
+/node_modules
+
+# logs
 logs
 *.log
 npm-debug.log*
@@ -16,6 +48,7 @@ lerna-debug.log*
 .DS_Store
 
 # Tests
+# tests
 /coverage
 /.nyc_output
 
@@ -45,3 +78,7 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+# environment
+.env
+.env.*
+!.env.example
