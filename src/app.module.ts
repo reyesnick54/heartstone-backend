@@ -8,6 +8,7 @@ import { envValidationSchema } from './config/env.validation';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
+import { DelegationModule } from './delegation/delegation.module';
 import { HealthModule } from './health/health.module';
 import { RedisModule } from './redis/redis.module';
 import { SystemModule } from './system/system.module';
@@ -28,6 +29,7 @@ import { SystemModule } from './system/system.module';
     RedisModule,
     HealthModule,
     SystemModule,
+    DelegationModule,
   ],
 })
 export class AppModule {}
