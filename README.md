@@ -1,3 +1,18 @@
+# heartstone-backend
+
+## Local development
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+Verify:
+
+- http://localhost:8000/health
+- http://localhost:8000/ready
+- http://localhost:8000/version
+- http://localhost:8000/docs
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -66,6 +81,7 @@ If you are looking for a cloud-based platform to deploy your NestJS application,
 
 ```bash
 $ npm install -g mau
+$ npm install -g @nestjs/mau
 $ mau deploy
 ```
 
