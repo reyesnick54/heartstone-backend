@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AppointmentsModule } from './appointments/appointments.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -29,6 +30,7 @@ import { SystemModule } from './system/system.module';
     RedisModule,
     HealthModule,
     SystemModule,
+    AppointmentsModule,
     GovernmentModule,
   ],
 })
