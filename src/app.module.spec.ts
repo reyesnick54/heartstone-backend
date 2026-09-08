@@ -1,14 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
+
 import { AppModule } from './app.module';
 import { PrismaService } from './database/prisma.service';
 
 describe('AppModule', () => {
-  let moduleRef: TestingModule;
+  let moduleRef: TestingModule | undefined;
 
   afterEach(async () => {
-    if (moduleRef) {
-      await moduleRef.close();
-    }
+    await moduleRef?.close();
   });
 
   it('boots the application', async () => {

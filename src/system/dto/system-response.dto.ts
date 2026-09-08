@@ -5,9 +5,20 @@ export class HealthResponseDto {
   status!: string;
 }
 
+export class ReadinessChecksDto {
+  @ApiProperty({ enum: ['up', 'down'], example: 'up' })
+  database!: 'up' | 'down';
+
+  @ApiProperty({ enum: ['up', 'down'], example: 'up' })
+  redis!: 'up' | 'down';
+}
+
 export class ReadyResponseDto {
-  @ApiProperty({ example: 'ready' })
-  status!: string;
+  @ApiProperty({ enum: ['ready', 'not_ready'], example: 'ready' })
+  status!: 'ready' | 'not_ready';
+
+  @ApiProperty({ type: ReadinessChecksDto })
+  checks!: ReadinessChecksDto;
 }
 
 export class VersionResponseDto {

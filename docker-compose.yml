@@ -4,15 +4,15 @@ services:
     container_name: heartstone-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-heartstone}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-heartstone_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-heartstone}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - heartstone-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-heartstone} -d ${POSTGRES_DB:-heartstone}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,20 +46,25 @@ services:
       heartstone-redis:
         condition: service_healthy
     environment:
-      APP_NAME: ${APP_NAME:-HeartStone API}
-      APP_VERSION: ${APP_VERSION:-0.1.0}
-      POSTGRES_HOST: ${POSTGRES_HOST:-heartstone-postgres}
-      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      REDIS_HOST: ${REDIS_HOST:-heartstone-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
+      NODE_ENV: development
+      PORT: 3000
+      APP_NAME: ${APP_NAME:-heartstone-backend}
+      API_VERSION: ${API_VERSION:-v1}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-heartstone}:${POSTGRES_PASSWORD:-heartstone_dev_password}@heartstone-postgres:5432/${POSTGRES_DB:-heartstone}?schema=public
+      REDIS_HOST: heartstone-redis
+      REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      CORS_ENABLED: ${CORS_ENABLED:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      CORS_CREDENTIALS: ${CORS_CREDENTIALS:-false}
+      JSON_BODY_LIMIT: ${JSON_BODY_LIMIT:-100kb}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "${API_PORT:-3000}:3000"
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

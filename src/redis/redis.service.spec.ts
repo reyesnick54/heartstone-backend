@@ -1,7 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+import { Test, type TestingModule } from '@nestjs/testing';
 import Redis from 'ioredis';
-import { REDIS_CONFIG_KEY, RedisConfig } from '../config/redis.config';
+
+import { REDIS_CONFIG_KEY, type RedisConfig } from '../config/redis.config';
 import { RedisService } from './redis.service';
 
 jest.mock('ioredis');
@@ -63,14 +64,8 @@ describe('RedisService', () => {
       lazyConnect: true,
     });
     expect(mockRedisClient.connect).toHaveBeenCalled();
-    expect(mockRedisClient.on).toHaveBeenCalledWith(
-      'error',
-      expect.any(Function),
-    );
-    expect(mockRedisClient.on).toHaveBeenCalledWith(
-      'connect',
-      expect.any(Function),
-    );
+    expect(mockRedisClient.on).toHaveBeenCalledWith('error', expect.any(Function));
+    expect(mockRedisClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
   });
 
   it('logs connection failures without throwing during startup', async () => {

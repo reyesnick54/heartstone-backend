@@ -1,0 +1,56 @@
+---
+description: HeartStone backend engineering and governance guardrails
+alwaysApply: true
+---
+
+# HeartStone Backend Cursor Rules
+
+HeartStone is a sovereign digital-government operating platform. Treat this repository as a production-grade government backend.
+
+## Canonical stack
+- Node.js 22+
+- TypeScript
+- NestJS
+- PostgreSQL
+- Prisma
+- Redis
+- Jest
+- Docker Compose
+- GitHub Actions
+
+Do not introduce a second backend framework, Python runtime, Fastify application, Vitest test stack, alternate ORM, or duplicate application bootstrap unless explicitly instructed.
+
+## Change discipline
+- Inspect before editing.
+- Make the smallest change that satisfies the current prompt.
+- Do not rewrite unrelated modules.
+- Do not implement future phases early.
+- Every schema change requires a Prisma migration.
+- Every domain feature requires tests.
+- Preserve strict TypeScript and avoid `any` unless explicitly justified.
+- Keep controllers thin; domain behavior belongs in services/modules.
+- Never commit credentials, private keys, tokens, production secrets, or personal data.
+- Run typecheck, lint, build, and relevant tests before declaring a task complete.
+
+## Government architecture invariants
+- User != Officeholder != Role != Permission != Authority.
+- Technical permission does not create legal or institutional authority.
+- Access does not equal authority.
+- Recommendations do not equal decisions.
+- AI assistance does not equal an official decision.
+- Authority, delegation, appointment, suspension, and validity must be explicit and auditable.
+- Government actions must remain attributable to identified institutional actors.
+
+## Phase 2 boundary
+Phase 2 is the Government Structure domain only. It may introduce the institutional primitives needed later by identity and authority modules, including:
+- Jurisdiction
+- Institution
+- GovernmentBody
+- Department
+- Office
+- Officeholder
+- Appointment
+- Delegation
+- ExternalAuthority
+
+Do not implement Phase 3 identity/authentication or Phase 4 authority-decision enforcement unless a later prompt explicitly requests it.

@@ -9,5 +9,4 @@
   "transformIgnorePatterns": [
     "node_modules/(?!(@nestjs/config)/)"
   ]
-  }
 }
