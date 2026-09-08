@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { InstitutionExternalAuthorityRelationshipType, RecordStatus } from '@prisma/client';
+import { InstitutionExternalAuthorityRelationshipType, RecordStatus, StructuralLifecycleStatus } from '@prisma/client';
 
 import { type PrismaService } from '../database/prisma.service';
 import { type ExternalAuthorityService } from '../external-authority/external-authority.service';
@@ -63,9 +63,12 @@ describe('InstitutionExternalAuthorityService', () => {
   it('rejects duplicate active relationships', async () => {
     institutionService.assertActive.mockResolvedValue({
       id: 'inst-1',
+      jurisdictionId: 'jur-1',
       code: 'GOV-1',
       name: 'Government',
-      status: RecordStatus.ACTIVE,
+      description: null,
+      type: 'MINISTRY',
+      status: StructuralLifecycleStatus.ACTIVE,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

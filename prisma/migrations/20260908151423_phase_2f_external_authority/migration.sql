@@ -8,18 +8,6 @@ CREATE TYPE "ExternalAuthorityType" AS ENUM ('GOVERNMENT_AUTHORITY', 'REGULATOR'
 CREATE TYPE "InstitutionExternalAuthorityRelationshipType" AS ENUM ('COORDINATION', 'REFERRAL', 'CONSULTATION', 'VERIFICATION', 'SUPERVISION', 'REGULATORY', 'DEPENDENCY', 'OTHER');
 
 -- CreateTable
-CREATE TABLE "institutions" (
-    "id" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "status" "RecordStatus" NOT NULL DEFAULT 'ACTIVE',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "institutions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "external_authorities" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -37,7 +25,7 @@ CREATE TABLE "external_authorities" (
 -- CreateTable
 CREATE TABLE "institution_external_authorities" (
     "id" TEXT NOT NULL,
-    "institutionId" TEXT NOT NULL,
+    "institutionId" UUID NOT NULL,
     "externalAuthorityId" TEXT NOT NULL,
     "relationshipType" "InstitutionExternalAuthorityRelationshipType" NOT NULL,
     "description" TEXT,
@@ -47,9 +35,6 @@ CREATE TABLE "institution_external_authorities" (
 
     CONSTRAINT "institution_external_authorities_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "institutions_code_key" ON "institutions"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "external_authorities_code_key" ON "external_authorities"("code");

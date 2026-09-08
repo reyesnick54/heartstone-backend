@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - phase-2-readiness
   pull_request:
     branches:
       - main
@@ -15,6 +16,9 @@ concurrency:
 env:
   NODE_VERSION: '22'
   DATABASE_URL: postgresql://heartstone:heartstone@localhost:5432/heartstone?schema=public
+  REDIS_HOST: localhost
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
 
 jobs:
   quality:
@@ -29,9 +33,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         run: npm run prisma:generate
@@ -40,7 +45,7 @@ jobs:
         run: npm run typecheck
 
       - name: Lint
-        run: npm run lint:check
+        run: npm run lint
 
       - name: Format check
         run: npm run format:check
@@ -65,6 +70,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       NODE_ENV: test
     steps:
@@ -76,9 +90,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         run: npm run prisma:generate

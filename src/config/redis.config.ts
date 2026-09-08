@@ -9,9 +9,18 @@ export interface RedisConfig {
   db: number;
 }
 
+function emptyToUndefined(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (trimmed === undefined || trimmed.length === 0) {
+    return undefined;
+  }
+
+  return trimmed;
+}
+
 export default registerAs(REDIS_CONFIG_KEY, (): RedisConfig => ({
   host: process.env.REDIS_HOST ?? 'localhost',
   port: Number(process.env.REDIS_PORT ?? 6379),
-  password: process.env.REDIS_PASSWORD?.trim() ? process.env.REDIS_PASSWORD : undefined,
+  password: emptyToUndefined(process.env.REDIS_PASSWORD),
   db: Number(process.env.REDIS_DB ?? 0),
 }));
