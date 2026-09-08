@@ -46,6 +46,39 @@ model SystemMetadata {
   @@map("system_metadata")
 }
 
+enum DelegationStatus {
+  PLANNED
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  REVOKED
+  ENDED
+}
+
+/// Minimal structural record for delegation FK targets (full domain in Phase 2A–2D).
+model Institution {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  delegationsAsDelegator Delegation[] @relation("DelegatorInstitution")
+  delegationsAsRecipient Delegation[] @relation("RecipientInstitution")
+
+  @@map("institutions")
+}
+
+/// Minimal structural record for delegation FK targets (full domain in Phase 2A–2D).
+model Office {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  delegationsAsDelegator Delegation[] @relation("DelegatorOffice")
+  delegationsAsRecipient Delegation[] @relation("RecipientOffice")
 enum AppointmentType {
   PERMANENT
   FIXED_TERM
@@ -76,6 +109,16 @@ model Office {
   @@map("offices")
 }
 
+/// Minimal structural record for delegation FK targets (full domain in Phase 2A–2D).
+model Officeholder {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  delegationsAsDelegator Delegation[] @relation("DelegatorOfficeholder")
+  delegationsAsRecipient Delegation[] @relation("RecipientOfficeholder")
 /// Minimal Officeholder record required for Appointment foreign-key integrity (Phase 2C scope).
 model Officeholder {
   id            String        @id @default(cuid())
@@ -88,6 +131,37 @@ model Officeholder {
   @@map("officeholders")
 }
 
+/// Structural delegation record — institutional evidence only, not legal authority.
+model Delegation {
+  id               String           @id @default(cuid())
+  referenceCode    String           @unique
+  sourceReference  String
+  scopeDescription String
+  status           DelegationStatus
+  effectiveFrom    DateTime
+  effectiveUntil   DateTime?
+  notes            String?
+
+  delegatorInstitutionId  String?
+  delegatorOfficeId       String?
+  delegatorOfficeholderId String?
+
+  recipientInstitutionId  String?
+  recipientOfficeId       String?
+  recipientOfficeholderId String?
+
+  delegatorInstitution  Institution?  @relation("DelegatorInstitution", fields: [delegatorInstitutionId], references: [id])
+  delegatorOffice       Office?         @relation("DelegatorOffice", fields: [delegatorOfficeId], references: [id])
+  delegatorOfficeholder Officeholder?   @relation("DelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
+
+  recipientInstitution  Institution?  @relation("RecipientInstitution", fields: [recipientInstitutionId], references: [id])
+  recipientOffice       Office?         @relation("RecipientOffice", fields: [recipientOfficeId], references: [id])
+  recipientOfficeholder Officeholder?   @relation("RecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("delegations")
 model Appointment {
   id                  String            @id @default(cuid())
   officeId            String
