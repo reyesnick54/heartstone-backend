@@ -47,6 +47,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const status = isPayloadTooLargeError(exception)
       ? HttpStatus.PAYLOAD_TOO_LARGE
       : exception instanceof HttpException
+    const status =
+      exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -56,6 +58,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message: string | string[] = isPayloadTooLargeError(exception)
       ? 'Request body too large'
       : 'Internal server error';
+    let message: string | string[] = 'Internal server error';
     if (typeof exceptionResponse === 'string') {
       message = exceptionResponse;
     } else if (
