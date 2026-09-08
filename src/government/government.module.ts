@@ -7,5 +7,8 @@ import { OfficesModule } from './offices/offices.module';
 
 @Module({
   imports: [JurisdictionsModule, InstitutionsModule, OfficesModule, OfficeholdersModule],
+
+@Module({
+  imports: [JurisdictionsModule, InstitutionsModule],
 })
 export class GovernmentModule {}
