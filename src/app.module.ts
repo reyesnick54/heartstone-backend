@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
+import { HealthModule } from './health/health.module';
 import { LoggerModule } from 'nestjs-pino';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -9,6 +13,13 @@ import { SystemModule } from './system/system.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env'],
+    }),
+    DatabaseModule,
+    HealthModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
       load: [appConfig],
       validationSchema: envValidationSchema,
       validationOptions: {

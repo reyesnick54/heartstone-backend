@@ -1,3 +1,5 @@
+// @ts-check
+import eslint from '@eslint/js';
 import js from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
@@ -5,6 +7,9 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
+    ignores: ['eslint.config.mjs'],
+  },
+  eslint.configs.recommended,
     ignores: ['eslint.config.mjs', 'dist/**', 'node_modules/**'],
   },
   js.configs.recommended,

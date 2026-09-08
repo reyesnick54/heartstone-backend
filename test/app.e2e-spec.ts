@@ -1,3 +1,10 @@
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
+import { App } from 'supertest/types';
+import { AppModule } from '../src/app.module';
+
+describe('Readiness (e2e)', () => {
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -30,6 +37,17 @@ describe('System endpoints (e2e)', () => {
     await app.close();
   });
 
+  it('/ready (GET) reports database availability', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/ready')
+      .expect(200);
+
+    expect(response.body).toEqual({
+      status: 'ready',
+      checks: {
+        database: true,
+      },
+    });
   it('GET /api/v1/health returns alive status', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/v1/health')
