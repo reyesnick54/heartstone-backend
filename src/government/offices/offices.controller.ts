@@ -17,13 +17,6 @@ export class OfficesController {
   @ApiCreatedResponse({ type: OfficeResponseDto })
   create(@Body() dto: CreateOfficeDto): Promise<OfficeResponseDto> {
     return this.service.create(dto);
-  constructor(private readonly officesService: OfficesService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create an office' })
-  @ApiCreatedResponse({ type: OfficeResponseDto })
-  create(@Body() dto: CreateOfficeDto): Promise<OfficeResponseDto> {
-    return this.officesService.create(dto);
   }
 
   @Get()
@@ -42,24 +35,11 @@ export class OfficesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a office' })
-    return this.officesService.findAll(query);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get an office by id' })
-  @ApiOkResponse({ type: OfficeResponseDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<OfficeResponseDto> {
-    return this.officesService.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update an office' })
   @ApiOkResponse({ type: OfficeResponseDto })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateOfficeDto,
   ): Promise<OfficeResponseDto> {
     return this.service.update(id, dto);
-    return this.officesService.update(id, dto);
   }
 }

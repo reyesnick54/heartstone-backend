@@ -32,6 +32,14 @@ Do not introduce a second backend framework, Python runtime, Fastify application
 - Never commit credentials, private keys, tokens, production secrets, or personal data.
 - Run typecheck, lint, build, and relevant tests before declaring a task complete.
 
+## Phase serialization
+- Every dependent phase or sub-phase MUST start from the latest green `main` branch.
+- A dependent phase MUST NOT begin until the preceding phase has been merged and post-merge CI on `main` is green.
+- Never recreate prerequisite Prisma models, tables, enums, modules, or migrations in a later phase. Extend the canonical implementation already on `main`.
+- Never resolve merge conflicts by concatenating both implementations. Reconcile to one canonical implementation.
+- Do not run dependent HeartStone phases in parallel.
+- If `main` is red, stop feature development and repair `main` before continuing.
+
 ## Government architecture invariants
 - User != Officeholder != Role != Permission != Authority.
 - Technical permission does not create legal or institutional authority.
@@ -42,7 +50,7 @@ Do not introduce a second backend framework, Python runtime, Fastify application
 - Government actions must remain attributable to identified institutional actors.
 
 ## Phase 2 boundary
-Phase 2 is the Government Structure domain only. It may introduce the institutional primitives needed later by identity and authority modules, including:
+Phase 2 is the Government Structure domain only. Its canonical implementation lives under `src/government` and includes:
 - Jurisdiction
 - Institution
 - GovernmentBody
@@ -52,5 +60,9 @@ Phase 2 is the Government Structure domain only. It may introduce the institutio
 - Appointment
 - Delegation
 - ExternalAuthority
+- InstitutionExternalAuthority
 
-Do not implement Phase 3 identity/authentication or Phase 4 authority-decision enforcement unless a later prompt explicitly requests it.
+Do not create duplicate root-level government domain modules outside `src/government`.
+
+## Phase 3 boundary
+Phase 3 is Identity & Access. It may begin only after Phase 2 is green on `main` and only when explicitly requested. Identity must not be conflated with Officeholder, Appointment, Role, Permission, or legal Authority. Phase 3 must not implement the later Authority Engine unless explicitly requested.

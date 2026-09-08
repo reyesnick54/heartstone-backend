@@ -17,10 +17,6 @@ describe('InstitutionsService', () => {
     ensureJurisdictionExists: jest.Mock;
   };
   let prisma: {
-  let prisma: {
-    jurisdiction: {
-      findUnique: jest.Mock;
-    };
     institution: {
       create: jest.Mock;
       findMany: jest.Mock;
@@ -48,10 +44,6 @@ describe('InstitutionsService', () => {
     };
 
     prisma = {
-    prisma = {
-      jurisdiction: {
-        findUnique: jest.fn(),
-      },
       institution: {
         create: jest.fn(),
         findMany: jest.fn(),
@@ -79,7 +71,6 @@ describe('InstitutionsService', () => {
 
   it('rejects institutions referencing a missing jurisdiction', async () => {
     validation.ensureJurisdictionExists.mockRejectedValue(new NotFoundException());
-    prisma.jurisdiction.findUnique.mockResolvedValue(null);
 
     await expect(
       service.create({
@@ -93,7 +84,6 @@ describe('InstitutionsService', () => {
 
   it('creates an institution for an existing jurisdiction', async () => {
     validation.ensureJurisdictionExists.mockResolvedValue(undefined);
-    prisma.jurisdiction.findUnique.mockResolvedValue({ id: jurisdictionId });
     prisma.institution.create.mockResolvedValue(sampleInstitution);
 
     await expect(
@@ -108,7 +98,6 @@ describe('InstitutionsService', () => {
 
   it('rejects duplicate institution codes within the same jurisdiction', async () => {
     validation.ensureJurisdictionExists.mockResolvedValue(undefined);
-    prisma.jurisdiction.findUnique.mockResolvedValue({ id: jurisdictionId });
     prisma.institution.create.mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
         code: 'P2002',

@@ -35,9 +35,6 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.department.deleteMany();
   await prisma.governmentBody.deleteMany();
   await prisma.externalAuthority.deleteMany();
-  await prisma.officeholder.deleteMany();
-  await prisma.office.deleteMany();
-  await prisma.department.deleteMany();
   await prisma.institution.deleteMany();
   await prisma.jurisdiction.deleteMany();
 }
