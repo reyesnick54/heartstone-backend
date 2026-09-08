@@ -8,7 +8,11 @@ import { envValidationSchema } from './config/env.validation';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
+import { DepartmentModule } from './department/department.module';
+import { GovernmentBodyModule } from './government-body/government-body.module';
 import { HealthModule } from './health/health.module';
+import { InstitutionModule } from './institution/institution.module';
+import { JurisdictionModule } from './jurisdiction/jurisdiction.module';
 import { RedisModule } from './redis/redis.module';
 import { SystemModule } from './system/system.module';
 
@@ -28,6 +32,10 @@ import { SystemModule } from './system/system.module';
     RedisModule,
     HealthModule,
     SystemModule,
+    JurisdictionModule,
+    InstitutionModule,
+    GovernmentBodyModule,
+    DepartmentModule,
   ],
 })
 export class AppModule {}
