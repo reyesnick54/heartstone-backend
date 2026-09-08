@@ -8,6 +8,21 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+interface PayloadTooLargeError extends Error {
+  type?: string;
+  status?: number;
+}
+
+function isPayloadTooLargeError(
+  exception: unknown,
+): exception is PayloadTooLargeError {
+  return (
+    exception instanceof Error &&
+    ((exception as PayloadTooLargeError).type === 'entity.too.large' ||
+      (exception as PayloadTooLargeError).status === 413)
+  );
+}
+
 interface ErrorResponseBody {
   statusCode: number;
   message: string | string[];
@@ -20,11 +35,18 @@ interface ErrorResponseBody {
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
+  constructor(
+    private readonly nodeEnv: string = process.env.NODE_ENV ?? 'development',
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    const status = isPayloadTooLargeError(exception)
+      ? HttpStatus.PAYLOAD_TOO_LARGE
+      : exception instanceof HttpException
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -33,6 +55,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const exceptionResponse =
       exception instanceof HttpException ? exception.getResponse() : null;
 
+    let message: string | string[] = isPayloadTooLargeError(exception)
+      ? 'Request body too large'
+      : 'Internal server error';
     let message: string | string[] = 'Internal server error';
     if (typeof exceptionResponse === 'string') {
       message = exceptionResponse;
@@ -42,6 +67,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       'message' in exceptionResponse
     ) {
       message = (exceptionResponse as { message: string | string[] }).message;
+    }
+
+    if (status >= 500 && this.nodeEnv === 'production') {
+      message = 'Internal server error';
     }
 
     const errorBody: ErrorResponseBody = {

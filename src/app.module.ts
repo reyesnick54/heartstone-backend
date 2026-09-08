@@ -1,4 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
+import { createPinoConfig } from './common/logging/pino-config';
+import appConfig from './config/app.config';
+import { envValidationSchema } from './config/env.validation';
+import securityConfig from './config/security.config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -24,6 +30,7 @@ import { SystemModule } from './system/system.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [appConfig, securityConfig],
       load: [redisConfig],
     }),
     RedisModule,
@@ -40,6 +47,7 @@ import { SystemModule } from './system/system.module';
         abortEarly: true,
       },
     }),
+    LoggerModule.forRoot(createPinoConfig()),
     LoggerModule.forRoot({
       pinoHttp: {
         transport:
