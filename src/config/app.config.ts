@@ -1,7 +1,9 @@
-import { registerAs } from '@nestjs/config';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { APP_CONFIG, AppConfig } from './config.constants';
+
+import { registerAs } from '@nestjs/config';
+
+import { APP_CONFIG, type AppConfig } from './config.constants';
 
 function resolveBuildVersion(): string | null {
   const fromEnv = process.env.BUILD_VERSION?.trim();

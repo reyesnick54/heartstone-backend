@@ -1,4 +1,5 @@
-import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { type ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
 describe('AllExceptionsFilter', () => {
@@ -36,10 +37,7 @@ describe('AllExceptionsFilter', () => {
     const filter = new AllExceptionsFilter('production');
     const { host, json, status } = createHost();
 
-    filter.catch(
-      new HttpException('Invalid input', HttpStatus.BAD_REQUEST),
-      host,
-    );
+    filter.catch(new HttpException('Invalid input', HttpStatus.BAD_REQUEST), host);
 
     expect(status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
     expect(json).toHaveBeenCalledWith(

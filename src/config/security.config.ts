@@ -1,10 +1,8 @@
 import { registerAs } from '@nestjs/config';
-import { SECURITY_CONFIG, SecurityConfig } from './config.constants';
 
-function parseBoolean(
-  value: string | undefined,
-  defaultValue: boolean,
-): boolean {
+import { SECURITY_CONFIG, type SecurityConfig } from './config.constants';
+
+function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
   if (value === undefined || value.trim() === '') {
     return defaultValue;
   }
@@ -12,10 +10,7 @@ function parseBoolean(
   return value === 'true' || value === '1';
 }
 
-function resolveCorsOrigins(
-  nodeEnv: string,
-  origins: string | undefined,
-): string[] | boolean {
+function resolveCorsOrigins(nodeEnv: string, origins: string | undefined): string[] | boolean {
   const trimmed = origins?.trim() ?? '';
 
   if (trimmed === '*') {
@@ -49,11 +44,8 @@ export default registerAs(SECURITY_CONFIG, (): SecurityConfig => {
       origins: resolveCorsOrigins(nodeEnv, process.env.CORS_ORIGINS),
       credentials: parseBoolean(process.env.CORS_CREDENTIALS, false),
     },
-    bodyLimit: process.env.JSON_BODY_LIMIT?.trim() || '100kb',
-    swaggerEnabled: parseBoolean(
-      process.env.SWAGGER_ENABLED,
-      nodeEnv !== 'production',
-    ),
+    bodyLimit: process.env.JSON_BODY_LIMIT?.trim() ?? '100kb',
+    swaggerEnabled: parseBoolean(process.env.SWAGGER_ENABLED, nodeEnv !== 'production'),
     trustProxy: parseBoolean(process.env.TRUST_PROXY, nodeEnv === 'production'),
   };
 });

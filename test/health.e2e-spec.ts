@@ -1,14 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { type INestApplication } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
-import {
-  createRedisServiceMock,
-  overrideRedisService,
-} from './redis-test-utils';
+import { type App } from 'supertest/types';
 
-describe('HealthController (e2e)', () => {
+import { AppModule } from '../src/app.module';
+import { configureApplication } from '../src/bootstrap/configure-application';
+import { createRedisServiceMock, overrideRedisService } from './redis-test-utils';
+
+describe('Readiness endpoints (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -20,7 +19,8 @@ describe('HealthController (e2e)', () => {
 
     const moduleFixture: TestingModule = await moduleBuilder.compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication({ bodyParser: false });
+    configureApplication(app);
     await app.init();
   });
 
@@ -28,19 +28,20 @@ describe('HealthController (e2e)', () => {
     await app.close();
   });
 
-  it('/ready (GET) returns 200 when Redis is healthy', () => {
+  it('GET /api/v1/ready returns 200 when Redis is healthy', () => {
     return request(app.getHttpServer())
-      .get('/ready')
+      .get('/api/v1/ready')
       .expect(200)
       .expect({
-        status: 'ok',
+        status: 'ready',
         checks: {
+          database: 'up',
           redis: 'up',
         },
       });
   });
 
-  it('/ready (GET) returns 503 when Redis is unhealthy', async () => {
+  it('GET /api/v1/ready returns 503 when Redis is unhealthy', async () => {
     const moduleBuilder = Test.createTestingModule({
       imports: [AppModule],
     });
@@ -50,16 +51,19 @@ describe('HealthController (e2e)', () => {
     overrideRedisService(moduleBuilder, redisServiceMock);
 
     const moduleFixture: TestingModule = await moduleBuilder.compile();
-    const unhealthyApp: INestApplication<App> =
-      moduleFixture.createNestApplication();
+    const unhealthyApp: INestApplication<App> = moduleFixture.createNestApplication({
+      bodyParser: false,
+    });
+    configureApplication(unhealthyApp);
     await unhealthyApp.init();
 
     await request(unhealthyApp.getHttpServer())
-      .get('/ready')
+      .get('/api/v1/ready')
       .expect(503)
       .expect({
-        status: 'error',
+        status: 'not_ready',
         checks: {
+          database: 'up',
           redis: 'down',
         },
       });

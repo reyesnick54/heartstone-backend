@@ -1,21 +1,21 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { type Express, json, urlencoded } from 'express';
 import helmet from 'helmet';
-import { Express, json, urlencoded } from 'express';
+
 import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import {
   APP_CONFIG,
-  AppConfig,
+  type AppConfig,
   SECURITY_CONFIG,
-  SecurityConfig,
+  type SecurityConfig,
 } from '../config/config.constants';
 
 export function configureApplication(app: INestApplication): void {
   const configService = app.get(ConfigService);
   const appConfig = configService.getOrThrow<AppConfig>(APP_CONFIG);
-  const securityConfig =
-    configService.getOrThrow<SecurityConfig>(SECURITY_CONFIG);
+  const securityConfig = configService.getOrThrow<SecurityConfig>(SECURITY_CONFIG);
 
   if (securityConfig.trustProxy) {
     const expressApp = app.getHttpAdapter().getInstance() as Express;
