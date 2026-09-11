@@ -50,4 +50,83 @@ export function asServiceOutputDefinitionListBody(body: unknown): ServiceOutputD
 
 export function asServiceRedressRouteListBody(body: unknown): ServiceRedressRouteBody[] {
   return body as ServiceRedressRouteBody[];
+export interface GovernmentServiceBody {
+  id: string;
+  code: string;
+  name: string;
+import type {
+  ApplicantCategory,
+  GovernmentServiceMaturityStatus,
+  GovernmentServicePublicAvailability,
+} from '@prisma/client';
+
+export interface GovernmentServiceBody {
+  id: string;
+  code: string;
+  slug: string;
+  officialName: string;
+  publicName: string;
+  summary?: string | null;
+  responsibleInstitutionId: string;
+  responsibleDepartmentId: string;
+  serviceFamilyId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GovernmentServiceVersionBody {
+  id: string;
+  versionLabel: string;
+  governmentServiceId: string;
+}
+
+export interface EligibilityGuidanceBody {
+  outcome: string;
+  governmentServiceVersionId: string;
+  disclaimer: string;
+  excludedActivity?: string;
+  missingFacts: string[];
+  matchedRules: unknown[];
+}
+
+export interface ServiceMatchBody {
+  primaryService?: { code: string; name: string };
+  disclaimer: string;
+  governmentServiceId: string;
+  version: string;
+  purpose?: string | null;
+  maturityStatus: GovernmentServiceMaturityStatus;
+  publicAvailability: GovernmentServicePublicAvailability;
+  applicantCategories: ApplicantCategory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceFunctionMappingBody {
+  id: string;
+  governmentServiceVersionId: string;
+  functionAuthorityRecordId: string;
+  sequenceOrder: number;
+  isConsequential: boolean;
+  publicStageLabel?: string | null;
+  functionAuthorityRecordCode?: string;
+  functionAuthorityRecordName?: string;
+}
+
+export function asGovernmentServiceBody(body: unknown): GovernmentServiceBody {
+  return body as GovernmentServiceBody;
+}
+
+export function asGovernmentServiceVersionBody(body: unknown): GovernmentServiceVersionBody {
+  return body as GovernmentServiceVersionBody;
+}
+
+export function asEligibilityGuidanceBody(body: unknown): EligibilityGuidanceBody {
+  return body as EligibilityGuidanceBody;
+}
+
+export function asServiceMatchBody(body: unknown): ServiceMatchBody {
+  return body as ServiceMatchBody;
+export function asServiceFunctionMappingBody(body: unknown): ServiceFunctionMappingBody {
+  return body as ServiceFunctionMappingBody;
 }
