@@ -145,6 +145,7 @@ describe('Phase 5A Service Catalog (integration)', () => {
       data: {
         maturityStatus: GovernmentServiceMaturityStatus.SUPERSEDED,
         publicAvailability: GovernmentServicePublicAvailability.HIDDEN,
+        supersededAt: new Date(),
       },
     });
 
