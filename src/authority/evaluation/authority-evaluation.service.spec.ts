@@ -6,6 +6,7 @@ import {
   AuthorityEvaluationOutcome,
 } from '@prisma/client';
 
+import { resetAllTestData } from '../../../test/helpers/integration-app';
 import appConfig from '../../config/app.config';
 import identityConfig from '../../config/identity.config';
 import redisConfig from '../../config/redis.config';
@@ -51,36 +52,7 @@ describe('AuthorityEvaluationService', () => {
   });
 
   beforeEach(async () => {
-    await prisma.authorityEvaluationRecord.deleteMany();
-    await prisma.functionActivationAudit.deleteMany();
-    await prisma.retainedNationalDetermination.deleteMany();
-    await prisma.segregationOfDutyRule.deleteMany();
-    await prisma.authorityDependency.deleteMany();
-    await prisma.authorityCondition.deleteMany();
-    await prisma.authorityActionRight.deleteMany();
-    await prisma.functionAuthorityAssignment.deleteMany();
-    await prisma.delegationStructuredScope.deleteMany();
-    await prisma.functionGoverningSource.deleteMany();
-    await prisma.governingSourceRelationship.deleteMany();
-    await prisma.governingSourceVersion.deleteMany();
-    await prisma.governingSource.deleteMany();
-    await prisma.functionAuthorityRecord.deleteMany();
-    await prisma.securityAuditEvent.deleteMany();
-    await prisma.session.deleteMany();
-    await prisma.authenticationMethod.deleteMany();
-    await prisma.credential.deleteMany();
-    await prisma.delegation.deleteMany();
-    await prisma.identityOfficeholderLink.deleteMany();
-    await prisma.identity.deleteMany();
-    await prisma.userAccount.deleteMany();
-    await prisma.person.deleteMany();
-    await prisma.appointment.deleteMany();
-    await prisma.officeholder.deleteMany();
-    await prisma.office.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.externalAuthority.deleteMany();
-    await prisma.institution.deleteMany();
-    await prisma.jurisdiction.deleteMany();
+    await resetAllTestData(prisma);
 
     ctx = await fixtures.seedStructuralContext();
     classificationFixtures = await fixtures.seedEightClassifications(ctx);
