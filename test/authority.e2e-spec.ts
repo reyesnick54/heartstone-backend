@@ -23,10 +23,7 @@ import {
   asFunctionAuthorityRecordBody,
   asFunctionAuthorityRecordListBody,
 } from './helpers/authority-test-types';
-import {
-  asInstitutionBody,
-  asJurisdictionBody,
-} from './helpers/government-test-types';
+import { asInstitutionBody, asJurisdictionBody } from './helpers/government-test-types';
 import {
   asIdentityBody,
   asLoginResponseBody,
@@ -130,10 +127,12 @@ describe('Phase 4A Authority register E2E acceptance', () => {
     const institution = asInstitutionBody(institutionRes.body);
 
     const classifications = Object.values(AuthorityClassification);
-    const lifecycleStates = Object.values(AuthorityLifecycleState);
+    const lifecycleStates = Object.values(AuthorityLifecycleState).filter(
+      (state) => state !== AuthorityLifecycleState.ACTIVE,
+    );
 
     for (const [index, classification] of classifications.entries()) {
-      const lifecycleState = lifecycleStates[index % lifecycleStates.length];
+      const lifecycleState = lifecycleStates[index % lifecycleStates.length]!;
 
       await request(app.getHttpServer())
         .post('/api/v1/authority/functions')
@@ -261,17 +260,17 @@ describe('Phase 4A Authority register E2E acceptance', () => {
       .post('/api/v1/authority/functions')
       .set('Authorization', authorization)
       .send({
-        code: 'ACTIVE-BUT-NOT-GRANTED',
-        name: 'Active Register Entry',
+        code: 'REGISTERED-BUT-NOT-GRANTED',
+        name: 'Registered Function Entry',
         functionClass: ControlledFunctionClass.ISSUANCE,
         authorityClassification: AuthorityClassification.ABSEZ_OWNED,
-        lifecycleState: AuthorityLifecycleState.ACTIVE,
+        lifecycleState: AuthorityLifecycleState.RECOGNIZED,
         institutionId: institution.id,
       })
       .expect(201);
 
     const record = asFunctionAuthorityRecordBody(createRes.body);
-    expect(record.lifecycleState).toBe(AuthorityLifecycleState.ACTIVE);
+    expect(record.lifecycleState).toBe(AuthorityLifecycleState.RECOGNIZED);
     expect(
       authorityBoundary.resolveGovernmentAuthority({
         identityId: identity.id,

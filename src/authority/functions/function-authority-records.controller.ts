@@ -18,6 +18,10 @@ import {
 } from '@nestjs/swagger';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import {
+  SourceFoundationEvaluation,
+  SourceFoundationEvaluatorService,
+} from '../common/source-foundation-evaluator.service';
 import { CreateFunctionAuthorityRecordDto } from './dto/create-function-authority-record.dto';
 import {
   FunctionAuthorityRecordResponseDto,
@@ -31,7 +35,10 @@ import { FunctionAuthorityRecordsService } from './function-authority-records.se
 @UseGuards(SessionAuthGuard)
 @Controller('authority/functions')
 export class FunctionAuthorityRecordsController {
-  constructor(private readonly recordsService: FunctionAuthorityRecordsService) {}
+  constructor(
+    private readonly recordsService: FunctionAuthorityRecordsService,
+    private readonly sourceFoundationEvaluator: SourceFoundationEvaluatorService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Register a consequential function in the authority control register' })
@@ -49,6 +56,14 @@ export class FunctionAuthorityRecordsController {
     @Query() query: QueryFunctionAuthorityRecordsDto,
   ): Promise<FunctionAuthorityRecordResponseDto[]> {
     return this.recordsService.findAll(query);
+  }
+
+  @Get(':id/source-foundation')
+  @ApiOperation({ summary: 'Evaluate governing source foundation for a function' })
+  evaluateSourceFoundation(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SourceFoundationEvaluation> {
+    return this.sourceFoundationEvaluator.evaluateForFunction(id);
   }
 
   @Get(':id')

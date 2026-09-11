@@ -87,9 +87,10 @@ model Jurisdiction {
   description  String?
   type         JurisdictionType
   status       StructuralLifecycleStatus @default(ACTIVE)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  institutions Institution[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  institutions     Institution[]
+  governingSources GoverningSource[]
 
   @@map("jurisdictions")
 }
@@ -371,6 +372,12 @@ enum SecurityAuditEventType {
   MFA_VERIFIED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
+  GOVERNING_SOURCE_CREATED
+  GOVERNING_SOURCE_STATUS_UPDATED
+  GOVERNING_SOURCE_AUTHENTICATION_UPDATED
+  GOVERNING_SOURCE_RELATIONSHIP_CREATED
+  FUNCTION_GOVERNING_SOURCE_LINKED
+  FUNCTION_GOVERNING_SOURCE_UPDATED
 }
 
 model Person {
@@ -652,8 +659,9 @@ model FunctionAuthorityRecord {
   revalidationAt          DateTime?
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
-  institution             Institution             @relation(fields: [institutionId], references: [id])
-  department              Department?             @relation(fields: [departmentId], references: [id])
+  institution             Institution               @relation(fields: [institutionId], references: [id])
+  department              Department?               @relation(fields: [departmentId], references: [id])
+  governingSourceLinks    FunctionGoverningSource[]
 
   @@index([institutionId])
   @@index([departmentId])
@@ -661,4 +669,150 @@ model FunctionAuthorityRecord {
   @@index([authorityClassification])
   @@index([functionClass])
   @@map("function_authority_records")
+}
+
+// ─── Phase 4B: Governing Source Registry ──────────────────────────────────────
+
+enum GoverningSourceType {
+  LEGISLATION
+  AMENDMENT
+  ORDER
+  GUIDELINE
+  MEMORANDUM
+  IMPLEMENTATION_PROTOCOL
+  EXECUTABLE_ANNEX
+  RESOLUTION
+  DELEGATION_INSTRUMENT
+  APPOINTMENT_INSTRUMENT
+  APPROVED_PROCEDURE
+  GOVERNMENT_DIRECTIVE
+  PROFESSIONAL_REQUIREMENT
+  OTHER_AUTHENTICATED_INSTRUMENT
+}
+
+enum SourceAuthenticationStatus {
+  UNVERIFIED
+  VERIFICATION_PENDING
+  AUTHENTICATED
+  REJECTED
+  DISPUTED
+}
+
+enum GoverningSourceStatus {
+  IDENTIFIED
+  AUTHENTICATION_PENDING
+  AUTHENTICATED
+  IN_FORCE
+  NOT_YET_EFFECTIVE
+  AMENDED
+  SUPERSEDED
+  REVOKED
+  EXPIRED
+  DISPUTED
+}
+
+enum GoverningSourceRelationshipType {
+  AMENDS
+  AMENDED_BY
+  SUPERSEDES
+  SUPERSEDED_BY
+  REVOKES
+  REVOKED_BY
+  IMPLEMENTS
+  SUPPLEMENTS
+  INCORPORATES
+  DEPENDENT_ON
+}
+
+enum FunctionSourceRelationshipType {
+  PRIMARY_BASIS
+  SUPPORTING
+  IMPLEMENTING
+  INTERPRETIVE_GUIDANCE
+  ADMINISTRATIVE_NOTE
+}
+
+enum FunctionSourceInterpretationStatus {
+  UNRESOLVED
+  RESOLVED
+  CONTESTED
+  NOT_APPLICABLE
+}
+
+enum SourceFoundationValidity {
+  VALID
+  UNRESOLVED
+  INVALID
+  EXPIRED
+  SUPERSEDED
+  CONFLICTING
+}
+
+model GoverningSource {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  sourceCode             String                        @unique
+  title                  String
+  sourceType             GoverningSourceType
+  issuer                 String?
+  jurisdictionId         String?                       @db.Uuid
+  instrumentDate         DateTime?                     @db.Date
+  effectiveDate          DateTime?                     @db.Date
+  commencementDate       DateTime?                     @db.Date
+  expiryDate             DateTime?                     @db.Date
+  authenticationStatus   SourceAuthenticationStatus    @default(UNVERIFIED)
+  sourceStatus           GoverningSourceStatus         @default(IDENTIFIED)
+  officialLocationRef    String?
+  documentFingerprint    String?
+  classificationMetadata Json?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  jurisdiction           Jurisdiction?                 @relation(fields: [jurisdictionId], references: [id])
+  relationshipsFrom      GoverningSourceRelationship[] @relation("GoverningSourceFrom")
+  relationshipsTo        GoverningSourceRelationship[] @relation("GoverningSourceTo")
+  functionLinks          FunctionGoverningSource[]
+
+  @@index([jurisdictionId])
+  @@index([sourceStatus])
+  @@index([authenticationStatus])
+  @@map("governing_sources")
+}
+
+model GoverningSourceRelationship {
+  id               String                        @id @default(uuid()) @db.Uuid
+  sourceId         String                        @db.Uuid
+  relatedSourceId  String                        @db.Uuid
+  relationshipType GoverningSourceRelationshipType
+  effectiveFrom    DateTime?                     @db.Date
+  effectiveUntil   DateTime?                     @db.Date
+  notes            String?
+  createdAt        DateTime                      @default(now())
+  source           GoverningSource               @relation("GoverningSourceFrom", fields: [sourceId], references: [id])
+  relatedSource    GoverningSource               @relation("GoverningSourceTo", fields: [relatedSourceId], references: [id])
+
+  @@unique([sourceId, relatedSourceId, relationshipType])
+  @@index([sourceId])
+  @@index([relatedSourceId])
+  @@map("governing_source_relationships")
+}
+
+model FunctionGoverningSource {
+  id                        String                             @id @default(uuid()) @db.Uuid
+  functionAuthorityRecordId   String                             @db.Uuid
+  governingSourceId           String                             @db.Uuid
+  provisionCitation         String?
+  relationshipType          FunctionSourceRelationshipType
+  isPrimary                 Boolean                            @default(false)
+  interpretationStatus      FunctionSourceInterpretationStatus @default(UNRESOLVED)
+  effectiveFrom             DateTime?                          @db.Date
+  effectiveUntil            DateTime?                          @db.Date
+  notes                     String?
+  createdAt                 DateTime                           @default(now())
+  updatedAt                 DateTime                           @updatedAt
+  functionAuthorityRecord   FunctionAuthorityRecord            @relation(fields: [functionAuthorityRecordId], references: [id])
+  governingSource           GoverningSource                    @relation(fields: [governingSourceId], references: [id])
+
+  @@unique([functionAuthorityRecordId, governingSourceId, relationshipType])
+  @@index([functionAuthorityRecordId])
+  @@index([governingSourceId])
+  @@map("function_governing_sources")
 }

@@ -233,7 +233,7 @@ describe('Phase 4A Authority register (integration)', () => {
         name: 'Applicant Intake',
         functionClass: ControlledFunctionClass.APPLICANT_INTAKE,
         authorityClassification: AuthorityClassification.ABSEZ_DELEGATED,
-        lifecycleState: AuthorityLifecycleState.ACTIVE,
+        lifecycleState: AuthorityLifecycleState.RECOGNIZED,
         institutionId,
       })
       .expect(201);

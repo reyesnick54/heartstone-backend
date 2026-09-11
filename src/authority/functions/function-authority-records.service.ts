@@ -1,8 +1,14 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { FunctionAuthorityRecord, Prisma } from '@prisma/client';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { AuthorityLifecycleState, FunctionAuthorityRecord, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { AuthorityValidationService } from '../common/authority-validation.service';
+import { SourceFoundationEvaluatorService } from '../common/source-foundation-evaluator.service';
 import { CreateFunctionAuthorityRecordDto } from './dto/create-function-authority-record.dto';
 import { QueryFunctionAuthorityRecordsDto } from './dto/function-authority-record.dto';
 import { UpdateFunctionAuthorityRecordDto } from './dto/update-function-authority-record.dto';
@@ -12,6 +18,7 @@ export class FunctionAuthorityRecordsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly validation: AuthorityValidationService,
+    private readonly sourceFoundation: SourceFoundationEvaluatorService,
   ) {}
 
   async create(dto: CreateFunctionAuthorityRecordDto): Promise<FunctionAuthorityRecord> {
@@ -22,6 +29,10 @@ export class FunctionAuthorityRecordsService {
         dto.departmentId,
         dto.institutionId,
       );
+    }
+
+    if (dto.lifecycleState === AuthorityLifecycleState.ACTIVE) {
+      await this.assertSourceFoundationPermitsActive('new function');
     }
 
     try {
@@ -99,6 +110,13 @@ export class FunctionAuthorityRecordsService {
       );
     }
 
+    if (
+      dto.lifecycleState === AuthorityLifecycleState.ACTIVE &&
+      existing.lifecycleState !== AuthorityLifecycleState.ACTIVE
+    ) {
+      await this.assertSourceFoundationPermitsActive(id);
+    }
+
     return this.prisma.functionAuthorityRecord.update({
       where: { id },
       data: {
@@ -128,6 +146,25 @@ export class FunctionAuthorityRecordsService {
               : undefined,
       },
     });
+  }
+
+  private async assertSourceFoundationPermitsActive(
+    functionAuthorityRecordId: string,
+  ): Promise<void> {
+    if (functionAuthorityRecordId === 'new function') {
+      throw new BadRequestException(
+        'Function cannot become ACTIVE without a registered governing source foundation',
+      );
+    }
+
+    const evaluation = await this.sourceFoundation.evaluateForFunction(functionAuthorityRecordId);
+    if (!this.sourceFoundation.supportsActiveUse(evaluation)) {
+      throw new BadRequestException({
+        message:
+          'Function cannot become ACTIVE: governing source foundation is not valid for active use',
+        sourceFoundation: evaluation,
+      });
+    }
   }
 
   private handleWriteError(error: unknown, code: string): never {
