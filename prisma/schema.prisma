@@ -1126,6 +1126,23 @@ enum ServiceFunctionMappingStatus {
   SUSPENDED
 }
 
+enum CatalogServiceType {
+  APPLICATION
+  REGISTRATION
+  LICENCE
+  PERMIT
+  CERTIFICATION
+  INFORMATION
+  OTHER
+}
+
+enum FormVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
 model ServiceFamily {
   id          String                    @id @default(uuid()) @db.Uuid
   code        String                    @unique
@@ -1146,6 +1163,9 @@ model GovernmentService {
   officialName             String
   publicName               String
   summary                  String?
+  catalogServiceType       CatalogServiceType?
+  internalNotes            String?
+  sensitiveConfig          Json?
   responsibleInstitutionId String                     @db.Uuid
   responsibleDepartmentId  String                     @db.Uuid
   serviceFamilyId          String                     @db.Uuid
@@ -1159,34 +1179,52 @@ model GovernmentService {
   @@index([responsibleInstitutionId])
   @@index([responsibleDepartmentId])
   @@index([serviceFamilyId])
+  @@index([catalogServiceType])
   @@map("government_services")
 }
 
 model GovernmentServiceVersion {
-  id                         String                                      @id @default(uuid()) @db.Uuid
-  governmentServiceId        String                                      @db.Uuid
-  version                    String
-  purpose                    String?
-  coveredActivities          String?
-  excludedActivities         String?
-  geographicScope            String?
-  publicDescription          String?
-  typicalValidityDescription String?
-  effectiveFrom              DateTime?
-  effectiveUntil             DateTime?
-  informationLastVerifiedAt  DateTime?
-  maturityStatus             GovernmentServiceMaturityStatus             @default(DRAFT)
-  publicAvailability         GovernmentServicePublicAvailability         @default(HIDDEN)
-  createdAt                  DateTime                                    @default(now())
-  updatedAt                  DateTime                                    @updatedAt
-  governmentService          GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
-  functionMappings           ServiceFunctionMapping[]
-  applicantCategories        GovernmentServiceVersionApplicantCategory[]
+  id                               String                                      @id @default(uuid()) @db.Uuid
+  governmentServiceId              String                                      @db.Uuid
+  version                          String
+  purpose                          String?
+  coveredActivities                String?
+  excludedActivities               String?
+  geographicScope                  String?
+  publicDescription                String?
+  typicalValidityDescription       String?
+  effectiveFrom                    DateTime?
+  effectiveUntil                   DateTime?
+  informationLastVerifiedAt        DateTime?
+  publicDisclaimer                 String?
+  authorityClassificationSummary   String?
+  majorDependencies                Json                                        @default("[]")
+  internalGoverningSourceMaterial  String?
+  restrictedSecurityNotes          String?
+  supersededAt                     DateTime?
+  formDefinitionId                 String?                                     @db.Uuid
+  formVersionId                    String?                                     @db.Uuid
+  maturityStatus                   GovernmentServiceMaturityStatus             @default(DRAFT)
+  publicAvailability               GovernmentServicePublicAvailability         @default(HIDDEN)
+  createdAt                        DateTime                                    @default(now())
+  updatedAt                        DateTime                                    @updatedAt
+  governmentService                GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
+  formDefinition                   FormDefinition?                             @relation(fields: [formDefinitionId], references: [id])
+  formVersion                      FormVersion?                                @relation(fields: [formVersionId], references: [id])
+  functionMappings                 ServiceFunctionMapping[]
+  applicantCategories              GovernmentServiceVersionApplicantCategory[]
+  fees                             GovernmentServiceFeeDefinition[]
+  eligibilityRules                 GovernmentServiceEligibilityRule[]
+  checklistItems                   GovernmentServiceChecklistItem[]
+  outputs                          GovernmentServiceOutputDefinition[]
+  redressRoutes                    GovernmentServiceRedressRoute[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
   @@index([maturityStatus])
   @@index([publicAvailability])
+  @@index([formDefinitionId])
+  @@index([formVersionId])
   @@map("government_service_versions")
 }
 
@@ -1221,4 +1259,125 @@ model ServiceFunctionMapping {
   @@index([governmentServiceVersionId])
   @@index([functionAuthorityRecordId])
   @@map("service_function_mappings")
+}
+
+model FormDefinition {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  code                     String                     @unique
+  name                     String
+  description              String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  versions                 FormVersion[]
+  governmentServiceVersions GovernmentServiceVersion[]
+
+  @@map("form_definitions")
+}
+
+model FormVersion {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  formDefinitionId         String                     @db.Uuid
+  versionNumber            Int
+  status                   FormVersionStatus          @default(DRAFT)
+  schema                   Json
+  activatedAt              DateTime?
+  supersededAt             DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  formDefinition           FormDefinition             @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+  governmentServiceVersions GovernmentServiceVersion[]
+
+  @@unique([formDefinitionId, versionNumber])
+  @@index([formDefinitionId])
+  @@index([status])
+  @@map("form_versions")
+}
+
+model GovernmentServiceFeeDefinition {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                   @db.Uuid
+  code                       String
+  label                      String
+  description                String?
+  amountCents                Int?
+  currency                   String                   @default("XCD")
+  isVariable                 Boolean                  @default(false)
+  sortOrder                  Int                      @default(0)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, code])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_fee_definitions")
+}
+
+model GovernmentServiceEligibilityRule {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                   @db.Uuid
+  ruleCode                   String
+  label                      String
+  description                String
+  configuration              Json                     @default("{}")
+  sortOrder                  Int                      @default(0)
+  isRequired                 Boolean                  @default(true)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, ruleCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_eligibility_rules")
+}
+
+model GovernmentServiceChecklistItem {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                   @db.Uuid
+  itemCode                   String
+  label                      String
+  description                String?
+  conditionExpression        Json?
+  sortOrder                  Int                      @default(0)
+  isRequired                 Boolean                  @default(true)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, itemCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_checklist_items")
+}
+
+model GovernmentServiceOutputDefinition {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                   @db.Uuid
+  outputCode                 String
+  label                      String
+  description                String?
+  validityLabel              String?
+  sortOrder                  Int                      @default(0)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, outputCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_output_definitions")
+}
+
+model GovernmentServiceRedressRoute {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                   @db.Uuid
+  routeCode                  String
+  label                      String
+  description                String?
+  contactReference           String?
+  sortOrder                  Int                      @default(0)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, routeCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_redress_routes")
 }
