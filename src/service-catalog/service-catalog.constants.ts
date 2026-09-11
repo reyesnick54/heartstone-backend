@@ -1,5 +1,8 @@
 import { EligibilityGuidanceOutcome } from '@prisma/client';
 
+export const NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER =
+  'NON_PRODUCTION_SERVICE_CATALOG_TEST_ONLY';
+
 export const ELIGIBILITY_GUIDANCE_DISCLAIMER =
   'This result is preliminary eligibility guidance only. It is based on information you supplied or that is currently available to the system. ' +
   'It does not establish completeness of your submission, does not waive any statutory or regulatory requirements, does not guarantee approval, ' +
@@ -75,8 +78,6 @@ export const RECOMMENDED_ACTIONS: Record<EligibilityGuidanceOutcome, string> = {
   [EligibilityGuidanceOutcome.UNRESOLVED]:
     'The system could not produce reliable guidance. Contact the administering institution for assistance.',
 };
-export const NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER =
-  'NON_PRODUCTION_SERVICE_CATALOG_TEST_ONLY';
 
 export const IMMUTABLE_PUBLISHED_MATURITY_STATUSES = [
   'RECOGNIZED',

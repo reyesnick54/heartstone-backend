@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { GovernmentServiceVersionStatus } from '@prisma/client';
+import { GovernmentServiceMaturityStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { PUBLICLY_PRESENTABLE_AVAILABILITY } from '../common/public-discovery.constants';
 import { type ApplicantFacts, EligibilityEvaluatorService } from './eligibility-evaluator.service';
+import { EligibilityVersionAccessService } from './eligibility-version-access.service';
 
 export interface ServiceMatchResult {
   primaryService?: {
@@ -23,19 +25,27 @@ export class ServiceMatcherService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly evaluator: EligibilityEvaluatorService,
+    private readonly versionAccess: EligibilityVersionAccessService,
   ) {}
 
   async match(facts: ApplicantFacts): Promise<ServiceMatchResult> {
     const now = new Date();
     const publishedVersions = await this.prisma.governmentServiceVersion.findMany({
       where: {
-        status: GovernmentServiceVersionStatus.PUBLISHED,
-        effectiveFrom: { lte: now },
-        OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
+        maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
+        publicAvailability: { in: PUBLICLY_PRESENTABLE_AVAILABILITY },
+        AND: [
+          {
+            OR: [{ effectiveFrom: null }, { effectiveFrom: { lte: now } }],
+          },
+          {
+            OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
+          },
+        ],
       },
       include: {
         governmentService: true,
-        eligibilityRules: {
+        serviceEligibilityRules: {
           where: { status: 'ACTIVE' },
         },
       },
@@ -50,13 +60,14 @@ export class ServiceMatcherService {
     let bestScore = -1;
 
     for (const version of publishedVersions) {
+      const dependencyCodes = this.versionAccess.extractDependencyCodes(version.majorDependencies);
       const result = await this.evaluator.evaluate(
         version.governmentServiceId,
         version.id,
-        version.versionLabel,
-        version.eligibilityRules,
+        version.version,
+        version.serviceEligibilityRules,
         facts,
-        version.dependencyCodes,
+        dependencyCodes,
       );
 
       if (result.missingFacts.length > 0) {
@@ -66,7 +77,7 @@ export class ServiceMatcherService {
       if (result.outcome === 'OUTSIDE_PUBLISHED_SCOPE') {
         excludedServices.push({
           code: version.governmentService.code,
-          name: version.governmentService.name,
+          name: version.governmentService.publicName,
           reason: result.excludedActivity ?? 'outside published scope',
         });
         continue;
@@ -75,7 +86,7 @@ export class ServiceMatcherService {
       if (result.outcome === 'LIKELY_INELIGIBLE') {
         excludedServices.push({
           code: version.governmentService.code,
-          name: version.governmentService.name,
+          name: version.governmentService.publicName,
           reason: 'likely ineligible based on supplied facts',
         });
         continue;
@@ -90,18 +101,19 @@ export class ServiceMatcherService {
         primaryService = {
           governmentServiceId: version.governmentServiceId,
           code: version.governmentService.code,
-          name: version.governmentService.name,
+          name: version.governmentService.publicName,
           outcome: result.outcome,
         };
-        possibleDependencies.push(...version.dependencyCodes);
+        possibleDependencies.push(...dependencyCodes);
       }
 
-      for (const relatedCode of version.relatedServiceCodes) {
+      const relatedCodes = this.versionAccess.extractRelatedServiceCodes(version.majorDependencies);
+      for (const relatedCode of relatedCodes) {
         const related = publishedVersions.find((v) => v.governmentService.code === relatedCode);
         if (related) {
           relatedServices.push({
             code: related.governmentService.code,
-            name: related.governmentService.name,
+            name: related.governmentService.publicName,
           });
         }
       }

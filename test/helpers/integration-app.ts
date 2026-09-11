@@ -7,7 +7,6 @@ import { configureApplication } from '../../src/bootstrap/configure-application'
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetAuthorityData } from './authority-test-reset';
-import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
@@ -44,6 +43,8 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetServiceCatalogData(prisma: PrismaService): Promise<void> {
+  await prisma.serviceEligibilityRuleAudit.deleteMany();
+  await prisma.serviceEligibilityRule.deleteMany();
   await prisma.serviceActivationRecord.deleteMany();
   await prisma.governmentServiceRedressRoute.deleteMany();
   await prisma.governmentServiceOutputDefinition.deleteMany();
