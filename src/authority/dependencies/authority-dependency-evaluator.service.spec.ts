@@ -23,6 +23,8 @@ import { PrismaService } from '../../database/prisma.service';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { AuthorityModule } from '../authority.module';
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
+import { resetAuthorityData } from '../../../test/helpers/authority-test-reset';
+import { resetGovernmentData } from '../../../test/helpers/integration-app';
 import { AuthorityDependenciesService } from './authority-dependencies.service';
 import { AuthorityDependencyEvaluator } from './authority-dependency-evaluator.service';
 
@@ -56,13 +58,8 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
   });
 
   beforeEach(async () => {
-    await prisma.institutionalAuthorityAct.deleteMany();
-    await prisma.externalDependencyDetermination.deleteMany();
-    await prisma.authorityDependency.deleteMany();
-    await prisma.functionAuthorityRecord.deleteMany();
-    await prisma.externalAuthority.deleteMany();
-    await prisma.institution.deleteMany();
-    await prisma.jurisdiction.deleteMany();
+    await resetAuthorityData(prisma);
+    await resetGovernmentData(prisma);
 
     const jurisdiction = await prisma.jurisdiction.create({
       data: { code: 'AG-SEZ', name: 'ABSEZ', type: JurisdictionType.SPECIAL_ECONOMIC_ZONE },
