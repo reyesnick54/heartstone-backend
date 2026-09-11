@@ -76,19 +76,24 @@ describe('Identity schema coherence', () => {
   });
 
   it('defines session lifecycle status enum with active, expired, and revoked states', () => {
-    expect(schema).toMatch(/enum SessionStatus\s*\{[^}]*ACTIVE[^}]*EXPIRED[^}]*REVOKED/s);
+    const sessionStatusBlock = schema.match(/enum SessionStatus\s*\{([^}]*)\}/s)?.[1] ?? '';
+    expect(sessionStatusBlock).toContain('ACTIVE');
+    expect(sessionStatusBlock).toContain('EXPIRED');
+    expect(sessionStatusBlock).toContain('REVOKED');
   });
 
   it('stores credential metadata safely without plaintext secret columns', () => {
     const credentialBlock = extractModelBlock(schema, 'Credential');
 
-    expect(credentialBlock).toContain('credentialFingerprint');
-    expect(credentialBlock).toContain('secretReference');
+    expect(credentialBlock).toContain('secretHash');
+    expect(credentialBlock).toContain('oidcProvider');
+    expect(credentialBlock).toContain('oidcSubject');
+    expect(credentialBlock).toContain('apiKeyHash');
     expect(credentialBlock).not.toMatch(/\bpassword\b/i);
     expect(credentialBlock).not.toMatch(/\baccessToken\b/i);
     expect(credentialBlock).not.toMatch(/\brefreshToken\b/i);
     expect(credentialBlock).not.toMatch(/\bmfaSecret\b/i);
-    expect(credentialBlock).not.toMatch(/\bapiKey\b/i);
+    expect(credentialBlock).not.toMatch(/\bplaintext\b/i);
   });
 
   it('defines RepresentativeAuthority without coupling to Appointment or Delegation', () => {

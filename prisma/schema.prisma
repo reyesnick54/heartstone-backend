@@ -180,228 +180,8 @@ model Officeholder {
   delegationsAsDelegator Delegation[]               @relation("DelegationDelegatorOfficeholder")
   delegationsAsRecipient Delegation[]               @relation("DelegationRecipientOfficeholder")
   identityLinks          IdentityOfficeholderLink[]
-  id                     String                    @id @default(uuid()) @db.Uuid
-  code                   String                    @unique
-  name                   String
-  description            String?
-  status                 StructuralLifecycleStatus @default(ACTIVE)
-  createdAt              DateTime                  @default(now())
-  updatedAt              DateTime                  @updatedAt
-  appointments           Appointment[]
-  delegationsAsDelegator Delegation[]              @relation("DelegationDelegatorOfficeholder")
-  delegationsAsRecipient Delegation[]              @relation("DelegationRecipientOfficeholder")
 
   @@map("officeholders")
-}
-
-enum IdentityAccountStatus {
-  ACTIVE
-  SUSPENDED
-  DEACTIVATED
-}
-
-enum UserAccountKind {
-  STANDARD
-  IDENTITY_ADMINISTRATOR
-}
-
-enum CredentialType {
-  PASSWORD
-  API_KEY
-  CLIENT_SECRET
-}
-
-enum CredentialStatus {
-  ACTIVE
-  REVOKED
-}
-
-enum AuthSessionStatus {
-  ACTIVE
-  REVOKED
-  EXPIRED
-}
-
-enum IdentityOfficeholderLinkStatus {
-  PENDING
-  VERIFIED
-  SUSPENDED
-  REVOKED
-  ENDED
-}
-
-enum IdentityOfficeholderVerificationMethod {
-  ADMIN_VERIFICATION
-  DOCUMENT_EVIDENCE
-  IN_PERSON_VERIFICATION
-  OTHER
-}
-
-enum SecurityAuditEventType {
-  ACCOUNT_CREATED
-  ACCOUNT_SUSPENDED
-  ACCOUNT_REACTIVATED
-  IDENTITY_LINKED
-  IDENTITY_VERIFICATION_CHANGED
-  CREDENTIAL_CREATED
-  CREDENTIAL_REVOKED
-  SESSION_CREATED
-  SESSION_REVOKED
-  SERVICE_IDENTITY_AUTHENTICATED
-  OFFICEHOLDER_LINKAGE_REQUESTED
-  OFFICEHOLDER_LINKAGE_ACTIVATED
-  OFFICEHOLDER_LINKAGE_SUSPENDED
-  OFFICEHOLDER_LINKAGE_REVOKED
-}
-
-enum SecurityAuditResult {
-  SUCCESS
-  FAILURE
-}
-
-enum PrincipalKind {
-  USER_ACCOUNT
-  SERVICE_IDENTITY
-  SYSTEM
-}
-
-model Person {
-  id                String                     @id @default(uuid()) @db.Uuid
-  displayName       String?
-  status            IdentityAccountStatus      @default(ACTIVE)
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @updatedAt
-  userAccounts      UserAccount[]
-  officeholderLinks IdentityOfficeholderLink[]
-
-  @@map("persons")
-}
-
-model UserAccount {
-  id                String                     @id @default(uuid()) @db.Uuid
-  personId          String                     @db.Uuid
-  username          String                     @unique
-  kind              UserAccountKind            @default(STANDARD)
-  status            IdentityAccountStatus      @default(ACTIVE)
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @updatedAt
-  person            Person                     @relation(fields: [personId], references: [id])
-  credentials       Credential[]
-  sessions          AuthSession[]
-  externalLinks     ExternalIdentityLink[]
-  officeholderLinks IdentityOfficeholderLink[]
-
-  @@index([personId])
-  @@map("user_accounts")
-}
-
-model ServiceIdentity {
-  id          String                @id @default(uuid()) @db.Uuid
-  code        String                @unique
-  name        String
-  status      IdentityAccountStatus @default(ACTIVE)
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
-  credentials Credential[]
-  sessions    AuthSession[]
-
-  @@map("service_identities")
-}
-
-model Credential {
-  id                String           @id @default(uuid()) @db.Uuid
-  userAccountId     String?          @db.Uuid
-  serviceIdentityId String?          @db.Uuid
-  type              CredentialType
-  identifier        String
-  secretHash        String?
-  status            CredentialStatus @default(ACTIVE)
-  revokedAt         DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  userAccount       UserAccount?     @relation(fields: [userAccountId], references: [id])
-  serviceIdentity   ServiceIdentity? @relation(fields: [serviceIdentityId], references: [id])
-
-  @@index([userAccountId])
-  @@index([serviceIdentityId])
-  @@map("credentials")
-}
-
-model AuthSession {
-  id                String            @id @default(uuid()) @db.Uuid
-  userAccountId     String?           @db.Uuid
-  serviceIdentityId String?           @db.Uuid
-  tokenHash         String            @unique
-  status            AuthSessionStatus @default(ACTIVE)
-  expiresAt         DateTime
-  revokedAt         DateTime?
-  correlationId     String?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  userAccount       UserAccount?      @relation(fields: [userAccountId], references: [id])
-  serviceIdentity   ServiceIdentity?  @relation(fields: [serviceIdentityId], references: [id])
-
-  @@index([userAccountId])
-  @@index([serviceIdentityId])
-  @@map("auth_sessions")
-}
-
-model ExternalIdentityLink {
-  id              String      @id @default(uuid()) @db.Uuid
-  userAccountId   String      @db.Uuid
-  providerKey     String
-  externalSubject String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  userAccount     UserAccount @relation(fields: [userAccountId], references: [id])
-
-  @@unique([providerKey, externalSubject])
-  @@index([userAccountId])
-  @@map("external_identity_links")
-}
-
-model IdentityOfficeholderLink {
-  id                 String                                  @id @default(uuid()) @db.Uuid
-  personId           String                                  @db.Uuid
-  userAccountId      String?                                 @db.Uuid
-  officeholderId     String                                  @db.Uuid
-  status             IdentityOfficeholderLinkStatus          @default(PENDING)
-  verificationMethod IdentityOfficeholderVerificationMethod?
-  evidenceReference  String?
-  effectiveFrom      DateTime?
-  effectiveUntil     DateTime?
-  createdAt          DateTime                                @default(now())
-  updatedAt          DateTime                                @updatedAt
-  person             Person                                  @relation(fields: [personId], references: [id])
-  userAccount        UserAccount?                            @relation(fields: [userAccountId], references: [id])
-  officeholder       Officeholder                            @relation(fields: [officeholderId], references: [id])
-
-  @@index([personId])
-  @@index([userAccountId])
-  @@index([officeholderId])
-  @@map("identity_officeholder_links")
-}
-
-model SecurityAuditEvent {
-  id            String                 @id @default(uuid()) @db.Uuid
-  eventType     SecurityAuditEventType
-  actorKind     PrincipalKind?
-  actorId       String?                @db.Uuid
-  subjectType   String?
-  subjectId     String?                @db.Uuid
-  correlationId String?
-  source        String?
-  result        SecurityAuditResult    @default(SUCCESS)
-  reason        String?
-  metadata      Json?
-  createdAt     DateTime               @default(now())
-
-  @@index([eventType])
-  @@index([actorId])
-  @@index([subjectId])
-  @@index([correlationId])
-  @@index([createdAt])
-  @@map("security_audit_events")
 }
 
 model Appointment {
@@ -497,39 +277,6 @@ enum CredentialType {
   OIDC
   API_KEY
   MFA_TOTP
-// ---------------------------------------------------------------------------
-// Phase 3A: Identity & Access — canonical identity primitives
-// User != Officeholder != Role != Permission != Authority
-// ---------------------------------------------------------------------------
-
-enum PersonStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  ARCHIVED
-}
-
-enum UserAccountStatus {
-  PENDING
-  ACTIVE
-  SUSPENDED
-  LOCKED
-  DEACTIVATED
-}
-
-enum IdentityVerificationStatus {
-  UNVERIFIED
-  PENDING
-  VERIFIED
-  REJECTED
-  EXPIRED
-}
-
-enum CredentialType {
-  PASSWORD_HASH
-  API_KEY_REFERENCE
-  CERTIFICATE_REFERENCE
-  OTHER
 }
 
 enum CredentialStatus {
@@ -564,38 +311,6 @@ enum MembershipStatus {
   ACTIVE
   SUSPENDED
   REVOKED
-  SUSPENDED
-  REVOKED
-  EXPIRED
-}
-
-enum OrganizationType {
-  COMPANY
-  APPLICANT_ORGANIZATION
-  INVESTOR_ENTITY
-  IMPLEMENTATION_PARTNER
-  OTHER
-}
-
-enum OrganizationStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  ARCHIVED
-}
-
-enum OrganizationMembershipStatus {
-  PENDING
-  ACTIVE
-  SUSPENDED
-  ENDED
-}
-
-enum OrganizationMembershipRole {
-  MEMBER
-  ADMINISTRATOR
-  CONTACT
-  OTHER
 }
 
 enum RepresentativeAuthorityStatus {
@@ -665,37 +380,6 @@ model Person {
   updatedAt   DateTime     @updatedAt
   userAccount UserAccount?
   identities  Identity[]
-enum AuthenticationMethodType {
-  PASSWORD
-  OIDC
-  SAML
-  MFA_TOTP
-  MFA_SMS
-  API_KEY
-  OTHER
-}
-
-enum AuthenticationMethodStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-}
-
-enum SessionStatus {
-  ACTIVE
-  EXPIRED
-  REVOKED
-}
-
-model Person {
-  id                        String                    @id @default(uuid()) @db.Uuid
-  displayName               String
-  status                    PersonStatus              @default(ACTIVE)
-  createdAt                 DateTime                  @default(now())
-  updatedAt                 DateTime                  @updatedAt
-  userAccounts              UserAccount[]
-  organizationMemberships   OrganizationMembership[]
-  representativeAuthorities RepresentativeAuthority[]
 
   @@map("persons")
 }
@@ -712,21 +396,6 @@ model UserAccount {
   sessions        Session[]
 
   @@index([status])
-  id                        String                    @id @default(uuid()) @db.Uuid
-  personId                  String                    @db.Uuid
-  username                  String                    @unique
-  status                    UserAccountStatus         @default(PENDING)
-  createdAt                 DateTime                  @default(now())
-  updatedAt                 DateTime                  @updatedAt
-  person                    Person                    @relation(fields: [personId], references: [id])
-  identities                Identity[]
-  credentials               Credential[]
-  organizationMemberships   OrganizationMembership[]
-  representativeAuthorities RepresentativeAuthority[]
-  authenticationMethods     AuthenticationMethod[]
-  sessions                  Session[]
-
-  @@index([personId])
   @@map("user_accounts")
 }
 
@@ -753,18 +422,6 @@ model Identity {
   @@index([personId])
   @@index([organizationId])
   @@index([type])
-  id                 String                     @id @default(uuid()) @db.Uuid
-  userAccountId      String                     @db.Uuid
-  providerCode       String
-  subjectId          String
-  verificationStatus IdentityVerificationStatus @default(UNVERIFIED)
-  verifiedAt         DateTime?
-  createdAt          DateTime                   @default(now())
-  updatedAt          DateTime                   @updatedAt
-  userAccount        UserAccount                @relation(fields: [userAccountId], references: [id])
-
-  @@unique([providerCode, subjectId])
-  @@index([userAccountId])
   @@map("identities")
 }
 
@@ -784,19 +441,6 @@ model Credential {
   identity     Identity         @relation(fields: [identityId], references: [id])
 
   @@index([identityId])
-  id                    String           @id @default(uuid()) @db.Uuid
-  userAccountId         String           @db.Uuid
-  type                  CredentialType
-  credentialFingerprint String?
-  secretReference       String?
-  status                CredentialStatus @default(PENDING)
-  expiresAt             DateTime?
-  revokedAt             DateTime?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
-  userAccount           UserAccount      @relation(fields: [userAccountId], references: [id])
-
-  @@index([userAccountId])
   @@index([status])
   @@map("credentials")
 }
@@ -814,13 +458,6 @@ model Organization {
   representativeAuthorities RepresentativeAuthority[]
 
   @@index([status])
-  type                      OrganizationType
-  status                    OrganizationStatus        @default(ACTIVE)
-  createdAt                 DateTime                  @default(now())
-  updatedAt                 DateTime                  @updatedAt
-  memberships               OrganizationMembership[]
-  representativeAuthorities RepresentativeAuthority[]
-
   @@map("organizations")
 }
 
@@ -840,24 +477,6 @@ model OrganizationMembership {
   @@unique([organizationId, identityId])
   @@index([organizationId])
   @@index([identityId])
-  id             String                       @id @default(uuid()) @db.Uuid
-  organizationId String                       @db.Uuid
-  personId       String                       @db.Uuid
-  userAccountId  String?                      @db.Uuid
-  role           OrganizationMembershipRole   @default(MEMBER)
-  status         OrganizationMembershipStatus @default(PENDING)
-  effectiveFrom  DateTime?
-  effectiveUntil DateTime?
-  createdAt      DateTime                     @default(now())
-  updatedAt      DateTime                     @updatedAt
-  organization   Organization                 @relation(fields: [organizationId], references: [id])
-  person         Person                       @relation(fields: [personId], references: [id])
-  userAccount    UserAccount?                 @relation(fields: [userAccountId], references: [id])
-
-  @@unique([organizationId, personId])
-  @@index([organizationId])
-  @@index([personId])
-  @@index([userAccountId])
   @@map("organization_memberships")
 }
 
@@ -866,10 +485,6 @@ model RepresentativeAuthority {
   organizationId   String                        @db.Uuid
   identityId       String                        @db.Uuid
   scopeDescription String
-  personId         String?                       @db.Uuid
-  userAccountId    String?                       @db.Uuid
-  mandateReference String
-  scopeDescription String?
   status           RepresentativeAuthorityStatus @default(PENDING)
   effectiveFrom    DateTime
   effectiveUntil   DateTime?
@@ -880,12 +495,6 @@ model RepresentativeAuthority {
 
   @@index([organizationId])
   @@index([identityId])
-  person           Person?                       @relation(fields: [personId], references: [id])
-  userAccount      UserAccount?                  @relation(fields: [userAccountId], references: [id])
-
-  @@index([organizationId])
-  @@index([personId])
-  @@index([userAccountId])
   @@map("representative_authorities")
 }
 
@@ -903,16 +512,6 @@ model AuthenticationMethod {
   identity       Identity                 @relation(fields: [identityId], references: [id])
 
   @@index([identityId])
-  id            String                     @id @default(uuid()) @db.Uuid
-  userAccountId String                     @db.Uuid
-  type          AuthenticationMethodType
-  providerCode  String?
-  status        AuthenticationMethodStatus @default(ACTIVE)
-  createdAt     DateTime                   @default(now())
-  updatedAt     DateTime                   @updatedAt
-  userAccount   UserAccount                @relation(fields: [userAccountId], references: [id])
-
-  @@index([userAccountId])
   @@map("authentication_methods")
 }
 
@@ -936,18 +535,6 @@ model Session {
   userAccount      UserAccount?             @relation(fields: [userAccountId], references: [id])
 
   @@index([identityId])
-  id             String        @id @default(uuid()) @db.Uuid
-  userAccountId  String        @db.Uuid
-  status         SessionStatus @default(ACTIVE)
-  expiresAt      DateTime
-  revokedAt      DateTime?
-  lastActivityAt DateTime?
-  ipAddress      String?
-  userAgent      String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  userAccount    UserAccount   @relation(fields: [userAccountId], references: [id])
-
   @@index([userAccountId])
   @@index([status])
   @@index([expiresAt])
