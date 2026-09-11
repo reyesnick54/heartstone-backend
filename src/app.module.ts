@@ -35,6 +35,7 @@ import { SystemModule } from './system/system.module';
     GovernmentModule,
     AuthorityModule,
     IdentityModule,
+    AuthorityModule,
   ],
 })
 export class AppModule {}

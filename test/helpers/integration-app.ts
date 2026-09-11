@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
+import { resetAuthorityData } from './authority-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
@@ -42,10 +43,13 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetAuthorityData(prisma);
+  await prisma.delegationStructuredScope.deleteMany();
   await prisma.delegation.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.institutionExternalAuthority.deleteMany();
   await prisma.office.deleteMany();
+  await prisma.identityOfficeholderLink.deleteMany();
   await prisma.officeholder.deleteMany();
   await prisma.department.deleteMany();
   await prisma.governmentBody.deleteMany();
@@ -54,7 +58,17 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.jurisdiction.deleteMany();
 }
 
+export async function resetAuthorityData(prisma: PrismaService): Promise<void> {
+  await prisma.authorityRevalidationMarker.deleteMany();
+  await prisma.authorityEvaluationRecord.deleteMany();
+  await prisma.authorityAssignment.deleteMany();
+  await prisma.authorityGoverningSource.deleteMany();
+  await prisma.authorityFunction.deleteMany();
+}
+
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetAuthorityData(prisma);
   await resetIdentityData(prisma);
+  await resetAuthorityData(prisma);
   await resetGovernmentData(prisma);
 }

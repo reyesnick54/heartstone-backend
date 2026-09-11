@@ -1,12 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { AuthorityActionType, AuthorityEvaluationOutcome } from '@prisma/client';
+
+import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
+import { AuthorityEvaluationStatus } from '../../authority/policy/authority-evaluation-status.enum';
+import { deriveEvaluationStatus } from '../../authority/policy/derive-evaluation-status.util';
 
 /**
- * Phase 3 authority boundary: governmental decision authority is NOT evaluated.
- * This service always returns null — no authority can be resolved until Phase 4.
+ * Identity-side authority boundary facade.
+ * Authentication and identity context alone never resolve government authority.
+ * With a complete function/action evaluation request, delegates to AuthorityEvaluationService.
  */
 export interface GovernmentAuthorityResolution {
-  hasGovernmentAuthority: false;
+  hasGovernmentAuthority: boolean;
   reason: string;
+  evaluationStatus?: AuthorityEvaluationStatus;
+  outcome?: AuthorityEvaluationOutcome;
+  functionAuthorityRecordId?: string;
+  action?: AuthorityActionType;
+  evaluationId?: string;
 }
 
 export interface AuthorityContext {
@@ -19,19 +31,105 @@ export interface AuthorityContext {
   representativeAuthorityId?: string;
   assuranceLevel?: string;
   externalClaims?: Record<string, unknown>;
+  functionAuthorityRecordId?: string;
+  action?: AuthorityActionType;
+  officeId?: string;
 }
 
 @Injectable()
 export class AuthorityBoundaryService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Phase 4 will evaluate context
-  resolveGovernmentAuthority(_context: AuthorityContext): GovernmentAuthorityResolution | null {
-    return null;
+  constructor(private readonly moduleRef: ModuleRef) {}
+
+  resolveGovernmentAuthority(context: AuthorityContext): GovernmentAuthorityResolution | null {
+    if (!this.isEvaluationRequest(context)) {
+      return null;
+    }
+
+    return {
+      hasGovernmentAuthority: false,
+      reason:
+        'Use AuthorityEvaluationService.evaluate() for runtime authority resolution. Identity alone grants no authority.',
+      functionAuthorityRecordId: context.functionAuthorityRecordId,
+      action: context.action,
+    };
+  }
+
+  async resolveGovernmentAuthorityAsync(
+    context: AuthorityContext,
+  ): Promise<GovernmentAuthorityResolution | null> {
+    if (!this.isEvaluationRequest(context)) {
+      return null;
+    }
+
+    const identityId = context.identityId;
+    const functionAuthorityRecordId = context.functionAuthorityRecordId;
+    const action = context.action;
+    if (!identityId || !functionAuthorityRecordId || !action) {
+      return null;
+    }
+
+    const evaluationService = this.getEvaluationService();
+    if (!evaluationService) {
+      return {
+        hasGovernmentAuthority: false,
+        reason: 'Authority evaluation engine is not available.',
+        functionAuthorityRecordId,
+        action,
+      };
+    }
+
+    const result = await evaluationService.evaluate({
+      identityId,
+      functionAuthorityRecordId,
+      action,
+      officeholderId: context.officeholderId,
+      officeId: context.officeId,
+      appointmentId: context.appointmentId,
+      delegationId: context.delegationId,
+    });
+
+    const status = deriveEvaluationStatus(result.outcome, result.explanationCodes);
+
+    return {
+      hasGovernmentAuthority: result.outcome === AuthorityEvaluationOutcome.ALLOW,
+      reason: result.summary,
+      evaluationStatus: status,
+      outcome: result.outcome,
+      functionAuthorityRecordId,
+      action,
+      evaluationId: result.evaluationId,
+    };
+  }
+
+  assertNoGovernmentAuthorityFromAuthenticationOnly(context: AuthorityContext): void {
+    const hasOnlyAuthContext =
+      Boolean(context.identityId ?? context.userAccountId) &&
+      !context.functionAuthorityRecordId &&
+      !context.action;
+
+    if (!hasOnlyAuthContext) {
+      return;
+    }
+
+    const resolution = this.resolveGovernmentAuthority(context);
+    if (resolution?.hasGovernmentAuthority) {
+      throw new Error('Government authority must not be resolved from authentication alone');
+    }
   }
 
   assertNoGovernmentAuthority(context: AuthorityContext): void {
-    const resolution = this.resolveGovernmentAuthority(context);
-    if (resolution !== null) {
-      throw new Error('Government authority must not be resolved in Phase 3');
+    this.assertNoGovernmentAuthorityFromAuthenticationOnly(context);
+  }
+
+  private isEvaluationRequest(context: AuthorityContext): boolean {
+    return Boolean(context.functionAuthorityRecordId && context.action && context.identityId);
+  }
+
+  private getEvaluationService(): AuthorityEvaluationService | undefined {
+    try {
+      return this.moduleRef.get(AuthorityEvaluationService, { strict: false });
+    } catch {
+      return undefined;
     }
   }
 }
