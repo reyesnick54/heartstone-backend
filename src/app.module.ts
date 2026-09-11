@@ -33,7 +33,6 @@ import { SystemModule } from './system/system.module';
     HealthModule,
     SystemModule,
     GovernmentModule,
-    AuthorityModule,
     IdentityModule,
     AuthorityModule,
   ],
