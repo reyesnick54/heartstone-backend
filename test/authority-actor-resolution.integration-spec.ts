@@ -163,9 +163,7 @@ describe('Phase 4C institutional actor resolution (integration)', () => {
         status: options?.status ?? DelegationStatus.ACTIVE,
         effectiveFrom: new Date('2026-01-01'),
         effectiveUntil:
-          options?.effectiveUntil === undefined
-            ? new Date('2026-12-31')
-            : options.effectiveUntil,
+          options?.effectiveUntil === undefined ? new Date('2026-12-31') : options.effectiveUntil,
       },
     });
 

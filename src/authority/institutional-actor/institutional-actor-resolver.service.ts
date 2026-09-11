@@ -337,8 +337,7 @@ export class InstitutionalActorResolver {
         orderBy: [{ effectiveFrom: 'desc' }, { createdAt: 'desc' }],
       });
 
-      delegation =
-        delegations.find((candidate) => this.isDelegationUsable(candidate, at)) ?? null;
+      delegation = delegations.find((candidate) => this.isDelegationUsable(candidate, at)) ?? null;
 
       if (!delegation && delegations.length > 0) {
         const failure = this.resolveDelegationFailure(delegations, at);
@@ -520,8 +519,7 @@ export class InstitutionalActorResolver {
     }
 
     const hasExpired = delegations.some(
-      (delegation) =>
-        delegation.effectiveUntil !== null && delegation.effectiveUntil <= at,
+      (delegation) => delegation.effectiveUntil !== null && delegation.effectiveUntil <= at,
     );
     if (hasExpired) {
       return {
