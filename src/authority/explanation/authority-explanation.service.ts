@@ -25,6 +25,7 @@ export class AuthorityExplanationService {
       codes.includes(AUTHORITY_EVALUATION_EXPLANATION_CODES.SOURCE_CONFLICT);
 
     const requiresRevalidation =
+      outcome === AuthorityEvaluationOutcome.ALLOW ||
       safeHalt ||
       outcome === AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION ||
       codes.some((code) =>

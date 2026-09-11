@@ -22,6 +22,7 @@ import { AuthorityConditionEvaluator } from '../conditions/authority-condition-e
 import { AuthorityDependencyEvaluator } from '../dependencies/authority-dependency-evaluator.service';
 import { AuthorityExplanationService } from '../explanation/authority-explanation.service';
 import { InstitutionalActorResolver } from '../institutional-actor/institutional-actor-resolver.service';
+import { deriveEvaluationStatus } from '../policy/derive-evaluation-status.util';
 import { SegregationOfDutyEvaluator } from '../sod/segregation-of-duty-evaluator.service';
 import { type AuthorityEvaluationRequest } from './authority-evaluation.types';
 import { AuthorityEvaluationResponseDto } from './dto/authority-evaluation-response.dto';
@@ -437,6 +438,7 @@ export class AuthorityEvaluationService {
       identityId: request.identityId,
       action: request.action,
       outcome,
+      status: deriveEvaluationStatus(outcome, uniqueCodes),
       explanationCodes: uniqueCodes,
       summary: explanation.summary,
       safeHalt: explanation.safeHalt,

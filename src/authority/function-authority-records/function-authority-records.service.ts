@@ -104,6 +104,14 @@ export class FunctionAuthorityRecordsService {
     return this.toResponse(record);
   }
 
+  async findByCode(code: string): Promise<FunctionAuthorityRecordResponseDto> {
+    const record = await this.prisma.functionAuthorityRecord.findUnique({ where: { code } });
+    if (!record) {
+      throw new NotFoundException(`FunctionAuthorityRecord with code "${code}" was not found`);
+    }
+    return this.toResponse(record);
+  }
+
   async findAll(query?: {
     classification?: Prisma.EnumAuthorityClassificationFilter;
     lifecycleStatus?: FunctionAuthorityLifecycleStatus;

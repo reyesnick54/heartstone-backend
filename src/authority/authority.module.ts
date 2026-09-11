@@ -16,6 +16,8 @@ import { FunctionAuthorityRecordsService } from './function-authority-records/fu
 import { GoverningSourcesController } from './governing-sources/governing-sources.controller';
 import { GoverningSourcesService } from './governing-sources/governing-sources.service';
 import { InstitutionalActorResolver } from './institutional-actor/institutional-actor-resolver.service';
+import { AuthorityPolicyGuard } from './policy/authority-policy.guard';
+import { AuthorityPolicyService } from './policy/authority-policy.service';
 import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.service';
 
 @Module({
@@ -38,6 +40,8 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     AuthorityDependenciesService,
     AuthorityValidationService,
     SegregationOfDutyEvaluator,
+    AuthorityPolicyGuard,
+    AuthorityPolicyService,
     SessionAuthGuard,
   ],
   exports: [
@@ -45,6 +49,8 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     FunctionAuthorityRecordsService,
     GoverningSourcesService,
     InstitutionalActorResolver,
+    AuthorityPolicyGuard,
+    AuthorityPolicyService,
   ],
 })
 export class AuthorityModule {}
