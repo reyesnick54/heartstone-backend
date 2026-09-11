@@ -1,4 +1,9 @@
-import type { AccountStatus, AssuranceLevel, IdentityType } from '@prisma/client';
+import type {
+  AccountStatus,
+  AssuranceLevel,
+  AuthenticationMethodType,
+  IdentityType,
+} from '@prisma/client';
 
 export interface PersonBody {
   id: string;
@@ -44,6 +49,10 @@ export interface LoginResponseBody {
   identityId: string;
   expiresAt: string;
   assuranceLevel: AssuranceLevel;
+  authMethod: AuthenticationMethodType;
+  mfaSatisfied: boolean;
+  authenticatedAt: string;
+  oidcProviderCode?: string | null;
 }
 
 export interface ProtectedProfileBody {

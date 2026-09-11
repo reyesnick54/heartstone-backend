@@ -35,4 +35,12 @@ export class CreateCredentialDto {
   @IsString()
   @MaxLength(255)
   oidcSubject?: string;
+
+  @ApiPropertyOptional({
+    description: 'Plaintext API key — hashed before storage, never persisted',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(512)
+  apiKey?: string;
 }
