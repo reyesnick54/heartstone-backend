@@ -109,7 +109,8 @@ export class SessionsService {
 
     const activeCredential = identity.credentials.find(
       (credential) =>
-        credential.type === CredentialType.PASSWORD && credential.status === CredentialStatus.ACTIVE,
+        credential.type === CredentialType.PASSWORD &&
+        credential.status === CredentialStatus.ACTIVE,
     );
 
     if (!activeCredential) {
@@ -181,9 +182,7 @@ export class SessionsService {
     const sessionToken = generateOpaqueToken();
     const tokenHash = hashToken(sessionToken);
     const issuedAt = new Date();
-    const expiresAt = new Date(
-      issuedAt.getTime() + this.identityConfig.sessionTtlSeconds * 1000,
-    );
+    const expiresAt = new Date(issuedAt.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
 
     const session = await this.prisma.session.create({
       data: {
