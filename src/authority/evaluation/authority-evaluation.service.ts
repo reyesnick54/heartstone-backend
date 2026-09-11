@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityClassification,
+  AuthorityDependencyBlockingStatus,
+  AuthorityDependencyType,
   AuthorityEvaluationOutcome,
   FunctionAssignmentStatus,
   FunctionAuthorityLifecycleStatus,
@@ -191,16 +193,35 @@ export class AuthorityEvaluationService {
       const dependencyFailures = await this.dependencyEvaluator.evaluate(
         functionRecord.id,
         functionRecord.dependencies,
-        { identityType: actor.identityType, at },
+        {
+          identityType: actor.identityType,
+          attestationSource: request.attestationSource,
+          at,
+        },
       );
       if (dependencyFailures.length > 0) {
         codes.push(...dependencyFailures);
-        const outcome = dependencyFailures.includes(
-          AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_RETAINED_NATIONAL_DETERMINATION,
-        )
-          ? AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION
-          : AuthorityEvaluationOutcome.DENY;
+        const outcome = this.resolveDependencyOutcome(
+          functionRecord.dependencies,
+          dependencyFailures,
+        );
         return this.finalize(request, codes, outcome, actor, at);
+      }
+
+      const decidingActions: AuthorityActionType[] = [
+        AuthorityActionType.DECIDE,
+        AuthorityActionType.APPROVE,
+        AuthorityActionType.ISSUE,
+      ];
+      if (decidingActions.includes(request.action)) {
+        codes.push(AUTHORITY_EVALUATION_EXPLANATION_CODES.ABSEZ_CANNOT_SUBSTITUTE_RETAINED_NATIONAL);
+        return this.finalize(
+          request,
+          codes,
+          AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION,
+          actor,
+          at,
+        );
       }
     }
 
@@ -241,16 +262,16 @@ export class AuthorityEvaluationService {
       {
         identityType: actor.identityType,
         externalDataAccessOnly: request.externalDataAccessOnly,
+        attestationSource: request.attestationSource,
         at,
       },
     );
     if (dependencyFailures.length > 0) {
       codes.push(...dependencyFailures);
-      const outcome = dependencyFailures.includes(
-        AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_RETAINED_NATIONAL_DETERMINATION,
-      )
-        ? AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION
-        : AuthorityEvaluationOutcome.DENY;
+      const outcome = this.resolveDependencyOutcome(
+        functionRecord.dependencies,
+        dependencyFailures,
+      );
       return this.finalize(request, codes, outcome, actor, at);
     }
 
@@ -269,6 +290,46 @@ export class AuthorityEvaluationService {
 
     codes.push(AUTHORITY_EVALUATION_EXPLANATION_CODES.ALLOW);
     return this.finalize(request, codes, AuthorityEvaluationOutcome.ALLOW, actor, at);
+  }
+
+  private resolveDependencyOutcome(
+    dependencies: {
+      dependencyType: AuthorityDependencyType;
+      blockingStatus: AuthorityDependencyBlockingStatus;
+    }[],
+    failureCodes: AuthorityExplanationCode[],
+  ): AuthorityEvaluationOutcome {
+    if (
+      failureCodes.includes(
+        AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_RETAINED_NATIONAL_DETERMINATION,
+      )
+    ) {
+      return AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION;
+    }
+
+    if (
+      failureCodes.includes(AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL) ||
+      failureCodes.includes(
+        AUTHORITY_EVALUATION_EXPLANATION_CODES.ADMINISTRATOR_CANNOT_SATISFY_PROFESSIONAL,
+      ) ||
+      failureCodes.includes(AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_PROFESSIONAL_REVIEW)
+    ) {
+      return AuthorityEvaluationOutcome.BLOCKED;
+    }
+
+    if (this.dependencyEvaluator.hasBlockingFailures(dependencies, failureCodes)) {
+      const requiresExternal = failureCodes.some((code) =>
+        [
+          AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_GOVERNMENT_CONCURRENCE,
+          AUTHORITY_EVALUATION_EXPLANATION_CODES.UNAUTHENTICATED_EXTERNAL_DETERMINATION,
+        ].includes(code as typeof AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_GOVERNMENT_CONCURRENCE),
+      );
+      return requiresExternal
+        ? AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION
+        : AuthorityEvaluationOutcome.BLOCKED;
+    }
+
+    return AuthorityEvaluationOutcome.DENY;
   }
 
   private evaluateGoverningSources(

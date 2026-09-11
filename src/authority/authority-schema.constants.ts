@@ -50,6 +50,8 @@ export const AUTHORITY_MODEL_NAMES = [
   'RetainedNationalDetermination',
   'AuthorityEvaluationRecord',
   'FunctionActivationAudit',
+  'ExternalDependencyDetermination',
+  'InstitutionalAuthorityAct',
 ] as const;
 
 export const NON_AUTHORITY_MODEL_NAMES = [

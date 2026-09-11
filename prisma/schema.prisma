@@ -111,6 +111,7 @@ model Institution {
   externalAuthorityRelations   InstitutionExternalAuthority[]
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  institutionalAuthorityActs   InstitutionalAuthorityAct[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -239,8 +240,10 @@ model ExternalAuthority {
   status                StructuralLifecycleStatus      @default(ACTIVE)
   createdAt             DateTime                       @default(now())
   updatedAt             DateTime                       @updatedAt
-  institutionRelations  InstitutionExternalAuthority[]
-  authorityDependencies AuthorityDependency[]
+  institutionRelations             InstitutionExternalAuthority[]
+  authorityDependencies            AuthorityDependency[]
+  externalDependencyDeterminations ExternalDependencyDetermination[]
+  institutionalAuthorityActs       InstitutionalAuthorityAct[]
 
   @@map("external_authorities")
 }
@@ -678,11 +681,60 @@ enum AuthorityDependencyType {
   RETAINED_NATIONAL_DETERMINATION
   PROFESSIONAL_QUALIFICATION
   EXTERNAL_DATA_ACCESS
+  EXPRESSLY_RETAINED_NATIONAL_DETERMINATION
+  GOVERNMENT_CONCURRENCE
+  MANDATORY_CONSULTATION
+  SHARED_COORDINATED_ACTION
+  PROFESSIONAL_REVIEW
+  SUPERVISORY_REVIEW
+  INSPECTION_DEPENDENCY
+  LIAISON
+  OTHER_AUTHENTICATED_DEPENDENCY
+}
+
+enum AuthorityDependencyBlockingStatus {
+  BLOCKING
+  NON_BLOCKING
+}
+
+enum AuthorityDependencyStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ExternalDeterminationStatus {
+  PENDING
+  GRANTED
+  DENIED
+  PARTIALLY_GRANTED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum InstitutionalActType {
+  DECISION
+  CONCURRENCE
+  CONSULTATION
+  SUPERVISION
+  LIAISON
+  PROFESSIONAL_DETERMINATION
+  COORDINATED_ACTION
+  DATA_EXCHANGE
+}
+
+enum ProfessionalAttestationSource {
+  QUALIFIED_PROFESSIONAL
+  AI_ASSISTANCE
+  ADMINISTRATOR
+  GOVERNMENT_OFFICIAL
+  OTHER
 }
 
 enum AuthorityEvaluationOutcome {
   ALLOW
   DENY
+  BLOCKED
   REQUIRES_EXTERNAL_DETERMINATION
   SAFE_HALT
 }
@@ -737,6 +789,7 @@ model FunctionAuthorityRecord {
   activationAudits       FunctionActivationAudit[]
   retainedDeterminations RetainedNationalDetermination[]
   delegationScopes       DelegationStructuredScope[]
+  institutionalActs      InstitutionalAuthorityAct[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -867,19 +920,77 @@ model AuthorityCondition {
 }
 
 model AuthorityDependency {
-  id                        String                  @id @default(uuid()) @db.Uuid
-  functionAuthorityRecordId String                  @db.Uuid
+  id                        String                          @id @default(uuid()) @db.Uuid
+  functionAuthorityRecordId String                          @db.Uuid
   dependencyType            AuthorityDependencyType
-  externalAuthorityId       String?                 @db.Uuid
-  configuration             Json                    @default("{}")
-  createdAt                 DateTime                @default(now())
-  updatedAt                 DateTime                @updatedAt
-  functionAuthorityRecord   FunctionAuthorityRecord @relation(fields: [functionAuthorityRecordId], references: [id])
-  externalAuthority         ExternalAuthority?      @relation(fields: [externalAuthorityId], references: [id])
+  externalAuthorityId       String?                         @db.Uuid
+  competentAuthorityLabel   String?
+  triggerCondition          String?
+  requiredOutcome           String?
+  blockingStatus            AuthorityDependencyBlockingStatus @default(BLOCKING)
+  sourceProvision           String?
+  requiredEvidenceReference String?
+  status                    AuthorityDependencyStatus       @default(ACTIVE)
+  effectiveFrom             DateTime?
+  effectiveUntil            DateTime?
+  configuration             Json                            @default("{}")
+  createdAt                 DateTime                        @default(now())
+  updatedAt                 DateTime                        @updatedAt
+  functionAuthorityRecord   FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
+  externalAuthority         ExternalAuthority?              @relation(fields: [externalAuthorityId], references: [id])
+  externalDeterminations    ExternalDependencyDetermination[]
 
   @@index([functionAuthorityRecordId])
   @@index([externalAuthorityId])
+  @@index([dependencyType])
   @@map("authority_dependencies")
+}
+
+model ExternalDependencyDetermination {
+  id                     String                       @id @default(uuid()) @db.Uuid
+  authorityDependencyId    String                       @db.Uuid
+  externalAuthorityId    String                       @db.Uuid
+  determinationReference String
+  determinationStatus    ExternalDeterminationStatus
+  effectiveDate          DateTime?
+  expiryDate             DateTime?
+  isAuthenticated        Boolean                      @default(false)
+  scope                  String?
+  receivedAt             DateTime                     @default(now())
+  retainedQuestion       String?
+  requiredDetermination  String?
+  referralBasis          String?
+  effectOnAbsezAction    String?
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  authorityDependency    AuthorityDependency          @relation(fields: [authorityDependencyId], references: [id])
+  externalAuthority      ExternalAuthority            @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([authorityDependencyId])
+  @@index([externalAuthorityId])
+  @@map("external_dependency_determinations")
+}
+
+model InstitutionalAuthorityAct {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  functionAuthorityRecordId String                  @db.Uuid
+  institutionId             String?                 @db.Uuid
+  externalAuthorityId       String?                 @db.Uuid
+  actorOfficeholderId       String?                 @db.Uuid
+  actorIdentityId           String?                 @db.Uuid
+  actType                   InstitutionalActType
+  decisionOrAction          String
+  evidenceReference         String?
+  legalEffect               String?
+  performedAt               DateTime                @default(now())
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  functionAuthorityRecord   FunctionAuthorityRecord @relation(fields: [functionAuthorityRecordId], references: [id])
+  institution               Institution?            @relation(fields: [institutionId], references: [id])
+  externalAuthority         ExternalAuthority?      @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([functionAuthorityRecordId])
+  @@map("institutional_authority_acts")
 }
 
 model SegregationOfDutyRule {

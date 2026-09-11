@@ -63,6 +63,10 @@ export class AuthorityExplanationService {
       return 'Competent external authority determination is required before proceeding.';
     }
 
+    if (outcome === AuthorityEvaluationOutcome.BLOCKED) {
+      return 'Authority evaluation is blocked pending required institutional dependency satisfaction.';
+    }
+
     const primary = codes[0] ?? AUTHORITY_EVALUATION_EXPLANATION_CODES.DENY;
     return `Authority evaluation denied: ${primary}`;
   }

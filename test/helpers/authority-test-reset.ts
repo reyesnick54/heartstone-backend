@@ -2,6 +2,8 @@ import { type PrismaService } from '../../src/database/prisma.service';
 
 export async function resetAuthorityData(prisma: PrismaService): Promise<void> {
   await prisma.delegationStructuredScope.deleteMany();
+  await prisma.institutionalAuthorityAct.deleteMany();
+  await prisma.externalDependencyDetermination.deleteMany();
   await prisma.authorityEvaluationRecord.deleteMany();
   await prisma.functionActivationAudit.deleteMany();
   await prisma.retainedNationalDetermination.deleteMany();

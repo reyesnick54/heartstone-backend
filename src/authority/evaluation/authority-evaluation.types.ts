@@ -1,4 +1,4 @@
-import { type AuthorityActionType } from '@prisma/client';
+import { type AuthorityActionType, type ProfessionalAttestationSource } from '@prisma/client';
 
 export interface AuthorityEvaluationRequest {
   identityId: string;
@@ -21,5 +21,6 @@ export interface AuthorityEvaluationRequest {
   isRecused?: boolean;
   priorActions?: AuthorityActionType[];
   externalDataAccessOnly?: boolean;
+  attestationSource?: ProfessionalAttestationSource;
   at?: Date;
 }

@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
+import { AuthorityValidationService } from './common/authority-validation.service';
 import { AuthorityConditionEvaluator } from './conditions/authority-condition-evaluator.service';
+import { AuthorityDependenciesController } from './dependencies/authority-dependencies.controller';
+import { AuthorityDependenciesService } from './dependencies/authority-dependencies.service';
 import { AuthorityDependencyEvaluator } from './dependencies/authority-dependency-evaluator.service';
 import { AuthorityEvaluationController } from './evaluation/authority-evaluation.controller';
 import { AuthorityEvaluationService } from './evaluation/authority-evaluation.service';
@@ -21,6 +24,7 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     GoverningSourcesController,
     FunctionAuthorityRecordsController,
     AuthorityEvaluationController,
+    AuthorityDependenciesController,
   ],
   providers: [
     GoverningSourcesService,
@@ -31,6 +35,8 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     InstitutionalActorResolver,
     AuthorityConditionEvaluator,
     AuthorityDependencyEvaluator,
+    AuthorityDependenciesService,
+    AuthorityValidationService,
     SegregationOfDutyEvaluator,
     SessionAuthGuard,
   ],

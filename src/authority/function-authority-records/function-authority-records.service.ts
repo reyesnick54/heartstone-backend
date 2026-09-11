@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AuthorityActionType,
+  AuthorityClassification,
   AuthorityConditionType,
+  AuthorityDependencyBlockingStatus,
+  AuthorityDependencyStatus,
   AuthorityDependencyType,
   FunctionAssignmentStatus,
   FunctionAuthorityLifecycleStatus,
@@ -11,6 +14,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { AuthorityValidationService } from '../common/authority-validation.service';
 import { CreateFunctionAuthorityRecordDto } from './dto/create-function-authority-record.dto';
 import { FunctionAuthorityRecordResponseDto } from './dto/function-authority-record-response.dto';
 
@@ -47,6 +51,15 @@ export interface CreateDependencyInput {
   functionAuthorityRecordId: string;
   dependencyType: AuthorityDependencyType;
   externalAuthorityId?: string;
+  competentAuthorityLabel?: string;
+  triggerCondition?: string;
+  requiredOutcome?: string;
+  blockingStatus?: AuthorityDependencyBlockingStatus;
+  sourceProvision?: string;
+  requiredEvidenceReference?: string;
+  status?: AuthorityDependencyStatus;
+  effectiveFrom?: Date;
+  effectiveUntil?: Date;
   configuration?: Record<string, unknown>;
 }
 
@@ -59,7 +72,10 @@ export interface CreateSodRuleInput {
 
 @Injectable()
 export class FunctionAuthorityRecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly validation: AuthorityValidationService,
+  ) {}
 
   async create(dto: CreateFunctionAuthorityRecordDto): Promise<FunctionAuthorityRecordResponseDto> {
     const record = await this.prisma.functionAuthorityRecord.create({
@@ -160,9 +176,28 @@ export class FunctionAuthorityRecordsService {
         functionAuthorityRecordId: input.functionAuthorityRecordId,
         dependencyType: input.dependencyType,
         externalAuthorityId: input.externalAuthorityId,
+        competentAuthorityLabel: input.competentAuthorityLabel,
+        triggerCondition: input.triggerCondition,
+        requiredOutcome: input.requiredOutcome,
+        blockingStatus: input.blockingStatus,
+        sourceProvision: input.sourceProvision,
+        requiredEvidenceReference: input.requiredEvidenceReference,
+        status: input.status,
+        effectiveFrom: input.effectiveFrom,
+        effectiveUntil: input.effectiveUntil,
         configuration: (input.configuration ?? {}) as Prisma.InputJsonValue,
       },
     });
+  }
+
+  async updateClassification(id: string, classification: AuthorityClassification) {
+    const existing = await this.findOne(id);
+    this.validation.assertClassificationTransitionAllowed(existing.classification, classification);
+    const record = await this.prisma.functionAuthorityRecord.update({
+      where: { id },
+      data: { classification },
+    });
+    return this.toResponse(record);
   }
 
   async createSodRule(input: CreateSodRuleInput) {

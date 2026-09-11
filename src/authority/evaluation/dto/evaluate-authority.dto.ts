@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AuthorityActionType } from '@prisma/client';
+import { AuthorityActionType, ProfessionalAttestationSource } from '@prisma/client';
 import {
   IsArray,
   IsBoolean,
@@ -106,4 +106,9 @@ export class EvaluateAuthorityDto {
   @IsOptional()
   @IsBoolean()
   externalDataAccessOnly?: boolean;
+
+  @ApiPropertyOptional({ enum: ProfessionalAttestationSource })
+  @IsOptional()
+  @IsEnum(ProfessionalAttestationSource)
+  attestationSource?: ProfessionalAttestationSource;
 }

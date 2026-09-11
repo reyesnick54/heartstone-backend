@@ -53,6 +53,7 @@ export class AuthorityEvaluationController {
       isRecused: dto.isRecused,
       priorActions: dto.priorActions,
       externalDataAccessOnly: dto.externalDataAccessOnly,
+      attestationSource: dto.attestationSource,
     });
   }
 
