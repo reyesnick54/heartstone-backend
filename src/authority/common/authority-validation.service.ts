@@ -18,6 +18,8 @@ export class AuthorityValidationService {
   }
 
   ensureExternalAuthorityExistsError(externalAuthorityId: string): NotFoundException {
-    return new NotFoundException(`External authority with id "${externalAuthorityId}" was not found`);
+    return new NotFoundException(
+      `External authority with id "${externalAuthorityId}" was not found`,
+    );
   }
 }

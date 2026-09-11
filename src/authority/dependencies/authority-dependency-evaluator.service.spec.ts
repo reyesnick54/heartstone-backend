@@ -15,6 +15,8 @@ import {
   StructuralLifecycleStatus,
 } from '@prisma/client';
 
+import { resetAuthorityData } from '../../../test/helpers/authority-test-reset';
+import { resetGovernmentData } from '../../../test/helpers/integration-app';
 import appConfig from '../../config/app.config';
 import redisConfig from '../../config/redis.config';
 import securityConfig from '../../config/security.config';
@@ -23,8 +25,6 @@ import { PrismaService } from '../../database/prisma.service';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { AuthorityModule } from '../authority.module';
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
-import { resetAuthorityData } from '../../../test/helpers/authority-test-reset';
-import { resetGovernmentData } from '../../../test/helpers/integration-app';
 import { AuthorityDependenciesService } from './authority-dependencies.service';
 import { AuthorityDependencyEvaluator } from './authority-dependency-evaluator.service';
 
@@ -228,9 +228,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
     });
-    expect(failures).toContain(
-      AUTHORITY_EVALUATION_EXPLANATION_CODES.CONSULTATION_NOT_CONCURRENCE,
-    );
+    expect(failures).toContain(AUTHORITY_EVALUATION_EXPLANATION_CODES.CONSULTATION_NOT_CONCURRENCE);
   });
 
   it('supervision does not automatically block an otherwise ABSEZ-owned function', async () => {
@@ -280,7 +278,9 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       identityType: IdentityType.INDIVIDUAL,
       attestationSource: ProfessionalAttestationSource.AI_ASSISTANCE,
     });
-    expect(failures).toContain(AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL);
+    expect(failures).toContain(
+      AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL,
+    );
   });
 
   it('professional-review requirement cannot be satisfied by ordinary administrator', async () => {

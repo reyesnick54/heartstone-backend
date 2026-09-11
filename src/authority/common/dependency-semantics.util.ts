@@ -56,9 +56,7 @@ export function dependencyRequiresAuthenticatedDetermination(
   return AUTHENTICATED_DEPENDENCY_TYPES.has(dependencyType);
 }
 
-export function isRetainedNationalDependencyType(
-  dependencyType: AuthorityDependencyType,
-): boolean {
+export function isRetainedNationalDependencyType(dependencyType: AuthorityDependencyType): boolean {
   return (
     dependencyType === AuthorityDependencyType.RETAINED_NATIONAL_DETERMINATION ||
     dependencyType === AuthorityDependencyType.EXPRESSLY_RETAINED_NATIONAL_DETERMINATION
