@@ -59,6 +59,7 @@ export interface EligibilityGuidanceResult {
 interface RuleEvaluation {
   matched: boolean;
   missingFact: boolean;
+  notApplicable?: boolean;
   reasonCode: string;
   rule: ServiceEligibilityRule;
 }
@@ -88,9 +89,16 @@ export class EligibilityEvaluatorService {
     const missingFacts: string[] = [];
     const reasonCodes: string[] = [];
     let excludedActivity: string | undefined;
+    let evaluatedRuleCount = 0;
 
     for (const rule of activeRules) {
       const evaluation = await this.evaluateRule(rule, facts);
+
+      if (evaluation.notApplicable) {
+        continue;
+      }
+
+      evaluatedRuleCount++;
 
       if (evaluation.missingFact) {
         missingFacts.push(rule.attributeKey);
@@ -125,6 +133,7 @@ export class EligibilityEvaluatorService {
     }
 
     const outcome = this.determineOutcome(
+      evaluatedRuleCount,
       activeRules,
       matchedRules,
       failedRules,
@@ -162,6 +171,16 @@ export class EligibilityEvaluatorService {
 
     const factValue = this.resolveFactValue(rule, facts);
     if (factValue === undefined) {
+      if (rule.category === ServiceEligibilityRuleCategory.EXCLUSION) {
+        return {
+          matched: false,
+          missingFact: false,
+          notApplicable: true,
+          reasonCode: '',
+          rule,
+        };
+      }
+
       return {
         matched: false,
         missingFact: true,
@@ -287,6 +306,7 @@ export class EligibilityEvaluatorService {
   }
 
   private determineOutcome(
+    evaluatedRuleCount: number,
     activeRules: ServiceEligibilityRule[],
     matchedRules: MatchedRuleSummary[],
     failedRules: MatchedRuleSummary[],
@@ -320,11 +340,11 @@ export class EligibilityEvaluatorService {
       return EligibilityGuidanceOutcome.LIKELY_INELIGIBLE;
     }
 
-    if (activeRules.length === 0) {
+    if (evaluatedRuleCount === 0) {
       return EligibilityGuidanceOutcome.UNRESOLVED;
     }
 
-    if (matchedRules.length === activeRules.length) {
+    if (matchedRules.length === evaluatedRuleCount) {
       return EligibilityGuidanceOutcome.LIKELY_ELIGIBLE;
     }
 

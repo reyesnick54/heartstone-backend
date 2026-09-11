@@ -62,6 +62,36 @@ describe('EligibilityEvaluatorService', () => {
     expect(result.disclaimer).toBe(ELIGIBILITY_GUIDANCE_DISCLAIMER);
   });
 
+  it('skips exclusion rules when activity fact is not supplied', async () => {
+    const result = await service.evaluate(
+      'service-1',
+      'version-1',
+      '1.0.0',
+      [
+        {
+          ...baseRule,
+          category: ServiceEligibilityRuleCategory.APPLICANT_CATEGORY,
+          operator: ServiceEligibilityRuleOperator.EQUALS,
+          expectedValue: { value: 'INDIVIDUAL' },
+        },
+        {
+          ...baseRule,
+          id: 'rule-2',
+          category: ServiceEligibilityRuleCategory.EXCLUSION,
+          attributeKey: 'activity',
+          operator: ServiceEligibilityRuleOperator.EQUALS,
+          expectedValue: { value: 'GAMBLING' },
+          reasonCode: 'EXCLUDED_ACTIVITY',
+        },
+      ],
+      { applicantCategory: 'INDIVIDUAL' },
+      [],
+    );
+
+    expect(result.outcome).toBe(EligibilityGuidanceOutcome.LIKELY_ELIGIBLE);
+    expect(result.missingFacts).toHaveLength(0);
+  });
+
   it('returns OUTSIDE_PUBLISHED_SCOPE for excluded activity', async () => {
     const result = await service.evaluate(
       'service-1',
