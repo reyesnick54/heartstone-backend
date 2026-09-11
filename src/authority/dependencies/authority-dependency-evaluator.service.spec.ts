@@ -15,6 +15,8 @@ import {
   StructuralLifecycleStatus,
 } from '@prisma/client';
 
+import { resetAuthorityData } from '../../../test/helpers/authority-test-reset';
+import { resetGovernmentData } from '../../../test/helpers/integration-app';
 import appConfig from '../../config/app.config';
 import redisConfig from '../../config/redis.config';
 import securityConfig from '../../config/security.config';
@@ -23,8 +25,6 @@ import { PrismaService } from '../../database/prisma.service';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { AuthorityModule } from '../authority.module';
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
-import { resetAuthorityData } from '../../../test/helpers/authority-test-reset';
-import { resetGovernmentData } from '../../../test/helpers/integration-app';
 import { AuthorityDependenciesService } from './authority-dependencies.service';
 import { AuthorityDependencyEvaluator } from './authority-dependency-evaluator.service';
 
