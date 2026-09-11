@@ -122,7 +122,11 @@ export class AuthorityDependencyEvaluator {
     dependency: DependencyRecord,
     config: Record<string, unknown>,
     context: EvaluationContext,
-    institutionalActs: { actType: InstitutionalActType; institutionId: string | null; externalAuthorityId: string | null }[],
+    institutionalActs: {
+      actType: InstitutionalActType;
+      institutionId: string | null;
+      externalAuthorityId: string | null;
+    }[],
     at: Date,
   ): Promise<AuthorityExplanationCode | null> {
     switch (dependency.dependencyType) {
@@ -154,7 +158,11 @@ export class AuthorityDependencyEvaluator {
         return this.evaluateSharedCoordinated(institutionalActs);
       case AuthorityDependencyType.OTHER_AUTHENTICATED_DEPENDENCY:
       case AuthorityDependencyType.INSPECTION_DEPENDENCY:
-        return this.evaluateAuthenticatedDetermination(dependency.id, dependency.externalAuthorityId, at);
+        return this.evaluateAuthenticatedDetermination(
+          dependency.id,
+          dependency.externalAuthorityId,
+          at,
+        );
       default:
         return null;
     }
@@ -188,7 +196,10 @@ export class AuthorityDependencyEvaluator {
     if (
       determination &&
       isEffectiveAt(
-        { effectiveFrom: determination.effectiveFrom, effectiveUntil: determination.effectiveUntil },
+        {
+          effectiveFrom: determination.effectiveFrom,
+          effectiveUntil: determination.effectiveUntil,
+        },
         at,
       )
     ) {
@@ -220,7 +231,10 @@ export class AuthorityDependencyEvaluator {
     }
 
     const required = (config.requiredQualifications as string[] | undefined) ?? [];
-    if (required.length === 0 && dependency.dependencyType === AuthorityDependencyType.PROFESSIONAL_QUALIFICATION) {
+    if (
+      required.length === 0 &&
+      dependency.dependencyType === AuthorityDependencyType.PROFESSIONAL_QUALIFICATION
+    ) {
       return null;
     }
 
@@ -329,7 +343,9 @@ export class AuthorityDependencyEvaluator {
     at: Date,
   ): Promise<AuthorityExplanationCode | null> {
     const valid = await this.hasValidExternalDetermination(dependencyId, competentAuthorityId, at);
-    return valid ? null : AUTHORITY_EVALUATION_EXPLANATION_CODES.UNAUTHENTICATED_EXTERNAL_DETERMINATION;
+    return valid
+      ? null
+      : AUTHORITY_EVALUATION_EXPLANATION_CODES.UNAUTHENTICATED_EXTERNAL_DETERMINATION;
   }
 
   private async hasValidExternalDetermination(

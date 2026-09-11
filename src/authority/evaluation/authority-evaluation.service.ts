@@ -215,7 +215,9 @@ export class AuthorityEvaluationService {
         AuthorityActionType.ISSUE,
       ];
       if (decidingActions.includes(request.action)) {
-        codes.push(AUTHORITY_EVALUATION_EXPLANATION_CODES.ABSEZ_CANNOT_SUBSTITUTE_RETAINED_NATIONAL);
+        codes.push(
+          AUTHORITY_EVALUATION_EXPLANATION_CODES.ABSEZ_CANNOT_SUBSTITUTE_RETAINED_NATIONAL,
+        );
         return this.finalize(
           request,
           codes,
@@ -309,7 +311,9 @@ export class AuthorityEvaluationService {
     }
 
     if (
-      failureCodes.includes(AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL) ||
+      failureCodes.includes(
+        AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL,
+      ) ||
       failureCodes.includes(
         AUTHORITY_EVALUATION_EXPLANATION_CODES.ADMINISTRATOR_CANNOT_SATISFY_PROFESSIONAL,
       ) ||
@@ -323,7 +327,9 @@ export class AuthorityEvaluationService {
         [
           AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_GOVERNMENT_CONCURRENCE,
           AUTHORITY_EVALUATION_EXPLANATION_CODES.UNAUTHENTICATED_EXTERNAL_DETERMINATION,
-        ].includes(code as typeof AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_GOVERNMENT_CONCURRENCE),
+        ].includes(
+          code as typeof AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_GOVERNMENT_CONCURRENCE,
+        ),
       );
       return requiresExternal
         ? AuthorityEvaluationOutcome.REQUIRES_EXTERNAL_DETERMINATION

@@ -10,10 +10,7 @@ import { AuthorityEvaluationOutcome } from '@prisma/client';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { AuthorityEvaluationService } from '../evaluation/authority-evaluation.service';
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
-import {
-  AUTHORITY_POLICY_KEY,
-  type AuthorityPolicyMetadata,
-} from './authority-policy.decorator';
+import { AUTHORITY_POLICY_KEY, type AuthorityPolicyMetadata } from './authority-policy.decorator';
 
 @Injectable()
 export class AuthorityPolicyGuard implements CanActivate {

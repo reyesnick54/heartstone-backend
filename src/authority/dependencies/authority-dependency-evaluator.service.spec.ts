@@ -228,9 +228,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
     });
-    expect(failures).toContain(
-      AUTHORITY_EVALUATION_EXPLANATION_CODES.CONSULTATION_NOT_CONCURRENCE,
-    );
+    expect(failures).toContain(AUTHORITY_EVALUATION_EXPLANATION_CODES.CONSULTATION_NOT_CONCURRENCE);
   });
 
   it('supervision does not automatically block an otherwise ABSEZ-owned function', async () => {
@@ -280,7 +278,9 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       identityType: IdentityType.INDIVIDUAL,
       attestationSource: ProfessionalAttestationSource.AI_ASSISTANCE,
     });
-    expect(failures).toContain(AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL);
+    expect(failures).toContain(
+      AUTHORITY_EVALUATION_EXPLANATION_CODES.AI_CANNOT_SATISFY_PROFESSIONAL,
+    );
   });
 
   it('professional-review requirement cannot be satisfied by ordinary administrator', async () => {
