@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { AuthenticationMethod } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { AuthenticationMethod, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { IdentityValidationService } from '../common/identity-validation.service';
 import { CreateAuthenticationMethodDto } from './dto/create-authentication-method.dto';
+import { QueryAuthenticationMethodsDto } from './dto/query-authentication-methods.dto';
+import { UpdateAuthenticationMethodDto } from './dto/update-authentication-method.dto';
 
 @Injectable()
 export class AuthenticationMethodsService {
@@ -36,5 +38,53 @@ export class AuthenticationMethodsService {
     });
 
     return method;
+  }
+
+  async findAll(query: QueryAuthenticationMethodsDto): Promise<AuthenticationMethod[]> {
+    const where: Prisma.AuthenticationMethodWhereInput = {};
+
+    if (query.identityId !== undefined) {
+      where.identityId = query.identityId;
+    }
+    if (query.type !== undefined) {
+      where.type = query.type;
+    }
+    if (query.isEnabled !== undefined) {
+      where.isEnabled = query.isEnabled;
+    }
+
+    return this.prisma.authenticationMethod.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }],
+    });
+  }
+
+  async findOne(id: string): Promise<AuthenticationMethod> {
+    const method = await this.prisma.authenticationMethod.findUnique({ where: { id } });
+    if (!method) {
+      throw new NotFoundException(`Authentication method with id "${id}" was not found`);
+    }
+    return method;
+  }
+
+  async update(id: string, dto: UpdateAuthenticationMethodDto): Promise<AuthenticationMethod> {
+    await this.findOne(id);
+    return this.prisma.authenticationMethod.update({ where: { id }, data: dto });
+  }
+
+  async activate(id: string): Promise<AuthenticationMethod> {
+    await this.findOne(id);
+    return this.prisma.authenticationMethod.update({
+      where: { id },
+      data: { isEnabled: true },
+    });
+  }
+
+  async suspend(id: string): Promise<AuthenticationMethod> {
+    await this.findOne(id);
+    return this.prisma.authenticationMethod.update({
+      where: { id },
+      data: { isEnabled: false },
+    });
   }
 }
