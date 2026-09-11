@@ -180,6 +180,16 @@ model Officeholder {
   delegationsAsDelegator Delegation[]               @relation("DelegationDelegatorOfficeholder")
   delegationsAsRecipient Delegation[]               @relation("DelegationRecipientOfficeholder")
   identityLinks          IdentityOfficeholderLink[]
+  id                     String                    @id @default(uuid()) @db.Uuid
+  code                   String                    @unique
+  name                   String
+  description            String?
+  status                 StructuralLifecycleStatus @default(ACTIVE)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  appointments           Appointment[]
+  delegationsAsDelegator Delegation[]              @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient Delegation[]              @relation("DelegationRecipientOfficeholder")
 
   @@map("officeholders")
 }
@@ -465,4 +475,518 @@ model InstitutionExternalAuthority {
   @@index([institutionId])
   @@index([externalAuthorityId])
   @@map("institution_external_authorities")
+}
+
+// ─── Phase 3: Identity & Access ─────────────────────────────────────────────
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum IdentityType {
+  INDIVIDUAL
+  ORGANIZATION
+  SERVICE
+}
+
+enum CredentialType {
+  PASSWORD
+  OIDC
+  API_KEY
+  MFA_TOTP
+// ---------------------------------------------------------------------------
+// Phase 3A: Identity & Access — canonical identity primitives
+// User != Officeholder != Role != Permission != Authority
+// ---------------------------------------------------------------------------
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum UserAccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  LOCKED
+  DEACTIVATED
+}
+
+enum IdentityVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum CredentialType {
+  PASSWORD_HASH
+  API_KEY_REFERENCE
+  CERTIFICATE_REFERENCE
+  OTHER
+}
+
+enum CredentialStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
+enum AuthenticationMethodType {
+  PASSWORD
+  OIDC
+  SERVICE_API_KEY
+  MFA_TOTP
+}
+
+enum AssuranceLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum OrganizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum OrganizationType {
+  COMPANY
+  APPLICANT_ORGANIZATION
+  INVESTOR_ENTITY
+  IMPLEMENTATION_PARTNER
+  OTHER
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum OrganizationMembershipStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ENDED
+}
+
+enum OrganizationMembershipRole {
+  MEMBER
+  ADMINISTRATOR
+  CONTACT
+  OTHER
+}
+
+enum RepresentativeAuthorityStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  ENDED
+}
+
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum SessionRevocationReason {
+  USER_LOGOUT
+  ADMIN_REVOCATION
+  ACCOUNT_REVOCATION
+  SECURITY_EVENT
+  REPLACED
+  EXPIRED
+}
+
+enum IdentityOfficeholderLinkStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
+enum SecurityAuditEventType {
+  PERSON_CREATED
+  USER_ACCOUNT_CREATED
+  USER_ACCOUNT_SUSPENDED
+  IDENTITY_CREATED
+  IDENTITY_ATTACHED
+  CREDENTIAL_CREATED
+  CREDENTIAL_REVOKED
+  AUTHENTICATION_METHOD_CONFIGURED
+  AUTHENTICATION_SUCCESS
+  AUTHENTICATION_FAILURE
+  SESSION_CREATED
+  SESSION_REVOKED
+  SESSION_REJECTED
+  SESSION_EXPIRED
+  CREDENTIAL_REJECTED
+  SUSPENDED_ACCOUNT_LOGIN_ATTEMPT
+  REVOKED_ACCOUNT_LOGIN_ATTEMPT
+  ORGANIZATION_CREATED
+  MEMBERSHIP_CREATED
+  REPRESENTATIVE_AUTHORITY_CREATED
+  OFFICEHOLDER_LINK_CREATED
+  OFFICEHOLDER_LINK_REVOKED
+  OIDC_CLAIM_RECEIVED
+  MFA_VERIFIED
+  SERVICE_IDENTITY_AUTHENTICATED
+  PROTECTED_ENDPOINT_ACCESS
+}
+
+model Person {
+  id          String       @id @default(uuid()) @db.Uuid
+  givenName   String
+  familyName  String
+  displayName String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userAccount UserAccount?
+  identities  Identity[]
+enum AuthenticationMethodType {
+  PASSWORD
+  OIDC
+  SAML
+  MFA_TOTP
+  MFA_SMS
+  API_KEY
+  OTHER
+}
+
+enum AuthenticationMethodStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model Person {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  displayName               String
+  status                    PersonStatus              @default(ACTIVE)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  userAccounts              UserAccount[]
+  organizationMemberships   OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+
+  @@map("persons")
+}
+
+model UserAccount {
+  id              String        @id @default(uuid()) @db.Uuid
+  personId        String?       @unique @db.Uuid
+  loginIdentifier String        @unique
+  status          AccountStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  person          Person?       @relation(fields: [personId], references: [id])
+  identities      Identity[]
+  sessions        Session[]
+
+  @@index([status])
+  id                        String                    @id @default(uuid()) @db.Uuid
+  personId                  String                    @db.Uuid
+  username                  String                    @unique
+  status                    UserAccountStatus         @default(PENDING)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  person                    Person                    @relation(fields: [personId], references: [id])
+  identities                Identity[]
+  credentials               Credential[]
+  organizationMemberships   OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+  authenticationMethods     AuthenticationMethod[]
+  sessions                  Session[]
+
+  @@index([personId])
+  @@map("user_accounts")
+}
+
+model Identity {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  type                      IdentityType
+  userAccountId             String?                    @db.Uuid
+  personId                  String?                    @db.Uuid
+  organizationId            String?                    @db.Uuid
+  displayName               String
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  userAccount               UserAccount?               @relation(fields: [userAccountId], references: [id])
+  person                    Person?                    @relation(fields: [personId], references: [id])
+  organization              Organization?              @relation(fields: [organizationId], references: [id])
+  credentials               Credential[]
+  authenticationMethods     AuthenticationMethod[]
+  sessions                  Session[]
+  memberships               OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+  officeholderLinks         IdentityOfficeholderLink[]
+
+  @@index([userAccountId])
+  @@index([personId])
+  @@index([organizationId])
+  @@index([type])
+  id                 String                     @id @default(uuid()) @db.Uuid
+  userAccountId      String                     @db.Uuid
+  providerCode       String
+  subjectId          String
+  verificationStatus IdentityVerificationStatus @default(UNVERIFIED)
+  verifiedAt         DateTime?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  userAccount        UserAccount                @relation(fields: [userAccountId], references: [id])
+
+  @@unique([providerCode, subjectId])
+  @@index([userAccountId])
+  @@map("identities")
+}
+
+model Credential {
+  id           String           @id @default(uuid()) @db.Uuid
+  identityId   String           @db.Uuid
+  type         CredentialType
+  status       CredentialStatus @default(PENDING)
+  secretHash   String?
+  oidcProvider String?
+  oidcSubject  String?
+  apiKeyHash   String?
+  revokedAt    DateTime?
+  lastUsedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  identity     Identity         @relation(fields: [identityId], references: [id])
+
+  @@index([identityId])
+  id                    String           @id @default(uuid()) @db.Uuid
+  userAccountId         String           @db.Uuid
+  type                  CredentialType
+  credentialFingerprint String?
+  secretReference       String?
+  status                CredentialStatus @default(PENDING)
+  expiresAt             DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  userAccount           UserAccount      @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@index([status])
+  @@map("credentials")
+}
+
+model Organization {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  code                      String                    @unique
+  name                      String
+  description               String?
+  status                    OrganizationStatus        @default(PENDING)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  identities                Identity[]
+  memberships               OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+
+  @@index([status])
+  type                      OrganizationType
+  status                    OrganizationStatus        @default(ACTIVE)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  memberships               OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  identityId     String           @db.Uuid
+  roleLabel      String?
+  status         MembershipStatus @default(PENDING)
+  effectiveFrom  DateTime         @default(now())
+  effectiveUntil DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  identity       Identity         @relation(fields: [identityId], references: [id])
+
+  @@unique([organizationId, identityId])
+  @@index([organizationId])
+  @@index([identityId])
+  id             String                       @id @default(uuid()) @db.Uuid
+  organizationId String                       @db.Uuid
+  personId       String                       @db.Uuid
+  userAccountId  String?                      @db.Uuid
+  role           OrganizationMembershipRole   @default(MEMBER)
+  status         OrganizationMembershipStatus @default(PENDING)
+  effectiveFrom  DateTime?
+  effectiveUntil DateTime?
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  organization   Organization                 @relation(fields: [organizationId], references: [id])
+  person         Person                       @relation(fields: [personId], references: [id])
+  userAccount    UserAccount?                 @relation(fields: [userAccountId], references: [id])
+
+  @@unique([organizationId, personId])
+  @@index([organizationId])
+  @@index([personId])
+  @@index([userAccountId])
+  @@map("organization_memberships")
+}
+
+model RepresentativeAuthority {
+  id               String                        @id @default(uuid()) @db.Uuid
+  organizationId   String                        @db.Uuid
+  identityId       String                        @db.Uuid
+  scopeDescription String
+  personId         String?                       @db.Uuid
+  userAccountId    String?                       @db.Uuid
+  mandateReference String
+  scopeDescription String?
+  status           RepresentativeAuthorityStatus @default(PENDING)
+  effectiveFrom    DateTime
+  effectiveUntil   DateTime?
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
+  organization     Organization                  @relation(fields: [organizationId], references: [id])
+  identity         Identity                      @relation(fields: [identityId], references: [id])
+
+  @@index([organizationId])
+  @@index([identityId])
+  person           Person?                       @relation(fields: [personId], references: [id])
+  userAccount      UserAccount?                  @relation(fields: [userAccountId], references: [id])
+
+  @@index([organizationId])
+  @@index([personId])
+  @@index([userAccountId])
+  @@map("representative_authorities")
+}
+
+model AuthenticationMethod {
+  id             String                   @id @default(uuid()) @db.Uuid
+  identityId     String                   @db.Uuid
+  type           AuthenticationMethodType
+  isEnabled      Boolean                  @default(true)
+  assuranceLevel AssuranceLevel           @default(NONE)
+  oidcIssuer     String?
+  oidcClientId   String?
+  oidcAudience   String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  identity       Identity                 @relation(fields: [identityId], references: [id])
+
+  @@index([identityId])
+  id            String                     @id @default(uuid()) @db.Uuid
+  userAccountId String                     @db.Uuid
+  type          AuthenticationMethodType
+  providerCode  String?
+  status        AuthenticationMethodStatus @default(ACTIVE)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  userAccount   UserAccount                @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@map("authentication_methods")
+}
+
+model Session {
+  id               String                   @id @default(uuid()) @db.Uuid
+  identityId       String                   @db.Uuid
+  userAccountId    String?                  @db.Uuid
+  tokenHash        String                   @unique
+  status           SessionStatus            @default(ACTIVE)
+  assuranceLevel   AssuranceLevel           @default(LOW)
+  issuedAt         DateTime                 @default(now())
+  expiresAt        DateTime
+  lastUsedAt       DateTime?
+  revokedAt        DateTime?
+  revocationReason SessionRevocationReason?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  identity         Identity                 @relation(fields: [identityId], references: [id])
+  userAccount      UserAccount?             @relation(fields: [userAccountId], references: [id])
+
+  @@index([identityId])
+  id             String        @id @default(uuid()) @db.Uuid
+  userAccountId  String        @db.Uuid
+  status         SessionStatus @default(ACTIVE)
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  lastActivityAt DateTime?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  userAccount    UserAccount   @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model IdentityOfficeholderLink {
+  id                 String                         @id @default(uuid()) @db.Uuid
+  identityId         String                         @db.Uuid
+  officeholderId     String                         @db.Uuid
+  status             IdentityOfficeholderLinkStatus @default(PENDING)
+  linkedAt           DateTime                       @default(now())
+  linkedByIdentityId String?                        @db.Uuid
+  revokedAt          DateTime?
+  createdAt          DateTime                       @default(now())
+  updatedAt          DateTime                       @updatedAt
+  identity           Identity                       @relation(fields: [identityId], references: [id])
+  officeholder       Officeholder                   @relation(fields: [officeholderId], references: [id])
+
+  @@unique([identityId, officeholderId])
+  @@index([identityId])
+  @@index([officeholderId])
+  @@map("identity_officeholder_links")
+}
+
+model SecurityAuditEvent {
+  id              String                 @id @default(uuid()) @db.Uuid
+  eventType       SecurityAuditEventType
+  identityId      String?                @db.Uuid
+  userAccountId   String?                @db.Uuid
+  sessionId       String?                @db.Uuid
+  actorIdentityId String?                @db.Uuid
+  metadata        Json?
+  ipAddress       String?
+  createdAt       DateTime               @default(now())
+
+  @@index([eventType])
+  @@index([identityId])
+  @@index([userAccountId])
+  @@index([createdAt])
+  @@map("security_audit_events")
 }

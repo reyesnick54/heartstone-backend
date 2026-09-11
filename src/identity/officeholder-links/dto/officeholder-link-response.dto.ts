@@ -6,6 +6,7 @@ import {
 } from '@prisma/client';
 
 import { isIdentityOfficeholderLinkActive } from '../../common/is-active-link.util';
+import { IdentityOfficeholderLinkStatus } from '@prisma/client';
 
 export class OfficeholderLinkResponseDto {
   @ApiProperty()
@@ -16,6 +17,7 @@ export class OfficeholderLinkResponseDto {
 
   @ApiPropertyOptional()
   userAccountId?: string | null;
+  identityId!: string;
 
   @ApiProperty()
   officeholderId!: string;
@@ -37,6 +39,14 @@ export class OfficeholderLinkResponseDto {
 
   @ApiProperty()
   isCurrent!: boolean;
+  @ApiProperty()
+  linkedAt!: Date;
+
+  @ApiPropertyOptional()
+  linkedByIdentityId?: string | null;
+
+  @ApiPropertyOptional()
+  revokedAt?: Date | null;
 
   @ApiProperty()
   createdAt!: Date;

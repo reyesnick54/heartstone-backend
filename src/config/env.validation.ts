@@ -4,6 +4,7 @@ interface ValidatedEnvironment {
   NODE_ENV: string;
   CORS_ORIGINS?: string;
   CORS_ENABLED?: string;
+  AUTH_LOCAL_PASSWORD_ENABLED?: string;
 }
 
 export const envValidationSchema = Joi.object({
@@ -20,6 +21,10 @@ export const envValidationSchema = Joi.object({
     .default('100kb'),
   SWAGGER_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
   TRUST_PROXY: Joi.string().valid('true', 'false', '1', '0', '').optional(),
+  SESSION_TTL_SECONDS: Joi.number().integer().min(60).max(86400).default(3600),
+  SESSION_TOKEN_BYTES: Joi.number().integer().min(16).max(64).default(32),
+  SESSION_RENEWAL_THRESHOLD_SECONDS: Joi.number().integer().min(0).max(43200).default(900),
+  AUTH_LOCAL_PASSWORD_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
 }).custom((value, helpers) => {
   const env = value as ValidatedEnvironment;
   const nodeEnv = env.NODE_ENV;
@@ -29,6 +34,15 @@ export const envValidationSchema = Joi.object({
   if (nodeEnv === 'production' && corsEnabled && corsOrigins === '*') {
     return helpers.error('any.custom', {
       message: 'CORS_ORIGINS=* is not allowed when NODE_ENV=production',
+    });
+  }
+
+  const localPasswordEnabled =
+    env.AUTH_LOCAL_PASSWORD_ENABLED === 'true' || env.AUTH_LOCAL_PASSWORD_ENABLED === '1';
+
+  if (nodeEnv === 'production' && localPasswordEnabled) {
+    return helpers.error('any.custom', {
+      message: 'AUTH_LOCAL_PASSWORD_ENABLED=true is not allowed when NODE_ENV=production',
     });
   }
 

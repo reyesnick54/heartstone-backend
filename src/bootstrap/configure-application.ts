@@ -63,6 +63,7 @@ export function configureApplication(app: INestApplication): void {
       .setTitle(appConfig.name)
       .setDescription('HeartStone backend API')
       .setVersion(appConfig.apiVersion)
+      .addBearerAuth()
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);

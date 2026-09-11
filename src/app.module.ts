@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
+import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
@@ -19,7 +20,7 @@ import { SystemModule } from './system/system.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, redisConfig, securityConfig],
+      load: [appConfig, redisConfig, securityConfig, identityConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: true,
