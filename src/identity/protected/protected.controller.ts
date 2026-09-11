@@ -40,7 +40,7 @@ export class ProtectedController {
   async getProfile(
     @CurrentSession() session: SessionContextDto,
   ): Promise<ProtectedProfileResponseDto> {
-    const authority = this.authorityBoundary.resolveGovernmentAuthority({
+    this.authorityBoundary.assertNoGovernmentAuthorityFromAuthenticationOnly({
       identityId: session.identityId,
       userAccountId: session.userAccountId ?? undefined,
       assuranceLevel: session.assuranceLevel,
@@ -59,9 +59,7 @@ export class ProtectedController {
       assuranceLevel: session.assuranceLevel,
       hasGovernmentAuthority: false,
       governmentAuthorityNote:
-        authority === null
-          ? 'Government authority is not evaluated in Phase 3'
-          : 'Unexpected authority resolution',
+        'Authentication establishes identity only; government authority requires function-level evaluation.',
     };
   }
 }
