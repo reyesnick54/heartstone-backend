@@ -29,6 +29,13 @@ export async function createIntegrationApp(): Promise<{
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await prisma.securityAuditEvent.deleteMany();
+  await prisma.identityOfficeholderLink.deleteMany();
+  await prisma.externalIdentityLink.deleteMany();
+  await prisma.authSession.deleteMany();
+  await prisma.credential.deleteMany();
+  await prisma.userAccount.deleteMany();
+  await prisma.serviceIdentity.deleteMany();
+  await prisma.person.deleteMany();
   await prisma.session.deleteMany();
   await prisma.identityOfficeholderLink.deleteMany();
   await prisma.representativeAuthority.deleteMany();
@@ -42,6 +49,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetIdentityData(prisma);
   await prisma.delegation.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.institutionExternalAuthority.deleteMany();

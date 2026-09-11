@@ -194,6 +194,216 @@ model Officeholder {
   @@map("officeholders")
 }
 
+enum IdentityAccountStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum UserAccountKind {
+  STANDARD
+  IDENTITY_ADMINISTRATOR
+}
+
+enum CredentialType {
+  PASSWORD
+  API_KEY
+  CLIENT_SECRET
+}
+
+enum CredentialStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum AuthSessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum IdentityOfficeholderLinkStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+  REVOKED
+  ENDED
+}
+
+enum IdentityOfficeholderVerificationMethod {
+  ADMIN_VERIFICATION
+  DOCUMENT_EVIDENCE
+  IN_PERSON_VERIFICATION
+  OTHER
+}
+
+enum SecurityAuditEventType {
+  ACCOUNT_CREATED
+  ACCOUNT_SUSPENDED
+  ACCOUNT_REACTIVATED
+  IDENTITY_LINKED
+  IDENTITY_VERIFICATION_CHANGED
+  CREDENTIAL_CREATED
+  CREDENTIAL_REVOKED
+  SESSION_CREATED
+  SESSION_REVOKED
+  SERVICE_IDENTITY_AUTHENTICATED
+  OFFICEHOLDER_LINKAGE_REQUESTED
+  OFFICEHOLDER_LINKAGE_ACTIVATED
+  OFFICEHOLDER_LINKAGE_SUSPENDED
+  OFFICEHOLDER_LINKAGE_REVOKED
+}
+
+enum SecurityAuditResult {
+  SUCCESS
+  FAILURE
+}
+
+enum PrincipalKind {
+  USER_ACCOUNT
+  SERVICE_IDENTITY
+  SYSTEM
+}
+
+model Person {
+  id                String                     @id @default(uuid()) @db.Uuid
+  displayName       String?
+  status            IdentityAccountStatus      @default(ACTIVE)
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  userAccounts      UserAccount[]
+  officeholderLinks IdentityOfficeholderLink[]
+
+  @@map("persons")
+}
+
+model UserAccount {
+  id                String                     @id @default(uuid()) @db.Uuid
+  personId          String                     @db.Uuid
+  username          String                     @unique
+  kind              UserAccountKind            @default(STANDARD)
+  status            IdentityAccountStatus      @default(ACTIVE)
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  person            Person                     @relation(fields: [personId], references: [id])
+  credentials       Credential[]
+  sessions          AuthSession[]
+  externalLinks     ExternalIdentityLink[]
+  officeholderLinks IdentityOfficeholderLink[]
+
+  @@index([personId])
+  @@map("user_accounts")
+}
+
+model ServiceIdentity {
+  id          String                @id @default(uuid()) @db.Uuid
+  code        String                @unique
+  name        String
+  status      IdentityAccountStatus @default(ACTIVE)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  credentials Credential[]
+  sessions    AuthSession[]
+
+  @@map("service_identities")
+}
+
+model Credential {
+  id                String           @id @default(uuid()) @db.Uuid
+  userAccountId     String?          @db.Uuid
+  serviceIdentityId String?          @db.Uuid
+  type              CredentialType
+  identifier        String
+  secretHash        String?
+  status            CredentialStatus @default(ACTIVE)
+  revokedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  userAccount       UserAccount?     @relation(fields: [userAccountId], references: [id])
+  serviceIdentity   ServiceIdentity? @relation(fields: [serviceIdentityId], references: [id])
+
+  @@index([userAccountId])
+  @@index([serviceIdentityId])
+  @@map("credentials")
+}
+
+model AuthSession {
+  id                String            @id @default(uuid()) @db.Uuid
+  userAccountId     String?           @db.Uuid
+  serviceIdentityId String?           @db.Uuid
+  tokenHash         String            @unique
+  status            AuthSessionStatus @default(ACTIVE)
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  correlationId     String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  userAccount       UserAccount?      @relation(fields: [userAccountId], references: [id])
+  serviceIdentity   ServiceIdentity?  @relation(fields: [serviceIdentityId], references: [id])
+
+  @@index([userAccountId])
+  @@index([serviceIdentityId])
+  @@map("auth_sessions")
+}
+
+model ExternalIdentityLink {
+  id              String      @id @default(uuid()) @db.Uuid
+  userAccountId   String      @db.Uuid
+  providerKey     String
+  externalSubject String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  userAccount     UserAccount @relation(fields: [userAccountId], references: [id])
+
+  @@unique([providerKey, externalSubject])
+  @@index([userAccountId])
+  @@map("external_identity_links")
+}
+
+model IdentityOfficeholderLink {
+  id                 String                                  @id @default(uuid()) @db.Uuid
+  personId           String                                  @db.Uuid
+  userAccountId      String?                                 @db.Uuid
+  officeholderId     String                                  @db.Uuid
+  status             IdentityOfficeholderLinkStatus          @default(PENDING)
+  verificationMethod IdentityOfficeholderVerificationMethod?
+  evidenceReference  String?
+  effectiveFrom      DateTime?
+  effectiveUntil     DateTime?
+  createdAt          DateTime                                @default(now())
+  updatedAt          DateTime                                @updatedAt
+  person             Person                                  @relation(fields: [personId], references: [id])
+  userAccount        UserAccount?                            @relation(fields: [userAccountId], references: [id])
+  officeholder       Officeholder                            @relation(fields: [officeholderId], references: [id])
+
+  @@index([personId])
+  @@index([userAccountId])
+  @@index([officeholderId])
+  @@map("identity_officeholder_links")
+}
+
+model SecurityAuditEvent {
+  id            String                 @id @default(uuid()) @db.Uuid
+  eventType     SecurityAuditEventType
+  actorKind     PrincipalKind?
+  actorId       String?                @db.Uuid
+  subjectType   String?
+  subjectId     String?                @db.Uuid
+  correlationId String?
+  source        String?
+  result        SecurityAuditResult    @default(SUCCESS)
+  reason        String?
+  metadata      Json?
+  createdAt     DateTime               @default(now())
+
+  @@index([eventType])
+  @@index([actorId])
+  @@index([subjectId])
+  @@index([correlationId])
+  @@index([createdAt])
+  @@map("security_audit_events")
+}
+
 model Appointment {
   id             String            @id @default(uuid()) @db.Uuid
   officeId       String            @db.Uuid
