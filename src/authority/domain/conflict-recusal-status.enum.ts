@@ -1,0 +1,10 @@
+export enum ConflictStatus {
+  NONE = 'NONE',
+  ACTIVE_DISQUALIFYING = 'ACTIVE_DISQUALIFYING',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+}
+
+export enum RecusalStatus {
+  NONE = 'NONE',
+  FORMALLY_RECUSED = 'FORMALLY_RECUSED',
+}

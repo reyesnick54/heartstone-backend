@@ -162,6 +162,7 @@ model Office {
   appointments           Appointment[]
   delegationsAsDelegator Delegation[]              @relation("DelegationDelegatorOffice")
   delegationsAsRecipient Delegation[]              @relation("DelegationRecipientOffice")
+  functionAuthorityRecords FunctionAuthorityRecord[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -576,4 +577,117 @@ model SecurityAuditEvent {
   @@index([userAccountId])
   @@index([createdAt])
   @@map("security_audit_events")
+}
+
+// ─── Phase 4: Authority Engine ────────────────────────────────────────────────
+
+enum GovernmentAction {
+  PREPARE
+  REVIEW
+  RECOMMEND
+  DECIDE
+  SIGN
+  ISSUE
+}
+
+enum GovernmentFunctionStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  ENDED
+}
+
+enum FunctionAuthorityRecordStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  ENDED
+}
+
+enum AuthorityConditionType {
+  REQUIRED_EVIDENCE
+  REQUIRED_QUALIFICATION
+  REQUIRED_CONCURRENCE
+  TRANSACTION_LIMIT
+  JURISDICTION_LIMIT
+  SUBJECT_MATTER_LIMIT
+  INFORMATION_CLASSIFICATION
+  CONFLICT_CHECK
+  RECUSAL_CHECK
+  SEGREGATION_OF_DUTIES
+  SECOND_APPROVAL
+  ACTIVATION_REQUIRED
+  OTHER_STRUCTURED_REQUIREMENT
+}
+
+enum AuthorityConditionStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum ConditionFailureBehavior {
+  BLOCK
+  REQUIRE_REVIEW
+  SAFE_HALT
+}
+
+model GovernmentFunction {
+  id                     String                   @id @default(uuid()) @db.Uuid
+  code                   String                   @unique
+  name                   String
+  description            String?
+  status                 GovernmentFunctionStatus @default(PENDING)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  functionAuthorityRecords FunctionAuthorityRecord[]
+  authorityConditions    AuthorityCondition[]
+
+  @@map("government_functions")
+}
+
+model FunctionAuthorityRecord {
+  id                  String                      @id @default(uuid()) @db.Uuid
+  governmentFunctionId String                     @db.Uuid
+  officeId            String?                     @db.Uuid
+  actionRight         GovernmentAction
+  status              FunctionAuthorityRecordStatus @default(PENDING)
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  createdAt           DateTime                    @default(now())
+  updatedAt           DateTime                    @updatedAt
+  governmentFunction  GovernmentFunction          @relation(fields: [governmentFunctionId], references: [id])
+  office              Office?                     @relation(fields: [officeId], references: [id])
+  authorityConditions AuthorityCondition[]
+
+  @@index([governmentFunctionId])
+  @@index([officeId])
+  @@map("function_authority_records")
+}
+
+model AuthorityCondition {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  functionAuthorityRecordId String?                  @db.Uuid
+  governmentFunctionId      String?                  @db.Uuid
+  actionRight               GovernmentAction?
+  conditionType             AuthorityConditionType
+  requiredAction            GovernmentAction?
+  configuration             Json
+  mandatory                 Boolean                  @default(true)
+  effectiveFrom             DateTime
+  effectiveUntil            DateTime?
+  status                    AuthorityConditionStatus @default(PENDING)
+  failureBehavior           ConditionFailureBehavior @default(BLOCK)
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+  governmentFunction        GovernmentFunction?        @relation(fields: [governmentFunctionId], references: [id])
+
+  @@index([functionAuthorityRecordId])
+  @@index([governmentFunctionId])
+  @@index([conditionType])
+  @@map("authority_conditions")
 }
