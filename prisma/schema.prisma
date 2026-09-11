@@ -382,9 +382,6 @@ enum SecurityAuditEventType {
   MFA_VERIFIED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
-  SERVICE_ELIGIBILITY_RULE_CREATED
-  SERVICE_ELIGIBILITY_RULE_UPDATED
-  SERVICE_ELIGIBILITY_RULE_PUBLISHED_CHANGE
 }
 
 model Person {
@@ -1142,11 +1139,74 @@ enum CatalogServiceType {
   OTHER
 }
 
-enum FormVersionStatus {
+enum FormDefinitionStatus {
   DRAFT
   ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum FormVersionStatus {
+  DRAFT
+  PUBLISHED
   SUPERSEDED
   ARCHIVED
+}
+
+enum FormFieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  INTEGER
+  DECIMAL
+  DATE
+  DATETIME
+  BOOLEAN
+  SELECT
+  MULTISELECT
+  RADIO
+  CHECKBOX
+  EMAIL
+  PHONE
+  COUNTRY
+  CURRENCY
+  ADDRESS
+  IDENTIFIER
+  FILE_REFERENCE
+  DECLARATION
+  INFORMATION_DISPLAY
+}
+
+enum FormDataClassification {
+  PUBLIC
+  INTERNAL
+  RESTRICTED
+  SENSITIVE
+}
+
+enum FormConditionalAction {
+  SHOW
+  HIDE
+  REQUIRE
+  OPTIONAL
+}
+
+enum FormConditionalLogic {
+  AND
+  OR
+}
+
+enum FormConditionalOperator {
+  EQUALS
+  NOT_EQUALS
+  IN
+  NOT_IN
+  IS_EMPTY
+  IS_NOT_EMPTY
+  GREATER_THAN
+  LESS_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
 }
 
 model ServiceFamily {
@@ -1228,16 +1288,16 @@ model GovernmentServiceVersion {
   supersededByVersion                 GovernmentServiceVersion?                   @relation("GovernmentServiceVersionSupersession", fields: [supersededByVersionId], references: [id])
   supersededVersions                  GovernmentServiceVersion[]                  @relation("GovernmentServiceVersionSupersession")
   activationRecords                   ServiceActivationRecord[]
-  formDefinition                      FormDefinition?                             @relation(fields: [formDefinitionId], references: [id])
+  formDefinition                      FormDefinition?                             @relation("ServiceVersionFormDefinition", fields: [formDefinitionId], references: [id])
   formVersion                         FormVersion?                                @relation(fields: [formVersionId], references: [id])
   functionMappings                    ServiceFunctionMapping[]
   applicantCategories                 GovernmentServiceVersionApplicantCategory[]
   fees                                GovernmentServiceFeeDefinition[]
   eligibilityRules                    GovernmentServiceEligibilityRule[]
-  serviceEligibilityRules             ServiceEligibilityRule[]
   checklistItems                      GovernmentServiceChecklistItem[]
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
+  formDefinitions                     FormDefinition[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1286,32 +1346,101 @@ model FormDefinition {
   id                        String                     @id @default(uuid()) @db.Uuid
   code                      String                     @unique
   name                      String
+  purpose                   String?
   description               String?
+  governmentServiceVersionId String                    @db.Uuid
+  status                    FormDefinitionStatus       @default(DRAFT)
   createdAt                 DateTime                   @default(now())
   updatedAt                 DateTime                   @updatedAt
+  governmentServiceVersion  GovernmentServiceVersion   @relation(fields: [governmentServiceVersionId], references: [id])
   versions                  FormVersion[]
-  governmentServiceVersions GovernmentServiceVersion[]
+  governmentServiceVersions GovernmentServiceVersion[] @relation("ServiceVersionFormDefinition")
 
+  @@index([governmentServiceVersionId])
+  @@index([status])
   @@map("form_definitions")
 }
 
 model FormVersion {
   id                        String                     @id @default(uuid()) @db.Uuid
   formDefinitionId          String                     @db.Uuid
-  versionNumber             Int
+  version                   Int
+  title                     Json
+  instructions              Json?
+  effectiveFrom             DateTime?
+  effectiveUntil            DateTime?
   status                    FormVersionStatus          @default(DRAFT)
-  schema                    Json
-  activatedAt               DateTime?
-  supersededAt              DateTime?
+  publishedAt               DateTime?
+  supersededById            String?                    @db.Uuid
   createdAt                 DateTime                   @default(now())
   updatedAt                 DateTime                   @updatedAt
   formDefinition            FormDefinition             @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+  supersededBy              FormVersion?               @relation("FormVersionSupersession", fields: [supersededById], references: [id])
+  supersedes                FormVersion[]              @relation("FormVersionSupersession")
+  sections                  FormSection[]
   governmentServiceVersions GovernmentServiceVersion[]
 
-  @@unique([formDefinitionId, versionNumber])
+  @@unique([formDefinitionId, version])
   @@index([formDefinitionId])
   @@index([status])
   @@map("form_versions")
+}
+
+model FormSection {
+  id            String      @id @default(uuid()) @db.Uuid
+  formVersionId String      @db.Uuid
+  sectionKey    String
+  title         Json
+  description   Json?
+  displayOrder  Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  formVersion   FormVersion @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
+  fields        FormField[]
+
+  @@unique([formVersionId, sectionKey])
+  @@index([formVersionId])
+  @@map("form_sections")
+}
+
+model FormField {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  formSectionId        String                     @db.Uuid
+  fieldKey             String
+  label                Json
+  description          Json?
+  fieldType            FormFieldType
+  required             Boolean                    @default(false)
+  displayOrder         Int
+  defaultValue         Json?
+  placeholder          Json?
+  dataClassification   FormDataClassification     @default(PUBLIC)
+  validationDefinition Json                       @default("{}")
+  options              Json?
+  sourceMetadata       Json?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  formSection          FormSection                @relation(fields: [formSectionId], references: [id], onDelete: Cascade)
+  conditionalRules     FormFieldConditionalRule[]
+
+  @@unique([formSectionId, fieldKey])
+  @@index([formSectionId])
+  @@map("form_fields")
+}
+
+model FormFieldConditionalRule {
+  id           String                @id @default(uuid()) @db.Uuid
+  formFieldId  String                @db.Uuid
+  action       FormConditionalAction
+  conditions   Json
+  logic        FormConditionalLogic  @default(AND)
+  displayOrder Int                   @default(0)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  formField    FormField             @relation(fields: [formFieldId], references: [id], onDelete: Cascade)
+
+  @@index([formFieldId])
+  @@map("form_field_conditional_rules")
 }
 
 model GovernmentServiceFeeDefinition {
@@ -1349,91 +1478,6 @@ model GovernmentServiceEligibilityRule {
   @@unique([governmentServiceVersionId, ruleCode])
   @@index([governmentServiceVersionId])
   @@map("government_service_eligibility_rules")
-}
-
-enum ServiceEligibilityRuleCategory {
-  APPLICANT_CATEGORY
-  ENTITY_TYPE
-  RESIDENCY_STATUS
-  ACTIVITY
-  LOCATION
-  GEOGRAPHIC_SCOPE
-  AGE_OR_THRESHOLD
-  OWNERSHIP_ATTRIBUTE
-  EMPLOYER_STATUS
-  PREREQUISITE_STATUS
-  REPRESENTATIVE_REQUIREMENT
-  EXCLUSION
-  REQUIRED_ATTRIBUTE
-  OTHER_STRUCTURED_RULE
-}
-
-enum ServiceEligibilityRuleOperator {
-  EQUALS
-  NOT_EQUALS
-  IN
-  NOT_IN
-  EXISTS
-  NOT_EXISTS
-  GREATER_THAN
-  GREATER_THAN_OR_EQUAL
-  LESS_THAN
-  LESS_THAN_OR_EQUAL
-  CONTAINS
-}
-
-enum ServiceEligibilityRuleStatus {
-  ACTIVE
-  SUPERSEDED
-  ARCHIVED
-}
-
-enum EligibilityGuidanceOutcome {
-  LIKELY_ELIGIBLE
-  LIKELY_INELIGIBLE
-  MORE_INFORMATION_REQUIRED
-  OUTSIDE_PUBLISHED_SCOPE
-  REFER_TO_OTHER_SERVICE
-  UNRESOLVED
-}
-
-model ServiceEligibilityRule {
-  id                         String                         @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId String                         @db.Uuid
-  category                   ServiceEligibilityRuleCategory
-  attributeKey               String
-  operator                   ServiceEligibilityRuleOperator
-  expectedValue              Json                           @default("{}")
-  reasonCode                 String
-  priority                   Int                            @default(0)
-  onFailureOutcome           EligibilityGuidanceOutcome?
-  status                     ServiceEligibilityRuleStatus   @default(ACTIVE)
-  effectiveFrom              DateTime
-  effectiveUntil             DateTime?
-  createdAt                  DateTime                       @default(now())
-  updatedAt                  DateTime                       @updatedAt
-  governmentServiceVersion   GovernmentServiceVersion       @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
-  audits                     ServiceEligibilityRuleAudit[]
-
-  @@index([governmentServiceVersionId])
-  @@index([status])
-  @@map("service_eligibility_rules")
-}
-
-model ServiceEligibilityRuleAudit {
-  id                         String                  @id @default(uuid()) @db.Uuid
-  serviceEligibilityRuleId   String?                 @db.Uuid
-  governmentServiceVersionId String                  @db.Uuid
-  actorIdentityId            String                  @db.Uuid
-  action                     String
-  previousSnapshot           Json?
-  newSnapshot                Json?
-  createdAt                  DateTime                @default(now())
-  serviceEligibilityRule     ServiceEligibilityRule? @relation(fields: [serviceEligibilityRuleId], references: [id], onDelete: SetNull)
-
-  @@index([governmentServiceVersionId])
-  @@index([serviceEligibilityRuleId])
-  @@map("service_eligibility_rule_audits")
 }
 
 model GovernmentServiceChecklistItem {

@@ -11,9 +11,12 @@ export async function resetServiceCatalogData(prisma: PrismaService): Promise<vo
   await prisma.governmentServiceFeeDefinition.deleteMany();
   await prisma.serviceFunctionMapping.deleteMany();
   await prisma.governmentServiceVersionApplicantCategory.deleteMany();
-  await prisma.governmentServiceVersion.deleteMany();
-  await prisma.governmentService.deleteMany();
+  await prisma.formFieldConditionalRule.deleteMany();
+  await prisma.formField.deleteMany();
+  await prisma.formSection.deleteMany();
   await prisma.formVersion.deleteMany();
   await prisma.formDefinition.deleteMany();
+  await prisma.governmentServiceVersion.deleteMany();
+  await prisma.governmentService.deleteMany();
   await prisma.serviceFamily.deleteMany();
 }

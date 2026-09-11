@@ -243,7 +243,7 @@ export function mapServiceStartPackage(
     versionLabel: version.version,
     formDefinitionId: version.formDefinitionId,
     formVersionId: version.formVersionId,
-    formSchema: version.formVersion?.schema ?? null,
+    formSchema: null,
     eligibilityGuidance: sortByOrder(version.eligibilityRules).map((rule) => ({
       ruleCode: rule.ruleCode,
       label: rule.label,

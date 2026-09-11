@@ -3,7 +3,11 @@ import { join } from 'node:path';
 
 import {
   APPLICANT_CATEGORIES,
+  FORBIDDEN_FORM_BOUNDARY_FIELDS,
   FORBIDDEN_SERVICE_CATALOG_AUTHORITY_FIELDS,
+  FORM_CONDITIONAL_ACTIONS,
+  FORM_FIELD_TYPES,
+  FORM_VERSION_STATUSES,
   GOVERNMENT_SERVICE_MATURITY_STATUSES,
   GOVERNMENT_SERVICE_PUBLIC_AVAILABILITY_MODES,
   SERVICE_CATALOG_MODEL_NAMES,
@@ -108,6 +112,58 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
 
     for (const modelName of phase6Models) {
       expect(schema).not.toContain(`model ${modelName}`);
+    }
+  });
+});
+
+describe('Forms engine schema coherence (Phase 5C)', () => {
+  const schema = readSchema();
+
+  it('defines all form engine models', () => {
+    for (const modelName of [
+      'FormDefinition',
+      'FormVersion',
+      'FormSection',
+      'FormField',
+      'FormFieldConditionalRule',
+    ]) {
+      expect(schema).toMatch(new RegExp(`model ${modelName}\\s*\\{`));
+    }
+  });
+
+  it('defines all required form field types', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormFieldType');
+    for (const fieldType of FORM_FIELD_TYPES) {
+      expect(enumBlock).toContain(fieldType);
+    }
+  });
+
+  it('defines conditional actions for deterministic behavior', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormConditionalAction');
+    for (const action of FORM_CONDITIONAL_ACTIONS) {
+      expect(enumBlock).toContain(action);
+    }
+  });
+
+  it('defines form version lifecycle statuses including published immutability states', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormVersionStatus');
+    for (const status of FORM_VERSION_STATUSES) {
+      expect(enumBlock).toContain(status);
+    }
+  });
+
+  it('links form definitions to government service versions', () => {
+    const block = extractModelBlock(schema, 'FormDefinition');
+    expect(block).toContain('governmentServiceVersionId');
+    expect(block).toContain('GovernmentServiceVersion');
+  });
+
+  it('does not add application or case boundary fields to form models', () => {
+    for (const modelName of ['FormDefinition', 'FormVersion', 'FormField']) {
+      const block = extractModelBlock(schema, modelName);
+      for (const forbiddenField of FORBIDDEN_FORM_BOUNDARY_FIELDS) {
+        expect(block).not.toContain(forbiddenField);
+      }
     }
   });
 });

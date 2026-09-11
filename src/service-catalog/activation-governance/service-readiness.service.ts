@@ -141,7 +141,7 @@ export class ServiceReadinessService {
     );
 
     if (isApplicationCapable) {
-      const hasActiveForm = version.formVersion?.status === FormVersionStatus.ACTIVE;
+      const hasActiveForm = version.formVersion?.status === FormVersionStatus.PUBLISHED;
       checks.push(
         this.check(
           SERVICE_READINESS_CHECK_CODES.PUBLISHED_FORM_EXISTS,
