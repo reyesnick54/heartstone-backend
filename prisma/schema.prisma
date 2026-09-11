@@ -112,6 +112,10 @@ model Institution {
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   institutionalAuthorityActs   InstitutionalAuthorityAct[]
+  governmentServices           GovernmentService[]
+  serviceFeeCollections        ServiceFeeDefinition[]        @relation("ServiceFeeCollectingInstitution")
+  serviceOutputIssuances       ServiceOutputDefinition[]     @relation("ServiceOutputIssuingInstitution")
+  serviceRedressResponsibility ServiceRedressRoute[]         @relation("ServiceRedressResponsibleInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -788,8 +792,10 @@ model FunctionAuthorityRecord {
   evaluations            AuthorityEvaluationRecord[]
   activationAudits       FunctionActivationAudit[]
   retainedDeterminations RetainedNationalDetermination[]
-  delegationScopes       DelegationStructuredScope[]
-  institutionalActs      InstitutionalAuthorityAct[]
+  delegationScopes            DelegationStructuredScope[]
+  institutionalActs           InstitutionalAuthorityAct[]
+  serviceFeeWaiverFunctions   ServiceFeeDefinition[]
+  serviceOutputFunctions      ServiceOutputDefinition[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -816,6 +822,9 @@ model GoverningSource {
   outgoingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipFrom")
   incomingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipTo")
   functionLinks             FunctionGoverningSource[]
+  serviceFeeDefinitions     ServiceFeeDefinition[]
+  serviceLevelTargets       ServiceLevelTarget[]
+  serviceRedressRoutes      ServiceRedressRoute[]
 
   @@index([status])
   @@index([effectiveFrom])
@@ -937,8 +946,9 @@ model AuthorityDependency {
   createdAt                 DateTime                        @default(now())
   updatedAt                 DateTime                        @updatedAt
   functionAuthorityRecord   FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
-  externalAuthority         ExternalAuthority?              @relation(fields: [externalAuthorityId], references: [id])
-  externalDeterminations    ExternalDependencyDetermination[]
+  externalAuthority              ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
+  externalDeterminations         ExternalDependencyDetermination[]
+  serviceDependencyDefinitions   ServiceDependencyDefinition[]
 
   @@index([functionAuthorityRecordId])
   @@index([externalAuthorityId])
@@ -1072,4 +1082,286 @@ model DelegationStructuredScope {
   @@index([delegationId])
   @@index([functionAuthorityRecordId])
   @@map("delegation_structured_scopes")
+}
+
+// ─── Phase 5: Service Catalog ────────────────────────────────────────────────
+
+enum ServiceLifecycleStatus {
+  DRAFT
+  PUBLISHED
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ServiceDataClassification {
+  PUBLIC
+  INTERNAL
+  RESTRICTED
+}
+
+enum ServiceFeeCalculationType {
+  FIXED
+  PERCENTAGE
+  TIERED
+  FORMULA_REFERENCE
+  VARIABLE_BY_CLASSIFICATION
+  EXTERNAL_FEE
+  NO_FEE
+}
+
+enum ServiceFeeRefundability {
+  REFUNDABLE
+  NON_REFUNDABLE
+  CONDITIONAL
+}
+
+enum ServiceOperatingMetadataStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ServiceLevelTargetType {
+  INITIAL_ACKNOWLEDGMENT
+  FULL_PROCESSING
+  DECISION_ISSUANCE
+  APPEAL_RESPONSE
+  EXTERNAL_DEPENDENCY
+  OTHER
+}
+
+enum ServiceLevelClockBasis {
+  ELAPSED_TIME
+  BUSINESS_PROCESSING
+  WAITING_ON_APPLICANT
+  WAITING_ON_EXTERNAL
+}
+
+enum ServiceLevelDayBasis {
+  CALENDAR_DAYS
+  BUSINESS_DAYS
+}
+
+enum ServiceLevelDurationUnit {
+  HOURS
+  DAYS
+  WEEKS
+  MONTHS
+}
+
+enum ServiceDependencyType {
+  GOVERNMENT
+  PROFESSIONAL
+  UTILITY
+  REGISTRY
+  VENDOR
+  PARTNER
+  PAYMENT
+  IDENTITY
+  INTEGRATION
+  OTHER
+}
+
+enum ServiceOutputType {
+  ACKNOWLEDGMENT
+  NOTICE
+  CERTIFICATE
+  LICENSE
+  PERMIT
+  REGISTRATION
+  REFERRAL
+  REPORT
+  DECISION
+  OTHER
+}
+
+enum ServiceRedressRouteType {
+  CORRECTION
+  COMPLAINT
+  RECONSIDERATION
+  ADMINISTRATIVE_REVIEW
+  APPEAL
+  EXTERNAL_REVIEW
+  JUDICIAL_REVIEW_INFORMATION
+  OTHER
+}
+
+model GovernmentService {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  code                     String                    @unique
+  name                     String
+  description              String?
+  responsibleInstitutionId String                    @db.Uuid
+  status                   ServiceLifecycleStatus    @default(DRAFT)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  responsibleInstitution   Institution               @relation(fields: [responsibleInstitutionId], references: [id])
+  versions                 ServiceVersion[]
+
+  @@index([responsibleInstitutionId])
+  @@map("government_services")
+}
+
+model ServiceVersion {
+  id                           String                    @id @default(uuid()) @db.Uuid
+  governmentServiceId          String                    @db.Uuid
+  versionLabel                 String
+  status                       ServiceLifecycleStatus    @default(DRAFT)
+  description                  String?
+  dataClassification           ServiceDataClassification @default(PUBLIC)
+  identityAssuranceExpectation AssuranceLevel?
+  sensitiveDataIndicator       Boolean                   @default(false)
+  manualFallbackDescription    String?
+  manualFallbackReference      String?
+  effectiveFrom                DateTime
+  effectiveUntil               DateTime?
+  createdAt                    DateTime                  @default(now())
+  updatedAt                    DateTime                  @updatedAt
+  governmentService            GovernmentService         @relation(fields: [governmentServiceId], references: [id])
+  feeDefinitions               ServiceFeeDefinition[]
+  levelTargets                 ServiceLevelTarget[]
+  dependencyDefinitions        ServiceDependencyDefinition[]
+  outputDefinitions            ServiceOutputDefinition[]
+  redressRoutes                ServiceRedressRoute[]
+
+  @@unique([governmentServiceId, versionLabel])
+  @@index([governmentServiceId])
+  @@map("service_versions")
+}
+
+model ServiceFeeDefinition {
+  id                        String                         @id @default(uuid()) @db.Uuid
+  serviceVersionId          String                         @db.Uuid
+  feeCode                   String
+  name                      String
+  description               String?
+  currency                  String
+  calculationType           ServiceFeeCalculationType
+  fixedAmount               Decimal?                       @db.Decimal(18, 4)
+  calculationConfiguration  Json                           @default("{}")
+  governingSourceId         String                         @db.Uuid
+  collectingInstitutionId   String                         @db.Uuid
+  refundability             ServiceFeeRefundability
+  waiverReductionAvailable  Boolean                        @default(false)
+  waiverAuthorityFunctionId String?                        @db.Uuid
+  isExternalProfessionalFee Boolean                        @default(false)
+  effectiveFrom             DateTime
+  effectiveUntil            DateTime?
+  status                    ServiceOperatingMetadataStatus @default(DRAFT)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  serviceVersion            ServiceVersion                 @relation(fields: [serviceVersionId], references: [id])
+  governingSource           GoverningSource                @relation(fields: [governingSourceId], references: [id])
+  collectingInstitution     Institution                    @relation("ServiceFeeCollectingInstitution", fields: [collectingInstitutionId], references: [id])
+  waiverAuthorityFunction   FunctionAuthorityRecord?       @relation(fields: [waiverAuthorityFunctionId], references: [id])
+
+  @@unique([serviceVersionId, feeCode, effectiveFrom])
+  @@index([serviceVersionId])
+  @@index([governingSourceId])
+  @@index([collectingInstitutionId])
+  @@map("service_fee_definitions")
+}
+
+model ServiceLevelTarget {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  serviceVersionId            String                         @db.Uuid
+  targetType                  ServiceLevelTargetType
+  targetDurationValue         Int
+  targetDurationUnit          ServiceLevelDurationUnit
+  clockBasis                  ServiceLevelClockBasis
+  dayBasis                    ServiceLevelDayBasis
+  startEventDescription       String
+  startEventReference         String?
+  pausable                    Boolean                        @default(false)
+  approvedPauseReasons        Json                           @default("[]")
+  externalDependencyTreatment String?
+  escalationThreshold         String?
+  governingSourceId           String?                        @db.Uuid
+  effectiveFrom               DateTime
+  effectiveUntil              DateTime?
+  status                      ServiceOperatingMetadataStatus @default(DRAFT)
+  createdAt                   DateTime                       @default(now())
+  updatedAt                   DateTime                       @updatedAt
+  serviceVersion              ServiceVersion                 @relation(fields: [serviceVersionId], references: [id])
+  governingSource             GoverningSource?               @relation(fields: [governingSourceId], references: [id])
+
+  @@index([serviceVersionId])
+  @@index([governingSourceId])
+  @@map("service_level_targets")
+}
+
+model ServiceDependencyDefinition {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  serviceVersionId      String                         @db.Uuid
+  dependencyType        ServiceDependencyType
+  authorityDependencyId String?                        @db.Uuid
+  name                  String
+  description           String?
+  externalEntityLabel   String?
+  operationalNotes      String?
+  effectiveFrom         DateTime
+  effectiveUntil        DateTime?
+  status                ServiceOperatingMetadataStatus @default(DRAFT)
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+  serviceVersion        ServiceVersion                 @relation(fields: [serviceVersionId], references: [id])
+  authorityDependency   AuthorityDependency?           @relation(fields: [authorityDependencyId], references: [id])
+
+  @@index([serviceVersionId])
+  @@index([authorityDependencyId])
+  @@map("service_dependency_definitions")
+}
+
+model ServiceOutputDefinition {
+  id                           String                         @id @default(uuid()) @db.Uuid
+  serviceVersionId             String                         @db.Uuid
+  outputType                   ServiceOutputType
+  publicName                   String
+  description                  String?
+  issuingInstitutionId         String?                        @db.Uuid
+  expectedValidityDescription  String?
+  renewalRequired              Boolean                        @default(false)
+  authorityFunctionId          String?                        @db.Uuid
+  electronicIssuanceEligible   Boolean                        @default(false)
+  electronicIssuanceMetadata   Json                           @default("{}")
+  effectiveFrom                DateTime
+  effectiveUntil               DateTime?
+  status                       ServiceOperatingMetadataStatus @default(DRAFT)
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  serviceVersion               ServiceVersion                 @relation(fields: [serviceVersionId], references: [id])
+  issuingInstitution           Institution?                   @relation("ServiceOutputIssuingInstitution", fields: [issuingInstitutionId], references: [id])
+  authorityFunction            FunctionAuthorityRecord?       @relation(fields: [authorityFunctionId], references: [id])
+
+  @@index([serviceVersionId])
+  @@index([issuingInstitutionId])
+  @@index([authorityFunctionId])
+  @@map("service_output_definitions")
+}
+
+model ServiceRedressRoute {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  serviceVersionId         String                         @db.Uuid
+  routeType                ServiceRedressRouteType
+  routeName                String
+  description              String?
+  responsibleInstitutionId String?                        @db.Uuid
+  deadlineDescription      String?
+  governingSourceId        String?                        @db.Uuid
+  independenceRequired     Boolean                        @default(false)
+  contactChannelMetadata   Json                           @default("{}")
+  effectiveFrom            DateTime
+  effectiveUntil           DateTime?
+  status                   ServiceOperatingMetadataStatus @default(DRAFT)
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  serviceVersion           ServiceVersion                 @relation(fields: [serviceVersionId], references: [id])
+  responsibleInstitution   Institution?                   @relation("ServiceRedressResponsibleInstitution", fields: [responsibleInstitutionId], references: [id])
+  governingSource          GoverningSource?               @relation(fields: [governingSourceId], references: [id])
+
+  @@index([serviceVersionId])
+  @@index([responsibleInstitutionId])
+  @@index([governingSourceId])
+  @@map("service_redress_routes")
 }
