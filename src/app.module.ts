@@ -14,6 +14,7 @@ import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { RedisModule } from './redis/redis.module';
+import { ServicesModule } from './services/services.module';
 import { SystemModule } from './system/system.module';
 
 @Module({
@@ -35,6 +36,7 @@ import { SystemModule } from './system/system.module';
     GovernmentModule,
     IdentityModule,
     AuthorityModule,
+    ServicesModule,
   ],
 })
 export class AppModule {}
