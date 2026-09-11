@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { IdentityModule } from '../../identity/identity.module';
+import { IdentityCommonModule } from '../../identity/common/identity-common.module';
 import { ServiceCatalogAuditService } from './service-catalog-audit.service';
 import { ServiceCatalogValidationService } from './service-catalog-validation.service';
 
 @Module({
-  imports: [IdentityModule],
+  imports: [IdentityCommonModule],
   providers: [ServiceCatalogValidationService, ServiceCatalogAuditService],
   exports: [ServiceCatalogValidationService, ServiceCatalogAuditService],
 })
