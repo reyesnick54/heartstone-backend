@@ -179,7 +179,9 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
       throw new Error('Expected configured service slug');
     }
 
-    await request(app.getHttpServer()).get(`/api/v1/public/services/${slug}/start-package`).expect(404);
+    await request(app.getHttpServer())
+      .get(`/api/v1/public/services/${slug}/start-package`)
+      .expect(404);
 
     const version = await prisma.governmentServiceVersion.findUnique({
       where: { id: service.governmentServiceVersionId },
@@ -227,12 +229,15 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
 
   it('5. service cannot override FunctionAuthorityRecord', async () => {
     const fixture = await seedPublicServiceDiscoveryFixture(prisma);
-    const fn = await seedFunctionAuthorityRecord(prisma, (
-      await prisma.governmentService.findUniqueOrThrow({
-        where: { id: fixture.activeServiceId },
-        select: { responsibleInstitutionId: true },
-      })
-    ).responsibleInstitutionId);
+    const fn = await seedFunctionAuthorityRecord(
+      prisma,
+      (
+        await prisma.governmentService.findUniqueOrThrow({
+          where: { id: fixture.activeServiceId },
+          select: { responsibleInstitutionId: true },
+        })
+      ).responsibleInstitutionId,
+    );
 
     await prisma.serviceFunctionMapping.create({
       data: {
@@ -533,8 +538,7 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
 
     const body = asServiceStartPackageBody(response.body);
     const maliciousField = body.formSchema?.properties?.maliciousScript as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(maliciousField?.['x-onChange']).toEqual('(() => { throw new Error("executed"); })()');
     expect(body).not.toHaveProperty('executed');
   });
@@ -632,9 +636,7 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
       .expect(200);
 
     const body = asServiceStartPackageBody(response.body);
-    expect(
-      body.conditionalChecklist.every((item) => !('isEvidenceVerified' in item)),
-    ).toBe(true);
+    expect(body.conditionalChecklist.every((item) => !('isEvidenceVerified' in item))).toBe(true);
     expect(body).not.toHaveProperty('verifiedEvidence');
   });
 
@@ -648,7 +650,9 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
     const body = asServiceStartPackageBody(response.body);
     expect(body).not.toHaveProperty('isSubstantiveApproval');
     expect(body).not.toHaveProperty('approved');
-    expect(body.conditionalChecklist.every((item) => !('isSubstantiveApproval' in item))).toBe(true);
+    expect(body.conditionalChecklist.every((item) => !('isSubstantiveApproval' in item))).toBe(
+      true,
+    );
   });
 
   it('21. requirement without valid configured basis cannot silently become mandatory', async () => {
@@ -799,9 +803,9 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
       .expect(200);
 
     const body = asServiceStartPackageBody(startPackage.body);
-    expect(body.outputDefinitions.some((output) => output.outputCode === 'LICENCE_CERTIFICATE')).toBe(
-      true,
-    );
+    expect(
+      body.outputDefinitions.some((output) => output.outputCode === 'LICENCE_CERTIFICATE'),
+    ).toBe(true);
     expect(await tableExists('issued_licenses')).toBe(false);
   });
 
@@ -874,7 +878,9 @@ describe('Phase 5H must-fail invariants (e2e)', () => {
   it('32. service suspension invalidates cached active listing', async () => {
     const fixture = await seedPublicServiceDiscoveryFixture(prisma);
 
-    const beforeList = await request(app.getHttpServer()).get('/api/v1/public/services').expect(200);
+    const beforeList = await request(app.getHttpServer())
+      .get('/api/v1/public/services')
+      .expect(200);
     expect(
       asPaginatedPublicServicesBody(beforeList.body).items.some(
         (item) => item.slug === fixture.activeServiceSlug,

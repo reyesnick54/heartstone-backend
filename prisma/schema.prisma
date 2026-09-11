@@ -764,37 +764,37 @@ enum RetainedNationalDeterminationStatus {
 }
 
 model FunctionAuthorityRecord {
-  id                      String                           @id @default(uuid()) @db.Uuid
-  code                    String                           @unique
-  name                    String
-  description             String?
-  classification          AuthorityClassification
-  functionClass           ControlledFunctionClass
-  lifecycleStatus         FunctionAuthorityLifecycleStatus @default(DRAFT)
-  institutionId           String?                          @db.Uuid
-  officeId                String?                          @db.Uuid
-  requiresDelegation      Boolean                          @default(false)
-  requiresAppointment     Boolean                          @default(true)
-  activatedAt             DateTime?
-  activatedByIdentityId   String?                          @db.Uuid
-  suspendedAt             DateTime?
-  createdAt               DateTime                         @default(now())
-  updatedAt               DateTime                         @updatedAt
-  institution             Institution?                     @relation(fields: [institutionId], references: [id])
-  office                  Office?                          @relation(fields: [officeId], references: [id])
-  governingSources        FunctionGoverningSource[]
-  assignments             FunctionAuthorityAssignment[]
-  actionRights            AuthorityActionRight[]
-  conditions              AuthorityCondition[]
-  dependencies            AuthorityDependency[]
-  sodRules                SegregationOfDutyRule[]
-  evaluations             AuthorityEvaluationRecord[]
-  activationAudits        FunctionActivationAudit[]
-  retainedDeterminations  RetainedNationalDetermination[]
-  delegationScopes        DelegationStructuredScope[]
-  institutionalActs       InstitutionalAuthorityAct[]
-  serviceFunctionMappings ServiceFunctionMapping[]
-  serviceActivationAuthorities GovernmentServiceVersion[] @relation("ServiceActivationAuthority")
+  id                           String                           @id @default(uuid()) @db.Uuid
+  code                         String                           @unique
+  name                         String
+  description                  String?
+  classification               AuthorityClassification
+  functionClass                ControlledFunctionClass
+  lifecycleStatus              FunctionAuthorityLifecycleStatus @default(DRAFT)
+  institutionId                String?                          @db.Uuid
+  officeId                     String?                          @db.Uuid
+  requiresDelegation           Boolean                          @default(false)
+  requiresAppointment          Boolean                          @default(true)
+  activatedAt                  DateTime?
+  activatedByIdentityId        String?                          @db.Uuid
+  suspendedAt                  DateTime?
+  createdAt                    DateTime                         @default(now())
+  updatedAt                    DateTime                         @updatedAt
+  institution                  Institution?                     @relation(fields: [institutionId], references: [id])
+  office                       Office?                          @relation(fields: [officeId], references: [id])
+  governingSources             FunctionGoverningSource[]
+  assignments                  FunctionAuthorityAssignment[]
+  actionRights                 AuthorityActionRight[]
+  conditions                   AuthorityCondition[]
+  dependencies                 AuthorityDependency[]
+  sodRules                     SegregationOfDutyRule[]
+  evaluations                  AuthorityEvaluationRecord[]
+  activationAudits             FunctionActivationAudit[]
+  retainedDeterminations       RetainedNationalDetermination[]
+  delegationScopes             DelegationStructuredScope[]
+  institutionalActs            InstitutionalAuthorityAct[]
+  serviceFunctionMappings      ServiceFunctionMapping[]
+  serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1190,50 +1190,50 @@ model GovernmentService {
 }
 
 model GovernmentServiceVersion {
-  id                               String                                      @id @default(uuid()) @db.Uuid
-  governmentServiceId              String                                      @db.Uuid
-  version                          String
-  purpose                          String?
-  coveredActivities                String?
-  excludedActivities               String?
-  geographicScope                  String?
-  publicDescription                String?
-  typicalValidityDescription       String?
-  effectiveFrom                    DateTime?
-  effectiveUntil                   DateTime?
-  informationLastVerifiedAt        DateTime?
-  publicDisclaimer                 String?
-  authorityClassificationSummary   String?
-  majorDependencies                Json                                        @default("[]")
-  internalGoverningSourceMaterial  String?
-  restrictedSecurityNotes          String?
-  supersededAt                     DateTime?
-  formDefinitionId                 String?                                     @db.Uuid
-  formVersionId                    String?                                     @db.Uuid
-  maturityStatus                   GovernmentServiceMaturityStatus             @default(DRAFT)
-  publicAvailability               GovernmentServicePublicAvailability         @default(HIDDEN)
-  institutionallyAccepted          Boolean                                     @default(false)
-  institutionallyAcceptedAt        DateTime?
-  testReadinessStatus              ServiceTestReadinessStatus                  @default(NOT_TESTED)
-  pilotScopeDescription            String?
-  activationFunctionAuthorityRecordId String?                                  @db.Uuid
-  supersededByVersionId            String?                                     @db.Uuid
-  createdAt                        DateTime                                    @default(now())
-  updatedAt                        DateTime                                    @updatedAt
-  governmentService                GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
-  activationFunctionAuthority      FunctionAuthorityRecord?                    @relation("ServiceActivationAuthority", fields: [activationFunctionAuthorityRecordId], references: [id])
-  supersededByVersion              GovernmentServiceVersion?                   @relation("GovernmentServiceVersionSupersession", fields: [supersededByVersionId], references: [id])
-  supersededVersions               GovernmentServiceVersion[]                  @relation("GovernmentServiceVersionSupersession")
-  activationRecords                ServiceActivationRecord[]
-  formDefinition                   FormDefinition?                             @relation(fields: [formDefinitionId], references: [id])
-  formVersion                      FormVersion?                                @relation(fields: [formVersionId], references: [id])
-  functionMappings                 ServiceFunctionMapping[]
-  applicantCategories              GovernmentServiceVersionApplicantCategory[]
-  fees                             GovernmentServiceFeeDefinition[]
-  eligibilityRules                 GovernmentServiceEligibilityRule[]
-  checklistItems                   GovernmentServiceChecklistItem[]
-  outputs                          GovernmentServiceOutputDefinition[]
-  redressRoutes                    GovernmentServiceRedressRoute[]
+  id                                  String                                      @id @default(uuid()) @db.Uuid
+  governmentServiceId                 String                                      @db.Uuid
+  version                             String
+  purpose                             String?
+  coveredActivities                   String?
+  excludedActivities                  String?
+  geographicScope                     String?
+  publicDescription                   String?
+  typicalValidityDescription          String?
+  effectiveFrom                       DateTime?
+  effectiveUntil                      DateTime?
+  informationLastVerifiedAt           DateTime?
+  publicDisclaimer                    String?
+  authorityClassificationSummary      String?
+  majorDependencies                   Json                                        @default("[]")
+  internalGoverningSourceMaterial     String?
+  restrictedSecurityNotes             String?
+  supersededAt                        DateTime?
+  formDefinitionId                    String?                                     @db.Uuid
+  formVersionId                       String?                                     @db.Uuid
+  maturityStatus                      GovernmentServiceMaturityStatus             @default(DRAFT)
+  publicAvailability                  GovernmentServicePublicAvailability         @default(HIDDEN)
+  institutionallyAccepted             Boolean                                     @default(false)
+  institutionallyAcceptedAt           DateTime?
+  testReadinessStatus                 ServiceTestReadinessStatus                  @default(NOT_TESTED)
+  pilotScopeDescription               String?
+  activationFunctionAuthorityRecordId String?                                     @db.Uuid
+  supersededByVersionId               String?                                     @db.Uuid
+  createdAt                           DateTime                                    @default(now())
+  updatedAt                           DateTime                                    @updatedAt
+  governmentService                   GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
+  activationFunctionAuthority         FunctionAuthorityRecord?                    @relation("ServiceActivationAuthority", fields: [activationFunctionAuthorityRecordId], references: [id])
+  supersededByVersion                 GovernmentServiceVersion?                   @relation("GovernmentServiceVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions                  GovernmentServiceVersion[]                  @relation("GovernmentServiceVersionSupersession")
+  activationRecords                   ServiceActivationRecord[]
+  formDefinition                      FormDefinition?                             @relation(fields: [formDefinitionId], references: [id])
+  formVersion                         FormVersion?                                @relation(fields: [formVersionId], references: [id])
+  functionMappings                    ServiceFunctionMapping[]
+  applicantCategories                 GovernmentServiceVersionApplicantCategory[]
+  fees                                GovernmentServiceFeeDefinition[]
+  eligibilityRules                    GovernmentServiceEligibilityRule[]
+  checklistItems                      GovernmentServiceChecklistItem[]
+  outputs                             GovernmentServiceOutputDefinition[]
+  redressRoutes                       GovernmentServiceRedressRoute[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1279,29 +1279,29 @@ model ServiceFunctionMapping {
 }
 
 model FormDefinition {
-  id                       String                     @id @default(uuid()) @db.Uuid
-  code                     String                     @unique
-  name                     String
-  description              String?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  versions                 FormVersion[]
+  id                        String                     @id @default(uuid()) @db.Uuid
+  code                      String                     @unique
+  name                      String
+  description               String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  versions                  FormVersion[]
   governmentServiceVersions GovernmentServiceVersion[]
 
   @@map("form_definitions")
 }
 
 model FormVersion {
-  id                       String                     @id @default(uuid()) @db.Uuid
-  formDefinitionId         String                     @db.Uuid
-  versionNumber            Int
-  status                   FormVersionStatus          @default(DRAFT)
-  schema                   Json
-  activatedAt              DateTime?
-  supersededAt             DateTime?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  formDefinition           FormDefinition             @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+  id                        String                     @id @default(uuid()) @db.Uuid
+  formDefinitionId          String                     @db.Uuid
+  versionNumber             Int
+  status                    FormVersionStatus          @default(DRAFT)
+  schema                    Json
+  activatedAt               DateTime?
+  supersededAt              DateTime?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  formDefinition            FormDefinition             @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
   governmentServiceVersions GovernmentServiceVersion[]
 
   @@unique([formDefinitionId, versionNumber])
@@ -1312,7 +1312,7 @@ model FormVersion {
 
 model GovernmentServiceFeeDefinition {
   id                         String                   @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
   code                       String
   label                      String
   description                String?
@@ -1331,7 +1331,7 @@ model GovernmentServiceFeeDefinition {
 
 model GovernmentServiceEligibilityRule {
   id                         String                   @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
   ruleCode                   String
   label                      String
   description                String
@@ -1349,7 +1349,7 @@ model GovernmentServiceEligibilityRule {
 
 model GovernmentServiceChecklistItem {
   id                         String                   @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
   itemCode                   String
   label                      String
   description                String?
@@ -1367,7 +1367,7 @@ model GovernmentServiceChecklistItem {
 
 model GovernmentServiceOutputDefinition {
   id                         String                   @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
   outputCode                 String
   label                      String
   description                String?
@@ -1384,7 +1384,7 @@ model GovernmentServiceOutputDefinition {
 
 model GovernmentServiceRedressRoute {
   id                         String                   @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
   routeCode                  String
   label                      String
   description                String?
@@ -1432,23 +1432,23 @@ enum ServiceActivationOutcome {
 }
 
 model ServiceActivationRecord {
-  id                           String                            @id @default(uuid()) @db.Uuid
-  governmentServiceVersionId   String                            @db.Uuid
-  priorMaturityStatus          GovernmentServiceMaturityStatus
-  newMaturityStatus            GovernmentServiceMaturityStatus
-  priorPublicAvailability      GovernmentServicePublicAvailability
-  newPublicAvailability        GovernmentServicePublicAvailability
-  actorIdentityId              String                            @db.Uuid
-  officeholderId               String?                           @db.Uuid
-  authorityEvaluationRecordId  String?                           @db.Uuid
-  activationBasis              String
-  effectiveAt                  DateTime
-  scopeLimitations             Json                              @default("[]")
-  reason                       String?
-  outcome                      ServiceActivationOutcome
-  createdAt                    DateTime                          @default(now())
-  governmentServiceVersion     GovernmentServiceVersion          @relation(fields: [governmentServiceVersionId], references: [id])
-  authorityEvaluationRecord    AuthorityEvaluationRecord?        @relation(fields: [authorityEvaluationRecordId], references: [id])
+  id                          String                              @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId  String                              @db.Uuid
+  priorMaturityStatus         GovernmentServiceMaturityStatus
+  newMaturityStatus           GovernmentServiceMaturityStatus
+  priorPublicAvailability     GovernmentServicePublicAvailability
+  newPublicAvailability       GovernmentServicePublicAvailability
+  actorIdentityId             String                              @db.Uuid
+  officeholderId              String?                             @db.Uuid
+  authorityEvaluationRecordId String?                             @db.Uuid
+  activationBasis             String
+  effectiveAt                 DateTime
+  scopeLimitations            Json                                @default("[]")
+  reason                      String?
+  outcome                     ServiceActivationOutcome
+  createdAt                   DateTime                            @default(now())
+  governmentServiceVersion    GovernmentServiceVersion            @relation(fields: [governmentServiceVersionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?          @relation(fields: [authorityEvaluationRecordId], references: [id])
 
   @@index([governmentServiceVersionId])
   @@index([actorIdentityId])

@@ -83,7 +83,9 @@ describe('Phase 5H representative scenarios (e2e)', () => {
       catalog.services.map((service) => service.slug).sort(),
     );
 
-    const licensing = catalog.services.find((service) => service.slug === 'business-operating-licence');
+    const licensing = catalog.services.find(
+      (service) => service.slug === 'business-operating-licence',
+    );
     if (!licensing) {
       throw new Error('Expected business licensing representative service');
     }
@@ -106,7 +108,9 @@ describe('Phase 5H representative scenarios (e2e)', () => {
 
   it('2. Guided Eligibility', async () => {
     const catalog = await seedRepresentativeCatalog();
-    const licensing = catalog.services.find((service) => service.slug === 'business-operating-licence');
+    const licensing = catalog.services.find(
+      (service) => service.slug === 'business-operating-licence',
+    );
     if (!licensing) {
       throw new Error('Expected business licensing representative service');
     }
@@ -144,7 +148,9 @@ describe('Phase 5H representative scenarios (e2e)', () => {
 
   it('3. Conditional Form', async () => {
     const catalog = await seedRepresentativeCatalog();
-    const licensing = catalog.services.find((service) => service.slug === 'business-operating-licence');
+    const licensing = catalog.services.find(
+      (service) => service.slug === 'business-operating-licence',
+    );
     if (!licensing) {
       throw new Error('Expected business licensing representative service');
     }
@@ -182,7 +188,11 @@ describe('Phase 5H representative scenarios (e2e)', () => {
     }
 
     const organization = await prisma.organization.create({
-      data: { code: 'REP-ORG', name: 'Authorized Representative Org', status: OrganizationStatus.ACTIVE },
+      data: {
+        code: 'REP-ORG',
+        name: 'Authorized Representative Org',
+        status: OrganizationStatus.ACTIVE,
+      },
     });
     const repIdentity = await prisma.identity.create({
       data: { type: IdentityType.INDIVIDUAL, displayName: 'Authorized Representative' },
@@ -220,12 +230,16 @@ describe('Phase 5H representative scenarios (e2e)', () => {
 
   it('5. Service Suspension', async () => {
     const catalog = await seedRepresentativeCatalog();
-    const immigration = catalog.services.find((service) => service.slug === 'immigration-residency');
+    const immigration = catalog.services.find(
+      (service) => service.slug === 'immigration-residency',
+    );
     if (!immigration) {
       throw new Error('Expected immigration representative service');
     }
 
-    const beforeList = await request(app.getHttpServer()).get('/api/v1/public/services').expect(200);
+    const beforeList = await request(app.getHttpServer())
+      .get('/api/v1/public/services')
+      .expect(200);
     expect(
       asPaginatedPublicServicesBody(beforeList.body).items.some(
         (item) => item.slug === immigration.slug,

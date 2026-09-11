@@ -1,7 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ApplicantCategory,
-} from '@prisma/client';
+import { ApplicantCategory } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 

@@ -138,7 +138,15 @@ describe('Phase 5A Service Catalog (integration)', () => {
         maturityStatus: GovernmentServiceMaturityStatus.SUPERSEDED,
         publicAvailability: GovernmentServicePublicAvailability.HIDDEN,
       })
-      .expect(200);
+      .expect(400);
+
+    await prisma.governmentServiceVersion.update({
+      where: { id: versionTwo.id },
+      data: {
+        maturityStatus: GovernmentServiceMaturityStatus.SUPERSEDED,
+        publicAvailability: GovernmentServicePublicAvailability.HIDDEN,
+      },
+    });
 
     const supersededRes = await request(app.getHttpServer())
       .get(`/api/v1/service-catalog/service-versions/${versionTwo.id}`)
@@ -253,7 +261,15 @@ describe('Phase 5A Service Catalog (integration)', () => {
         maturityStatus: GovernmentServiceMaturityStatus.CONFIGURED,
         publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
       })
-      .expect(200);
+      .expect(400);
+
+    await prisma.governmentServiceVersion.update({
+      where: { id: version.id },
+      data: {
+        maturityStatus: GovernmentServiceMaturityStatus.CONFIGURED,
+        publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
+      },
+    });
 
     const configuredVersion = asGovernmentServiceVersionBody(
       (
@@ -275,7 +291,15 @@ describe('Phase 5A Service Catalog (integration)', () => {
         maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
         publicAvailability: GovernmentServicePublicAvailability.SUSPENDED,
       })
-      .expect(200);
+      .expect(400);
+
+    await prisma.governmentServiceVersion.update({
+      where: { id: version.id },
+      data: {
+        maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
+        publicAvailability: GovernmentServicePublicAvailability.SUSPENDED,
+      },
+    });
 
     const suspendedVersion = asGovernmentServiceVersionBody(
       (
