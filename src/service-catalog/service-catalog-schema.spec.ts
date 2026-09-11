@@ -2,29 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
-  FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS,
-  SERVICE_CATALOG_MODEL_NAMES,
-  SERVICE_DEPENDENCY_TYPES,
-  SERVICE_FEE_CALCULATION_TYPES,
-  SERVICE_OUTPUT_TYPES,
-  SERVICE_REDRESS_ROUTE_TYPES,
-import { SERVICE_CATALOG_MODEL_NAMES } from './service-catalog-schema.constants';
-
-describe('Service Catalog schema coherence', () => {
-  const schema = readFileSync(join(__dirname, '../../prisma/schema.prisma'), 'utf8');
-
-  for (const modelName of SERVICE_CATALOG_MODEL_NAMES) {
-    it(`defines model ${modelName}`, () => {
-      expect(schema).toMatch(new RegExp(`model ${modelName}\\s*\\{`));
-    });
-  }
-
-  it('does not define APPROVED as an eligibility guidance outcome', () => {
-    const outcomeBlock = /enum EligibilityGuidanceOutcome \{[^}]+\}/.exec(schema)?.[0] ?? '';
-    expect(outcomeBlock).not.toContain('APPROVED');
-import {
   APPLICANT_CATEGORIES,
+  FORBIDDEN_FORM_BOUNDARY_FIELDS,
   FORBIDDEN_SERVICE_CATALOG_AUTHORITY_FIELDS,
+  FORM_CONDITIONAL_ACTIONS,
+  FORM_FIELD_TYPES,
+  FORM_VERSION_STATUSES,
   GOVERNMENT_SERVICE_MATURITY_STATUSES,
   GOVERNMENT_SERVICE_PUBLIC_AVAILABILITY_MODES,
   SERVICE_CATALOG_MODEL_NAMES,
@@ -37,31 +20,6 @@ function readSchema(): string {
 }
 
 function extractModelBlock(schema: string, modelName: string): string {
-  const startToken = `model ${modelName}`;
-  const startIndex = schema.indexOf(startToken);
-  if (startIndex === -1) {
-    return '';
-  }
-
-  const braceStart = schema.indexOf('{', startIndex);
-  if (braceStart === -1) {
-    return '';
-  }
-
-  let depth = 0;
-  for (let index = braceStart; index < schema.length; index += 1) {
-    const char = schema[index];
-    if (char === '{') {
-      depth += 1;
-    } else if (char === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        return schema.slice(braceStart + 1, index);
-      }
-    }
-  }
-
-  return '';
   const pattern = new RegExp(`model ${modelName}\\s*\\{([^}]*)\\}`, 's');
   const match = pattern.exec(schema);
   return match?.[1] ?? '';
@@ -72,82 +30,11 @@ function extractEnumBlock(schema: string, enumName: string): string {
   return match?.[1] ?? '';
 }
 
-describe('Service catalog schema coherence (Phase 5E)', () => {
 describe('Service catalog schema coherence (Phase 5A)', () => {
   const schema = readSchema();
 
   it('defines all canonical service catalog models', () => {
     for (const modelName of SERVICE_CATALOG_MODEL_NAMES) {
-      expect(schema).toMatch(new RegExp(`model ${modelName}\\s*\\{`));
-    }
-  });
-
-  it('defines all supported fee calculation types', () => {
-    const block = extractEnumBlock(schema, 'ServiceFeeCalculationType');
-    for (const calculationType of SERVICE_FEE_CALCULATION_TYPES) {
-      expect(block).toContain(calculationType);
-    }
-  });
-
-  it('defines all supported dependency types', () => {
-    const block = extractEnumBlock(schema, 'ServiceDependencyType');
-    for (const dependencyType of SERVICE_DEPENDENCY_TYPES) {
-      expect(block).toContain(dependencyType);
-    }
-  });
-
-  it('defines all supported output types', () => {
-    const block = extractEnumBlock(schema, 'ServiceOutputType');
-    for (const outputType of SERVICE_OUTPUT_TYPES) {
-      expect(block).toContain(outputType);
-    }
-  });
-
-  it('defines all supported redress route types', () => {
-    const block = extractEnumBlock(schema, 'ServiceRedressRouteType');
-    for (const routeType of SERVICE_REDRESS_ROUTE_TYPES) {
-      expect(block).toContain(routeType);
-    }
-  });
-
-  it('requires governing source on fee definitions', () => {
-    const block = extractModelBlock(schema, 'ServiceFeeDefinition');
-    expect(block).toContain('governingSourceId');
-    expect(block).toContain('governingSource');
-  });
-
-  it('allows optional reference to Phase 4 authority dependency', () => {
-    const block = extractModelBlock(schema, 'ServiceDependencyDefinition');
-    expect(block).toContain('authorityDependencyId');
-    expect(block).toContain('authorityDependency');
-  });
-
-  it('does not include payment state fields in Phase 5 service catalog models', () => {
-    for (const modelName of SERVICE_CATALOG_MODEL_NAMES) {
-      const block = extractModelBlock(schema, modelName);
-      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS) {
-        expect(block).not.toMatch(new RegExp(`\\b${forbiddenField}\\b`));
-      }
-    }
-  });
-
-  it('supports historical reconstructability via effective dating on fee definitions', () => {
-    const block = extractModelBlock(schema, 'ServiceFeeDefinition');
-    expect(block).toContain('effectiveFrom');
-    expect(block).toContain('effectiveUntil');
-    expect(schema).toMatch(/@@unique\(\[serviceVersionId, feeCode, effectiveFrom\]\)/);
-  });
-
-  it('supports historical reconstructability via effective dating on SLA targets', () => {
-    const block = extractModelBlock(schema, 'ServiceLevelTarget');
-    expect(block).toContain('effectiveFrom');
-    expect(block).toContain('effectiveUntil');
-  });
-
-  it('supports historical reconstructability via effective dating on output definitions', () => {
-    const block = extractModelBlock(schema, 'ServiceOutputDefinition');
-    expect(block).toContain('effectiveFrom');
-    expect(block).toContain('effectiveUntil');
       expect(schema).toContain(`model ${modelName}`);
     }
   });
@@ -225,6 +112,58 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
 
     for (const modelName of phase6Models) {
       expect(schema).not.toContain(`model ${modelName}`);
+    }
+  });
+});
+
+describe('Forms engine schema coherence (Phase 5C)', () => {
+  const schema = readSchema();
+
+  it('defines all form engine models', () => {
+    for (const modelName of [
+      'FormDefinition',
+      'FormVersion',
+      'FormSection',
+      'FormField',
+      'FormFieldConditionalRule',
+    ]) {
+      expect(schema).toMatch(new RegExp(`model ${modelName}\\s*\\{`));
+    }
+  });
+
+  it('defines all required form field types', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormFieldType');
+    for (const fieldType of FORM_FIELD_TYPES) {
+      expect(enumBlock).toContain(fieldType);
+    }
+  });
+
+  it('defines conditional actions for deterministic behavior', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormConditionalAction');
+    for (const action of FORM_CONDITIONAL_ACTIONS) {
+      expect(enumBlock).toContain(action);
+    }
+  });
+
+  it('defines form version lifecycle statuses including published immutability states', () => {
+    const enumBlock = extractEnumBlock(schema, 'FormVersionStatus');
+    for (const status of FORM_VERSION_STATUSES) {
+      expect(enumBlock).toContain(status);
+    }
+  });
+
+  it('links form definitions to government service versions', () => {
+    const block = extractModelBlock(schema, 'FormDefinition');
+    expect(block).toContain('governmentServiceVersionId');
+    expect(block).toContain('GovernmentServiceVersion');
+  });
+
+  it('does not add application or case boundary fields to form models', () => {
+    for (const modelName of ['FormDefinition', 'FormVersion', 'FormField']) {
+      const block = extractModelBlock(schema, modelName);
+      for (const forbiddenField of FORBIDDEN_FORM_BOUNDARY_FIELDS) {
+        expect(block).not.toContain(forbiddenField);
+      }
     }
   });
 });

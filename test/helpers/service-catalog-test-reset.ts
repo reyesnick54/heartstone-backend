@@ -1,14 +1,6 @@
 import { type PrismaService } from '../../src/database/prisma.service';
 
 export async function resetServiceCatalogData(prisma: PrismaService): Promise<void> {
-  await prisma.serviceRedressRoute.deleteMany();
-  await prisma.serviceOutputDefinition.deleteMany();
-  await prisma.serviceDependencyDefinition.deleteMany();
-  await prisma.serviceLevelTarget.deleteMany();
-  await prisma.serviceFeeDefinition.deleteMany();
-  await prisma.serviceVersion.deleteMany();
-  await prisma.serviceEligibilityRuleAudit.deleteMany();
-  await prisma.serviceEligibilityRule.deleteMany();
   await prisma.serviceActivationRecord.deleteMany();
   await prisma.governmentServiceRedressRoute.deleteMany();
   await prisma.governmentServiceOutputDefinition.deleteMany();
@@ -17,9 +9,12 @@ export async function resetServiceCatalogData(prisma: PrismaService): Promise<vo
   await prisma.governmentServiceFeeDefinition.deleteMany();
   await prisma.serviceFunctionMapping.deleteMany();
   await prisma.governmentServiceVersionApplicantCategory.deleteMany();
-  await prisma.governmentServiceVersion.deleteMany();
-  await prisma.governmentService.deleteMany();
+  await prisma.formFieldConditionalRule.deleteMany();
+  await prisma.formField.deleteMany();
+  await prisma.formSection.deleteMany();
   await prisma.formVersion.deleteMany();
   await prisma.formDefinition.deleteMany();
+  await prisma.governmentServiceVersion.deleteMany();
+  await prisma.governmentService.deleteMany();
   await prisma.serviceFamily.deleteMany();
 }
