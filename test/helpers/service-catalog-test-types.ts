@@ -1,3 +1,7 @@
+export interface GovernmentServiceBody {
+  id: string;
+  code: string;
+  name: string;
 import type {
   ApplicantCategory,
   GovernmentServiceMaturityStatus,
@@ -20,6 +24,22 @@ export interface GovernmentServiceBody {
 
 export interface GovernmentServiceVersionBody {
   id: string;
+  versionLabel: string;
+  governmentServiceId: string;
+}
+
+export interface EligibilityGuidanceBody {
+  outcome: string;
+  governmentServiceVersionId: string;
+  disclaimer: string;
+  excludedActivity?: string;
+  missingFacts: string[];
+  matchedRules: unknown[];
+}
+
+export interface ServiceMatchBody {
+  primaryService?: { code: string; name: string };
+  disclaimer: string;
   governmentServiceId: string;
   version: string;
   purpose?: string | null;
@@ -49,6 +69,12 @@ export function asGovernmentServiceVersionBody(body: unknown): GovernmentService
   return body as GovernmentServiceVersionBody;
 }
 
+export function asEligibilityGuidanceBody(body: unknown): EligibilityGuidanceBody {
+  return body as EligibilityGuidanceBody;
+}
+
+export function asServiceMatchBody(body: unknown): ServiceMatchBody {
+  return body as ServiceMatchBody;
 export function asServiceFunctionMappingBody(body: unknown): ServiceFunctionMappingBody {
   return body as ServiceFunctionMappingBody;
 }

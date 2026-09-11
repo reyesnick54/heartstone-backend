@@ -7,6 +7,7 @@ import { configureApplication } from '../../src/bootstrap/configure-application'
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetAuthorityData } from './authority-test-reset';
+import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
