@@ -24,4 +24,6 @@ export interface SecurityConfig {
 export interface IdentityConfig {
   sessionTtlSeconds: number;
   sessionTokenBytes: number;
+  sessionRenewalThresholdSeconds: number;
+  localPasswordAuthEnabled: boolean;
 }

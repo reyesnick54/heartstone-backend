@@ -327,6 +327,15 @@ enum SessionStatus {
   EXPIRED
 }
 
+enum SessionRevocationReason {
+  USER_LOGOUT
+  ADMIN_REVOCATION
+  ACCOUNT_REVOCATION
+  SECURITY_EVENT
+  REPLACED
+  EXPIRED
+}
+
 enum IdentityOfficeholderLinkStatus {
   PENDING
   ACTIVE
@@ -347,6 +356,10 @@ enum SecurityAuditEventType {
   SESSION_CREATED
   SESSION_REVOKED
   SESSION_REJECTED
+  SESSION_EXPIRED
+  CREDENTIAL_REJECTED
+  SUSPENDED_ACCOUNT_LOGIN_ATTEMPT
+  REVOKED_ACCOUNT_LOGIN_ATTEMPT
   ORGANIZATION_CREATED
   MEMBERSHIP_CREATED
   REPRESENTATIVE_AUTHORITY_CREATED
@@ -503,20 +516,23 @@ model AuthenticationMethod {
 }
 
 model Session {
-  id             String         @id @default(uuid()) @db.Uuid
-  identityId     String         @db.Uuid
-  userAccountId  String?        @db.Uuid
-  tokenHash      String         @unique
-  status         SessionStatus  @default(ACTIVE)
-  assuranceLevel AssuranceLevel @default(LOW)
-  expiresAt      DateTime
-  revokedAt      DateTime?
-  ipAddress      String?
-  userAgent      String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  identity       Identity       @relation(fields: [identityId], references: [id])
-  userAccount    UserAccount?   @relation(fields: [userAccountId], references: [id])
+  id               String                   @id @default(uuid()) @db.Uuid
+  identityId       String                   @db.Uuid
+  userAccountId    String?                  @db.Uuid
+  tokenHash        String                   @unique
+  status           SessionStatus            @default(ACTIVE)
+  assuranceLevel   AssuranceLevel           @default(LOW)
+  issuedAt         DateTime                 @default(now())
+  expiresAt        DateTime
+  lastUsedAt       DateTime?
+  revokedAt        DateTime?
+  revocationReason SessionRevocationReason?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  identity         Identity                 @relation(fields: [identityId], references: [id])
+  userAccount      UserAccount?             @relation(fields: [userAccountId], references: [id])
 
   @@index([identityId])
   @@index([userAccountId])

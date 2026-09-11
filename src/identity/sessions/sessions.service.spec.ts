@@ -4,23 +4,32 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { AccountStatus, SessionStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { AccountLookupService } from '../accounts/account-lookup.service';
 import { SecurityAuditService } from '../audit/security-audit.service';
+import { CREDENTIAL_VERIFIER } from '../auth/interfaces/credential-verifier.interface';
+import { IdentityResolutionService } from '../auth/services/identity-resolution.service';
 import { SessionsService } from './sessions.service';
 
 describe('SessionsService', () => {
   let service: SessionsService;
 
   const mockPrisma = {
-    userAccount: { findUnique: jest.fn(), update: jest.fn() },
-    credential: { update: jest.fn() },
     session: {
       create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
 
   const mockAudit = { record: jest.fn() };
+  const mockAccountLookup = {
+    findByLoginIdentifier: jest.fn(),
+    isAuthenticatable: jest.fn(),
+  };
+  const mockIdentityResolution = {
+    resolveFromSession: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,12 +39,18 @@ describe('SessionsService', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest
-              .fn()
-              .mockReturnValue({ sessionTtlSeconds: 3600, sessionTokenBytes: 32 }),
+            getOrThrow: jest.fn().mockReturnValue({
+              sessionTtlSeconds: 3600,
+              sessionTokenBytes: 32,
+              sessionRenewalThresholdSeconds: 900,
+              localPasswordAuthEnabled: true,
+            }),
           },
         },
         { provide: SecurityAuditService, useValue: mockAudit },
+        { provide: AccountLookupService, useValue: mockAccountLookup },
+        { provide: IdentityResolutionService, useValue: mockIdentityResolution },
+        { provide: CREDENTIAL_VERIFIER, useValue: [] },
       ],
     }).compile();
 
