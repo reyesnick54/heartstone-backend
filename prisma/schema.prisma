@@ -876,6 +876,7 @@ model GoverningSource {
   outgoingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipFrom")
   incomingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipTo")
   functionLinks             FunctionGoverningSource[]
+  serviceRequirements       ServiceRequirement[]
   serviceFeeDefinitions     ServiceFeeDefinition[]
   serviceLevelTargets       ServiceLevelTarget[]
   serviceRedressRoutes      ServiceRedressRoute[]
@@ -1145,6 +1146,11 @@ model DelegationStructuredScope {
   @@map("delegation_structured_scopes")
 }
 
+// ─── Phase 5: Service Catalog ─────────────────────────────────────────────────
+
+enum GovernmentServiceLifecycleStatus {
+  DRAFT
+  ACTIVE
 // ─── Phase 5: Service Catalog ────────────────────────────────────────────────
 
 enum ServiceLifecycleStatus {
@@ -1154,6 +1160,94 @@ enum ServiceLifecycleStatus {
   ARCHIVED
 }
 
+enum GovernmentServiceVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+  RETIRED
+}
+
+enum FormVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum DeclarationVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum ServiceRequirementType {
+  INFORMATION
+  FORM_FIELD
+  IDENTITY
+  REPRESENTATION
+  DOCUMENT
+  EVIDENCE
+  DECLARATION
+  FEE
+  PREREQUISITE
+  PROFESSIONAL_DOCUMENT
+  EXTERNAL_DETERMINATION
+  OTHER_STRUCTURED_REQUIREMENT
+}
+
+enum ServiceRequirementMandatoryStatus {
+  MANDATORY
+  CONDITIONAL
+  OPTIONAL
+}
+
+enum ServiceRequirementEffectiveState {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  EXPIRED
+}
+
+enum EvidenceQualityExpectation {
+  SUBMITTED
+  ORIGINAL_REQUIRED
+  CERTIFIED_COPY_REQUIRED
+  VERIFICATION_REQUIRED
+  PROFESSIONAL_VALIDATION_REQUIRED
+  EXTERNAL_CONFIRMATION_REQUIRED
+}
+
+enum StructuredApplicabilityRuleStatus {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+enum StructuredApplicabilityRuleType {
+  FACT_EQUALS
+  FACT_NOT_EQUALS
+  FACT_IN
+  FACT_NOT_IN
+  FACT_PRESENT
+  FACT_NOT_PRESENT
+  ALL_OF
+  ANY_OF
+}
+
+model GovernmentService {
+  id              String                           @id @default(uuid()) @db.Uuid
+  institutionId   String                           @db.Uuid
+  code            String
+  name            String
+  description     String?
+  lifecycleStatus GovernmentServiceLifecycleStatus @default(DRAFT)
+  createdAt       DateTime                         @default(now())
+  updatedAt       DateTime                         @updatedAt
+  institution     Institution                      @relation(fields: [institutionId], references: [id])
+  versions        GovernmentServiceVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([lifecycleStatus])
 enum ServiceDataClassification {
   PUBLIC
   INTERNAL
@@ -1603,6 +1697,19 @@ model GovernmentService {
 }
 
 model GovernmentServiceVersion {
+  id                 String                         @id @default(uuid()) @db.Uuid
+  governmentServiceId String                        @db.Uuid
+  versionLabel       String
+  status             GovernmentServiceVersionStatus @default(DRAFT)
+  publishedAt        DateTime?
+  effectiveFrom      DateTime?
+  effectiveUntil     DateTime?
+  isImmutable        Boolean                        @default(false)
+  createdAt          DateTime                       @default(now())
+  updatedAt          DateTime                       @updatedAt
+  governmentService  GovernmentService              @relation(fields: [governmentServiceId], references: [id])
+  requirements       ServiceRequirement[]
+  applicabilityRules StructuredApplicabilityRule[]
   id                  String                         @id @default(uuid()) @db.Uuid
   governmentServiceId String                         @db.Uuid
   versionLabel        String
@@ -1623,6 +1730,15 @@ model GovernmentServiceVersion {
   @@map("government_service_versions")
 }
 
+model FormDefinition {
+  id          String        @id @default(uuid()) @db.Uuid
+  code        String        @unique
+  name        String
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  versions    FormVersion[]
+  requirements ServiceRequirement[]
 model ServiceEligibilityRule {
   id                         String                         @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                         @db.Uuid
@@ -1762,6 +1878,19 @@ model FormDefinition {
 }
 
 model FormVersion {
+  id               String            @id @default(uuid()) @db.Uuid
+  formDefinitionId String            @db.Uuid
+  versionLabel     String
+  status           FormVersionStatus @default(DRAFT)
+  publishedAt      DateTime?
+  isImmutable      Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  formDefinition   FormDefinition    @relation(fields: [formDefinitionId], references: [id])
+  fields           FormField[]
+  requirements     ServiceRequirement[]
+
+  @@unique([formDefinitionId, versionLabel])
   id                        String                     @id @default(uuid()) @db.Uuid
   formDefinitionId          String                     @db.Uuid
   versionNumber             Int
@@ -1780,6 +1909,117 @@ model FormVersion {
   @@map("form_versions")
 }
 
+model FormField {
+  id            String   @id @default(uuid()) @db.Uuid
+  formVersionId String   @db.Uuid
+  fieldKey      String
+  label         String
+  fieldType     String
+  displayOrder  Int      @default(0)
+  configuration Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  formVersion   FormVersion @relation(fields: [formVersionId], references: [id])
+  requirements  ServiceRequirement[]
+
+  @@unique([formVersionId, fieldKey])
+  @@index([formVersionId])
+  @@map("form_fields")
+}
+
+model DeclarationDefinition {
+  id          String                     @id @default(uuid()) @db.Uuid
+  code        String                     @unique
+  name        String
+  description String?
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  versions    DeclarationDefinitionVersion[]
+  requirements ServiceRequirement[]
+
+  @@map("declaration_definitions")
+}
+
+model DeclarationDefinitionVersion {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  declarationDefinitionId String                   @db.Uuid
+  versionLabel            String
+  declarationText         String
+  status                  DeclarationVersionStatus @default(DRAFT)
+  publishedAt             DateTime?
+  isImmutable             Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  declarationDefinition   DeclarationDefinition    @relation(fields: [declarationDefinitionId], references: [id])
+  requirements              ServiceRequirement[]
+
+  @@unique([declarationDefinitionId, versionLabel])
+  @@index([declarationDefinitionId])
+  @@index([status])
+  @@map("declaration_definition_versions")
+}
+
+model StructuredApplicabilityRule {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  serviceVersionId      String                            @db.Uuid
+  code                  String
+  name                  String
+  description           String?
+  ruleType              StructuredApplicabilityRuleType
+  configuration         Json                              @default("{}")
+  status                StructuredApplicabilityRuleStatus @default(DRAFT)
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  serviceVersion        GovernmentServiceVersion          @relation(fields: [serviceVersionId], references: [id])
+  requirements          ServiceRequirement[]
+
+  @@unique([serviceVersionId, code])
+  @@index([serviceVersionId])
+  @@index([status])
+  @@map("structured_applicability_rules")
+}
+
+model ServiceRequirement {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  serviceVersionId              String                            @db.Uuid
+  code                          String
+  name                          String
+  publicDescription             String?
+  requirementType               ServiceRequirementType
+  mandatoryStatus               ServiceRequirementMandatoryStatus
+  displayOrder                  Int                               @default(0)
+  effectiveState                ServiceRequirementEffectiveState  @default(DRAFT)
+  sourceReference               String?
+  governingSourceId             String?                           @db.Uuid
+  verificationRequired          Boolean                           @default(false)
+  validityExpectationDays       Int?
+  evidenceQualityExpectation    EvidenceQualityExpectation?
+  applicabilityRuleId           String?                           @db.Uuid
+  formDefinitionId              String?                           @db.Uuid
+  formVersionId                 String?                           @db.Uuid
+  formFieldId                   String?                           @db.Uuid
+  declarationDefinitionId       String?                           @db.Uuid
+  declarationDefinitionVersionId String?                          @db.Uuid
+  configuration                 Json                              @default("{}")
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  serviceVersion                GovernmentServiceVersion          @relation(fields: [serviceVersionId], references: [id])
+  governingSource               GoverningSource?                  @relation(fields: [governingSourceId], references: [id])
+  applicabilityRule             StructuredApplicabilityRule?      @relation(fields: [applicabilityRuleId], references: [id])
+  formDefinition                FormDefinition?                   @relation(fields: [formDefinitionId], references: [id])
+  formVersion                   FormVersion?                      @relation(fields: [formVersionId], references: [id])
+  formField                     FormField?                        @relation(fields: [formFieldId], references: [id])
+  declarationDefinition         DeclarationDefinition?            @relation(fields: [declarationDefinitionId], references: [id])
+  declarationDefinitionVersion    DeclarationDefinitionVersion?     @relation(fields: [declarationDefinitionVersionId], references: [id])
+
+  @@unique([serviceVersionId, code])
+  @@index([serviceVersionId])
+  @@index([effectiveState])
+  @@index([governingSourceId])
+  @@index([applicabilityRuleId])
+  @@map("service_requirements")
 model GovernmentServiceFeeDefinition {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
