@@ -223,7 +223,8 @@ model Delegation {
   delegatorOffice         Office?          @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
   delegatorOfficeholder   Officeholder?    @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
   recipientOffice         Office?          @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
-  recipientOfficeholder   Officeholder?    @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
+  recipientOfficeholder   Officeholder?               @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
+  structuredScopes        DelegationStructuredScope[]
 
   @@index([institutionId])
   @@map("delegations")
@@ -622,11 +623,22 @@ enum AuthorityActionType {
   RETRIEVE
   SUMMARIZE
   PREPARE
+  REVIEW
+  VERIFY
   CHECK
+  RECOMMEND
+  CONCUR
+  APPROVE
   DECIDE
   SIGN
   ISSUE
-  APPROVE
+  INSPECT
+  ENFORCE
+  SUSPEND
+  REVOKE
+  HEAR_REVIEW
+  ADMINISTER
+  AUDIT
   CONSULT
   SUPERVISE
   LIAISE
@@ -724,6 +736,7 @@ model FunctionAuthorityRecord {
   evaluations            AuthorityEvaluationRecord[]
   activationAudits       FunctionActivationAudit[]
   retainedDeterminations RetainedNationalDetermination[]
+  delegationScopes       DelegationStructuredScope[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -932,4 +945,20 @@ model FunctionActivationAudit {
 
   @@index([functionAuthorityRecordId])
   @@map("function_activation_audits")
+}
+
+model DelegationStructuredScope {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  delegationId              String                  @db.Uuid
+  functionAuthorityRecordId String                  @db.Uuid
+  allowedActionTypes        AuthorityActionType[]
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  delegation                Delegation              @relation(fields: [delegationId], references: [id], onDelete: Cascade)
+  functionAuthorityRecord   FunctionAuthorityRecord @relation(fields: [functionAuthorityRecordId], references: [id])
+
+  @@unique([delegationId, functionAuthorityRecordId])
+  @@index([delegationId])
+  @@index([functionAuthorityRecordId])
+  @@map("delegation_structured_scopes")
 }

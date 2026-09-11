@@ -59,6 +59,7 @@ describe('AuthorityEvaluationService', () => {
     await prisma.authorityCondition.deleteMany();
     await prisma.authorityActionRight.deleteMany();
     await prisma.functionAuthorityAssignment.deleteMany();
+    await prisma.delegationStructuredScope.deleteMany();
     await prisma.functionGoverningSource.deleteMany();
     await prisma.governingSourceRelationship.deleteMany();
     await prisma.governingSourceVersion.deleteMany();
@@ -146,6 +147,8 @@ describe('AuthorityEvaluationService', () => {
 
   it('requires delegation for ABSEZ_DELEGATED when delegation missing', async () => {
     const delegated = fixtureFor(AuthorityClassification.ABSEZ_DELEGATED);
+    await prisma.delegationStructuredScope.deleteMany();
+    await prisma.delegation.deleteMany();
 
     const result = await evaluation.evaluate({
       identityId: ctx.identityId,

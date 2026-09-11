@@ -94,6 +94,9 @@ export class AuthorityEvaluationService {
       officeId: request.officeId ?? functionRecord.officeId ?? undefined,
       appointmentId: request.appointmentId,
       delegationId: request.delegationId,
+      functionAuthorityRecordId: functionRecord.id,
+      requestedAction: request.action,
+      requiresDelegation: functionRecord.requiresDelegation,
       at,
     });
 

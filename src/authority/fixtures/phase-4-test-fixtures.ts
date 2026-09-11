@@ -194,6 +194,18 @@ export class Phase4TestFixtures {
         requiresDelegation: true,
         permitted: [AuthorityActionType.APPROVE],
         denied: [],
+        extra: async (functionId) => {
+          if (ctx.delegationId === undefined) {
+            return;
+          }
+          await this.prisma.delegationStructuredScope.create({
+            data: {
+              delegationId: ctx.delegationId,
+              functionAuthorityRecordId: functionId,
+              allowedActionTypes: [AuthorityActionType.APPROVE],
+            },
+          });
+        },
       },
       {
         classification: AuthorityClassification.EXPRESSLY_RETAINED_NATIONAL,
