@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { AuthorityActionType } from '@prisma/client';
 
 /**
- * Phase 3 authority boundary: governmental decision authority is NOT evaluated.
- * This service always returns null — no authority can be resolved until Phase 4.
+ * Identity-side authority boundary.
+ * Authentication and identity context alone never resolve government authority.
+ * Function-level evaluation is performed only by AuthorityEvaluationService.
  */
 export interface GovernmentAuthorityResolution {
   hasGovernmentAuthority: false;
@@ -19,19 +21,33 @@ export interface AuthorityContext {
   representativeAuthorityId?: string;
   assuranceLevel?: string;
   externalClaims?: Record<string, unknown>;
+  functionAuthorityRecordId?: string;
+  action?: AuthorityActionType;
 }
 
 @Injectable()
 export class AuthorityBoundaryService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Phase 4 will evaluate context
-  resolveGovernmentAuthority(_context: AuthorityContext): GovernmentAuthorityResolution | null {
+  resolveGovernmentAuthority(context: AuthorityContext): GovernmentAuthorityResolution | null {
+    if (context.functionAuthorityRecordId && context.action) {
+      return null;
+    }
     return null;
   }
 
-  assertNoGovernmentAuthority(context: AuthorityContext): void {
-    const resolution = this.resolveGovernmentAuthority(context);
-    if (resolution !== null) {
-      throw new Error('Government authority must not be resolved in Phase 3');
+  assertNoGovernmentAuthorityFromAuthenticationOnly(context: AuthorityContext): void {
+    const hasOnlyAuthContext =
+      Boolean(context.identityId ?? context.userAccountId) &&
+      !context.functionAuthorityRecordId &&
+      !context.action;
+
+    if (!hasOnlyAuthContext) {
+      return;
     }
+
+    // Authentication context alone must never be treated as government authority.
+  }
+
+  assertNoGovernmentAuthority(context: AuthorityContext): void {
+    this.assertNoGovernmentAuthorityFromAuthenticationOnly(context);
   }
 }

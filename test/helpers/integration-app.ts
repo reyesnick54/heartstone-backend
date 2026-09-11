@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
+import { resetAuthorityData } from './authority-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
@@ -55,6 +56,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetAuthorityData(prisma);
   await resetIdentityData(prisma);
   await resetGovernmentData(prisma);
 }

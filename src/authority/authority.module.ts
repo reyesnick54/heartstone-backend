@@ -1,0 +1,44 @@
+import { Module } from '@nestjs/common';
+
+import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { SessionsModule } from '../identity/sessions/sessions.module';
+import { AuthorityConditionEvaluator } from './conditions/authority-condition-evaluator.service';
+import { AuthorityDependencyEvaluator } from './dependencies/authority-dependency-evaluator.service';
+import { AuthorityEvaluationController } from './evaluation/authority-evaluation.controller';
+import { AuthorityEvaluationService } from './evaluation/authority-evaluation.service';
+import { AuthorityExplanationService } from './explanation/authority-explanation.service';
+import { FunctionActivationService } from './function-authority-records/function-activation.service';
+import { FunctionAuthorityRecordsController } from './function-authority-records/function-authority-records.controller';
+import { FunctionAuthorityRecordsService } from './function-authority-records/function-authority-records.service';
+import { GoverningSourcesController } from './governing-sources/governing-sources.controller';
+import { GoverningSourcesService } from './governing-sources/governing-sources.service';
+import { InstitutionalActorResolver } from './institutional-actor/institutional-actor-resolver.service';
+import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.service';
+
+@Module({
+  imports: [SessionsModule],
+  controllers: [
+    GoverningSourcesController,
+    FunctionAuthorityRecordsController,
+    AuthorityEvaluationController,
+  ],
+  providers: [
+    GoverningSourcesService,
+    FunctionAuthorityRecordsService,
+    FunctionActivationService,
+    AuthorityEvaluationService,
+    AuthorityExplanationService,
+    InstitutionalActorResolver,
+    AuthorityConditionEvaluator,
+    AuthorityDependencyEvaluator,
+    SegregationOfDutyEvaluator,
+    SessionAuthGuard,
+  ],
+  exports: [
+    AuthorityEvaluationService,
+    FunctionAuthorityRecordsService,
+    GoverningSourcesService,
+    InstitutionalActorResolver,
+  ],
+})
+export class AuthorityModule {}

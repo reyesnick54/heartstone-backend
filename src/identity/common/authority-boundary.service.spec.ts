@@ -3,7 +3,7 @@ import { AuthorityBoundaryService } from './authority-boundary.service';
 describe('AuthorityBoundaryService', () => {
   const service = new AuthorityBoundaryService();
 
-  it('never resolves government authority', () => {
+  it('never resolves government authority from identity context alone', () => {
     expect(
       service.resolveGovernmentAuthority({
         identityId: 'id-1',
@@ -15,7 +15,7 @@ describe('AuthorityBoundaryService', () => {
     ).toBeNull();
   });
 
-  it('assertNoGovernmentAuthority passes in Phase 3', () => {
+  it('assertNoGovernmentAuthority passes for identity-only context', () => {
     expect(() => {
       service.assertNoGovernmentAuthority({
         identityId: 'id-1',
