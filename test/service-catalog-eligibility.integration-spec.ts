@@ -2,7 +2,8 @@ import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   AuthenticationMethodType,
-  GovernmentServiceVersionStatus,
+  GovernmentServiceMaturityStatus,
+  GovernmentServicePublicAvailability,
   IdentityType,
   ServiceEligibilityRuleCategory,
   ServiceEligibilityRuleOperator,
@@ -22,6 +23,7 @@ import {
   asUserAccountBody,
 } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { seedServiceCatalogFixture } from './helpers/service-catalog-test-fixtures';
 import {
   asEligibilityGuidanceBody,
   asGovernmentServiceBody,
@@ -35,6 +37,10 @@ describe('Phase 5B Service Eligibility (integration)', () => {
   let adminIdentityId: string;
   let adminSessionToken: string;
   let technicalAdminSessionToken: string;
+  let catalogSessionToken: string;
+  let institutionId: string;
+  let departmentId: string;
+  let serviceFamilyId: string;
 
   beforeAll(async () => {
     process.env.SERVICE_CATALOG_ADMIN_IDENTITY_IDS = '';
@@ -45,6 +51,12 @@ describe('Phase 5B Service Eligibility (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const fixture = await seedServiceCatalogFixture(app, prisma);
+    catalogSessionToken = fixture.sessionToken;
+    institutionId = fixture.institutionId;
+    departmentId = fixture.departmentId;
+    serviceFamilyId = fixture.serviceFamilyId;
+
     const { identityId, sessionToken } = await createIdentityWithSession(
       app,
       'catalog.admin@test.gov',
@@ -61,22 +73,42 @@ describe('Phase 5B Service Eligibility (integration)', () => {
     await app.close();
   });
 
+  async function publishVersion(versionId: string): Promise<void> {
+    await prisma.governmentServiceVersion.update({
+      where: { id: versionId },
+      data: {
+        maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
+        publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
+        effectiveFrom: new Date('2020-01-01T00:00:00.000Z'),
+      },
+    });
+  }
+
   async function seedServiceWithRules(options?: {
     publishVersion?: boolean;
     supersededVersion?: boolean;
   }) {
     const serviceRes = await request(app.getHttpServer())
       .post('/api/v1/service-catalog/services')
-      .send({ code: 'BIZ-LICENSE', name: 'Business License' })
+      .set('Authorization', `Bearer ${catalogSessionToken}`)
+      .send({
+        code: 'BIZ-LICENSE',
+        slug: 'business-license',
+        officialName: 'Business License',
+        publicName: 'Business License',
+        responsibleInstitutionId: institutionId,
+        responsibleDepartmentId: departmentId,
+        serviceFamilyId,
+      })
       .expect(201);
     const serviceId = asGovernmentServiceBody(serviceRes.body).id;
 
     const versionRes = await request(app.getHttpServer())
       .post(`/api/v1/service-catalog/services/${serviceId}/versions`)
+      .set('Authorization', `Bearer ${catalogSessionToken}`)
       .send({
-        versionLabel: '1.0.0',
+        version: '1.0.0',
         effectiveFrom: '2020-01-01T00:00:00.000Z',
-        status: GovernmentServiceVersionStatus.DRAFT,
       })
       .expect(201);
     const versionId = asGovernmentServiceVersionBody(versionRes.body).id;
@@ -84,10 +116,10 @@ describe('Phase 5B Service Eligibility (integration)', () => {
     if (options?.supersededVersion) {
       const oldVersionRes = await request(app.getHttpServer())
         .post(`/api/v1/service-catalog/services/${serviceId}/versions`)
+        .set('Authorization', `Bearer ${catalogSessionToken}`)
         .send({
-          versionLabel: '0.9.0',
+          version: '0.9.0',
           effectiveFrom: '2019-01-01T00:00:00.000Z',
-          status: GovernmentServiceVersionStatus.PUBLISHED,
         })
         .expect(201);
 
@@ -96,7 +128,8 @@ describe('Phase 5B Service Eligibility (integration)', () => {
       await prisma.governmentServiceVersion.update({
         where: { id: oldVersionId },
         data: {
-          status: GovernmentServiceVersionStatus.SUPERSEDED,
+          maturityStatus: GovernmentServiceMaturityStatus.SUPERSEDED,
+          publicAvailability: GovernmentServicePublicAvailability.HIDDEN,
           effectiveUntil: new Date('2019-12-31T23:59:59.999Z'),
         },
       });
@@ -142,9 +175,7 @@ describe('Phase 5B Service Eligibility (integration)', () => {
       .expect(201);
 
     if (options?.publishVersion ?? true) {
-      await request(app.getHttpServer())
-        .post(`/api/v1/service-catalog/services/${serviceId}/versions/${versionId}/publish`)
-        .expect(201);
+      await publishVersion(versionId);
     }
 
     return { serviceId, versionId };
@@ -200,8 +231,6 @@ describe('Phase 5B Service Eligibility (integration)', () => {
       .expect(201);
 
     const guidance = asEligibilityGuidanceBody(res.body);
-    // A superseded-only rule would have matched this value as eligible; the current
-    // published version instead requires INDIVIDUAL and must be used for the check.
     expect(guidance.outcome).toBe('LIKELY_INELIGIBLE');
     expect(guidance.governmentServiceVersionId).toBe(versionId);
     expect(guidance.matchedRules).toHaveLength(0);

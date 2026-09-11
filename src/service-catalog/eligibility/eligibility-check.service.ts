@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { type ServiceEligibilityRule } from '@prisma/client';
 
 import { GovernmentServicesService } from '../government-services/government-services.service';
 import {
@@ -7,11 +6,13 @@ import {
   EligibilityEvaluatorService,
   type EligibilityGuidanceResult,
 } from './eligibility-evaluator.service';
+import { EligibilityVersionAccessService } from './eligibility-version-access.service';
 
 @Injectable()
 export class EligibilityCheckService {
   constructor(
     private readonly governmentServices: GovernmentServicesService,
+    private readonly versionAccess: EligibilityVersionAccessService,
     private readonly evaluator: EligibilityEvaluatorService,
   ) {}
 
@@ -22,22 +23,24 @@ export class EligibilityCheckService {
   ): Promise<EligibilityGuidanceResult> {
     await this.governmentServices.findOne(serviceId);
 
-    let version;
-    if (versionId) {
-      version = await this.governmentServices.getVersionById(versionId);
-      if (version.governmentServiceId !== serviceId) {
-        throw new NotFoundException(`Version ${versionId} does not belong to service ${serviceId}`);
-      }
-    } else {
-      version = await this.governmentServices.getCurrentPublishedVersion(serviceId);
-      if (!version) {
-        throw new NotFoundException(`No published version available for service ${serviceId}`);
-      }
+    const version = versionId
+      ? await this.versionAccess.getVersionById(versionId)
+      : await this.versionAccess.getCurrentPublishedVersion(serviceId);
+
+    if (!version) {
+      throw new NotFoundException(
+        versionId
+          ? `Government service version ${versionId} not found`
+          : `No published version available for service ${serviceId}`,
+      );
     }
 
-    const rules = await this.loadActiveRules(version.id);
+    if (version.governmentServiceId !== serviceId) {
+      throw new NotFoundException(`Version ${version.id} does not belong to service ${serviceId}`);
+    }
+
     const now = new Date();
-    const activeRules = rules.filter(
+    const activeRules = version.serviceEligibilityRules.filter(
       (rule) =>
         rule.status === 'ACTIVE' &&
         rule.effectiveFrom <= now &&
@@ -47,15 +50,10 @@ export class EligibilityCheckService {
     return this.evaluator.evaluate(
       serviceId,
       version.id,
-      version.versionLabel,
+      version.version,
       activeRules,
       facts,
-      version.dependencyCodes,
+      this.versionAccess.extractDependencyCodes(version.majorDependencies),
     );
-  }
-
-  private async loadActiveRules(versionId: string): Promise<ServiceEligibilityRule[]> {
-    const version = await this.governmentServices.getVersionById(versionId);
-    return version.eligibilityRules;
   }
 }

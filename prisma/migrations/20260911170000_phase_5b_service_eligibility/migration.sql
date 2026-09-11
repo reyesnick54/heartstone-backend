@@ -4,8 +4,6 @@ ALTER TYPE "SecurityAuditEventType" ADD VALUE 'SERVICE_ELIGIBILITY_RULE_UPDATED'
 ALTER TYPE "SecurityAuditEventType" ADD VALUE 'SERVICE_ELIGIBILITY_RULE_PUBLISHED_CHANGE';
 
 -- CreateEnum
-CREATE TYPE "GovernmentServiceStatus" AS ENUM ('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
-CREATE TYPE "GovernmentServiceVersionStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'SUPERSEDED', 'ARCHIVED');
 CREATE TYPE "ServiceEligibilityRuleCategory" AS ENUM (
   'APPLICANT_CATEGORY',
   'ENTITY_TYPE',
@@ -46,37 +44,6 @@ CREATE TYPE "EligibilityGuidanceOutcome" AS ENUM (
 );
 
 -- CreateTable
-CREATE TABLE "government_services" (
-    "id" UUID NOT NULL,
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "institutionId" UUID,
-    "status" "GovernmentServiceStatus" NOT NULL DEFAULT 'DRAFT',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "government_services_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "government_service_versions" (
-    "id" UUID NOT NULL,
-    "governmentServiceId" UUID NOT NULL,
-    "versionLabel" TEXT NOT NULL,
-    "status" "GovernmentServiceVersionStatus" NOT NULL DEFAULT 'DRAFT',
-    "effectiveFrom" TIMESTAMP(3) NOT NULL,
-    "effectiveUntil" TIMESTAMP(3),
-    "publishedAt" TIMESTAMP(3),
-    "relatedServiceCodes" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "dependencyCodes" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "government_service_versions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "service_eligibility_rules" (
     "id" UUID NOT NULL,
     "governmentServiceVersionId" UUID NOT NULL,
@@ -96,7 +63,6 @@ CREATE TABLE "service_eligibility_rules" (
     CONSTRAINT "service_eligibility_rules_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "service_eligibility_rule_audits" (
     "id" UUID NOT NULL,
     "serviceEligibilityRuleId" UUID,
@@ -111,18 +77,11 @@ CREATE TABLE "service_eligibility_rule_audits" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "government_services_code_key" ON "government_services"("code");
-CREATE INDEX "government_services_institutionId_idx" ON "government_services"("institutionId");
-CREATE UNIQUE INDEX "government_service_versions_governmentServiceId_versionLabel_key" ON "government_service_versions"("governmentServiceId", "versionLabel");
-CREATE INDEX "government_service_versions_governmentServiceId_idx" ON "government_service_versions"("governmentServiceId");
-CREATE INDEX "government_service_versions_status_idx" ON "government_service_versions"("status");
 CREATE INDEX "service_eligibility_rules_governmentServiceVersionId_idx" ON "service_eligibility_rules"("governmentServiceVersionId");
 CREATE INDEX "service_eligibility_rules_status_idx" ON "service_eligibility_rules"("status");
 CREATE INDEX "service_eligibility_rule_audits_governmentServiceVersionId_idx" ON "service_eligibility_rule_audits"("governmentServiceVersionId");
 CREATE INDEX "service_eligibility_rule_audits_serviceEligibilityRuleId_idx" ON "service_eligibility_rule_audits"("serviceEligibilityRuleId");
 
 -- AddForeignKey
-ALTER TABLE "government_services" ADD CONSTRAINT "government_services_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "government_service_versions" ADD CONSTRAINT "government_service_versions_governmentServiceId_fkey" FOREIGN KEY ("governmentServiceId") REFERENCES "government_services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "service_eligibility_rules" ADD CONSTRAINT "service_eligibility_rules_governmentServiceVersionId_fkey" FOREIGN KEY ("governmentServiceVersionId") REFERENCES "government_service_versions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "service_eligibility_rules" ADD CONSTRAINT "service_eligibility_rules_governmentServiceVersionId_fkey" FOREIGN KEY ("governmentServiceVersionId") REFERENCES "government_service_versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "service_eligibility_rule_audits" ADD CONSTRAINT "service_eligibility_rule_audits_serviceEligibilityRuleId_fkey" FOREIGN KEY ("serviceEligibilityRuleId") REFERENCES "service_eligibility_rules"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,28 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  GovernmentServiceVersionStatus,
-  Prisma,
-  ServiceEligibilityRule,
-  ServiceEligibilityRuleStatus,
-} from '@prisma/client';
+import { Prisma, ServiceEligibilityRule, ServiceEligibilityRuleStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import {
   EligibilityRuleAuditContext,
   ServiceCatalogAuditService,
 } from '../common/service-catalog-audit.service';
-import { ServiceCatalogValidationService } from '../common/service-catalog-validation.service';
 import { GovernmentServicesService } from '../government-services/government-services.service';
 import { CreateEligibilityRuleDto } from './dto/create-eligibility-rule.dto';
 import { UpdateEligibilityRuleDto } from './dto/update-eligibility-rule.dto';
+import { EligibilityValidationService } from './eligibility-validation.service';
+import { EligibilityVersionAccessService } from './eligibility-version-access.service';
 
 @Injectable()
 export class EligibilityRulesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly validation: ServiceCatalogValidationService,
+    private readonly validation: EligibilityValidationService,
     private readonly audit: ServiceCatalogAuditService,
     private readonly governmentServices: GovernmentServicesService,
+    private readonly versionAccess: EligibilityVersionAccessService,
   ) {}
 
   async create(
@@ -32,13 +29,13 @@ export class EligibilityRulesService {
     auditContext: EligibilityRuleAuditContext,
   ): Promise<ServiceEligibilityRule> {
     await this.governmentServices.findOne(serviceId);
-    const version = await this.governmentServices.getVersionById(versionId);
+    const version = await this.versionAccess.getVersionById(versionId);
 
     if (version.governmentServiceId !== serviceId) {
       throw new NotFoundException(`Version ${versionId} does not belong to service ${serviceId}`);
     }
 
-    this.validation.assertVersionAllowsRuleMutation(version.status);
+    this.validation.assertVersionAllowsRuleMutation(version.maturityStatus);
     this.validation.validateRuleConfiguration(dto);
 
     const rule = await this.prisma.serviceEligibilityRule.create({
@@ -62,7 +59,7 @@ export class EligibilityRulesService {
   }
 
   async findByService(serviceId: string): Promise<ServiceEligibilityRule[]> {
-    const publishedVersion = await this.governmentServices.getCurrentPublishedVersion(serviceId);
+    const publishedVersion = await this.versionAccess.getCurrentPublishedVersion(serviceId);
     if (!publishedVersion) {
       return [];
     }
@@ -101,7 +98,7 @@ export class EligibilityRulesService {
     }
 
     this.validation.assertVersionAllowsRuleMutation(
-      existing.governmentServiceVersion.status,
+      existing.governmentServiceVersion.maturityStatus,
       existing.status,
     );
 
@@ -131,8 +128,10 @@ export class EligibilityRulesService {
       },
     });
 
-    const isPublished =
-      existing.governmentServiceVersion.status === GovernmentServiceVersionStatus.PUBLISHED;
+    const isPublished = this.versionAccess.isPubliclyPresentableVersion(
+      existing.governmentServiceVersion.maturityStatus,
+      existing.governmentServiceVersion.publicAvailability,
+    );
 
     await this.audit.recordRuleUpdated(
       auditContext,

@@ -51,14 +51,6 @@ import { GovernmentServicesService } from './government-services.service';
 
 @ApiTags('service-catalog')
 @Controller('service-catalog/services')
-export class GovernmentServicesController {
-  constructor(private readonly governmentServices: GovernmentServicesService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a government service catalog entry' })
-  @ApiCreatedResponse({ description: 'Created government service' })
-  create(@Body() dto: CreateGovernmentServiceDto) {
-    return this.governmentServices.create(dto);
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
 export class GovernmentServicesController {

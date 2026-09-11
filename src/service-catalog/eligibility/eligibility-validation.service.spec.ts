@@ -2,18 +2,17 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { ServiceEligibilityRuleCategory, ServiceEligibilityRuleOperator } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
-import { ServiceCatalogValidationService } from './service-catalog-validation.service';
+import { EligibilityValidationService } from './eligibility-validation.service';
 
-describe('ServiceCatalogValidationService', () => {
-  let service: ServiceCatalogValidationService;
+describe('EligibilityValidationService', () => {
+  let service: EligibilityValidationService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ServiceCatalogValidationService, { provide: PrismaService, useValue: {} }],
+      providers: [EligibilityValidationService],
     }).compile();
 
-    service = module.get(ServiceCatalogValidationService);
+    service = module.get(EligibilityValidationService);
   });
 
   it('rejects malformed rule configuration missing expectedValue for EQUALS', () => {

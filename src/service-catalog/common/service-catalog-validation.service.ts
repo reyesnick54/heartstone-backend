@@ -1,27 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ServiceFeeCalculationType } from '@prisma/client';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  GovernmentServiceVersionStatus,
-  ServiceEligibilityRuleCategory,
-  ServiceEligibilityRuleOperator,
-  ServiceEligibilityRuleStatus,
-} from '@prisma/client';
-
-import { PrismaService } from '../../database/prisma.service';
-import {
-  CATEGORY_FACT_KEYS,
-  OPERATORS_REQUIRING_NUMERIC,
-  OPERATORS_REQUIRING_VALUE,
-} from '../service-catalog.constants';
-
-export interface RuleConfigurationInput {
-  category: ServiceEligibilityRuleCategory;
-  attributeKey: string;
-  operator: ServiceEligibilityRuleOperator;
-  expectedValue: unknown;
-  reasonCode: string;
-}
 
 import { PrismaService } from '../../database/prisma.service';
 
