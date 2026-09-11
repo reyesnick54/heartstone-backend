@@ -192,7 +192,7 @@ describe('Phase 5B Service Eligibility (integration)', () => {
   });
 
   it('does not use superseded version rules for new checks', async () => {
-    const { serviceId } = await seedServiceWithRules({ supersededVersion: true });
+    const { serviceId, versionId } = await seedServiceWithRules({ supersededVersion: true });
 
     const res = await request(app.getHttpServer())
       .post(`/api/v1/service-catalog/services/${serviceId}/eligibility/check`)
@@ -200,7 +200,10 @@ describe('Phase 5B Service Eligibility (integration)', () => {
       .expect(201);
 
     const guidance = asEligibilityGuidanceBody(res.body);
-    expect(guidance.outcome).toBe('MORE_INFORMATION_REQUIRED');
+    // A superseded-only rule would have matched this value as eligible; the current
+    // published version instead requires INDIVIDUAL and must be used for the check.
+    expect(guidance.outcome).toBe('LIKELY_INELIGIBLE');
+    expect(guidance.governmentServiceVersionId).toBe(versionId);
     expect(guidance.matchedRules).toHaveLength(0);
   });
 
