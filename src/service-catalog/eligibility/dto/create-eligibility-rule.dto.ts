@@ -29,6 +29,7 @@ export class CreateEligibilityRuleDto {
   operator!: ServiceEligibilityRuleOperator;
 
   @ApiProperty({ example: { value: 'INDIVIDUAL' } })
+  @Allow()
   expectedValue!: unknown;
 
   @ApiProperty({ example: 'APPLICANT_CATEGORY_MATCH' })

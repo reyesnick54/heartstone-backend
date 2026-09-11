@@ -34,6 +34,7 @@ export class UpdateEligibilityRuleDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Allow()
   expectedValue?: unknown;
 
   @ApiPropertyOptional()
