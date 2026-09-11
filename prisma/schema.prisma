@@ -112,6 +112,7 @@ model Institution {
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   institutionalAuthorityActs   InstitutionalAuthorityAct[]
+  governmentServices           GovernmentService[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -379,6 +380,9 @@ enum SecurityAuditEventType {
   MFA_VERIFIED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
+  SERVICE_ELIGIBILITY_RULE_CREATED
+  SERVICE_ELIGIBILITY_RULE_UPDATED
+  SERVICE_ELIGIBILITY_RULE_PUBLISHED_CHANGE
 }
 
 model Person {
@@ -1072,4 +1076,142 @@ model DelegationStructuredScope {
   @@index([delegationId])
   @@index([functionAuthorityRecordId])
   @@map("delegation_structured_scopes")
+}
+
+// ─── Phase 5: Service Catalog ────────────────────────────────────────────────
+
+enum GovernmentServiceStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum GovernmentServiceVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum ServiceEligibilityRuleCategory {
+  APPLICANT_CATEGORY
+  ENTITY_TYPE
+  RESIDENCY_STATUS
+  ACTIVITY
+  LOCATION
+  GEOGRAPHIC_SCOPE
+  AGE_OR_THRESHOLD
+  OWNERSHIP_ATTRIBUTE
+  EMPLOYER_STATUS
+  PREREQUISITE_STATUS
+  REPRESENTATIVE_REQUIREMENT
+  EXCLUSION
+  REQUIRED_ATTRIBUTE
+  OTHER_STRUCTURED_RULE
+}
+
+enum ServiceEligibilityRuleOperator {
+  EQUALS
+  NOT_EQUALS
+  IN
+  NOT_IN
+  EXISTS
+  NOT_EXISTS
+  GREATER_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN
+  LESS_THAN_OR_EQUAL
+  CONTAINS
+}
+
+enum ServiceEligibilityRuleStatus {
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum EligibilityGuidanceOutcome {
+  LIKELY_ELIGIBLE
+  LIKELY_INELIGIBLE
+  MORE_INFORMATION_REQUIRED
+  OUTSIDE_PUBLISHED_SCOPE
+  REFER_TO_OTHER_SERVICE
+  UNRESOLVED
+}
+
+model GovernmentService {
+  id            String                  @id @default(uuid()) @db.Uuid
+  code          String                  @unique
+  name          String
+  description   String?
+  institutionId String?                 @db.Uuid
+  status        GovernmentServiceStatus @default(DRAFT)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  institution   Institution?            @relation(fields: [institutionId], references: [id])
+  versions      GovernmentServiceVersion[]
+
+  @@index([institutionId])
+  @@map("government_services")
+}
+
+model GovernmentServiceVersion {
+  id                  String                         @id @default(uuid()) @db.Uuid
+  governmentServiceId String                         @db.Uuid
+  versionLabel        String
+  status              GovernmentServiceVersionStatus @default(DRAFT)
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  publishedAt         DateTime?
+  relatedServiceCodes String[]                       @default([])
+  dependencyCodes     String[]                       @default([])
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
+  governmentService   GovernmentService              @relation(fields: [governmentServiceId], references: [id])
+  eligibilityRules    ServiceEligibilityRule[]
+
+  @@unique([governmentServiceId, versionLabel])
+  @@index([governmentServiceId])
+  @@index([status])
+  @@map("government_service_versions")
+}
+
+model ServiceEligibilityRule {
+  id                         String                         @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                         @db.Uuid
+  category                   ServiceEligibilityRuleCategory
+  attributeKey               String
+  operator                   ServiceEligibilityRuleOperator
+  expectedValue              Json                           @default("{}")
+  reasonCode                 String
+  priority                   Int                            @default(0)
+  onFailureOutcome           EligibilityGuidanceOutcome?
+  status                     ServiceEligibilityRuleStatus   @default(ACTIVE)
+  effectiveFrom              DateTime
+  effectiveUntil             DateTime?
+  createdAt                  DateTime                       @default(now())
+  updatedAt                  DateTime                       @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion       @relation(fields: [governmentServiceVersionId], references: [id])
+  audits                     ServiceEligibilityRuleAudit[]
+
+  @@index([governmentServiceVersionId])
+  @@index([status])
+  @@map("service_eligibility_rules")
+}
+
+model ServiceEligibilityRuleAudit {
+  id                         String                  @id @default(uuid()) @db.Uuid
+  serviceEligibilityRuleId   String?                 @db.Uuid
+  governmentServiceVersionId String                  @db.Uuid
+  actorIdentityId            String                  @db.Uuid
+  action                     String
+  previousSnapshot           Json?
+  newSnapshot                Json?
+  createdAt                  DateTime                @default(now())
+  serviceEligibilityRule     ServiceEligibilityRule? @relation(fields: [serviceEligibilityRuleId], references: [id])
+
+  @@index([governmentServiceVersionId])
+  @@index([serviceEligibilityRuleId])
+  @@map("service_eligibility_rule_audits")
 }
