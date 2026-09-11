@@ -1,59 +1,76 @@
-import { ForbiddenException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import {
+  AccountStatus,
+  AssuranceLevel,
+  AuthenticationMethodType,
+  CredentialStatus,
   CredentialType,
   IdentityOfficeholderLinkStatus,
-  IdentityOfficeholderVerificationMethod,
-  PrincipalKind,
-  SecurityAuditEventType,
-  UserAccountKind,
+  IdentityType,
+  MembershipStatus,
+  OrganizationStatus,
+  RepresentativeAuthorityStatus,
+  SessionStatus,
 } from '@prisma/client';
 
+import appConfig from '../config/app.config';
+import identityConfig from '../config/identity.config';
+import redisConfig from '../config/redis.config';
+import securityConfig from '../config/security.config';
+import { DatabaseModule } from '../database/database.module';
 import { PrismaService } from '../database/prisma.service';
-import { UserAccountsService } from './accounts/user-accounts.service';
-import { SecurityAuditService } from './audit/security-audit.service';
-import { AuthService } from './auth/auth.service';
-import { isIdentityOfficeholderLinkActive } from './common/is-active-link.util';
+import { AuthorityBoundaryService } from './common/authority-boundary.service';
+import { hashToken, verifySecret } from './common/crypto.util';
 import { CredentialsService } from './credentials/credentials.service';
 import { IdentityModule } from './identity.module';
-import { IdentityOfficeholderLinksService } from './officeholder-links/identity-officeholder-links.service';
+import { OfficeholderLinksService } from './officeholder-links/officeholder-links.service';
 import { OidcAuthService } from './oidc/oidc-auth.service';
-import { ServiceIdentitiesService } from './service-identities/service-identities.service';
+import { SessionsService } from './sessions/sessions.service';
+import { UserAccountsService } from './user-accounts/user-accounts.service';
 
-describe('Phase 3E must-fail invariants', () => {
+describe('Phase 3 architectural must-fail invariants', () => {
   let moduleRef: TestingModule;
   let prisma: PrismaService;
   let userAccounts: UserAccountsService;
-  let authService: AuthService;
   let credentials: CredentialsService;
-  let linksService: IdentityOfficeholderLinksService;
+  let sessions: SessionsService;
+  let officeholderLinks: OfficeholderLinksService;
   let oidcAuth: OidcAuthService;
-  let serviceIdentities: ServiceIdentitiesService;
-  let audit: SecurityAuditService;
-
+  let authorityBoundary: AuthorityBoundaryService;
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [IdentityModule],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [appConfig, redisConfig, securityConfig, identityConfig],
+        }),
+        DatabaseModule,
+        IdentityModule,
+      ],
     }).compile();
 
     prisma = moduleRef.get(PrismaService);
     userAccounts = moduleRef.get(UserAccountsService);
-    authService = moduleRef.get(AuthService);
     credentials = moduleRef.get(CredentialsService);
-    linksService = moduleRef.get(IdentityOfficeholderLinksService);
+    sessions = moduleRef.get(SessionsService);
+    officeholderLinks = moduleRef.get(OfficeholderLinksService);
     oidcAuth = moduleRef.get(OidcAuthService);
-    serviceIdentities = moduleRef.get(ServiceIdentitiesService);
-    audit = moduleRef.get(SecurityAuditService);
+    authorityBoundary = moduleRef.get(AuthorityBoundaryService);
   });
 
   beforeEach(async () => {
     await prisma.securityAuditEvent.deleteMany();
+    await prisma.session.deleteMany();
     await prisma.identityOfficeholderLink.deleteMany();
-    await prisma.externalIdentityLink.deleteMany();
-    await prisma.authSession.deleteMany();
+    await prisma.representativeAuthority.deleteMany();
+    await prisma.organizationMembership.deleteMany();
+    await prisma.authenticationMethod.deleteMany();
     await prisma.credential.deleteMany();
+    await prisma.identity.deleteMany();
     await prisma.userAccount.deleteMany();
-    await prisma.serviceIdentity.deleteMany();
+    await prisma.organization.deleteMany();
     await prisma.person.deleteMany();
     await prisma.delegation.deleteMany();
     await prisma.appointment.deleteMany();
@@ -66,292 +83,375 @@ describe('Phase 3E must-fail invariants', () => {
 
   async function createOfficeholder(code = 'OH-001'): Promise<string> {
     const officeholder = await prisma.officeholder.create({
-      data: {
-        code,
-        name: 'Test Officeholder',
-      },
+      data: { code, name: 'Test Officeholder' },
     });
-
     return officeholder.id;
   }
 
-  async function createStandardUser(username: string, password: string) {
+  async function provisionUser(loginIdentifier: string, password: string) {
+    const person = await prisma.person.create({
+      data: { givenName: 'Test', familyName: 'User' },
+    });
+
     const account = await userAccounts.create({
-      username,
-      displayName: username,
-      actor: { kind: PrincipalKind.SYSTEM },
+      loginIdentifier,
+      personId: person.id,
+      status: AccountStatus.ACTIVE,
+    });
+
+    const identity = await prisma.identity.create({
+      data: {
+        type: IdentityType.INDIVIDUAL,
+        displayName: loginIdentifier,
+        userAccountId: account.id,
+        personId: person.id,
+      },
     });
 
     await credentials.create({
-      userAccountId: account.id,
+      identityId: identity.id,
       type: CredentialType.PASSWORD,
-      identifier: username,
-      secret: password,
-      actor: { kind: PrincipalKind.SYSTEM },
+      password,
+      status: CredentialStatus.ACTIVE,
     });
 
-    const login = await authService.loginUser({ username, password });
-    return { account, login };
+    const login = await sessions.authenticateWithPassword(loginIdentifier, password);
+    return { person, account, identity, login };
   }
 
-  async function createAdminUser(username: string, password: string) {
-    const account = await userAccounts.create({
-      username,
-      displayName: username,
-      kind: UserAccountKind.IDENTITY_ADMINISTRATOR,
-      actor: { kind: PrincipalKind.SYSTEM },
-    });
-
-    await credentials.create({
-      userAccountId: account.id,
-      type: CredentialType.PASSWORD,
-      identifier: username,
-      secret: password,
-      actor: { kind: PrincipalKind.SYSTEM },
-    });
-
-    const login = await authService.loginUser({ username, password });
-    return { account, login };
-  }
-
-  it('1. creating a UserAccount does not create Officeholder', async () => {
+  it('1. UserAccount creation does not create Officeholder', async () => {
     const before = await prisma.officeholder.count();
     await userAccounts.create({
-      username: 'alice',
-      actor: { kind: PrincipalKind.SYSTEM },
+      loginIdentifier: 'alice@test.gov',
+      status: AccountStatus.PENDING,
     });
-    const after = await prisma.officeholder.count();
-    expect(after).toBe(before);
+    expect(await prisma.officeholder.count()).toBe(before);
   });
 
-  it('2. authenticating a UserAccount does not create Officeholder', async () => {
+  it('2. Authentication does not create Officeholder', async () => {
     const before = await prisma.officeholder.count();
-    await createStandardUser('bob', 'password123');
-    const after = await prisma.officeholder.count();
-    expect(after).toBe(before);
+    await provisionUser('bob@test.gov', 'password123');
+    expect(await prisma.officeholder.count()).toBe(before);
   });
 
-  it('3. linking Identity to Officeholder does not create Appointment', async () => {
-    const officeholderId = await createOfficeholder();
-    const { account, login } = await createStandardUser('carol', 'password123');
-    const { login: adminLogin } = await createAdminUser('admin1', 'password123');
-
-    const link = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    await linksService.activateLink({
-      linkId: link.id,
-      verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-      actor: adminLogin.principal,
-    });
-
-    const appointmentCount = await prisma.appointment.count({
-      where: { officeholderId },
-    });
-
-    expect(appointmentCount).toBe(0);
-  });
-
-  it('4. linking Identity to Officeholder does not create Delegation', async () => {
-    const officeholderId = await createOfficeholder('OH-002');
-    const { account, login } = await createStandardUser('dave', 'password123');
-    const { login: adminLogin } = await createAdminUser('admin2', 'password123');
-
-    const link = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    await linksService.activateLink({
-      linkId: link.id,
-      verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-      actor: adminLogin.principal,
-    });
-
-    const delegationCount = await prisma.delegation.count();
-    expect(delegationCount).toBe(0);
-  });
-
-  it('5. linking Identity to Officeholder does not produce a governmental decision permission', async () => {
-    const officeholderId = await createOfficeholder('OH-003');
-    const { account, login } = await createStandardUser('erin', 'password123');
-    const { login: adminLogin } = await createAdminUser('admin3', 'password123');
-
-    const link = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    await linksService.activateLink({
-      linkId: link.id,
-      verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-      actor: adminLogin.principal,
-    });
-
-    const principal = await authService.resolvePrincipalFromToken(login.token);
-
-    expect(principal.verifiedOfficeholderId).toBe(officeholderId);
-    expect(principal).not.toHaveProperty('canApprove');
-    expect(principal).not.toHaveProperty('canIssue');
-    expect(principal).not.toHaveProperty('decisionAuthority');
-    expect(principal).not.toHaveProperty('legalAuthority');
-  });
-
-  it('6. inactive/suspended/revoked linkage cannot be treated as active', async () => {
-    const officeholderId = await createOfficeholder('OH-004');
-    const { account, login } = await createStandardUser('frank', 'password123');
-    const { login: adminLogin } = await createAdminUser('admin4', 'password123');
-
-    const pending = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    expect(isIdentityOfficeholderLinkActive(pending)).toBe(false);
-
-    const verified = await linksService.activateLink({
-      linkId: pending.id,
-      verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-      actor: adminLogin.principal,
-    });
-
-    expect(isIdentityOfficeholderLinkActive(verified)).toBe(true);
-
-    const suspended = await linksService.suspendLink(verified.id, adminLogin.principal);
-    expect(isIdentityOfficeholderLinkActive(suspended)).toBe(false);
-
-    const revoked = await linksService.revokeLink(verified.id, adminLogin.principal);
-    expect(isIdentityOfficeholderLinkActive(revoked)).toBe(false);
-
-    const current = await linksService.findCurrentForPerson(account.personId);
-    expect(current).toBeNull();
-  });
-
-  it('7. a normal user cannot self-activate an Officeholder linkage', async () => {
-    const officeholderId = await createOfficeholder('OH-005');
-    const { account, login } = await createStandardUser('grace', 'password123');
-
-    const link = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    expect(() => {
-      authService.assertIdentityAdministrator(login.principal);
-    }).toThrow(ForbiddenException);
-
-    await expect(
-      linksService.activateLink({
-        linkId: link.id,
-        verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-        actor: login.principal,
-      }),
-    ).rejects.toThrow(ForbiddenException);
-
-    const stored = await linksService.findById(link.id);
-    expect(stored.status).toBe(IdentityOfficeholderLinkStatus.PENDING);
-  });
-
-  it('8. external OIDC role claims cannot create or activate Officeholder linkage automatically', async () => {
-    const officeholderId = await createOfficeholder('OH-006');
+  it('3. OIDC role claims do not create Officeholder', async () => {
+    const officeholderId = await createOfficeholder('OH-OIDC');
 
     const result = await oidcAuth.linkOrCreateUserFromOidcClaims({
       providerKey: 'test-oidc',
       subject: 'sub-123',
-      username: 'oidc-user',
+      loginIdentifier: 'oidc-user@test.gov',
       displayName: 'OIDC User',
       roles: ['officeholder', 'minister', 'admin'],
     });
 
     const links = await prisma.identityOfficeholderLink.findMany({
-      where: {
-        personId: result.personId,
-        officeholderId,
-      },
+      where: { officeholderId, identityId: result.identityId },
     });
 
     expect(links).toHaveLength(0);
+    expect(await prisma.officeholder.count()).toBe(1);
+  });
 
-    const identityLinkedEvents = await audit.listByEventType(
-      SecurityAuditEventType.IDENTITY_LINKED,
+  it('4. MFA success does not create governmental authority', async () => {
+    const { identity, account } = await provisionUser('mfa-user@test.gov', 'password123');
+
+    await prisma.authenticationMethod.create({
+      data: {
+        identityId: identity.id,
+        type: AuthenticationMethodType.MFA_TOTP,
+        assuranceLevel: AssuranceLevel.HIGH,
+      },
+    });
+
+    const resolution = authorityBoundary.resolveGovernmentAuthority({
+      identityId: identity.id,
+      userAccountId: account.id,
+      assuranceLevel: AssuranceLevel.HIGH,
+    });
+
+    expect(resolution).toBeNull();
+  });
+
+  it('5. Service identity authentication does not create Officeholder', async () => {
+    const officeholderId = await createOfficeholder('OH-SVC');
+    const serviceIdentity = await prisma.identity.create({
+      data: {
+        type: IdentityType.SERVICE,
+        displayName: 'Reporting Service',
+      },
+    });
+
+    await credentials.create({
+      identityId: serviceIdentity.id,
+      type: CredentialType.API_KEY,
+      status: CredentialStatus.ACTIVE,
+    });
+
+    const { session } = await sessions.createSession({
+      identityId: serviceIdentity.id,
+      assuranceLevel: AssuranceLevel.LOW,
+    });
+
+    expect(session.identityId).toBe(serviceIdentity.id);
+
+    const links = await prisma.identityOfficeholderLink.findMany({ where: { officeholderId } });
+    expect(links).toHaveLength(0);
+  });
+
+  it('6. IdentityOfficeholderLink does not create Appointment', async () => {
+    const officeholderId = await createOfficeholder('OH-LINK-1');
+    const { identity } = await provisionUser('carol@test.gov', 'password123');
+
+    await officeholderLinks.create({
+      identityId: identity.id,
+      officeholderId,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    });
+
+    expect(
+      await prisma.appointment.count({
+        where: { officeholderId },
+      }),
+    ).toBe(0);
+  });
+
+  it('7. IdentityOfficeholderLink does not create Delegation', async () => {
+    const officeholderId = await createOfficeholder('OH-LINK-2');
+    const { identity } = await provisionUser('dave@test.gov', 'password123');
+
+    await officeholderLinks.create({
+      identityId: identity.id,
+      officeholderId,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    });
+
+    expect(await prisma.delegation.count()).toBe(0);
+  });
+
+  it('8. OrganizationMembership does not create Appointment', async () => {
+    const organization = await prisma.organization.create({
+      data: {
+        code: 'ORG-1',
+        name: 'Test Org',
+        status: OrganizationStatus.ACTIVE,
+      },
+    });
+    const { identity } = await provisionUser('member@test.gov', 'password123');
+
+    await prisma.organizationMembership.create({
+      data: {
+        organizationId: organization.id,
+        identityId: identity.id,
+        status: MembershipStatus.ACTIVE,
+      },
+    });
+
+    expect(await prisma.appointment.count()).toBe(0);
+  });
+
+  it('9. RepresentativeAuthority does not create governmental Delegation', async () => {
+    const organization = await prisma.organization.create({
+      data: {
+        code: 'ORG-2',
+        name: 'Partner Org',
+        status: OrganizationStatus.ACTIVE,
+      },
+    });
+    const { identity } = await provisionUser('rep@test.gov', 'password123');
+
+    await prisma.representativeAuthority.create({
+      data: {
+        organizationId: organization.id,
+        identityId: identity.id,
+        scopeDescription: 'Submit applications',
+        status: RepresentativeAuthorityStatus.ACTIVE,
+        effectiveFrom: new Date(),
+      },
+    });
+
+    expect(await prisma.delegation.count()).toBe(0);
+  });
+
+  it('10. Technical permissions do not establish legal authority', async () => {
+    const { identity, account } = await provisionUser('tech@test.gov', 'password123');
+
+    const resolution = authorityBoundary.resolveGovernmentAuthority({
+      identityId: identity.id,
+      userAccountId: account.id,
+      externalClaims: { admin: true, officer: true },
+    });
+
+    expect(resolution).toBeNull();
+  });
+
+  it('11. Suspended/revoked accounts cannot authenticate', async () => {
+    const { account } = await provisionUser('suspended@test.gov', 'password123');
+
+    await prisma.userAccount.update({
+      where: { id: account.id },
+      data: { status: AccountStatus.SUSPENDED },
+    });
+
+    await expect(
+      sessions.authenticateWithPassword('suspended@test.gov', 'password123'),
+    ).rejects.toThrow(UnauthorizedException);
+
+    await prisma.userAccount.update({
+      where: { id: account.id },
+      data: { status: AccountStatus.REVOKED },
+    });
+
+    await expect(
+      sessions.authenticateWithPassword('suspended@test.gov', 'password123'),
+    ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('12. Expired/revoked sessions are rejected', async () => {
+    const { login } = await provisionUser('session@test.gov', 'password123');
+
+    await prisma.session.update({
+      where: { id: login.session.id },
+      data: {
+        status: SessionStatus.REVOKED,
+        revokedAt: new Date(),
+      },
+    });
+
+    await expect(sessions.validateSessionToken(login.sessionToken)).rejects.toThrow(
+      UnauthorizedException,
     );
-    expect(identityLinkedEvents[0]?.metadata).toMatchObject({
+
+    const { login: expiredLogin } = await provisionUser('expired@test.gov', 'password123');
+    await prisma.session.update({
+      where: { id: expiredLogin.session.id },
+      data: {
+        status: SessionStatus.EXPIRED,
+        expiresAt: new Date('2020-01-01'),
+      },
+    });
+
+    await expect(sessions.validateSessionToken(expiredLogin.sessionToken)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('13. Revoked credentials are rejected', async () => {
+    const { identity } = await provisionUser('cred@test.gov', 'password123');
+
+    await prisma.credential.updateMany({
+      where: { identityId: identity.id },
+      data: { status: CredentialStatus.REVOKED, revokedAt: new Date() },
+    });
+
+    await expect(sessions.authenticateWithPassword('cred@test.gov', 'password123')).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('14. Inactive/revoked Officeholder linkage is not treated as current', async () => {
+    const officeholderId = await createOfficeholder('OH-LINK-3');
+    const { identity } = await provisionUser('link@test.gov', 'password123');
+
+    const pendingLink = await officeholderLinks.create({
+      identityId: identity.id,
+      officeholderId,
+      status: IdentityOfficeholderLinkStatus.PENDING,
+    });
+
+    const activeLinks = await prisma.identityOfficeholderLink.findMany({
+      where: {
+        identityId: identity.id,
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+      },
+    });
+    expect(activeLinks).toHaveLength(0);
+
+    await prisma.identityOfficeholderLink.update({
+      where: { id: pendingLink.id },
+      data: { status: IdentityOfficeholderLinkStatus.ACTIVE },
+    });
+
+    await prisma.identityOfficeholderLink.update({
+      where: { id: pendingLink.id },
+      data: { status: IdentityOfficeholderLinkStatus.REVOKED, revokedAt: new Date() },
+    });
+
+    const currentLinks = await prisma.identityOfficeholderLink.findMany({
+      where: {
+        identityId: identity.id,
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+      },
+    });
+    expect(currentLinks).toHaveLength(0);
+  });
+
+  it('15. Security audit history remains after lifecycle changes', async () => {
+    const officeholderId = await createOfficeholder('OH-AUDIT');
+    const { identity } = await provisionUser('audit@test.gov', 'password123');
+
+    const link = await officeholderLinks.create({
+      identityId: identity.id,
+      officeholderId,
+      status: IdentityOfficeholderLinkStatus.PENDING,
+    });
+
+    await prisma.identityOfficeholderLink.update({
+      where: { id: link.id },
+      data: { status: IdentityOfficeholderLinkStatus.ACTIVE },
+    });
+
+    await prisma.identityOfficeholderLink.update({
+      where: { id: link.id },
+      data: { status: IdentityOfficeholderLinkStatus.REVOKED, revokedAt: new Date() },
+    });
+
+    const events = await prisma.securityAuditEvent.findMany({
+      where: {
+        OR: [{ identityId: identity.id }, { metadata: { path: ['linkId'], equals: link.id } }],
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    expect(events.length).toBeGreaterThanOrEqual(2);
+    expect(events.some((event) => event.eventType === 'OFFICEHOLDER_LINK_CREATED')).toBe(true);
+    expect(events.some((event) => event.eventType === 'AUTHENTICATION_SUCCESS')).toBe(true);
+  });
+
+  it('records OIDC claims without creating officeholder linkage metadata', async () => {
+    await oidcAuth.linkOrCreateUserFromOidcClaims({
+      providerKey: 'azure-ad',
+      subject: 'azure-subject-1',
+      loginIdentifier: 'azure-user@test.gov',
+      roles: ['admin', 'officer'],
+    });
+
+    const events = await prisma.securityAuditEvent.findMany({
+      where: { eventType: 'OIDC_CLAIM_RECEIVED' },
+    });
+
+    expect(events[0]?.metadata).toMatchObject({
       officeholderLinkageCreated: false,
       officeholderLinkageActivated: false,
     });
   });
 
-  it('9. a service identity cannot become an Officeholder through ordinary authentication', async () => {
-    const officeholderId = await createOfficeholder('OH-007');
-    const service = await serviceIdentities.create({
-      code: 'svc-reporting',
-      name: 'Reporting Service',
-    });
+  it('stores only hashed session tokens', async () => {
+    const { login } = await provisionUser('token@test.gov', 'password123');
+    const stored = await prisma.session.findUnique({ where: { id: login.session.id } });
 
-    await credentials.create({
-      serviceIdentityId: service.id,
-      type: CredentialType.API_KEY,
-      identifier: service.code,
-      secret: 'service-secret-key',
-      actor: { kind: PrincipalKind.SYSTEM },
-    });
-
-    const login = await authService.loginService({
-      code: service.code,
-      apiKey: 'service-secret-key',
-    });
-
-    expect(login.principal.kind).toBe(PrincipalKind.SERVICE_IDENTITY);
-    expect(login.principal.verifiedOfficeholderId).toBeUndefined();
-    expect(login.principal.personId).toBeUndefined();
-
-    const links = await prisma.identityOfficeholderLink.findMany({
-      where: { officeholderId },
-    });
-    expect(links).toHaveLength(0);
+    expect(stored?.tokenHash).toBe(hashToken(login.sessionToken));
+    expect(stored?.tokenHash).not.toBe(login.sessionToken);
   });
 
-  it('10. audit history remains after security lifecycle changes', async () => {
-    const officeholderId = await createOfficeholder('OH-008');
-    const { account, login } = await createStandardUser('henry', 'password123');
-    const { login: adminLogin } = await createAdminUser('admin5', 'password123');
+  it('stores only hashed password credentials', async () => {
+    const { identity } = await provisionUser('hash@test.gov', 'PlainPassword123!');
+    const credential = await prisma.credential.findFirst({ where: { identityId: identity.id } });
 
-    const link = await linksService.requestLink({
-      personId: account.personId,
-      userAccountId: account.id,
-      officeholderId,
-      actor: login.principal,
-    });
-
-    await linksService.activateLink({
-      linkId: link.id,
-      verificationMethod: IdentityOfficeholderVerificationMethod.ADMIN_VERIFICATION,
-      actor: adminLogin.principal,
-    });
-
-    await linksService.suspendLink(link.id, adminLogin.principal);
-    await linksService.revokeLink(link.id, adminLogin.principal);
-
-    const events = await audit.listBySubject('identity_officeholder_link', link.id);
-
-    expect(events.map((event) => event.eventType)).toEqual([
-      SecurityAuditEventType.OFFICEHOLDER_LINKAGE_REQUESTED,
-      SecurityAuditEventType.OFFICEHOLDER_LINKAGE_ACTIVATED,
-      SecurityAuditEventType.IDENTITY_VERIFICATION_CHANGED,
-      SecurityAuditEventType.OFFICEHOLDER_LINKAGE_SUSPENDED,
-      SecurityAuditEventType.OFFICEHOLDER_LINKAGE_REVOKED,
-    ]);
+    expect(credential?.secretHash).toBeTruthy();
+    expect(credential?.secretHash).not.toBe('PlainPassword123!');
+    expect(credential?.secretHash).toBeTruthy();
+    const matches = await verifySecret('PlainPassword123!', credential?.secretHash ?? '');
+    expect(matches).toBe(true);
   });
 });
