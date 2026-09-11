@@ -137,16 +137,17 @@ model GovernmentBody {
 }
 
 model Department {
-  id            String                    @id @default(uuid()) @db.Uuid
-  institutionId String                    @db.Uuid
-  code          String
-  name          String
-  description   String?
-  status        StructuralLifecycleStatus @default(ACTIVE)
-  createdAt     DateTime                  @default(now())
-  updatedAt     DateTime                  @updatedAt
-  institution   Institution               @relation(fields: [institutionId], references: [id])
-  offices       Office[]
+  id                            String                    @id @default(uuid()) @db.Uuid
+  institutionId                 String                    @db.Uuid
+  code                          String
+  name                          String
+  description                   String?
+  status                        StructuralLifecycleStatus @default(ACTIVE)
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @updatedAt
+  institution                   Institution               @relation(fields: [institutionId], references: [id])
+  offices                       Office[]
+  responsibleGovernmentServices GovernmentService[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -187,6 +188,7 @@ model Officeholder {
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOfficeholder")
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  ownedGovernmentServices      GovernmentService[]
 
   @@map("officeholders")
 }
@@ -209,22 +211,22 @@ model Appointment {
 }
 
 model Delegation {
-  id                      String           @id @default(uuid()) @db.Uuid
-  institutionId           String           @db.Uuid
-  delegatorOfficeId       String?          @db.Uuid
-  delegatorOfficeholderId String?          @db.Uuid
-  recipientOfficeId       String?          @db.Uuid
-  recipientOfficeholderId String?          @db.Uuid
+  id                      String                      @id @default(uuid()) @db.Uuid
+  institutionId           String                      @db.Uuid
+  delegatorOfficeId       String?                     @db.Uuid
+  delegatorOfficeholderId String?                     @db.Uuid
+  recipientOfficeId       String?                     @db.Uuid
+  recipientOfficeholderId String?                     @db.Uuid
   scopeDescription        String
-  status                  DelegationStatus @default(PENDING)
+  status                  DelegationStatus            @default(PENDING)
   effectiveFrom           DateTime
   effectiveUntil          DateTime?
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
-  institution             Institution      @relation(fields: [institutionId], references: [id])
-  delegatorOffice         Office?          @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
-  delegatorOfficeholder   Officeholder?    @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
-  recipientOffice         Office?          @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  institution             Institution                 @relation(fields: [institutionId], references: [id])
+  delegatorOffice         Office?                     @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
+  delegatorOfficeholder   Officeholder?               @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
+  recipientOffice         Office?                     @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
   recipientOfficeholder   Officeholder?               @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
   structuredScopes        DelegationStructuredScope[]
 
@@ -233,14 +235,14 @@ model Delegation {
 }
 
 model ExternalAuthority {
-  id                    String                         @id @default(uuid()) @db.Uuid
-  code                  String                         @unique
-  name                  String
-  description           String?
-  type                  ExternalAuthorityType
-  status                StructuralLifecycleStatus      @default(ACTIVE)
-  createdAt             DateTime                       @default(now())
-  updatedAt             DateTime                       @updatedAt
+  id                               String                            @id @default(uuid()) @db.Uuid
+  code                             String                            @unique
+  name                             String
+  description                      String?
+  type                             ExternalAuthorityType
+  status                           StructuralLifecycleStatus         @default(ACTIVE)
+  createdAt                        DateTime                          @default(now())
+  updatedAt                        DateTime                          @updatedAt
   institutionRelations             InstitutionExternalAuthority[]
   authorityDependencies            AuthorityDependency[]
   externalDependencyDeterminations ExternalDependencyDetermination[]
@@ -380,6 +382,9 @@ enum SecurityAuditEventType {
   MFA_VERIFIED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
+  SERVICE_ELIGIBILITY_RULE_CREATED
+  SERVICE_ELIGIBILITY_RULE_UPDATED
+  SERVICE_ELIGIBILITY_RULE_PUBLISHED_CHANGE
 }
 
 model Person {
@@ -789,8 +794,41 @@ model FunctionAuthorityRecord {
   evaluations            AuthorityEvaluationRecord[]
   activationAudits       FunctionActivationAudit[]
   retainedDeterminations RetainedNationalDetermination[]
-  delegationScopes       DelegationStructuredScope[]
-  institutionalActs      InstitutionalAuthorityAct[]
+  delegationScopes            DelegationStructuredScope[]
+  institutionalActs           InstitutionalAuthorityAct[]
+  serviceFeeWaiverFunctions   ServiceFeeDefinition[]
+  serviceOutputFunctions      ServiceOutputDefinition[]
+  id                           String                           @id @default(uuid()) @db.Uuid
+  code                         String                           @unique
+  name                         String
+  description                  String?
+  classification               AuthorityClassification
+  functionClass                ControlledFunctionClass
+  lifecycleStatus              FunctionAuthorityLifecycleStatus @default(DRAFT)
+  institutionId                String?                          @db.Uuid
+  officeId                     String?                          @db.Uuid
+  requiresDelegation           Boolean                          @default(false)
+  requiresAppointment          Boolean                          @default(true)
+  activatedAt                  DateTime?
+  activatedByIdentityId        String?                          @db.Uuid
+  suspendedAt                  DateTime?
+  createdAt                    DateTime                         @default(now())
+  updatedAt                    DateTime                         @updatedAt
+  institution                  Institution?                     @relation(fields: [institutionId], references: [id])
+  office                       Office?                          @relation(fields: [officeId], references: [id])
+  governingSources             FunctionGoverningSource[]
+  assignments                  FunctionAuthorityAssignment[]
+  actionRights                 AuthorityActionRight[]
+  conditions                   AuthorityCondition[]
+  dependencies                 AuthorityDependency[]
+  sodRules                     SegregationOfDutyRule[]
+  evaluations                  AuthorityEvaluationRecord[]
+  activationAudits             FunctionActivationAudit[]
+  retainedDeterminations       RetainedNationalDetermination[]
+  delegationScopes             DelegationStructuredScope[]
+  institutionalActs            InstitutionalAuthorityAct[]
+  serviceFunctionMappings      ServiceFunctionMapping[]
+  serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -817,6 +855,10 @@ model GoverningSource {
   outgoingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipFrom")
   incomingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipTo")
   functionLinks             FunctionGoverningSource[]
+  serviceRequirements       ServiceRequirement[]
+  serviceFeeDefinitions     ServiceFeeDefinition[]
+  serviceLevelTargets       ServiceLevelTarget[]
+  serviceRedressRoutes      ServiceRedressRoute[]
 
   @@index([status])
   @@index([effectiveFrom])
@@ -921,24 +963,31 @@ model AuthorityCondition {
 }
 
 model AuthorityDependency {
-  id                        String                          @id @default(uuid()) @db.Uuid
-  functionAuthorityRecordId String                          @db.Uuid
+  id                        String                            @id @default(uuid()) @db.Uuid
+  functionAuthorityRecordId String                            @db.Uuid
   dependencyType            AuthorityDependencyType
-  externalAuthorityId       String?                         @db.Uuid
+  externalAuthorityId       String?                           @db.Uuid
   competentAuthorityLabel   String?
   triggerCondition          String?
   requiredOutcome           String?
   blockingStatus            AuthorityDependencyBlockingStatus @default(BLOCKING)
   sourceProvision           String?
   requiredEvidenceReference String?
-  status                    AuthorityDependencyStatus       @default(ACTIVE)
+  status                    AuthorityDependencyStatus         @default(ACTIVE)
   effectiveFrom             DateTime?
   effectiveUntil            DateTime?
   configuration             Json                            @default("{}")
   createdAt                 DateTime                        @default(now())
   updatedAt                 DateTime                        @updatedAt
   functionAuthorityRecord   FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
-  externalAuthority         ExternalAuthority?              @relation(fields: [externalAuthorityId], references: [id])
+  externalAuthority              ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
+  externalDeterminations         ExternalDependencyDetermination[]
+  serviceDependencyDefinitions   ServiceDependencyDefinition[]
+  configuration             Json                              @default("{}")
+  createdAt                 DateTime                          @default(now())
+  updatedAt                 DateTime                          @updatedAt
+  functionAuthorityRecord   FunctionAuthorityRecord           @relation(fields: [functionAuthorityRecordId], references: [id])
+  externalAuthority         ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
   externalDeterminations    ExternalDependencyDetermination[]
 
   @@index([functionAuthorityRecordId])
@@ -948,24 +997,24 @@ model AuthorityDependency {
 }
 
 model ExternalDependencyDetermination {
-  id                     String                       @id @default(uuid()) @db.Uuid
-  authorityDependencyId    String                       @db.Uuid
-  externalAuthorityId    String                       @db.Uuid
+  id                     String                      @id @default(uuid()) @db.Uuid
+  authorityDependencyId  String                      @db.Uuid
+  externalAuthorityId    String                      @db.Uuid
   determinationReference String
   determinationStatus    ExternalDeterminationStatus
   effectiveDate          DateTime?
   expiryDate             DateTime?
-  isAuthenticated        Boolean                      @default(false)
+  isAuthenticated        Boolean                     @default(false)
   scope                  String?
-  receivedAt             DateTime                     @default(now())
+  receivedAt             DateTime                    @default(now())
   retainedQuestion       String?
   requiredDetermination  String?
   referralBasis          String?
   effectOnAbsezAction    String?
-  createdAt              DateTime                     @default(now())
-  updatedAt              DateTime                     @updatedAt
-  authorityDependency    AuthorityDependency          @relation(fields: [authorityDependencyId], references: [id])
-  externalAuthority      ExternalAuthority            @relation(fields: [externalAuthorityId], references: [id])
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  authorityDependency    AuthorityDependency         @relation(fields: [authorityDependencyId], references: [id])
+  externalAuthority      ExternalAuthority           @relation(fields: [externalAuthorityId], references: [id])
 
   @@index([authorityDependencyId])
   @@index([externalAuthorityId])
@@ -1037,6 +1086,7 @@ model AuthorityEvaluationRecord {
   explanationCodes          Json                       @default("[]")
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
+  serviceActivationRecords  ServiceActivationRecord[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
