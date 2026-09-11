@@ -4,7 +4,7 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
-import { GovernmentServicesService } from '../src/service-catalog/government-services/government-services.service';
+import { seedFormsGovernmentServiceVersion } from './helpers/forms-test-fixtures';
 import {
   asFormDefinitionBody,
   asFormReconstructBody,
@@ -17,11 +17,8 @@ import { createIntegrationApp, resetAllTestData } from './helpers/integration-ap
 describe('Forms engine (integration)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
-  let governmentServices: GovernmentServicesService;
-
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
-    governmentServices = app.get(GovernmentServicesService);
   });
 
   beforeEach(async () => {
@@ -36,17 +33,7 @@ describe('Forms engine (integration)', () => {
     serviceVersionId: string;
     formDefinitionId: string;
   }> {
-    const service = await governmentServices.createService({
-      code: 'NON_PRODUCTION-business-license',
-      name: 'Business License',
-    });
-
-    const serviceVersion = await governmentServices.createServiceVersion({
-      governmentServiceId: service.id,
-      title: 'Business License v1',
-    });
-
-    await governmentServices.publishServiceVersion(serviceVersion.id);
+    const { serviceVersionId } = await seedFormsGovernmentServiceVersion(prisma);
 
     const definitionResponse = await request(app.getHttpServer())
       .post('/api/v1/forms/definitions')
@@ -54,12 +41,12 @@ describe('Forms engine (integration)', () => {
         code: 'NON_PRODUCTION-business-license-form',
         name: 'Business License Application Form',
         purpose: 'Collect applicant details',
-        governmentServiceVersionId: serviceVersion.id,
+        governmentServiceVersionId: serviceVersionId,
       })
       .expect(201);
 
     return {
-      serviceVersionId: serviceVersion.id,
+      serviceVersionId,
       formDefinitionId: asFormDefinitionBody(definitionResponse.body).id,
     };
   }
@@ -219,7 +206,11 @@ describe('Forms engine (integration)', () => {
       ).body,
     );
 
-    expect(schema.sections[0].fields.map((field) => field.fieldKey)).toEqual([
+    const firstSection = schema.sections[0];
+    if (!firstSection) {
+      throw new Error('Expected at least one form section');
+    }
+    expect(firstSection.fields.map((field) => field.fieldKey)).toEqual([
       'full_name',
       'birth_date',
       'country',
@@ -228,9 +219,7 @@ describe('Forms engine (integration)', () => {
       'declaration',
     ]);
 
-    const declarationField = schema.sections[0].fields.find(
-      (field) => field.fieldKey === 'declaration',
-    );
+    const declarationField = firstSection.fields.find((field) => field.fieldKey === 'declaration');
     expect(declarationField?.declaration?.declarationVersion).toBe('1.0.0');
     expect(declarationField?.declaration?.declarationText.en).toContain('true and complete');
   });
@@ -380,6 +369,10 @@ describe('Forms engine (integration)', () => {
 
     expect(reconstructed.version).toBe(1);
     expect(reconstructed.sections).toHaveLength(1);
-    expect(reconstructed.sections[0].fields).toHaveLength(6);
+    const firstReconstructedSection = reconstructed.sections[0];
+    if (!firstReconstructedSection) {
+      throw new Error('Expected reconstructed form to include a section');
+    }
+    expect(firstReconstructedSection.fields).toHaveLength(6);
   });
 });

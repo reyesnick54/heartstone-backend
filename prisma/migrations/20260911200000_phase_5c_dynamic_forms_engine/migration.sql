@@ -1,9 +1,6 @@
--- Phase 5C: Service Catalog & Dynamic Versioned Forms Engine
+-- Phase 5C: Dynamic Versioned Forms Engine (extends Phase 5G form stubs)
 
-CREATE TYPE "GovernmentServiceStatus" AS ENUM ('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
-CREATE TYPE "GovernmentServiceVersionStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'SUPERSEDED', 'ARCHIVED');
 CREATE TYPE "FormDefinitionStatus" AS ENUM ('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
-CREATE TYPE "FormVersionStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'SUPERSEDED', 'ARCHIVED');
 CREATE TYPE "FormFieldType" AS ENUM (
   'TEXT',
   'TEXTAREA',
@@ -43,48 +40,18 @@ CREATE TYPE "FormConditionalOperator" AS ENUM (
   'LESS_THAN_OR_EQUAL'
 );
 
-CREATE TABLE "government_services" (
-  "id" UUID NOT NULL,
-  "code" TEXT NOT NULL,
-  "name" TEXT NOT NULL,
-  "description" TEXT,
-  "institutionId" UUID,
-  "status" "GovernmentServiceStatus" NOT NULL DEFAULT 'DRAFT',
-  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" TIMESTAMP(3) NOT NULL,
+ALTER TYPE "FormVersionStatus" RENAME VALUE 'ACTIVE' TO 'PUBLISHED';
+ALTER TYPE "FormVersionStatus" ADD VALUE IF NOT EXISTS 'ARCHIVED';
 
-  CONSTRAINT "government_services_pkey" PRIMARY KEY ("id")
-);
+ALTER TABLE "form_definitions"
+  ADD COLUMN "purpose" TEXT,
+  ADD COLUMN "governmentServiceVersionId" UUID,
+  ADD COLUMN "status" "FormDefinitionStatus" NOT NULL DEFAULT 'DRAFT';
 
-CREATE TABLE "government_service_versions" (
-  "id" UUID NOT NULL,
-  "governmentServiceId" UUID NOT NULL,
-  "version" INTEGER NOT NULL,
-  "title" TEXT NOT NULL,
-  "description" TEXT,
-  "status" "GovernmentServiceVersionStatus" NOT NULL DEFAULT 'DRAFT',
-  "effectiveFrom" TIMESTAMP(3),
-  "effectiveUntil" TIMESTAMP(3),
-  "publishedAt" TIMESTAMP(3),
-  "supersededById" UUID,
-  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" TIMESTAMP(3) NOT NULL,
+ALTER TABLE "form_versions" DROP CONSTRAINT IF EXISTS "form_versions_formDefinitionId_fkey";
+ALTER TABLE "government_service_versions" DROP CONSTRAINT IF EXISTS "government_service_versions_formVersionId_fkey";
 
-  CONSTRAINT "government_service_versions_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "form_definitions" (
-  "id" UUID NOT NULL,
-  "code" TEXT NOT NULL,
-  "name" TEXT NOT NULL,
-  "purpose" TEXT,
-  "governmentServiceVersionId" UUID NOT NULL,
-  "status" "FormDefinitionStatus" NOT NULL DEFAULT 'DRAFT',
-  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" TIMESTAMP(3) NOT NULL,
-
-  CONSTRAINT "form_definitions_pkey" PRIMARY KEY ("id")
-);
+DROP TABLE IF EXISTS "form_versions";
 
 CREATE TABLE "form_versions" (
   "id" UUID NOT NULL,
@@ -99,7 +66,6 @@ CREATE TABLE "form_versions" (
   "supersededById" UUID,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
-
   CONSTRAINT "form_versions_pkey" PRIMARY KEY ("id")
 );
 
@@ -112,7 +78,6 @@ CREATE TABLE "form_sections" (
   "displayOrder" INTEGER NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
-
   CONSTRAINT "form_sections_pkey" PRIMARY KEY ("id")
 );
 
@@ -133,7 +98,6 @@ CREATE TABLE "form_fields" (
   "sourceMetadata" JSONB,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
-
   CONSTRAINT "form_fields_pkey" PRIMARY KEY ("id")
 );
 
@@ -146,45 +110,19 @@ CREATE TABLE "form_field_conditional_rules" (
   "displayOrder" INTEGER NOT NULL DEFAULT 0,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
-
   CONSTRAINT "form_field_conditional_rules_pkey" PRIMARY KEY ("id")
 );
-
-CREATE UNIQUE INDEX "government_services_code_key" ON "government_services"("code");
-CREATE INDEX "government_services_institutionId_idx" ON "government_services"("institutionId");
-CREATE INDEX "government_services_status_idx" ON "government_services"("status");
-
-CREATE UNIQUE INDEX "government_service_versions_governmentServiceId_version_key" ON "government_service_versions"("governmentServiceId", "version");
-CREATE INDEX "government_service_versions_governmentServiceId_idx" ON "government_service_versions"("governmentServiceId");
-CREATE INDEX "government_service_versions_status_idx" ON "government_service_versions"("status");
-
-CREATE UNIQUE INDEX "form_definitions_code_key" ON "form_definitions"("code");
-CREATE INDEX "form_definitions_governmentServiceVersionId_idx" ON "form_definitions"("governmentServiceVersionId");
-CREATE INDEX "form_definitions_status_idx" ON "form_definitions"("status");
 
 CREATE UNIQUE INDEX "form_versions_formDefinitionId_version_key" ON "form_versions"("formDefinitionId", "version");
 CREATE INDEX "form_versions_formDefinitionId_idx" ON "form_versions"("formDefinitionId");
 CREATE INDEX "form_versions_status_idx" ON "form_versions"("status");
-
 CREATE UNIQUE INDEX "form_sections_formVersionId_sectionKey_key" ON "form_sections"("formVersionId", "sectionKey");
 CREATE INDEX "form_sections_formVersionId_idx" ON "form_sections"("formVersionId");
-
 CREATE UNIQUE INDEX "form_fields_formSectionId_fieldKey_key" ON "form_fields"("formSectionId", "fieldKey");
 CREATE INDEX "form_fields_formSectionId_idx" ON "form_fields"("formSectionId");
-
 CREATE INDEX "form_field_conditional_rules_formFieldId_idx" ON "form_field_conditional_rules"("formFieldId");
-
-ALTER TABLE "government_services"
-  ADD CONSTRAINT "government_services_institutionId_fkey"
-  FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
-ALTER TABLE "government_service_versions"
-  ADD CONSTRAINT "government_service_versions_governmentServiceId_fkey"
-  FOREIGN KEY ("governmentServiceId") REFERENCES "government_services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE "government_service_versions"
-  ADD CONSTRAINT "government_service_versions_supersededById_fkey"
-  FOREIGN KEY ("supersededById") REFERENCES "government_service_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+CREATE INDEX "form_definitions_governmentServiceVersionId_idx" ON "form_definitions"("governmentServiceVersionId");
+CREATE INDEX "form_definitions_status_idx" ON "form_definitions"("status");
 
 ALTER TABLE "form_definitions"
   ADD CONSTRAINT "form_definitions_governmentServiceVersionId_fkey"
@@ -192,7 +130,7 @@ ALTER TABLE "form_definitions"
 
 ALTER TABLE "form_versions"
   ADD CONSTRAINT "form_versions_formDefinitionId_fkey"
-  FOREIGN KEY ("formDefinitionId") REFERENCES "form_definitions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  FOREIGN KEY ("formDefinitionId") REFERENCES "form_definitions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "form_versions"
   ADD CONSTRAINT "form_versions_supersededById_fkey"
@@ -209,3 +147,7 @@ ALTER TABLE "form_fields"
 ALTER TABLE "form_field_conditional_rules"
   ADD CONSTRAINT "form_field_conditional_rules_formFieldId_fkey"
   FOREIGN KEY ("formFieldId") REFERENCES "form_fields"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "government_service_versions"
+  ADD CONSTRAINT "government_service_versions_formVersionId_fkey"
+  FOREIGN KEY ("formVersionId") REFERENCES "form_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
