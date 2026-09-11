@@ -1,7 +1,12 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { AccountStatus, SessionStatus } from '@prisma/client';
+import {
+  AccountStatus,
+  AuthenticationMethodType,
+  IdentityType,
+  SessionStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { AccountLookupService } from '../accounts/account-lookup.service';
@@ -42,6 +47,7 @@ describe('SessionsService', () => {
             getOrThrow: jest.fn().mockReturnValue({
               sessionTtlSeconds: 3600,
               sessionTokenBytes: 32,
+              serviceCredentialPepper: 'test-pepper-not-production',
               sessionRenewalThresholdSeconds: 900,
               localPasswordAuthEnabled: true,
             }),
@@ -66,6 +72,10 @@ describe('SessionsService', () => {
       status: SessionStatus.REVOKED,
       expiresAt: new Date(Date.now() + 3600000),
       assuranceLevel: 'LOW',
+      authMethod: AuthenticationMethodType.PASSWORD,
+      mfaSatisfied: false,
+      authenticatedAt: new Date(),
+      identity: { type: IdentityType.INDIVIDUAL },
       userAccount: { status: AccountStatus.ACTIVE },
     });
 
@@ -80,6 +90,10 @@ describe('SessionsService', () => {
       status: SessionStatus.ACTIVE,
       expiresAt: new Date(Date.now() - 1000),
       assuranceLevel: 'LOW',
+      authMethod: AuthenticationMethodType.PASSWORD,
+      mfaSatisfied: false,
+      authenticatedAt: new Date(),
+      identity: { type: IdentityType.INDIVIDUAL },
       userAccount: { status: AccountStatus.ACTIVE },
     });
     mockPrisma.session.update.mockResolvedValue({});

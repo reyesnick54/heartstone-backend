@@ -21,9 +21,27 @@ export interface SecurityConfig {
   trustProxy: boolean;
 }
 
+export const OIDC_CONFIG = 'oidc';
+
 export interface IdentityConfig {
   sessionTtlSeconds: number;
   sessionTokenBytes: number;
+  serviceCredentialPepper: string;
+}
+
+export interface OidcProviderConfig {
+  code: string;
+  name: string;
+  issuer: string;
+  audience: string;
+  jwksUri: string;
+  allowedAlgorithms: string[];
+  clockToleranceSeconds?: number;
+}
+
+export interface OidcConfig {
+  enabled: boolean;
+  providers: OidcProviderConfig[];
   sessionRenewalThresholdSeconds: number;
   localPasswordAuthEnabled: boolean;
 }

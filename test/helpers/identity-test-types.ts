@@ -1,6 +1,8 @@
 import type {
   AccountStatus,
   AssuranceLevel,
+  AuthenticationMethodType,
+  IdentityType,
   CredentialStatus,
   CredentialType,
   IdentityType,
@@ -90,6 +92,10 @@ export interface LoginResponseBody {
   identityId: string;
   expiresAt: string;
   assuranceLevel: AssuranceLevel;
+  authMethod: AuthenticationMethodType;
+  mfaSatisfied: boolean;
+  authenticatedAt: string;
+  oidcProviderCode?: string | null;
 }
 
 export interface ProtectedProfileBody {

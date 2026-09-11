@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import {
   AccountStatus,
   AssuranceLevel,
+  AuthenticationMethodType,
   CredentialStatus,
   CredentialType,
+  IdentityType,
   Session,
   SessionRevocationReason,
   SessionStatus,
@@ -16,6 +18,9 @@ import { AccountLookupService } from '../accounts/account-lookup.service';
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { type AuthenticatedPrincipal } from '../auth/domain/authenticated-principal';
 import { SessionContextDto } from '../auth/dto/session-context.dto';
+import type { MappedOidcClaims } from '../auth/oidc/types/mapped-oidc-claims';
+import type { ServiceIdentityAuthResult } from '../auth/service-identity/service-identity-auth.service';
+import { generateOpaqueToken, hashToken, verifySecret } from '../common/crypto.util';
 import {
   CREDENTIAL_VERIFIER,
   type CredentialVerifier,
@@ -157,6 +162,8 @@ export class SessionsService {
       identityId: identity.id,
       userAccountId: account.id,
       assuranceLevel: AssuranceLevel.LOW,
+      authMethod: AuthenticationMethodType.PASSWORD,
+      mfaSatisfied: false,
       ipAddress: context?.ipAddress,
       userAgent: context?.userAgent,
     });
@@ -172,10 +179,100 @@ export class SessionsService {
     return { session, sessionToken };
   }
 
+  async authenticateWithOidc(
+    claims: MappedOidcClaims,
+    resolved: {
+      identityId: string;
+      userAccountId?: string | null;
+      identityType: IdentityType;
+    },
+    context?: { ipAddress?: string; userAgent?: string },
+  ): Promise<{ session: Session; sessionToken: string }> {
+    await this.audit.record({
+      eventType: 'OIDC_CLAIM_RECEIVED',
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      metadata: {
+        providerCode: claims.providerCode,
+        subject: claims.subject,
+        assuranceLevel: claims.assuranceLevel,
+        mfaSatisfied: claims.mfaSatisfied,
+        externalContext: JSON.parse(JSON.stringify(claims.externalContext)) as Record<
+          string,
+          string | string[]
+        >,
+      },
+      ipAddress: context?.ipAddress,
+    });
+
+    if (claims.mfaSatisfied) {
+      await this.audit.record({
+        eventType: 'MFA_VERIFIED',
+        identityId: resolved.identityId,
+        metadata: { providerCode: claims.providerCode, amr: claims.amr },
+        ipAddress: context?.ipAddress,
+      });
+    }
+
+    const { session, sessionToken } = await this.createSession({
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      assuranceLevel: claims.assuranceLevel,
+      authMethod: AuthenticationMethodType.OIDC,
+      oidcProviderCode: claims.providerCode,
+      mfaSatisfied: claims.mfaSatisfied,
+      authenticatedAt: claims.authenticatedAt,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
+    await this.audit.record({
+      eventType: 'AUTHENTICATION_SUCCESS',
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      sessionId: session.id,
+      metadata: { method: AuthenticationMethodType.OIDC, providerCode: claims.providerCode },
+      ipAddress: context?.ipAddress,
+    });
+
+    return { session, sessionToken };
+  }
+
+  async authenticateWithServiceApiKey(
+    authResult: ServiceIdentityAuthResult,
+    context?: { ipAddress?: string; userAgent?: string },
+  ): Promise<{ session: Session; sessionToken: string }> {
+    const { session, sessionToken } = await this.createSession({
+      identityId: authResult.identityId,
+      assuranceLevel: authResult.assuranceLevel,
+      authMethod: AuthenticationMethodType.SERVICE_API_KEY,
+      mfaSatisfied: authResult.mfaSatisfied,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
+    await this.audit.record({
+      eventType: 'AUTHENTICATION_SUCCESS',
+      identityId: authResult.identityId,
+      sessionId: session.id,
+      metadata: {
+        method: AuthenticationMethodType.SERVICE_API_KEY,
+        serviceCode: authResult.serviceCode,
+      },
+      ipAddress: context?.ipAddress,
+    });
+
+    return { session, sessionToken };
+  }
+
   async createSession(input: {
     identityId: string;
     userAccountId?: string;
     assuranceLevel?: AssuranceLevel;
+    authMethod?: AuthenticationMethodType;
+    oidcProviderCode?: string;
+    mfaSatisfied?: boolean;
+    authenticatedAt?: Date;
     ipAddress?: string;
     userAgent?: string;
   }): Promise<{ session: Session; sessionToken: string }> {
@@ -191,6 +288,10 @@ export class SessionsService {
         tokenHash,
         status: SessionStatus.ACTIVE,
         assuranceLevel: input.assuranceLevel ?? AssuranceLevel.LOW,
+        authMethod: input.authMethod ?? AuthenticationMethodType.PASSWORD,
+        oidcProviderCode: input.oidcProviderCode,
+        mfaSatisfied: input.mfaSatisfied ?? false,
+        authenticatedAt: input.authenticatedAt ?? new Date(),
         issuedAt,
         expiresAt,
         ipAddress: input.ipAddress,
@@ -213,7 +314,7 @@ export class SessionsService {
     const tokenHash = hashToken(token);
     const session = await this.prisma.session.findUnique({
       where: { tokenHash },
-      include: { userAccount: true },
+      include: { userAccount: true, identity: true },
     });
 
     if (!session) {
@@ -265,6 +366,18 @@ export class SessionsService {
       throw new UnauthorizedException('Account is not active');
     }
 
+    return {
+      sessionId: session.id,
+      identityId: session.identityId,
+      userAccountId: session.userAccountId,
+      assuranceLevel: session.assuranceLevel,
+      authMethod: session.authMethod,
+      oidcProviderCode: session.oidcProviderCode,
+      mfaSatisfied: session.mfaSatisfied,
+      authenticatedAt: session.authenticatedAt,
+      identityType: session.identity.type,
+      isServicePrincipal: session.identity.type === IdentityType.SERVICE,
+    };
     const renewedSession = await this.maybeRenewSession(session, now);
     const principal = this.identityResolution.resolveFromSession(renewedSession);
 
