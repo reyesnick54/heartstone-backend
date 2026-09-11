@@ -4,6 +4,7 @@ import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ActivationGovernanceModule } from './activation-governance/activation-governance.module';
 import { ServiceCatalogCommonModule } from './common/service-catalog-common.module';
+import { EligibilityModule } from './eligibility/eligibility.module';
 import { FormsModule } from './forms/forms.module';
 import { GovernmentServiceVersionsModule } from './government-service-versions/government-service-versions.module';
 import { GovernmentServicesController } from './government-services/government-services.controller';
@@ -19,6 +20,7 @@ import { PublicServiceFamiliesController } from './public/public-service-familie
     GovernmentServiceVersionsModule,
     ActivationGovernanceModule,
     FormsModule,
+    EligibilityModule,
   ],
   controllers: [
     GovernmentServicesController,
@@ -30,6 +32,7 @@ import { PublicServiceFamiliesController } from './public/public-service-familie
     PublicServiceDiscoveryService,
     ActivationGovernanceModule,
     FormsModule,
+    EligibilityModule,
     GovernmentServicesService,
   ],
 })

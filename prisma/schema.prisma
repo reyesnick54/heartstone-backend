@@ -382,6 +382,9 @@ enum SecurityAuditEventType {
   MFA_VERIFIED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
+  SERVICE_ELIGIBILITY_RULE_CREATED
+  SERVICE_ELIGIBILITY_RULE_UPDATED
+  SERVICE_ELIGIBILITY_RULE_PUBLISHED_CHANGE
 }
 
 model Person {
@@ -1294,6 +1297,7 @@ model GovernmentServiceVersion {
   applicantCategories                 GovernmentServiceVersionApplicantCategory[]
   fees                                GovernmentServiceFeeDefinition[]
   eligibilityRules                    GovernmentServiceEligibilityRule[]
+  serviceEligibilityRules             ServiceEligibilityRule[]
   checklistItems                      GovernmentServiceChecklistItem[]
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
@@ -1478,6 +1482,91 @@ model GovernmentServiceEligibilityRule {
   @@unique([governmentServiceVersionId, ruleCode])
   @@index([governmentServiceVersionId])
   @@map("government_service_eligibility_rules")
+}
+
+enum ServiceEligibilityRuleCategory {
+  APPLICANT_CATEGORY
+  ENTITY_TYPE
+  RESIDENCY_STATUS
+  ACTIVITY
+  LOCATION
+  GEOGRAPHIC_SCOPE
+  AGE_OR_THRESHOLD
+  OWNERSHIP_ATTRIBUTE
+  EMPLOYER_STATUS
+  PREREQUISITE_STATUS
+  REPRESENTATIVE_REQUIREMENT
+  EXCLUSION
+  REQUIRED_ATTRIBUTE
+  OTHER_STRUCTURED_RULE
+}
+
+enum ServiceEligibilityRuleOperator {
+  EQUALS
+  NOT_EQUALS
+  IN
+  NOT_IN
+  EXISTS
+  NOT_EXISTS
+  GREATER_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN
+  LESS_THAN_OR_EQUAL
+  CONTAINS
+}
+
+enum ServiceEligibilityRuleStatus {
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum EligibilityGuidanceOutcome {
+  LIKELY_ELIGIBLE
+  LIKELY_INELIGIBLE
+  MORE_INFORMATION_REQUIRED
+  OUTSIDE_PUBLISHED_SCOPE
+  REFER_TO_OTHER_SERVICE
+  UNRESOLVED
+}
+
+model ServiceEligibilityRule {
+  id                         String                         @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                         @db.Uuid
+  category                   ServiceEligibilityRuleCategory
+  attributeKey               String
+  operator                   ServiceEligibilityRuleOperator
+  expectedValue              Json                           @default("{}")
+  reasonCode                 String
+  priority                   Int                            @default(0)
+  onFailureOutcome           EligibilityGuidanceOutcome?
+  status                     ServiceEligibilityRuleStatus   @default(ACTIVE)
+  effectiveFrom              DateTime
+  effectiveUntil             DateTime?
+  createdAt                  DateTime                       @default(now())
+  updatedAt                  DateTime                       @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion       @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  audits                     ServiceEligibilityRuleAudit[]
+
+  @@index([governmentServiceVersionId])
+  @@index([status])
+  @@map("service_eligibility_rules")
+}
+
+model ServiceEligibilityRuleAudit {
+  id                         String                  @id @default(uuid()) @db.Uuid
+  serviceEligibilityRuleId   String?                 @db.Uuid
+  governmentServiceVersionId String                  @db.Uuid
+  actorIdentityId            String                  @db.Uuid
+  action                     String
+  previousSnapshot           Json?
+  newSnapshot                Json?
+  createdAt                  DateTime                @default(now())
+  serviceEligibilityRule     ServiceEligibilityRule? @relation(fields: [serviceEligibilityRuleId], references: [id], onDelete: SetNull)
+
+  @@index([governmentServiceVersionId])
+  @@index([serviceEligibilityRuleId])
+  @@map("service_eligibility_rule_audits")
 }
 
 model GovernmentServiceChecklistItem {
