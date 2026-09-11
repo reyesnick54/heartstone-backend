@@ -95,16 +95,16 @@ model Jurisdiction {
 }
 
 model Institution {
-  id                         String                        @id @default(uuid()) @db.Uuid
-  jurisdictionId             String                        @db.Uuid
+  id                         String                         @id @default(uuid()) @db.Uuid
+  jurisdictionId             String                         @db.Uuid
   code                       String
   name                       String
   description                String?
   type                       InstitutionType
-  status                     StructuralLifecycleStatus     @default(ACTIVE)
-  createdAt                  DateTime                      @default(now())
-  updatedAt                  DateTime                      @updatedAt
-  jurisdiction               Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  status                     StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt                  DateTime                       @default(now())
+  updatedAt                  DateTime                       @updatedAt
+  jurisdiction               Jurisdiction                   @relation(fields: [jurisdictionId], references: [id])
   governmentBodies           GovernmentBody[]
   departments                Department[]
   delegations                Delegation[]
@@ -150,18 +150,18 @@ model Department {
 }
 
 model Office {
-  id           String                    @id @default(uuid()) @db.Uuid
-  departmentId String                    @db.Uuid
-  code         String
-  name         String
-  description  String?
-  status       StructuralLifecycleStatus @default(ACTIVE)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  department   Department                @relation(fields: [departmentId], references: [id])
-  appointments Appointment[]
-  delegationsAsDelegator Delegation[] @relation("DelegationDelegatorOffice")
-  delegationsAsRecipient Delegation[] @relation("DelegationRecipientOffice")
+  id                     String                    @id @default(uuid()) @db.Uuid
+  departmentId           String                    @db.Uuid
+  code                   String
+  name                   String
+  description            String?
+  status                 StructuralLifecycleStatus @default(ACTIVE)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  department             Department                @relation(fields: [departmentId], references: [id])
+  appointments           Appointment[]
+  delegationsAsDelegator Delegation[]              @relation("DelegationDelegatorOffice")
+  delegationsAsRecipient Delegation[]              @relation("DelegationRecipientOffice")
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -169,16 +169,16 @@ model Office {
 }
 
 model Officeholder {
-  id           String                    @id @default(uuid()) @db.Uuid
-  code         String                    @unique
-  name         String
-  description  String?
-  status       StructuralLifecycleStatus @default(ACTIVE)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  appointments Appointment[]
-  delegationsAsDelegator Delegation[] @relation("DelegationDelegatorOfficeholder")
-  delegationsAsRecipient Delegation[] @relation("DelegationRecipientOfficeholder")
+  id                     String                    @id @default(uuid()) @db.Uuid
+  code                   String                    @unique
+  name                   String
+  description            String?
+  status                 StructuralLifecycleStatus @default(ACTIVE)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  appointments           Appointment[]
+  delegationsAsDelegator Delegation[]              @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient Delegation[]              @relation("DelegationRecipientOfficeholder")
 
   @@map("officeholders")
 }
@@ -201,37 +201,37 @@ model Appointment {
 }
 
 model Delegation {
-  id                       String           @id @default(uuid()) @db.Uuid
-  institutionId            String           @db.Uuid
-  delegatorOfficeId        String?          @db.Uuid
-  delegatorOfficeholderId  String?          @db.Uuid
-  recipientOfficeId        String?          @db.Uuid
-  recipientOfficeholderId  String?          @db.Uuid
-  scopeDescription         String
-  status                   DelegationStatus @default(PENDING)
-  effectiveFrom            DateTime
-  effectiveUntil           DateTime?
-  createdAt                DateTime         @default(now())
-  updatedAt                DateTime         @updatedAt
-  institution              Institution      @relation(fields: [institutionId], references: [id])
-  delegatorOffice          Office?          @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
-  delegatorOfficeholder    Officeholder?    @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
-  recipientOffice          Office?          @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
-  recipientOfficeholder    Officeholder?    @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
+  id                      String           @id @default(uuid()) @db.Uuid
+  institutionId           String           @db.Uuid
+  delegatorOfficeId       String?          @db.Uuid
+  delegatorOfficeholderId String?          @db.Uuid
+  recipientOfficeId       String?          @db.Uuid
+  recipientOfficeholderId String?          @db.Uuid
+  scopeDescription        String
+  status                  DelegationStatus @default(PENDING)
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  institution             Institution      @relation(fields: [institutionId], references: [id])
+  delegatorOffice         Office?          @relation("DelegationDelegatorOffice", fields: [delegatorOfficeId], references: [id])
+  delegatorOfficeholder   Officeholder?    @relation("DelegationDelegatorOfficeholder", fields: [delegatorOfficeholderId], references: [id])
+  recipientOffice         Office?          @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
+  recipientOfficeholder   Officeholder?    @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
 
   @@index([institutionId])
   @@map("delegations")
 }
 
 model ExternalAuthority {
-  id            String                        @id @default(uuid()) @db.Uuid
-  code          String                        @unique
-  name          String
-  description   String?
-  type          ExternalAuthorityType
-  status        StructuralLifecycleStatus     @default(ACTIVE)
-  createdAt     DateTime                      @default(now())
-  updatedAt     DateTime                      @updatedAt
+  id                   String                         @id @default(uuid()) @db.Uuid
+  code                 String                         @unique
+  name                 String
+  description          String?
+  type                 ExternalAuthorityType
+  status               StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt            DateTime                       @default(now())
+  updatedAt            DateTime                       @updatedAt
   institutionRelations InstitutionExternalAuthority[]
 
   @@map("external_authorities")
@@ -254,4 +254,263 @@ model InstitutionExternalAuthority {
   @@index([institutionId])
   @@index([externalAuthorityId])
   @@map("institution_external_authorities")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3A: Identity & Access — canonical identity primitives
+// User != Officeholder != Role != Permission != Authority
+// ---------------------------------------------------------------------------
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum UserAccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  LOCKED
+  DEACTIVATED
+}
+
+enum IdentityVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum CredentialType {
+  PASSWORD_HASH
+  API_KEY_REFERENCE
+  CERTIFICATE_REFERENCE
+  OTHER
+}
+
+enum CredentialStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum OrganizationType {
+  COMPANY
+  APPLICANT_ORGANIZATION
+  INVESTOR_ENTITY
+  IMPLEMENTATION_PARTNER
+  OTHER
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum OrganizationMembershipStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ENDED
+}
+
+enum OrganizationMembershipRole {
+  MEMBER
+  ADMINISTRATOR
+  CONTACT
+  OTHER
+}
+
+enum RepresentativeAuthorityStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  ENDED
+}
+
+enum AuthenticationMethodType {
+  PASSWORD
+  OIDC
+  SAML
+  MFA_TOTP
+  MFA_SMS
+  API_KEY
+  OTHER
+}
+
+enum AuthenticationMethodStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model Person {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  displayName               String
+  status                    PersonStatus              @default(ACTIVE)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  userAccounts              UserAccount[]
+  organizationMemberships   OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+
+  @@map("persons")
+}
+
+model UserAccount {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  personId                  String                    @db.Uuid
+  username                  String                    @unique
+  status                    UserAccountStatus         @default(PENDING)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  person                    Person                    @relation(fields: [personId], references: [id])
+  identities                Identity[]
+  credentials               Credential[]
+  organizationMemberships   OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+  authenticationMethods     AuthenticationMethod[]
+  sessions                  Session[]
+
+  @@index([personId])
+  @@map("user_accounts")
+}
+
+model Identity {
+  id                 String                     @id @default(uuid()) @db.Uuid
+  userAccountId      String                     @db.Uuid
+  providerCode       String
+  subjectId          String
+  verificationStatus IdentityVerificationStatus @default(UNVERIFIED)
+  verifiedAt         DateTime?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  userAccount        UserAccount                @relation(fields: [userAccountId], references: [id])
+
+  @@unique([providerCode, subjectId])
+  @@index([userAccountId])
+  @@map("identities")
+}
+
+model Credential {
+  id                    String           @id @default(uuid()) @db.Uuid
+  userAccountId         String           @db.Uuid
+  type                  CredentialType
+  credentialFingerprint String?
+  secretReference       String?
+  status                CredentialStatus @default(PENDING)
+  expiresAt             DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  userAccount           UserAccount      @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@index([status])
+  @@map("credentials")
+}
+
+model Organization {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  code                      String                    @unique
+  name                      String
+  type                      OrganizationType
+  status                    OrganizationStatus        @default(ACTIVE)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  memberships               OrganizationMembership[]
+  representativeAuthorities RepresentativeAuthority[]
+
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String                       @id @default(uuid()) @db.Uuid
+  organizationId String                       @db.Uuid
+  personId       String                       @db.Uuid
+  userAccountId  String?                      @db.Uuid
+  role           OrganizationMembershipRole   @default(MEMBER)
+  status         OrganizationMembershipStatus @default(PENDING)
+  effectiveFrom  DateTime?
+  effectiveUntil DateTime?
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  organization   Organization                 @relation(fields: [organizationId], references: [id])
+  person         Person                       @relation(fields: [personId], references: [id])
+  userAccount    UserAccount?                 @relation(fields: [userAccountId], references: [id])
+
+  @@unique([organizationId, personId])
+  @@index([organizationId])
+  @@index([personId])
+  @@index([userAccountId])
+  @@map("organization_memberships")
+}
+
+model RepresentativeAuthority {
+  id               String                        @id @default(uuid()) @db.Uuid
+  organizationId   String                        @db.Uuid
+  personId         String?                       @db.Uuid
+  userAccountId    String?                       @db.Uuid
+  mandateReference String
+  scopeDescription String?
+  status           RepresentativeAuthorityStatus @default(PENDING)
+  effectiveFrom    DateTime
+  effectiveUntil   DateTime?
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
+  organization     Organization                  @relation(fields: [organizationId], references: [id])
+  person           Person?                       @relation(fields: [personId], references: [id])
+  userAccount      UserAccount?                  @relation(fields: [userAccountId], references: [id])
+
+  @@index([organizationId])
+  @@index([personId])
+  @@index([userAccountId])
+  @@map("representative_authorities")
+}
+
+model AuthenticationMethod {
+  id            String                     @id @default(uuid()) @db.Uuid
+  userAccountId String                     @db.Uuid
+  type          AuthenticationMethodType
+  providerCode  String?
+  status        AuthenticationMethodStatus @default(ACTIVE)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  userAccount   UserAccount                @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@map("authentication_methods")
+}
+
+model Session {
+  id             String        @id @default(uuid()) @db.Uuid
+  userAccountId  String        @db.Uuid
+  status         SessionStatus @default(ACTIVE)
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  lastActivityAt DateTime?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  userAccount    UserAccount   @relation(fields: [userAccountId], references: [id])
+
+  @@index([userAccountId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("sessions")
 }
