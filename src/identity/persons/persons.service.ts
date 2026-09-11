@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Person } from '@prisma/client';
+import { Person, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { CreatePersonDto } from './dto/create-person.dto';
+import { QueryPersonsDto } from './dto/query-persons.dto';
+import { UpdatePersonDto } from './dto/update-person.dto';
 
 @Injectable()
 export class PersonsService {
@@ -29,11 +31,29 @@ export class PersonsService {
     return person;
   }
 
+  async findAll(query: QueryPersonsDto): Promise<Person[]> {
+    const where: Prisma.PersonWhereInput = {};
+
+    if (query.familyName !== undefined) {
+      where.familyName = query.familyName;
+    }
+
+    return this.prisma.person.findMany({
+      where,
+      orderBy: [{ familyName: 'asc' }, { givenName: 'asc' }],
+    });
+  }
+
   async findOne(id: string): Promise<Person> {
     const person = await this.prisma.person.findUnique({ where: { id } });
     if (!person) {
       throw new NotFoundException(`Person with id "${id}" was not found`);
     }
     return person;
+  }
+
+  async update(id: string, dto: UpdatePersonDto): Promise<Person> {
+    await this.findOne(id);
+    return this.prisma.person.update({ where: { id }, data: dto });
   }
 }

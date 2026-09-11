@@ -17,6 +17,7 @@ interface ValidatedEnvironment {
   OIDC_ENABLED?: string;
   OIDC_PROVIDERS_JSON?: string;
   SERVICE_CREDENTIAL_PEPPER?: string;
+  AUTH_LOCAL_PASSWORD_ENABLED?: string;
 }
 
 export const envValidationSchema = Joi.object({
@@ -42,6 +43,8 @@ export const envValidationSchema = Joi.object({
     then: Joi.string().min(16).required(),
     otherwise: Joi.string().min(16).default('test-pepper-not-production'),
   }),
+  SESSION_RENEWAL_THRESHOLD_SECONDS: Joi.number().integer().min(0).max(43200).default(900),
+  AUTH_LOCAL_PASSWORD_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
 }).custom((value, helpers) => {
   const env = value as ValidatedEnvironment;
   const nodeEnv = env.NODE_ENV;
@@ -92,6 +95,13 @@ export const envValidationSchema = Joi.object({
         message: 'OIDC_PROVIDERS_JSON must be valid JSON',
       });
     }
+  const localPasswordEnabled =
+    env.AUTH_LOCAL_PASSWORD_ENABLED === 'true' || env.AUTH_LOCAL_PASSWORD_ENABLED === '1';
+
+  if (nodeEnv === 'production' && localPasswordEnabled) {
+    return helpers.error('any.custom', {
+      message: 'AUTH_LOCAL_PASSWORD_ENABLED=true is not allowed when NODE_ENV=production',
+    });
   }
 
   return value as ValidatedEnvironment;

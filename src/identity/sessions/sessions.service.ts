@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AccountStatus,
@@ -8,24 +8,41 @@ import {
   CredentialType,
   IdentityType,
   Session,
+  SessionRevocationReason,
   SessionStatus,
 } from '@prisma/client';
 
 import { IDENTITY_CONFIG, type IdentityConfig } from '../../config/config.constants';
 import { PrismaService } from '../../database/prisma.service';
+import { AccountLookupService } from '../accounts/account-lookup.service';
 import { SecurityAuditService } from '../audit/security-audit.service';
+import { type AuthenticatedPrincipal } from '../auth/domain/authenticated-principal';
 import { SessionContextDto } from '../auth/dto/session-context.dto';
 import type { MappedOidcClaims } from '../auth/oidc/types/mapped-oidc-claims';
 import type { ServiceIdentityAuthResult } from '../auth/service-identity/service-identity-auth.service';
 import { generateOpaqueToken, hashToken, verifySecret } from '../common/crypto.util';
+import {
+  CREDENTIAL_VERIFIER,
+  type CredentialVerifier,
+} from '../auth/interfaces/credential-verifier.interface';
+import { IdentityResolutionService } from '../auth/services/identity-resolution.service';
+import { generateOpaqueToken, hashToken } from '../common/crypto.util';
 
 @Injectable()
 export class SessionsService {
+  private readonly verifiers: Map<string, CredentialVerifier>;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly audit: SecurityAuditService,
-  ) {}
+    private readonly accountLookup: AccountLookupService,
+    private readonly identityResolution: IdentityResolutionService,
+    @Inject(CREDENTIAL_VERIFIER)
+    credentialVerifiers: CredentialVerifier[],
+  ) {
+    this.verifiers = new Map(credentialVerifiers.map((verifier) => [verifier.method, verifier]));
+  }
 
   private get identityConfig(): IdentityConfig {
     return this.configService.getOrThrow<IdentityConfig>(IDENTITY_CONFIG);
@@ -36,23 +53,49 @@ export class SessionsService {
     password: string,
     context?: { ipAddress?: string; userAgent?: string },
   ): Promise<{ session: Session; sessionToken: string }> {
-    const account = await this.prisma.userAccount.findUnique({
-      where: { loginIdentifier },
-      include: {
-        identities: {
-          include: {
-            credentials: {
-              where: { type: CredentialType.PASSWORD, status: CredentialStatus.ACTIVE },
-            },
-          },
-        },
-      },
-    });
-
-    if (account?.status !== AccountStatus.ACTIVE) {
+    if (!this.identityConfig.localPasswordAuthEnabled) {
       await this.audit.record({
         eventType: 'AUTHENTICATION_FAILURE',
-        metadata: { loginIdentifier, reason: 'account_not_found_or_inactive' },
+        metadata: { loginIdentifier, reason: 'password_auth_disabled' },
+        ipAddress: context?.ipAddress,
+      });
+      throw new UnauthorizedException('Password authentication is not enabled');
+    }
+
+    const account = await this.accountLookup.findByLoginIdentifier(loginIdentifier);
+
+    if (!account) {
+      await this.audit.record({
+        eventType: 'AUTHENTICATION_FAILURE',
+        metadata: { loginIdentifier, reason: 'account_not_found' },
+        ipAddress: context?.ipAddress,
+      });
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (account.status === AccountStatus.SUSPENDED) {
+      await this.audit.record({
+        eventType: 'SUSPENDED_ACCOUNT_LOGIN_ATTEMPT',
+        userAccountId: account.id,
+        ipAddress: context?.ipAddress,
+      });
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (account.status === AccountStatus.REVOKED) {
+      await this.audit.record({
+        eventType: 'REVOKED_ACCOUNT_LOGIN_ATTEMPT',
+        userAccountId: account.id,
+        ipAddress: context?.ipAddress,
+      });
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!this.accountLookup.isAuthenticatable(account)) {
+      await this.audit.record({
+        eventType: 'AUTHENTICATION_FAILURE',
+        userAccountId: account.id,
+        metadata: { reason: 'account_not_authenticatable', status: account.status },
         ipAddress: context?.ipAddress,
       });
       throw new UnauthorizedException('Invalid credentials');
@@ -69,20 +112,42 @@ export class SessionsService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const passwordCredential = identity.credentials.find((c) => c.type === CredentialType.PASSWORD);
-    if (!passwordCredential?.secretHash) {
+    const activeCredential = identity.credentials.find(
+      (credential) =>
+        credential.type === CredentialType.PASSWORD &&
+        credential.status === CredentialStatus.ACTIVE,
+    );
+
+    if (!activeCredential) {
       await this.audit.record({
-        eventType: 'AUTHENTICATION_FAILURE',
+        eventType: 'CREDENTIAL_REJECTED',
         identityId: identity.id,
         userAccountId: account.id,
-        metadata: { reason: 'no_password_credential' },
+        metadata: { reason: 'no_active_password_credential' },
         ipAddress: context?.ipAddress,
       });
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const valid = await verifySecret(password, passwordCredential.secretHash);
+    const verifier = this.verifiers.get('password');
+    if (!verifier) {
+      throw new UnauthorizedException('Password authentication is not configured');
+    }
+
+    const valid = await verifier.verify({
+      identityId: identity.id,
+      userAccountId: account.id,
+      credential: password,
+    });
+
     if (!valid) {
+      await this.audit.record({
+        eventType: 'CREDENTIAL_REJECTED',
+        identityId: identity.id,
+        userAccountId: account.id,
+        metadata: { reason: 'invalid_password' },
+        ipAddress: context?.ipAddress,
+      });
       await this.audit.record({
         eventType: 'AUTHENTICATION_FAILURE',
         identityId: identity.id,
@@ -92,11 +157,6 @@ export class SessionsService {
       });
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    await this.prisma.credential.update({
-      where: { id: passwordCredential.id },
-      data: { lastUsedAt: new Date() },
-    });
 
     const { session, sessionToken } = await this.createSession({
       identityId: identity.id,
@@ -218,7 +278,8 @@ export class SessionsService {
   }): Promise<{ session: Session; sessionToken: string }> {
     const sessionToken = generateOpaqueToken();
     const tokenHash = hashToken(sessionToken);
-    const expiresAt = new Date(Date.now() + this.identityConfig.sessionTtlSeconds * 1000);
+    const issuedAt = new Date();
+    const expiresAt = new Date(issuedAt.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
 
     const session = await this.prisma.session.create({
       data: {
@@ -231,6 +292,7 @@ export class SessionsService {
         oidcProviderCode: input.oidcProviderCode,
         mfaSatisfied: input.mfaSatisfied ?? false,
         authenticatedAt: input.authenticatedAt ?? new Date(),
+        issuedAt,
         expiresAt,
         ipAddress: input.ipAddress,
         userAgent: input.userAgent,
@@ -273,13 +335,19 @@ export class SessionsService {
       throw new UnauthorizedException('Session has been revoked');
     }
 
-    if (session.expiresAt < new Date()) {
+    const now = new Date();
+
+    if (session.expiresAt < now) {
       await this.prisma.session.update({
         where: { id: session.id },
-        data: { status: SessionStatus.EXPIRED },
+        data: {
+          status: SessionStatus.EXPIRED,
+          revokedAt: now,
+          revocationReason: SessionRevocationReason.EXPIRED,
+        },
       });
       await this.audit.record({
-        eventType: 'SESSION_REJECTED',
+        eventType: 'SESSION_EXPIRED',
         sessionId: session.id,
         identityId: session.identityId,
         metadata: { reason: 'session_expired' },
@@ -293,7 +361,7 @@ export class SessionsService {
         sessionId: session.id,
         identityId: session.identityId,
         userAccountId: session.userAccountId ?? undefined,
-        metadata: { reason: 'account_suspended' },
+        metadata: { reason: 'account_not_active' },
       });
       throw new UnauthorizedException('Account is not active');
     }
@@ -310,17 +378,29 @@ export class SessionsService {
       identityType: session.identity.type,
       isServicePrincipal: session.identity.type === IdentityType.SERVICE,
     };
+    const renewedSession = await this.maybeRenewSession(session, now);
+    const principal = this.identityResolution.resolveFromSession(renewedSession);
+
+    return this.toSessionContext(principal);
   }
 
-  async revokeSession(sessionId: string, identityId?: string): Promise<void> {
+  async revokeSession(
+    sessionId: string,
+    identityId?: string,
+    reason: SessionRevocationReason = SessionRevocationReason.USER_LOGOUT,
+  ): Promise<void> {
     const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
-    if (!session) {
+    if (!session || session.status === SessionStatus.REVOKED) {
       return;
     }
 
     await this.prisma.session.update({
       where: { id: sessionId },
-      data: { status: SessionStatus.REVOKED, revokedAt: new Date() },
+      data: {
+        status: SessionStatus.REVOKED,
+        revokedAt: new Date(),
+        revocationReason: reason,
+      },
     });
 
     await this.audit.record({
@@ -328,6 +408,71 @@ export class SessionsService {
       sessionId,
       identityId: identityId ?? session.identityId,
       userAccountId: session.userAccountId ?? undefined,
+      metadata: { reason },
     });
+  }
+
+  async revokeAllAccountSessions(
+    userAccountId: string,
+    reason: SessionRevocationReason = SessionRevocationReason.ACCOUNT_REVOCATION,
+  ): Promise<number> {
+    const now = new Date();
+
+    const result = await this.prisma.session.updateMany({
+      where: {
+        userAccountId,
+        status: SessionStatus.ACTIVE,
+      },
+      data: {
+        status: SessionStatus.REVOKED,
+        revokedAt: now,
+        revocationReason: reason,
+      },
+    });
+
+    if (result.count > 0) {
+      await this.audit.record({
+        eventType: 'SESSION_REVOKED',
+        userAccountId,
+        metadata: { reason, revokedCount: result.count, scope: 'all_account_sessions' },
+      });
+    }
+
+    return result.count;
+  }
+
+  resolvePrincipal(session: Session): AuthenticatedPrincipal {
+    return this.identityResolution.resolveFromSession(session);
+  }
+
+  private async maybeRenewSession(session: Session, now: Date): Promise<Session> {
+    const thresholdMs = this.identityConfig.sessionRenewalThresholdSeconds * 1000;
+    const timeRemaining = session.expiresAt.getTime() - now.getTime();
+
+    if (timeRemaining > thresholdMs) {
+      return this.prisma.session.update({
+        where: { id: session.id },
+        data: { lastUsedAt: now },
+      });
+    }
+
+    const newExpiresAt = new Date(now.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
+
+    return this.prisma.session.update({
+      where: { id: session.id },
+      data: {
+        lastUsedAt: now,
+        expiresAt: newExpiresAt,
+      },
+    });
+  }
+
+  private toSessionContext(principal: AuthenticatedPrincipal): SessionContextDto {
+    return {
+      sessionId: principal.sessionId,
+      identityId: principal.identityId,
+      userAccountId: principal.userAccountId,
+      assuranceLevel: principal.assuranceLevel,
+    };
   }
 }

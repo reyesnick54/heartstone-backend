@@ -42,4 +42,6 @@ export interface OidcProviderConfig {
 export interface OidcConfig {
   enabled: boolean;
   providers: OidcProviderConfig[];
+  sessionRenewalThresholdSeconds: number;
+  localPasswordAuthEnabled: boolean;
 }
