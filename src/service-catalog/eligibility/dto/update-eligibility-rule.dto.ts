@@ -5,7 +5,15 @@ import {
   ServiceEligibilityRuleOperator,
   ServiceEligibilityRuleStatus,
 } from '@prisma/client';
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  Allow,
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class UpdateEligibilityRuleDto {
   @ApiPropertyOptional({ enum: ServiceEligibilityRuleCategory })
