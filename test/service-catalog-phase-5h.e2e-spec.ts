@@ -11,9 +11,9 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
-import { seedPhase5RepresentativeCatalog } from '../src/service-catalog/fixtures/phase-5-representative-catalog.fixture';
 import { ServiceCatalogCacheService } from '../src/service-catalog/common/service-catalog-cache.service';
 import { ServiceCatalogLifecycleService } from '../src/service-catalog/common/service-catalog-lifecycle.service';
+import { seedPhase5RepresentativeCatalog } from '../src/service-catalog/fixtures/phase-5-representative-catalog.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   asPaginatedPublicServicesBody,
@@ -64,7 +64,7 @@ describe('Phase 5H representative scenarios (e2e)', () => {
 
   async function expectNoPhase6Records(): Promise<void> {
     for (const tableName of PHASE_6_PLUS_TABLES) {
-      const rows = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+      const rows = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
         'SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = $1',
         tableName,
       );
@@ -168,12 +168,8 @@ describe('Phase 5H representative scenarios (e2e)', () => {
       isRequired: true,
       conditionExpression: { field: 'activityType', equals: 'RESTRICTED' },
     });
-    expect(body.formSchema).toMatchObject({
-      properties: expect.objectContaining({
-        activityType: expect.any(Object),
-        restrictedActivityDetail: expect.any(Object),
-      }),
-    });
+    expect(body.formSchema?.properties?.activityType).toBeDefined();
+    expect(body.formSchema?.properties?.restrictedActivityDetail).toBeDefined();
 
     await expectNoPhase6Records();
   });

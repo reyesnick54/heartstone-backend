@@ -48,6 +48,30 @@ export interface PublicEligibilityBody {
   nonbindingDisclaimer: string;
 }
 
+export interface ServiceStartPackageChecklistItemBody {
+  itemCode: string;
+  label: string;
+  description: string | null;
+  conditionExpression: Record<string, unknown> | null;
+  isRequired: boolean;
+}
+
+export interface ServiceStartPackageFeeBody {
+  code: string;
+  label: string;
+  description: string | null;
+  amountCents: number | null;
+  currency: string;
+  isVariable: boolean;
+}
+
+export interface ServiceStartPackageOutputBody {
+  outputCode: string;
+  label: string;
+  description: string | null;
+  validityLabel: string | null;
+}
+
 export interface ServiceStartPackageBody {
   serviceId: string;
   serviceSlug: string;
@@ -58,6 +82,10 @@ export interface ServiceStartPackageBody {
   formSchema: {
     properties?: Record<string, unknown>;
   } | null;
+  conditionalChecklist: ServiceStartPackageChecklistItemBody[];
+  feeDefinitions: ServiceStartPackageFeeBody[];
+  outputDefinitions: ServiceStartPackageOutputBody[];
+  publicDisclaimers: string[];
   applicationCapable: boolean;
   configurationFingerprint: string;
 }

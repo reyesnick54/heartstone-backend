@@ -102,9 +102,9 @@ describe('Phase 5A Service Catalog (e2e)', () => {
         maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
         publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
       })
-      .expect(200);
+      .expect(400);
 
-    const activeVersion = asGovernmentServiceVersionBody(
+    const unchangedVersion = asGovernmentServiceVersionBody(
       (
         await request(app.getHttpServer())
           .get(`/api/v1/service-catalog/service-versions/${version.id}`)
@@ -113,9 +113,11 @@ describe('Phase 5A Service Catalog (e2e)', () => {
       ).body,
     );
 
-    expect(isPubliclyActive(activeVersion.maturityStatus, activeVersion.publicAvailability)).toBe(
-      true,
-    );
+    expect(unchangedVersion.maturityStatus).toBe(GovernmentServiceMaturityStatus.DRAFT);
+    expect(unchangedVersion.publicAvailability).toBe(GovernmentServicePublicAvailability.HIDDEN);
+    expect(
+      isPubliclyActive(unchangedVersion.maturityStatus, unchangedVersion.publicAvailability),
+    ).toBe(false);
 
     await request(app.getHttpServer())
       .patch(`/api/v1/service-catalog/services/${service.id}`)

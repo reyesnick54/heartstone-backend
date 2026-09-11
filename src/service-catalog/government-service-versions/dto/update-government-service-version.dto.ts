@@ -1,8 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ApplicantCategory,
-  GovernmentServiceMaturityStatus,
-  GovernmentServicePublicAvailability,
 } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
@@ -61,16 +59,6 @@ export class UpdateGovernmentServiceVersionDto {
   @Type(() => Date)
   @IsDate()
   informationLastVerifiedAt?: Date;
-
-  @ApiPropertyOptional({ enum: GovernmentServiceMaturityStatus })
-  @IsOptional()
-  @IsEnum(GovernmentServiceMaturityStatus)
-  maturityStatus?: GovernmentServiceMaturityStatus;
-
-  @ApiPropertyOptional({ enum: GovernmentServicePublicAvailability })
-  @IsOptional()
-  @IsEnum(GovernmentServicePublicAvailability)
-  publicAvailability?: GovernmentServicePublicAvailability;
 
   @ApiPropertyOptional({ enum: ApplicantCategory, isArray: true })
   @IsOptional()

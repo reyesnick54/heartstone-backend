@@ -12,6 +12,7 @@ import {
   GovernmentServicePublicAvailability,
   InstitutionType,
   JurisdictionType,
+  type Prisma,
   ServiceFunctionMappingStatus,
   StructuralLifecycleStatus,
 } from '@prisma/client';
@@ -54,7 +55,7 @@ interface FamilyDefinition {
   conditionalChecklist?: {
     itemCode: string;
     label: string;
-    conditionExpression: Record<string, unknown>;
+    conditionExpression: Prisma.InputJsonValue;
   };
 }
 

@@ -97,6 +97,7 @@ export class GovernmentServiceVersionsService {
     }
 
     this.assertVersionMutable(existing.maturityStatus, dto);
+    this.assertNoClientLifecycleMutation(dto);
 
     const { applicantCategories, ...versionData } = dto;
 
@@ -124,6 +125,15 @@ export class GovernmentServiceVersionsService {
     });
 
     return this.toResponse(updated);
+  }
+
+  private assertNoClientLifecycleMutation(dto: UpdateGovernmentServiceVersionDto): void {
+    const body = dto as Record<string, unknown>;
+    for (const field of ['maturityStatus', 'publicAvailability', 'activated', 'eligible']) {
+      if (field in body) {
+        throw new BadRequestException(`Client-supplied "${field}" is not accepted`);
+      }
+    }
   }
 
   private assertVersionMutable(
