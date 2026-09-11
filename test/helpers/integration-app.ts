@@ -42,6 +42,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await prisma.functionAuthorityRecord.deleteMany();
   await prisma.delegation.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.institutionExternalAuthority.deleteMany();

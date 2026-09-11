@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -33,6 +34,7 @@ import { SystemModule } from './system/system.module';
     SystemModule,
     GovernmentModule,
     IdentityModule,
+    AuthorityModule,
   ],
 })
 export class AppModule {}
