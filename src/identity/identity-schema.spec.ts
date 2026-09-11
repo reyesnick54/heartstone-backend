@@ -76,6 +76,7 @@ describe('Identity schema coherence', () => {
   });
 
   it('defines session lifecycle status enum with active, expired, and revoked states', () => {
+    const sessionStatusBlock = (/enum SessionStatus\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
     const sessionStatusBlock = /enum SessionStatus\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     const sessionStatusMatch = /enum SessionStatus\s*\{([^}]*)\}/s.exec(schema);
     const sessionStatusBlock = sessionStatusMatch?.[1] ?? '';
