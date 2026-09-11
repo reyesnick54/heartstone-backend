@@ -81,7 +81,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const identities = asIdentityListBody(listRes.body);
     expect(identities).toHaveLength(1);
-    expect(identities[0].id).toBe(identity.id);
+    expect(identities[0]?.id).toBe(identity.id);
   });
 
   it('rejects duplicate user account login identifiers', async () => {
