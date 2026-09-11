@@ -20,6 +20,8 @@ export const envValidationSchema = Joi.object({
     .default('100kb'),
   SWAGGER_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
   TRUST_PROXY: Joi.string().valid('true', 'false', '1', '0', '').optional(),
+  SESSION_TTL_SECONDS: Joi.number().integer().min(60).max(86400).default(3600),
+  SESSION_TOKEN_BYTES: Joi.number().integer().min(16).max(64).default(32),
 }).custom((value, helpers) => {
   const env = value as ValidatedEnvironment;
   const nodeEnv = env.NODE_ENV;

@@ -1,5 +1,6 @@
 export const APP_CONFIG = 'app';
 export const SECURITY_CONFIG = 'security';
+export const IDENTITY_CONFIG = 'identity';
 
 export interface AppConfig {
   name: string;
@@ -18,4 +19,9 @@ export interface SecurityConfig {
   bodyLimit: string;
   swaggerEnabled: boolean;
   trustProxy: boolean;
+}
+
+export interface IdentityConfig {
+  sessionTtlSeconds: number;
+  sessionTokenBytes: number;
 }
