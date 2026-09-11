@@ -88,7 +88,9 @@ export class PublicServiceDiscoveryService {
     }>(cacheKey);
 
     if (cached) {
-      cached.items.forEach((item) => { assertNoRestrictedFields(item as unknown as Record<string, unknown>); });
+      cached.items.forEach((item) => {
+        assertNoRestrictedFields(item as unknown as Record<string, unknown>);
+      });
       return cached;
     }
 
@@ -126,7 +128,9 @@ export class PublicServiceDiscoveryService {
     const items = this.selectLatestPublicVersionPerService(versions).map((version) =>
       mapPublicServiceSummary(version),
     );
-    items.forEach((item) => { assertNoRestrictedFields(item as unknown as Record<string, unknown>); });
+    items.forEach((item) => {
+      assertNoRestrictedFields(item as unknown as Record<string, unknown>);
+    });
 
     const response = {
       items,
@@ -309,7 +313,9 @@ export class PublicServiceDiscoveryService {
       throw new NotFoundException(`Public service '${slug}' was not found`);
     }
 
-    if (currentVersion.publicAvailability === GovernmentServicePublicAvailability.INFORMATION_ONLY) {
+    if (
+      currentVersion.publicAvailability === GovernmentServicePublicAvailability.INFORMATION_ONLY
+    ) {
       throw new InformationOnlyNotStartableException();
     }
 
@@ -336,11 +342,14 @@ export class PublicServiceDiscoveryService {
       resolvedVersion = pinnedVersion;
     }
 
-    const startPackage = mapServiceStartPackage(resolvedVersion, [
-      PUBLIC_NONBINDING_DISCLAIMER,
-      PUBLIC_START_PACKAGE_DISCLAIMER,
-      resolvedVersion.publicDisclaimer ?? '',
-    ].filter(Boolean));
+    const startPackage = mapServiceStartPackage(
+      resolvedVersion,
+      [
+        PUBLIC_NONBINDING_DISCLAIMER,
+        PUBLIC_START_PACKAGE_DISCLAIMER,
+        resolvedVersion.publicDisclaimer ?? '',
+      ].filter(Boolean),
+    );
 
     if (
       query.configurationFingerprint &&
@@ -467,7 +476,10 @@ export class PublicServiceDiscoveryService {
       return attributeValue !== undefined && attributeValue !== null && attributeValue !== '';
     }
 
-    if (configuration.requiresTruthyAttribute === true && typeof configuration.attribute === 'string') {
+    if (
+      configuration.requiresTruthyAttribute === true &&
+      typeof configuration.attribute === 'string'
+    ) {
       return Boolean(dto.attributes?.[configuration.attribute]);
     }
 

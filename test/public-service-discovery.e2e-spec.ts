@@ -45,9 +45,7 @@ describe('Public service discovery (e2e)', () => {
   it('lists only publicly authorized services and excludes suspended ones from active listings', async () => {
     const fixture = await seedPublicServiceDiscoveryFixture(prisma);
 
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/public/services')
-      .expect(200);
+    const response = await request(app.getHttpServer()).get('/api/v1/public/services').expect(200);
 
     const body = asPaginatedPublicServicesBody(response.body);
     expect(body.total).toBe(3);
@@ -125,9 +123,7 @@ describe('Public service discovery (e2e)', () => {
 
     const body = asPublicServiceSummaryListBody(response.body);
     expect(body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ slug: 'business-operating-licence' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ slug: 'business-operating-licence' })]),
     );
   });
 
@@ -246,9 +242,7 @@ describe('Public service discovery (e2e)', () => {
     await lifecycleService.suspendServiceVersion(fixture.activeServiceVersionId);
     expect(invalidateSpy).toHaveBeenCalledWith(fixture.activeServiceSlug);
 
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/public/services')
-      .expect(200);
+    const response = await request(app.getHttpServer()).get('/api/v1/public/services').expect(200);
 
     const body = asPaginatedPublicServicesBody(response.body);
     const slugs = body.items.map((item) => item.slug);

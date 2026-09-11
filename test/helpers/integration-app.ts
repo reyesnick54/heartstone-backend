@@ -43,6 +43,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetServiceCatalogData(prisma: PrismaService): Promise<void> {
+  await prisma.serviceActivationRecord.deleteMany();
   await prisma.governmentServiceRedressRoute.deleteMany();
   await prisma.governmentServiceOutputDefinition.deleteMany();
   await prisma.governmentServiceChecklistItem.deleteMany();

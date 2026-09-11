@@ -12,7 +12,10 @@ export class MatchPublicServicesDto {
   @IsEnum(ApplicantCategory)
   applicantCategory?: ApplicantCategory;
 
-  @ApiPropertyOptional({ type: [String], description: 'Optional activity hints supplied by the citizen' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Optional activity hints supplied by the citizen',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

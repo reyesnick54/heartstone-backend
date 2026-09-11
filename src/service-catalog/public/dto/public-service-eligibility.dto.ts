@@ -8,12 +8,16 @@ export class PublicServiceEligibilityDto {
   @IsEnum(ApplicantCategory)
   applicantCategory?: ApplicantCategory;
 
-  @ApiPropertyOptional({ description: 'Non-persistent applicant attributes used for guidance only' })
+  @ApiPropertyOptional({
+    description: 'Non-persistent applicant attributes used for guidance only',
+  })
   @IsOptional()
   @IsObject()
   attributes?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Optional service version id when checking against a pinned package' })
+  @ApiPropertyOptional({
+    description: 'Optional service version id when checking against a pinned package',
+  })
   @IsOptional()
   @IsString()
   serviceVersionId?: string;

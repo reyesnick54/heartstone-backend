@@ -1,5 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ApplicantCategory, CatalogServiceType,GovernmentServicePublicAvailability } from '@prisma/client';
+import {
+  ApplicantCategory,
+  CatalogServiceType,
+  GovernmentServicePublicAvailability,
+} from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
@@ -14,7 +18,9 @@ export class QueryPublicServicesDto {
   @IsEnum(ApplicantCategory)
   applicantCategory?: ApplicantCategory;
 
-  @ApiPropertyOptional({ description: 'Keyword search across public name, purpose, and activities' })
+  @ApiPropertyOptional({
+    description: 'Keyword search across public name, purpose, and activities',
+  })
   @IsOptional()
   @IsString()
   keyword?: string;

@@ -7,7 +7,9 @@ export class QueryServiceStartPackageDto {
   @IsUUID()
   serviceVersionId?: string;
 
-  @ApiPropertyOptional({ description: 'Previously issued configuration fingerprint for version pinning' })
+  @ApiPropertyOptional({
+    description: 'Previously issued configuration fingerprint for version pinning',
+  })
   @IsOptional()
   @IsString()
   configurationFingerprint?: string;

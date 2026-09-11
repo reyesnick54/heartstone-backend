@@ -24,7 +24,9 @@ export class PublicServiceDiscoveryController {
   @Get()
   @ApiOperation({ summary: 'List publicly discoverable government services' })
   @ApiOkResponse({ type: PaginatedPublicServicesResponseDto })
-  listServices(@Query() query: QueryPublicServicesDto): Promise<PaginatedPublicServicesResponseDto> {
+  listServices(
+    @Query() query: QueryPublicServicesDto,
+  ): Promise<PaginatedPublicServicesResponseDto> {
     return this.publicServiceDiscoveryService.listServices(query);
   }
 

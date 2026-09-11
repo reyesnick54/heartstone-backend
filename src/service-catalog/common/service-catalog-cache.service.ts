@@ -31,15 +31,17 @@ export class ServiceCatalogCacheService {
     }
   }
 
-  async set(cacheKey: string, value: unknown, ttlSeconds = PUBLIC_SERVICE_LIST_CACHE_TTL_SECONDS): Promise<void> {
+  async set(
+    cacheKey: string,
+    value: unknown,
+    ttlSeconds = PUBLIC_SERVICE_LIST_CACHE_TTL_SECONDS,
+  ): Promise<void> {
     if (!this.redisService.isConnected()) {
       return;
     }
 
     try {
-      await this.redisService
-        .getClient()
-        .set(cacheKey, JSON.stringify(value), 'EX', ttlSeconds);
+      await this.redisService.getClient().set(cacheKey, JSON.stringify(value), 'EX', ttlSeconds);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Failed to write cache key ${cacheKey}: ${message}`);

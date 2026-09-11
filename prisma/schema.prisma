@@ -188,6 +188,7 @@ model Officeholder {
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOfficeholder")
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  ownedGovernmentServices      GovernmentService[]
 
   @@map("officeholders")
 }
@@ -793,6 +794,7 @@ model FunctionAuthorityRecord {
   delegationScopes        DelegationStructuredScope[]
   institutionalActs       InstitutionalAuthorityAct[]
   serviceFunctionMappings ServiceFunctionMapping[]
+  serviceActivationAuthorities GovernmentServiceVersion[] @relation("ServiceActivationAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1039,6 +1041,7 @@ model AuthorityEvaluationRecord {
   explanationCodes          Json                       @default("[]")
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
+  serviceActivationRecords  ServiceActivationRecord[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1174,9 +1177,12 @@ model GovernmentService {
   responsibleInstitution   Institution                @relation(fields: [responsibleInstitutionId], references: [id])
   responsibleDepartment    Department                 @relation(fields: [responsibleDepartmentId], references: [id])
   serviceFamily            ServiceFamily              @relation(fields: [serviceFamilyId], references: [id])
+  ownerOfficeholderId      String?                    @db.Uuid
+  ownerOfficeholder        Officeholder?              @relation(fields: [ownerOfficeholderId], references: [id])
   versions                 GovernmentServiceVersion[]
 
   @@index([responsibleInstitutionId])
+  @@index([ownerOfficeholderId])
   @@index([responsibleDepartmentId])
   @@index([serviceFamilyId])
   @@index([catalogServiceType])
@@ -1206,9 +1212,19 @@ model GovernmentServiceVersion {
   formVersionId                    String?                                     @db.Uuid
   maturityStatus                   GovernmentServiceMaturityStatus             @default(DRAFT)
   publicAvailability               GovernmentServicePublicAvailability         @default(HIDDEN)
+  institutionallyAccepted          Boolean                                     @default(false)
+  institutionallyAcceptedAt        DateTime?
+  testReadinessStatus              ServiceTestReadinessStatus                  @default(NOT_TESTED)
+  pilotScopeDescription            String?
+  activationFunctionAuthorityRecordId String?                                  @db.Uuid
+  supersededByVersionId            String?                                     @db.Uuid
   createdAt                        DateTime                                    @default(now())
   updatedAt                        DateTime                                    @updatedAt
   governmentService                GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
+  activationFunctionAuthority      FunctionAuthorityRecord?                    @relation("ServiceActivationAuthority", fields: [activationFunctionAuthorityRecordId], references: [id])
+  supersededByVersion              GovernmentServiceVersion?                   @relation("GovernmentServiceVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions               GovernmentServiceVersion[]                  @relation("GovernmentServiceVersionSupersession")
+  activationRecords                ServiceActivationRecord[]
   formDefinition                   FormDefinition?                             @relation(fields: [formDefinitionId], references: [id])
   formVersion                      FormVersion?                                @relation(fields: [formVersionId], references: [id])
   functionMappings                 ServiceFunctionMapping[]
@@ -1225,6 +1241,7 @@ model GovernmentServiceVersion {
   @@index([publicAvailability])
   @@index([formDefinitionId])
   @@index([formVersionId])
+  @@index([activationFunctionAuthorityRecordId])
   @@map("government_service_versions")
 }
 
@@ -1380,4 +1397,61 @@ model GovernmentServiceRedressRoute {
   @@unique([governmentServiceVersionId, routeCode])
   @@index([governmentServiceVersionId])
   @@map("government_service_redress_routes")
+}
+
+// ─── Phase 5F: Service Activation & Publication Governance ───────────────────
+
+enum ServiceTestReadinessStatus {
+  NOT_TESTED
+  TESTS_IN_PROGRESS
+  TECHNICAL_TESTS_PASSED
+  INSTITUTIONAL_REVIEW_PENDING
+  INSTITUTIONAL_REVIEW_PASSED
+}
+
+enum ServiceReadinessLevel {
+  NOT_READY
+  TECHNICALLY_READY
+  INSTITUTIONALLY_ACCEPTED
+  OPERATIONALLY_ACTIVE
+}
+
+enum ServiceReadinessCheckOutcome {
+  PASS
+  FAIL
+  REQUIRES_CONFIGURATION
+  BLOCKED
+}
+
+enum ServiceActivationOutcome {
+  ACTIVATED
+  BLOCKED
+  REQUIRES_CONFIGURATION
+  REQUIRES_READINESS
+  DENIED
+}
+
+model ServiceActivationRecord {
+  id                           String                            @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId   String                            @db.Uuid
+  priorMaturityStatus          GovernmentServiceMaturityStatus
+  newMaturityStatus            GovernmentServiceMaturityStatus
+  priorPublicAvailability      GovernmentServicePublicAvailability
+  newPublicAvailability        GovernmentServicePublicAvailability
+  actorIdentityId              String                            @db.Uuid
+  officeholderId               String?                           @db.Uuid
+  authorityEvaluationRecordId  String?                           @db.Uuid
+  activationBasis              String
+  effectiveAt                  DateTime
+  scopeLimitations             Json                              @default("[]")
+  reason                       String?
+  outcome                      ServiceActivationOutcome
+  createdAt                    DateTime                          @default(now())
+  governmentServiceVersion     GovernmentServiceVersion          @relation(fields: [governmentServiceVersionId], references: [id])
+  authorityEvaluationRecord    AuthorityEvaluationRecord?        @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([governmentServiceVersionId])
+  @@index([actorIdentityId])
+  @@index([createdAt])
+  @@map("service_activation_records")
 }

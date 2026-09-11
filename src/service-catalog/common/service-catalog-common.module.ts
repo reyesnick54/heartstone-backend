@@ -7,7 +7,11 @@ import { ServiceCatalogValidationService } from './service-catalog-validation.se
 
 @Module({
   imports: [RedisModule],
-  providers: [ServiceCatalogValidationService, ServiceCatalogCacheService, ServiceCatalogLifecycleService],
+  providers: [
+    ServiceCatalogValidationService,
+    ServiceCatalogCacheService,
+    ServiceCatalogLifecycleService,
+  ],
   exports: [
     ServiceCatalogValidationService,
     ServiceCatalogCacheService,

@@ -224,7 +224,10 @@ async function createPublishedService(
       formDefinitionId: input.formDefinitionId,
       formVersionId: input.formVersionId,
       applicantCategories: {
-        create: [{ category: ApplicantCategory.BUSINESS }, { category: ApplicantCategory.INVESTOR }],
+        create: [
+          { category: ApplicantCategory.BUSINESS },
+          { category: ApplicantCategory.INVESTOR },
+        ],
       },
       fees: {
         create: [
@@ -243,7 +246,10 @@ async function createPublishedService(
             ruleCode: 'REGISTERED_BUSINESS',
             label: 'Registered business',
             description: 'Applicant must represent a registered business entity.',
-            configuration: { requiredAttribute: 'registeredBusiness', requiresTruthyAttribute: true },
+            configuration: {
+              requiredAttribute: 'registeredBusiness',
+              requiresTruthyAttribute: true,
+            },
             sortOrder: 1,
           },
         ],
