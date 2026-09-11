@@ -1,40 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
-
-export class CreateGovernmentServiceDto {
-  @ApiProperty()
-import { GovernmentServiceStatus } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
-
-export class CreateGovernmentServiceDto {
-  @ApiProperty({ example: 'BUSINESS-LICENSE' })
-  @IsString()
-  @MinLength(1)
-  code!: string;
-
-  @ApiProperty()
-  @ApiProperty({ example: 'Business License Application' })
-  @IsString()
-  @MinLength(1)
-  name!: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @ApiProperty()
-  @IsUUID()
-  responsibleInstitutionId!: string;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsUUID()
-  institutionId?: string;
-
-  @ApiPropertyOptional({ enum: GovernmentServiceStatus })
-  @IsOptional()
-  @IsEnum(GovernmentServiceStatus)
-  status?: GovernmentServiceStatus;
 import { IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
 
 export class CreateGovernmentServiceDto {
