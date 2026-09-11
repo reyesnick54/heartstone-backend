@@ -7,7 +7,7 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import { seedPhase5eOperatingMetadataFixture } from '../src/service-catalog/fixtures/phase-5e-test-fixtures';
-import { FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS } from '../src/service-catalog/service-catalog-schema.constants';
+import { FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS } from '../src/service-catalog/service-catalog-schema.constants';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { asServiceFeeDefinitionListBody } from './helpers/service-catalog-test-types';
 
@@ -38,9 +38,10 @@ describe('Phase 5E must-fail invariants (e2e)', () => {
 
     const fees = asServiceFeeDefinitionListBody(response.body);
     for (const fee of fees) {
-      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS) {
+      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS) {
         expect(fee).not.toHaveProperty(forbiddenField);
       }
+      expect(fee.waived).toBe(false);
     }
   });
 
@@ -59,7 +60,7 @@ describe('Phase 5E must-fail invariants (e2e)', () => {
     for (const modelName of serviceCatalogModels) {
       const pattern = new RegExp(`model ${modelName}\\s*\\{([^}]*)\\}`, 's');
       const block = pattern.exec(schema)?.[1] ?? '';
-      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS) {
+      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS) {
         expect(block).not.toMatch(new RegExp(`\\b${forbiddenField}\\b`));
       }
     }

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
-  FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS,
+  FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS,
   SERVICE_CATALOG_MODEL_NAMES,
   SERVICE_DEPENDENCY_TYPES,
   SERVICE_FEE_CALCULATION_TYPES,
@@ -101,7 +101,7 @@ describe('Service catalog schema coherence (Phase 5E)', () => {
   it('does not include payment state fields in Phase 5 service catalog models', () => {
     for (const modelName of SERVICE_CATALOG_MODEL_NAMES) {
       const block = extractModelBlock(schema, modelName);
-      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS) {
+      for (const forbiddenField of FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS) {
         expect(block).not.toMatch(new RegExp(`\\b${forbiddenField}\\b`));
       }
     }

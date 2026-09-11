@@ -55,12 +55,16 @@ export const SERVICE_CATALOG_MODEL_NAMES = [
   'ServiceRedressRoute',
 ] as const;
 
-export const FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS = [
+export const FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS = [
   'paymentStatus',
   'paymentState',
   'isPaid',
   'paymentConfirmed',
   'paymentApproved',
+] as const;
+
+export const FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS = [
+  ...FORBIDDEN_SERVICE_CATALOG_PAYMENT_FIELDS,
   'approvalOnExpiry',
   'autoApproveOnExpiry',
   'issuedCertificateId',
@@ -68,8 +72,6 @@ export const FORBIDDEN_SERVICE_CATALOG_BOUNDARY_FIELDS = [
   'decisionOutcome',
   'appealDecision',
   'appealOutcome',
-  'waived',
-  'feeWaived',
   'authorityTransferred',
   'conferredAuthority',
 ] as const;
