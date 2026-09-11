@@ -70,10 +70,8 @@ describe('Phase 5E service operating metadata (integration)', () => {
 
     const targets = asServiceLevelTargetListBody(response.body);
     expect(targets).toHaveLength(1);
-    const target = targets[0];
-    expect(target).toBeDefined();
-    expect(target!.approved).toBe(false);
-    expect(target!.isCurrent).toBe(true);
+    expect(targets[0]?.approved).toBe(false);
+    expect(targets[0]?.isCurrent).toBe(true);
   });
 
   it('describes external dependency metadata without transferring authority', async () => {
@@ -87,11 +85,9 @@ describe('Phase 5E service operating metadata (integration)', () => {
 
     const dependencies = asServiceDependencyDefinitionListBody(response.body);
     expect(dependencies).toHaveLength(1);
-    const dependency = dependencies[0];
-    expect(dependency).toBeDefined();
-    expect(dependency!.authorityDependencyId).toBe(fixture.authorityDependencyId);
-    expect(dependency!.authorityTransferred).toBe(false);
-    expect(dependency!.metadataOnly).toBe(true);
+    expect(dependencies[0]?.authorityDependencyId).toBe(fixture.authorityDependencyId);
+    expect(dependencies[0]?.authorityTransferred).toBe(false);
+    expect(dependencies[0]?.metadataOnly).toBe(true);
   });
 
   it('defines certificate and decision outputs without issuing or deciding', async () => {
@@ -121,10 +117,8 @@ describe('Phase 5E service operating metadata (integration)', () => {
 
     const routes = asServiceRedressRouteListBody(response.body);
     expect(routes).toHaveLength(1);
-    const route = routes[0];
-    expect(route).toBeDefined();
-    expect(route!.routeType).toBe('APPEAL');
-    expect(route!.decided).toBe(false);
+    expect(routes[0]?.routeType).toBe('APPEAL');
+    expect(routes[0]?.decided).toBe(false);
   });
 
   it('creates operating metadata through API with governing source linkage', async () => {

@@ -107,7 +107,7 @@ export class ServiceFeeDefinitionsService {
       description: fee.description,
       currency: fee.currency,
       calculationType: fee.calculationType,
-      fixedAmount: fee.fixedAmount?.toString() ?? null,
+      fixedAmount: fee.fixedAmount !== null ? fee.fixedAmount.toFixed(2) : null,
       calculationConfiguration: fee.calculationConfiguration as Record<string, unknown>,
       governingSourceId: fee.governingSourceId,
       collectingInstitutionId: fee.collectingInstitutionId,
