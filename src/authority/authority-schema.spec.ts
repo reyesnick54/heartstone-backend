@@ -8,7 +8,6 @@ import {
   CONTROLLED_FUNCTION_CLASSES,
   FORBIDDEN_AUTHORITY_BOUNDARY_FIELDS,
   FUNCTION_AUTHORITY_LIFECYCLE_STATES,
-  NON_AUTHORITY_MODEL_NAMES,
 } from './authority-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');

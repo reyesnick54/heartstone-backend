@@ -312,6 +312,9 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       data: { requiresDelegation: true },
     });
 
+    await prisma.delegationStructuredScope.deleteMany();
+    await prisma.delegation.deleteMany();
+
     const missing = await evaluate('mf-test-token', {
       functionAuthorityRecordId: base.fn.id,
       action: AuthorityActionType.DECIDE,
@@ -323,8 +326,19 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_DELEGATION,
     );
 
+    const delegation = await prisma.delegation.create({
+      data: {
+        institutionId: base.institution.id,
+        delegatorOfficeId: base.office.id,
+        recipientOfficeholderId: base.officeholder.id,
+        scopeDescription: 'scope',
+        status: DelegationStatus.ACTIVE,
+        effectiveFrom: new Date('2020-01-01'),
+      },
+    });
+
     await prisma.delegation.update({
-      where: { id: base.delegation.id },
+      where: { id: delegation.id },
       data: { effectiveUntil: new Date('2021-01-01') },
     });
     const expired = await evaluate('mf-test-token', {
@@ -333,14 +347,14 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       officeholderId: base.officeholder.id,
       officeId: base.office.id,
       appointmentId: base.appointment.id,
-      delegationId: base.delegation.id,
+      delegationId: delegation.id,
     });
     expect(expired.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.EXPIRED_DELEGATION,
     );
 
     await prisma.delegation.update({
-      where: { id: base.delegation.id },
+      where: { id: delegation.id },
       data: { status: DelegationStatus.REVOKED, effectiveUntil: null },
     });
     const revoked = await evaluate('mf-test-token', {
@@ -349,7 +363,7 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       officeholderId: base.officeholder.id,
       officeId: base.office.id,
       appointmentId: base.appointment.id,
-      delegationId: base.delegation.id,
+      delegationId: delegation.id,
     });
     expect(revoked.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.REVOKED_DELEGATION,
