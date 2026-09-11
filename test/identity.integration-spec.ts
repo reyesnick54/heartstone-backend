@@ -1,9 +1,5 @@
 import { type INestApplication } from '@nestjs/common';
-import {
-  AccountStatus,
-  AuthenticationMethodType,
-  IdentityType,
-} from '@prisma/client';
+import { AccountStatus, AuthenticationMethodType, IdentityType } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
