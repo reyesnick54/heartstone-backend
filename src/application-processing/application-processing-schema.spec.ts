@@ -1,19 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { FORBIDDEN_PHASE_7_MODELS } from './application-processing.constants';
 import {
   APPLICATION_PROCESSING_MODEL_NAMES,
   CASE_COMMUNICATION_TYPES,
   CASE_EVENT_TYPES,
   CASE_MILESTONE_STATUSES,
   CASE_PUBLIC_STATUS_STAGES,
-  FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS,
-  PHASE_7_REFERENCE_FIELDS,
-import { FORBIDDEN_PHASE_7_MODELS } from './application-processing.constants';
-import {
-  APPLICATION_PROCESSING_MODEL_NAMES,
   FORBIDDEN_APPLICATION_AUTHORITY_FIELDS,
   FORBIDDEN_CASE_CLIENT_MUTATION_FIELDS,
+  FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS,
+  PHASE_7_REFERENCE_FIELDS,
 } from './application-processing-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -99,6 +97,9 @@ describe('Application processing schema coherence (Phase 6G)', () => {
   it('documents forbidden client-settable projection fields', () => {
     expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('publicStage');
     expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('caseStatus');
+  });
+});
+
 describe('Application processing schema coherence (Phase 6)', () => {
   const schema = readSchema();
 
@@ -154,6 +155,6 @@ describe('Application processing schema coherence (Phase 6)', () => {
     expect(schema).toContain('model CasePublicStatusProjection');
     const block = extractModelBlock(schema, 'CasePublicStatusProjection');
     expect(block).toContain('sourceCaseStatus');
-    expect(block).toContain('publicStatusLabel');
+    expect(block).toContain('publicStageLabel');
   });
 });

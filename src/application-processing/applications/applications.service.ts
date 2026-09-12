@@ -231,7 +231,7 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    if (application.case?.status !== 'WAITING_APPLICANT') {
+    if (application.case?.caseStatus !== 'WAITING_APPLICANT') {
       throw new ForbiddenException(
         'Corrections are only accepted when case is waiting for applicant',
       );
@@ -300,7 +300,7 @@ export class ApplicationsService {
 
     await this.prisma.case.update({
       where: { id: application.case.id },
-      data: { status: 'COMPLETENESS_REVIEW' },
+      data: { caseStatus: 'COMPLETENESS_REVIEW' },
     });
 
     return {

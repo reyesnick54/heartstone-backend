@@ -26,7 +26,7 @@ export class CaseStatusService {
       await tx.caseStatusHistory.create({
         data: {
           caseId,
-          fromStatus: caseRecord.status,
+          fromStatus: caseRecord.caseStatus,
           toStatus,
           reason,
           actorIdentityId,
@@ -35,7 +35,7 @@ export class CaseStatusService {
 
       return tx.case.update({
         where: { id: caseId, version: caseRecord.version },
-        data: { status: toStatus, version: { increment: 1 } },
+        data: { caseStatus: toStatus, version: { increment: 1 } },
       });
     });
 

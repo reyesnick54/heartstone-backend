@@ -62,7 +62,7 @@ export class CaseDashboardReadService {
         governmentService: true,
         responsibleDepartment: true,
         currentCaseManagerOfficeholder: true,
-        workflowInstances: {
+        timelineWorkflowInstances: {
           where: { status: { in: ['ACTIVE', 'PAUSED', 'SAFE_HALT'] } },
           include: {
             stepInstances: {
@@ -79,7 +79,7 @@ export class CaseDashboardReadService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    const activeWorkflow = caseRecord.workflowInstances[0] ?? null;
+    const activeWorkflow = caseRecord.timelineWorkflowInstances[0] ?? null;
     const milestones = await this.caseMilestoneService.listForCase(caseId);
     const recentEvents = await this.caseEventService.listOfficialTimeline(caseId, 20);
 
