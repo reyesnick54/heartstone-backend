@@ -11,3 +11,4 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.case.deleteMany();
   await prisma.application.deleteMany();
 }
+export { resetApplicationProcessingData } from '../../src/database/application-processing-test-reset';
