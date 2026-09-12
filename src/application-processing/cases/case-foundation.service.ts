@@ -59,6 +59,20 @@ export class CaseFoundationService {
         data: { status: ApplicationStatus.RECEIVED },
       });
 
+      const workflowVersion = await tx.workflowVersion.findFirst({
+        where: {
+          workflowDefinition: { governmentServiceId: application.governmentServiceId },
+          status: 'APPROVED',
+        },
+        orderBy: { approvedAt: 'desc' },
+      });
+
+      if (!workflowVersion) {
+        throw new NotFoundException(
+          `No approved workflow version found for service "${application.governmentServiceId}"`,
+        );
+      }
+
       return tx.case.create({
         data: {
           caseNumber,
@@ -66,9 +80,11 @@ export class CaseFoundationService {
           applicantIdentityId: application.applicantIdentityId,
           governmentServiceId: application.governmentServiceId,
           governmentServiceVersionId: application.governmentServiceVersionId,
+          workflowVersionId: workflowVersion.id,
+          configurationFingerprint: application.configurationFingerprint,
           responsibleInstitutionId: application.governmentService.responsibleInstitutionId,
           responsibleDepartmentId: application.governmentService.responsibleDepartmentId,
-          caseStatus: CaseStatus.RECEIVED,
+          status: CaseStatus.RECEIVED,
         },
       });
     });
@@ -109,6 +125,10 @@ export class CaseFoundationService {
     applicantIdentityId: string;
     governmentServiceId: string;
     governmentServiceVersionId: string;
+    formDefinitionId: string;
+    formVersionId: string;
+    configurationFingerprint: string;
+    applicantCategory: Application['applicantCategory'];
   }): Promise<Application> {
     return this.prisma.application.create({
       data: {
@@ -116,6 +136,10 @@ export class CaseFoundationService {
         applicantIdentityId: input.applicantIdentityId,
         governmentServiceId: input.governmentServiceId,
         governmentServiceVersionId: input.governmentServiceVersionId,
+        formDefinitionId: input.formDefinitionId,
+        formVersionId: input.formVersionId,
+        configurationFingerprint: input.configurationFingerprint,
+        applicantCategory: input.applicantCategory,
         status: ApplicationStatus.SUBMITTED,
       },
     });

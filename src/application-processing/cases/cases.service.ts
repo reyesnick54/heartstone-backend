@@ -33,13 +33,22 @@ export class CasesService {
       application.governmentServiceId,
     );
 
+    const service = await this.prisma.governmentService.findUniqueOrThrow({
+      where: { id: application.governmentServiceId },
+      select: { responsibleInstitutionId: true, responsibleDepartmentId: true },
+    });
+
     const caseRecord = await this.prisma.case.create({
       data: {
         caseNumber: generateReferenceNumber(CASE_NUMBER_PREFIX),
         applicationId: application.id,
+        applicantIdentityId: application.applicantIdentityId,
+        governmentServiceId: application.governmentServiceId,
         governmentServiceVersionId: application.governmentServiceVersionId,
         workflowVersionId: workflowVersion.id,
         configurationFingerprint: application.configurationFingerprint,
+        responsibleInstitutionId: service.responsibleInstitutionId,
+        responsibleDepartmentId: service.responsibleDepartmentId,
         status: CaseStatus.RECEIVED,
       },
     });

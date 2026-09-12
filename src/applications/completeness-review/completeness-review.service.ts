@@ -161,7 +161,8 @@ export class CompletenessReviewService {
 
     if (reviewer.isAiAssisted && reviewer.requiresHumanReview) {
       throw new ForbiddenException({
-        message: 'AI-assisted actors cannot independently finalize consequential completeness review',
+        message:
+          'AI-assisted actors cannot independently finalize consequential completeness review',
         code: APPLICATIONS_EXPLANATION_CODES.AI_CANNOT_FINALIZE_CONSEQUENTIAL_REVIEW,
       });
     }
@@ -242,7 +243,9 @@ export class CompletenessReviewService {
         reason: 'Awaiting applicant correction after deficiency notice',
       });
     } else {
-      explanationCodes.push(APPLICATIONS_EXPLANATION_CODES.ADMINISTRATIVE_COMPLETENESS_NOT_APPROVAL);
+      explanationCodes.push(
+        APPLICATIONS_EXPLANATION_CODES.ADMINISTRATIVE_COMPLETENESS_NOT_APPROVAL,
+      );
 
       await this.workflowService.transition({
         caseId: review.caseId,
@@ -324,8 +327,7 @@ export class CompletenessReviewService {
     items: { isRequired: boolean; status: CompletenessReviewItemStatus }[],
   ): CompletenessReviewStatus {
     const hasUnresolvedRequired = items.some(
-      (item) =>
-        item.isRequired && item.status === CompletenessReviewItemStatus.UNRESOLVED,
+      (item) => item.isRequired && item.status === CompletenessReviewItemStatus.UNRESOLVED,
     );
 
     if (hasUnresolvedRequired) {

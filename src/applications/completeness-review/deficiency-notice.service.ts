@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type CompletenessReviewItem,DeficiencyNoticeStatus } from '@prisma/client';
+import { type CompletenessReviewItem, DeficiencyNoticeStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { APPLICATIONS_EXPLANATION_CODES } from '../applications.constants';
@@ -43,7 +43,8 @@ export class DeficiencyNoticeService {
             create: input.deficientItems.map((item) => ({
               completenessReviewItemId: item.id,
               checklistItemCode: item.checklistItemCode,
-              deficiencyDescription: item.reviewerNotes ?? `Administrative deficiency: ${item.label}`,
+              deficiencyDescription:
+                item.reviewerNotes ?? `Administrative deficiency: ${item.label}`,
               requiredAction: `Provide or correct: ${item.label}`,
             })),
           },

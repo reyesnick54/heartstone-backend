@@ -3,12 +3,7 @@ import { CompletenessReviewItemStatus, CompletenessReviewStatus } from '@prisma/
 import { CompletenessReviewService } from './completeness-review.service';
 
 describe('CompletenessReviewService (unit)', () => {
-  const service = new CompletenessReviewService(
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-  );
+  const service = new CompletenessReviewService({} as never, {} as never, {} as never, {} as never);
 
   it('determines INCOMPLETE when required items are deficient', () => {
     const status = service.determineCompletenessFromItems([

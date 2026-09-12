@@ -1,12 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  Prisma,
-  WorkflowConsequenceLevel,
-  WorkflowVersionStatus,
-} from '@prisma/client';
+import { Prisma, WorkflowConsequenceLevel, WorkflowVersionStatus } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
-import { CreateWorkflowVersionDto, UpdateWorkflowVersionDto } from './dto/create-workflow-version.dto';
+import {
+  CreateWorkflowVersionDto,
+  UpdateWorkflowVersionDto,
+} from './dto/create-workflow-version.dto';
 import { WorkflowVersionResponseDto } from './dto/workflow-version-response.dto';
 import { IMMUTABLE_WORKFLOW_VERSION_STATUSES } from './workflow.constants';
 
@@ -76,9 +75,7 @@ export class WorkflowVersionsService {
     });
 
     if (!latestActive) {
-      throw new BadRequestException(
-        'Cannot supersede without an existing ACTIVE workflow version',
-      );
+      throw new BadRequestException('Cannot supersede without an existing ACTIVE workflow version');
     }
 
     const newVersion = await this.create(workflowDefinitionId, dto);
@@ -209,7 +206,9 @@ export class WorkflowVersionsService {
     }
 
     if (existing.status !== WorkflowVersionStatus.DRAFT) {
-      throw new BadRequestException('Only DRAFT workflow versions can be marked ACTIVE for testing');
+      throw new BadRequestException(
+        'Only DRAFT workflow versions can be marked ACTIVE for testing',
+      );
     }
 
     const updated = await this.prisma.workflowVersion.update({
@@ -230,7 +229,11 @@ export class WorkflowVersionsService {
 
   private assertNoClientStatusMutation(dto: UpdateWorkflowVersionDto): void {
     const body = dto as Record<string, unknown>;
-    for (const field of ['status', 'supersededByVersionId', 'activationFunctionAuthorityRecordId']) {
+    for (const field of [
+      'status',
+      'supersededByVersionId',
+      'activationFunctionAuthorityRecordId',
+    ]) {
       if (field in body) {
         throw new BadRequestException(`Client-supplied "${field}" is not accepted`);
       }

@@ -527,6 +527,9 @@ describe('Phase 6 must-fail invariants (e2e)', () => {
     await prisma.caseCommunication.create({
       data: {
         caseId,
+        communicationType: 'INTERNAL_NOTE',
+        recipientType: 'INTERNAL',
+        channel: 'SYSTEM',
         visibility: 'INTERNAL',
         subject: 'Internal note',
         body: 'Sensitive internal content',

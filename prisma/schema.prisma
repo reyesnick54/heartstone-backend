@@ -114,7 +114,9 @@ model Institution {
   institutionalAuthorityActs    InstitutionalAuthorityAct[]
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
+  masterAdministrativeFiles     MasterAdministrativeFile[]
   caseReferrals                 CaseReferral[]
+  retentionSchedules            RetentionSchedule[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -139,20 +141,20 @@ model GovernmentBody {
 }
 
 model Department {
-  id                            String                    @id @default(uuid()) @db.Uuid
-  institutionId                 String                    @db.Uuid
+  id                            String                     @id @default(uuid()) @db.Uuid
+  institutionId                 String                     @db.Uuid
   code                          String
   name                          String
   description                   String?
-  status                        StructuralLifecycleStatus @default(ACTIVE)
-  createdAt                     DateTime                  @default(now())
-  updatedAt                     DateTime                  @updatedAt
-  institution                   Institution               @relation(fields: [institutionId], references: [id])
+  status                        StructuralLifecycleStatus  @default(ACTIVE)
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  institution                   Institution                @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
-  responsibleWorkflowDefinitions WorkflowDefinition[]
-  responsibleWorkflowSteps      WorkflowStepDefinition[]
+  masterAdministrativeFiles     MasterAdministrativeFile[]
+  departmentalReviewRecords     DepartmentalReviewRecord[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -172,10 +174,8 @@ model Office {
   appointments                 Appointment[]
   delegationsAsDelegator       Delegation[]                  @relation("DelegationDelegatorOffice")
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOffice")
-  functionAuthorityRecords       FunctionAuthorityRecord[]
+  functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
-  responsibleWorkflowSteps     WorkflowStepDefinition[]
-  ownedWorkflowDefinitions     WorkflowDefinition[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -196,11 +196,9 @@ model Officeholder {
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   ownedGovernmentServices      GovernmentService[]
-  managedCases                 Case[]                        @relation("CaseManager")
+  casesManaged                 Case[]                        @relation("CaseManager")
   caseEventsAsActor            CaseEvent[]                   @relation("CaseEventOfficeholder")
-  communicationsAsSender       CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
-  completenessReviews          CompletenessReview[] @relation("CompletenessReviewReviewerOfficeholder")
-  deficiencyNoticesIssued      DeficiencyNotice[] @relation("DeficiencyNoticeIssuerOfficeholder")
+  communicationsSent           CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
 
   @@map("officeholders")
 }
@@ -260,6 +258,7 @@ model ExternalAuthority {
   externalDependencyDeterminations ExternalDependencyDetermination[]
   institutionalAuthorityActs       InstitutionalAuthorityAct[]
   caseReferrals                    CaseReferral[]
+  professionalReviewRecords        ProfessionalReviewRecord[]
 
   @@map("external_authorities")
 }
@@ -446,12 +445,7 @@ model Identity {
   applicationsAsApplicant   Application[]              @relation("ApplicationApplicant")
   casesAsApplicant          Case[]                     @relation("CaseApplicant")
   caseEventsAsActor         CaseEvent[]                @relation("CaseEventActor")
-  communicationsAsSender    CaseCommunication[]        @relation("CommunicationSender")
-  applicationCases          ApplicationCase[]          @relation("ApplicationCaseApplicant")
-  applicationSubmissions    ApplicationSubmission[]    @relation("ApplicationSubmissionSubmitter")
-  completenessReviews       CompletenessReview[]       @relation("CompletenessReviewReviewer")
-  deficiencyNoticesIssued   DeficiencyNotice[]         @relation("DeficiencyNoticeIssuer")
-  applications              Application[]
+  communicationsSent        CaseCommunication[]        @relation("CommunicationSender")
 
   @@index([userAccountId])
   @@index([personId])
@@ -819,9 +813,6 @@ model FunctionAuthorityRecord {
   institutionalActs            InstitutionalAuthorityAct[]
   serviceFunctionMappings      ServiceFunctionMapping[]
   serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
-  workflowSteps                WorkflowStep[]
-  workflowActivationAuthorities WorkflowVersion[]               @relation("WorkflowActivationAuthority")
-  workflowStepAuthorities     WorkflowStepDefinition[]
   workflowStepDefinitions      WorkflowStepDefinition[]
 
   @@index([classification])
@@ -1071,11 +1062,6 @@ model AuthorityEvaluationRecord {
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords  ServiceActivationRecord[]
-  completenessReviews       CompletenessReview[]
-  functionAuthorityRecord        FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
-  serviceActivationRecords       ServiceActivationRecord[]
-  caseWorkflowStepInstances      CaseWorkflowStepInstance[]
-  caseWorkflowTransitionEvents   CaseWorkflowTransitionEvent[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1279,8 +1265,6 @@ model GovernmentService {
   versions                 GovernmentServiceVersion[]
   applications             Application[]
   cases                    Case[]
-  applicationCases         ApplicationCase[]
-  applications             Application[]
   workflowDefinitions      WorkflowDefinition[]
 
   @@index([responsibleInstitutionId])
@@ -1337,13 +1321,6 @@ model GovernmentServiceVersion {
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
   formDefinitions                     FormDefinition[]
-  applications                        Application[]
-  applicationCases                    ApplicationCase[]
-  applicationSubmissions              ApplicationSubmission[]
-  completenessReviews                 CompletenessReview[]
-  cases                               CaseRecord[]
-  workflowDefinitions                 WorkflowDefinition[]
-  workflowVersions                    WorkflowVersion[]
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
   cases                               Case[]
@@ -1641,7 +1618,7 @@ model ServiceActivationRecord {
   @@map("service_activation_records")
 }
 
-// ─── Phase 6: Application Processing & Cases ─────────────────────────────────
+// ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
 
 enum ApplicationStatus {
   DRAFT
@@ -1651,17 +1628,29 @@ enum ApplicationStatus {
   CLOSED
 }
 
+enum ApplicationSubmissionStatus {
+  SUBMITTED
+  ACKNOWLEDGED
+  SUPERSEDED
+}
+
 enum CaseStatus {
   RECEIVED
   OPEN
+  INTAKE
   IN_PROGRESS
   COMPLETENESS_REVIEW
+  WAITING_APPLICANT
   SUBSTANTIVE_REVIEW
+  PENDING_EXTERNAL
+  PENDING_INTERNAL
   REFERRAL_PENDING
   PROFESSIONAL_REVIEW
   INSPECTION
   DECISION_PENDING
   SAFE_HALT
+  SAFE_HALTED
+  SUSPENDED
   WITHDRAWN
   CLOSED
   ARCHIVED
@@ -1679,471 +1668,30 @@ enum CasePriority {
   NORMAL
   HIGH
   URGENT
-// ─── Phase 6: Applications, Workflow & Cases ─────────────────────────────────
-
-enum ApplicationCaseStatus {
-  OPEN
-  CLOSED
-  SAFE_HALTED
-}
-
-enum CaseWorkflowStage {
-  SUBMITTED
-  COMPLETENESS_REVIEW
-  INCOMPLETE
-  WAITING_APPLICANT
-  RESUBMITTED
-  ADMINISTRATIVELY_COMPLETE
-  SUBSTANTIVE_REVIEW
-  SAFE_HALTED
-}
-
-enum CompletenessReviewStatus {
-  PENDING
-  IN_REVIEW
-  INCOMPLETE
-  COMPLETE
-  UNRESOLVED
-  SAFE_HALTED
-}
-
-enum CompletenessReviewItemStatus {
-  PRESENT
-  MISSING
-  ILLEGIBLE
-  CORRUPTED
-  APPARENTLY_INCONSISTENT
-  SUBSTITUTION_PENDING
-  NOT_APPLICABLE
-  UNRESOLVED
-}
-
-enum DeficiencyNoticeStatus {
-  DRAFT
-  ISSUED
-  RESPONDED
-  EXPIRED
-// ─── Phase 6: Applications, Cases, and Workflow Runtime ─────────────────────
-
-enum CaseStatus {
-  OPEN
-  IN_PROGRESS
-  DECISION_PENDING
-  AWAITING_ISSUANCE
-  CLOSED
-  CANCELLED
-}
-
-enum WorkflowVersionStatus {
-  DRAFT
-  ACTIVE
-  SUSPENDED
-  SUPERSEDED
-  ARCHIVED
-}
-
-enum WorkflowStepType {
-  ADMINISTRATIVE
-  DECISION_GATE
-  ISSUANCE_GATE
-  PARALLEL_FORK
-  PARALLEL_JOIN
-  WAITING_APPLICANT
-  WAITING_EXTERNAL
-  WAITING_PROFESSIONAL
-}
-
-enum WorkflowTransitionConditionType {
-  ALWAYS
-  STEP_COMPLETED
-  ALL_JOIN_BRANCHES_COMPLETE
-  CORRECTION_RETURN
-  ESCALATION
 }
 
 enum CaseWorkflowInstanceStatus {
   NOT_STARTED
-  ACTIVE
-  PAUSED
-  SAFE_HALT
-  COMPLETED
-  CANCELLED
-  WAITING_APPLICANT
-  WAITING_EXTERNAL
-  WAITING_PROFESSIONAL
-  PAUSED
-  SAFE_HALTED
-  SUSPENDED
-  COMPLETED
-  CANCELLED
-// ─── Phase 6C: Versioned Workflow Definition Engine ──────────────────────────
-
-enum WorkflowVersionStatus {
-  DRAFT
-  AUTHORITY_REVIEW
-  PROCEDURE_APPROVED
-  CONFIGURED
-  TESTED
-  ACCEPTED
-  ACTIVE
-  PAUSED
-  RESTRICTED
-  SUSPENDED
-  SUPERSEDED
-  RETIRED
-}
-
-enum WorkflowConsequenceLevel {
-  INFORMATIONAL
-  PROCEDURAL
-  SUBSTANTIVE
-  HIGH_CONSEQUENCE
-}
-
-enum WorkflowStageType {
-  INTAKE
-  COMPLETENESS
-  SUBSTANTIVE_REVIEW
-  EXTERNAL_REFERRAL
-  PROFESSIONAL_REVIEW
-  INSPECTION
-  RECOMMENDATION
-  DECISION_GATE
-  ISSUANCE_GATE
-  NOTICE
-  OVERSIGHT
-  CLOSURE
-  CUSTOM_ADMINISTRATIVE
-}
-
-enum WorkflowStepType {
-  ADMINISTRATIVE_TASK
-  REVIEW
-  VERIFICATION
-  EXTERNAL_REFERRAL
-  PROFESSIONAL_REFERRAL
-  RECOMMENDATION
-  DECISION
-  ISSUANCE
-  NOTICE
-  WAIT
-  CUSTOM
-}
-
-enum WorkflowTransitionType {
-  NORMAL
-  CONDITIONAL
-  RETURN_FOR_CORRECTION
-  ESCALATION
-  EXTERNAL_REFERRAL
-  PROFESSIONAL_REFERRAL
-  SAFE_HALT
-  WITHDRAWAL
-  CLOSURE
-}
-
-model WorkflowDefinition {
-  id                       String             @id @default(uuid()) @db.Uuid
-  code                     String             @unique
-  name                     String
-  governmentServiceId      String             @db.Uuid
-  responsibleDepartmentId  String             @db.Uuid
-  institutionalOwnerOfficeId String?          @db.Uuid
-  description              String?
-  createdAt                DateTime           @default(now())
-  updatedAt                DateTime           @updatedAt
-  governmentService        GovernmentService  @relation(fields: [governmentServiceId], references: [id])
-  responsibleDepartment    Department         @relation(fields: [responsibleDepartmentId], references: [id])
-  institutionalOwnerOffice Office?            @relation(fields: [institutionalOwnerOfficeId], references: [id])
-  versions                 WorkflowVersion[]
-
-  @@index([governmentServiceId])
-  @@index([responsibleDepartmentId])
-  @@index([institutionalOwnerOfficeId])
-// ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
-
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  WITHDRAWN
-  CLOSED
-}
-
-enum ApplicationSubmissionStatus {
-  SUBMITTED
-  ACKNOWLEDGED
-  SUPERSEDED
-}
-
-enum CaseStatus {
-  RECEIVED
-  INTAKE
-  COMPLETENESS_REVIEW
-  WAITING_APPLICANT
-  SUBSTANTIVE_REVIEW
-  PENDING_EXTERNAL
-  PENDING_INTERNAL
-  DECISION_PENDING
-  SAFE_HALTED
-  SUSPENDED
-  CLOSED
-}
-
-enum CaseWorkflowInstanceStatus {
   PENDING
   ACTIVE
+  PAUSED
   WAITING_APPLICANT
   WAITING_EXTERNAL
+  SAFE_HALT
   SAFE_HALTED
   COMPLETED
   SUSPENDED
+  CANCELLED
 }
 
 enum CaseWorkflowStepInstanceStatus {
   PENDING
-  IN_PROGRESS
-  COMPLETED
-  SKIPPED
-  BLOCKED
-}
-
-enum CaseEventType {
-  APPLICATION_RECEIVED
-  CASE_OPENED
-  CASE_ASSIGNED
-  WORKFLOW_STARTED
-  STEP_STARTED
-  STEP_COMPLETED
-  COMPLETENESS_STARTED
-  DEFICIENCY_ISSUED
-  APPLICANT_RESPONSE_RECEIVED
-  COMPLETENESS_COMPLETED
-  REFERRED
-  REFERRAL_ACKNOWLEDGED
-  REFERRAL_RESPONSE_RECEIVED
-  PROFESSIONAL_REVIEW_REQUESTED
-  INSPECTION_REQUESTED
-  ISSUE_ESCALATED
-  WORKFLOW_PAUSED
-  WORKFLOW_RESUMED
-  SAFE_HALT
-  DECISION_PENDING
-  WITHDRAWN
-  CLOSED
-}
-
-enum CaseEventPublicVisibility {
-  INTERNAL
-  OFFICIAL
-  APPLICANT_VISIBLE
-}
-
-enum CaseCommunicationType {
-  APPLICANT_MESSAGE
-  DEFICIENCY_NOTICE
-  REQUEST_FOR_INFORMATION
-  STATUS_UPDATE
-  REFERRAL_NOTICE
-  INTERNAL_NOTE
-  EXTERNAL_CORRESPONDENCE
-  SYSTEM_NOTICE
-}
-
-enum CaseCommunicationChannel {
-  PORTAL
-  EMAIL
-  SMS
-  POSTAL
-  COUNTER
-  SYSTEM
-}
-
-enum CaseCommunicationDeliveryStatus {
-  DRAFT
-  QUEUED
-  SENT
-  DELIVERED
-  FAILED
-  RECEIVED
-}
-
-enum CaseRecipientType {
-  APPLICANT
-  OFFICEHOLDER
-  DEPARTMENT
-  EXTERNAL_AUTHORITY
-  INTERNAL
-  SYSTEM
-}
-
-enum CaseRecordClassification {
-  PUBLIC
-  OFFICIAL
-  INTERNAL
-  RESTRICTED
-  PRIVILEGED
-}
-
-enum CaseMilestoneStatus {
-  UPCOMING
-  IN_PROGRESS
-  AT_RISK
-  DELAYED
-  COMPLETED
-  CANCELLED
-}
-
-enum CasePublicStatusStage {
-  RECEIVED
-  CHECKING_SUBMISSION
-  MORE_INFORMATION_NEEDED
-  UNDER_REVIEW
-  WAITING_ON_OTHER_AUTHORITY
-  PROFESSIONAL_REVIEW
-  INSPECTION
-  DECISION_PENDING
-  COMPLETED
-  CLOSED
-}
-
-model Application {
-  id                         String            @id @default(uuid()) @db.Uuid
-  applicationNumber          String            @unique
-  applicantIdentityId        String            @db.Uuid
-  governmentServiceId        String            @db.Uuid
-  governmentServiceVersionId String            @db.Uuid
-  status                     ApplicationStatus @default(DRAFT)
-  createdAt                  DateTime          @default(now())
-  updatedAt                  DateTime          @updatedAt
-  applicantIdentity          Identity          @relation("ApplicationApplicant", fields: [applicantIdentityId], references: [id])
-  governmentService          GovernmentService @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  case                       Case?
-
-  @@index([applicantIdentityId])
-  @@index([governmentServiceId])
-  @@index([governmentServiceVersionId])
-  @@map("applications")
-}
-
-model Case {
-  id                               String           @id @default(uuid()) @db.Uuid
-  caseNumber                       String           @unique
-  applicationId                    String           @unique @db.Uuid
-  applicantIdentityId              String           @db.Uuid
-  governmentServiceId              String           @db.Uuid
-  governmentServiceVersionId         String           @db.Uuid
-  responsibleInstitutionId         String           @db.Uuid
-  responsibleDepartmentId          String           @db.Uuid
-  caseStatus                       CaseStatus       @default(RECEIVED)
-  legalStatus                      CaseLegalStatus  @default(NONE)
-  priority                         CasePriority     @default(NORMAL)
-  openedAt                         DateTime         @default(now())
-  closedAt                         DateTime?
-  currentCaseManagerOfficeholderId String?          @db.Uuid
-  masterAdministrativeFileReference String?
-  documentRegisterReference        String?
-  evidencePacketReference          String?
-  recordsClassificationReference   String?
-  retentionLegalHoldReference      String?
-  createdAt                        DateTime         @default(now())
-  updatedAt                        DateTime         @updatedAt
-  application                      Application      @relation(fields: [applicationId], references: [id])
-  applicantIdentity                Identity         @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
-  governmentService                GovernmentService @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion         GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  responsibleInstitution           Institution      @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment            Department       @relation(fields: [responsibleDepartmentId], references: [id])
-  currentCaseManagerOfficeholder   Officeholder?    @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
-  workflowInstances                CaseWorkflowInstance[]
-  events                           CaseEvent[]
-  communications                   CaseCommunication[]
-  milestones                       CaseMilestone[]
-  publicStatusProjection           CasePublicStatusProjection?
-
-  @@index([applicantIdentityId])
-  @@index([governmentServiceId])
-  @@index([responsibleDepartmentId])
-  @@index([caseStatus])
-  @@index([currentCaseManagerOfficeholderId])
-  @@map("cases")
-}
-
-model CaseWorkflowInstance {
-  id                       String                     @id @default(uuid()) @db.Uuid
-  caseId                   String                     @db.Uuid
-  workflowVersionReference String
-  status                   CaseWorkflowInstanceStatus @default(NOT_STARTED)
-  currentStageKey          String?
-  currentStageLabel        String?
-  startedAt                DateTime?
-  completedAt              DateTime?
-  pausedAt                 DateTime?
-  safeHaltActive           Boolean                    @default(false)
-  safeHaltPublicLabel      String?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  case                     Case                       @relation(fields: [caseId], references: [id])
-  stepInstances            CaseWorkflowStepInstance[]
-  events                   CaseEvent[]
-
-  @@index([caseId])
-  READY
-  IN_PROGRESS
-  WAITING
-  BLOCKED
-  COMPLETED
-  SKIPPED_AUTHORIZED
-  SAFE_HALTED
-  CANCELLED
-}
-
-enum CaseWorkflowTransitionEventType {
-  WORKFLOW_STARTED
-  STEP_STARTED
-  STEP_COMPLETED
-  TRANSITION_EVALUATED
-  PARALLEL_FORK
-  PARALLEL_JOIN
-  PAUSE
-  RESUME
-  RETURN_FOR_CORRECTION
-  ESCALATION
-  SAFE_HALT
-  WORKFLOW_COMPLETED
-  WORKFLOW_CANCELLED
-}
-
-model CaseRecord {
-  id                         String                   @id @default(uuid()) @db.Uuid
-  caseReference              String                   @unique
-  governmentServiceVersionId String                   @db.Uuid
-  status                     CaseStatus               @default(OPEN)
-  createdAt                  DateTime                 @default(now())
-  updatedAt                  DateTime                 @updatedAt
-  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  workflowInstances          CaseWorkflowInstance[]
-
-  @@index([governmentServiceVersionId])
-  @@index([status])
-  @@map("cases")
-}
-
-model WorkflowDefinition {
-  id                         String                   @id @default(uuid()) @db.Uuid
-  code                       String                   @unique
-  name                       String
-  governmentServiceVersionId String                   @db.Uuid
-  createdAt                  DateTime                 @default(now())
-  updatedAt                  DateTime                 @updatedAt
-  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  versions                   WorkflowVersion[]
-
-  @@index([governmentServiceVersionId])
   ACTIVE
+  IN_PROGRESS
   COMPLETED
   SKIPPED
   FAILED
+  BLOCKED
   WAITING_APPLICANT
   WAITING_EXTERNAL
   SAFE_HALTED
@@ -2194,12 +1742,6 @@ enum CompletenessReviewOutcome {
   COMPLETE
 }
 
-enum ChecklistItemReviewStatus {
-  PRESENT
-  MISSING
-  NOT_APPLICABLE
-}
-
 enum DeficiencyNoticeStatus {
   ISSUED
   RESPONDED
@@ -2208,174 +1750,6 @@ enum DeficiencyNoticeStatus {
 }
 
 enum ApplicantInformationRequestStatus {
-  OPEN
-  RESPONDED
-  CLOSED
-  EXPIRED
-}
-
-enum ApplicationCaseNotificationOutboxStatus {
-  PENDING
-  DISPATCHED
-  FAILED
-}
-
-model ApplicationCase {
-  id                         String                              @id @default(uuid()) @db.Uuid
-  caseReference              String                              @unique
-  governmentServiceId        String                              @db.Uuid
-  governmentServiceVersionId String                              @db.Uuid
-  configurationFingerprint   String
-  applicantIdentityId        String                              @db.Uuid
-  status                     ApplicationCaseStatus               @default(OPEN)
-  currentWorkflowStage       CaseWorkflowStage                   @default(SUBMITTED)
-  workflowStageEnteredAt     DateTime                            @default(now())
-  createdAt                  DateTime                            @default(now())
-  updatedAt                  DateTime                            @updatedAt
-  governmentService          GovernmentService                   @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion   GovernmentServiceVersion            @relation(fields: [governmentServiceVersionId], references: [id])
-  applicantIdentity          Identity                            @relation("ApplicationCaseApplicant", fields: [applicantIdentityId], references: [id])
-  submissions                ApplicationSubmission[]
-  completenessReviews        CompletenessReview[]
-  deficiencyNotices          DeficiencyNotice[]
-  applicantInformationRequests ApplicantInformationRequest[]
-  workflowTransitions        CaseWorkflowTransition[]
-  notificationOutbox         ApplicationCaseNotificationOutbox[]
-
-  @@index([governmentServiceId])
-  @@index([governmentServiceVersionId])
-  @@index([applicantIdentityId])
-  @@index([currentWorkflowStage])
-  @@map("application_cases")
-}
-
-model ApplicationSubmission {
-  id                            String              @id @default(uuid()) @db.Uuid
-  caseId                        String              @db.Uuid
-  submissionSequence              Int
-  governmentServiceVersionId      String              @db.Uuid
-  formVersionId                   String?             @db.Uuid
-  configurationFingerprint        String
-  pinnedChecklistItemIds          Json
-  pinnedChecklistFingerprint      String
-  answers                         Json                @default("{}")
-  submittedAt                     DateTime
-  submittedByIdentityId           String              @db.Uuid
-  priorSubmissionId               String?             @db.Uuid
-  triggeredByDeficiencyNoticeId   String?             @db.Uuid
-  createdAt                       DateTime            @default(now())
-  case                            ApplicationCase     @relation(fields: [caseId], references: [id])
-  governmentServiceVersion        GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  submittedByIdentity             Identity            @relation("ApplicationSubmissionSubmitter", fields: [submittedByIdentityId], references: [id])
-  priorSubmission                 ApplicationSubmission? @relation("ApplicationSubmissionCorrectionChain", fields: [priorSubmissionId], references: [id])
-  correctionSubmissions           ApplicationSubmission[] @relation("ApplicationSubmissionCorrectionChain")
-  triggeredByDeficiencyNotice     DeficiencyNotice?   @relation("DeficiencyNoticeCorrectionSubmission", fields: [triggeredByDeficiencyNoticeId], references: [id])
-  completenessReviews             CompletenessReview[]
-  deficiencyNotices               DeficiencyNotice[]
-  originalInformationRequests     ApplicantInformationRequest[] @relation("ApplicantInformationRequestOriginalSubmission")
-  responseInformationRequests     ApplicantInformationRequest[] @relation("ApplicantInformationRequestResponseSubmission")
-
-  @@unique([caseId, submissionSequence])
-  @@index([caseId])
-  @@index([governmentServiceVersionId])
-  @@index([submittedByIdentityId])
-  @@index([priorSubmissionId])
-  @@map("application_submissions")
-}
-
-model CaseWorkflowTransition {
-  id              String            @id @default(uuid()) @db.Uuid
-  caseId          String            @db.Uuid
-  fromStage       CaseWorkflowStage
-  toStage         CaseWorkflowStage
-  reason          String?
-  actorIdentityId String?           @db.Uuid
-  createdAt       DateTime          @default(now())
-  case            ApplicationCase   @relation(fields: [caseId], references: [id])
-
-  @@index([caseId])
-  @@index([createdAt])
-  @@map("case_workflow_transitions")
-}
-
-model CompletenessReview {
-  id                              String                   @id @default(uuid()) @db.Uuid
-  caseId                          String                   @db.Uuid
-  applicationSubmissionId         String                   @db.Uuid
-  governmentServiceVersionId      String                   @db.Uuid
-  checklistConfigurationFingerprint String
-  reviewerIdentityId              String?                  @db.Uuid
-  reviewerOfficeholderId          String?                  @db.Uuid
-  status                          CompletenessReviewStatus @default(PENDING)
-  reviewSequence                  Int                      @default(1)
-  startedAt                       DateTime?
-  completedAt                     DateTime?
-  authorityEvaluationRecordId     String?                  @db.Uuid
-  createdAt                       DateTime                 @default(now())
-  updatedAt                       DateTime                 @updatedAt
-  case                            ApplicationCase          @relation(fields: [caseId], references: [id])
-  applicationSubmission           ApplicationSubmission    @relation(fields: [applicationSubmissionId], references: [id])
-  governmentServiceVersion        GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  reviewerIdentity                Identity?                @relation("CompletenessReviewReviewer", fields: [reviewerIdentityId], references: [id])
-  reviewerOfficeholder            Officeholder?            @relation("CompletenessReviewReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
-  authorityEvaluationRecord       AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
-  items                           CompletenessReviewItem[]
-  deficiencyNotices               DeficiencyNotice[]
-
-  @@index([caseId])
-  @@index([applicationSubmissionId])
-  @@index([governmentServiceVersionId])
-  @@index([status])
-  @@map("completeness_reviews")
-}
-
-model CompletenessReviewItem {
-  id                   String                       @id @default(uuid()) @db.Uuid
-  completenessReviewId String                       @db.Uuid
-  checklistItemId      String                       @db.Uuid
-  checklistItemCode    String
-  label                String
-  isRequired           Boolean                      @default(true)
-  status               CompletenessReviewItemStatus @default(UNRESOLVED)
-  reviewerNotes        String?
-  createdAt            DateTime                     @default(now())
-  updatedAt            DateTime                     @updatedAt
-  completenessReview   CompletenessReview           @relation(fields: [completenessReviewId], references: [id], onDelete: Cascade)
-  deficiencyNoticeItems DeficiencyNoticeItem[]
-
-  @@unique([completenessReviewId, checklistItemCode])
-  @@index([completenessReviewId])
-  @@index([checklistItemId])
-  @@map("completeness_review_items")
-}
-
-model DeficiencyNotice {
-  id                         String                 @id @default(uuid()) @db.Uuid
-  reference                  String                 @unique
-  caseId                     String                 @db.Uuid
-  applicationSubmissionId    String                 @db.Uuid
-  completenessReviewId       String                 @db.Uuid
-  requiredApplicantAction    String
-  responseDeadline           DateTime
-  departmentContactReference String
-  issuedByIdentityId         String                 @db.Uuid
-  issuedByOfficeholderId     String?                @db.Uuid
-  issuedAt                   DateTime
-  status                     DeficiencyNoticeStatus @default(ISSUED)
-  isProceduralNotice         Boolean                @default(true)
-  createdAt                  DateTime               @default(now())
-  case                       ApplicationCase        @relation(fields: [caseId], references: [id])
-  applicationSubmission      ApplicationSubmission    @relation(fields: [applicationSubmissionId], references: [id])
-  completenessReview         CompletenessReview     @relation(fields: [completenessReviewId], references: [id])
-  issuedByIdentity           Identity               @relation("DeficiencyNoticeIssuer", fields: [issuedByIdentityId], references: [id])
-  issuedByOfficeholder       Officeholder?          @relation("DeficiencyNoticeIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
-  items                      DeficiencyNoticeItem[]
-  applicantInformationRequests ApplicantInformationRequest[]
-  correctionSubmissions      ApplicationSubmission[] @relation("DeficiencyNoticeCorrectionSubmission")
-
-  @@index([caseId])
-  @@index([applicationSubmissionId])
-  @@index([completenessReviewId])
   ISSUED
   RESPONDED
   EXPIRED
@@ -2406,6 +1780,8 @@ enum CaseReferralResponseAuthStatus {
   UNAUTHENTICATED
   AUTHENTICATED
   REJECTED
+  VERIFIED
+  DISPUTED
 }
 
 enum CaseSlaClockStatus {
@@ -2438,17 +1814,25 @@ enum CaseEventType {
   APPLICATION_RECEIVED
   ACKNOWLEDGMENT_ISSUED
   CASE_CREATED
+  CASE_OPENED
+  CASE_ASSIGNED
   WORKFLOW_STARTED
   STEP_STARTED
   STEP_COMPLETED
   STEP_FAILED
   COMPLETENESS_REVIEW_STARTED
+  COMPLETENESS_STARTED
   COMPLETENESS_REVIEW_COMPLETED
+  COMPLETENESS_COMPLETED
   DEFICIENCY_ISSUED
   APPLICANT_CORRECTION_RECEIVED
+  APPLICANT_RESPONSE_RECEIVED
   REFERRAL_CREATED
+  REFERRED
   REFERRAL_ACKNOWLEDGED
   REFERRAL_RESPONSE_RECEIVED
+  PROFESSIONAL_REVIEW_REQUESTED
+  INSPECTION_REQUESTED
   ASSIGNMENT_CREATED
   ASSIGNMENT_SUPERSEDED
   SLA_CLOCK_STARTED
@@ -2457,15 +1841,73 @@ enum CaseEventType {
   SLA_BREACHED
   ESCALATION_CREATED
   ISSUE_CREATED
+  ISSUE_ESCALATED
   STATUS_CHANGED
+  WORKFLOW_PAUSED
+  WORKFLOW_RESUMED
   SAFE_HALT
   SUSPENSION_APPLIED
+  DECISION_PENDING
+  WITHDRAWN
+  CLOSED
+}
+
+enum CaseEventPublicVisibility {
+  INTERNAL
+  OFFICIAL
+  APPLICANT_VISIBLE
 }
 
 enum CaseCommunicationVisibility {
   INTERNAL
   APPLICANT
   EXTERNAL
+}
+
+enum CaseCommunicationType {
+  APPLICANT_MESSAGE
+  DEFICIENCY_NOTICE
+  REQUEST_FOR_INFORMATION
+  STATUS_UPDATE
+  REFERRAL_NOTICE
+  INTERNAL_NOTE
+  EXTERNAL_CORRESPONDENCE
+  SYSTEM_NOTICE
+}
+
+enum CaseCommunicationChannel {
+  PORTAL
+  EMAIL
+  SMS
+  POSTAL
+  COUNTER
+  SYSTEM
+}
+
+enum CaseCommunicationDeliveryStatus {
+  DRAFT
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  RECEIVED
+}
+
+enum CaseRecipientType {
+  APPLICANT
+  OFFICEHOLDER
+  DEPARTMENT
+  EXTERNAL_AUTHORITY
+  INTERNAL
+  SYSTEM
+}
+
+enum CaseRecordClassification {
+  PUBLIC
+  OFFICIAL
+  INTERNAL
+  RESTRICTED
+  PRIVILEGED
 }
 
 enum CaseMilestoneType {
@@ -2475,6 +1917,28 @@ enum CaseMilestoneType {
   SUBSTANTIVE_REVIEW_START
   EXTERNAL_REFERRAL
   DECISION_PENDING
+}
+
+enum CaseMilestoneStatus {
+  UPCOMING
+  IN_PROGRESS
+  AT_RISK
+  DELAYED
+  COMPLETED
+  CANCELLED
+}
+
+enum CasePublicStatusStage {
+  RECEIVED
+  CHECKING_SUBMISSION
+  MORE_INFORMATION_NEEDED
+  UNDER_REVIEW
+  WAITING_ON_OTHER_AUTHORITY
+  PROFESSIONAL_REVIEW
+  INSPECTION
+  DECISION_PENDING
+  COMPLETED
+  CLOSED
 }
 
 model Application {
@@ -2494,7 +1958,7 @@ model Application {
   idempotencyKey             String?
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
-  applicantIdentity          Identity                 @relation(fields: [applicantIdentityId], references: [id])
+  applicantIdentity          Identity                 @relation("ApplicationApplicant", fields: [applicantIdentityId], references: [id])
   organization               Organization?            @relation(fields: [organizationId], references: [id])
   representativeAuthority    RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
   governmentService          GovernmentService        @relation(fields: [governmentServiceId], references: [id])
@@ -2542,35 +2006,59 @@ model ApplicationSubmission {
 }
 
 model Case {
-  id                         String                      @id @default(uuid()) @db.Uuid
-  caseNumber                 String                      @unique
-  applicationId              String                      @unique @db.Uuid
-  governmentServiceVersionId String                      @db.Uuid
-  workflowVersionId          String                      @db.Uuid
-  configurationFingerprint   String
-  status                     CaseStatus                  @default(RECEIVED)
-  legalStatusLabel           String?
-  version                    Int                         @default(1)
-  createdAt                  DateTime                    @default(now())
-  updatedAt                  DateTime                    @updatedAt
-  application                Application                 @relation(fields: [applicationId], references: [id])
-  governmentServiceVersion   GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
-  workflowVersion            WorkflowVersion             @relation(fields: [workflowVersionId], references: [id])
-  statusHistory              CaseStatusHistory[]
-  workflowInstance           CaseWorkflowInstance?
-  assignments                CaseAssignment[]
-  referrals                  CaseReferral[]
-  slaClocks                  CaseSlaClock[]
-  escalations                CaseEscalation[]
-  issues                     CaseIssue[]
-  events                     CaseEvent[]
-  communications             CaseCommunication[]
-  milestones                 CaseMilestone[]
-  publicStatusProjection     CasePublicStatusProjection?
+  id                                String                      @id @default(uuid()) @db.Uuid
+  caseNumber                        String                      @unique
+  applicationId                     String                      @unique @db.Uuid
+  applicantIdentityId               String                      @db.Uuid
+  governmentServiceId               String                      @db.Uuid
+  governmentServiceVersionId        String                      @db.Uuid
+  workflowVersionId                 String                      @db.Uuid
+  configurationFingerprint          String
+  responsibleInstitutionId          String                      @db.Uuid
+  responsibleDepartmentId           String                      @db.Uuid
+  status                            CaseStatus                  @default(RECEIVED)
+  legalStatus                       CaseLegalStatus             @default(NONE)
+  legalStatusLabel                  String?
+  priority                          CasePriority                @default(NORMAL)
+  version                           Int                         @default(1)
+  openedAt                          DateTime                    @default(now())
+  closedAt                          DateTime?
+  currentCaseManagerOfficeholderId  String?                     @db.Uuid
+  masterAdministrativeFileReference String?
+  documentRegisterReference         String?
+  evidencePacketReference           String?
+  recordsClassificationReference    String?
+  retentionLegalHoldReference       String?
+  createdAt                         DateTime                    @default(now())
+  updatedAt                         DateTime                    @updatedAt
+  application                       Application                 @relation(fields: [applicationId], references: [id])
+  applicantIdentity                 Identity                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
+  governmentService                 GovernmentService           @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion          GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
+  workflowVersion                   WorkflowVersion             @relation(fields: [workflowVersionId], references: [id])
+  responsibleInstitution            Institution                 @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment             Department                  @relation(fields: [responsibleDepartmentId], references: [id])
+  currentCaseManagerOfficeholder    Officeholder?               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
+  statusHistory                     CaseStatusHistory[]
+  workflowInstance                  CaseWorkflowInstance?
+  assignments                       CaseAssignment[]
+  referrals                         CaseReferral[]
+  slaClocks                         CaseSlaClock[]
+  escalations                       CaseEscalation[]
+  issues                            CaseIssue[]
+  events                            CaseEvent[]
+  communications                    CaseCommunication[]
+  milestones                        CaseMilestone[]
+  publicStatusProjection            CasePublicStatusProjection?
+  masterAdministrativeFile          MasterAdministrativeFile?
 
+  @@index([applicantIdentityId])
+  @@index([governmentServiceId])
+  @@index([responsibleDepartmentId])
   @@index([status])
   @@index([governmentServiceVersionId])
   @@index([workflowVersionId])
+  @@index([currentCaseManagerOfficeholderId])
   @@map("cases")
 }
 
@@ -2607,50 +2095,6 @@ model WorkflowDefinition {
 }
 
 model WorkflowVersion {
-  id                    String                 @id @default(uuid()) @db.Uuid
-  workflowDefinitionId  String                 @db.Uuid
-  version               Int
-  status                WorkflowVersionStatus  @default(DRAFT)
-  effectiveFrom         DateTime?
-  effectiveUntil        DateTime?
-  suspendedAt           DateTime?
-  supersededByVersionId String?                @db.Uuid
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  workflowDefinition    WorkflowDefinition     @relation(fields: [workflowDefinitionId], references: [id])
-  supersededByVersion   WorkflowVersion?       @relation("WorkflowVersionSupersession", fields: [supersededByVersionId], references: [id])
-  supersededVersions    WorkflowVersion[]      @relation("WorkflowVersionSupersession")
-  steps                 WorkflowStep[]
-  transitions           WorkflowTransition[]
-  caseInstances         CaseWorkflowInstance[]
-  id                                  String                   @id @default(uuid()) @db.Uuid
-  workflowDefinitionId                String                   @db.Uuid
-  version                             String
-  governmentServiceVersionId          String                   @db.Uuid
-  status                              WorkflowVersionStatus    @default(DRAFT)
-  consequenceLevel                    WorkflowConsequenceLevel @default(PROCEDURAL)
-  effectiveFrom                       DateTime?
-  effectiveUntil                      DateTime?
-  supersededByVersionId               String?                  @db.Uuid
-  activationFunctionAuthorityRecordId String?                  @db.Uuid
-  manualFallbackReference             String?
-  entryConditions                     Json                     @default("{}")
-  createdAt                           DateTime                 @default(now())
-  updatedAt                           DateTime                 @updatedAt
-  workflowDefinition                  WorkflowDefinition       @relation(fields: [workflowDefinitionId], references: [id])
-  governmentServiceVersion            GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  activationFunctionAuthority         FunctionAuthorityRecord? @relation("WorkflowActivationAuthority", fields: [activationFunctionAuthorityRecordId], references: [id])
-  supersededByVersion                 WorkflowVersion?         @relation("WorkflowVersionSupersession", fields: [supersededByVersionId], references: [id])
-  supersededVersions                  WorkflowVersion[]        @relation("WorkflowVersionSupersession")
-  stages                              WorkflowStageDefinition[]
-  steps                               WorkflowStepDefinition[]
-  transitions                         WorkflowTransitionDefinition[]
-
-  @@unique([workflowDefinitionId, version])
-  @@index([workflowDefinitionId])
-  @@index([governmentServiceVersionId])
-  @@index([status])
-  @@index([activationFunctionAuthorityRecordId])
   id                   String                         @id @default(uuid()) @db.Uuid
   workflowDefinitionId String                         @db.Uuid
   version              String
@@ -2675,38 +2119,7 @@ model WorkflowVersion {
   @@map("workflow_versions")
 }
 
-model WorkflowStep {
-  id                        String              @id @default(uuid()) @db.Uuid
-  workflowVersionId         String              @db.Uuid
-  stepKey                   String
-  label                     String
-  stepType                  WorkflowStepType
-  stageKey                  String
-  sequenceOrder             Int                 @default(0)
-  functionAuthorityRecordId String?             @db.Uuid
-  authorityAction           AuthorityActionType?
-  isConsequential           Boolean             @default(false)
-  isHumanRequired           Boolean             @default(true)
-  parallelGroupKey          String?
-  requiredJoinBranchKeys    Json                @default("[]")
-  dependsOnStepKeys         Json                @default("[]")
-  createdAt                 DateTime            @default(now())
-  updatedAt                 DateTime            @updatedAt
-  workflowVersion           WorkflowVersion     @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
-  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
 model WorkflowStageDefinition {
-  id                String              @id @default(uuid()) @db.Uuid
-  workflowVersionId String              @db.Uuid
-  stageKey          String
-  name              String
-  sequence          Int
-  stageType         WorkflowStageType
-  description       String?
-  entryRules        Json                @default("{}")
-  completionRules   Json                @default("{}")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  workflowVersion   WorkflowVersion     @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
   id                String                   @id @default(uuid()) @db.Uuid
   workflowVersionId String                   @db.Uuid
   stageKey          String
@@ -2724,44 +2137,6 @@ model WorkflowStageDefinition {
 }
 
 model WorkflowStepDefinition {
-  id                        String                  @id @default(uuid()) @db.Uuid
-  workflowVersionId         String                  @db.Uuid
-  stageId                   String                  @db.Uuid
-  stepKey                   String
-  name                      String
-  stepType                  WorkflowStepType
-  sequence                  Int
-  responsibleDepartmentId   String?                 @db.Uuid
-  responsibleOfficeId       String?                 @db.Uuid
-  functionAuthorityRecordId String?                 @db.Uuid
-  requiredAuthorityAction   AuthorityActionType?
-  requiredEvidence          Json                    @default("[]")
-  routingConfiguration      Json                    @default("{}")
-  deadlineConfiguration     Json                    @default("{}")
-  pauseConfiguration        Json                    @default("{}")
-  escalationConfiguration   Json                    @default("{}")
-  safeHaltConfiguration     Json                    @default("{}")
-  manualAllowed             Boolean                 @default(true)
-  isConsequential           Boolean                 @default(false)
-  isStartingStep            Boolean                 @default(false)
-  parallelForkGroupKey      String?
-  parallelJoinGroupKey      String?
-  permitsCycle              Boolean                 @default(false)
-  createdAt                 DateTime                @default(now())
-  updatedAt                 DateTime                @updatedAt
-  workflowVersion           WorkflowVersion         @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
-  stage                     WorkflowStageDefinition @relation(fields: [stageId], references: [id], onDelete: Cascade)
-  responsibleDepartment     Department?             @relation(fields: [responsibleDepartmentId], references: [id])
-  responsibleOffice         Office?                 @relation(fields: [responsibleOfficeId], references: [id])
-  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
-  outgoingTransitions       WorkflowTransitionDefinition[] @relation("TransitionFromStep")
-  incomingTransitions       WorkflowTransitionDefinition[] @relation("TransitionToStep")
-
-  @@unique([workflowVersionId, stepKey])
-  @@index([workflowVersionId])
-  @@index([stageId])
-  @@index([responsibleDepartmentId])
-  @@index([responsibleOfficeId])
   id                        String                         @id @default(uuid()) @db.Uuid
   workflowVersionId         String                         @db.Uuid
   workflowStageDefinitionId String?                        @db.Uuid
@@ -2789,66 +2164,10 @@ model WorkflowStepDefinition {
   @@unique([workflowVersionId, stepKey])
   @@index([workflowVersionId])
   @@index([functionAuthorityRecordId])
-  @@map("workflow_steps")
-}
-
-model WorkflowTransition {
-  id                String                        @id @default(uuid()) @db.Uuid
-  workflowVersionId String                        @db.Uuid
-  fromStepKey       String
-  toStepKey         String
-  transitionKey     String
-  conditionType     WorkflowTransitionConditionType @default(ALWAYS)
-  conditionRules    Json                          @default("{}")
-  isDefault         Boolean                       @default(false)
-  createdAt         DateTime                      @default(now())
-  updatedAt         DateTime                      @updatedAt
-  workflowVersion   WorkflowVersion               @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
-
-  @@unique([workflowVersionId, transitionKey])
-  @@index([workflowVersionId])
-  @@index([fromStepKey])
-  @@map("workflow_transitions")
-}
-
-model CaseWorkflowInstance {
-  id                 String                     @id @default(uuid()) @db.Uuid
-  caseId             String                     @db.Uuid
-  workflowVersionId  String                     @db.Uuid
-  status             CaseWorkflowInstanceStatus @default(NOT_STARTED)
-  currentStageKey    String?
-  currentStageLabel  String?
-  startedAt          DateTime?
-  completedAt        DateTime?
-  pausedAt           DateTime?
-  suspendedAt        DateTime?
-  safeHaltReason     String?
-  concurrencyVersion Int                        @default(0)
-  createdAt          DateTime                   @default(now())
-  updatedAt          DateTime                   @updatedAt
-  caseRecord         CaseRecord                 @relation(fields: [caseId], references: [id])
-  workflowVersion    WorkflowVersion            @relation(fields: [workflowVersionId], references: [id])
-  stepInstances      CaseWorkflowStepInstance[]
-  transitionEvents   CaseWorkflowTransitionEvent[]
-
-  @@index([caseId])
   @@map("workflow_step_definitions")
 }
 
 model WorkflowTransitionDefinition {
-  id                String                 @id @default(uuid()) @db.Uuid
-  workflowVersionId String                 @db.Uuid
-  fromStepId        String                 @db.Uuid
-  toStepId          String                 @db.Uuid
-  transitionType    WorkflowTransitionType @default(NORMAL)
-  conditionConfig   Json                   @default("{}")
-  priority          Int                    @default(0)
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  workflowVersion   WorkflowVersion        @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
-  fromStep          WorkflowStepDefinition @relation("TransitionFromStep", fields: [fromStepId], references: [id], onDelete: Cascade)
-  toStep            WorkflowStepDefinition @relation("TransitionToStep", fields: [toStepId], references: [id], onDelete: Cascade)
-
   id                String                     @id @default(uuid()) @db.Uuid
   workflowVersionId String                     @db.Uuid
   fromStepId        String                     @db.Uuid
@@ -2872,20 +2191,26 @@ model WorkflowTransitionDefinition {
 }
 
 model CaseWorkflowInstance {
-  id                String                     @id @default(uuid()) @db.Uuid
-  caseId            String                     @unique @db.Uuid
-  workflowVersionId String                     @db.Uuid
-  status            CaseWorkflowInstanceStatus @default(PENDING)
-  currentStepKeys   String[]                   @default([])
-  startedAt         DateTime?
-  completedAt       DateTime?
-  haltedAt          DateTime?
-  haltReason        String?
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @updatedAt
-  case              Case                       @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  workflowVersion   WorkflowVersion            @relation(fields: [workflowVersionId], references: [id])
-  stepInstances     CaseWorkflowStepInstance[]
+  id                  String                     @id @default(uuid()) @db.Uuid
+  caseId              String                     @unique @db.Uuid
+  workflowVersionId   String                     @db.Uuid
+  status              CaseWorkflowInstanceStatus @default(PENDING)
+  currentStepKeys     String[]                   @default([])
+  currentStageKey     String?
+  currentStageLabel   String?
+  startedAt           DateTime?
+  completedAt         DateTime?
+  pausedAt            DateTime?
+  haltedAt            DateTime?
+  haltReason          String?
+  safeHaltActive      Boolean                    @default(false)
+  safeHaltPublicLabel String?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  case                Case                       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  workflowVersion     WorkflowVersion            @relation(fields: [workflowVersionId], references: [id])
+  stepInstances       CaseWorkflowStepInstance[]
+  events              CaseEvent[]
 
   @@index([workflowVersionId])
   @@index([status])
@@ -2893,73 +2218,6 @@ model CaseWorkflowInstance {
 }
 
 model CaseWorkflowStepInstance {
-  id                 String                         @id @default(uuid()) @db.Uuid
-  workflowInstanceId String                         @db.Uuid
-  stepKey            String
-  stepLabel          String?
-  status             CaseWorkflowStepInstanceStatus @default(PENDING)
-  startedAt          DateTime?
-  completedAt        DateTime?
-  createdAt          DateTime                       @default(now())
-  updatedAt          DateTime                       @updatedAt
-  workflowInstance   CaseWorkflowInstance           @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
-  events             CaseEvent[]
-
-  @@unique([workflowInstanceId, stepKey])
-  @@index([workflowInstanceId])
-  @@map("case_workflow_step_instances")
-}
-
-model CaseEvent {
-  id                 String                    @id @default(uuid()) @db.Uuid
-  caseId             String                    @db.Uuid
-  eventType          CaseEventType
-  actorIdentityId    String?                   @db.Uuid
-  officeholderId     String?                   @db.Uuid
-  institutionId      String?                   @db.Uuid
-  departmentId       String?                   @db.Uuid
-  workflowInstanceId String?                   @db.Uuid
-  stepInstanceId     String?                   @db.Uuid
-  correlationId      String?
-  occurredAt         DateTime
-  metadata           Json                      @default("{}")
-  publicVisibility   CaseEventPublicVisibility @default(INTERNAL)
-  createdAt          DateTime                  @default(now())
-  case               Case                      @relation(fields: [caseId], references: [id])
-  actorIdentity      Identity?                 @relation("CaseEventActor", fields: [actorIdentityId], references: [id])
-  officeholder       Officeholder?             @relation("CaseEventOfficeholder", fields: [officeholderId], references: [id])
-  workflowInstance   CaseWorkflowInstance?     @relation(fields: [workflowInstanceId], references: [id])
-  stepInstance       CaseWorkflowStepInstance? @relation(fields: [stepInstanceId], references: [id])
-  communications     CaseCommunication[]
-  projectionUpdates  CasePublicStatusProjection[] @relation("ProjectionSourceEvent")
-
-  @@index([caseId, occurredAt])
-  @@index([eventType])
-  @@index([publicVisibility])
-  @@index([correlationId])
-  id                          String                       @id @default(uuid()) @db.Uuid
-  caseWorkflowInstanceId      String                       @db.Uuid
-  workflowStepId              String                       @db.Uuid
-  stepKey                     String
-  status                      CaseWorkflowStepInstanceStatus @default(PENDING)
-  parallelBranchKey           String?
-  startedAt                   DateTime?
-  completedAt                 DateTime?
-  actorIdentityId             String?                      @db.Uuid
-  officeholderId              String?                      @db.Uuid
-  authorityEvaluationRecordId String?                      @db.Uuid
-  completionIdempotencyKey    String?                      @unique
-  concurrencyVersion          Int                          @default(0)
-  createdAt                   DateTime                     @default(now())
-  updatedAt                   DateTime                     @updatedAt
-  caseWorkflowInstance        CaseWorkflowInstance         @relation(fields: [caseWorkflowInstanceId], references: [id], onDelete: Cascade)
-  workflowStep                WorkflowStep                 @relation(fields: [workflowStepId], references: [id])
-  authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
-  transitionEvents            CaseWorkflowTransitionEvent[]
-
-  @@unique([caseWorkflowInstanceId, stepKey, parallelBranchKey])
-  @@index([caseWorkflowInstanceId])
-  @@index([workflowStepId])
   id                       String                         @id @default(uuid()) @db.Uuid
   caseWorkflowInstanceId   String                         @db.Uuid
   workflowStepDefinitionId String                         @db.Uuid
@@ -2976,6 +2234,7 @@ model CaseEvent {
   caseWorkflowInstance     CaseWorkflowInstance           @relation(fields: [caseWorkflowInstanceId], references: [id], onDelete: Cascade)
   workflowStepDefinition   WorkflowStepDefinition         @relation(fields: [workflowStepDefinitionId], references: [id])
   completenessReviews      CompletenessReview[]
+  events                   CaseEvent[]
 
   @@unique([caseWorkflowInstanceId, workflowStepDefinitionId])
   @@index([caseWorkflowInstanceId])
@@ -2983,32 +2242,6 @@ model CaseEvent {
   @@map("case_workflow_step_instances")
 }
 
-model CaseWorkflowTransitionEvent {
-  id                          String                        @id @default(uuid()) @db.Uuid
-  caseWorkflowInstanceId      String                        @db.Uuid
-  caseWorkflowStepInstanceId  String?                       @db.Uuid
-  eventType                   CaseWorkflowTransitionEventType
-  fromStatus                  String?
-  toStatus                    String?
-  fromStepKey                 String?
-  toStepKey                   String?
-  actorIdentityId             String?                       @db.Uuid
-  officeholderId              String?                       @db.Uuid
-  authorityEvaluationRecordId String?                       @db.Uuid
-  reason                      String?
-  notes                       String?
-  idempotencyKey              String?                       @unique
-  metadata                    Json                          @default("{}")
-  occurredAt                  DateTime
-  createdAt                   DateTime                      @default(now())
-  caseWorkflowInstance        CaseWorkflowInstance          @relation(fields: [caseWorkflowInstanceId], references: [id], onDelete: Cascade)
-  caseWorkflowStepInstance    CaseWorkflowStepInstance?     @relation(fields: [caseWorkflowStepInstanceId], references: [id])
-  authorityEvaluationRecord   AuthorityEvaluationRecord?    @relation(fields: [authorityEvaluationRecordId], references: [id])
-
-  @@index([caseWorkflowInstanceId])
-  @@index([caseWorkflowStepInstanceId])
-  @@index([occurredAt])
-  @@map("case_workflow_transition_events")
 model CompletenessReview {
   id                         String                    @id @default(uuid()) @db.Uuid
   applicationSubmissionId    String                    @db.Uuid
@@ -3048,57 +2281,6 @@ model DeficiencyNotice {
   @@map("deficiency_notices")
 }
 
-model DeficiencyNoticeItem {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  deficiencyNoticeId       String                 @db.Uuid
-  completenessReviewItemId String                 @db.Uuid
-  checklistItemCode        String
-  deficiencyDescription    String
-  requiredAction           String
-  createdAt                DateTime               @default(now())
-  deficiencyNotice         DeficiencyNotice       @relation(fields: [deficiencyNoticeId], references: [id], onDelete: Cascade)
-  completenessReviewItem   CompletenessReviewItem @relation(fields: [completenessReviewItemId], references: [id])
-
-  @@index([deficiencyNoticeId])
-  @@index([completenessReviewItemId])
-  @@map("deficiency_notice_items")
-}
-
-model ApplicantInformationRequest {
-  id                     String                            @id @default(uuid()) @db.Uuid
-  caseId                 String                            @db.Uuid
-  deficiencyNoticeId     String                            @db.Uuid
-  originalSubmissionId   String                            @db.Uuid
-  responseSubmissionId   String?                           @db.Uuid
-  requestedAt            DateTime                          @default(now())
-  responseDeadline       DateTime
-  status                 ApplicantInformationRequestStatus @default(OPEN)
-  createdAt              DateTime                          @default(now())
-  updatedAt              DateTime                          @updatedAt
-  case                   ApplicationCase                   @relation(fields: [caseId], references: [id])
-  deficiencyNotice       DeficiencyNotice                  @relation(fields: [deficiencyNoticeId], references: [id])
-  originalSubmission     ApplicationSubmission             @relation("ApplicantInformationRequestOriginalSubmission", fields: [originalSubmissionId], references: [id])
-  responseSubmission     ApplicationSubmission?            @relation("ApplicantInformationRequestResponseSubmission", fields: [responseSubmissionId], references: [id])
-
-  @@index([caseId])
-  @@index([deficiencyNoticeId])
-  @@index([originalSubmissionId])
-  @@index([status])
-  @@map("applicant_information_requests")
-}
-
-model ApplicationCaseNotificationOutbox {
-  id        String                                @id @default(uuid()) @db.Uuid
-  caseId    String                                @db.Uuid
-  eventType String
-  payload   Json                                  @default("{}")
-  status    ApplicationCaseNotificationOutboxStatus @default(PENDING)
-  createdAt DateTime                              @default(now())
-  case      ApplicationCase                       @relation(fields: [caseId], references: [id])
-
-  @@index([caseId])
-  @@index([status])
-  @@map("application_case_notification_outbox")
 model ApplicantInformationRequest {
   id                      String                            @id @default(uuid()) @db.Uuid
   applicationSubmissionId String                            @db.Uuid
@@ -3235,63 +2417,86 @@ model CaseIssue {
 }
 
 model CaseEvent {
-  id              String        @id @default(uuid()) @db.Uuid
-  caseId          String        @db.Uuid
-  eventType       CaseEventType
-  payload         Json          @default("{}")
-  actorIdentityId String?       @db.Uuid
-  recordedAt      DateTime      @default(now())
-  case            Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                 String                       @id @default(uuid()) @db.Uuid
+  caseId             String                       @db.Uuid
+  eventType          CaseEventType
+  payload            Json                         @default("{}")
+  metadata           Json                         @default("{}")
+  actorIdentityId    String?                      @db.Uuid
+  officeholderId     String?                      @db.Uuid
+  institutionId      String?                      @db.Uuid
+  departmentId       String?                      @db.Uuid
+  workflowInstanceId String?                      @db.Uuid
+  stepInstanceId     String?                      @db.Uuid
+  correlationId      String?
+  occurredAt         DateTime                     @default(now())
+  recordedAt         DateTime                     @default(now())
+  publicVisibility   CaseEventPublicVisibility    @default(INTERNAL)
+  createdAt          DateTime                     @default(now())
+  case               Case                         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actorIdentity      Identity?                    @relation("CaseEventActor", fields: [actorIdentityId], references: [id])
+  officeholder       Officeholder?                @relation("CaseEventOfficeholder", fields: [officeholderId], references: [id])
+  workflowInstance   CaseWorkflowInstance?        @relation(fields: [workflowInstanceId], references: [id])
+  stepInstance       CaseWorkflowStepInstance?    @relation(fields: [stepInstanceId], references: [id])
+  communications     CaseCommunication[]
+  projectionUpdates  CasePublicStatusProjection[] @relation("ProjectionSourceEvent")
 
   @@index([caseId])
+  @@index([caseId, occurredAt])
   @@index([eventType])
   @@index([recordedAt])
+  @@index([publicVisibility])
+  @@index([correlationId])
   @@map("case_events")
 }
 
 model CaseCommunication {
-  id                    String                          @id @default(uuid()) @db.Uuid
-  caseId                String                          @db.Uuid
-  communicationType     CaseCommunicationType
-  senderIdentityId      String?                         @db.Uuid
-  senderOfficeholderId  String?                         @db.Uuid
-  recipientType         CaseRecipientType
-  recipientReference    String?
-  channel               CaseCommunicationChannel
-  subject               String?
-  body                  String
-  templateReference     String?
-  templateVersion       String?
-  sentAt                DateTime?
-  receivedAt            DateTime?
-  deliveryStatus        CaseCommunicationDeliveryStatus @default(DRAFT)
-  classification        CaseRecordClassification        @default(OFFICIAL)
-  publicVisibility      CaseEventPublicVisibility       @default(INTERNAL)
-  caseEventId           String?                         @db.Uuid
-  createdAt             DateTime                        @default(now())
-  updatedAt             DateTime                        @updatedAt
-  case                  Case                            @relation(fields: [caseId], references: [id])
-  senderIdentity        Identity?                       @relation("CommunicationSender", fields: [senderIdentityId], references: [id])
-  senderOfficeholder    Officeholder?                   @relation("CommunicationSenderOfficeholder", fields: [senderOfficeholderId], references: [id])
-  caseEvent             CaseEvent?                      @relation(fields: [caseEventId], references: [id])
-  outboxEntries         CaseCommunicationOutbox[]
+  id                   String                          @id @default(uuid()) @db.Uuid
+  caseId               String                          @db.Uuid
+  communicationType    CaseCommunicationType
+  visibility           CaseCommunicationVisibility?
+  senderIdentityId     String?                         @db.Uuid
+  senderOfficeholderId String?                         @db.Uuid
+  authorIdentityId     String?                         @db.Uuid
+  recipientType        CaseRecipientType
+  recipientReference   String?
+  channel              CaseCommunicationChannel
+  subject              String?
+  body                 String
+  templateReference    String?
+  templateVersion      String?
+  sentAt               DateTime?
+  receivedAt           DateTime?
+  deliveryStatus       CaseCommunicationDeliveryStatus @default(DRAFT)
+  classification       CaseRecordClassification        @default(OFFICIAL)
+  publicVisibility     CaseEventPublicVisibility       @default(INTERNAL)
+  caseEventId          String?                         @db.Uuid
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  case                 Case                            @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  senderIdentity       Identity?                       @relation("CommunicationSender", fields: [senderIdentityId], references: [id])
+  senderOfficeholder   Officeholder?                   @relation("CommunicationSenderOfficeholder", fields: [senderOfficeholderId], references: [id])
+  caseEvent            CaseEvent?                      @relation(fields: [caseEventId], references: [id])
+  outboxEntries        CaseCommunicationOutbox[]
 
+  @@index([caseId])
   @@index([caseId, createdAt])
   @@index([communicationType])
+  @@index([visibility])
   @@index([publicVisibility])
   @@map("case_communications")
 }
 
 model CaseCommunicationOutbox {
-  id              String            @id @default(uuid()) @db.Uuid
-  communicationId String            @db.Uuid
+  id              String                   @id @default(uuid()) @db.Uuid
+  communicationId String                   @db.Uuid
   channel         CaseCommunicationChannel
-  payload         Json              @default("{}")
-  queuedAt        DateTime          @default(now())
+  payload         Json                     @default("{}")
+  queuedAt        DateTime                 @default(now())
   processedAt     DateTime?
-  status          String            @default("QUEUED")
-  createdAt       DateTime          @default(now())
-  communication   CaseCommunication @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+  status          String                   @default("QUEUED")
+  createdAt       DateTime                 @default(now())
+  communication   CaseCommunication        @relation(fields: [communicationId], references: [id], onDelete: Cascade)
 
   @@index([communicationId])
   @@index([status])
@@ -3299,76 +2504,827 @@ model CaseCommunicationOutbox {
 }
 
 model CaseMilestone {
-  id                    String              @id @default(uuid()) @db.Uuid
-  caseId                String              @db.Uuid
-  name                  String
-  targetDate            DateTime?
-  actualDate            DateTime?
-  status                CaseMilestoneStatus @default(UPCOMING)
-  responsiblePartyRef   String?
-  sourceSlaReference    String?
-  dependencyReference   String?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  case                  Case                @relation(fields: [caseId], references: [id])
+  id                      String                       @id @default(uuid()) @db.Uuid
+  caseId                  String                       @db.Uuid
+  milestoneType           CaseMilestoneType?
+  label                   String?
+  name                    String?
+  targetDate              DateTime?
+  actualDate              DateTime?
+  reachedAt               DateTime?
+  status                  CaseMilestoneStatus?
+  responsiblePartyRef     String?
+  sourceSlaReference      String?
+  dependencyReference     String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  case                    Case                         @relation(fields: [caseId], references: [id], onDelete: Cascade)
   publicStatusProjections CasePublicStatusProjection[] @relation("CurrentMilestone")
 
   @@index([caseId])
   @@index([status])
-  id               String                      @id @default(uuid()) @db.Uuid
-  caseId           String                      @db.Uuid
-  visibility       CaseCommunicationVisibility @default(INTERNAL)
-  subject          String
-  body             String
-  authorIdentityId String?                     @db.Uuid
-  createdAt        DateTime                    @default(now())
-  case             Case                        @relation(fields: [caseId], references: [id], onDelete: Cascade)
-
-  @@index([caseId])
-  @@index([visibility])
-  @@map("case_communications")
-}
-
-model CaseMilestone {
-  id            String            @id @default(uuid()) @db.Uuid
-  caseId        String            @db.Uuid
-  milestoneType CaseMilestoneType
-  label         String
-  reachedAt     DateTime          @default(now())
-  case          Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
-
-  @@index([caseId])
   @@map("case_milestones")
 }
 
 model CasePublicStatusProjection {
-  id                    String                @id @default(uuid()) @db.Uuid
-  caseId                String                @unique @db.Uuid
-  publicStage           CasePublicStatusStage
-  publicStageLabel      String
-  publicStageDetail     String?
-  sourceCaseStatus      CaseStatus
-  sourceLegalStatus     CaseLegalStatus
-  currentMilestoneId    String?               @db.Uuid
-  applicantDisclaimer   String
-  projectionVersion     Int                   @default(1)
-  lastDerivedAt         DateTime
-  sourceEventId         String?               @db.Uuid
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  case                  Case                  @relation(fields: [caseId], references: [id])
-  currentMilestone      CaseMilestone?        @relation("CurrentMilestone", fields: [currentMilestoneId], references: [id])
-  sourceEvent           CaseEvent?            @relation("ProjectionSourceEvent", fields: [sourceEventId], references: [id])
+  id                  String                 @id @default(uuid()) @db.Uuid
+  caseId              String                 @unique @db.Uuid
+  publicStage         CasePublicStatusStage?
+  publicStageLabel    String?
+  publicStageDetail   String?
+  publicStatusLabel   String?
+  publicMessage       String?
+  sourceCaseStatus    CaseStatus
+  sourceLegalStatus   CaseLegalStatus?
+  currentMilestoneId  String?                @db.Uuid
+  applicantDisclaimer String?
+  projectionVersion   Int                    @default(1)
+  lastDerivedAt       DateTime?
+  lastUpdatedAt       DateTime?
+  sourceEventId       String?                @db.Uuid
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  case                Case                   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  currentMilestone    CaseMilestone?         @relation("CurrentMilestone", fields: [currentMilestoneId], references: [id])
+  sourceEvent         CaseEvent?             @relation("ProjectionSourceEvent", fields: [sourceEventId], references: [id])
 
   @@index([publicStage])
-  id                String     @id @default(uuid()) @db.Uuid
-  caseId            String     @unique @db.Uuid
-  publicStatusLabel String
-  publicMessage     String?
-  lastUpdatedAt     DateTime   @default(now())
-  sourceCaseStatus  CaseStatus
-  case              Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
-
   @@index([sourceCaseStatus])
   @@map("case_public_status_projections")
+}
+
+// ─── Phase 7: Master Administrative File, Evidence & Records Management ────
+
+enum EvidenceStatus {
+  RECEIVED
+  VERIFIED
+  ACCEPTED
+  DISPUTED
+  WITHDRAWN
+  SUPERSEDED
+  EXPIRED
+  QUARANTINED
+}
+
+enum EvidenceVerificationStatus {
+  PENDING
+  IN_PROGRESS
+  VERIFIED
+  REJECTED
+  DISPUTED
+  SUPERSEDED
+}
+
+enum EvidencePurposeType {
+  IDENTITY_VERIFICATION
+  ELIGIBILITY_SUPPORT
+  TECHNICAL_COMPLIANCE
+  PROFESSIONAL_ATTESTATION
+  INSPECTION_RESULT
+  DECISION_SUPPORT
+  COMMUNICATION_RECORD
+  OTHER
+}
+
+enum DocumentClassification {
+  PUBLIC
+  OFFICIAL
+  INTERNAL
+  RESTRICTED
+  PRIVILEGED
+  LEGALLY_PRIVILEGED
+}
+
+enum MasterAdministrativeFileStatus {
+  OPEN
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+enum MasterAdministrativeFileSectionType {
+  INTAKE
+  CORRESPONDENCE
+  EVIDENCE
+  REVIEW
+  INSPECTION
+  DECISION_SUPPORT
+  RETENTION
+  OTHER
+}
+
+enum DocumentRecordStatus {
+  REGISTERED
+  ACTIVE
+  SUPERSEDED
+  WITHDRAWN
+  ARCHIVED
+}
+
+enum DocumentAssociationType {
+  CASE
+  APPLICATION
+  EVIDENCE
+  COMMUNICATION
+  REVIEW
+  INSPECTION
+  PACKET
+  OTHER
+}
+
+enum EvidencePacketStatus {
+  DRAFT
+  ASSEMBLED
+  SEALED
+  TRANSMITTED
+  ARCHIVED
+}
+
+enum EvidenceCustodyEventType {
+  RECEIVED
+  TRANSFERRED
+  SEALED
+  UNSEALED
+  COPIED
+  DESTROYED
+  QUARANTINED
+  RELEASED
+}
+
+enum RecordCorrectionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  APPLIED
+}
+
+enum RecordIntegrityEventType {
+  HASH_VERIFIED
+  HASH_MISMATCH
+  TAMPER_DETECTED
+  SEAL_APPLIED
+  SEAL_BROKEN
+  CORRECTION_APPLIED
+}
+
+enum RecordAccessEventType {
+  VIEW
+  DOWNLOAD
+  EXPORT
+  PRINT
+  REDACTED_VIEW
+  DENIED
+}
+
+enum RetentionDispositionAction {
+  RETAIN
+  REVIEW
+  TRANSFER
+  DESTROY
+}
+
+enum RecordDispositionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  EXECUTED
+  CANCELLED
+}
+
+enum LegalHoldStatus {
+  DRAFT
+  ACTIVE
+  RELEASED
+  SUPERSEDED
+}
+
+enum LegalHoldTargetType {
+  MASTER_ADMINISTRATIVE_FILE
+  DOCUMENT
+  EVIDENCE
+  PACKET
+  CASE
+  COLLECTION
+}
+
+enum PreservationCollectionStatus {
+  ACTIVE
+  COMPLETED
+  RELEASED
+}
+
+enum ArchivalTransferStatus {
+  PENDING
+  IN_TRANSIT
+  RECEIVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReviewRecordStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SUPERSEDED
+}
+
+enum InspectionRecordStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model MasterAdministrativeFile {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  fileReference        String                            @unique
+  caseId               String?                           @unique @db.Uuid
+  institutionId        String                            @db.Uuid
+  departmentId         String?                           @db.Uuid
+  title                String
+  status               MasterAdministrativeFileStatus    @default(OPEN)
+  classification       DocumentClassification            @default(OFFICIAL)
+  openedAt             DateTime                          @default(now())
+  closedAt             DateTime?
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  case                 Case?                             @relation(fields: [caseId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+  department           Department?                       @relation(fields: [departmentId], references: [id])
+  sections             MasterAdministrativeFileSection[]
+  documents            DocumentRecord[]
+  evidenceRecords      EvidenceRecord[]
+  packets              EvidencePacket[]
+  retentionAssignments RecordRetentionAssignment[]
+  legalHoldTargets     LegalHoldTarget[]
+
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([status])
+  @@map("master_administrative_files")
+}
+
+model MasterAdministrativeFileSection {
+  id                         String                              @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId String                              @db.Uuid
+  sectionKey                 String
+  title                      String
+  sectionType                MasterAdministrativeFileSectionType @default(OTHER)
+  displayOrder               Int
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile            @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  documents                  DocumentRecord[]
+  evidenceRecords            EvidenceRecord[]
+
+  @@unique([masterAdministrativeFileId, sectionKey])
+  @@index([masterAdministrativeFileId])
+  @@map("master_administrative_file_sections")
+}
+
+model DocumentRecord {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  documentReference          String                           @unique
+  masterAdministrativeFileId String?                          @db.Uuid
+  sectionId                  String?                          @db.Uuid
+  title                      String
+  description                String?
+  classification             DocumentClassification           @default(OFFICIAL)
+  status                     DocumentRecordStatus             @default(REGISTERED)
+  registeredAt               DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile?        @relation(fields: [masterAdministrativeFileId], references: [id])
+  section                    MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
+  versions                   DocumentVersion[]
+  associations               DocumentAssociation[]
+  evidenceRecords            EvidenceRecord[]
+  retentionAssignments       RecordRetentionAssignment[]
+  legalHoldTargets           LegalHoldTarget[]
+
+  @@index([masterAdministrativeFileId])
+  @@index([sectionId])
+  @@index([status])
+  @@map("document_records")
+}
+
+model DocumentVersion {
+  id                     String                @id @default(uuid()) @db.Uuid
+  documentRecordId       String                @db.Uuid
+  versionNumber          Int
+  contentHash            String
+  storageReference       String
+  mimeType               String?
+  byteSize               Int?
+  registeredByIdentityId String?               @db.Uuid
+  registeredAt           DateTime              @default(now())
+  supersededAt           DateTime?
+  createdAt              DateTime              @default(now())
+  documentRecord         DocumentRecord        @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  associations           DocumentAssociation[]
+
+  @@unique([documentRecordId, versionNumber])
+  @@index([documentRecordId])
+  @@map("document_versions")
+}
+
+model DocumentAssociation {
+  id                String                  @id @default(uuid()) @db.Uuid
+  documentRecordId  String                  @db.Uuid
+  documentVersionId String?                 @db.Uuid
+  associationType   DocumentAssociationType
+  targetReference   String
+  notes             String?
+  createdAt         DateTime                @default(now())
+  documentRecord    DocumentRecord          @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentVersion   DocumentVersion?        @relation(fields: [documentVersionId], references: [id])
+
+  @@index([documentRecordId])
+  @@index([documentVersionId])
+  @@index([associationType])
+  @@map("document_associations")
+}
+
+model EvidenceRecord {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  evidenceReference          String                           @unique
+  masterAdministrativeFileId String?                          @db.Uuid
+  sectionId                  String?                          @db.Uuid
+  documentRecordId           String?                          @db.Uuid
+  title                      String
+  description                String?
+  status                     EvidenceStatus                   @default(RECEIVED)
+  classification             DocumentClassification           @default(OFFICIAL)
+  receivedAt                 DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile?        @relation(fields: [masterAdministrativeFileId], references: [id])
+  section                    MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
+  documentRecord             DocumentRecord?                  @relation(fields: [documentRecordId], references: [id])
+  verifications              EvidenceVerification[]
+  requirementLinks           EvidenceRequirementLink[]
+  purposeAcceptances         EvidencePurposeAcceptance[]
+  qualityAssessments         EvidenceQualityAssessment[]
+  custodyEvents              EvidenceCustodyEvent[]
+  packetItems                EvidencePacketItem[]
+  inspectionItems            InspectionEvidenceItem[]
+  retentionAssignments       RecordRetentionAssignment[]
+  legalHoldTargets           LegalHoldTarget[]
+
+  @@index([masterAdministrativeFileId])
+  @@index([sectionId])
+  @@index([documentRecordId])
+  @@index([status])
+  @@map("evidence_records")
+}
+
+model EvidenceVerification {
+  id                     String                     @id @default(uuid()) @db.Uuid
+  evidenceRecordId       String                     @db.Uuid
+  status                 EvidenceVerificationStatus @default(PENDING)
+  verifierIdentityId     String?                    @db.Uuid
+  verifierOfficeholderId String?                    @db.Uuid
+  methodReference        String?
+  findings               String?
+  verifiedAt             DateTime?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  evidenceRecord         EvidenceRecord             @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceRecordId])
+  @@index([status])
+  @@map("evidence_verifications")
+}
+
+model EvidenceRequirementLink {
+  id                String         @id @default(uuid()) @db.Uuid
+  evidenceRecordId  String         @db.Uuid
+  requirementCode   String
+  requirementLabel  String?
+  serviceVersionRef String?
+  satisfied         Boolean        @default(false)
+  linkedAt          DateTime       @default(now())
+  createdAt         DateTime       @default(now())
+  evidenceRecord    EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceRecordId])
+  @@index([requirementCode])
+  @@map("evidence_requirement_links")
+}
+
+model EvidencePurposeAcceptance {
+  id                       String              @id @default(uuid()) @db.Uuid
+  evidenceRecordId         String              @db.Uuid
+  purposeType              EvidencePurposeType
+  acceptedByIdentityId     String?             @db.Uuid
+  acceptedByOfficeholderId String?             @db.Uuid
+  acceptedAt               DateTime?
+  notes                    String?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  evidenceRecord           EvidenceRecord      @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceRecordId])
+  @@index([purposeType])
+  @@map("evidence_purpose_acceptances")
+}
+
+model EvidenceQualityAssessment {
+  id                 String         @id @default(uuid()) @db.Uuid
+  evidenceRecordId   String         @db.Uuid
+  assessorIdentityId String?        @db.Uuid
+  qualityScore       Int?
+  assessmentNotes    String?
+  assessedAt         DateTime       @default(now())
+  createdAt          DateTime       @default(now())
+  evidenceRecord     EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceRecordId])
+  @@map("evidence_quality_assessments")
+}
+
+model DepartmentalReviewRecord {
+  id                         String             @id @default(uuid()) @db.Uuid
+  reviewReference            String             @unique
+  masterAdministrativeFileId String?            @db.Uuid
+  departmentId               String             @db.Uuid
+  reviewerOfficeholderId     String?            @db.Uuid
+  status                     ReviewRecordStatus @default(DRAFT)
+  findings                   String?
+  completedAt                DateTime?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  department                 Department         @relation(fields: [departmentId], references: [id])
+
+  @@index([departmentId])
+  @@index([status])
+  @@map("departmental_review_records")
+}
+
+model GovernmentCommunicationRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  communicationReference     String                   @unique
+  masterAdministrativeFileId String?                  @db.Uuid
+  caseCommunicationId        String?                  @db.Uuid
+  channel                    CaseCommunicationChannel
+  subject                    String?
+  body                       String
+  classification             DocumentClassification   @default(OFFICIAL)
+  sentAt                     DateTime?
+  receivedAt                 DateTime?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+
+  @@index([masterAdministrativeFileId])
+  @@map("government_communication_records")
+}
+
+model ProfessionalReviewRecord {
+  id                         String             @id @default(uuid()) @db.Uuid
+  reviewReference            String             @unique
+  masterAdministrativeFileId String?            @db.Uuid
+  externalAuthorityId        String?            @db.Uuid
+  reviewerReference          String?
+  status                     ReviewRecordStatus @default(DRAFT)
+  findings                   String?
+  completedAt                DateTime?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  externalAuthority          ExternalAuthority? @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([externalAuthorityId])
+  @@index([status])
+  @@map("professional_review_records")
+}
+
+model InspectionRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  inspectionReference        String                   @unique
+  masterAdministrativeFileId String?                  @db.Uuid
+  inspectorOfficeholderId    String?                  @db.Uuid
+  status                     InspectionRecordStatus   @default(SCHEDULED)
+  scheduledAt                DateTime?
+  completedAt                DateTime?
+  findings                   String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  evidenceItems              InspectionEvidenceItem[]
+
+  @@index([status])
+  @@map("inspection_records")
+}
+
+model InspectionEvidenceItem {
+  id                 String           @id @default(uuid()) @db.Uuid
+  inspectionRecordId String           @db.Uuid
+  evidenceRecordId   String           @db.Uuid
+  notes              String?
+  createdAt          DateTime         @default(now())
+  inspectionRecord   InspectionRecord @relation(fields: [inspectionRecordId], references: [id], onDelete: Cascade)
+  evidenceRecord     EvidenceRecord   @relation(fields: [evidenceRecordId], references: [id])
+
+  @@unique([inspectionRecordId, evidenceRecordId])
+  @@index([inspectionRecordId])
+  @@index([evidenceRecordId])
+  @@map("inspection_evidence_items")
+}
+
+model EvidenceCustodyEvent {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  evidenceRecordId    String                   @db.Uuid
+  eventType           EvidenceCustodyEventType
+  actorIdentityId     String?                  @db.Uuid
+  actorOfficeholderId String?                  @db.Uuid
+  fromLocationRef     String?
+  toLocationRef       String?
+  notes               String?
+  occurredAt          DateTime                 @default(now())
+  createdAt           DateTime                 @default(now())
+  evidenceRecord      EvidenceRecord           @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceRecordId])
+  @@index([occurredAt])
+  @@map("evidence_custody_events")
+}
+
+model EvidencePacket {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  packetReference            String                    @unique
+  masterAdministrativeFileId String?                   @db.Uuid
+  title                      String
+  status                     EvidencePacketStatus      @default(DRAFT)
+  sealedAt                   DateTime?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  versions                   EvidencePacketVersion[]
+  legalHoldTargets           LegalHoldTarget[]
+
+  @@index([masterAdministrativeFileId])
+  @@index([status])
+  @@map("evidence_packets")
+}
+
+model EvidencePacketVersion {
+  id               String                  @id @default(uuid()) @db.Uuid
+  evidencePacketId String                  @db.Uuid
+  versionNumber    Int
+  manifestHash     String
+  createdAt        DateTime                @default(now())
+  evidencePacket   EvidencePacket          @relation(fields: [evidencePacketId], references: [id], onDelete: Cascade)
+  items            EvidencePacketItem[]
+  manifest         EvidencePacketManifest?
+
+  @@unique([evidencePacketId, versionNumber])
+  @@index([evidencePacketId])
+  @@map("evidence_packet_versions")
+}
+
+model EvidencePacketItem {
+  id                      String                @id @default(uuid()) @db.Uuid
+  evidencePacketVersionId String                @db.Uuid
+  evidenceRecordId        String                @db.Uuid
+  sequenceNumber          Int
+  notes                   String?
+  createdAt               DateTime              @default(now())
+  evidencePacketVersion   EvidencePacketVersion @relation(fields: [evidencePacketVersionId], references: [id], onDelete: Cascade)
+  evidenceRecord          EvidenceRecord        @relation(fields: [evidenceRecordId], references: [id])
+
+  @@unique([evidencePacketVersionId, sequenceNumber])
+  @@index([evidencePacketVersionId])
+  @@index([evidenceRecordId])
+  @@map("evidence_packet_items")
+}
+
+model EvidencePacketManifest {
+  id                      String                @id @default(uuid()) @db.Uuid
+  evidencePacketVersionId String                @unique @db.Uuid
+  manifestReference       String                @unique
+  manifestPayload         Json                  @default("{}")
+  contentHash             String
+  createdAt               DateTime              @default(now())
+  evidencePacketVersion   EvidencePacketVersion @relation(fields: [evidencePacketVersionId], references: [id], onDelete: Cascade)
+
+  @@map("evidence_packet_manifests")
+}
+
+model RecordCorrection {
+  id                    String                 @id @default(uuid()) @db.Uuid
+  correctionReference   String                 @unique
+  targetRecordType      String
+  targetRecordId        String                 @db.Uuid
+  status                RecordCorrectionStatus @default(DRAFT)
+  reason                String
+  correctionPayload     Json                   @default("{}")
+  requestedByIdentityId String?                @db.Uuid
+  approvedByIdentityId  String?                @db.Uuid
+  appliedAt             DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([targetRecordType, targetRecordId])
+  @@index([status])
+  @@map("record_corrections")
+}
+
+model RecordIntegrityEvent {
+  id               String                   @id @default(uuid()) @db.Uuid
+  targetRecordType String
+  targetRecordId   String                   @db.Uuid
+  eventType        RecordIntegrityEventType
+  contentHash      String?
+  details          Json                     @default("{}")
+  detectedAt       DateTime                 @default(now())
+  createdAt        DateTime                 @default(now())
+
+  @@index([targetRecordType, targetRecordId])
+  @@index([eventType])
+  @@map("record_integrity_events")
+}
+
+model RecordAccessEvent {
+  id                  String                @id @default(uuid()) @db.Uuid
+  targetRecordType    String
+  targetRecordId      String                @db.Uuid
+  eventType           RecordAccessEventType
+  actorIdentityId     String?               @db.Uuid
+  actorOfficeholderId String?               @db.Uuid
+  accessGranted       Boolean               @default(true)
+  reason              String?
+  occurredAt          DateTime              @default(now())
+  createdAt           DateTime              @default(now())
+
+  @@index([targetRecordType, targetRecordId])
+  @@index([actorIdentityId])
+  @@index([occurredAt])
+  @@map("record_access_events")
+}
+
+model RetentionSchedule {
+  id             String          @id @default(uuid()) @db.Uuid
+  scheduleCode   String          @unique
+  name           String
+  description    String?
+  institutionId  String?         @db.Uuid
+  effectiveFrom  DateTime?
+  effectiveUntil DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  institution    Institution?    @relation(fields: [institutionId], references: [id])
+  rules          RetentionRule[]
+
+  @@index([institutionId])
+  @@map("retention_schedules")
+}
+
+model RetentionRule {
+  id                  String                      @id @default(uuid()) @db.Uuid
+  retentionScheduleId String                      @db.Uuid
+  ruleCode            String
+  recordCategory      String
+  retentionPeriodDays Int?
+  dispositionAction   RetentionDispositionAction  @default(RETAIN)
+  legalBasis          String?
+  createdAt           DateTime                    @default(now())
+  updatedAt           DateTime                    @updatedAt
+  retentionSchedule   RetentionSchedule           @relation(fields: [retentionScheduleId], references: [id], onDelete: Cascade)
+  assignments         RecordRetentionAssignment[]
+
+  @@unique([retentionScheduleId, ruleCode])
+  @@index([retentionScheduleId])
+  @@map("retention_rules")
+}
+
+model RecordRetentionAssignment {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  retentionRuleId            String                     @db.Uuid
+  masterAdministrativeFileId String?                    @db.Uuid
+  documentRecordId           String?                    @db.Uuid
+  evidenceRecordId           String?                    @db.Uuid
+  assignedAt                 DateTime                   @default(now())
+  reviewDueAt                DateTime?
+  dispositionDueAt           DateTime?
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  retentionRule              RetentionRule              @relation(fields: [retentionRuleId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?  @relation(fields: [masterAdministrativeFileId], references: [id])
+  documentRecord             DocumentRecord?            @relation(fields: [documentRecordId], references: [id])
+  evidenceRecord             EvidenceRecord?            @relation(fields: [evidenceRecordId], references: [id])
+  dispositionRequests        RecordDispositionRequest[]
+
+  @@index([retentionRuleId])
+  @@index([masterAdministrativeFileId])
+  @@index([documentRecordId])
+  @@index([evidenceRecordId])
+  @@map("record_retention_assignments")
+}
+
+model LegalHold {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  holdReference           String                   @unique
+  title                   String
+  status                  LegalHoldStatus          @default(DRAFT)
+  reason                  String
+  issuedByIdentityId      String?                  @db.Uuid
+  effectiveFrom           DateTime?
+  releasedAt              DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  targets                 LegalHoldTarget[]
+  preservationCollections PreservationCollection[]
+
+  @@index([status])
+  @@map("legal_holds")
+}
+
+model LegalHoldTarget {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  legalHoldId                String                    @db.Uuid
+  targetType                 LegalHoldTargetType
+  masterAdministrativeFileId String?                   @db.Uuid
+  documentRecordId           String?                   @db.Uuid
+  evidenceRecordId           String?                   @db.Uuid
+  evidencePacketId           String?                   @db.Uuid
+  targetReference            String?
+  createdAt                  DateTime                  @default(now())
+  legalHold                  LegalHold                 @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  documentRecord             DocumentRecord?           @relation(fields: [documentRecordId], references: [id])
+  evidenceRecord             EvidenceRecord?           @relation(fields: [evidenceRecordId], references: [id])
+  evidencePacket             EvidencePacket?           @relation(fields: [evidencePacketId], references: [id])
+
+  @@index([legalHoldId])
+  @@index([targetType])
+  @@map("legal_hold_targets")
+}
+
+model PreservationCollection {
+  id                  String                       @id @default(uuid()) @db.Uuid
+  legalHoldId         String                       @db.Uuid
+  collectionReference String                       @unique
+  status              PreservationCollectionStatus @default(ACTIVE)
+  description         String?
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
+  legalHold           LegalHold                    @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
+  archivalTransfers   ArchivalTransfer[]
+
+  @@index([legalHoldId])
+  @@index([status])
+  @@map("preservation_collections")
+}
+
+model ArchivalTransfer {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  transferReference        String                  @unique
+  preservationCollectionId String?                 @db.Uuid
+  status                   ArchivalTransferStatus  @default(PENDING)
+  sourceLocationRef        String?
+  destinationLocationRef   String?
+  transferredAt            DateTime?
+  receivedAt               DateTime?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  preservationCollection   PreservationCollection? @relation(fields: [preservationCollectionId], references: [id])
+
+  @@index([preservationCollectionId])
+  @@index([status])
+  @@map("archival_transfers")
+}
+
+model RecordDispositionRequest {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  requestReference            String                     @unique
+  recordRetentionAssignmentId String                     @db.Uuid
+  status                      RecordDispositionStatus    @default(DRAFT)
+  requestedAction             RetentionDispositionAction
+  reason                      String
+  requestedByIdentityId       String?                    @db.Uuid
+  approvedByIdentityId        String?                    @db.Uuid
+  requestedAt                 DateTime                   @default(now())
+  approvedAt                  DateTime?
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  recordRetentionAssignment   RecordRetentionAssignment  @relation(fields: [recordRetentionAssignmentId], references: [id])
+  dispositionRecord           RecordDispositionRecord?
+
+  @@index([recordRetentionAssignmentId])
+  @@index([status])
+  @@map("record_disposition_requests")
+}
+
+model RecordDispositionRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  recordDispositionRequestId String                   @unique @db.Uuid
+  dispositionReference       String                   @unique
+  status                     RecordDispositionStatus  @default(EXECUTED)
+  executedAt                 DateTime                 @default(now())
+  executedByIdentityId       String?                  @db.Uuid
+  executionNotes             String?
+  createdAt                  DateTime                 @default(now())
+  recordDispositionRequest   RecordDispositionRequest @relation(fields: [recordDispositionRequestId], references: [id], onDelete: Cascade)
+
+  @@map("record_disposition_records")
 }

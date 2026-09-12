@@ -127,7 +127,10 @@ export class WorkflowOrchestrationService {
       });
 
       for (const step of workflowVersion.steps) {
-        const isParallelBranch = step.parallelGroupKey !== null && step.stepType !== WorkflowStepType.PARALLEL_FORK && step.stepType !== WorkflowStepType.PARALLEL_JOIN;
+        const isParallelBranch =
+          step.parallelGroupKey !== null &&
+          step.stepType !== WorkflowStepType.PARALLEL_FORK &&
+          step.stepType !== WorkflowStepType.PARALLEL_JOIN;
         await tx.caseWorkflowStepInstance.create({
           data: {
             caseWorkflowInstanceId: created.id,
@@ -208,13 +211,13 @@ export class WorkflowOrchestrationService {
         const forkDeps = dependsOn.length > 0;
         if (!forkDeps && step.sequenceOrder > 0) {
           const priorSteps = instance.workflowVersion.steps.filter(
-            (s) => s.sequenceOrder < step.sequenceOrder && s.stepType !== WorkflowStepType.PARALLEL_FORK,
+            (s) =>
+              s.sequenceOrder < step.sequenceOrder && s.stepType !== WorkflowStepType.PARALLEL_FORK,
           );
           const priorComplete = priorSteps.every((ps) =>
             instance.stepInstances.some(
               (si) =>
-                si.stepKey === ps.stepKey &&
-                si.status === CaseWorkflowStepInstanceStatus.COMPLETED,
+                si.stepKey === ps.stepKey && si.status === CaseWorkflowStepInstanceStatus.COMPLETED,
             ),
           );
           if (!priorComplete) {
@@ -495,8 +498,7 @@ export class WorkflowOrchestrationService {
       const branchInstance = instance.stepInstances.find(
         (si) =>
           si.stepKey === branchStep.stepKey &&
-          (si.parallelBranchKey === branchStep.parallelGroupKey ||
-            si.parallelBranchKey === null),
+          (si.parallelBranchKey === branchStep.parallelGroupKey || si.parallelBranchKey === null),
       );
       if (branchInstance?.status === CaseWorkflowStepInstanceStatus.PENDING) {
         await this.prisma.caseWorkflowStepInstance.update({
@@ -909,7 +911,13 @@ export class WorkflowOrchestrationService {
   }
 
   private async evaluateStepAuthority(
-    actor: { identityId: string; officeholderId?: string; officeId?: string; appointmentId?: string; delegationId?: string },
+    actor: {
+      identityId: string;
+      officeholderId?: string;
+      officeId?: string;
+      appointmentId?: string;
+      delegationId?: string;
+    },
     step: {
       functionAuthorityRecordId: string | null;
       authorityAction: AuthorityActionType | null;

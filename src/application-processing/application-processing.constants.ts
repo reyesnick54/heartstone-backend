@@ -1,5 +1,4 @@
 export const NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER =
-  'NON_PRODUCTION_APPLICATION_PROCESSING';
   'NON_PRODUCTION_APPLICATION_PROCESSING_TEST_ONLY';
 
 export const APPLICATION_NUMBER_PREFIX = 'APP';
@@ -15,7 +14,6 @@ export const FORBIDDEN_PHASE_7_MODELS = [
   'IssuedPermit',
   'IssuedCertificate',
   'EvidenceVault',
-  'MasterAdministrativeFile',
 ] as const;
 
 export const FORBIDDEN_CLIENT_CASE_STATUSES = ['DECIDED', 'ISSUED', 'APPROVED', 'REFUSED'] as const;

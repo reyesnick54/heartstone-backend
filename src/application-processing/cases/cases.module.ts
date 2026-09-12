@@ -1,41 +1,7 @@
-import { Module } from '@nestjs/common';
-
-import { AuthorityModule } from '../../authority/authority.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
-import { CaseFoundationService } from './case-foundation.service';
-import { CaseCommunicationService } from './timeline/case-communication.service';
-import { CaseCommunicationOutboxService } from './timeline/case-communication-outbox.service';
-import { CaseDashboardReadService } from './timeline/case-dashboard-read.service';
-import { CaseEventService } from './timeline/case-event.service';
-import { CaseMilestoneService } from './timeline/case-milestone.service';
-import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
-import { CaseTimelineController } from './timeline/case-timeline.controller';
-
-@Module({
-  imports: [AuthorityModule, SessionsModule],
-  controllers: [CaseTimelineController],
-  providers: [
-    SessionAuthGuard,
-    CaseFoundationService,
-    CaseEventService,
-    CaseCommunicationService,
-    CaseCommunicationOutboxService,
-    CaseMilestoneService,
-    CasePublicStatusProjectionService,
-    CaseDashboardReadService,
-  ],
-  exports: [
-    CaseFoundationService,
-    CaseEventService,
-    CaseCommunicationService,
-    CaseMilestoneService,
-    CasePublicStatusProjectionService,
-    CaseDashboardReadService,
-  ],
 import { forwardRef, Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../../authority/authority.module';
+import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { ApplicationsModule } from '../applications/applications.module';
 import { ApplicationProcessingCommonModule } from '../common/application-processing-common.module';
@@ -46,9 +12,17 @@ import { CaseSlaService } from '../sla/case-sla.service';
 import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.service';
 import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
 import { CaseEventsService } from './case-events.service';
+import { CaseFoundationService } from './case-foundation.service';
 import { CaseStatusService } from './case-status.service';
 import { CasesController } from './cases.controller';
 import { CasesService } from './cases.service';
+import { CaseCommunicationService } from './timeline/case-communication.service';
+import { CaseCommunicationOutboxService } from './timeline/case-communication-outbox.service';
+import { CaseDashboardReadService } from './timeline/case-dashboard-read.service';
+import { CaseEventService } from './timeline/case-event.service';
+import { CaseMilestoneService } from './timeline/case-milestone.service';
+import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
+import { CaseTimelineController } from './timeline/case-timeline.controller';
 
 @Module({
   imports: [
@@ -57,18 +31,36 @@ import { CasesService } from './cases.service';
     AuthorityModule,
     forwardRef(() => ApplicationsModule),
   ],
-  controllers: [CasesController],
+  controllers: [CasesController, CaseTimelineController],
   providers: [
+    SessionAuthGuard,
     CasesService,
     CaseEventsService,
     CaseStatusService,
+    CaseFoundationService,
     CasePublicStatusService,
     WorkflowDefinitionsService,
     WorkflowRuntimeService,
     CompletenessReviewsService,
     CaseReferralsService,
     CaseSlaService,
+    CaseEventService,
+    CaseCommunicationService,
+    CaseCommunicationOutboxService,
+    CaseMilestoneService,
+    CasePublicStatusProjectionService,
+    CaseDashboardReadService,
   ],
-  exports: [CasesService, WorkflowDefinitionsService, WorkflowRuntimeService],
+  exports: [
+    CasesService,
+    CaseFoundationService,
+    CaseEventService,
+    CaseCommunicationService,
+    CaseMilestoneService,
+    CasePublicStatusProjectionService,
+    CaseDashboardReadService,
+    WorkflowDefinitionsService,
+    WorkflowRuntimeService,
+  ],
 })
 export class CasesModule {}

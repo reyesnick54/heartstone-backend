@@ -100,7 +100,7 @@ describe('Phase 6G case timeline, communications, and applicant status', () => {
   it('derives applicant status from authoritative case state', async () => {
     await prisma.case.update({
       where: { id: caseId },
-      data: { caseStatus: CaseStatus.DECISION_PENDING },
+      data: { status: CaseStatus.DECISION_PENDING },
     });
 
     const projectionService = app.get(CasePublicStatusProjectionService);
@@ -195,7 +195,7 @@ describe('Phase 6G case timeline, communications, and applicant status', () => {
 
     await prisma.case.update({
       where: { id: caseId },
-      data: { caseStatus: CaseStatus.SAFE_HALT },
+      data: { status: CaseStatus.SAFE_HALT },
     });
 
     const projectionService = app.get(CasePublicStatusProjectionService);
