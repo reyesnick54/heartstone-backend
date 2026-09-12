@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -10,6 +11,7 @@ import {
   Query,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { type Response } from 'express';
@@ -17,6 +19,7 @@ import { type Response } from 'express';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ForbiddenDocumentFieldsInterceptor } from '../common/forbidden-document-fields.interceptor';
 import { DocumentAccessService } from './document-access.service';
 import { DocumentAssociationsService } from './document-associations.service';
 import { DocumentRecordsService } from './document-records.service';
@@ -29,6 +32,7 @@ import { UploadDocumentVersionDto } from './dto/upload-document-version.dto';
 @ApiTags('evidence-records-documents')
 @Controller('documents')
 @UseGuards(SessionAuthGuard)
+@UseInterceptors(ForbiddenDocumentFieldsInterceptor)
 @ApiBearerAuth()
 export class DocumentsController {
   constructor(
@@ -110,6 +114,13 @@ export class DocumentsController {
       `attachment; filename="${result.filename.replace(/"/g, '')}"`,
     );
     res.send(result.content);
+  }
+
+  @Get('versions/*path/download')
+  rejectStorageKeyDownload(): never {
+    throw new BadRequestException(
+      'Storage object keys cannot be used for download authorization',
+    );
   }
 
   @Post('associations')

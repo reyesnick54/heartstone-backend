@@ -176,7 +176,7 @@ describe('Phase 7B evidence records (integration)', () => {
       .set('Authorization', `Bearer ${fixture.officialSessionToken}`)
       .expect(200);
 
-    expect(downloadRes.text).toBe('restricted official access');
+    expect((downloadRes.body as Buffer).toString()).toBe('restricted official access');
   });
 
   it('keeps superseded versions reconstructable from storage', async () => {
@@ -214,7 +214,7 @@ describe('Phase 7B evidence records (integration)', () => {
       .set('Authorization', `Bearer ${fixture.officialSessionToken}`)
       .expect(200);
 
-    expect(firstDownload.text).toBe('superseded-but-preserved');
+    expect((firstDownload.body as Buffer).toString()).toBe('superseded-but-preserved');
   });
 
   it('records audit events for upload and download', async () => {
