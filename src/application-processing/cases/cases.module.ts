@@ -12,7 +12,6 @@ import { CaseEventService } from './timeline/case-event.service';
 import { CaseMilestoneService } from './timeline/case-milestone.service';
 import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
 import { CaseTimelineController } from './timeline/case-timeline.controller';
-import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
 
 @Module({
   imports: [AuthorityModule, SessionsModule, RecordsModule],

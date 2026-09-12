@@ -102,7 +102,6 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
       'Application',
       'Case',
       'CaseWorkflow',
-      'EvidencePacket',
       'GovernmentDecision',
       'IssuedLicense',
       'IssuedPermit',

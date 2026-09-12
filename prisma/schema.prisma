@@ -115,6 +115,7 @@ model Institution {
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
   masterAdministrativeFiles     MasterAdministrativeFile[]
+  governmentResponses           GovernmentResponse[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -198,6 +199,9 @@ model Officeholder {
   managedCases                 Case[]                        @relation("CaseManager")
   caseEventsAsActor            CaseEvent[]                   @relation("CaseEventOfficeholder")
   communicationsAsSender       CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  recordCorrectionsApproved    RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents        RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents           RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
 
   @@map("officeholders")
 }
@@ -443,6 +447,10 @@ model Identity {
   casesAsApplicant          Case[]                     @relation("CaseApplicant")
   caseEventsAsActor         CaseEvent[]                @relation("CaseEventActor")
   communicationsAsSender    CaseCommunication[]        @relation("CommunicationSender")
+  recordCorrectionsRequested RecordCorrection[]        @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved  RecordCorrection[]        @relation("RecordCorrectionApprover")
+  recordIntegrityEvents     RecordIntegrityEvent[]     @relation("RecordIntegrityActor")
+  recordAccessEvents        RecordAccessEvent[]        @relation("RecordAccessIdentity")
 
   @@index([userAccountId])
   @@index([personId])
@@ -808,6 +816,7 @@ model FunctionAuthorityRecord {
   institutionalActs            InstitutionalAuthorityAct[]
   serviceFunctionMappings      ServiceFunctionMapping[]
   serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
+  recordCorrections            RecordCorrection[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1055,6 +1064,8 @@ model AuthorityEvaluationRecord {
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords  ServiceActivationRecord[]
+  recordCorrections         RecordCorrection[]
+  evidenceReviews           EvidenceReview[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2082,6 +2093,13 @@ model MasterAdministrativeFile {
   administrativeOwnerOffice            Office                                    @relation("MasterFileAdministrativeOwner", fields: [administrativeOwnerOfficeId], references: [id])
   recordsCustodianOffice               Office                                    @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
   sections                             MasterAdministrativeFileSection[]
+  versions                             MasterAdministrativeFileVersion[]
+  documents                            EvidenceDocument[]
+  evidenceItems                        EvidenceItem[]
+  evidencePackets                      EvidencePacket[]
+  reviews                              EvidenceReview[]
+  governmentResponses                  GovernmentResponse[]
+  professionalFindings               ProfessionalFinding[]
 
   @@index([applicationId])
   @@index([governmentServiceId])
@@ -2108,4 +2126,345 @@ model MasterAdministrativeFileSection {
   @@unique([masterAdministrativeFileId, sectionType])
   @@index([masterAdministrativeFileId])
   @@map("master_administrative_file_sections")
+}
+
+// ─── Phase 7F: Correction, Integrity, Access, and Replay ─────────────────────
+
+enum EvidenceItemStatus {
+  PENDING
+  RECEIVED
+  UNDER_REVIEW
+  VERIFIED
+  DISPUTED
+  SUPERSEDED
+  REJECTED
+  ARCHIVED
+}
+
+enum EvidenceDocumentVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  DISPUTED
+}
+
+enum EvidenceReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETE
+  DISPUTED
+  SUPERSEDED
+}
+
+enum GovernmentResponseStatus {
+  DRAFT
+  ISSUED
+  SUPERSEDED
+}
+
+enum ProfessionalFindingStatus {
+  DRAFT
+  ISSUED
+  DISPUTED
+  SUPERSEDED
+}
+
+enum RecordCorrectionStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IMPLEMENTED
+  SUPERSEDED
+}
+
+enum RecordIntegrityEventType {
+  CREATED
+  HASHED
+  VERIFIED
+  VERSIONED
+  SUPERSEDED
+  CORRECTED
+  EXPORTED
+  RESTORED
+  ARCHIVED
+  MIGRATED
+}
+
+enum RecordAccessEventType {
+  VIEW
+  DOWNLOAD
+  EXPORT
+  PRINT_REQUEST
+  SHARE_AUTHORIZED
+  ADMIN_ACCESS
+}
+
+enum RecordAccessResult {
+  ALLOWED
+  DENIED
+}
+
+enum RecordsReplayMode {
+  HISTORICAL_REPLAY
+  CURRENT_VIEW
+}
+
+model MasterAdministrativeFileVersion {
+  id                        String   @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String   @db.Uuid
+  versionNumber             Int
+  snapshot                  Json
+  contentHash               String
+  effectiveAt               DateTime @default(now())
+  supersededAt              DateTime?
+  supersededById            String?  @db.Uuid
+  createdByIdentityId       String?  @db.Uuid
+  createdAt                 DateTime @default(now())
+  masterAdministrativeFile  MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  supersededBy              MasterAdministrativeFileVersion? @relation("MafVersionSupersession", fields: [supersededById], references: [id])
+  supersedes                MasterAdministrativeFileVersion[] @relation("MafVersionSupersession")
+
+  @@unique([masterAdministrativeFileId, versionNumber])
+  @@index([masterAdministrativeFileId, effectiveAt])
+  @@map("master_administrative_file_versions")
+}
+
+model EvidenceDocument {
+  id                        String                                      @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String                                      @db.Uuid
+  documentCode              String
+  title                     String
+  classification            MasterAdministrativeFileSecurityClassification @default(OFFICIAL)
+  createdAt                 DateTime                                    @default(now())
+  updatedAt                 DateTime                                    @updatedAt
+  masterAdministrativeFile  MasterAdministrativeFile                    @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  versions                  EvidenceDocumentVersion[]
+
+  @@unique([masterAdministrativeFileId, documentCode])
+  @@index([masterAdministrativeFileId])
+  @@map("evidence_documents")
+}
+
+model EvidenceDocumentVersion {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  documentId          String                        @db.Uuid
+  versionNumber       Int
+  contentReference    String
+  contentHash         String
+  status              EvidenceDocumentVersionStatus @default(ACTIVE)
+  effectiveAt         DateTime                      @default(now())
+  supersededAt        DateTime?
+  supersededById      String?                       @db.Uuid
+  createdByIdentityId String?                       @db.Uuid
+  createdAt           DateTime                      @default(now())
+  document            EvidenceDocument              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  supersededBy        EvidenceDocumentVersion?      @relation("EvidenceDocumentVersionSupersession", fields: [supersededById], references: [id])
+  supersedes          EvidenceDocumentVersion[]     @relation("EvidenceDocumentVersionSupersession")
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId, effectiveAt])
+  @@map("evidence_document_versions")
+}
+
+model EvidenceItem {
+  id                        String             @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String             @db.Uuid
+  evidenceCode              String
+  evidenceType              String
+  status                    EvidenceItemStatus @default(PENDING)
+  statusChangedAt           DateTime           @default(now())
+  contentReference          String?
+  metadata                  Json               @default("{}")
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  masterAdministrativeFile  MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  statusHistory             EvidenceItemStatusHistory[]
+
+  @@unique([masterAdministrativeFileId, evidenceCode])
+  @@index([masterAdministrativeFileId, status])
+  @@map("evidence_items")
+}
+
+model EvidenceItemStatusHistory {
+  id              String              @id @default(uuid()) @db.Uuid
+  evidenceItemId  String              @db.Uuid
+  fromStatus      EvidenceItemStatus?
+  toStatus        EvidenceItemStatus
+  reason          String?
+  changedAt       DateTime            @default(now())
+  actorIdentityId String?             @db.Uuid
+  evidenceItem    EvidenceItem        @relation(fields: [evidenceItemId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceItemId, changedAt])
+  @@map("evidence_item_status_history")
+}
+
+model EvidencePacket {
+  id                        String   @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String   @db.Uuid
+  packetNumber              String
+  title                     String
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  masterAdministrativeFile  MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  versions                  EvidencePacketVersion[]
+
+  @@unique([masterAdministrativeFileId, packetNumber])
+  @@index([masterAdministrativeFileId])
+  @@map("evidence_packets")
+}
+
+model EvidencePacketVersion {
+  id                       String   @id @default(uuid()) @db.Uuid
+  packetId                 String   @db.Uuid
+  versionNumber            Int
+  frozenAt                 DateTime @default(now())
+  contentHash              String
+  itemReferences           Json     @default("[]")
+  workflowVersionReference String?
+  authorityReferences      Json     @default("[]")
+  supersededAt             DateTime?
+  createdByIdentityId      String?  @db.Uuid
+  createdAt                DateTime @default(now())
+  packet                   EvidencePacket @relation(fields: [packetId], references: [id], onDelete: Cascade)
+
+  @@unique([packetId, versionNumber])
+  @@index([packetId, frozenAt])
+  @@map("evidence_packet_versions")
+}
+
+model EvidenceReview {
+  id                          String               @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId    String               @db.Uuid
+  reviewReference             String               @unique
+  status                      EvidenceReviewStatus @default(PENDING)
+  reviewerIdentityId          String?              @db.Uuid
+  reviewerOfficeholderId      String?              @db.Uuid
+  authorityEvaluationRecordId String?              @db.Uuid
+  findings                    String?
+  startedAt                   DateTime?
+  completedAt                 DateTime?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  masterAdministrativeFile    MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([masterAdministrativeFileId, status])
+  @@map("evidence_reviews")
+}
+
+model GovernmentResponse {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String                   @db.Uuid
+  responseReference         String                   @unique
+  respondingInstitutionId   String                   @db.Uuid
+  status                    GovernmentResponseStatus @default(DRAFT)
+  responseContent           String
+  issuedAt                  DateTime?
+  supersededAt              DateTime?
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  masterAdministrativeFile  MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  respondingInstitution     Institution              @relation(fields: [respondingInstitutionId], references: [id])
+
+  @@index([masterAdministrativeFileId, status])
+  @@map("government_responses")
+}
+
+model ProfessionalFinding {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId  String                    @db.Uuid
+  findingReference          String                    @unique
+  professionalBodyRef       String
+  status                    ProfessionalFindingStatus @default(DRAFT)
+  findingContent            String
+  issuedAt                  DateTime?
+  supersededAt              DateTime?
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  masterAdministrativeFile  MasterAdministrativeFile  @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+
+  @@index([masterAdministrativeFileId, status])
+  @@map("professional_findings")
+}
+
+model RecordCorrection {
+  id                            String                 @id @default(uuid()) @db.Uuid
+  targetRecordType              String
+  targetRecordId                String                 @db.Uuid
+  targetVersionId               String?                @db.Uuid
+  requestedBy                   String                 @db.Uuid
+  requestedAt                   DateTime               @default(now())
+  errorOrDisputeDescription     String
+  supportingEvidenceIds         Json                   @default("[]")
+  correctionAuthorityFunctionId String?                @db.Uuid
+  authorityEvaluationRecordId   String?                @db.Uuid
+  approvedByIdentityId          String?                @db.Uuid
+  approvedByOfficeholderId      String?                @db.Uuid
+  approvedAt                    DateTime?
+  replacementRecordReference    String?
+  downstreamAffectedReferences  Json                   @default("[]")
+  reassessmentRequired          Boolean                @default(false)
+  noticeRequired                Boolean                @default(false)
+  status                        RecordCorrectionStatus @default(REQUESTED)
+  reason                        String?
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  requester                     Identity               @relation("RecordCorrectionRequester", fields: [requestedBy], references: [id])
+  approverIdentity              Identity?              @relation("RecordCorrectionApprover", fields: [approvedByIdentityId], references: [id])
+  approverOfficeholder          Officeholder?          @relation("RecordCorrectionApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  correctionAuthorityFunction   FunctionAuthorityRecord? @relation(fields: [correctionAuthorityFunctionId], references: [id])
+
+  @@index([targetRecordType, targetRecordId])
+  @@index([status])
+  @@index([requestedBy])
+  @@map("record_corrections")
+}
+
+model RecordIntegrityEvent {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  recordType              String
+  recordId                String                   @db.Uuid
+  recordVersionId         String?                  @db.Uuid
+  eventType               RecordIntegrityEventType
+  hashAlgorithm           String                   @default("SHA-256")
+  contentHash             String
+  priorIntegrityEventHash String?
+  occurredAt              DateTime                 @default(now())
+  actorIdentityId         String?                  @db.Uuid
+  actorOfficeholderId     String?                  @db.Uuid
+  systemComponent         String
+  reason                  String?
+  metadata                Json                     @default("{}")
+  createdAt               DateTime                 @default(now())
+  actorIdentity           Identity?                @relation("RecordIntegrityActor", fields: [actorIdentityId], references: [id])
+  actorOfficeholder       Officeholder?            @relation("RecordIntegrityActorOfficeholder", fields: [actorOfficeholderId], references: [id])
+
+  @@index([recordType, recordId, occurredAt])
+  @@index([eventType])
+  @@map("record_integrity_events")
+}
+
+model RecordAccessEvent {
+  id                   String                @id @default(uuid()) @db.Uuid
+  recordType           String
+  recordId             String                @db.Uuid
+  accessType           RecordAccessEventType
+  identityId           String?               @db.Uuid
+  officeholderId       String?               @db.Uuid
+  purpose              String
+  occurredAt           DateTime              @default(now())
+  result               RecordAccessResult
+  correlationId        String?
+  securityAuditEventId String?               @db.Uuid
+  createdAt            DateTime              @default(now())
+  identity             Identity?             @relation("RecordAccessIdentity", fields: [identityId], references: [id])
+  officeholder         Officeholder?         @relation("RecordAccessOfficeholder", fields: [officeholderId], references: [id])
+
+  @@index([recordType, recordId, occurredAt])
+  @@index([identityId])
+  @@index([accessType])
+  @@map("record_access_events")
 }
