@@ -280,8 +280,8 @@ export async function seedApplicationsFixture(
   });
 
   for (const [account, password] of [
-    [applicantAccount, 'ApplicantPass123!'],
-    [otherAccount, 'OtherPass123!'],
+    [applicantAccount, 'ApplicantPass123!', `${marker}-applicant@test.gov`],
+    [otherAccount, 'OtherPass123!', `${marker}-other@test.gov`],
   ] as const) {
     const identity = account.id === applicantAccount.id ? applicantIdentity : otherIdentity;
     await request(app.getHttpServer())

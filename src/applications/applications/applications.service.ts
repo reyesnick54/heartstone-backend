@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   Application,
   ApplicationStatus,
@@ -159,9 +164,7 @@ export class ApplicationsService {
 
       if (existing) {
         if (existing.applicationId !== applicationId) {
-          throw new ConflictException(
-            'Idempotency key is already associated with another application',
-          );
+          throw new ConflictException('Idempotency key is already associated with another application');
         }
 
         return this.buildAcknowledgment(existing.submission, existing.submission.application);
@@ -196,8 +199,7 @@ export class ApplicationsService {
       dto.submittedCapacity ??
       (representativeAuthorityId ? SubmittedCapacity.REPRESENTATIVE : SubmittedCapacity.SELF);
 
-    const submissionChannel =
-      dto.submissionChannel ?? application.submissionChannel ?? SubmissionChannel.WEB_PORTAL;
+    const submissionChannel = dto.submissionChannel ?? application.submissionChannel;
 
     const submittedAt = new Date();
     const payloadHash = computePayloadHash(dto.answers);
@@ -310,9 +312,7 @@ export class ApplicationsService {
 
       if (existing) {
         if (existing.applicationId !== applicationId) {
-          throw new ConflictException(
-            'Idempotency key is already associated with another application',
-          );
+          throw new ConflictException('Idempotency key is already associated with another application');
         }
 
         return this.buildAcknowledgment(existing.submission, existing.submission.application);
@@ -356,8 +356,7 @@ export class ApplicationsService {
       dto.submittedCapacity ??
       (representativeAuthorityId ? SubmittedCapacity.REPRESENTATIVE : SubmittedCapacity.SELF);
 
-    const submissionChannel =
-      dto.submissionChannel ?? application.submissionChannel ?? SubmissionChannel.WEB_PORTAL;
+    const submissionChannel = dto.submissionChannel ?? application.submissionChannel;
 
     const submittedAt = new Date();
     const payloadHash = computePayloadHash(dto.answers);

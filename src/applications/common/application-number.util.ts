@@ -5,7 +5,7 @@ import { APPLICATION_NUMBER_PREFIX } from './applications.constants';
 export function generateApplicationNumber(): string {
   const year = new Date().getFullYear();
   const suffix = randomBytes(4).toString('hex').toUpperCase();
-  return `${APPLICATION_NUMBER_PREFIX}-${year}-${suffix}`;
+  return `${APPLICATION_NUMBER_PREFIX}-${String(year)}-${suffix}`;
 }
 
 export function generateAcknowledgmentReference(

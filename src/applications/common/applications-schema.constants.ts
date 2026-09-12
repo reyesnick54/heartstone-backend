@@ -18,7 +18,7 @@ export const APPLICATION_STATUS_VALUES = [
 
 export const FORBIDDEN_APPLICATION_STATUS_VALUES = ['APPROVED', 'REFUSED'] as const;
 
-export const PHASE_6C_BOUNDARY_MODEL_NAMES = [
+export const PHASE_6G_BOUNDARY_MODEL_NAMES = [
   'CaseWorkflow',
   'EvidencePacket',
   'GovernmentDecision',

@@ -1,8 +1,6 @@
 import { type INestApplication } from '@nestjs/common';
 import {
   ApplicationStatus,
-  FormFieldType,
-  FormVersionStatus,
   GovernmentServiceMaturityStatus,
   GovernmentServicePublicAvailability,
 } from '@prisma/client';
@@ -35,9 +33,7 @@ describe('Phase 6A Applications (integration)', () => {
     await app.close();
   });
 
-  async function createDraftApplication(
-    fixture: Awaited<ReturnType<typeof seedApplicationsFixture>>,
-  ) {
+  async function createDraftApplication(fixture: Awaited<ReturnType<typeof seedApplicationsFixture>>) {
     const response = await request(app.getHttpServer())
       .post('/api/v1/applications')
       .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
@@ -402,7 +398,7 @@ describe('Phase 6A Applications (integration)', () => {
       })
       .expect(201);
 
-    const schema = await prisma.$queryRaw<{ table_name: string }[]>`
+    const forbiddenTables = await prisma.$queryRaw<{ table_name: string }[]>`
       SELECT table_name
       FROM information_schema.tables
       WHERE table_schema = 'public'
@@ -414,6 +410,11 @@ describe('Phase 6A Applications (integration)', () => {
         )
     `;
 
-    expect(schema).toHaveLength(0);
+    expect(forbiddenTables).toHaveLength(0);
+
+    const caseCount = await prisma.case.count({
+      where: { applicationId: application.id },
+    });
+    expect(caseCount).toBe(0);
   });
 });

@@ -114,6 +114,9 @@ model Institution {
   institutionalAuthorityActs    InstitutionalAuthorityAct[]
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
+  referringCaseReferrals        CaseReferral[]                @relation("CaseReferralReferringInstitution")
+  receivingCaseReferrals        CaseReferral[]                @relation("CaseReferralReceivingInstitution")
+  sourceCaseReferralResponses   CaseReferralResponse[]        @relation("CaseReferralResponseSourceInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -150,6 +153,8 @@ model Department {
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
+  caseAssignments               CaseAssignment[]          @relation("CaseAssignmentDepartment")
+  referringCaseReferrals        CaseReferral[]            @relation("CaseReferralReferringDepartment")
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -172,6 +177,7 @@ model Office {
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   assignedCases                Case[]
+  caseAssignments              CaseAssignment[]          @relation("CaseAssignmentOffice")
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -192,8 +198,12 @@ model Officeholder {
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   ownedGovernmentServices      GovernmentService[]
-  managedCases                 Case[]              @relation("CaseManager")
+  managedCases                 Case[]                        @relation("CaseManager")
   caseStatusHistoryEntries     CaseStatusHistory[]
+  caseAssignments              CaseAssignment[]              @relation("CaseAssignmentOfficeholder")
+  caseAssignmentsAssignedBy    CaseAssignment[]              @relation("CaseAssignmentAssignedByOfficeholder")
+  caseEscalationsTriggeredBy   CaseEscalation[]              @relation("CaseEscalationTriggeredByOfficeholder")
+  ownedCaseIssues              CaseIssue[]                   @relation("CaseIssueOwner")
 
   @@map("officeholders")
 }
@@ -252,6 +262,8 @@ model ExternalAuthority {
   authorityDependencies            AuthorityDependency[]
   externalDependencyDeterminations ExternalDependencyDetermination[]
   institutionalAuthorityActs       InstitutionalAuthorityAct[]
+  receivingCaseReferrals           CaseReferral[]                    @relation("CaseReferralReceivingExternalAuthority")
+  sourceCaseReferralResponses      CaseReferralResponse[]            @relation("CaseReferralResponseSourceExternalAuthority")
 
   @@map("external_authorities")
 }
@@ -440,6 +452,10 @@ model Identity {
   casesAsApplicant                 Case[]                     @relation("CaseApplicant")
   caseStatusHistoryAsActor         CaseStatusHistory[]        @relation("CaseStatusHistoryActor")
   caseRelationshipsEstablished     CaseRelationship[]         @relation("CaseRelationshipEstablishedBy")
+  caseAssignmentsAssignedBy        CaseAssignment[]           @relation("CaseAssignmentAssignedBy")
+  caseReferralsCreatedBy           CaseReferral[]             @relation("CaseReferralCreatedBy")
+  caseSlaPausesAuthorizedBy        CaseSlaPause[]             @relation("CaseSlaPauseAuthorizedBy")
+  caseEscalationsTriggeredBy       CaseEscalation[]           @relation("CaseEscalationTriggeredBy")
 
   @@index([userAccountId])
   @@index([personId])
@@ -957,6 +973,7 @@ model AuthorityDependency {
   functionAuthorityRecord   FunctionAuthorityRecord           @relation(fields: [functionAuthorityRecordId], references: [id])
   externalAuthority         ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
   externalDeterminations    ExternalDependencyDetermination[]
+  caseReferrals             CaseReferral[]
 
   @@index([functionAuthorityRecordId])
   @@index([externalAuthorityId])
@@ -983,6 +1000,7 @@ model ExternalDependencyDetermination {
   updatedAt              DateTime                    @updatedAt
   authorityDependency    AuthorityDependency         @relation(fields: [authorityDependencyId], references: [id])
   externalAuthority      ExternalAuthority           @relation(fields: [externalAuthorityId], references: [id])
+  caseReferralResponses  CaseReferralResponse[]
 
   @@index([authorityDependencyId])
   @@index([externalAuthorityId])
@@ -1353,6 +1371,7 @@ model ServiceFunctionMapping {
   updatedAt                  DateTime                     @updatedAt
   governmentServiceVersion   GovernmentServiceVersion     @relation(fields: [governmentServiceVersionId], references: [id])
   functionAuthorityRecord    FunctionAuthorityRecord      @relation(fields: [functionAuthorityRecordId], references: [id])
+  caseSlaClocks              CaseSlaClock[]
 
   @@unique([governmentServiceVersionId, functionAuthorityRecordId])
   @@index([governmentServiceVersionId])
@@ -1796,12 +1815,21 @@ model Case {
   statusHistory                    CaseStatusHistory[]
   outgoingRelationships            CaseRelationship[]       @relation("CaseRelationshipSource")
   incomingRelationships            CaseRelationship[]       @relation("CaseRelationshipTarget")
+  currentWorkflowStepId            String?                    @db.Uuid
+  currentWorkflowStep              CaseWorkflowStep?          @relation("CaseCurrentWorkflowStep", fields: [currentWorkflowStepId], references: [id])
+  workflowSteps                    CaseWorkflowStep[]         @relation("CaseWorkflowSteps")
+  assignments                      CaseAssignment[]
+  referrals                        CaseReferral[]
+  slaClocks                        CaseSlaClock[]
+  escalations                      CaseEscalation[]
+  issues                           CaseIssue[]
 
   @@index([applicantIdentityId])
   @@index([responsibleDepartmentId])
   @@index([responsibleInstitutionId])
   @@index([caseStatus])
   @@index([legalStatus])
+  @@index([currentWorkflowStepId])
   @@map("cases")
 }
 
@@ -1848,4 +1876,351 @@ model CaseRelationship {
   @@index([parentCaseId])
   @@index([childCaseId])
   @@map("case_relationships")
+}
+
+// ─── Phase 6F: Case Assignments, Referrals, SLA Clocks and Escalation ───────
+
+enum CaseWorkflowStepStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  SKIPPED
+}
+
+enum CaseAssignmentType {
+  CASE_MANAGER
+  REVIEWER
+  SPECIALIST
+  COORDINATOR
+  INSPECTOR_PLACEHOLDER
+  OTHER_APPROVED_ROLE
+}
+
+enum CaseAssignmentStatus {
+  ACTIVE
+  SUSPENDED
+  ENDED
+}
+
+enum CaseReferralType {
+  INTERNAL_DEPARTMENT
+  GOVERNMENT_AUTHORITY
+  PROFESSIONAL
+  PARTNER
+  OTHER_APPROVED_EXTERNAL
+}
+
+enum CaseReferralStatus {
+  DRAFT
+  SENT
+  ACKNOWLEDGED
+  AWAITING_RESPONSE
+  RESPONSE_RECEIVED
+  CLOSED
+  CANCELLED
+}
+
+enum CaseReferralResponseStatus {
+  RECEIVED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  PARTIALLY_ACCEPTED
+}
+
+enum CaseReferralResponseAuthStatus {
+  UNAUTHENTICATED
+  AUTHENTICATED
+  VERIFIED
+  DISPUTED
+}
+
+enum CaseSlaClockType {
+  ABSEZ_PROCESSING_TIME
+  APPLICANT_TIME
+  EXTERNAL_DEPENDENCY_TIME
+  PROFESSIONAL_DEPENDENCY_TIME
+  PAUSED_AUTHORIZED
+  SYSTEM_DISRUPTION
+}
+
+enum CaseSlaClockStatus {
+  RUNNING
+  PAUSED
+  COMPLETED
+  BREACHED
+  AT_RISK
+  CANCELLED
+}
+
+enum CaseSlaPauseReason {
+  REFERRAL_PENDING
+  APPLICANT_DELAY
+  EXTERNAL_DEPENDENCY
+  AUTHORIZED_PAUSE
+  SYSTEM_DISRUPTION
+}
+
+enum CaseEscalationRoute {
+  DEPARTMENT
+  ONE_STOP_ADMINISTRATION
+  SENIOR_ADMINISTRATIVE
+  MANAGEMENT_COMMITTEE
+  COMPETENT_EXTERNAL_AUTHORITY
+}
+
+enum CaseEscalationStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  CLOSED
+}
+
+enum CaseIssueType {
+  UNRESOLVED_REQUIREMENT
+  DEPENDENCY_DELAY
+  APPLICANT_RESPONSE_PENDING
+  PROFESSIONAL_ISSUE
+  AUTHORITY_ISSUE
+  SYSTEM_ISSUE
+  OTHER
+}
+
+enum CaseIssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum CaseIssueStatus {
+  OPEN
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+model CaseWorkflowStep {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  caseId                   String                 @db.Uuid
+  stepKey                  String
+  label                    String
+  sequenceOrder            Int
+  status                   CaseWorkflowStepStatus @default(PENDING)
+  blocksOnUnresolvedIssues Boolean                @default(false)
+  enteredAt                DateTime?
+  completedAt              DateTime?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  case                     Case                   @relation("CaseWorkflowSteps", fields: [caseId], references: [id])
+  currentForCases          Case[]                 @relation("CaseCurrentWorkflowStep")
+  referrals                CaseReferral[]
+
+  @@unique([caseId, stepKey])
+  @@index([caseId])
+  @@index([status])
+  @@map("case_workflow_steps")
+}
+
+model CaseAssignment {
+  id                       String               @id @default(uuid()) @db.Uuid
+  caseId                   String               @db.Uuid
+  assignmentType           CaseAssignmentType
+  assignedOfficeholderId   String               @db.Uuid
+  assignedOfficeId         String?              @db.Uuid
+  assignedDepartmentId     String?              @db.Uuid
+  assignedByIdentityId     String               @db.Uuid
+  assignedByOfficeholderId String?              @db.Uuid
+  effectiveFrom            DateTime
+  effectiveUntil           DateTime?
+  status                   CaseAssignmentStatus @default(ACTIVE)
+  purpose                  String?
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  case                     Case                 @relation(fields: [caseId], references: [id])
+  assignedOfficeholder     Officeholder         @relation("CaseAssignmentOfficeholder", fields: [assignedOfficeholderId], references: [id])
+  assignedOffice           Office?              @relation("CaseAssignmentOffice", fields: [assignedOfficeId], references: [id])
+  assignedDepartment       Department?          @relation("CaseAssignmentDepartment", fields: [assignedDepartmentId], references: [id])
+  assignedByIdentity       Identity             @relation("CaseAssignmentAssignedBy", fields: [assignedByIdentityId], references: [id])
+  assignedByOfficeholder   Officeholder?        @relation("CaseAssignmentAssignedByOfficeholder", fields: [assignedByOfficeholderId], references: [id])
+
+  @@index([caseId])
+  @@index([assignedOfficeholderId])
+  @@index([assignmentType])
+  @@index([status])
+  @@map("case_assignments")
+}
+
+model CaseReferral {
+  id                             String               @id @default(uuid()) @db.Uuid
+  referralReference              String               @unique
+  caseId                         String               @db.Uuid
+  workflowStepId                 String?              @db.Uuid
+  referralType                   CaseReferralType
+  referringInstitutionId         String               @db.Uuid
+  referringDepartmentId          String?              @db.Uuid
+  receivingInstitutionId         String?              @db.Uuid
+  receivingExternalAuthorityId   String?              @db.Uuid
+  authorityDependencyId          String?              @db.Uuid
+  purpose                        String
+  questionsRequestedResponse     String?
+  sentAt                         DateTime?
+  acknowledgedAt                 DateTime?
+  dueAt                          DateTime?
+  status                         CaseReferralStatus   @default(DRAFT)
+  securityHandlingClassification String?
+  outgoingPackageReferences      Json                 @default("[]")
+  createdByIdentityId            String               @db.Uuid
+  createdAt                      DateTime             @default(now())
+  updatedAt                      DateTime             @updatedAt
+  case                           Case                 @relation(fields: [caseId], references: [id])
+  workflowStep                   CaseWorkflowStep?    @relation(fields: [workflowStepId], references: [id])
+  referringInstitution           Institution          @relation("CaseReferralReferringInstitution", fields: [referringInstitutionId], references: [id])
+  referringDepartment            Department?          @relation("CaseReferralReferringDepartment", fields: [referringDepartmentId], references: [id])
+  receivingInstitution           Institution?         @relation("CaseReferralReceivingInstitution", fields: [receivingInstitutionId], references: [id])
+  receivingExternalAuthority     ExternalAuthority?   @relation("CaseReferralReceivingExternalAuthority", fields: [receivingExternalAuthorityId], references: [id])
+  authorityDependency            AuthorityDependency? @relation(fields: [authorityDependencyId], references: [id])
+  createdByIdentity              Identity             @relation("CaseReferralCreatedBy", fields: [createdByIdentityId], references: [id])
+  responses                      CaseReferralResponse[]
+  slaPauses                      CaseSlaPause[]
+
+  @@index([caseId])
+  @@index([workflowStepId])
+  @@index([referringInstitutionId])
+  @@index([receivingInstitutionId])
+  @@index([receivingExternalAuthorityId])
+  @@index([authorityDependencyId])
+  @@index([status])
+  @@map("case_referrals")
+}
+
+model CaseReferralResponse {
+  id                                String                         @id @default(uuid()) @db.Uuid
+  referralId                        String                         @db.Uuid
+  responseReference                 String
+  receivedAt                        DateTime
+  sourceInstitutionId               String?                        @db.Uuid
+  sourceExternalAuthorityId         String?                        @db.Uuid
+  authenticatedStatus               CaseReferralResponseAuthStatus @default(UNAUTHENTICATED)
+  status                            CaseReferralResponseStatus     @default(RECEIVED)
+  determinationReference            String?
+  conditionsReference               String?
+  effectiveDate                     DateTime?
+  expiryDate                        DateTime?
+  summary                           String?
+  recordReferences                  Json                           @default("[]")
+  externalDependencyDeterminationId String?                        @db.Uuid
+  createdAt                         DateTime                       @default(now())
+  updatedAt                         DateTime                       @updatedAt
+  referral                          CaseReferral                   @relation(fields: [referralId], references: [id])
+  sourceInstitution                 Institution?                   @relation("CaseReferralResponseSourceInstitution", fields: [sourceInstitutionId], references: [id])
+  sourceExternalAuthority           ExternalAuthority?             @relation("CaseReferralResponseSourceExternalAuthority", fields: [sourceExternalAuthorityId], references: [id])
+  externalDependencyDetermination   ExternalDependencyDetermination? @relation(fields: [externalDependencyDeterminationId], references: [id])
+
+  @@index([referralId])
+  @@index([sourceInstitutionId])
+  @@index([sourceExternalAuthorityId])
+  @@index([externalDependencyDeterminationId])
+  @@map("case_referral_responses")
+}
+
+model CaseSlaClock {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  caseId                   String                  @db.Uuid
+  clockType                CaseSlaClockType
+  serviceLevelTargetLabel  String?
+  targetDurationDays       Int?
+  serviceFunctionMappingId String?                 @db.Uuid
+  startedAt                DateTime
+  dueAt                    DateTime?
+  elapsedMs                Int                     @default(0)
+  pausedDurationMs         Int                     @default(0)
+  status                   CaseSlaClockStatus      @default(RUNNING)
+  breachAt                 DateTime?
+  atRiskAt                 DateTime?
+  completedAt              DateTime?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  case                     Case                    @relation(fields: [caseId], references: [id])
+  serviceFunctionMapping     ServiceFunctionMapping? @relation(fields: [serviceFunctionMappingId], references: [id])
+  pauses                   CaseSlaPause[]
+
+  @@index([caseId])
+  @@index([clockType])
+  @@index([status])
+  @@index([serviceFunctionMappingId])
+  @@map("case_sla_clocks")
+}
+
+model CaseSlaPause {
+  id                     String             @id @default(uuid()) @db.Uuid
+  slaClockId             String             @db.Uuid
+  referralId             String?            @db.Uuid
+  pauseReason            CaseSlaPauseReason
+  pausedAt               DateTime
+  resumedAt              DateTime?
+  authorizedByIdentityId String?            @db.Uuid
+  notes                  String?
+  createdAt              DateTime           @default(now())
+  slaClock               CaseSlaClock       @relation(fields: [slaClockId], references: [id])
+  referral               CaseReferral?      @relation(fields: [referralId], references: [id])
+  authorizedByIdentity   Identity?          @relation("CaseSlaPauseAuthorizedBy", fields: [authorizedByIdentityId], references: [id])
+
+  @@index([slaClockId])
+  @@index([referralId])
+  @@map("case_sla_pauses")
+}
+
+model CaseEscalation {
+  id                         String               @id @default(uuid()) @db.Uuid
+  caseId                     String               @db.Uuid
+  escalationRoute            CaseEscalationRoute
+  triggeredByIdentityId      String               @db.Uuid
+  triggeredByOfficeholderId    String?              @db.Uuid
+  relatedIssueId             String?              @db.Uuid
+  relatedSlaClockId          String?              @db.Uuid
+  relatedReferralId          String?              @db.Uuid
+  reason                     String
+  status                     CaseEscalationStatus @default(OPEN)
+  preservesAuthorityBoundary Boolean              @default(true)
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+  resolvedAt                 DateTime?
+  case                       Case                 @relation(fields: [caseId], references: [id])
+  triggeredByIdentity        Identity             @relation("CaseEscalationTriggeredBy", fields: [triggeredByIdentityId], references: [id])
+  triggeredByOfficeholder    Officeholder?        @relation("CaseEscalationTriggeredByOfficeholder", fields: [triggeredByOfficeholderId], references: [id])
+  relatedIssue               CaseIssue?           @relation("CaseEscalationRelatedIssue", fields: [relatedIssueId], references: [id])
+  issueEscalations           CaseIssue[]          @relation("CaseIssueEscalation")
+
+  @@index([caseId])
+  @@index([escalationRoute])
+  @@index([status])
+  @@map("case_escalations")
+}
+
+model CaseIssue {
+  id                  String            @id @default(uuid()) @db.Uuid
+  caseId              String            @db.Uuid
+  issueType           CaseIssueType
+  severity            CaseIssueSeverity @default(MEDIUM)
+  ownerOfficeholderId String?           @db.Uuid
+  status              CaseIssueStatus   @default(OPEN)
+  description         String
+  blocksWorkflow      Boolean           @default(false)
+  escalationId        String?           @db.Uuid
+  openedAt            DateTime          @default(now())
+  resolvedAt          DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  case                Case              @relation(fields: [caseId], references: [id])
+  ownerOfficeholder   Officeholder?     @relation("CaseIssueOwner", fields: [ownerOfficeholderId], references: [id])
+  escalation          CaseEscalation?   @relation("CaseIssueEscalation", fields: [escalationId], references: [id])
+  relatedEscalations  CaseEscalation[]  @relation("CaseEscalationRelatedIssue")
+
+  @@index([caseId])
+  @@index([issueType])
+  @@index([status])
+  @@index([ownerOfficeholderId])
+  @@map("case_issues")
 }

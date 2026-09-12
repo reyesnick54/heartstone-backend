@@ -1,5 +1,9 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Application, MembershipStatus, RepresentativeAuthorityStatus } from '@prisma/client';
+import {
+  Application,
+  MembershipStatus,
+  RepresentativeAuthorityStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
@@ -26,8 +30,7 @@ export class ApplicationAccessService {
       });
 
       if (
-        authority &&
-        authority.identityId === identityId &&
+        authority?.identityId === identityId &&
         authority.status === RepresentativeAuthorityStatus.ACTIVE
       ) {
         return application;
@@ -61,8 +64,13 @@ export class ApplicationAccessService {
         where: { id: representativeAuthorityId },
       });
 
+      if (!authority) {
+        throw new ForbiddenException(
+          'Representative authority does not grant access to the specified organization',
+        );
+      }
+
       if (
-        !authority ||
         authority.identityId !== identityId ||
         authority.organizationId !== organizationId ||
         authority.status !== RepresentativeAuthorityStatus.ACTIVE
