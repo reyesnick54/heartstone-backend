@@ -97,21 +97,20 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     expect(schema).not.toMatch(/enum ServiceFamilyType/);
   });
 
-  it('does not define Phase 6 application-processing models', () => {
-    const phase6Models = [
-      'Application',
-      'Case',
-      'CaseWorkflow',
-      'EvidencePacket',
-      'GovernmentDecision',
-      'IssuedLicense',
-      'IssuedPermit',
-      'PaymentTransaction',
-      'InspectionCase',
+  it('does not embed Phase 6 application-processing fields in catalog models', () => {
+    const catalogModels = [
+      'GovernmentService',
+      'GovernmentServiceVersion',
+      'FormDefinition',
+      'FormVersion',
     ];
+    const forbiddenPhase6Fields = ['caseId', 'applicationId', 'caseStatus', 'approvalStatus'];
 
-    for (const modelName of phase6Models) {
-      expect(schema).not.toContain(`model ${modelName}`);
+    for (const modelName of catalogModels) {
+      const block = extractModelBlock(schema, modelName);
+      for (const field of forbiddenPhase6Fields) {
+        expect(block).not.toContain(field);
+      }
     }
   });
 });
