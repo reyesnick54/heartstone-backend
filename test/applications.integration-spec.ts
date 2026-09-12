@@ -408,7 +408,6 @@ describe('Phase 6A Applications (integration)', () => {
           'government_decisions',
           'issued_licenses',
           'issued_permits',
-          'cases',
           'evidence_packets'
         )
     `;

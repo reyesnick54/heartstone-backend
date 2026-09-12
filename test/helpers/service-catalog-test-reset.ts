@@ -1,6 +1,8 @@
 import { type PrismaService } from '../../src/database/prisma.service';
+import { resetCasesData } from './cases-test-reset';
 
 export async function resetServiceCatalogData(prisma: PrismaService): Promise<void> {
+  await resetCasesData(prisma);
   await prisma.applicationSubmissionIdempotencyKey.deleteMany();
   await prisma.applicationSubmission.deleteMany();
   await prisma.application.deleteMany();

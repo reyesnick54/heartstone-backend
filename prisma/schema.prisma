@@ -113,6 +113,7 @@ model Institution {
   functionAuthorityAssignments  FunctionAuthorityAssignment[]
   institutionalAuthorityActs    InstitutionalAuthorityAct[]
   responsibleGovernmentServices GovernmentService[]
+  cases                         Case[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -148,6 +149,7 @@ model Department {
   institution                   Institution               @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
+  cases                         Case[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -169,6 +171,7 @@ model Office {
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOffice")
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  assignedCases                Case[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -189,6 +192,8 @@ model Officeholder {
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   ownedGovernmentServices      GovernmentService[]
+  managedCases                 Case[]              @relation("CaseManager")
+  caseStatusHistoryEntries     CaseStatusHistory[]
 
   @@map("officeholders")
 }
@@ -430,8 +435,11 @@ model Identity {
   memberships               OrganizationMembership[]
   representativeAuthorities RepresentativeAuthority[]
   officeholderLinks         IdentityOfficeholderLink[]
-  applicationsAsApplicant   Application[]              @relation("ApplicationApplicant")
-  applicationSubmissions    ApplicationSubmission[]    @relation("SubmissionSubmitter")
+  applicationsAsApplicant        Application[]              @relation("ApplicationApplicant")
+  applicationSubmissions         ApplicationSubmission[]    @relation("SubmissionSubmitter")
+  casesAsApplicant                 Case[]                     @relation("CaseApplicant")
+  caseStatusHistoryAsActor         CaseStatusHistory[]        @relation("CaseStatusHistoryActor")
+  caseRelationshipsEstablished     CaseRelationship[]         @relation("CaseRelationshipEstablishedBy")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1249,6 +1257,7 @@ model GovernmentService {
   ownerOfficeholder        Officeholder?              @relation(fields: [ownerOfficeholderId], references: [id])
   versions                 GovernmentServiceVersion[]
   applications             Application[]
+  cases                    Case[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -1306,6 +1315,7 @@ model GovernmentServiceVersion {
   formDefinitions                     FormDefinition[]
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
+  cases                               Case[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1649,6 +1659,7 @@ model Application {
   draftFormVersion           FormVersion?        @relation(fields: [draftFormVersionId], references: [id])
   submissions                ApplicationSubmission[]
   idempotencyKeys            ApplicationSubmissionIdempotencyKey[]
+  case                       Case?
 
   @@index([applicantIdentityId])
   @@index([representativeAuthorityId])
@@ -1685,6 +1696,7 @@ model ApplicationSubmission {
   supersedesSubmission       ApplicationSubmission? @relation("SubmissionSupersession", fields: [supersedesSubmissionId], references: [id])
   supersededBy               ApplicationSubmission[] @relation("SubmissionSupersession")
   idempotencyKeys            ApplicationSubmissionIdempotencyKey[]
+  case                       Case?
 
   @@unique([applicationId, submissionSequence])
   @@index([applicationId])
@@ -1706,4 +1718,134 @@ model ApplicationSubmissionIdempotencyKey {
   @@index([applicationId])
   @@index([submissionId])
   @@map("application_submission_idempotency_keys")
+}
+
+// ─── Phase 6B: Core Case Management Engine ───────────────────────────────────
+
+enum CaseStatus {
+  RECEIVED
+  IDENTITY_PENDING
+  COMPLETENESS_REVIEW
+  INCOMPLETE
+  COMPLETE
+  SUBSTANTIVE_REVIEW
+  EXTERNAL_REFERRAL
+  PROFESSIONAL_REVIEW
+  INSPECTION
+  DECISION_PENDING
+  DECIDED
+  ISSUED
+  UNDER_CONTINUING_OVERSIGHT
+  UNDER_COMPLAINT_OR_APPEAL
+  SUSPENDED
+  REVOKED
+  WITHDRAWN
+  CLOSED
+  ARCHIVED
+}
+
+enum CaseLegalStatus {
+  NONE
+  PENDING
+  UNRESOLVED
+  EXTERNAL_STATUS_PENDING
+}
+
+enum CasePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CaseRelationshipType {
+  RELATED_CASE
+  PARENT_CHILD
+  RELATED_SERVICE_MATTER
+  ORGANIZATION_PROJECT_REFERENCE
+}
+
+model Case {
+  id                               String                   @id @default(uuid()) @db.Uuid
+  caseNumber                       String                   @unique
+  applicationId                    String                   @unique @db.Uuid
+  applicationSubmissionId          String                   @unique @db.Uuid
+  governmentServiceId              String                   @db.Uuid
+  governmentServiceVersionId       String                   @db.Uuid
+  responsibleInstitutionId         String                   @db.Uuid
+  responsibleDepartmentId          String                   @db.Uuid
+  caseStatus                       CaseStatus               @default(RECEIVED)
+  legalStatus                      CaseLegalStatus          @default(NONE)
+  priority                         CasePriority             @default(NORMAL)
+  openedAt                         DateTime                 @default(now())
+  closedAt                         DateTime?
+  currentCaseManagerOfficeholderId String?                  @db.Uuid
+  currentAssignedOfficeId          String?                  @db.Uuid
+  applicantIdentityId              String                   @db.Uuid
+  createdAt                        DateTime                 @default(now())
+  updatedAt                        DateTime                 @updatedAt
+  application                      Application              @relation(fields: [applicationId], references: [id])
+  applicationSubmission            ApplicationSubmission    @relation(fields: [applicationSubmissionId], references: [id])
+  governmentService                GovernmentService        @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion         GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  responsibleInstitution           Institution              @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment            Department               @relation(fields: [responsibleDepartmentId], references: [id])
+  applicantIdentity                Identity                 @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
+  currentCaseManagerOfficeholder   Officeholder?            @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
+  currentAssignedOffice            Office?                  @relation(fields: [currentAssignedOfficeId], references: [id])
+  statusHistory                    CaseStatusHistory[]
+  outgoingRelationships            CaseRelationship[]       @relation("CaseRelationshipSource")
+  incomingRelationships            CaseRelationship[]       @relation("CaseRelationshipTarget")
+
+  @@index([applicantIdentityId])
+  @@index([responsibleDepartmentId])
+  @@index([responsibleInstitutionId])
+  @@index([caseStatus])
+  @@index([legalStatus])
+  @@map("cases")
+}
+
+model CaseStatusHistory {
+  id                  String           @id @default(uuid()) @db.Uuid
+  caseId              String           @db.Uuid
+  previousStatus      CaseStatus?
+  newStatus           CaseStatus
+  previousLegalStatus CaseLegalStatus?
+  newLegalStatus      CaseLegalStatus
+  actorIdentityId     String           @db.Uuid
+  officeholderId      String?          @db.Uuid
+  reason              String?
+  correlationId       String?
+  createdAt           DateTime         @default(now())
+  case                Case             @relation(fields: [caseId], references: [id])
+  actorIdentity       Identity         @relation("CaseStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  officeholder        Officeholder?    @relation(fields: [officeholderId], references: [id])
+
+  @@index([caseId])
+  @@index([actorIdentityId])
+  @@index([createdAt])
+  @@map("case_status_history")
+}
+
+model CaseRelationship {
+  id                      String               @id @default(uuid()) @db.Uuid
+  sourceCaseId            String               @db.Uuid
+  targetCaseId            String?              @db.Uuid
+  relationshipType        CaseRelationshipType
+  relatedServiceMatterRef String?
+  organizationProjectRef  String?
+  parentCaseId            String?              @db.Uuid
+  childCaseId             String?              @db.Uuid
+  establishedByIdentityId String               @db.Uuid
+  reason                  String?
+  createdAt               DateTime             @default(now())
+  sourceCase              Case                 @relation("CaseRelationshipSource", fields: [sourceCaseId], references: [id])
+  targetCase              Case?                @relation("CaseRelationshipTarget", fields: [targetCaseId], references: [id])
+  establishedByIdentity   Identity             @relation("CaseRelationshipEstablishedBy", fields: [establishedByIdentityId], references: [id])
+
+  @@index([sourceCaseId])
+  @@index([targetCaseId])
+  @@index([parentCaseId])
+  @@index([childCaseId])
+  @@map("case_relationships")
 }

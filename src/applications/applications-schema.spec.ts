@@ -5,7 +5,7 @@ import {
   APPLICATION_MODEL_NAMES,
   APPLICATION_STATUS_VALUES,
   FORBIDDEN_APPLICATION_STATUS_VALUES,
-  PHASE_6B_BOUNDARY_MODEL_NAMES,
+  PHASE_6C_BOUNDARY_MODEL_NAMES,
 } from './common/applications-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -67,8 +67,8 @@ describe('Applications schema coherence (Phase 6A)', () => {
     expect(block).toContain('submissionId');
   });
 
-  it('does not define Phase 6B case management or decision models', () => {
-    for (const modelName of PHASE_6B_BOUNDARY_MODEL_NAMES) {
+  it('does not define Phase 6C case workflow or decision models', () => {
+    for (const modelName of PHASE_6C_BOUNDARY_MODEL_NAMES) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
   });
