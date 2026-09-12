@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CaseEventType,
+  CaseMilestoneStatus,
   CaseMilestoneType,
   CaseStatus,
   CaseWorkflowInstanceStatus,
@@ -139,7 +140,8 @@ export class CompletenessReviewsService {
       data: {
         caseId: input.caseId,
         milestoneType: CaseMilestoneType.COMPLETENESS_COMPLETE,
-        label: 'Completeness review complete',
+        name: 'Completeness review complete',
+        status: CaseMilestoneStatus.COMPLETED,
       },
     });
 

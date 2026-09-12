@@ -39,7 +39,7 @@ describe('CasePublicStatusProjectionService', () => {
 
     const caseRecord = {
       id: 'case-1',
-      caseStatus: CaseStatus.RECEIVED,
+      status: CaseStatus.RECEIVED,
       legalStatus: 'NONE',
     };
 

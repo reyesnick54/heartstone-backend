@@ -1,6 +1,7 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.caseCommunicationOutbox.deleteMany();
   await prisma.casePublicStatusProjection.deleteMany();
   await prisma.caseMilestone.deleteMany();
   await prisma.caseCommunication.deleteMany();

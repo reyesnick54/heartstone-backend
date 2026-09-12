@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  ApplicantCategory,
   type Application,
   ApplicationStatus,
   type Case,
@@ -9,6 +10,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.service';
 import { CaseEventService } from './timeline/case-event.service';
 import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
 
@@ -22,6 +24,7 @@ export interface OpenCaseFromApplicationInput {
 export class CaseFoundationService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly workflowDefinitions: WorkflowDefinitionsService,
     private readonly caseEventService: CaseEventService,
     private readonly projectionService: CasePublicStatusProjectionService,
   ) {}
@@ -51,6 +54,9 @@ export class CaseFoundationService {
       return existingCase;
     }
 
+    const workflowVersion = await this.workflowDefinitions.resolveApprovedWorkflowForService(
+      application.governmentServiceId,
+    );
     const caseNumber = await this.generateCaseNumber();
 
     const caseRecord = await this.prisma.$transaction(async (tx) => {
@@ -68,7 +74,9 @@ export class CaseFoundationService {
           governmentServiceVersionId: application.governmentServiceVersionId,
           responsibleInstitutionId: application.governmentService.responsibleInstitutionId,
           responsibleDepartmentId: application.governmentService.responsibleDepartmentId,
-          caseStatus: CaseStatus.RECEIVED,
+          workflowVersionId: workflowVersion.id,
+          configurationFingerprint: application.configurationFingerprint,
+          status: CaseStatus.RECEIVED,
         },
       });
     });
@@ -109,6 +117,9 @@ export class CaseFoundationService {
     applicantIdentityId: string;
     governmentServiceId: string;
     governmentServiceVersionId: string;
+    formDefinitionId: string;
+    formVersionId: string;
+    configurationFingerprint: string;
   }): Promise<Application> {
     return this.prisma.application.create({
       data: {
@@ -116,6 +127,10 @@ export class CaseFoundationService {
         applicantIdentityId: input.applicantIdentityId,
         governmentServiceId: input.governmentServiceId,
         governmentServiceVersionId: input.governmentServiceVersionId,
+        formDefinitionId: input.formDefinitionId,
+        formVersionId: input.formVersionId,
+        configurationFingerprint: input.configurationFingerprint,
+        applicantCategory: ApplicantCategory.INDIVIDUAL,
         status: ApplicationStatus.SUBMITTED,
       },
     });
