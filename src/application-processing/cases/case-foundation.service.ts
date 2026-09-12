@@ -68,7 +68,7 @@ export class CaseFoundationService {
           governmentServiceVersionId: application.governmentServiceVersionId,
           responsibleInstitutionId: application.governmentService.responsibleInstitutionId,
           responsibleDepartmentId: application.governmentService.responsibleDepartmentId,
-          caseStatus: CaseStatus.RECEIVED,
+          status: CaseStatus.RECEIVED,
         },
       });
     });

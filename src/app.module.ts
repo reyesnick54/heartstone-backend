@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ApplicationsModule } from './applications/applications.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
+import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -44,6 +45,7 @@ import { WorkflowsModule } from './workflows/workflows.module';
     ApplicationsModule,
     WorkflowsModule,
     ApplicationProcessingModule,
+    EvidenceRecordsModule,
   ],
 })
 export class AppModule {}

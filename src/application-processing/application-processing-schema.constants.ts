@@ -120,6 +120,8 @@ export const PHASE_7_REFERENCE_FIELDS = [
   'evidencePacketReference',
   'recordsClassificationReference',
   'retentionLegalHoldReference',
+] as const;
+
 export const FORBIDDEN_APPLICATION_AUTHORITY_FIELDS = [
   'hasAuthority',
   'authorityGranted',
