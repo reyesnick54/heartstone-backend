@@ -19,7 +19,6 @@ import { PrismaService } from '../database/prisma.service';
 import { EvidenceRecordsBoundaryService } from './common/evidence-records-boundary.service';
 import { MasterFileCompletenessService } from './completeness/master-file-completeness.service';
 import { PHASE_7H_INVARIANTS } from './evidence-records-phase-7h.constants';
-import { EvidenceRecordsModule } from './evidence-records.module';
 
 describe('Phase 7H architectural must-fail invariants', () => {
   let moduleRef: TestingModule;
@@ -35,8 +34,8 @@ describe('Phase 7H architectural must-fail invariants', () => {
           load: [appConfig, redisConfig, securityConfig, identityConfig],
         }),
         DatabaseModule,
-        EvidenceRecordsModule,
       ],
+      providers: [EvidenceRecordsBoundaryService, MasterFileCompletenessService],
     }).compile();
 
     prisma = moduleRef.get(PrismaService);
@@ -46,6 +45,9 @@ describe('Phase 7H architectural must-fail invariants', () => {
 
   beforeEach(async () => {
     await resetEvidenceRecordsData(prisma);
+    await prisma.legalHold.deleteMany();
+    await prisma.caseWorkflowStepInstance.deleteMany();
+    await prisma.caseWorkflowInstance.deleteMany();
     await prisma.case.deleteMany();
     await prisma.applicationSubmission.deleteMany();
     await prisma.application.deleteMany();
@@ -54,15 +56,15 @@ describe('Phase 7H architectural must-fail invariants', () => {
     await prisma.workflowStageDefinition.deleteMany();
     await prisma.workflowVersion.deleteMany();
     await prisma.workflowDefinition.deleteMany();
-    await prisma.governmentServiceVersion.deleteMany();
-    await prisma.governmentService.deleteMany();
     await prisma.formVersion.deleteMany();
     await prisma.formDefinition.deleteMany();
+    await prisma.governmentServiceVersion.deleteMany();
+    await prisma.governmentService.deleteMany();
+    await prisma.serviceFamily.deleteMany();
     await prisma.department.deleteMany();
     await prisma.institution.deleteMany();
     await prisma.jurisdiction.deleteMany();
     await prisma.identity.deleteMany();
-    await prisma.legalHold.deleteMany();
   });
 
   afterAll(async () => {
@@ -191,11 +193,7 @@ describe('Phase 7H architectural must-fail invariants', () => {
         workflowVersionId: workflow.id,
         configurationFingerprint: 'fp',
         responsibleInstitutionId: institution.id,
-        responsibleDepartmentId: (
-          await prisma.department.create({
-            data: { institutionId: institution.id, code: 'P7H-DEPT', name: 'Dept' },
-          })
-        ).id,
+        responsibleDepartmentId: department.id,
       },
     });
     const masterFile = await prisma.masterAdministrativeFile.create({
@@ -545,11 +543,7 @@ describe('Phase 7H architectural must-fail invariants', () => {
         workflowVersionId: workflow.id,
         configurationFingerprint: 'fp',
         responsibleInstitutionId: institution.id,
-        responsibleDepartmentId: (
-          await prisma.department.create({
-            data: { institutionId: institution.id, code: 'P7H-DEPT2', name: 'Dept' },
-          })
-        ).id,
+        responsibleDepartmentId: department.id,
       },
     });
     const masterFile = await prisma.masterAdministrativeFile.create({

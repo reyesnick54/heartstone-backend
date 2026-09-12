@@ -252,7 +252,7 @@ export class EvidenceRecordsController {
       delegationId?: string;
     },
   ) {
-    return this.corrections.apply(id, session.identityId, body.functionAuthorityRecordId
+    const authority = body?.functionAuthorityRecordId
       ? {
           functionAuthorityRecordId: body.functionAuthorityRecordId,
           officeholderId: body.officeholderId,
@@ -260,7 +260,9 @@ export class EvidenceRecordsController {
           appointmentId: body.appointmentId,
           delegationId: body.delegationId,
         }
-      : undefined);
+      : undefined;
+
+    return this.corrections.apply(id, session.identityId, authority);
   }
 
   @Post('legal-holds')

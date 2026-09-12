@@ -12,7 +12,7 @@ import { type App } from 'supertest/types';
 
 import { MasterFileCompletenessService } from '../src/evidence-records/completeness/master-file-completeness.service';
 import { PrismaService } from '../src/database/prisma.service';
-import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import {
   createAndFreezePacket,
   recordGovernmentCommunication,
@@ -27,7 +27,7 @@ describe('Phase 7 evidence records (integration)', () => {
   let completeness: MasterFileCompletenessService;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
+    ({ app } = await createPhase7IntegrationApp());
     prisma = app.get(PrismaService);
     completeness = app.get(MasterFileCompletenessService);
   });

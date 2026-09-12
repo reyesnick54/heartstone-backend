@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
-import { ApplicationsModule } from './applications/applications.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
@@ -40,9 +39,7 @@ import { WorkflowsModule } from './workflows/workflows.module';
     GovernmentModule,
     IdentityModule,
     AuthorityModule,
-    ApplicationsModule,
     ServiceCatalogModule,
-    ApplicationsModule,
     WorkflowsModule,
     ApplicationProcessingModule,
     EvidenceRecordsModule,

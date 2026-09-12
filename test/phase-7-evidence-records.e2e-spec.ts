@@ -4,7 +4,7 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
-import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import { seedPhase6Fixture, VALID_FORM_ANSWERS } from './helpers/phase-6-test-fixtures';
 import {
   asApplicationBody,
@@ -23,7 +23,7 @@ describe('Phase 7 evidence records (e2e)', () => {
   let prisma: PrismaService;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
+    ({ app } = await createPhase7IntegrationApp());
     prisma = app.get(PrismaService);
   });
 
