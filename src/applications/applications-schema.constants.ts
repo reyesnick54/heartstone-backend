@@ -1,0 +1,61 @@
+export const APPLICATIONS_MODEL_NAMES = [
+  'CaseRecord',
+  'WorkflowDefinition',
+  'WorkflowVersion',
+  'WorkflowStep',
+  'WorkflowTransition',
+  'CaseWorkflowInstance',
+  'CaseWorkflowStepInstance',
+  'CaseWorkflowTransitionEvent',
+] as const;
+
+export const CASE_WORKFLOW_INSTANCE_STATUSES = [
+  'NOT_STARTED',
+  'ACTIVE',
+  'WAITING_APPLICANT',
+  'WAITING_EXTERNAL',
+  'WAITING_PROFESSIONAL',
+  'PAUSED',
+  'SAFE_HALTED',
+  'SUSPENDED',
+  'COMPLETED',
+  'CANCELLED',
+] as const;
+
+export const CASE_WORKFLOW_STEP_INSTANCE_STATUSES = [
+  'PENDING',
+  'READY',
+  'IN_PROGRESS',
+  'WAITING',
+  'BLOCKED',
+  'COMPLETED',
+  'SKIPPED_AUTHORIZED',
+  'SAFE_HALTED',
+  'CANCELLED',
+] as const;
+
+export const WORKFLOW_STEP_TYPES = [
+  'ADMINISTRATIVE',
+  'DECISION_GATE',
+  'ISSUANCE_GATE',
+  'PARALLEL_FORK',
+  'PARALLEL_JOIN',
+  'WAITING_APPLICANT',
+  'WAITING_EXTERNAL',
+  'WAITING_PROFESSIONAL',
+] as const;
+
+export const TERMINAL_CASE_WORKFLOW_INSTANCE_STATUSES = [
+  'COMPLETED',
+  'CANCELLED',
+  'SAFE_HALTED',
+] as const;
+
+export const TERMINAL_CASE_WORKFLOW_STEP_INSTANCE_STATUSES = [
+  'COMPLETED',
+  'SKIPPED_AUTHORIZED',
+  'SAFE_HALTED',
+  'CANCELLED',
+] as const;
+
+export const NON_PRODUCTION_APPLICATIONS_FIXTURE_MARKER = 'NON_PRODUCTION_PHASE_6D';
