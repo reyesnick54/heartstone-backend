@@ -11,6 +11,7 @@ import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
+import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
@@ -41,6 +42,7 @@ import { SystemModule } from './system/system.module';
     ServiceCatalogModule,
     ApplicationProcessingModule,
     RecordsModule,
+    EvidenceRecordsModule,
   ],
 })
 export class AppModule {}
