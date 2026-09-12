@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CaseWorkflowStage } from '@prisma/client';
+import { ApplicationCaseWorkflowStage } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { APPLICATIONS_EXPLANATION_CODES } from '../applications.constants';
@@ -7,7 +7,7 @@ import { ALLOWED_CASE_WORKFLOW_TRANSITIONS } from './case-workflow.constants';
 
 export interface WorkflowTransitionRequest {
   caseId: string;
-  toStage: CaseWorkflowStage;
+  toStage: ApplicationCaseWorkflowStage;
   actorIdentityId?: string;
   reason?: string;
 }
@@ -16,7 +16,10 @@ export interface WorkflowTransitionRequest {
 export class CaseWorkflowService {
   constructor(private readonly prisma: PrismaService) {}
 
-  assertTransitionAllowed(fromStage: CaseWorkflowStage, toStage: CaseWorkflowStage): void {
+  assertTransitionAllowed(
+    fromStage: ApplicationCaseWorkflowStage,
+    toStage: ApplicationCaseWorkflowStage,
+  ): void {
     const allowed = ALLOWED_CASE_WORKFLOW_TRANSITIONS[fromStage];
     if (!allowed.includes(toStage)) {
       throw new BadRequestException({
@@ -28,8 +31,8 @@ export class CaseWorkflowService {
 
   async transition(request: WorkflowTransitionRequest): Promise<{
     caseId: string;
-    fromStage: CaseWorkflowStage;
-    toStage: CaseWorkflowStage;
+    fromStage: ApplicationCaseWorkflowStage;
+    toStage: ApplicationCaseWorkflowStage;
   }> {
     const caseRecord = await this.prisma.applicationCase.findUnique({
       where: { id: request.caseId },
@@ -52,7 +55,7 @@ export class CaseWorkflowService {
         },
       });
 
-      await tx.caseWorkflowTransition.create({
+      await tx.applicationCaseWorkflowTransition.create({
         data: {
           caseId: request.caseId,
           fromStage: caseRecord.currentWorkflowStage,

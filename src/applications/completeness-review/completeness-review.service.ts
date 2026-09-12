@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  ApplicationCaseCompletenessReviewItemStatus,
+  ApplicationCaseCompletenessReviewStatus,
+  ApplicationCaseWorkflowStage,
   AuthorityActionType,
   AuthorityEvaluationOutcome,
-  CaseWorkflowStage,
-  CompletenessReviewItemStatus,
-  CompletenessReviewStatus,
   IdentityType,
   Prisma,
 } from '@prisma/client';
@@ -27,17 +27,17 @@ import {
 } from './completeness-review.types';
 import { DeficiencyNoticeService } from './deficiency-notice.service';
 
-const DEFICIENT_ITEM_STATUSES: CompletenessReviewItemStatus[] = [
-  CompletenessReviewItemStatus.MISSING,
-  CompletenessReviewItemStatus.ILLEGIBLE,
-  CompletenessReviewItemStatus.CORRUPTED,
-  CompletenessReviewItemStatus.APPARENTLY_INCONSISTENT,
-  CompletenessReviewItemStatus.SUBSTITUTION_PENDING,
+const DEFICIENT_ITEM_STATUSES: ApplicationCaseCompletenessReviewItemStatus[] = [
+  ApplicationCaseCompletenessReviewItemStatus.MISSING,
+  ApplicationCaseCompletenessReviewItemStatus.ILLEGIBLE,
+  ApplicationCaseCompletenessReviewItemStatus.CORRUPTED,
+  ApplicationCaseCompletenessReviewItemStatus.APPARENTLY_INCONSISTENT,
+  ApplicationCaseCompletenessReviewItemStatus.SUBSTITUTION_PENDING,
 ];
 
-const SATISFIED_ITEM_STATUSES: CompletenessReviewItemStatus[] = [
-  CompletenessReviewItemStatus.PRESENT,
-  CompletenessReviewItemStatus.NOT_APPLICABLE,
+const SATISFIED_ITEM_STATUSES: ApplicationCaseCompletenessReviewItemStatus[] = [
+  ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+  ApplicationCaseCompletenessReviewItemStatus.NOT_APPLICABLE,
 ];
 
 @Injectable()
@@ -54,7 +54,7 @@ export class CompletenessReviewService {
     applicationSubmissionId: string;
     reviewer: CompletenessReviewerContext;
   }) {
-    const submission = await this.prisma.applicationSubmission.findUnique({
+    const submission = await this.prisma.applicationCaseSubmission.findUnique({
       where: { id: input.applicationSubmissionId },
       include: {
         case: true,
@@ -71,11 +71,11 @@ export class CompletenessReviewService {
       checklistItems,
     );
 
-    const priorReviewCount = await this.prisma.completenessReview.count({
+    const priorReviewCount = await this.prisma.applicationCaseCompletenessReview.count({
       where: { caseId: input.caseId },
     });
 
-    const review = await this.prisma.completenessReview.create({
+    const review = await this.prisma.applicationCaseCompletenessReview.create({
       data: {
         caseId: input.caseId,
         applicationSubmissionId: submission.id,
@@ -83,7 +83,7 @@ export class CompletenessReviewService {
         checklistConfigurationFingerprint: checklistFingerprint,
         reviewerIdentityId: input.reviewer.identityId,
         reviewerOfficeholderId: input.reviewer.officeholderId,
-        status: CompletenessReviewStatus.IN_REVIEW,
+        status: ApplicationCaseCompletenessReviewStatus.IN_REVIEW,
         reviewSequence: priorReviewCount + 1,
         startedAt: new Date(),
         items: {
@@ -92,7 +92,7 @@ export class CompletenessReviewService {
             checklistItemCode: item.itemCode,
             label: item.label,
             isRequired: item.isRequired,
-            status: CompletenessReviewItemStatus.UNRESOLVED,
+            status: ApplicationCaseCompletenessReviewItemStatus.UNRESOLVED,
           })),
         },
       },
@@ -129,7 +129,7 @@ export class CompletenessReviewService {
         });
       }
 
-      await this.prisma.completenessReviewItem.updateMany({
+      await this.prisma.applicationCaseCompletenessReviewItem.updateMany({
         where: {
           completenessReviewId: reviewId,
           checklistItemCode: assessment.checklistItemCode,
@@ -161,7 +161,8 @@ export class CompletenessReviewService {
 
     if (reviewer.isAiAssisted && reviewer.requiresHumanReview) {
       throw new ForbiddenException({
-        message: 'AI-assisted actors cannot independently finalize consequential completeness review',
+        message:
+          'AI-assisted actors cannot independently finalize consequential completeness review',
         code: APPLICATIONS_EXPLANATION_CODES.AI_CANNOT_FINALIZE_CONSEQUENTIAL_REVIEW,
       });
     }
@@ -193,7 +194,8 @@ export class CompletenessReviewService {
     }
 
     const unresolvedRequired = review.items.filter(
-      (item) => item.isRequired && item.status === CompletenessReviewItemStatus.UNRESOLVED,
+      (item) =>
+        item.isRequired && item.status === ApplicationCaseCompletenessReviewItemStatus.UNRESOLVED,
     );
 
     if (unresolvedRequired.length > 0) {
@@ -209,12 +211,12 @@ export class CompletenessReviewService {
 
     const finalStatus =
       deficientRequired.length > 0
-        ? CompletenessReviewStatus.INCOMPLETE
-        : CompletenessReviewStatus.COMPLETE;
+        ? ApplicationCaseCompletenessReviewStatus.INCOMPLETE
+        : ApplicationCaseCompletenessReviewStatus.COMPLETE;
 
     const completedAt = new Date();
 
-    await this.prisma.completenessReview.update({
+    await this.prisma.applicationCaseCompletenessReview.update({
       where: { id: reviewId },
       data: {
         status: finalStatus,
@@ -225,35 +227,37 @@ export class CompletenessReviewService {
       },
     });
 
-    if (finalStatus === CompletenessReviewStatus.INCOMPLETE) {
+    if (finalStatus === ApplicationCaseCompletenessReviewStatus.INCOMPLETE) {
       explanationCodes.push(APPLICATIONS_EXPLANATION_CODES.DEFICIENCY_NOTICE_IS_PROCEDURAL);
 
       await this.workflowService.transition({
         caseId: review.caseId,
-        toStage: CaseWorkflowStage.INCOMPLETE,
+        toStage: ApplicationCaseWorkflowStage.INCOMPLETE,
         actorIdentityId: reviewer.identityId,
         reason: 'Completeness review found administrative deficiencies',
       });
 
       await this.workflowService.transition({
         caseId: review.caseId,
-        toStage: CaseWorkflowStage.WAITING_APPLICANT,
+        toStage: ApplicationCaseWorkflowStage.WAITING_APPLICANT,
         actorIdentityId: reviewer.identityId,
         reason: 'Awaiting applicant correction after deficiency notice',
       });
     } else {
-      explanationCodes.push(APPLICATIONS_EXPLANATION_CODES.ADMINISTRATIVE_COMPLETENESS_NOT_APPROVAL);
+      explanationCodes.push(
+        APPLICATIONS_EXPLANATION_CODES.ADMINISTRATIVE_COMPLETENESS_NOT_APPROVAL,
+      );
 
       await this.workflowService.transition({
         caseId: review.caseId,
-        toStage: CaseWorkflowStage.ADMINISTRATIVELY_COMPLETE,
+        toStage: ApplicationCaseWorkflowStage.ADMINISTRATIVELY_COMPLETE,
         actorIdentityId: reviewer.identityId,
         reason: 'Administrative completeness achieved; not an approval',
       });
 
       await this.workflowService.transition({
         caseId: review.caseId,
-        toStage: CaseWorkflowStage.SUBSTANTIVE_REVIEW,
+        toStage: ApplicationCaseWorkflowStage.SUBSTANTIVE_REVIEW,
         actorIdentityId: reviewer.identityId,
         reason: 'Routing to substantive review after administrative completeness',
       });
@@ -270,7 +274,7 @@ export class CompletenessReviewService {
       reviewId,
       status: finalStatus,
       authorityEvaluationRecordId: authorityResult.evaluationId,
-      administrativelyComplete: finalStatus === CompletenessReviewStatus.COMPLETE,
+      administrativelyComplete: finalStatus === ApplicationCaseCompletenessReviewStatus.COMPLETE,
       isApproval: false,
       explanationCodes,
     };
@@ -289,7 +293,7 @@ export class CompletenessReviewService {
   ) {
     const review = await this.getReview(reviewId);
 
-    if (review.status !== CompletenessReviewStatus.INCOMPLETE) {
+    if (review.status !== ApplicationCaseCompletenessReviewStatus.INCOMPLETE) {
       throw new BadRequestException('Deficiency notice requires an INCOMPLETE completeness review');
     }
 
@@ -321,15 +325,15 @@ export class CompletenessReviewService {
   }
 
   determineCompletenessFromItems(
-    items: { isRequired: boolean; status: CompletenessReviewItemStatus }[],
-  ): CompletenessReviewStatus {
+    items: { isRequired: boolean; status: ApplicationCaseCompletenessReviewItemStatus }[],
+  ): ApplicationCaseCompletenessReviewStatus {
     const hasUnresolvedRequired = items.some(
       (item) =>
-        item.isRequired && item.status === CompletenessReviewItemStatus.UNRESOLVED,
+        item.isRequired && item.status === ApplicationCaseCompletenessReviewItemStatus.UNRESOLVED,
     );
 
     if (hasUnresolvedRequired) {
-      return CompletenessReviewStatus.UNRESOLVED;
+      return ApplicationCaseCompletenessReviewStatus.UNRESOLVED;
     }
 
     const hasDeficientRequired = items.some(
@@ -337,7 +341,7 @@ export class CompletenessReviewService {
     );
 
     if (hasDeficientRequired) {
-      return CompletenessReviewStatus.INCOMPLETE;
+      return ApplicationCaseCompletenessReviewStatus.INCOMPLETE;
     }
 
     const allRequiredSatisfied = items
@@ -345,12 +349,12 @@ export class CompletenessReviewService {
       .every((item) => SATISFIED_ITEM_STATUSES.includes(item.status));
 
     return allRequiredSatisfied
-      ? CompletenessReviewStatus.COMPLETE
-      : CompletenessReviewStatus.UNRESOLVED;
+      ? ApplicationCaseCompletenessReviewStatus.COMPLETE
+      : ApplicationCaseCompletenessReviewStatus.UNRESOLVED;
   }
 
   private async getReview(reviewId: string) {
-    const review = await this.prisma.completenessReview.findUnique({
+    const review = await this.prisma.applicationCaseCompletenessReview.findUnique({
       where: { id: reviewId },
       include: { items: true },
     });
@@ -362,11 +366,11 @@ export class CompletenessReviewService {
     return review;
   }
 
-  private isFinalized(status: CompletenessReviewStatus): boolean {
+  private isFinalized(status: ApplicationCaseCompletenessReviewStatus): boolean {
     return (
-      status === CompletenessReviewStatus.COMPLETE ||
-      status === CompletenessReviewStatus.INCOMPLETE ||
-      status === CompletenessReviewStatus.SAFE_HALTED
+      status === ApplicationCaseCompletenessReviewStatus.COMPLETE ||
+      status === ApplicationCaseCompletenessReviewStatus.INCOMPLETE ||
+      status === ApplicationCaseCompletenessReviewStatus.SAFE_HALTED
     );
   }
 

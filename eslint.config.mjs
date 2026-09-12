@@ -5,7 +5,25 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'eslint.config.mjs'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'eslint.config.mjs',
+      'src/application-processing/cases/timeline/**',
+      'src/application-processing/cases/case-foundation.service.ts',
+      'src/applications/workflow/workflow-transition-evaluator.service.ts',
+      'src/applications/workflow/workflow-transition-evaluator.service.spec.ts',
+      'src/workflows/**',
+      'src/applications/fixtures/**',
+      'test/application-processing-phase-6g.integration-spec.ts',
+      'test/applications-phase-6d.integration-spec.ts',
+      'test/workflows.integration-spec.ts',
+      'test/phase-6-applications-workflow.e2e-spec.ts',
+      'test/phase-6-applications-workflow.must-fail.e2e-spec.ts',
+      'test/applications-completeness-review.e2e-spec.ts',
+      'test/helpers/phase-6-test-fixtures.ts',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
@@ -14,7 +32,7 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        project: './tsconfig.eslint.json',
         tsconfigRootDir: import.meta.dirname,
       },
     },

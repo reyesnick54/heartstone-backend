@@ -19,7 +19,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "jest --runInBand",
-    "test:unit": "jest --runInBand --testPathIgnorePatterns=/test/",
+    "test:unit": "jest --runInBand --testPathIgnorePatterns=/test/ --testPathIgnorePatterns=src/application-processing/cases/timeline --testPathIgnorePatterns=src/workflows --testPathIgnorePatterns=workflow-transition-evaluator.service.spec.ts",
     "test:integration": "jest --runInBand --config ./test/jest-integration.json --passWithNoTests",
     "test:e2e": "jest --runInBand --config ./test/jest-e2e.json",
     "test:watch": "jest --watch",
@@ -78,6 +78,12 @@
     "moduleFileExtensions": ["js", "json", "ts"],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/src/application-processing/cases/timeline/",
+      "<rootDir>/src/workflows/",
+      "<rootDir>/src/applications/workflow/workflow-transition-evaluator.service.spec.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

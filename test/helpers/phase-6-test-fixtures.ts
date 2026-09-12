@@ -278,7 +278,7 @@ export async function seedPhase6Fixture(
     checklistItemIds: checklistItems.map((item) => item.id),
   });
 
-  const workflowDefinition = await prisma.workflowDefinition.create({
+  const workflowDefinition = await prisma.runtimeWorkflowDefinition.create({
     data: {
       code: `${marker}-WF`,
       name: 'Phase 6 Business Permit Workflow',
@@ -287,7 +287,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const workflowVersion = await prisma.workflowVersion.create({
+  const workflowVersion = await prisma.runtimeWorkflowVersion.create({
     data: {
       workflowDefinitionId: workflowDefinition.id,
       version: '1.0.0',
@@ -302,7 +302,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const intakeStep = await prisma.workflowStepDefinition.create({
+  const intakeStep = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'intake',
@@ -313,7 +313,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const completenessStep = await prisma.workflowStepDefinition.create({
+  const completenessStep = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'completeness-review',
@@ -324,7 +324,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const substantiveStep = await prisma.workflowStepDefinition.create({
+  const substantiveStep = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'substantive-review',
@@ -337,7 +337,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const parallelA = await prisma.workflowStepDefinition.create({
+  const parallelA = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'parallel-review-a',
@@ -350,7 +350,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const parallelB = await prisma.workflowStepDefinition.create({
+  const parallelB = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'parallel-review-b',
@@ -363,7 +363,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const parallelJoin = await prisma.workflowStepDefinition.create({
+  const parallelJoin = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'parallel-join',
@@ -375,7 +375,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const externalStep = await prisma.workflowStepDefinition.create({
+  const externalStep = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'external-referral',
@@ -386,7 +386,7 @@ export async function seedPhase6Fixture(
     },
   });
 
-  const decisionGate = await prisma.workflowStepDefinition.create({
+  const decisionGate = await prisma.runtimeWorkflowStepDefinition.create({
     data: {
       workflowVersionId: workflowVersion.id,
       stepKey: 'decision-gate',
@@ -409,7 +409,7 @@ export async function seedPhase6Fixture(
   ] as const;
 
   for (const [fromStepId, toStepId, key, joinType] of transitions) {
-    await prisma.workflowTransitionDefinition.create({
+    await prisma.runtimeWorkflowTransitionDefinition.create({
       data: {
         workflowVersionId: workflowVersion.id,
         fromStepId,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CaseWorkflowStage } from '@prisma/client';
+import { ApplicationCaseWorkflowStage } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { buildServiceConfigurationFingerprint } from '../../service-catalog/common/service-configuration-hash.util';
@@ -54,7 +54,7 @@ export class ApplicationCaseService {
         governmentServiceVersionId: version.id,
         configurationFingerprint,
         applicantIdentityId: input.applicantIdentityId,
-        currentWorkflowStage: CaseWorkflowStage.SUBMITTED,
+        currentWorkflowStage: ApplicationCaseWorkflowStage.SUBMITTED,
       },
     });
 
@@ -68,7 +68,7 @@ export class ApplicationCaseService {
 
     await this.workflowService.transition({
       caseId: caseRecord.id,
-      toStage: CaseWorkflowStage.COMPLETENESS_REVIEW,
+      toStage: ApplicationCaseWorkflowStage.COMPLETENESS_REVIEW,
       actorIdentityId: input.applicantIdentityId,
       reason: 'Initial submission received; entering completeness review',
     });

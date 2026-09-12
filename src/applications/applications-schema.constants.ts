@@ -1,13 +1,21 @@
 export const APPLICATIONS_MODEL_NAMES = [
   'ApplicationCase',
-  'ApplicationSubmission',
-  'CaseWorkflowTransition',
-  'CompletenessReview',
-  'CompletenessReviewItem',
-  'DeficiencyNotice',
-  'DeficiencyNoticeItem',
-  'ApplicantInformationRequest',
+  'ApplicationCaseSubmission',
+  'ApplicationCaseWorkflowTransition',
+  'ApplicationCaseCompletenessReview',
+  'ApplicationCaseCompletenessReviewItem',
+  'ApplicationCaseDeficiencyNotice',
+  'ApplicationCaseDeficiencyNoticeItem',
+  'ApplicationCaseInformationRequest',
   'ApplicationCaseNotificationOutbox',
+  'CaseRecord',
+  'RuntimeWorkflowDefinition',
+  'RuntimeWorkflowVersion',
+  'RuntimeWorkflowStep',
+  'RuntimeWorkflowTransition',
+  'RuntimeCaseWorkflowInstance',
+  'RuntimeCaseWorkflowStepInstance',
+  'RuntimeCaseWorkflowTransitionEvent',
 ] as const;
 
 export const CASE_WORKFLOW_STAGES = [
@@ -42,15 +50,6 @@ export const COMPLETENESS_REVIEW_ITEM_STATUSES = [
 ] as const;
 
 export const FORBIDDEN_COMPLETENESS_ITEM_STATUSES = ['VERIFIED'] as const;
-  'CaseRecord',
-  'WorkflowDefinition',
-  'WorkflowVersion',
-  'WorkflowStep',
-  'WorkflowTransition',
-  'CaseWorkflowInstance',
-  'CaseWorkflowStepInstance',
-  'CaseWorkflowTransitionEvent',
-] as const;
 
 export const CASE_WORKFLOW_INSTANCE_STATUSES = [
   'NOT_STARTED',
