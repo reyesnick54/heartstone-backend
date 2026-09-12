@@ -11,6 +11,7 @@ import {
   FORBIDDEN_APPLICATION_AUTHORITY_FIELDS,
   FORBIDDEN_CASE_CLIENT_MUTATION_FIELDS,
   FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS,
+  PHASE_7_REFERENCE_FIELDS,
 } from './application-processing-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -133,5 +134,16 @@ describe('Application processing schema coherence (Phase 6)', () => {
   it('documents forbidden client-settable projection fields', () => {
     expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('publicStage');
     expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('status');
+  });
+
+  it('defines Phase 7A Master Administrative File models and case reference', () => {
+    const block = extractModelBlock(schema, 'Case');
+    for (const field of PHASE_7_REFERENCE_FIELDS) {
+      expect(block).toContain(field);
+    }
+    expect(schema).toContain('model MasterAdministrativeFile');
+    expect(schema).toContain('model MasterAdministrativeFileSection');
+    expect(schema).not.toContain('model DocumentRegister');
+    expect(schema).not.toContain('model EvidencePacket');
   });
 });

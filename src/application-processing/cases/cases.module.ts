@@ -3,6 +3,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AuthorityModule } from '../../authority/authority.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { RecordsModule } from '../../records/records.module';
 import { ApplicationsModule } from '../applications/applications.module';
 import { ApplicationProcessingCommonModule } from '../common/application-processing-common.module';
 import { CompletenessReviewsService } from '../completeness/completeness-reviews.service';
@@ -29,6 +30,7 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     ApplicationProcessingCommonModule,
     SessionsModule,
     AuthorityModule,
+    RecordsModule,
     forwardRef(() => ApplicationsModule),
   ],
   controllers: [CasesController, CaseTimelineController],

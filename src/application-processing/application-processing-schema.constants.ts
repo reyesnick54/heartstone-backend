@@ -128,3 +128,5 @@ export const FORBIDDEN_CASE_CLIENT_MUTATION_FIELDS = [
   'issuedAt',
   'refusalReason',
 ] as const;
+
+export const PHASE_7_REFERENCE_FIELDS = ['masterAdministrativeFileReference'] as const;

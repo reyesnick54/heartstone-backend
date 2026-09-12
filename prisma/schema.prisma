@@ -115,6 +115,7 @@ model Institution {
   responsibleGovernmentServices GovernmentService[]
   caseReferrals                 CaseReferral[]
   responsibleCases              Case[]
+  masterAdministrativeFiles     MasterAdministrativeFile[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -151,6 +152,7 @@ model Department {
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   responsibleCases              Case[]
+  masterAdministrativeFiles     MasterAdministrativeFile[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -172,6 +174,8 @@ model Office {
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOffice")
   functionAuthorityRecords     FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  masterFilesAsAdministrativeOwner MasterAdministrativeFile[] @relation("MasterFileAdministrativeOwner")
+  masterFilesAsRecordsCustodian MasterAdministrativeFile[] @relation("MasterFileRecordsCustodian")
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -1261,6 +1265,7 @@ model GovernmentService {
   applications             Application[]
   workflowDefinitions      WorkflowDefinition[]
   cases                    Case[]
+  masterAdministrativeFiles MasterAdministrativeFile[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -1319,6 +1324,7 @@ model GovernmentServiceVersion {
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
   cases                               Case[]
+  masterAdministrativeFiles           MasterAdministrativeFile[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1960,6 +1966,7 @@ model Application {
   formVersion                FormVersion              @relation(fields: [formVersionId], references: [id])
   submissions                ApplicationSubmission[]
   case                       Case?
+  masterAdministrativeFile   MasterAdministrativeFile?
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2017,6 +2024,7 @@ model Case {
   openedAt                         DateTime                    @default(now())
   closedAt                         DateTime?
   currentCaseManagerOfficeholderId String?                     @db.Uuid
+  masterAdministrativeFileReference String?
   createdAt                        DateTime                    @default(now())
   updatedAt                        DateTime                    @updatedAt
   application                      Application                 @relation(fields: [applicationId], references: [id])
@@ -2038,6 +2046,7 @@ model Case {
   communications                   CaseCommunication[]
   milestones                       CaseMilestone[]
   publicStatusProjection           CasePublicStatusProjection?
+  masterAdministrativeFile         MasterAdministrativeFile?
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2532,4 +2541,121 @@ model CasePublicStatusProjection {
   @@index([sourceCaseStatus])
   @@index([publicStage])
   @@map("case_public_status_projections")
+}
+
+// ─── Phase 7A: Master Administrative File Foundation ─────────────────────────
+
+enum MasterAdministrativeFileLifecycleStatus {
+  OPEN
+  ACTIVE
+  RESTRICTED
+  SAFE_HALTED
+  CLOSURE_PENDING
+  CLOSED
+  ARCHIVED
+}
+
+enum MasterAdministrativeFileSecurityClassification {
+  PUBLIC
+  OFFICIAL
+  INTERNAL
+  RESTRICTED
+  SECRET
+}
+
+enum MasterAdministrativeFilePrivacyClassification {
+  STANDARD
+  PERSONAL
+  SENSITIVE_PERSONAL
+  SPECIAL_CATEGORY
+}
+
+enum MasterAdministrativeFileIntegrityStatus {
+  INTACT
+  INTEGRITY_REVIEW_REQUIRED
+  INTEGRITY_COMPROMISED
+}
+
+enum MasterAdministrativeFileSectionType {
+  FILE_CONTROL_AND_INDEX
+  AUTHORITY_AND_PROCEDURE
+  APPLICANT_AND_REPRESENTATION
+  APPLICATION_HISTORY
+  SUPPORTING_EVIDENCE
+  COMPLETENESS_REVIEW
+  SUBSTANTIVE_REVIEW
+  GOVERNMENT_REFERRALS
+  PROFESSIONAL_REVIEWS
+  INSPECTIONS
+  RECOMMENDATION_AND_DECISION
+  ISSUANCE
+  CONDITIONS_AND_COMPLIANCE
+  FEES_AND_FINANCIAL_RECORDS
+  COMMUNICATIONS_AND_NOTICES
+  CONTINUING_OBLIGATIONS_AND_MONITORING
+  COMPLAINT_RECONSIDERATION_APPEAL
+  SUSPENSION_REVOCATION_ENFORCEMENT
+  CLOSURE_AND_ARCHIVE
+  AUDIT_AND_TECHNICAL_HISTORY
+}
+
+model MasterAdministrativeFile {
+  id                                   String                                       @id @default(uuid()) @db.Uuid
+  fileNumber                           String                                       @unique
+  caseId                               String                                       @unique @db.Uuid
+  applicationId                        String                                       @unique @db.Uuid
+  governmentServiceId                  String                                       @db.Uuid
+  governmentServiceVersionId           String                                       @db.Uuid
+  responsibleInstitutionId             String                                       @db.Uuid
+  responsibleDepartmentId              String                                       @db.Uuid
+  administrativeOwnerOfficeId          String                                       @db.Uuid
+  recordsCustodianOfficeId             String                                       @db.Uuid
+  workflowVersionId                    String?
+  openedAt                             DateTime                                     @default(now())
+  closedAt                             DateTime?
+  lifecycleStatus                      MasterAdministrativeFileLifecycleStatus      @default(OPEN)
+  securityClassification               MasterAdministrativeFileSecurityClassification @default(OFFICIAL)
+  privacyClassification                MasterAdministrativeFilePrivacyClassification  @default(STANDARD)
+  retentionCategoryCode                String?
+  legalHoldIndicator                   Boolean                                      @default(false)
+  authoritativeRecordLocationReference String
+  archiveLocationReference             String?
+  integrityStatus                      MasterAdministrativeFileIntegrityStatus      @default(INTACT)
+  lastReviewedAt                       DateTime?
+  createdAt                            DateTime                                     @default(now())
+  updatedAt                            DateTime                                     @updatedAt
+  case                                 Case                                         @relation(fields: [caseId], references: [id])
+  application                          Application                                  @relation(fields: [applicationId], references: [id])
+  governmentService                    GovernmentService                            @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion             GovernmentServiceVersion                     @relation(fields: [governmentServiceVersionId], references: [id])
+  responsibleInstitution               Institution                                  @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment                Department                                   @relation(fields: [responsibleDepartmentId], references: [id])
+  administrativeOwnerOffice            Office                                       @relation("MasterFileAdministrativeOwner", fields: [administrativeOwnerOfficeId], references: [id])
+  recordsCustodianOffice               Office                                       @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
+  sections                             MasterAdministrativeFileSection[]
+
+  @@index([governmentServiceId])
+  @@index([responsibleInstitutionId])
+  @@index([responsibleDepartmentId])
+  @@index([administrativeOwnerOfficeId])
+  @@index([recordsCustodianOfficeId])
+  @@index([lifecycleStatus])
+  @@map("master_administrative_files")
+}
+
+model MasterAdministrativeFileSection {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId String                            @db.Uuid
+  sectionType                MasterAdministrativeFileSectionType
+  sectionNumber              Int
+  title                      String
+  description                String?
+  isRestricted               Boolean                           @default(false)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile          @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+
+  @@unique([masterAdministrativeFileId, sectionType], map: "maf_sections_file_section_type_key")
+  @@index([masterAdministrativeFileId], map: "maf_sections_file_id_idx")
+  @@map("master_administrative_file_sections")
 }
