@@ -97,11 +97,13 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     expect(schema).not.toMatch(/enum ServiceFamilyType/);
   });
 
+  it('does not define Phase 7 decision or issuance models', () => {
   it('does not define Phase 7+ decision or issuance models', () => {
     const phase7Models = [
       'GovernmentDecision',
       'IssuedLicense',
       'IssuedPermit',
+      'EvidencePacket',
       'IssuedCertificate',
       'EvidencePacket',
       'EvidenceVault',

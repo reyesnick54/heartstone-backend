@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { ApplicationsModule } from './applications/applications.module';
+import { ApplicationsWorkflowModule } from './applications-workflow/applications-workflow.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
+import { CasesModule } from './cases/cases.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -38,6 +41,9 @@ import { SystemModule } from './system/system.module';
     IdentityModule,
     AuthorityModule,
     ServiceCatalogModule,
+    ApplicationsModule,
+    CasesModule,
+    ApplicationsWorkflowModule,
     ApplicationProcessingModule,
   ],
 })
