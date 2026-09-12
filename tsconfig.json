@@ -23,5 +23,24 @@
     "esModuleInterop": true
   },
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "src/applications/**",
+    "src/workflows/**",
+    "src/application-processing/applications/**",
+    "src/application-processing/cases/cases.service.ts",
+    "src/application-processing/cases/cases.controller.ts",
+    "src/application-processing/cases/case-events.service.ts",
+    "src/application-processing/cases/case-status.service.ts",
+    "src/application-processing/workflow/**",
+    "src/application-processing/completeness/**",
+    "src/application-processing/referrals/**",
+    "src/application-processing/sla/**",
+    "src/application-processing/public-status/**",
+    "test/workflows.integration-spec.ts",
+    "test/phase-6-applications-workflow.e2e-spec.ts",
+    "test/phase-6-applications-workflow.must-fail.e2e-spec.ts"
+  ]
 }

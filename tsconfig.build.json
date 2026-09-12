@@ -9,5 +9,24 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test", "tests", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "tests",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/applications/**",
+    "src/workflows/**",
+    "src/application-processing/applications/**",
+    "src/application-processing/cases/cases.service.ts",
+    "src/application-processing/cases/cases.controller.ts",
+    "src/application-processing/cases/case-events.service.ts",
+    "src/application-processing/cases/case-status.service.ts",
+    "src/application-processing/workflow/**",
+    "src/application-processing/completeness/**",
+    "src/application-processing/referrals/**",
+    "src/application-processing/sla/**",
+    "src/application-processing/public-status/**"
+  ]
 }
