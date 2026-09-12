@@ -16,6 +16,7 @@ import { IdentityModule } from './identity/identity.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SystemModule } from './system/system.module';
     IdentityModule,
     AuthorityModule,
     ServiceCatalogModule,
+    WorkflowsModule,
   ],
 })
 export class AppModule {}
