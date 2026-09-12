@@ -1,6 +1,6 @@
 import {
-  type CompletenessReviewItemStatus,
-  type CompletenessReviewStatus,
+  type ApplicationCaseCompletenessReviewItemStatus,
+  type ApplicationCaseCompletenessReviewStatus,
 } from '@prisma/client';
 
 export interface CompletenessReviewerContext {
@@ -13,13 +13,13 @@ export interface CompletenessReviewerContext {
 
 export interface CompletenessItemAssessment {
   checklistItemCode: string;
-  status: CompletenessReviewItemStatus;
+  status: ApplicationCaseCompletenessReviewItemStatus;
   reviewerNotes?: string;
 }
 
 export interface FinalizeCompletenessReviewResult {
   reviewId: string;
-  status: CompletenessReviewStatus;
+  status: ApplicationCaseCompletenessReviewStatus;
   authorityEvaluationRecordId?: string;
   administrativelyComplete: boolean;
   isApproval: false;

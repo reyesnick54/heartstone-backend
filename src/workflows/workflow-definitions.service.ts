@@ -79,7 +79,10 @@ export class WorkflowDefinitionsService {
     return this.toResponse(definition);
   }
 
-  async update(id: string, dto: UpdateWorkflowDefinitionDto): Promise<WorkflowDefinitionResponseDto> {
+  async update(
+    id: string,
+    dto: UpdateWorkflowDefinitionDto,
+  ): Promise<WorkflowDefinitionResponseDto> {
     await this.findOne(id);
 
     const updated = await this.prisma.workflowDefinition.update({

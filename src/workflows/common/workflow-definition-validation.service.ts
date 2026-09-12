@@ -124,7 +124,10 @@ export class WorkflowDefinitionValidationService {
     };
   }
 
-  private validateStartingStep(graph: LoadedWorkflowGraph, issues: WorkflowValidationIssue[]): void {
+  private validateStartingStep(
+    graph: LoadedWorkflowGraph,
+    issues: WorkflowValidationIssue[],
+  ): void {
     const startingSteps = graph.steps.filter((step) => step.isStartingStep);
     if (startingSteps.length === 0) {
       issues.push({
@@ -143,7 +146,10 @@ export class WorkflowDefinitionValidationService {
     }
   }
 
-  private validateDuplicateKeys(graph: LoadedWorkflowGraph, issues: WorkflowValidationIssue[]): void {
+  private validateDuplicateKeys(
+    graph: LoadedWorkflowGraph,
+    issues: WorkflowValidationIssue[],
+  ): void {
     const stageKeys = new Set<string>();
     for (const stage of graph.stages) {
       if (stageKeys.has(stage.stageKey)) {
@@ -174,7 +180,10 @@ export class WorkflowDefinitionValidationService {
     issues: WorkflowValidationIssue[],
   ): void {
     for (const step of graph.steps) {
-      if (step.stageType === WorkflowStageType.DECISION_GATE && step.stepType !== WorkflowStepType.DECISION) {
+      if (
+        step.stageType === WorkflowStageType.DECISION_GATE &&
+        step.stepType !== WorkflowStepType.DECISION
+      ) {
         issues.push({
           code: 'DECISION_GATE_STEP_MISMATCH',
           message: `Step "${step.stepKey}" in DECISION_GATE stage must use DECISION step type`,
@@ -182,7 +191,10 @@ export class WorkflowDefinitionValidationService {
         });
       }
 
-      if (step.stageType === WorkflowStageType.ISSUANCE_GATE && step.stepType !== WorkflowStepType.ISSUANCE) {
+      if (
+        step.stageType === WorkflowStageType.ISSUANCE_GATE &&
+        step.stepType !== WorkflowStepType.ISSUANCE
+      ) {
         issues.push({
           code: 'ISSUANCE_GATE_STEP_MISMATCH',
           message: `Step "${step.stepKey}" in ISSUANCE_GATE stage must use ISSUANCE step type`,
@@ -190,7 +202,10 @@ export class WorkflowDefinitionValidationService {
         });
       }
 
-      if (step.stepType === WorkflowStepType.DECISION && step.stageType === WorkflowStageType.ISSUANCE_GATE) {
+      if (
+        step.stepType === WorkflowStepType.DECISION &&
+        step.stageType === WorkflowStageType.ISSUANCE_GATE
+      ) {
         issues.push({
           code: 'DECISION_IN_ISSUANCE_GATE',
           message: `Decision step "${step.stepKey}" cannot be placed in an ISSUANCE_GATE stage`,
@@ -198,7 +213,10 @@ export class WorkflowDefinitionValidationService {
         });
       }
 
-      if (step.stepType === WorkflowStepType.ISSUANCE && step.stageType === WorkflowStageType.DECISION_GATE) {
+      if (
+        step.stepType === WorkflowStepType.ISSUANCE &&
+        step.stageType === WorkflowStageType.DECISION_GATE
+      ) {
         issues.push({
           code: 'ISSUANCE_IN_DECISION_GATE',
           message: `Issuance step "${step.stepKey}" cannot be placed in a DECISION_GATE stage`,
@@ -233,14 +251,18 @@ export class WorkflowDefinitionValidationService {
       } catch (error) {
         issues.push({
           code: 'UNSAFE_CONDITION_CONFIG',
-          message: error instanceof Error ? error.message : 'Unsafe transition condition configuration',
+          message:
+            error instanceof Error ? error.message : 'Unsafe transition condition configuration',
           path: transition.id,
         });
       }
     }
   }
 
-  private validateReachability(graph: LoadedWorkflowGraph, issues: WorkflowValidationIssue[]): void {
+  private validateReachability(
+    graph: LoadedWorkflowGraph,
+    issues: WorkflowValidationIssue[],
+  ): void {
     const startingStep = graph.steps.find((step) => step.isStartingStep);
     if (!startingStep) {
       return;
@@ -462,7 +484,9 @@ export class WorkflowDefinitionValidationService {
     }
 
     if (requiredAuthorityAction) {
-      const actionRight = record.actionRights.find((right) => right.action === requiredAuthorityAction);
+      const actionRight = record.actionRights.find(
+        (right) => right.action === requiredAuthorityAction,
+      );
       if (!actionRight?.permitted) {
         return {
           code: 'AUTHORITY_ACTION_NOT_PERMITTED',

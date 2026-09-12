@@ -1,22 +1,24 @@
-import { CaseWorkflowStage } from '@prisma/client';
+import { ApplicationCaseWorkflowStage } from '@prisma/client';
 
 export const ALLOWED_CASE_WORKFLOW_TRANSITIONS: Record<
-  CaseWorkflowStage,
-  readonly CaseWorkflowStage[]
+  ApplicationCaseWorkflowStage,
+  readonly ApplicationCaseWorkflowStage[]
 > = {
-  [CaseWorkflowStage.SUBMITTED]: [CaseWorkflowStage.COMPLETENESS_REVIEW],
-  [CaseWorkflowStage.COMPLETENESS_REVIEW]: [
-    CaseWorkflowStage.INCOMPLETE,
-    CaseWorkflowStage.ADMINISTRATIVELY_COMPLETE,
-    CaseWorkflowStage.SAFE_HALTED,
+  [ApplicationCaseWorkflowStage.SUBMITTED]: [ApplicationCaseWorkflowStage.COMPLETENESS_REVIEW],
+  [ApplicationCaseWorkflowStage.COMPLETENESS_REVIEW]: [
+    ApplicationCaseWorkflowStage.INCOMPLETE,
+    ApplicationCaseWorkflowStage.ADMINISTRATIVELY_COMPLETE,
+    ApplicationCaseWorkflowStage.SAFE_HALTED,
   ],
-  [CaseWorkflowStage.INCOMPLETE]: [CaseWorkflowStage.WAITING_APPLICANT],
-  [CaseWorkflowStage.WAITING_APPLICANT]: [
-    CaseWorkflowStage.RESUBMITTED,
-    CaseWorkflowStage.SAFE_HALTED,
+  [ApplicationCaseWorkflowStage.INCOMPLETE]: [ApplicationCaseWorkflowStage.WAITING_APPLICANT],
+  [ApplicationCaseWorkflowStage.WAITING_APPLICANT]: [
+    ApplicationCaseWorkflowStage.RESUBMITTED,
+    ApplicationCaseWorkflowStage.SAFE_HALTED,
   ],
-  [CaseWorkflowStage.RESUBMITTED]: [CaseWorkflowStage.COMPLETENESS_REVIEW],
-  [CaseWorkflowStage.ADMINISTRATIVELY_COMPLETE]: [CaseWorkflowStage.SUBSTANTIVE_REVIEW],
-  [CaseWorkflowStage.SUBSTANTIVE_REVIEW]: [CaseWorkflowStage.SAFE_HALTED],
-  [CaseWorkflowStage.SAFE_HALTED]: [],
+  [ApplicationCaseWorkflowStage.RESUBMITTED]: [ApplicationCaseWorkflowStage.COMPLETENESS_REVIEW],
+  [ApplicationCaseWorkflowStage.ADMINISTRATIVELY_COMPLETE]: [
+    ApplicationCaseWorkflowStage.SUBSTANTIVE_REVIEW,
+  ],
+  [ApplicationCaseWorkflowStage.SUBSTANTIVE_REVIEW]: [ApplicationCaseWorkflowStage.SAFE_HALTED],
+  [ApplicationCaseWorkflowStage.SAFE_HALTED]: [],
 };

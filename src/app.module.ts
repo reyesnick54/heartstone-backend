@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
-import { ApplicationsModule } from './applications/applications.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
+import { ApplicationsModule } from './applications/applications.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
@@ -12,13 +12,13 @@ import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
+import { EvidenceModule } from './evidence/evidence.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
-import { WorkflowsModule } from './workflows/workflows.module';
 
 @Module({
   imports: [
@@ -41,9 +41,8 @@ import { WorkflowsModule } from './workflows/workflows.module';
     AuthorityModule,
     ApplicationsModule,
     ServiceCatalogModule,
-    ApplicationsModule,
-    WorkflowsModule,
     ApplicationProcessingModule,
+    EvidenceModule,
   ],
 })
 export class AppModule {}

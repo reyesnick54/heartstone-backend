@@ -1,0 +1,66 @@
+export const EVIDENCE_MODEL_NAMES = [
+  'MasterAdministrativeFile',
+  'DocumentVersion',
+  'EvidenceRecord',
+  'EvidenceVerification',
+  'EvidenceRequirementLink',
+  'EvidencePurposeAcceptance',
+  'EvidenceQualityAssessment',
+] as const;
+
+export const EVIDENCE_RECORD_STATUSES = [
+  'REQUESTED',
+  'RECEIVED',
+  'UNREADABLE',
+  'INCOMPLETE',
+  'DUPLICATE',
+  'APPLICANT_ASSERTED',
+  'EXTERNALLY_ISSUED',
+  'PENDING_VERIFICATION',
+  'VERIFIED',
+  'PARTIALLY_VERIFIED',
+  'DISPUTED',
+  'EXPIRED',
+  'SUPERSEDED',
+  'WITHDRAWN',
+  'REJECTED_FOR_STATED_PURPOSE',
+  'ACCEPTED_FOR_LIMITED_RELIANCE',
+  'ACCEPTED_FOR_ADMINISTRATIVE_PURPOSE',
+] as const;
+
+export const EVIDENCE_VERIFICATION_CATEGORIES = [
+  'INTEGRITY',
+  'ISSUER',
+  'SIGNATURE',
+  'SEAL',
+  'IDENTITY',
+  'DATE',
+  'REGISTRY_MATCH',
+  'CONTENT_FACT',
+  'PROFESSIONAL',
+  'OTHER_CONTROLLED_METHOD',
+] as const;
+
+export const EVIDENCE_ACCEPTANCE_PURPOSES = [
+  'COMPLETENESS',
+  'SUBSTANTIVE_REVIEW',
+  'PROFESSIONAL_REVIEW',
+  'INSPECTION',
+  'EXTERNAL_REFERRAL',
+  'FUTURE_DECISION_PACKET',
+  'COMPLIANCE',
+  'OTHER_APPROVED_PURPOSE',
+] as const;
+
+export const EVIDENCE_QUALITY_CRITERIA = [
+  'RELEVANCE',
+  'PROVENANCE',
+  'AUTHENTICITY',
+  'COMPLETENESS',
+  'CURRENCY',
+  'INDEPENDENCE',
+  'RELIABILITY',
+  'INTEGRITY',
+  'SCOPE',
+  'FITNESS_FOR_PURPOSE',
+] as const;

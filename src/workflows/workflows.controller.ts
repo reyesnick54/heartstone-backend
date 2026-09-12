@@ -53,7 +53,9 @@ export class WorkflowsController {
   @Post('definitions')
   @ApiOperation({ summary: 'Create a workflow definition (stable identity)' })
   @ApiCreatedResponse({ type: WorkflowDefinitionResponseDto })
-  createDefinition(@Body() dto: CreateWorkflowDefinitionDto): Promise<WorkflowDefinitionResponseDto> {
+  createDefinition(
+    @Body() dto: CreateWorkflowDefinitionDto,
+  ): Promise<WorkflowDefinitionResponseDto> {
     return this.definitionsService.create(dto);
   }
 

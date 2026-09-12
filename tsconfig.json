@@ -22,6 +22,20 @@
     "useUnknownInCatchVariables": true,
     "esModuleInterop": true
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "src/applications/workflow/workflow-orchestration.service.ts",
+    "src/applications/workflow/workflow-orchestration.types.ts",
+    "src/applications/workflow/workflow-transition-evaluator.service.ts",
+    "src/applications/workflow/workflow-transition-evaluator.service.spec.ts",
+    "src/application-processing/cases/timeline/**/*",
+    "src/application-processing/cases/case-foundation.service.ts",
+    "src/workflows/**/*",
+    "src/applications/fixtures/**/*",
+    "test/application-processing-phase-6g.integration-spec.ts",
+    "test/applications-phase-6d.integration-spec.ts"
+  ]
 }

@@ -15,11 +15,7 @@ const ALLOWED_CONDITION_OPERATORS = new Set([
   'or',
 ]);
 
-export function assertSafeConditionStructure(
-  value: unknown,
-  path = 'condition',
-  depth = 0,
-): void {
+export function assertSafeConditionStructure(value: unknown, path = 'condition', depth = 0): void {
   if (depth > 8) {
     throw new BadRequestException(`${path} exceeds maximum nesting depth`);
   }
@@ -49,7 +45,10 @@ export function assertSafeConditionStructure(
     }
 
     if (path.endsWith('conditionConfig') || path.includes('Rules')) {
-      if (!ALLOWED_CONDITION_OPERATORS.has(normalizedKey) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+      if (
+        !ALLOWED_CONDITION_OPERATORS.has(normalizedKey) &&
+        !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)
+      ) {
         throw new BadRequestException(`${path}.${key} is not an allowed condition field`);
       }
     }

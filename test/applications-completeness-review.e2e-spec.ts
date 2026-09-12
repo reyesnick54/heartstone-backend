@@ -1,8 +1,8 @@
 import { type INestApplication } from '@nestjs/common';
 import {
-  CaseWorkflowStage,
-  CompletenessReviewItemStatus,
-  CompletenessReviewStatus,
+  ApplicationCaseCompletenessReviewItemStatus,
+  ApplicationCaseCompletenessReviewStatus,
+  ApplicationCaseWorkflowStage,
 } from '@prisma/client';
 
 import { APPLICATIONS_EXPLANATION_CODES } from '../src/applications/applications.constants';
@@ -36,7 +36,9 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     await app.close();
   });
 
-  async function openCaseWithReview(fixture: Awaited<ReturnType<typeof seedApplicationsCompletenessFixture>>) {
+  async function openCaseWithReview(
+    fixture: Awaited<ReturnType<typeof seedApplicationsCompletenessFixture>>,
+  ) {
     const { caseRecord, submission } = await caseService.openCaseWithInitialSubmission({
       governmentServiceId: fixture.governmentServiceId,
       governmentServiceVersionId: fixture.governmentServiceVersionId,
@@ -67,9 +69,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.MISSING },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.CORRUPTED },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.MISSING,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.CORRUPTED,
+      },
     ]);
 
     const updated = await prisma.completenessReview.findUniqueOrThrow({
@@ -77,16 +88,22 @@ describe('Phase 6E completeness review loop (e2e)', () => {
       include: { items: true },
     });
 
-    const identityItem = updated.items.find((item) => item.checklistItemCode === 'IDENTITY_DOCUMENT');
-    const businessPlanItem = updated.items.find((item) => item.checklistItemCode === 'BUSINESS_PLAN');
+    const identityItem = updated.items.find(
+      (item) => item.checklistItemCode === 'IDENTITY_DOCUMENT',
+    );
+    const businessPlanItem = updated.items.find(
+      (item) => item.checklistItemCode === 'BUSINESS_PLAN',
+    );
     const feeItem = updated.items.find((item) => item.checklistItemCode === 'FEE_RECEIPT');
 
-    expect(identityItem?.status).toBe(CompletenessReviewItemStatus.PRESENT);
-    expect(businessPlanItem?.status).toBe(CompletenessReviewItemStatus.MISSING);
-    expect(feeItem?.status).toBe(CompletenessReviewItemStatus.CORRUPTED);
-    expect(updated.items.every((item) => item.status !== ('VERIFIED' as CompletenessReviewItemStatus))).toBe(
-      true,
-    );
+    expect(identityItem?.status).toBe(ApplicationCaseCompletenessReviewItemStatus.PRESENT);
+    expect(businessPlanItem?.status).toBe(ApplicationCaseCompletenessReviewItemStatus.MISSING);
+    expect(feeItem?.status).toBe(ApplicationCaseCompletenessReviewItemStatus.CORRUPTED);
+    expect(
+      updated.items.every(
+        (item) => item.status !== ('VERIFIED' as ApplicationCaseCompletenessReviewItemStatus),
+      ),
+    ).toBe(true);
   });
 
   it('rejects undisclosed checklist requirements during assessment', async () => {
@@ -95,7 +112,10 @@ describe('Phase 6E completeness review loop (e2e)', () => {
 
     await expect(
       completenessReviewService.assessItems(review.id, [
-        { checklistItemCode: 'UNDISCLOSED_REQUIREMENT', status: CompletenessReviewItemStatus.MISSING },
+        {
+          checklistItemCode: 'UNDISCLOSED_REQUIREMENT',
+          status: ApplicationCaseCompletenessReviewItemStatus.MISSING,
+        },
       ]),
     ).rejects.toMatchObject({
       response: {
@@ -109,9 +129,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.MISSING },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.MISSING,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     await completenessReviewService.finalizeReview(review.id, {
@@ -140,9 +169,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { caseRecord, submission, review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.MISSING },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.MISSING,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     await completenessReviewService.finalizeReview(review.id, {
@@ -195,9 +233,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { caseRecord, review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.MISSING },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.MISSING,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     await completenessReviewService.finalizeReview(review.id, {
@@ -232,9 +279,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     });
 
     await completenessReviewService.assessItems(correction.review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     const result = await completenessReviewService.finalizeReview(correction.review.id, {
@@ -245,10 +301,10 @@ describe('Phase 6E completeness review loop (e2e)', () => {
 
     const updatedCase = await caseService.getCase(caseRecord.id);
 
-    expect(result.status).toBe(CompletenessReviewStatus.COMPLETE);
+    expect(result.status).toBe(ApplicationCaseCompletenessReviewStatus.COMPLETE);
     expect(result.administrativelyComplete).toBe(true);
     expect(result.isApproval).toBe(false);
-    expect(updatedCase.currentWorkflowStage).toBe(CaseWorkflowStage.SUBSTANTIVE_REVIEW);
+    expect(updatedCase.currentWorkflowStage).toBe(ApplicationCaseWorkflowStage.SUBSTANTIVE_REVIEW);
   });
 
   it('prevents newer checklist versions from silently altering an existing case', async () => {
@@ -266,7 +322,8 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     });
 
     const submissionService = app.get(
-      (await import('../src/applications/submissions/application-submission.service')).ApplicationSubmissionService,
+      (await import('../src/applications/submissions/application-submission.service'))
+        .ApplicationSubmissionService,
     );
 
     await expect(
@@ -288,9 +345,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     await expect(
@@ -310,9 +376,18 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     const { review } = await openCaseWithReview(fixture);
 
     await completenessReviewService.assessItems(review.id, [
-      { checklistItemCode: 'IDENTITY_DOCUMENT', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'BUSINESS_PLAN', status: CompletenessReviewItemStatus.PRESENT },
-      { checklistItemCode: 'FEE_RECEIPT', status: CompletenessReviewItemStatus.PRESENT },
+      {
+        checklistItemCode: 'IDENTITY_DOCUMENT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'BUSINESS_PLAN',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
+      {
+        checklistItemCode: 'FEE_RECEIPT',
+        status: ApplicationCaseCompletenessReviewItemStatus.PRESENT,
+      },
     ]);
 
     await expect(
@@ -336,11 +411,11 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     expect(review.checklistConfigurationFingerprint).toBe(submission.pinnedChecklistFingerprint);
 
     const determination = completenessReviewService.determineCompletenessFromItems([
-      { isRequired: true, status: CompletenessReviewItemStatus.PRESENT },
-      { isRequired: true, status: CompletenessReviewItemStatus.PRESENT },
-      { isRequired: true, status: CompletenessReviewItemStatus.PRESENT },
+      { isRequired: true, status: ApplicationCaseCompletenessReviewItemStatus.PRESENT },
+      { isRequired: true, status: ApplicationCaseCompletenessReviewItemStatus.PRESENT },
+      { isRequired: true, status: ApplicationCaseCompletenessReviewItemStatus.PRESENT },
     ]);
 
-    expect(determination).toBe(CompletenessReviewStatus.COMPLETE);
+    expect(determination).toBe(ApplicationCaseCompletenessReviewStatus.COMPLETE);
   });
 });

@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ApplicantInformationRequestStatus,
-  CaseWorkflowStage,
-  DeficiencyNoticeStatus,
+  ApplicationCaseDeficiencyNoticeStatus,
+  ApplicationCaseInformationRequestStatus,
+  ApplicationCaseWorkflowStage,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -33,7 +33,7 @@ export class ApplicantCorrectionService {
   ) {}
 
   async submitCorrection(input: SubmitApplicantCorrectionInput) {
-    const notice = await this.prisma.deficiencyNotice.findUnique({
+    const notice = await this.prisma.applicationCaseDeficiencyNotice.findUnique({
       where: { id: input.deficiencyNoticeId },
       include: {
         applicantInformationRequests: true,
@@ -45,7 +45,7 @@ export class ApplicantCorrectionService {
       throw new NotFoundException('Deficiency notice not found for case');
     }
 
-    if (notice.status !== DeficiencyNoticeStatus.ISSUED) {
+    if (notice.status !== ApplicationCaseDeficiencyNoticeStatus.ISSUED) {
       throw new BadRequestException('Deficiency notice is not open for applicant response');
     }
 
@@ -62,18 +62,18 @@ export class ApplicantCorrectionService {
     });
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.deficiencyNotice.update({
+      await tx.applicationCaseDeficiencyNotice.update({
         where: { id: notice.id },
-        data: { status: DeficiencyNoticeStatus.RESPONDED },
+        data: { status: ApplicationCaseDeficiencyNoticeStatus.RESPONDED },
       });
 
       const infoRequest = notice.applicantInformationRequests[0];
       if (infoRequest) {
-        await tx.applicantInformationRequest.update({
+        await tx.applicationCaseInformationRequest.update({
           where: { id: infoRequest.id },
           data: {
             responseSubmissionId: newSubmission.id,
-            status: ApplicantInformationRequestStatus.RESPONDED,
+            status: ApplicationCaseInformationRequestStatus.RESPONDED,
           },
         });
       }
@@ -93,14 +93,14 @@ export class ApplicantCorrectionService {
 
     await this.workflowService.transition({
       caseId: input.caseId,
-      toStage: CaseWorkflowStage.RESUBMITTED,
+      toStage: ApplicationCaseWorkflowStage.RESUBMITTED,
       actorIdentityId: input.applicantIdentityId,
       reason: 'Applicant submitted correction in response to deficiency notice',
     });
 
     await this.workflowService.transition({
       caseId: input.caseId,
-      toStage: CaseWorkflowStage.COMPLETENESS_REVIEW,
+      toStage: ApplicationCaseWorkflowStage.COMPLETENESS_REVIEW,
       actorIdentityId: input.applicantIdentityId,
       reason: 'Re-entering completeness review after applicant correction',
     });

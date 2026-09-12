@@ -88,7 +88,7 @@ export class ApplicationSubmissionService {
       pinnedItems,
     );
 
-    return this.prisma.applicationSubmission.create({
+    return this.prisma.applicationCaseSubmission.create({
       data: {
         caseId: input.caseId,
         submissionSequence: nextSequence,
@@ -107,7 +107,7 @@ export class ApplicationSubmissionService {
   }
 
   async getSubmission(id: string) {
-    const submission = await this.prisma.applicationSubmission.findUnique({
+    const submission = await this.prisma.applicationCaseSubmission.findUnique({
       where: { id },
     });
 
