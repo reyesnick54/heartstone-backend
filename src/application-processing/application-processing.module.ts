@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
 
+import { CasesModule } from './cases/cases.module';
+
+@Module({
+  imports: [CasesModule],
+  exports: [CasesModule],
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ApplicationsModule } from './applications/applications.module';
