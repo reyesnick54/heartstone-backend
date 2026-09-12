@@ -97,20 +97,20 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     expect(schema).not.toMatch(/enum ServiceFamilyType/);
   });
 
-  it('does not define Phase 6 application-processing models', () => {
-    const phase6Models = [
-      'Application',
-      'Case',
-      'CaseWorkflow',
-      'EvidencePacket',
+  it('does not define Phase 7+ decision or issuance models', () => {
+    const phase7Models = [
       'GovernmentDecision',
       'IssuedLicense',
       'IssuedPermit',
+      'IssuedCertificate',
+      'EvidencePacket',
+      'EvidenceVault',
+      'MasterAdministrativeFile',
       'PaymentTransaction',
       'InspectionCase',
     ];
 
-    for (const modelName of phase6Models) {
+    for (const modelName of phase7Models) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
   });

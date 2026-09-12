@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
@@ -39,6 +40,7 @@ import { WorkflowsModule } from './workflows/workflows.module';
     AuthorityModule,
     ServiceCatalogModule,
     WorkflowsModule,
+    ApplicationProcessingModule,
   ],
 })
 export class AppModule {}
