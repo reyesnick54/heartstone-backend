@@ -300,15 +300,21 @@ describe('Phase 7 must-fail invariants (e2e)', () => {
       .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
       .expect(200);
 
-    const { EvidenceRecordsBoundaryService } = await import(
-      '../src/evidence-records/common/evidence-records-boundary.service'
-    );
+    const { EvidenceRecordsBoundaryService } =
+      await import('../src/evidence-records/common/evidence-records-boundary.service');
     const boundary = app.get(EvidenceRecordsBoundaryService);
-    await expect(boundary.assertApplicantCannotAccessLegalHold(hold.id)).rejects.toThrow(/legal hold/i);
+    await expect(boundary.assertApplicantCannotAccessLegalHold(hold.id)).rejects.toThrow(
+      /legal hold/i,
+    );
   });
 
   it('14. Phase 7 cannot issue license/permit/certificate tables', async () => {
-    const tables = ['issued_licenses', 'issued_permits', 'issued_certificates', 'government_decisions'];
+    const tables = [
+      'issued_licenses',
+      'issued_permits',
+      'issued_certificates',
+      'government_decisions',
+    ];
     for (const table of tables) {
       const result = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
         `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = '${table}'`,

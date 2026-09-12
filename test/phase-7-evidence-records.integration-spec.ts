@@ -1,7 +1,6 @@
 import { type INestApplication } from '@nestjs/common';
 import {
   EvidencePacketStatus,
-  EvidencePurposeType,
   EvidenceStatus,
   LegalHoldTargetType,
   RecordCorrectionStatus,
@@ -10,8 +9,8 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { MasterFileCompletenessService } from '../src/evidence-records/completeness/master-file-completeness.service';
 import { PrismaService } from '../src/database/prisma.service';
+import { MasterFileCompletenessService } from '../src/evidence-records/completeness/master-file-completeness.service';
 import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import {
   createAndFreezePacket,
@@ -276,9 +275,8 @@ describe('Phase 7 evidence records (integration)', () => {
         },
       });
 
-      const { EvidenceRecordsBoundaryService } = await import(
-        '../src/evidence-records/common/evidence-records-boundary.service'
-      );
+      const { EvidenceRecordsBoundaryService } =
+        await import('../src/evidence-records/common/evidence-records-boundary.service');
       const boundary = app.get(EvidenceRecordsBoundaryService);
       await expect(
         boundary.assertLegalHoldDoesNotBlockDisposition('EvidenceRecord', fixture.evidenceId),

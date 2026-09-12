@@ -4,13 +4,13 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
-import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import { seedPhase6Fixture, VALID_FORM_ANSWERS } from './helpers/phase-6-test-fixtures';
 import {
   asApplicationBody,
   asReferralBody,
   asSubmitApplicationResponseBody,
 } from './helpers/phase-6-test-types';
+import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import {
   createAndFreezePacket,
   seedPhase7Fixture,

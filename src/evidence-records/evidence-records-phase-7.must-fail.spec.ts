@@ -9,11 +9,11 @@ import {
   RecordCorrectionStatus,
 } from '@prisma/client';
 
+import { resetAllTestData } from '../../test/helpers/integration-app';
 import appConfig from '../config/app.config';
 import identityConfig from '../config/identity.config';
 import redisConfig from '../config/redis.config';
 import securityConfig from '../config/security.config';
-import { resetEvidenceRecordsData } from '../../test/helpers/evidence-records-test-reset';
 import { DatabaseModule } from '../database/database.module';
 import { PrismaService } from '../database/prisma.service';
 import { EvidenceRecordsBoundaryService } from './common/evidence-records-boundary.service';
@@ -44,27 +44,7 @@ describe('Phase 7H architectural must-fail invariants', () => {
   });
 
   beforeEach(async () => {
-    await resetEvidenceRecordsData(prisma);
-    await prisma.legalHold.deleteMany();
-    await prisma.caseWorkflowStepInstance.deleteMany();
-    await prisma.caseWorkflowInstance.deleteMany();
-    await prisma.case.deleteMany();
-    await prisma.applicationSubmission.deleteMany();
-    await prisma.application.deleteMany();
-    await prisma.workflowTransitionDefinition.deleteMany();
-    await prisma.workflowStepDefinition.deleteMany();
-    await prisma.workflowStageDefinition.deleteMany();
-    await prisma.workflowVersion.deleteMany();
-    await prisma.workflowDefinition.deleteMany();
-    await prisma.formVersion.deleteMany();
-    await prisma.formDefinition.deleteMany();
-    await prisma.governmentServiceVersion.deleteMany();
-    await prisma.governmentService.deleteMany();
-    await prisma.serviceFamily.deleteMany();
-    await prisma.department.deleteMany();
-    await prisma.institution.deleteMany();
-    await prisma.jurisdiction.deleteMany();
-    await prisma.identity.deleteMany();
+    await resetAllTestData(prisma);
   });
 
   afterAll(async () => {
@@ -78,41 +58,41 @@ describe('Phase 7H architectural must-fail invariants', () => {
   });
 
   it('1. client cannot set evidence status to VERIFIED', () => {
-    expect(() => boundary.assertClientCannotSetVerified({ status: EvidenceStatus.VERIFIED })).toThrow(
-      /verified/i,
-    );
+    expect(() => {
+      boundary.assertClientCannotSetVerified({ status: EvidenceStatus.VERIFIED });
+    }).toThrow(/verified/i);
   });
 
   it('2. client cannot set evidence status to ACCEPTED', () => {
-    expect(() =>
-      boundary.assertClientCannotSetAccepted({ status: EvidenceStatus.ACCEPTED }),
-    ).toThrow(/accepted/i);
+    expect(() => {
+      boundary.assertClientCannotSetAccepted({ status: EvidenceStatus.ACCEPTED });
+    }).toThrow(/accepted/i);
   });
 
   it('3. client cannot set packet sealedAt directly', () => {
-    expect(() => boundary.assertClientCannotSetSealed({ sealedAt: new Date().toISOString() })).toThrow(
-      /seal/i,
-    );
+    expect(() => {
+      boundary.assertClientCannotSetSealed({ sealedAt: new Date().toISOString() });
+    }).toThrow(/seal/i);
   });
 
   it('4. client cannot set contentHash directly', () => {
-    expect(() => boundary.assertClientCannotSetContentHash({ contentHash: 'tampered' })).toThrow(
-      /hash/i,
-    );
+    expect(() => {
+      boundary.assertClientCannotSetContentHash({ contentHash: 'tampered' });
+    }).toThrow(/hash/i);
   });
 
   it('5. client cannot escalate classification to privileged levels', () => {
-    expect(() =>
+    expect(() => {
       boundary.assertClientCannotEscalateClassification({
         classification: DocumentClassification.LEGALLY_PRIVILEGED,
-      }),
-    ).toThrow(/classification/i);
+      });
+    }).toThrow(/classification/i);
   });
 
   it('6. client cannot mass-assign protected status fields', () => {
-    expect(() => boundary.assertClientPayloadDoesNotSetProtectedFields({ status: 'VERIFIED' }, ['status'])).toThrow(
-      /protected field/i,
-    );
+    expect(() => {
+      boundary.assertClientPayloadDoesNotSetProtectedFields({ status: 'VERIFIED' }, ['status']);
+    }).toThrow(/protected field/i);
   });
 
   it('7. applicant cannot access unrelated master file', async () => {
@@ -212,61 +192,88 @@ describe('Phase 7H architectural must-fail invariants', () => {
 
   it('8. applicant cannot access unrelated evidence record', async () => {
     await expect(
-      boundary.assertApplicantCanAccessEvidence('00000000-0000-4000-8000-000000000099', '00000000-0000-4000-8000-000000000001'),
+      boundary.assertApplicantCanAccessEvidence(
+        '00000000-0000-4000-8000-000000000099',
+        '00000000-0000-4000-8000-000000000001',
+      ),
     ).rejects.toThrow();
   });
 
   it('9. applicant cannot access unrelated evidence packet', async () => {
     await expect(
-      boundary.assertApplicantCanAccessPacket('00000000-0000-4000-8000-000000000099', '00000000-0000-4000-8000-000000000001'),
+      boundary.assertApplicantCanAccessPacket(
+        '00000000-0000-4000-8000-000000000099',
+        '00000000-0000-4000-8000-000000000001',
+      ),
     ).rejects.toThrow();
   });
 
   it('10. applicant cannot access legal hold records', async () => {
     const hold = await prisma.legalHold.create({
-      data: { holdReference: 'HLD-P7H-001', title: 'Hold', reason: 'Litigation', status: LegalHoldStatus.ACTIVE },
+      data: {
+        holdReference: 'HLD-P7H-001',
+        title: 'Hold',
+        reason: 'Litigation',
+        status: LegalHoldStatus.ACTIVE,
+      },
     });
-    await expect(boundary.assertApplicantCannotAccessLegalHold(hold.id)).rejects.toThrow(/legal hold/i);
+    await expect(boundary.assertApplicantCannotAccessLegalHold(hold.id)).rejects.toThrow(
+      /legal hold/i,
+    );
   });
 
   it('11. applicant cannot verify evidence', () => {
-    expect(() => boundary.assertApplicantCannotVerify(true)).toThrow(/cannot verify/i);
+    expect(() => {
+      boundary.assertApplicantCannotVerify(true);
+    }).toThrow(/cannot verify/i);
   });
 
   it('12. applicant cannot accept evidence', () => {
-    expect(() => boundary.assertApplicantCannotAccept(true)).toThrow(/cannot accept/i);
+    expect(() => {
+      boundary.assertApplicantCannotAccept(true);
+    }).toThrow(/cannot accept/i);
   });
 
   it('13. evidence cannot be accepted before verification', () => {
-    expect(() => boundary.assertEvidenceVerifiedBeforeAcceptance(EvidenceStatus.RECEIVED)).toThrow(
-      /verified before acceptance/i,
-    );
+    expect(() => {
+      boundary.assertEvidenceVerifiedBeforeAcceptance(EvidenceStatus.RECEIVED);
+    }).toThrow(/verified before acceptance/i);
   });
 
   it('14. disputed evidence cannot be accepted', () => {
-    expect(() => boundary.assertNotDisputed(EvidenceStatus.DISPUTED)).toThrow(/disputed/i);
+    expect(() => {
+      boundary.assertNotDisputed(EvidenceStatus.DISPUTED);
+    }).toThrow(/disputed/i);
   });
 
   it('15. withdrawn evidence cannot be accepted', () => {
-    expect(() => boundary.assertNotWithdrawn(EvidenceStatus.WITHDRAWN)).toThrow(/withdrawn/i);
+    expect(() => {
+      boundary.assertNotWithdrawn(EvidenceStatus.WITHDRAWN);
+    }).toThrow(/withdrawn/i);
   });
 
   it('16. superseded evidence cannot be modified', () => {
-    expect(() => boundary.assertNotSuperseded(EvidenceStatus.SUPERSEDED)).toThrow(/superseded/i);
+    expect(() => {
+      boundary.assertNotSuperseded(EvidenceStatus.SUPERSEDED);
+    }).toThrow(/superseded/i);
   });
 
   it('17. quarantined evidence cannot enter packet', () => {
-    expect(() => boundary.assertNotQuarantined(EvidenceStatus.QUARANTINED)).toThrow(/quarantined/i);
+    expect(() => {
+      boundary.assertNotQuarantined(EvidenceStatus.QUARANTINED);
+    }).toThrow(/quarantined/i);
   });
 
   it('18. sealed packet cannot be modified', () => {
-    expect(() => boundary.assertPacketNotSealed(EvidencePacketStatus.SEALED)).toThrow(/sealed packet/i);
+    expect(() => {
+      boundary.assertPacketNotSealed(EvidencePacketStatus.SEALED);
+    }).toThrow(/sealed packet/i);
   });
 
   it('19. packet freeze is irreversible', () => {
-    expect(() => boundary.assertPacketFreezeIrreversible(EvidencePacketStatus.SEALED)).toThrow(
-      /irreversible/i,
-    );
+    expect(() => {
+      boundary.assertPacketFreezeIrreversible(EvidencePacketStatus.SEALED);
+    }).toThrow(/irreversible/i);
   });
 
   it('20. legal hold blocks disposition execution', async () => {
@@ -291,15 +298,15 @@ describe('Phase 7H architectural must-fail invariants', () => {
     });
     const targetId = hold.targets[0]?.evidenceRecordId;
     if (!targetId) throw new Error('Expected evidence target');
-    await expect(boundary.assertLegalHoldDoesNotBlockDisposition('EvidenceRecord', targetId)).rejects.toThrow(
-      /legal hold/i,
-    );
+    await expect(
+      boundary.assertLegalHoldDoesNotBlockDisposition('EvidenceRecord', targetId),
+    ).rejects.toThrow(/legal hold/i);
   });
 
   it('21. record correction requires approval before apply', () => {
-    expect(() => boundary.assertCorrectionRequiresApproval(RecordCorrectionStatus.DRAFT)).toThrow(
-      /approval/i,
-    );
+    expect(() => {
+      boundary.assertCorrectionRequiresApproval(RecordCorrectionStatus.DRAFT);
+    }).toThrow(/approval/i);
   });
 
   it('22. record correction cannot overwrite original is enforced by apply creating new record', () => {
@@ -323,25 +330,33 @@ describe('Phase 7H architectural must-fail invariants', () => {
   });
 
   it('27. master file requires linked case', () => {
-    expect(() => boundary.assertMasterFileRequiresCase(null)).toThrow(/requires linked case/i);
+    expect(() => {
+      boundary.assertMasterFileRequiresCase(null);
+    }).toThrow(/requires linked case/i);
   });
 
   it('28. Phase 7 cannot create GovernmentDecision', () => {
-    expect(() => boundary.assertPhase7CannotCreateDecision()).toThrow(/GovernmentDecision/i);
+    expect(() => {
+      boundary.assertPhase7CannotCreateDecision();
+    }).toThrow(/GovernmentDecision/i);
   });
 
   it('29. Phase 7 cannot issue license/permit/certificate', () => {
-    expect(() => boundary.assertPhase7CannotIssueInstrument()).toThrow(/issue license/i);
+    expect(() => {
+      boundary.assertPhase7CannotIssueInstrument();
+    }).toThrow(/issue license/i);
   });
 
   it('30. AI-assisted actor cannot verify evidence independently', () => {
-    expect(() => boundary.assertAiCannotVerifyIndependently(true)).toThrow(/AI-assisted/i);
+    expect(() => {
+      boundary.assertAiCannotVerifyIndependently(true);
+    }).toThrow(/AI-assisted/i);
   });
 
   it('31. service identity cannot accept decision-support evidence', () => {
-    expect(() =>
-      boundary.assertServiceIdentityCannotAcceptDecisionSupport(IdentityType.SERVICE),
-    ).toThrow(/Service identity/i);
+    expect(() => {
+      boundary.assertServiceIdentityCannotAcceptDecisionSupport(IdentityType.SERVICE);
+    }).toThrow(/Service identity/i);
   });
 
   it('32. professional review does not constitute government decision', () => {
@@ -353,16 +368,22 @@ describe('Phase 7H architectural must-fail invariants', () => {
   });
 
   it('34. inspection custody chain must be maintained', () => {
-    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 34)?.description).toMatch(/custody chain/i);
+    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 34)?.description).toMatch(
+      /custody chain/i,
+    );
   });
 
   it('35. custody events cannot be client-backdated', () => {
     const future = new Date(Date.now() + 3600_000);
-    expect(() => boundary.assertCustodyEventNotBackdated(future)).toThrow(/backdated/i);
+    expect(() => {
+      boundary.assertCustodyEventNotBackdated(future);
+    }).toThrow(/backdated/i);
   });
 
   it('36. packet manifest hash must match items', () => {
-    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 36)?.description).toMatch(/manifest hash/i);
+    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 36)?.description).toMatch(
+      /manifest hash/i,
+    );
   });
 
   it('37. undisclosed requirement cannot be satisfied', () => {
@@ -374,13 +395,15 @@ describe('Phase 7H architectural must-fail invariants', () => {
   });
 
   it('39. case reference fields cannot be client-written', () => {
-    expect(() =>
-      boundary.assertClientCannotSetCaseReferenceFields({ evidencePacketReference: 'PKT-CLIENT' }),
-    ).toThrow(/protected field/i);
+    expect(() => {
+      boundary.assertClientCannotSetCaseReferenceFields({ evidencePacketReference: 'PKT-CLIENT' });
+    }).toThrow(/protected field/i);
   });
 
   it('40. decision-support packet cannot include non-accepted evidence', () => {
-    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 40)?.description).toMatch(/non-accepted/i);
+    expect(PHASE_7H_INVARIANTS.find((item) => item.id === 40)?.description).toMatch(
+      /non-accepted/i,
+    );
   });
 
   it('41. archival transfer cannot destroy records', () => {
@@ -473,7 +496,12 @@ describe('Phase 7H architectural must-fail invariants', () => {
       data: { code: 'P7H-JUR2', name: 'P7H Jurisdiction 2', type: 'NATIONAL' },
     });
     const institution = await prisma.institution.create({
-      data: { jurisdictionId: jurisdiction.id, code: 'P7H-INST2', name: 'P7H Inst 2', type: 'AGENCY' },
+      data: {
+        jurisdictionId: jurisdiction.id,
+        code: 'P7H-INST2',
+        name: 'P7H Inst 2',
+        type: 'AGENCY',
+      },
     });
     const department = await prisma.department.create({
       data: { institutionId: institution.id, code: 'P7H-DEPT2', name: 'P7H Department 2' },

@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
-import { AuthorityActionType, AuthorityEvaluationOutcome } from '@prisma/client';
+import { type AuthorityActionType, AuthorityEvaluationOutcome } from '@prisma/client';
 
-import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
+import { type AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 
 export interface ConsequentialAuthorityInput {
   identityId: string;

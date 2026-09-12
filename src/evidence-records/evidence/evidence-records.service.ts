@@ -4,7 +4,6 @@ import {
   EvidencePurposeType,
   EvidenceStatus,
   EvidenceVerificationStatus,
-  IdentityType,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';

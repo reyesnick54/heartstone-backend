@@ -1,21 +1,10 @@
-import {
-  CaseCommunicationChannel,
-  EvidencePurposeType,
-  EvidenceStatus,
-} from '@prisma/client';
+import { CaseCommunicationChannel, EvidencePurposeType, type EvidenceStatus } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
-import {
-  type Phase6FixtureContext,
-  seedPhase6Fixture,
-  VALID_FORM_ANSWERS,
-} from './phase-6-test-fixtures';
-import {
-  asApplicationBody,
-  asSubmitApplicationResponseBody,
-} from './phase-6-test-types';
+import { seedPhase6Fixture, VALID_FORM_ANSWERS } from './phase-6-test-fixtures';
+import { asApplicationBody, asSubmitApplicationResponseBody } from './phase-6-test-types';
 import {
   asEvidenceBody,
   asMasterFileBody,
@@ -193,16 +182,16 @@ export async function recordGovernmentCommunication(
   fixture: Phase7FixtureContext,
   bodyText = 'Official request for additional information',
 ) {
-  return (
-    await request(app.getHttpServer())
-      .post('/api/v1/government-communications')
-      .set('Authorization', `Bearer ${fixture.officialSessionToken}`)
-      .send({
-        masterAdministrativeFileId: fixture.masterFileId,
-        channel: CaseCommunicationChannel.PORTAL,
-        subject: 'Additional information required',
-        body: bodyText,
-      })
-      .expect(201)
-  ).body;
+  const response = await request(app.getHttpServer())
+    .post('/api/v1/government-communications')
+    .set('Authorization', `Bearer ${fixture.officialSessionToken}`)
+    .send({
+      masterAdministrativeFileId: fixture.masterFileId,
+      channel: CaseCommunicationChannel.PORTAL,
+      subject: 'Additional information required',
+      body: bodyText,
+    })
+    .expect(201);
+
+  return response.body as { mutatesCaseStatus: boolean };
 }

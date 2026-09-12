@@ -62,15 +62,13 @@ export class CaseDashboardReadService {
         governmentService: true,
         responsibleDepartment: true,
         currentCaseManagerOfficeholder: true,
-        workflowInstances: {
-          where: { status: { in: ['ACTIVE', 'PAUSED', 'SAFE_HALT'] } },
+        workflowInstance: {
           include: {
             stepInstances: {
               where: { status: { in: ['PENDING', 'IN_PROGRESS', 'BLOCKED'] } },
+              include: { workflowStepDefinition: true },
             },
           },
-          orderBy: { startedAt: 'desc' },
-          take: 1,
         },
       },
     });
@@ -79,7 +77,11 @@ export class CaseDashboardReadService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    const activeWorkflow = caseRecord.workflowInstances[0] ?? null;
+    const activeWorkflow =
+      caseRecord.workflowInstance &&
+      ['ACTIVE', 'PAUSED', 'SAFE_HALT'].includes(caseRecord.workflowInstance.status)
+        ? caseRecord.workflowInstance
+        : null;
     const milestones = await this.caseMilestoneService.listForCase(caseId);
     const recentEvents = await this.caseEventService.listOfficialTimeline(caseId, 20);
 
@@ -139,15 +141,15 @@ export class CaseDashboardReadService {
           }
         : null,
       outstandingTasks: (activeWorkflow?.stepInstances ?? []).map((step) => ({
-        stepKey: step.stepKey,
-        stepLabel: step.stepLabel,
+        stepKey: step.workflowStepDefinition.stepKey,
+        stepLabel: step.workflowStepDefinition.label,
         status: step.status,
       })),
       sla: milestones.map((milestone) => ({
         milestoneId: milestone.id,
-        name: milestone.name,
+        name: milestone.name ?? milestone.label ?? 'Milestone',
         targetDate: milestone.targetDate?.toISOString() ?? null,
-        status: milestone.status,
+        status: milestone.status ?? 'UPCOMING',
         sourceSlaReference: milestone.sourceSlaReference,
       })),
       dependencies: milestones
@@ -156,13 +158,13 @@ export class CaseDashboardReadService {
         )
         .map((milestone) => ({
           reference: milestone.dependencyReference,
-          status: milestone.status,
+          status: milestone.status ?? 'UPCOMING',
         })),
       openIssues: milestones
         .filter((milestone) => milestone.status === 'AT_RISK' || milestone.status === 'DELAYED')
         .map((milestone) => ({
           type: 'MILESTONE',
-          summary: `${milestone.name} is ${milestone.status.toLowerCase().replace('_', ' ')}`,
+          summary: `${milestone.name ?? milestone.label ?? 'Milestone'} is ${(milestone.status ?? 'UNKNOWN').toLowerCase().replace('_', ' ')}`,
         })),
       recentEvents: recentEvents.map((event) => ({
         id: event.id,

@@ -51,7 +51,9 @@ describe('Applications schema coherence (Phase 6)', () => {
 
   it('defines completeness item statuses without VERIFIED', () => {
     for (const forbidden of FORBIDDEN_COMPLETENESS_ITEM_STATUSES) {
-      expect(schema).not.toMatch(new RegExp(`enum CompletenessReviewItemStatus[\\s\\S]*${forbidden}`));
+      expect(schema).not.toMatch(
+        new RegExp(`enum CompletenessReviewItemStatus[\\s\\S]*${forbidden}`),
+      );
     }
     for (const status of COMPLETENESS_REVIEW_ITEM_STATUSES) {
       expect(status).toBeTruthy();

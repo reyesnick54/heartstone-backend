@@ -29,6 +29,7 @@ export class InMemoryDocumentStorageService extends DocumentStorageService {
     content: Buffer,
     metadata: { mimeType?: string; actorIdentityId: string },
   ): Promise<StoredDocumentPayload> {
+    await Promise.resolve();
     const storageReference = `mem://${randomUUID()}`;
     const contentHash = createHash('sha256').update(content).digest('hex');
 
@@ -63,6 +64,7 @@ export class InMemoryDocumentStorageService extends DocumentStorageService {
   }
 
   async createPresignedUpload(request: PresignedUploadRequest): Promise<PresignedUrlResult> {
+    await Promise.resolve();
     const storageReference = `mem://${randomUUID()}`;
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
@@ -89,6 +91,7 @@ export class InMemoryDocumentStorageService extends DocumentStorageService {
   }
 
   async verifyAccess(storageReference: string, actorIdentityId: string): Promise<boolean> {
+    await Promise.resolve();
     const object = this.objects.get(storageReference);
     if (!object) {
       return false;

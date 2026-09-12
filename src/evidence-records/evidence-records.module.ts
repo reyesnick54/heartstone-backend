@@ -4,14 +4,14 @@ import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
-import { GovernmentCommunicationRecordsService } from './communications/government-communication-records.service';
-import { MasterFileCompletenessService } from './completeness/master-file-completeness.service';
 import { EvidenceRecordsAccessService } from './common/evidence-records-access.service';
 import { EvidenceRecordsBoundaryService } from './common/evidence-records-boundary.service';
+import { GovernmentCommunicationRecordsService } from './communications/government-communication-records.service';
+import { MasterFileCompletenessService } from './completeness/master-file-completeness.service';
 import { RecordCorrectionsService } from './corrections/record-corrections.service';
 import { DocumentRecordsService } from './documents/document-records.service';
-import { EvidenceRecordsController } from './evidence-records.controller';
 import { EvidenceRecordsService } from './evidence/evidence-records.service';
+import { EvidenceRecordsController } from './evidence-records.controller';
 import { InspectionRecordsService } from './inspections/inspection-records.service';
 import { LegalHoldsService } from './legal-holds/legal-holds.service';
 import { MasterFilesController } from './master-files/master-files.controller';
@@ -28,7 +28,12 @@ import { InMemoryDocumentStorageService } from './storage/in-memory-document-sto
 
 @Module({
   imports: [DatabaseModule, AuthorityModule, SessionsModule],
-  controllers: [EvidenceRecordsController, MasterFilesController, RetentionController, ReplayController],
+  controllers: [
+    EvidenceRecordsController,
+    MasterFilesController,
+    RetentionController,
+    ReplayController,
+  ],
   providers: [
     SessionAuthGuard,
     EvidenceRecordsAccessService,

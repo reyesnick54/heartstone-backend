@@ -22,6 +22,9 @@ export interface ApplicationProcessingFixtureContext {
   serviceFamilyId: string;
   governmentServiceId: string;
   governmentServiceVersionId: string;
+  formDefinitionId: string;
+  formVersionId: string;
+  configurationFingerprint: string;
   applicantIdentityId: string;
   applicantSessionToken: string;
   officialIdentityId: string;
@@ -86,6 +89,42 @@ export async function seedApplicationProcessingFixture(
       version: '1.0.0',
       maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
       publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
+    },
+  });
+
+  const formDefinition = await prisma.formDefinition.create({
+    data: {
+      code: `${marker}-FORM`,
+      name: 'NON_PRODUCTION Test Form',
+      governmentServiceVersionId: serviceVersion.id,
+    },
+  });
+
+  const formVersion = await prisma.formVersion.create({
+    data: {
+      formDefinitionId: formDefinition.id,
+      version: 1,
+      title: { en: 'Test Form' },
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
+    },
+  });
+
+  const workflowDefinition = await prisma.workflowDefinition.create({
+    data: {
+      code: `${marker}-WF`,
+      name: 'Application Processing Test Workflow',
+      governmentServiceId: service.id,
+      status: 'APPROVED',
+    },
+  });
+
+  await prisma.workflowVersion.create({
+    data: {
+      workflowDefinitionId: workflowDefinition.id,
+      version: '1.0.0',
+      status: 'APPROVED',
+      approvedAt: new Date(),
     },
   });
 
@@ -175,6 +214,9 @@ export async function seedApplicationProcessingFixture(
     serviceFamilyId: serviceFamily.id,
     governmentServiceId: service.id,
     governmentServiceVersionId: serviceVersion.id,
+    formDefinitionId: formDefinition.id,
+    formVersionId: formVersion.id,
+    configurationFingerprint: `${marker}-fingerprint`,
     applicantIdentityId: applicantIdentity.id,
     applicantSessionToken,
     officialIdentityId: officialIdentity.id,
@@ -193,6 +235,10 @@ export async function seedCaseFromApplication(
     applicantIdentityId: fixture.applicantIdentityId,
     governmentServiceId: fixture.governmentServiceId,
     governmentServiceVersionId: fixture.governmentServiceVersionId,
+    formDefinitionId: fixture.formDefinitionId,
+    formVersionId: fixture.formVersionId,
+    configurationFingerprint: fixture.configurationFingerprint,
+    applicantCategory: 'INDIVIDUAL',
   });
 
   const caseRecord = await foundation.openCaseFromApplication({

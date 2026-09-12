@@ -141,15 +141,15 @@ model GovernmentBody {
 }
 
 model Department {
-  id                            String                    @id @default(uuid()) @db.Uuid
-  institutionId                 String                    @db.Uuid
+  id                            String                     @id @default(uuid()) @db.Uuid
+  institutionId                 String                     @db.Uuid
   code                          String
   name                          String
   description                   String?
-  status                        StructuralLifecycleStatus @default(ACTIVE)
-  createdAt                     DateTime                  @default(now())
-  updatedAt                     DateTime                  @updatedAt
-  institution                   Institution               @relation(fields: [institutionId], references: [id])
+  status                        StructuralLifecycleStatus  @default(ACTIVE)
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  institution                   Institution                @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   cases                         Case[]
@@ -1369,19 +1369,19 @@ model ServiceFunctionMapping {
 }
 
 model FormDefinition {
-  id                        String                     @id @default(uuid()) @db.Uuid
-  code                      String                     @unique
-  name                      String
-  purpose                   String?
-  description               String?
-  governmentServiceVersionId String                    @db.Uuid
-  status                    FormDefinitionStatus       @default(DRAFT)
-  createdAt                 DateTime                   @default(now())
-  updatedAt                 DateTime                   @updatedAt
-  governmentServiceVersion  GovernmentServiceVersion   @relation(fields: [governmentServiceVersionId], references: [id])
-  versions                  FormVersion[]
-  governmentServiceVersions GovernmentServiceVersion[] @relation("ServiceVersionFormDefinition")
-  applications              Application[]
+  id                         String                     @id @default(uuid()) @db.Uuid
+  code                       String                     @unique
+  name                       String
+  purpose                    String?
+  description                String?
+  governmentServiceVersionId String                     @db.Uuid
+  status                     FormDefinitionStatus       @default(DRAFT)
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion   @relation(fields: [governmentServiceVersionId], references: [id])
+  versions                   FormVersion[]
+  governmentServiceVersions  GovernmentServiceVersion[] @relation("ServiceVersionFormDefinition")
+  applications               Application[]
 
   @@index([governmentServiceVersionId])
   @@index([status])
@@ -1617,6 +1617,7 @@ model ServiceActivationRecord {
   @@index([createdAt])
   @@map("service_activation_records")
 }
+
 // ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
 
 enum ApplicationStatus {
@@ -1941,29 +1942,29 @@ enum CasePublicStatusStage {
 }
 
 model Application {
-  id                         String              @id @default(uuid()) @db.Uuid
-  applicationNumber          String?             @unique
-  applicantIdentityId        String              @db.Uuid
-  organizationId             String?             @db.Uuid
-  representativeAuthorityId  String?             @db.Uuid
-  governmentServiceId        String              @db.Uuid
-  governmentServiceVersionId String              @db.Uuid
-  formDefinitionId           String              @db.Uuid
-  formVersionId              String              @db.Uuid
+  id                         String                   @id @default(uuid()) @db.Uuid
+  applicationNumber          String?                  @unique
+  applicantIdentityId        String                   @db.Uuid
+  organizationId             String?                  @db.Uuid
+  representativeAuthorityId  String?                  @db.Uuid
+  governmentServiceId        String                   @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
+  formDefinitionId           String                   @db.Uuid
+  formVersionId              String                   @db.Uuid
   configurationFingerprint   String
   applicantCategory          ApplicantCategory
-  status                     ApplicationStatus   @default(DRAFT)
-  draftAnswers               Json                @default("{}")
+  status                     ApplicationStatus        @default(DRAFT)
+  draftAnswers               Json                     @default("{}")
   idempotencyKey             String?
-  createdAt                  DateTime            @default(now())
-  updatedAt                  DateTime            @updatedAt
-  applicantIdentity          Identity            @relation("ApplicationApplicant", fields: [applicantIdentityId], references: [id])
-  organization               Organization?       @relation(fields: [organizationId], references: [id])
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  applicantIdentity          Identity                 @relation("ApplicationApplicant", fields: [applicantIdentityId], references: [id])
+  organization               Organization?            @relation(fields: [organizationId], references: [id])
   representativeAuthority    RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
-  governmentService          GovernmentService   @relation(fields: [governmentServiceId], references: [id])
+  governmentService          GovernmentService        @relation(fields: [governmentServiceId], references: [id])
   governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  formDefinition             FormDefinition      @relation(fields: [formDefinitionId], references: [id])
-  formVersion                FormVersion         @relation(fields: [formVersionId], references: [id])
+  formDefinition             FormDefinition           @relation(fields: [formDefinitionId], references: [id])
+  formVersion                FormVersion              @relation(fields: [formVersionId], references: [id])
   submissions                ApplicationSubmission[]
   case                       Case?
 
@@ -1976,26 +1977,26 @@ model Application {
 }
 
 model ApplicationSubmission {
-  id                         String                      @id @default(uuid()) @db.Uuid
-  applicationId              String                      @db.Uuid
-  submissionNumber           String                      @unique
-  sequenceNumber             Int
-  status                     ApplicationSubmissionStatus @default(SUBMITTED)
-  answersSnapshot            Json
-  configurationFingerprint   String
-  governmentServiceVersionId String                      @db.Uuid
-  formVersionId              String                      @db.Uuid
-  submittedAt                DateTime                    @default(now())
-  acknowledgedAt             DateTime?
-  acknowledgmentReference    String?                     @unique
-  contentHash                String
-  supersededAt               DateTime?
-  createdAt                  DateTime                    @default(now())
-  application                Application                 @relation(fields: [applicationId], references: [id])
-  governmentServiceVersion   GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
-  formVersion                FormVersion                 @relation(fields: [formVersionId], references: [id])
-  completenessReviews        CompletenessReview[]
-  deficiencyNotices          DeficiencyNotice[]
+  id                           String                        @id @default(uuid()) @db.Uuid
+  applicationId                String                        @db.Uuid
+  submissionNumber             String                        @unique
+  sequenceNumber               Int
+  status                       ApplicationSubmissionStatus   @default(SUBMITTED)
+  answersSnapshot              Json
+  configurationFingerprint     String
+  governmentServiceVersionId   String                        @db.Uuid
+  formVersionId                String                        @db.Uuid
+  submittedAt                  DateTime                      @default(now())
+  acknowledgedAt               DateTime?
+  acknowledgmentReference      String?                       @unique
+  contentHash                  String
+  supersededAt                 DateTime?
+  createdAt                    DateTime                      @default(now())
+  application                  Application                   @relation(fields: [applicationId], references: [id])
+  governmentServiceVersion     GovernmentServiceVersion      @relation(fields: [governmentServiceVersionId], references: [id])
+  formVersion                  FormVersion                   @relation(fields: [formVersionId], references: [id])
+  completenessReviews          CompletenessReview[]
+  deficiencyNotices            DeficiencyNotice[]
   applicantInformationRequests ApplicantInformationRequest[]
 
   @@unique([applicationId, sequenceNumber])
@@ -2005,39 +2006,39 @@ model ApplicationSubmission {
 }
 
 model Case {
-  id                                String           @id @default(uuid()) @db.Uuid
-  caseNumber                        String           @unique
-  applicationId                     String           @unique @db.Uuid
-  applicantIdentityId               String           @db.Uuid
-  governmentServiceId               String           @db.Uuid
-  governmentServiceVersionId        String           @db.Uuid
-  workflowVersionId                 String           @db.Uuid
+  id                                String                      @id @default(uuid()) @db.Uuid
+  caseNumber                        String                      @unique
+  applicationId                     String                      @unique @db.Uuid
+  applicantIdentityId               String                      @db.Uuid
+  governmentServiceId               String                      @db.Uuid
+  governmentServiceVersionId        String                      @db.Uuid
+  workflowVersionId                 String                      @db.Uuid
   configurationFingerprint          String
-  responsibleInstitutionId          String           @db.Uuid
-  responsibleDepartmentId           String           @db.Uuid
-  status                            CaseStatus       @default(RECEIVED)
-  legalStatus                       CaseLegalStatus  @default(NONE)
+  responsibleInstitutionId          String                      @db.Uuid
+  responsibleDepartmentId           String                      @db.Uuid
+  status                            CaseStatus                  @default(RECEIVED)
+  legalStatus                       CaseLegalStatus             @default(NONE)
   legalStatusLabel                  String?
-  priority                          CasePriority     @default(NORMAL)
-  version                           Int              @default(1)
-  openedAt                          DateTime         @default(now())
+  priority                          CasePriority                @default(NORMAL)
+  version                           Int                         @default(1)
+  openedAt                          DateTime                    @default(now())
   closedAt                          DateTime?
-  currentCaseManagerOfficeholderId  String?          @db.Uuid
+  currentCaseManagerOfficeholderId  String?                     @db.Uuid
   masterAdministrativeFileReference String?
   documentRegisterReference         String?
   evidencePacketReference           String?
   recordsClassificationReference    String?
   retentionLegalHoldReference       String?
-  createdAt                         DateTime         @default(now())
-  updatedAt                         DateTime         @updatedAt
-  application                       Application      @relation(fields: [applicationId], references: [id])
-  applicantIdentity                 Identity         @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
-  governmentService                 GovernmentService @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion          GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  workflowVersion                   WorkflowVersion  @relation(fields: [workflowVersionId], references: [id])
-  responsibleInstitution            Institution      @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment             Department       @relation(fields: [responsibleDepartmentId], references: [id])
-  currentCaseManagerOfficeholder    Officeholder?    @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
+  createdAt                         DateTime                    @default(now())
+  updatedAt                         DateTime                    @updatedAt
+  application                       Application                 @relation(fields: [applicationId], references: [id])
+  applicantIdentity                 Identity                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
+  governmentService                 GovernmentService           @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion          GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
+  workflowVersion                   WorkflowVersion             @relation(fields: [workflowVersionId], references: [id])
+  responsibleInstitution            Institution                 @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment             Department                  @relation(fields: [responsibleDepartmentId], references: [id])
+  currentCaseManagerOfficeholder    Officeholder?               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
   statusHistory                     CaseStatusHistory[]
   workflowInstance                  CaseWorkflowInstance?
   assignments                       CaseAssignment[]
@@ -2416,27 +2417,27 @@ model CaseIssue {
 }
 
 model CaseEvent {
-  id                 String                    @id @default(uuid()) @db.Uuid
-  caseId             String                    @db.Uuid
+  id                 String                       @id @default(uuid()) @db.Uuid
+  caseId             String                       @db.Uuid
   eventType          CaseEventType
-  payload            Json                      @default("{}")
-  metadata           Json                      @default("{}")
-  actorIdentityId    String?                   @db.Uuid
-  officeholderId     String?                   @db.Uuid
-  institutionId      String?                   @db.Uuid
-  departmentId       String?                   @db.Uuid
-  workflowInstanceId String?                   @db.Uuid
-  stepInstanceId     String?                   @db.Uuid
+  payload            Json                         @default("{}")
+  metadata           Json                         @default("{}")
+  actorIdentityId    String?                      @db.Uuid
+  officeholderId     String?                      @db.Uuid
+  institutionId      String?                      @db.Uuid
+  departmentId       String?                      @db.Uuid
+  workflowInstanceId String?                      @db.Uuid
+  stepInstanceId     String?                      @db.Uuid
   correlationId      String?
-  occurredAt         DateTime                  @default(now())
-  recordedAt         DateTime                  @default(now())
-  publicVisibility   CaseEventPublicVisibility @default(INTERNAL)
-  createdAt          DateTime                  @default(now())
-  case               Case                      @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  actorIdentity      Identity?                 @relation("CaseEventActor", fields: [actorIdentityId], references: [id])
-  officeholder       Officeholder?             @relation("CaseEventOfficeholder", fields: [officeholderId], references: [id])
-  workflowInstance   CaseWorkflowInstance?     @relation(fields: [workflowInstanceId], references: [id])
-  stepInstance       CaseWorkflowStepInstance? @relation(fields: [stepInstanceId], references: [id])
+  occurredAt         DateTime                     @default(now())
+  recordedAt         DateTime                     @default(now())
+  publicVisibility   CaseEventPublicVisibility    @default(INTERNAL)
+  createdAt          DateTime                     @default(now())
+  case               Case                         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actorIdentity      Identity?                    @relation("CaseEventActor", fields: [actorIdentityId], references: [id])
+  officeholder       Officeholder?                @relation("CaseEventOfficeholder", fields: [officeholderId], references: [id])
+  workflowInstance   CaseWorkflowInstance?        @relation(fields: [workflowInstanceId], references: [id])
+  stepInstance       CaseWorkflowStepInstance?    @relation(fields: [stepInstanceId], references: [id])
   communications     CaseCommunication[]
   projectionUpdates  CasePublicStatusProjection[] @relation("ProjectionSourceEvent")
 
@@ -2503,21 +2504,21 @@ model CaseCommunicationOutbox {
 }
 
 model CaseMilestone {
-  id                  String              @id @default(uuid()) @db.Uuid
-  caseId              String              @db.Uuid
-  milestoneType       CaseMilestoneType?
-  label               String?
-  name                String?
-  targetDate          DateTime?
-  actualDate          DateTime?
-  reachedAt           DateTime?
-  status              CaseMilestoneStatus?
-  responsiblePartyRef String?
-  sourceSlaReference  String?
-  dependencyReference String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  case                Case                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                      String                       @id @default(uuid()) @db.Uuid
+  caseId                  String                       @db.Uuid
+  milestoneType           CaseMilestoneType?
+  label                   String?
+  name                    String?
+  targetDate              DateTime?
+  actualDate              DateTime?
+  reachedAt               DateTime?
+  status                  CaseMilestoneStatus?
+  responsiblePartyRef     String?
+  sourceSlaReference      String?
+  dependencyReference     String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  case                    Case                         @relation(fields: [caseId], references: [id], onDelete: Cascade)
   publicStatusProjections CasePublicStatusProjection[] @relation("CurrentMilestone")
 
   @@index([caseId])
@@ -2526,8 +2527,8 @@ model CaseMilestone {
 }
 
 model CasePublicStatusProjection {
-  id                  String                @id @default(uuid()) @db.Uuid
-  caseId              String                @unique @db.Uuid
+  id                  String                 @id @default(uuid()) @db.Uuid
+  caseId              String                 @unique @db.Uuid
   publicStage         CasePublicStatusStage?
   publicStageLabel    String?
   publicStageDetail   String?
@@ -2535,17 +2536,17 @@ model CasePublicStatusProjection {
   publicMessage       String?
   sourceCaseStatus    CaseStatus
   sourceLegalStatus   CaseLegalStatus?
-  currentMilestoneId  String?               @db.Uuid
+  currentMilestoneId  String?                @db.Uuid
   applicantDisclaimer String?
-  projectionVersion   Int                   @default(1)
+  projectionVersion   Int                    @default(1)
   lastDerivedAt       DateTime?
   lastUpdatedAt       DateTime?
-  sourceEventId       String?               @db.Uuid
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  case                Case                  @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  currentMilestone    CaseMilestone?        @relation("CurrentMilestone", fields: [currentMilestoneId], references: [id])
-  sourceEvent         CaseEvent?            @relation("ProjectionSourceEvent", fields: [sourceEventId], references: [id])
+  sourceEventId       String?                @db.Uuid
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  case                Case                   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  currentMilestone    CaseMilestone?         @relation("CurrentMilestone", fields: [currentMilestoneId], references: [id])
+  sourceEvent         CaseEvent?             @relation("ProjectionSourceEvent", fields: [sourceEventId], references: [id])
 
   @@index([publicStage])
   @@index([sourceCaseStatus])
@@ -2737,27 +2738,27 @@ enum InspectionRecordStatus {
 }
 
 model MasterAdministrativeFile {
-  id                 String                        @id @default(uuid()) @db.Uuid
-  fileReference      String                        @unique
-  caseId             String?                       @unique @db.Uuid
-  institutionId      String                        @db.Uuid
-  departmentId       String?                       @db.Uuid
-  title              String
-  status             MasterAdministrativeFileStatus @default(OPEN)
-  classification     DocumentClassification        @default(OFFICIAL)
-  openedAt           DateTime                      @default(now())
-  closedAt           DateTime?
-  createdAt          DateTime                      @default(now())
-  updatedAt          DateTime                      @updatedAt
-  case               Case?                         @relation(fields: [caseId], references: [id])
-  institution        Institution                   @relation(fields: [institutionId], references: [id])
-  department         Department?                   @relation(fields: [departmentId], references: [id])
-  sections           MasterAdministrativeFileSection[]
-  documents          DocumentRecord[]
-  evidenceRecords    EvidenceRecord[]
-  packets            EvidencePacket[]
+  id                   String                            @id @default(uuid()) @db.Uuid
+  fileReference        String                            @unique
+  caseId               String?                           @unique @db.Uuid
+  institutionId        String                            @db.Uuid
+  departmentId         String?                           @db.Uuid
+  title                String
+  status               MasterAdministrativeFileStatus    @default(OPEN)
+  classification       DocumentClassification            @default(OFFICIAL)
+  openedAt             DateTime                          @default(now())
+  closedAt             DateTime?
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  case                 Case?                             @relation(fields: [caseId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+  department           Department?                       @relation(fields: [departmentId], references: [id])
+  sections             MasterAdministrativeFileSection[]
+  documents            DocumentRecord[]
+  evidenceRecords      EvidenceRecord[]
+  packets              EvidencePacket[]
   retentionAssignments RecordRetentionAssignment[]
-  legalHoldTargets   LegalHoldTarget[]
+  legalHoldTargets     LegalHoldTarget[]
 
   @@index([institutionId])
   @@index([departmentId])
@@ -2766,17 +2767,17 @@ model MasterAdministrativeFile {
 }
 
 model MasterAdministrativeFileSection {
-  id                       String                              @id @default(uuid()) @db.Uuid
-  masterAdministrativeFileId String                            @db.Uuid
-  sectionKey               String
-  title                    String
-  sectionType              MasterAdministrativeFileSectionType @default(OTHER)
-  displayOrder             Int
-  createdAt                DateTime                            @default(now())
-  updatedAt                DateTime                            @updatedAt
-  masterAdministrativeFile MasterAdministrativeFile            @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
-  documents                DocumentRecord[]
-  evidenceRecords          EvidenceRecord[]
+  id                         String                              @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId String                              @db.Uuid
+  sectionKey                 String
+  title                      String
+  sectionType                MasterAdministrativeFileSectionType @default(OTHER)
+  displayOrder               Int
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile            @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  documents                  DocumentRecord[]
+  evidenceRecords            EvidenceRecord[]
 
   @@unique([masterAdministrativeFileId, sectionKey])
   @@index([masterAdministrativeFileId])
@@ -2784,24 +2785,24 @@ model MasterAdministrativeFileSection {
 }
 
 model DocumentRecord {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  documentReference        String                 @unique
-  masterAdministrativeFileId String?              @db.Uuid
-  sectionId                String?                @db.Uuid
-  title                    String
-  description              String?
-  classification           DocumentClassification @default(OFFICIAL)
-  status                   DocumentRecordStatus   @default(REGISTERED)
-  registeredAt             DateTime               @default(now())
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
-  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
-  section                  MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
-  versions                 DocumentVersion[]
-  associations             DocumentAssociation[]
-  evidenceRecords          EvidenceRecord[]
-  retentionAssignments     RecordRetentionAssignment[]
-  legalHoldTargets         LegalHoldTarget[]
+  id                         String                           @id @default(uuid()) @db.Uuid
+  documentReference          String                           @unique
+  masterAdministrativeFileId String?                          @db.Uuid
+  sectionId                  String?                          @db.Uuid
+  title                      String
+  description                String?
+  classification             DocumentClassification           @default(OFFICIAL)
+  status                     DocumentRecordStatus             @default(REGISTERED)
+  registeredAt               DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile?        @relation(fields: [masterAdministrativeFileId], references: [id])
+  section                    MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
+  versions                   DocumentVersion[]
+  associations               DocumentAssociation[]
+  evidenceRecords            EvidenceRecord[]
+  retentionAssignments       RecordRetentionAssignment[]
+  legalHoldTargets           LegalHoldTarget[]
 
   @@index([masterAdministrativeFileId])
   @@index([sectionId])
@@ -2810,19 +2811,19 @@ model DocumentRecord {
 }
 
 model DocumentVersion {
-  id               String         @id @default(uuid()) @db.Uuid
-  documentRecordId String         @db.Uuid
-  versionNumber    Int
-  contentHash      String
-  storageReference String
-  mimeType         String?
-  byteSize         Int?
-  registeredByIdentityId String?  @db.Uuid
-  registeredAt     DateTime       @default(now())
-  supersededAt     DateTime?
-  createdAt        DateTime       @default(now())
-  documentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
-  associations     DocumentAssociation[]
+  id                     String                @id @default(uuid()) @db.Uuid
+  documentRecordId       String                @db.Uuid
+  versionNumber          Int
+  contentHash            String
+  storageReference       String
+  mimeType               String?
+  byteSize               Int?
+  registeredByIdentityId String?               @db.Uuid
+  registeredAt           DateTime              @default(now())
+  supersededAt           DateTime?
+  createdAt              DateTime              @default(now())
+  documentRecord         DocumentRecord        @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  associations           DocumentAssociation[]
 
   @@unique([documentRecordId, versionNumber])
   @@index([documentRecordId])
@@ -2832,7 +2833,7 @@ model DocumentVersion {
 model DocumentAssociation {
   id                String                  @id @default(uuid()) @db.Uuid
   documentRecordId  String                  @db.Uuid
-  documentVersionId String?               @db.Uuid
+  documentVersionId String?                 @db.Uuid
   associationType   DocumentAssociationType
   targetReference   String
   notes             String?
@@ -2847,30 +2848,30 @@ model DocumentAssociation {
 }
 
 model EvidenceRecord {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  evidenceReference        String                 @unique
-  masterAdministrativeFileId String?              @db.Uuid
-  sectionId                String?                @db.Uuid
-  documentRecordId         String?                @db.Uuid
-  title                    String
-  description              String?
-  status                   EvidenceStatus         @default(RECEIVED)
-  classification           DocumentClassification @default(OFFICIAL)
-  receivedAt               DateTime               @default(now())
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
-  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
-  section                  MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
-  documentRecord           DocumentRecord?        @relation(fields: [documentRecordId], references: [id])
-  verifications            EvidenceVerification[]
-  requirementLinks         EvidenceRequirementLink[]
-  purposeAcceptances       EvidencePurposeAcceptance[]
-  qualityAssessments       EvidenceQualityAssessment[]
-  custodyEvents            EvidenceCustodyEvent[]
-  packetItems              EvidencePacketItem[]
-  inspectionItems          InspectionEvidenceItem[]
-  retentionAssignments     RecordRetentionAssignment[]
-  legalHoldTargets         LegalHoldTarget[]
+  id                         String                           @id @default(uuid()) @db.Uuid
+  evidenceReference          String                           @unique
+  masterAdministrativeFileId String?                          @db.Uuid
+  sectionId                  String?                          @db.Uuid
+  documentRecordId           String?                          @db.Uuid
+  title                      String
+  description                String?
+  status                     EvidenceStatus                   @default(RECEIVED)
+  classification             DocumentClassification           @default(OFFICIAL)
+  receivedAt                 DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile?        @relation(fields: [masterAdministrativeFileId], references: [id])
+  section                    MasterAdministrativeFileSection? @relation(fields: [sectionId], references: [id])
+  documentRecord             DocumentRecord?                  @relation(fields: [documentRecordId], references: [id])
+  verifications              EvidenceVerification[]
+  requirementLinks           EvidenceRequirementLink[]
+  purposeAcceptances         EvidencePurposeAcceptance[]
+  qualityAssessments         EvidenceQualityAssessment[]
+  custodyEvents              EvidenceCustodyEvent[]
+  packetItems                EvidencePacketItem[]
+  inspectionItems            InspectionEvidenceItem[]
+  retentionAssignments       RecordRetentionAssignment[]
+  legalHoldTargets           LegalHoldTarget[]
 
   @@index([masterAdministrativeFileId])
   @@index([sectionId])
@@ -2880,17 +2881,17 @@ model EvidenceRecord {
 }
 
 model EvidenceVerification {
-  id               String                     @id @default(uuid()) @db.Uuid
-  evidenceRecordId String                     @db.Uuid
-  status           EvidenceVerificationStatus @default(PENDING)
-  verifierIdentityId String?                  @db.Uuid
-  verifierOfficeholderId String?              @db.Uuid
-  methodReference  String?
-  findings         String?
-  verifiedAt       DateTime?
-  createdAt        DateTime                   @default(now())
-  updatedAt        DateTime                   @updatedAt
-  evidenceRecord   EvidenceRecord             @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+  id                     String                     @id @default(uuid()) @db.Uuid
+  evidenceRecordId       String                     @db.Uuid
+  status                 EvidenceVerificationStatus @default(PENDING)
+  verifierIdentityId     String?                    @db.Uuid
+  verifierOfficeholderId String?                    @db.Uuid
+  methodReference        String?
+  findings               String?
+  verifiedAt             DateTime?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  evidenceRecord         EvidenceRecord             @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
 
   @@index([evidenceRecordId])
   @@index([status])
@@ -2898,15 +2899,15 @@ model EvidenceVerification {
 }
 
 model EvidenceRequirementLink {
-  id                 String   @id @default(uuid()) @db.Uuid
-  evidenceRecordId   String   @db.Uuid
-  requirementCode    String
-  requirementLabel   String?
-  serviceVersionRef  String?
-  satisfied          Boolean  @default(false)
-  linkedAt           DateTime @default(now())
-  createdAt          DateTime @default(now())
-  evidenceRecord     EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+  id                String         @id @default(uuid()) @db.Uuid
+  evidenceRecordId  String         @db.Uuid
+  requirementCode   String
+  requirementLabel  String?
+  serviceVersionRef String?
+  satisfied         Boolean        @default(false)
+  linkedAt          DateTime       @default(now())
+  createdAt         DateTime       @default(now())
+  evidenceRecord    EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
 
   @@index([evidenceRecordId])
   @@index([requirementCode])
@@ -2914,16 +2915,16 @@ model EvidenceRequirementLink {
 }
 
 model EvidencePurposeAcceptance {
-  id               String              @id @default(uuid()) @db.Uuid
-  evidenceRecordId String              @db.Uuid
-  purposeType      EvidencePurposeType
-  acceptedByIdentityId String?         @db.Uuid
-  acceptedByOfficeholderId String?     @db.Uuid
-  acceptedAt       DateTime?
-  notes            String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  evidenceRecord   EvidenceRecord      @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+  id                       String              @id @default(uuid()) @db.Uuid
+  evidenceRecordId         String              @db.Uuid
+  purposeType              EvidencePurposeType
+  acceptedByIdentityId     String?             @db.Uuid
+  acceptedByOfficeholderId String?             @db.Uuid
+  acceptedAt               DateTime?
+  notes                    String?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  evidenceRecord           EvidenceRecord      @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
 
   @@index([evidenceRecordId])
   @@index([purposeType])
@@ -2931,31 +2932,31 @@ model EvidencePurposeAcceptance {
 }
 
 model EvidenceQualityAssessment {
-  id               String   @id @default(uuid()) @db.Uuid
-  evidenceRecordId String   @db.Uuid
-  assessorIdentityId String? @db.Uuid
-  qualityScore     Int?
-  assessmentNotes  String?
-  assessedAt       DateTime @default(now())
-  createdAt        DateTime @default(now())
-  evidenceRecord   EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+  id                 String         @id @default(uuid()) @db.Uuid
+  evidenceRecordId   String         @db.Uuid
+  assessorIdentityId String?        @db.Uuid
+  qualityScore       Int?
+  assessmentNotes    String?
+  assessedAt         DateTime       @default(now())
+  createdAt          DateTime       @default(now())
+  evidenceRecord     EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
 
   @@index([evidenceRecordId])
   @@map("evidence_quality_assessments")
 }
 
 model DepartmentalReviewRecord {
-  id                       String             @id @default(uuid()) @db.Uuid
-  reviewReference          String             @unique
-  masterAdministrativeFileId String?          @db.Uuid
-  departmentId             String             @db.Uuid
-  reviewerOfficeholderId   String?            @db.Uuid
-  status                   ReviewRecordStatus @default(DRAFT)
-  findings                 String?
-  completedAt              DateTime?
-  createdAt                DateTime           @default(now())
-  updatedAt                DateTime           @updatedAt
-  department               Department         @relation(fields: [departmentId], references: [id])
+  id                         String             @id @default(uuid()) @db.Uuid
+  reviewReference            String             @unique
+  masterAdministrativeFileId String?            @db.Uuid
+  departmentId               String             @db.Uuid
+  reviewerOfficeholderId     String?            @db.Uuid
+  status                     ReviewRecordStatus @default(DRAFT)
+  findings                   String?
+  completedAt                DateTime?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  department                 Department         @relation(fields: [departmentId], references: [id])
 
   @@index([departmentId])
   @@index([status])
@@ -2963,35 +2964,35 @@ model DepartmentalReviewRecord {
 }
 
 model GovernmentCommunicationRecord {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  communicationReference   String                 @unique
-  masterAdministrativeFileId String?              @db.Uuid
-  caseCommunicationId      String?                @db.Uuid
-  channel                  CaseCommunicationChannel
-  subject                  String?
-  body                     String
-  classification           DocumentClassification @default(OFFICIAL)
-  sentAt                   DateTime?
-  receivedAt               DateTime?
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
+  id                         String                   @id @default(uuid()) @db.Uuid
+  communicationReference     String                   @unique
+  masterAdministrativeFileId String?                  @db.Uuid
+  caseCommunicationId        String?                  @db.Uuid
+  channel                    CaseCommunicationChannel
+  subject                    String?
+  body                       String
+  classification             DocumentClassification   @default(OFFICIAL)
+  sentAt                     DateTime?
+  receivedAt                 DateTime?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
 
   @@index([masterAdministrativeFileId])
   @@map("government_communication_records")
 }
 
 model ProfessionalReviewRecord {
-  id                       String             @id @default(uuid()) @db.Uuid
-  reviewReference          String             @unique
-  masterAdministrativeFileId String?          @db.Uuid
-  externalAuthorityId      String?            @db.Uuid
-  reviewerReference        String?
-  status                   ReviewRecordStatus @default(DRAFT)
-  findings                 String?
-  completedAt              DateTime?
-  createdAt                DateTime           @default(now())
-  updatedAt                DateTime           @updatedAt
-  externalAuthority        ExternalAuthority? @relation(fields: [externalAuthorityId], references: [id])
+  id                         String             @id @default(uuid()) @db.Uuid
+  reviewReference            String             @unique
+  masterAdministrativeFileId String?            @db.Uuid
+  externalAuthorityId        String?            @db.Uuid
+  reviewerReference          String?
+  status                     ReviewRecordStatus @default(DRAFT)
+  findings                   String?
+  completedAt                DateTime?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  externalAuthority          ExternalAuthority? @relation(fields: [externalAuthorityId], references: [id])
 
   @@index([externalAuthorityId])
   @@index([status])
@@ -2999,17 +3000,17 @@ model ProfessionalReviewRecord {
 }
 
 model InspectionRecord {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  inspectionReference      String                 @unique
-  masterAdministrativeFileId String?              @db.Uuid
-  inspectorOfficeholderId  String?                @db.Uuid
-  status                   InspectionRecordStatus @default(SCHEDULED)
-  scheduledAt              DateTime?
-  completedAt              DateTime?
-  findings                 String?
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
-  evidenceItems            InspectionEvidenceItem[]
+  id                         String                   @id @default(uuid()) @db.Uuid
+  inspectionReference        String                   @unique
+  masterAdministrativeFileId String?                  @db.Uuid
+  inspectorOfficeholderId    String?                  @db.Uuid
+  status                     InspectionRecordStatus   @default(SCHEDULED)
+  scheduledAt                DateTime?
+  completedAt                DateTime?
+  findings                   String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  evidenceItems              InspectionEvidenceItem[]
 
   @@index([status])
   @@map("inspection_records")
@@ -3031,17 +3032,17 @@ model InspectionEvidenceItem {
 }
 
 model EvidenceCustodyEvent {
-  id               String                   @id @default(uuid()) @db.Uuid
-  evidenceRecordId String                   @db.Uuid
-  eventType        EvidenceCustodyEventType
-  actorIdentityId  String?                  @db.Uuid
-  actorOfficeholderId String?               @db.Uuid
-  fromLocationRef  String?
-  toLocationRef    String?
-  notes            String?
-  occurredAt       DateTime                 @default(now())
-  createdAt        DateTime                 @default(now())
-  evidenceRecord   EvidenceRecord           @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
+  id                  String                   @id @default(uuid()) @db.Uuid
+  evidenceRecordId    String                   @db.Uuid
+  eventType           EvidenceCustodyEventType
+  actorIdentityId     String?                  @db.Uuid
+  actorOfficeholderId String?                  @db.Uuid
+  fromLocationRef     String?
+  toLocationRef       String?
+  notes               String?
+  occurredAt          DateTime                 @default(now())
+  createdAt           DateTime                 @default(now())
+  evidenceRecord      EvidenceRecord           @relation(fields: [evidenceRecordId], references: [id], onDelete: Cascade)
 
   @@index([evidenceRecordId])
   @@index([occurredAt])
@@ -3049,17 +3050,17 @@ model EvidenceCustodyEvent {
 }
 
 model EvidencePacket {
-  id                       String               @id @default(uuid()) @db.Uuid
-  packetReference          String               @unique
-  masterAdministrativeFileId String?            @db.Uuid
-  title                    String
-  status                   EvidencePacketStatus @default(DRAFT)
-  sealedAt                 DateTime?
-  createdAt                DateTime             @default(now())
-  updatedAt                DateTime             @updatedAt
-  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
-  versions                 EvidencePacketVersion[]
-  legalHoldTargets         LegalHoldTarget[]
+  id                         String                    @id @default(uuid()) @db.Uuid
+  packetReference            String                    @unique
+  masterAdministrativeFileId String?                   @db.Uuid
+  title                      String
+  status                     EvidencePacketStatus      @default(DRAFT)
+  sealedAt                   DateTime?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  versions                   EvidencePacketVersion[]
+  legalHoldTargets           LegalHoldTarget[]
 
   @@index([masterAdministrativeFileId])
   @@index([status])
@@ -3067,12 +3068,12 @@ model EvidencePacket {
 }
 
 model EvidencePacketVersion {
-  id               String         @id @default(uuid()) @db.Uuid
-  evidencePacketId String         @db.Uuid
+  id               String                  @id @default(uuid()) @db.Uuid
+  evidencePacketId String                  @db.Uuid
   versionNumber    Int
   manifestHash     String
-  createdAt        DateTime       @default(now())
-  evidencePacket   EvidencePacket @relation(fields: [evidencePacketId], references: [id], onDelete: Cascade)
+  createdAt        DateTime                @default(now())
+  evidencePacket   EvidencePacket          @relation(fields: [evidencePacketId], references: [id], onDelete: Cascade)
   items            EvidencePacketItem[]
   manifest         EvidencePacketManifest?
 
@@ -3110,18 +3111,18 @@ model EvidencePacketManifest {
 }
 
 model RecordCorrection {
-  id                 String                 @id @default(uuid()) @db.Uuid
-  correctionReference String                @unique
-  targetRecordType   String
-  targetRecordId     String                 @db.Uuid
-  status             RecordCorrectionStatus @default(DRAFT)
-  reason             String
-  correctionPayload  Json                   @default("{}")
-  requestedByIdentityId String?             @db.Uuid
-  approvedByIdentityId String?               @db.Uuid
-  appliedAt          DateTime?
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @updatedAt
+  id                    String                 @id @default(uuid()) @db.Uuid
+  correctionReference   String                 @unique
+  targetRecordType      String
+  targetRecordId        String                 @db.Uuid
+  status                RecordCorrectionStatus @default(DRAFT)
+  reason                String
+  correctionPayload     Json                   @default("{}")
+  requestedByIdentityId String?                @db.Uuid
+  approvedByIdentityId  String?                @db.Uuid
+  appliedAt             DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 
   @@index([targetRecordType, targetRecordId])
   @@index([status])
@@ -3144,16 +3145,16 @@ model RecordIntegrityEvent {
 }
 
 model RecordAccessEvent {
-  id               String                @id @default(uuid()) @db.Uuid
-  targetRecordType String
-  targetRecordId   String                @db.Uuid
-  eventType        RecordAccessEventType
-  actorIdentityId  String?               @db.Uuid
-  actorOfficeholderId String?             @db.Uuid
-  accessGranted    Boolean               @default(true)
-  reason           String?
-  occurredAt       DateTime              @default(now())
-  createdAt        DateTime              @default(now())
+  id                  String                @id @default(uuid()) @db.Uuid
+  targetRecordType    String
+  targetRecordId      String                @db.Uuid
+  eventType           RecordAccessEventType
+  actorIdentityId     String?               @db.Uuid
+  actorOfficeholderId String?               @db.Uuid
+  accessGranted       Boolean               @default(true)
+  reason              String?
+  occurredAt          DateTime              @default(now())
+  createdAt           DateTime              @default(now())
 
   @@index([targetRecordType, targetRecordId])
   @@index([actorIdentityId])
@@ -3162,33 +3163,33 @@ model RecordAccessEvent {
 }
 
 model RetentionSchedule {
-  id                String          @id @default(uuid()) @db.Uuid
-  scheduleCode      String          @unique
-  name              String
-  description       String?
-  institutionId     String?         @db.Uuid
-  effectiveFrom     DateTime?
-  effectiveUntil    DateTime?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  institution       Institution?    @relation(fields: [institutionId], references: [id])
-  rules             RetentionRule[]
+  id             String          @id @default(uuid()) @db.Uuid
+  scheduleCode   String          @unique
+  name           String
+  description    String?
+  institutionId  String?         @db.Uuid
+  effectiveFrom  DateTime?
+  effectiveUntil DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  institution    Institution?    @relation(fields: [institutionId], references: [id])
+  rules          RetentionRule[]
 
   @@index([institutionId])
   @@map("retention_schedules")
 }
 
 model RetentionRule {
-  id                  String                     @id @default(uuid()) @db.Uuid
-  retentionScheduleId String                     @db.Uuid
+  id                  String                      @id @default(uuid()) @db.Uuid
+  retentionScheduleId String                      @db.Uuid
   ruleCode            String
   recordCategory      String
   retentionPeriodDays Int?
-  dispositionAction   RetentionDispositionAction @default(RETAIN)
+  dispositionAction   RetentionDispositionAction  @default(RETAIN)
   legalBasis          String?
-  createdAt           DateTime                   @default(now())
-  updatedAt           DateTime                   @updatedAt
-  retentionSchedule   RetentionSchedule          @relation(fields: [retentionScheduleId], references: [id], onDelete: Cascade)
+  createdAt           DateTime                    @default(now())
+  updatedAt           DateTime                    @updatedAt
+  retentionSchedule   RetentionSchedule           @relation(fields: [retentionScheduleId], references: [id], onDelete: Cascade)
   assignments         RecordRetentionAssignment[]
 
   @@unique([retentionScheduleId, ruleCode])
@@ -3197,21 +3198,21 @@ model RetentionRule {
 }
 
 model RecordRetentionAssignment {
-  id                       String              @id @default(uuid()) @db.Uuid
-  retentionRuleId          String              @db.Uuid
-  masterAdministrativeFileId String?           @db.Uuid
-  documentRecordId         String?             @db.Uuid
-  evidenceRecordId         String?             @db.Uuid
-  assignedAt               DateTime            @default(now())
-  reviewDueAt              DateTime?
-  dispositionDueAt         DateTime?
-  createdAt                DateTime            @default(now())
-  updatedAt                DateTime            @updatedAt
-  retentionRule            RetentionRule       @relation(fields: [retentionRuleId], references: [id])
-  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
-  documentRecord           DocumentRecord?     @relation(fields: [documentRecordId], references: [id])
-  evidenceRecord           EvidenceRecord?     @relation(fields: [evidenceRecordId], references: [id])
-  dispositionRequests      RecordDispositionRequest[]
+  id                         String                     @id @default(uuid()) @db.Uuid
+  retentionRuleId            String                     @db.Uuid
+  masterAdministrativeFileId String?                    @db.Uuid
+  documentRecordId           String?                    @db.Uuid
+  evidenceRecordId           String?                    @db.Uuid
+  assignedAt                 DateTime                   @default(now())
+  reviewDueAt                DateTime?
+  dispositionDueAt           DateTime?
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  retentionRule              RetentionRule              @relation(fields: [retentionRuleId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?  @relation(fields: [masterAdministrativeFileId], references: [id])
+  documentRecord             DocumentRecord?            @relation(fields: [documentRecordId], references: [id])
+  evidenceRecord             EvidenceRecord?            @relation(fields: [evidenceRecordId], references: [id])
+  dispositionRequests        RecordDispositionRequest[]
 
   @@index([retentionRuleId])
   @@index([masterAdministrativeFileId])
@@ -3221,17 +3222,17 @@ model RecordRetentionAssignment {
 }
 
 model LegalHold {
-  id                String          @id @default(uuid()) @db.Uuid
-  holdReference     String          @unique
-  title             String
-  status            LegalHoldStatus @default(DRAFT)
-  reason            String
-  issuedByIdentityId String?        @db.Uuid
-  effectiveFrom     DateTime?
-  releasedAt        DateTime?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  targets           LegalHoldTarget[]
+  id                      String                   @id @default(uuid()) @db.Uuid
+  holdReference           String                   @unique
+  title                   String
+  status                  LegalHoldStatus          @default(DRAFT)
+  reason                  String
+  issuedByIdentityId      String?                  @db.Uuid
+  effectiveFrom           DateTime?
+  releasedAt              DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  targets                 LegalHoldTarget[]
   preservationCollections PreservationCollection[]
 
   @@index([status])
@@ -3239,20 +3240,20 @@ model LegalHold {
 }
 
 model LegalHoldTarget {
-  id                       String            @id @default(uuid()) @db.Uuid
-  legalHoldId              String            @db.Uuid
-  targetType               LegalHoldTargetType
-  masterAdministrativeFileId String?       @db.Uuid
-  documentRecordId         String?           @db.Uuid
-  evidenceRecordId         String?           @db.Uuid
-  evidencePacketId         String?           @db.Uuid
-  targetReference          String?
-  createdAt                DateTime          @default(now())
-  legalHold                LegalHold         @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
-  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
-  documentRecord           DocumentRecord?   @relation(fields: [documentRecordId], references: [id])
-  evidenceRecord           EvidenceRecord?   @relation(fields: [evidenceRecordId], references: [id])
-  evidencePacket           EvidencePacket?   @relation(fields: [evidencePacketId], references: [id])
+  id                         String                    @id @default(uuid()) @db.Uuid
+  legalHoldId                String                    @db.Uuid
+  targetType                 LegalHoldTargetType
+  masterAdministrativeFileId String?                   @db.Uuid
+  documentRecordId           String?                   @db.Uuid
+  evidenceRecordId           String?                   @db.Uuid
+  evidencePacketId           String?                   @db.Uuid
+  targetReference            String?
+  createdAt                  DateTime                  @default(now())
+  legalHold                  LegalHold                 @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  documentRecord             DocumentRecord?           @relation(fields: [documentRecordId], references: [id])
+  evidenceRecord             EvidenceRecord?           @relation(fields: [evidenceRecordId], references: [id])
+  evidencePacket             EvidencePacket?           @relation(fields: [evidencePacketId], references: [id])
 
   @@index([legalHoldId])
   @@index([targetType])
@@ -3260,15 +3261,15 @@ model LegalHoldTarget {
 }
 
 model PreservationCollection {
-  id            String                       @id @default(uuid()) @db.Uuid
-  legalHoldId   String                       @db.Uuid
-  collectionReference String                 @unique
-  status        PreservationCollectionStatus @default(ACTIVE)
-  description   String?
-  createdAt     DateTime                     @default(now())
-  updatedAt     DateTime                     @updatedAt
-  legalHold     LegalHold                    @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
-  archivalTransfers ArchivalTransfer[]
+  id                  String                       @id @default(uuid()) @db.Uuid
+  legalHoldId         String                       @db.Uuid
+  collectionReference String                       @unique
+  status              PreservationCollectionStatus @default(ACTIVE)
+  description         String?
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
+  legalHold           LegalHold                    @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
+  archivalTransfers   ArchivalTransfer[]
 
   @@index([legalHoldId])
   @@index([status])
@@ -3276,16 +3277,16 @@ model PreservationCollection {
 }
 
 model ArchivalTransfer {
-  id                       String                 @id @default(uuid()) @db.Uuid
-  transferReference        String                 @unique
-  preservationCollectionId String?                @db.Uuid
-  status                   ArchivalTransferStatus @default(PENDING)
+  id                       String                  @id @default(uuid()) @db.Uuid
+  transferReference        String                  @unique
+  preservationCollectionId String?                 @db.Uuid
+  status                   ArchivalTransferStatus  @default(PENDING)
   sourceLocationRef        String?
   destinationLocationRef   String?
   transferredAt            DateTime?
   receivedAt               DateTime?
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @updatedAt
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
   preservationCollection   PreservationCollection? @relation(fields: [preservationCollectionId], references: [id])
 
   @@index([preservationCollectionId])
@@ -3294,20 +3295,20 @@ model ArchivalTransfer {
 }
 
 model RecordDispositionRequest {
-  id                        String                  @id @default(uuid()) @db.Uuid
-  requestReference          String                  @unique
-  recordRetentionAssignmentId String                @db.Uuid
-  status                    RecordDispositionStatus @default(DRAFT)
-  requestedAction           RetentionDispositionAction
-  reason                    String
-  requestedByIdentityId     String?                 @db.Uuid
-  approvedByIdentityId      String?                 @db.Uuid
-  requestedAt               DateTime                @default(now())
-  approvedAt                DateTime?
-  createdAt                 DateTime                @default(now())
-  updatedAt                 DateTime                @updatedAt
-  recordRetentionAssignment RecordRetentionAssignment @relation(fields: [recordRetentionAssignmentId], references: [id])
-  dispositionRecord         RecordDispositionRecord?
+  id                          String                     @id @default(uuid()) @db.Uuid
+  requestReference            String                     @unique
+  recordRetentionAssignmentId String                     @db.Uuid
+  status                      RecordDispositionStatus    @default(DRAFT)
+  requestedAction             RetentionDispositionAction
+  reason                      String
+  requestedByIdentityId       String?                    @db.Uuid
+  approvedByIdentityId        String?                    @db.Uuid
+  requestedAt                 DateTime                   @default(now())
+  approvedAt                  DateTime?
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  recordRetentionAssignment   RecordRetentionAssignment  @relation(fields: [recordRetentionAssignmentId], references: [id])
+  dispositionRecord           RecordDispositionRecord?
 
   @@index([recordRetentionAssignmentId])
   @@index([status])
@@ -3315,15 +3316,15 @@ model RecordDispositionRequest {
 }
 
 model RecordDispositionRecord {
-  id                       String                  @id @default(uuid()) @db.Uuid
-  recordDispositionRequestId String                @unique @db.Uuid
-  dispositionReference     String                  @unique
-  status                   RecordDispositionStatus @default(EXECUTED)
-  executedAt               DateTime                @default(now())
-  executedByIdentityId     String?                 @db.Uuid
-  executionNotes           String?
-  createdAt                DateTime                @default(now())
-  recordDispositionRequest RecordDispositionRequest @relation(fields: [recordDispositionRequestId], references: [id], onDelete: Cascade)
+  id                         String                   @id @default(uuid()) @db.Uuid
+  recordDispositionRequestId String                   @unique @db.Uuid
+  dispositionReference       String                   @unique
+  status                     RecordDispositionStatus  @default(EXECUTED)
+  executedAt                 DateTime                 @default(now())
+  executedByIdentityId       String?                  @db.Uuid
+  executionNotes             String?
+  createdAt                  DateTime                 @default(now())
+  recordDispositionRequest   RecordDispositionRequest @relation(fields: [recordDispositionRequestId], references: [id], onDelete: Cascade)
 
   @@map("record_disposition_records")
 }

@@ -4,7 +4,6 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
-import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -12,14 +11,13 @@ import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
+import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
-import { WorkflowsModule } from './workflows/workflows.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -40,7 +38,6 @@ import { WorkflowsModule } from './workflows/workflows.module';
     IdentityModule,
     AuthorityModule,
     ServiceCatalogModule,
-    WorkflowsModule,
     ApplicationProcessingModule,
     EvidenceRecordsModule,
   ],

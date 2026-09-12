@@ -21,7 +21,9 @@ export class RetentionController {
     @Body() body: RequestDispositionDto,
   ) {
     return this.dispositionService.requestDisposition({
-      ...body,
+      recordRetentionAssignmentId: body.recordRetentionAssignmentId,
+      requestedAction: body.requestedAction,
+      reason: body.reason,
       requestedByIdentityId: session.identityId,
     });
   }
@@ -35,7 +37,12 @@ export class RetentionController {
     return this.dispositionService.execute({
       dispositionRequestId: id,
       executedByIdentityId: session.identityId,
-      ...body,
+      functionAuthorityRecordId: body.functionAuthorityRecordId,
+      officeholderId: body.officeholderId,
+      officeId: body.officeId,
+      appointmentId: body.appointmentId,
+      delegationId: body.delegationId,
+      executionNotes: body.executionNotes,
     });
   }
 }

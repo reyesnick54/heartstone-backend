@@ -3,10 +3,7 @@ import { DocumentRecordStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { EvidenceRecordsBoundaryService } from '../common/evidence-records-boundary.service';
-import {
-  generateEvidenceReferenceNumber,
-  hashContent,
-} from '../common/reference-number.util';
+import { generateEvidenceReferenceNumber, hashContent } from '../common/reference-number.util';
 import { DOCUMENT_REFERENCE_PREFIX } from '../evidence-records.constants';
 import { MasterFilesService } from '../master-files/master-files.service';
 

@@ -3,17 +3,13 @@ import { WorkflowVersionStatus } from '@prisma/client';
 export const NON_PRODUCTION_WORKFLOW_FIXTURE_MARKER = 'NON_PRODUCTION_WORKFLOW_TEST_ONLY';
 
 export const IMMUTABLE_WORKFLOW_VERSION_STATUSES: readonly WorkflowVersionStatus[] = [
-  WorkflowVersionStatus.ACTIVE,
-  WorkflowVersionStatus.PAUSED,
-  WorkflowVersionStatus.RESTRICTED,
+  WorkflowVersionStatus.APPROVED,
   WorkflowVersionStatus.SUSPENDED,
   WorkflowVersionStatus.SUPERSEDED,
-  WorkflowVersionStatus.RETIRED,
 ];
 
 export const WORKFLOW_INSTANCE_STARTABLE_STATUSES: readonly WorkflowVersionStatus[] = [
-  WorkflowVersionStatus.ACCEPTED,
-  WorkflowVersionStatus.ACTIVE,
+  WorkflowVersionStatus.APPROVED,
 ];
 
 export const UNSAFE_CONDITION_KEYS = [

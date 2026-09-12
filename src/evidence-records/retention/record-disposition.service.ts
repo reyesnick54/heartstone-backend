@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AuthorityActionType,
-  RecordDispositionStatus,
   type RecordDispositionRequest,
+  RecordDispositionStatus,
 } from '@prisma/client';
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
@@ -78,7 +78,9 @@ export class RecordDispositionService {
     });
 
     if (!request) {
-      throw new NotFoundException(`Disposition request "${input.dispositionRequestId}" was not found`);
+      throw new NotFoundException(
+        `Disposition request "${input.dispositionRequestId}" was not found`,
+      );
     }
 
     const targetId =
@@ -99,7 +101,9 @@ export class RecordDispositionService {
       delegationId: input.delegationId,
     });
 
-    const dispositionReference = generateEvidenceReferenceNumber(`${CORRECTION_REFERENCE_PREFIX}-EXE`);
+    const dispositionReference = generateEvidenceReferenceNumber(
+      `${CORRECTION_REFERENCE_PREFIX}-EXE`,
+    );
 
     return this.prisma.$transaction(async (tx) => {
       await tx.recordDispositionRecord.create({

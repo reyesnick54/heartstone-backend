@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LegalHoldStatus, LegalHoldTargetType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';

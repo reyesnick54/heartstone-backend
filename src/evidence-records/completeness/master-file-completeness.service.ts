@@ -42,7 +42,9 @@ export class MasterFileCompletenessService {
     ).length;
 
     if (disputedEvidenceCount > 0) {
-      explanationCodes.push(EVIDENCE_RECORDS_EXPLANATION_CODES.DISPUTED_EVIDENCE_CANNOT_BE_ACCEPTED);
+      explanationCodes.push(
+        EVIDENCE_RECORDS_EXPLANATION_CODES.DISPUTED_EVIDENCE_CANNOT_BE_ACCEPTED,
+      );
       return {
         masterAdministrativeFileId: input.masterAdministrativeFileId,
         outcome: 'INCOMPLETE',

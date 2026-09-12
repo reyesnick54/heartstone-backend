@@ -1,8 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  EvidenceCustodyEventType,
-  InspectionRecordStatus,
-} from '@prisma/client';
+import { EvidenceCustodyEventType, InspectionRecordStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { EvidenceRecordsBoundaryService } from '../common/evidence-records-boundary.service';

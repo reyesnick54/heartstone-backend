@@ -1,7 +1,4 @@
-import {
-  type CompletenessReviewItemStatus,
-  type CompletenessReviewStatus,
-} from '@prisma/client';
+import { type CompletenessReviewItemStatus, type CompletenessReviewStatus } from '@prisma/client';
 
 export interface CompletenessReviewerContext {
   identityId: string;

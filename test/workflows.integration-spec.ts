@@ -1,9 +1,5 @@
 import { type INestApplication } from '@nestjs/common';
-import {
-  WorkflowStageType,
-  WorkflowStepType,
-  WorkflowVersionStatus,
-} from '@prisma/client';
+import { WorkflowStageType, WorkflowStepType, WorkflowVersionStatus } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 

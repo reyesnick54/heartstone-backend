@@ -80,9 +80,7 @@ export class EvidenceRecordsBoundaryService {
       DocumentClassification.PRIVILEGED,
       DocumentClassification.LEGALLY_PRIVILEGED,
     ];
-    if (
-      privileged.includes(payload.classification as (typeof privileged)[number])
-    ) {
+    if (privileged.includes(payload.classification as (typeof privileged)[number])) {
       throw new ForbiddenException({
         message: 'Client cannot set privileged classification',
         code: EVIDENCE_RECORDS_EXPLANATION_CODES.CLIENT_CANNOT_SET_CLASSIFICATION,
@@ -174,7 +172,7 @@ export class EvidenceRecordsBoundaryService {
 
   async assertOfficialIdentity(identityId: string): Promise<void> {
     const identity = await this.prisma.identity.findUnique({ where: { id: identityId } });
-    if (!identity || identity.type !== IdentityType.INDIVIDUAL) {
+    if (identity?.type !== IdentityType.INDIVIDUAL) {
       throw new ForbiddenException({
         message: 'Official human identity required',
         code: EVIDENCE_RECORDS_EXPLANATION_CODES.APPLICANT_CANNOT_VERIFY,

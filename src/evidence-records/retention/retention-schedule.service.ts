@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  type RecordRetentionAssignment,
-  type RetentionSchedule,
-} from '@prisma/client';
+import { type RecordRetentionAssignment, type RetentionSchedule } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 

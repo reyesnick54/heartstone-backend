@@ -36,7 +36,9 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     await app.close();
   });
 
-  async function openCaseWithReview(fixture: Awaited<ReturnType<typeof seedApplicationsCompletenessFixture>>) {
+  async function openCaseWithReview(
+    fixture: Awaited<ReturnType<typeof seedApplicationsCompletenessFixture>>,
+  ) {
     const { caseRecord, submission } = await caseService.openCaseWithInitialSubmission({
       governmentServiceId: fixture.governmentServiceId,
       governmentServiceVersionId: fixture.governmentServiceVersionId,
@@ -77,16 +79,20 @@ describe('Phase 6E completeness review loop (e2e)', () => {
       include: { items: true },
     });
 
-    const identityItem = updated.items.find((item) => item.checklistItemCode === 'IDENTITY_DOCUMENT');
-    const businessPlanItem = updated.items.find((item) => item.checklistItemCode === 'BUSINESS_PLAN');
+    const identityItem = updated.items.find(
+      (item) => item.checklistItemCode === 'IDENTITY_DOCUMENT',
+    );
+    const businessPlanItem = updated.items.find(
+      (item) => item.checklistItemCode === 'BUSINESS_PLAN',
+    );
     const feeItem = updated.items.find((item) => item.checklistItemCode === 'FEE_RECEIPT');
 
     expect(identityItem?.status).toBe(CompletenessReviewItemStatus.PRESENT);
     expect(businessPlanItem?.status).toBe(CompletenessReviewItemStatus.MISSING);
     expect(feeItem?.status).toBe(CompletenessReviewItemStatus.CORRUPTED);
-    expect(updated.items.every((item) => item.status !== ('VERIFIED' as CompletenessReviewItemStatus))).toBe(
-      true,
-    );
+    expect(
+      updated.items.every((item) => item.status !== ('VERIFIED' as CompletenessReviewItemStatus)),
+    ).toBe(true);
   });
 
   it('rejects undisclosed checklist requirements during assessment', async () => {
@@ -95,7 +101,10 @@ describe('Phase 6E completeness review loop (e2e)', () => {
 
     await expect(
       completenessReviewService.assessItems(review.id, [
-        { checklistItemCode: 'UNDISCLOSED_REQUIREMENT', status: CompletenessReviewItemStatus.MISSING },
+        {
+          checklistItemCode: 'UNDISCLOSED_REQUIREMENT',
+          status: CompletenessReviewItemStatus.MISSING,
+        },
       ]),
     ).rejects.toMatchObject({
       response: {
@@ -266,7 +275,8 @@ describe('Phase 6E completeness review loop (e2e)', () => {
     });
 
     const submissionService = app.get(
-      (await import('../src/applications/submissions/application-submission.service')).ApplicationSubmissionService,
+      (await import('../src/applications/submissions/application-submission.service'))
+        .ApplicationSubmissionService,
     );
 
     await expect(

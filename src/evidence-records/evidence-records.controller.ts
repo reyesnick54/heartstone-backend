@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { EvidencePurposeType, LegalHoldTargetType } from '@prisma/client';
 
@@ -75,7 +67,7 @@ export class EvidenceRecordsController {
       actorIdentityId: session.identityId,
       isOfficial,
       ...body,
-      clientPayload: body as Record<string, unknown>,
+      clientPayload: body,
     });
   }
 
@@ -98,7 +90,7 @@ export class EvidenceRecordsController {
       actorIdentityId: session.identityId,
       isOfficial,
       ...body,
-      clientPayload: body as Record<string, unknown>,
+      clientPayload: body,
     });
   }
 
@@ -177,7 +169,7 @@ export class EvidenceRecordsController {
       actorIdentityId: session.identityId,
       isOfficial,
       title: body.title,
-      clientPayload: body as Record<string, unknown>,
+      clientPayload: body,
     });
   }
 
@@ -250,9 +242,9 @@ export class EvidenceRecordsController {
       officeId?: string;
       appointmentId?: string;
       delegationId?: string;
-    },
+    } = {},
   ) {
-    const authority = body?.functionAuthorityRecordId
+    const authority = body.functionAuthorityRecordId
       ? {
           functionAuthorityRecordId: body.functionAuthorityRecordId,
           officeholderId: body.officeholderId,

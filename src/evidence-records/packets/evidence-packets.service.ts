@@ -1,16 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  EvidencePacketStatus,
-  EvidencePurposeType,
-  EvidenceStatus,
-} from '@prisma/client';
+import { EvidencePacketStatus, EvidencePurposeType, EvidenceStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { EvidenceRecordsBoundaryService } from '../common/evidence-records-boundary.service';
-import {
-  generateEvidenceReferenceNumber,
-  hashContent,
-} from '../common/reference-number.util';
+import { generateEvidenceReferenceNumber, hashContent } from '../common/reference-number.util';
 import { PACKET_REFERENCE_PREFIX } from '../evidence-records.constants';
 import { MasterFilesService } from '../master-files/master-files.service';
 
@@ -93,18 +86,14 @@ export class EvidencePacketsService {
 
     return this.prisma.evidencePacketItem.create({
       data: {
-        evidencePacketVersionId: version!.id,
+        evidencePacketVersionId: version.id,
         evidenceRecordId: input.evidenceRecordId,
         sequenceNumber: input.sequenceNumber,
       },
     });
   }
 
-  async freeze(input: {
-    packetId: string;
-    actorIdentityId: string;
-    isOfficial: boolean;
-  }) {
+  async freeze(input: { packetId: string; actorIdentityId: string; isOfficial: boolean }) {
     const packet = await this.getPacket(input.packetId);
     this.boundary.assertPacketFreezeIrreversible(packet.status);
 
