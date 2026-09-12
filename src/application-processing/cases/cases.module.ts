@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../../authority/authority.module';
+import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { CaseFoundationService } from './case-foundation.service';
 import { CaseCommunicationService } from './timeline/case-communication.service';
 import { CaseCommunicationOutboxService } from './timeline/case-communication-outbox.service';
@@ -11,9 +13,10 @@ import { CasePublicStatusProjectionService } from './timeline/case-public-status
 import { CaseTimelineController } from './timeline/case-timeline.controller';
 
 @Module({
-  imports: [AuthorityModule],
+  imports: [AuthorityModule, SessionsModule],
   controllers: [CaseTimelineController],
   providers: [
+    SessionAuthGuard,
     CaseFoundationService,
     CaseEventService,
     CaseCommunicationService,

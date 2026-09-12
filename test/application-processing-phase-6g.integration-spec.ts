@@ -89,8 +89,12 @@ describe('Phase 6G case timeline, communications, and applicant status', () => {
 
     const applicantComms = asCaseCommunicationsBody(applicantCommsResponse.body);
     expect(applicantComms).toHaveLength(1);
-    expect(applicantComms[0].communicationType).toBe(CaseCommunicationType.STATUS_UPDATE);
-    expect(applicantComms[0].body).not.toContain('Privileged legal advice');
+    const [visibleCommunication] = applicantComms;
+    if (!visibleCommunication) {
+      throw new Error('Expected applicant-visible communication');
+    }
+    expect(visibleCommunication.communicationType).toBe(CaseCommunicationType.STATUS_UPDATE);
+    expect(visibleCommunication.body).not.toContain('Privileged legal advice');
   });
 
   it('derives applicant status from authoritative case state', async () => {
