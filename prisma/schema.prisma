@@ -850,6 +850,8 @@ model GoverningSource {
   outgoingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipFrom")
   incomingRelationships     GoverningSourceRelationship[] @relation("SourceRelationshipTo")
   functionLinks             FunctionGoverningSource[]
+  recordsClassifications    RecordsClassification[]
+  retentionSchedules        RetentionSchedule[]
 
   @@index([status])
   @@index([effectiveFrom])
@@ -1800,6 +1802,11 @@ model Case {
   closedAt                         DateTime?
   currentCaseManagerOfficeholderId String?                  @db.Uuid
   currentAssignedOfficeId          String?                  @db.Uuid
+  masterAdministrativeFileReference String?
+  documentRegisterReference        String?
+  evidencePacketReference          String?
+  recordsClassificationReference   String?
+  retentionLegalHoldReference      String?
   applicantIdentityId              String                   @db.Uuid
   createdAt                        DateTime                 @default(now())
   updatedAt                        DateTime                 @updatedAt
@@ -2223,4 +2230,462 @@ model CaseIssue {
   @@index([status])
   @@index([ownerOfficeholderId])
   @@map("case_issues")
+}
+
+// ─── Phase 7G: Records Retention, Legal Hold, Archival & Disposition ─────────
+
+enum RecordsClassificationStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+  SUSPENDED
+}
+
+enum RetentionScheduleStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  SUSPENDED
+  ARCHIVED
+}
+
+enum RetentionTriggerType {
+  DATE_CREATED
+  DATE_RECEIVED
+  DATE_OF_DECISION
+  CASE_CLOSURE
+  INSTRUMENT_EXPIRY
+  END_OF_RELATIONSHIP
+  PROJECT_COMPLETION
+  FINAL_PAYMENT
+  COMPLETION_OF_APPEAL
+  CUSTOM_APPROVED_TRIGGER
+}
+
+enum RetentionDurationUnit {
+  DAYS
+  MONTHS
+  YEARS
+  INDEFINITE
+  EVENT_DRIVEN
+}
+
+enum LegalHoldStatus {
+  DRAFT
+  ACTIVE
+  RELEASED
+  SUPERSEDED
+}
+
+enum LegalHoldScope {
+  NARROW
+  STANDARD
+  INSTITUTION_WIDE
+  CROSS_INSTITUTION
+}
+
+enum LegalHoldConfidentiality {
+  STANDARD
+  RESTRICTED
+  PRIVILEGED
+}
+
+enum LegalHoldTargetType {
+  MASTER_ADMINISTRATIVE_FILE
+  CASE
+  DOCUMENT
+  EVIDENCE
+  EVIDENCE_PACKET
+  RECORD_CLASS
+  PRESERVATION_COLLECTION
+}
+
+enum PreservationCollectionPurpose {
+  APPEAL
+  INVESTIGATION
+  LITIGATION
+  AUDIT
+  INCIDENT
+  INSTITUTIONAL_REVIEW
+  OTHER_APPROVED
+}
+
+enum PreservationCollectionStatus {
+  ACTIVE
+  RELEASED
+  ARCHIVED
+}
+
+enum ArchivalTransferStatus {
+  DRAFT
+  MANIFEST_PREPARED
+  IN_TRANSIT
+  RECEIVED
+  ACKNOWLEDGED
+  REJECTED
+  CANCELLED
+}
+
+enum DispositionEligibilityStatus {
+  NOT_EVALUATED
+  NOT_ELIGIBLE
+  ELIGIBLE_FOR_REVIEW
+  BLOCKED
+}
+
+enum DispositionRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXECUTED
+  CANCELLED
+  SAFE_HALTED
+}
+
+enum DispositionSafeHaltReason {
+  LEGAL_HOLD_ACTIVE
+  RETENTION_AUTHORITY_UNRESOLVED
+  RETENTION_PERIOD_UNRESOLVED
+  APPEAL_ACTIVE
+  INVESTIGATION_ACTIVE
+  CONTINUING_OBLIGATION
+  ARCHIVE_TRANSFER_INCOMPLETE
+  CLASSIFICATION_UNRESOLVED
+  REQUIRED_APPROVAL_MISSING
+  INTEGRITY_CANNOT_BE_VERIFIED
+  VENDOR_POLICY_CONFLICT
+  ADVERSE_EVIDENCE_PROTECTED
+}
+
+enum DispositionMethod {
+  SECURE_DESTRUCTION
+  TRANSFER_TO_NATIONAL_ARCHIVES
+  TRANSFER_TO_INSTITUTIONAL_ARCHIVES
+  DEACCESSION
+  OTHER_APPROVED
+}
+
+enum DispositionExecutionResult {
+  COMPLETED
+  PARTIALLY_COMPLETED
+  FAILED
+  ABORTED
+}
+
+enum ExternalRecordsRepositoryStatus {
+  ACTIVE
+  SUSPENDED
+  DECOMMISSIONED
+}
+
+model RecordsClassification {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  code                       String                      @unique
+  name                       String
+  description                String?
+  securityClassification     String
+  privacyClassification      String
+  accessRestriction          String?
+  archivalRequirement        String?
+  integrityRequirement     String?
+  reviewIntervalDays         Int?
+  disposalApprovalRequired   Boolean                     @default(true)
+  governingSourceId          String?                     @db.Uuid
+  status                     RecordsClassificationStatus @default(DRAFT)
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  governingSource            GoverningSource?            @relation(fields: [governingSourceId], references: [id])
+  retentionSchedules         RetentionSchedule[]
+  retentionAssignments       RecordRetentionAssignment[]
+  legalHoldTargets           LegalHoldTarget[]
+
+  @@index([governingSourceId])
+  @@index([status])
+  @@map("records_classifications")
+}
+
+model RetentionSchedule {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  code                     String
+  name                     String
+  recordsClassificationId  String                  @db.Uuid
+  versionNumber            Int                     @default(1)
+  supersededByScheduleId   String?                 @unique @db.Uuid
+  retentionDurationValue   Int?
+  retentionDurationUnit    RetentionDurationUnit?
+  triggerType              RetentionTriggerType
+  triggerConfiguration     Json                    @default("{}")
+  governingSourceId        String                  @db.Uuid
+  approvedByIdentityId     String?                 @db.Uuid
+  approvedAt               DateTime?
+  effectiveFrom            DateTime
+  effectiveUntil           DateTime?
+  reviewAt                 DateTime?
+  scheduleSnapshotHash     String
+  status                   RetentionScheduleStatus @default(DRAFT)
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  recordsClassification    RecordsClassification   @relation(fields: [recordsClassificationId], references: [id])
+  governingSource          GoverningSource         @relation(fields: [governingSourceId], references: [id])
+  supersededBySchedule     RetentionSchedule?      @relation("RetentionScheduleSupersession", fields: [supersededByScheduleId], references: [id])
+  supersededSchedule       RetentionSchedule?      @relation("RetentionScheduleSupersession")
+  rules                    RetentionRule[]
+  retentionAssignments     RecordRetentionAssignment[]
+  dispositionRequests      RecordDispositionRequest[]
+
+  @@unique([code, versionNumber])
+  @@index([recordsClassificationId])
+  @@index([governingSourceId])
+  @@index([status])
+  @@map("retention_schedules")
+}
+
+model RetentionRule {
+  id                  String               @id @default(uuid()) @db.Uuid
+  retentionScheduleId String               @db.Uuid
+  ruleOrder           Int                  @default(1)
+  label               String
+  triggerType         RetentionTriggerType
+  triggerConfiguration Json                @default("{}")
+  durationValue       Int?
+  durationUnit        RetentionDurationUnit?
+  minimumRetention    Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  retentionSchedule   RetentionSchedule    @relation(fields: [retentionScheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([retentionScheduleId, ruleOrder])
+  @@index([retentionScheduleId])
+  @@map("retention_rules")
+}
+
+model RecordRetentionAssignment {
+  id                      String                @id @default(uuid()) @db.Uuid
+  targetType              LegalHoldTargetType
+  targetReference         String
+  recordsClassificationId String                @db.Uuid
+  retentionScheduleId     String                @db.Uuid
+  assignedAt              DateTime              @default(now())
+  assignedByIdentityId    String                @db.Uuid
+  triggerAnchorAt         DateTime?
+  retentionExpiresAt      DateTime?
+  scheduleVersionNumber   Int
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  recordsClassification   RecordsClassification @relation(fields: [recordsClassificationId], references: [id])
+  retentionSchedule       RetentionSchedule     @relation(fields: [retentionScheduleId], references: [id])
+
+  @@unique([targetType, targetReference, retentionScheduleId])
+  @@index([recordsClassificationId])
+  @@index([retentionScheduleId])
+  @@index([targetType, targetReference])
+  @@map("record_retention_assignments")
+}
+
+model LegalHold {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  holdNumber            String                   @unique
+  title                 String
+  authorityReference    String
+  reason                String
+  issuedByIdentityId    String                   @db.Uuid
+  issuedAt              DateTime                 @default(now())
+  effectiveFrom         DateTime
+  releasedAt            DateTime?
+  status                LegalHoldStatus          @default(DRAFT)
+  scope                 LegalHoldScope           @default(STANDARD)
+  confidentiality       LegalHoldConfidentiality @default(STANDARD)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  targets               LegalHoldTarget[]
+  releaseRecords        LegalHoldReleaseRecord[]
+
+  @@index([status])
+  @@index([effectiveFrom])
+  @@map("legal_holds")
+}
+
+model LegalHoldTarget {
+  id                      String                @id @default(uuid()) @db.Uuid
+  legalHoldId             String                @db.Uuid
+  targetType              LegalHoldTargetType
+  targetReference         String
+  recordsClassificationId String?               @db.Uuid
+  notes                   String?
+  createdAt               DateTime              @default(now())
+  legalHold               LegalHold             @relation(fields: [legalHoldId], references: [id], onDelete: Cascade)
+  recordsClassification   RecordsClassification? @relation(fields: [recordsClassificationId], references: [id])
+
+  @@unique([legalHoldId, targetType, targetReference])
+  @@index([targetType, targetReference])
+  @@index([legalHoldId])
+  @@map("legal_hold_targets")
+}
+
+model LegalHoldReleaseRecord {
+  id                         String    @id @default(uuid()) @db.Uuid
+  legalHoldId                String    @db.Uuid
+  releasedByIdentityId       String    @db.Uuid
+  releaseAuthorityReference  String
+  releaseReason              String
+  releasedAt                 DateTime  @default(now())
+  auditManifestHash          String
+  createdAt                  DateTime  @default(now())
+  legalHold                  LegalHold @relation(fields: [legalHoldId], references: [id])
+
+  @@index([legalHoldId])
+  @@index([releasedAt])
+  @@map("legal_hold_release_records")
+}
+
+model PreservationCollection {
+  id                   String                        @id @default(uuid()) @db.Uuid
+  collectionReference  String                        @unique
+  title                String
+  purpose              PreservationCollectionPurpose
+  status               PreservationCollectionStatus  @default(ACTIVE)
+  frozenAt             DateTime                      @default(now())
+  frozenByIdentityId   String                        @db.Uuid
+  integrityManifest    Json                          @default("[]")
+  manifestHash         String
+  releaseAuthorityRef  String?
+  releasedAt           DateTime?
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  items                PreservationCollectionItem[]
+
+  @@index([status])
+  @@index([purpose])
+  @@map("preservation_collections")
+}
+
+model PreservationCollectionItem {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  preservationCollectionId String                 @db.Uuid
+  targetType               LegalHoldTargetType
+  targetReference          String
+  versionReference         String
+  integrityHash            String
+  capturedAt               DateTime               @default(now())
+  preservationCollection   PreservationCollection @relation(fields: [preservationCollectionId], references: [id], onDelete: Cascade)
+
+  @@unique([preservationCollectionId, targetType, targetReference, versionReference])
+  @@index([preservationCollectionId])
+  @@map("preservation_collection_items")
+}
+
+model ExternalRecordsRepository {
+  id                         String                          @id @default(uuid()) @db.Uuid
+  code                       String                          @unique
+  provider                   String
+  institutionalOwnership     String
+  systemOfRecord             Boolean                         @default(false)
+  location                   String
+  exportCapability           String
+  retentionCompatibility     String
+  legalHoldCapability        String
+  backupTreatment            String
+  terminationExitRequirement String
+  vendorDefaultDeletionPolicy String?
+  institutionalScheduleOverridesVendor Boolean             @default(true)
+  status                     ExternalRecordsRepositoryStatus @default(ACTIVE)
+  createdAt                  DateTime                        @default(now())
+  updatedAt                  DateTime                        @updatedAt
+  sourceTransfers            ArchivalTransfer[]              @relation("ArchivalTransferSource")
+  destinationTransfers       ArchivalTransfer[]              @relation("ArchivalTransferDestination")
+
+  @@map("external_records_repositories")
+}
+
+model ArchivalTransfer {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  transferNumber              String                   @unique
+  sourceRepositoryId          String                   @db.Uuid
+  destinationRepositoryId     String                   @db.Uuid
+  manifest                    Json                     @default("[]")
+  manifestHash                String
+  integrityVerification       String
+  metadataCompleteness        String
+  restrictions                String?
+  transferDate                DateTime?
+  sendingCustodianIdentityId  String?                  @db.Uuid
+  receivingAcknowledgedAt     DateTime?
+  receivingCustodianIdentityId String?                 @db.Uuid
+  status                      ArchivalTransferStatus   @default(DRAFT)
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+  sourceRepository            ExternalRecordsRepository @relation("ArchivalTransferSource", fields: [sourceRepositoryId], references: [id])
+  destinationRepository       ExternalRecordsRepository @relation("ArchivalTransferDestination", fields: [destinationRepositoryId], references: [id])
+  items                       ArchivalTransferItem[]
+
+  @@index([status])
+  @@index([sourceRepositoryId])
+  @@index([destinationRepositoryId])
+  @@map("archival_transfers")
+}
+
+model ArchivalTransferItem {
+  id                 String           @id @default(uuid()) @db.Uuid
+  archivalTransferId String           @db.Uuid
+  targetType         LegalHoldTargetType
+  targetReference    String
+  versionReference   String
+  integrityHash      String
+  metadata           Json             @default("{}")
+  createdAt          DateTime         @default(now())
+  archivalTransfer   ArchivalTransfer @relation(fields: [archivalTransferId], references: [id], onDelete: Cascade)
+
+  @@unique([archivalTransferId, targetType, targetReference, versionReference])
+  @@index([archivalTransferId])
+  @@map("archival_transfer_items")
+}
+
+model RecordDispositionRequest {
+  id                         String                       @id @default(uuid()) @db.Uuid
+  requestReference           String                       @unique
+  targetType                 LegalHoldTargetType
+  targetReference            String
+  retentionScheduleId        String?                      @db.Uuid
+  eligibilityStatus          DispositionEligibilityStatus @default(NOT_EVALUATED)
+  eligibilityCalculatedAt    DateTime?
+  eligibilityNotes           String?
+  safeHaltReasons            DispositionSafeHaltReason[]  @default([])
+  appealActive               Boolean                      @default(false)
+  investigationActive        Boolean                      @default(false)
+  adverseEvidenceProtected   Boolean                      @default(false)
+  requestedByIdentityId      String                       @db.Uuid
+  reason                     String
+  status                     DispositionRequestStatus     @default(DRAFT)
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  retentionSchedule          RetentionSchedule?           @relation(fields: [retentionScheduleId], references: [id])
+  dispositionRecords         RecordDispositionRecord[]
+
+  @@index([targetType, targetReference])
+  @@index([status])
+  @@index([retentionScheduleId])
+  @@map("record_disposition_requests")
+}
+
+model RecordDispositionRecord {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  dispositionRequestId       String                     @db.Uuid
+  authorizedByIdentityId     String                     @db.Uuid
+  authorityReference         String
+  dispositionDate            DateTime
+  method                     DispositionMethod
+  manifestCertificate        Json                       @default("{}")
+  manifestCertificateHash    String
+  verificationNotes          String?
+  result                     DispositionExecutionResult
+  createdAt                  DateTime                   @default(now())
+  dispositionRequest         RecordDispositionRequest   @relation(fields: [dispositionRequestId], references: [id])
+
+  @@index([dispositionRequestId])
+  @@index([dispositionDate])
+  @@map("record_disposition_records")
 }
