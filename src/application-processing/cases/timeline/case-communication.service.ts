@@ -75,7 +75,11 @@ export class CaseCommunicationService {
       return created;
     });
 
-    if (!isInternal && communication.deliveryStatus === CaseCommunicationDeliveryStatus.QUEUED) {
+    if (
+      !isInternal &&
+      communication.deliveryStatus === CaseCommunicationDeliveryStatus.QUEUED &&
+      communication.channel
+    ) {
       await this.outboxService.enqueue(communication.id, communication.channel, {
         communicationId: communication.id,
         caseId: communication.caseId,

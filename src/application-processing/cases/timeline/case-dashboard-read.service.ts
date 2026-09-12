@@ -62,15 +62,15 @@ export class CaseDashboardReadService {
         governmentService: true,
         responsibleDepartment: true,
         currentCaseManagerOfficeholder: true,
-        workflowInstances: {
-          where: { status: { in: ['ACTIVE', 'PAUSED', 'SAFE_HALT'] } },
+        workflowInstance: {
           include: {
             stepInstances: {
-              where: { status: { in: ['PENDING', 'IN_PROGRESS', 'BLOCKED'] } },
+              where: {
+                status: { in: ['PENDING', 'ACTIVE', 'WAITING_APPLICANT', 'WAITING_EXTERNAL'] },
+              },
+              include: { workflowStepDefinition: true },
             },
           },
-          orderBy: { startedAt: 'desc' },
-          take: 1,
         },
       },
     });
@@ -79,7 +79,7 @@ export class CaseDashboardReadService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    const activeWorkflow = caseRecord.workflowInstances[0] ?? null;
+    const activeWorkflow = caseRecord.workflowInstance;
     const milestones = await this.caseMilestoneService.listForCase(caseId);
     const recentEvents = await this.caseEventService.listOfficialTimeline(caseId, 20);
 
@@ -133,14 +133,14 @@ export class CaseDashboardReadService {
         : null,
       workflowStage: activeWorkflow
         ? {
-            stageKey: activeWorkflow.currentStageKey,
-            stageLabel: activeWorkflow.currentStageLabel,
+            stageKey: activeWorkflow.currentStepKeys[0] ?? null,
+            stageLabel: activeWorkflow.currentStepKeys[0] ?? null,
             status: activeWorkflow.status,
           }
         : null,
       outstandingTasks: (activeWorkflow?.stepInstances ?? []).map((step) => ({
-        stepKey: step.stepKey,
-        stepLabel: step.stepLabel,
+        stepKey: step.workflowStepDefinition.stepKey,
+        stepLabel: step.workflowStepDefinition.label,
         status: step.status,
       })),
       sla: milestones.map((milestone) => ({

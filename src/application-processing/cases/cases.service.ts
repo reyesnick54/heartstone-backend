@@ -3,6 +3,7 @@ import {
   Application,
   ApplicationSubmission,
   CaseEventType,
+  CaseMilestoneStatus,
   CaseMilestoneType,
   CaseStatus,
 } from '@prisma/client';
@@ -33,11 +34,20 @@ export class CasesService {
       application.governmentServiceId,
     );
 
+    const service = await this.prisma.governmentService.findUniqueOrThrow({
+      where: { id: application.governmentServiceId },
+      select: { responsibleInstitutionId: true, responsibleDepartmentId: true },
+    });
+
     const caseRecord = await this.prisma.case.create({
       data: {
         caseNumber: generateReferenceNumber(CASE_NUMBER_PREFIX),
         applicationId: application.id,
+        applicantIdentityId: application.applicantIdentityId,
+        governmentServiceId: application.governmentServiceId,
         governmentServiceVersionId: application.governmentServiceVersionId,
+        responsibleInstitutionId: service.responsibleInstitutionId,
+        responsibleDepartmentId: service.responsibleDepartmentId,
         workflowVersionId: workflowVersion.id,
         configurationFingerprint: application.configurationFingerprint,
         status: CaseStatus.RECEIVED,
@@ -57,7 +67,10 @@ export class CasesService {
       data: {
         caseId: caseRecord.id,
         milestoneType: CaseMilestoneType.RECEIPT,
-        label: 'Application received',
+        name: 'Application received',
+        status: CaseMilestoneStatus.COMPLETED,
+        reachedAt: new Date(),
+        actualDate: new Date(),
       },
     });
 

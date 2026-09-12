@@ -1,11 +1,18 @@
 import {
   AccountStatus,
   AuthenticationMethodType,
+  FormDefinitionStatus,
+  FormFieldType,
+  FormVersionStatus,
   GovernmentServiceMaturityStatus,
   GovernmentServicePublicAvailability,
   IdentityType,
   InstitutionType,
   JurisdictionType,
+  WorkflowDefinitionStatus,
+  WorkflowStepConsequenceLevel,
+  WorkflowStepType,
+  WorkflowVersionStatus,
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
@@ -13,6 +20,7 @@ import { type App } from 'supertest/types';
 import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/application-processing/application-processing.constants';
 import { type CaseFoundationService } from '../../src/application-processing/cases/case-foundation.service';
 import { type PrismaService } from '../../src/database/prisma.service';
+import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/common/service-configuration-hash.util';
 import { asLoginResponseBody } from './identity-test-types';
 
 export interface ApplicationProcessingFixtureContext {
@@ -22,6 +30,9 @@ export interface ApplicationProcessingFixtureContext {
   serviceFamilyId: string;
   governmentServiceId: string;
   governmentServiceVersionId: string;
+  formDefinitionId: string;
+  formVersionId: string;
+  configurationFingerprint: string;
   applicantIdentityId: string;
   applicantSessionToken: string;
   officialIdentityId: string;
@@ -86,6 +97,84 @@ export async function seedApplicationProcessingFixture(
       version: '1.0.0',
       maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
       publicAvailability: GovernmentServicePublicAvailability.ACTIVE,
+    },
+  });
+
+  const formDefinition = await prisma.formDefinition.create({
+    data: {
+      code: `${marker}-FORM`,
+      name: 'Timeline Test Form',
+      governmentServiceVersionId: serviceVersion.id,
+      status: FormDefinitionStatus.ACTIVE,
+    },
+  });
+
+  const formVersion = await prisma.formVersion.create({
+    data: {
+      formDefinitionId: formDefinition.id,
+      version: 1,
+      title: { en: 'Timeline Test Form' },
+      status: FormVersionStatus.PUBLISHED,
+      publishedAt: new Date(),
+      sections: {
+        create: {
+          sectionKey: 'main',
+          title: { en: 'Main' },
+          displayOrder: 1,
+          fields: {
+            create: {
+              fieldKey: 'name',
+              label: { en: 'Name' },
+              fieldType: FormFieldType.TEXT,
+              required: true,
+              displayOrder: 1,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  await prisma.governmentServiceVersion.update({
+    where: { id: serviceVersion.id },
+    data: { formDefinitionId: formDefinition.id, formVersionId: formVersion.id },
+  });
+
+  const configurationFingerprint = buildServiceConfigurationFingerprint({
+    serviceVersionId: serviceVersion.id,
+    formVersionId: formVersion.id,
+    feeDefinitionIds: [],
+    eligibilityRuleIds: [],
+    checklistItemIds: [],
+  });
+
+  const workflowDefinition = await prisma.workflowDefinition.create({
+    data: {
+      code: `${marker}-WF`,
+      name: 'Timeline Test Workflow',
+      governmentServiceId: service.id,
+      status: WorkflowDefinitionStatus.APPROVED,
+    },
+  });
+
+  await prisma.workflowVersion.create({
+    data: {
+      workflowDefinitionId: workflowDefinition.id,
+      version: '1.0.0',
+      status: WorkflowVersionStatus.APPROVED,
+      approvedAt: new Date(),
+      stages: {
+        create: [{ stageKey: 'intake', label: 'Intake', displayOrder: 1 }],
+      },
+      steps: {
+        create: {
+          stepKey: 'intake',
+          label: 'Intake',
+          stepType: WorkflowStepType.INTAKE,
+          consequenceLevel: WorkflowStepConsequenceLevel.INFORMATIONAL,
+          displayOrder: 1,
+        },
+      },
     },
   });
 
@@ -175,6 +264,9 @@ export async function seedApplicationProcessingFixture(
     serviceFamilyId: serviceFamily.id,
     governmentServiceId: service.id,
     governmentServiceVersionId: serviceVersion.id,
+    formDefinitionId: formDefinition.id,
+    formVersionId: formVersion.id,
+    configurationFingerprint,
     applicantIdentityId: applicantIdentity.id,
     applicantSessionToken,
     officialIdentityId: officialIdentity.id,
@@ -193,6 +285,9 @@ export async function seedCaseFromApplication(
     applicantIdentityId: fixture.applicantIdentityId,
     governmentServiceId: fixture.governmentServiceId,
     governmentServiceVersionId: fixture.governmentServiceVersionId,
+    formDefinitionId: fixture.formDefinitionId,
+    formVersionId: fixture.formVersionId,
+    configurationFingerprint: fixture.configurationFingerprint,
   });
 
   const caseRecord = await foundation.openCaseFromApplication({

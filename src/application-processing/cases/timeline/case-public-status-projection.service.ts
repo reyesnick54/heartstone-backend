@@ -22,7 +22,7 @@ export class CasePublicStatusProjectionService {
     caseRecord: Case,
     sourceEvent?: CaseEvent,
   ): Promise<CasePublicStatusProjection> {
-    const stage = this.mapCaseStatusToPublicStage(caseRecord.caseStatus);
+    const stage = this.mapCaseStatusToPublicStage(caseRecord.status);
     const stageLabel = PUBLIC_STATUS_STAGE_LABELS[stage] ?? stage;
     const stageDetail = this.buildApplicantSafeDetail(caseRecord, stage);
 
@@ -37,11 +37,13 @@ export class CasePublicStatusProjectionService {
           publicStage: stage,
           publicStageLabel: stageLabel,
           publicStageDetail: stageDetail,
-          sourceCaseStatus: caseRecord.caseStatus,
+          publicStatusLabel: stageLabel,
+          sourceCaseStatus: caseRecord.status,
           sourceLegalStatus: caseRecord.legalStatus,
           applicantDisclaimer: APPLICANT_STATUS_DISCLAIMER,
           projectionVersion: existing.projectionVersion + 1,
           lastDerivedAt: new Date(),
+          lastUpdatedAt: new Date(),
           sourceEventId: sourceEvent?.id,
         },
       });
@@ -53,10 +55,12 @@ export class CasePublicStatusProjectionService {
         publicStage: stage,
         publicStageLabel: stageLabel,
         publicStageDetail: stageDetail,
-        sourceCaseStatus: caseRecord.caseStatus,
+        publicStatusLabel: stageLabel,
+        sourceCaseStatus: caseRecord.status,
         sourceLegalStatus: caseRecord.legalStatus,
         applicantDisclaimer: APPLICANT_STATUS_DISCLAIMER,
         lastDerivedAt: new Date(),
+        lastUpdatedAt: new Date(),
         sourceEventId: sourceEvent?.id,
       },
     });
@@ -68,7 +72,7 @@ export class CasePublicStatusProjectionService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    const stage = this.mapEventToPublicStage(event.eventType, caseRecord.caseStatus);
+    const stage = this.mapEventToPublicStage(event.eventType, caseRecord.status);
     const stageLabel = PUBLIC_STATUS_STAGE_LABELS[stage] ?? stage;
 
     const existing = await this.prisma.casePublicStatusProjection.findUnique({
@@ -79,11 +83,13 @@ export class CasePublicStatusProjectionService {
       publicStage: stage,
       publicStageLabel: stageLabel,
       publicStageDetail: this.buildApplicantSafeDetail(caseRecord, stage),
-      sourceCaseStatus: caseRecord.caseStatus,
+      publicStatusLabel: stageLabel,
+      sourceCaseStatus: caseRecord.status,
       sourceLegalStatus: caseRecord.legalStatus,
       applicantDisclaimer: APPLICANT_STATUS_DISCLAIMER,
       projectionVersion: (existing?.projectionVersion ?? 0) + 1,
       lastDerivedAt: new Date(),
+      lastUpdatedAt: new Date(),
       sourceEventId: event.id,
     };
 
@@ -187,7 +193,7 @@ export class CasePublicStatusProjectionService {
       return 'Your application is awaiting a formal decision. No outcome has been recorded yet.';
     }
 
-    if (caseRecord.caseStatus === CaseStatus.SAFE_HALT) {
+    if (caseRecord.status === CaseStatus.SAFE_HALT) {
       return 'Processing is temporarily paused. Further details are not available through this channel.';
     }
 

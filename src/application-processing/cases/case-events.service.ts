@@ -13,12 +13,16 @@ export class CaseEventsService {
     payload: Record<string, unknown> = {},
     actorIdentityId?: string,
   ) {
+    const now = new Date();
     return this.prisma.caseEvent.create({
       data: {
         caseId,
         eventType,
         payload: payload as Prisma.InputJsonValue,
+        metadata: payload as Prisma.InputJsonValue,
         actorIdentityId,
+        recordedAt: now,
+        occurredAt: now,
       },
     });
   }

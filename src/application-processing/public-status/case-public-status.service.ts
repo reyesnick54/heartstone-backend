@@ -28,13 +28,19 @@ export class CasePublicStatusService {
       create: {
         caseId,
         publicStatusLabel,
+        publicStageLabel: publicStatusLabel,
         sourceCaseStatus,
         publicMessage: 'This status is informational only and does not constitute a decision.',
+        applicantDisclaimer:
+          'This status is informational only and does not constitute a government decision or approval.',
+        lastDerivedAt: new Date(),
       },
       update: {
         publicStatusLabel,
+        publicStageLabel: publicStatusLabel,
         sourceCaseStatus,
         lastUpdatedAt: new Date(),
+        lastDerivedAt: new Date(),
       },
     });
   }
@@ -45,8 +51,13 @@ export class CasePublicStatusService {
       include: {
         application: true,
         publicStatusProjection: true,
-        communications: { where: { visibility: 'APPLICANT' }, orderBy: { createdAt: 'desc' } },
-        milestones: { orderBy: { reachedAt: 'asc' } },
+        communications: {
+          where: {
+            OR: [{ visibility: 'APPLICANT' }, { publicVisibility: 'APPLICANT_VISIBLE' }],
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        milestones: { orderBy: [{ reachedAt: 'asc' }, { createdAt: 'asc' }] },
       },
     });
 

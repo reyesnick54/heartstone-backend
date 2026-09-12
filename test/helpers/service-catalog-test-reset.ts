@@ -1,8 +1,11 @@
 import { type PrismaService } from '../../src/database/prisma.service';
-import { resetWorkflowData } from './workflow-test-reset';
 
 export async function resetServiceCatalogData(prisma: PrismaService): Promise<void> {
-  await resetWorkflowData(prisma);
+  await prisma.workflowTransitionDefinition.deleteMany();
+  await prisma.workflowStepDefinition.deleteMany();
+  await prisma.workflowStageDefinition.deleteMany();
+  await prisma.workflowVersion.deleteMany();
+  await prisma.workflowDefinition.deleteMany();
   await prisma.serviceActivationRecord.deleteMany();
   await prisma.governmentServiceRedressRoute.deleteMany();
   await prisma.governmentServiceOutputDefinition.deleteMany();
