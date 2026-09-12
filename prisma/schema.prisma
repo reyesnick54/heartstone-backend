@@ -149,6 +149,8 @@ model Department {
   institution                   Institution               @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
+  responsibleWorkflowDefinitions WorkflowDefinition[]
+  responsibleWorkflowSteps      WorkflowStepDefinition[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -168,8 +170,10 @@ model Office {
   appointments                 Appointment[]
   delegationsAsDelegator       Delegation[]                  @relation("DelegationDelegatorOffice")
   delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOffice")
-  functionAuthorityRecords     FunctionAuthorityRecord[]
+  functionAuthorityRecords       FunctionAuthorityRecord[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
+  responsibleWorkflowSteps     WorkflowStepDefinition[]
+  ownedWorkflowDefinitions     WorkflowDefinition[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -800,6 +804,8 @@ model FunctionAuthorityRecord {
   institutionalActs            InstitutionalAuthorityAct[]
   serviceFunctionMappings      ServiceFunctionMapping[]
   serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
+  workflowActivationAuthorities WorkflowVersion[]               @relation("WorkflowActivationAuthority")
+  workflowStepAuthorities     WorkflowStepDefinition[]
   workflowStepDefinitions      WorkflowStepDefinition[]
 
   @@index([classification])
@@ -1307,6 +1313,7 @@ model GovernmentServiceVersion {
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
   formDefinitions                     FormDefinition[]
+  workflowVersions                    WorkflowVersion[]
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
   cases                               Case[]
@@ -1604,6 +1611,90 @@ model ServiceActivationRecord {
   @@map("service_activation_records")
 }
 
+// ─── Phase 6C: Versioned Workflow Definition Engine ──────────────────────────
+
+enum WorkflowVersionStatus {
+  DRAFT
+  AUTHORITY_REVIEW
+  PROCEDURE_APPROVED
+  CONFIGURED
+  TESTED
+  ACCEPTED
+  ACTIVE
+  PAUSED
+  RESTRICTED
+  SUSPENDED
+  SUPERSEDED
+  RETIRED
+}
+
+enum WorkflowConsequenceLevel {
+  INFORMATIONAL
+  PROCEDURAL
+  SUBSTANTIVE
+  HIGH_CONSEQUENCE
+}
+
+enum WorkflowStageType {
+  INTAKE
+  COMPLETENESS
+  SUBSTANTIVE_REVIEW
+  EXTERNAL_REFERRAL
+  PROFESSIONAL_REVIEW
+  INSPECTION
+  RECOMMENDATION
+  DECISION_GATE
+  ISSUANCE_GATE
+  NOTICE
+  OVERSIGHT
+  CLOSURE
+  CUSTOM_ADMINISTRATIVE
+}
+
+enum WorkflowStepType {
+  ADMINISTRATIVE_TASK
+  REVIEW
+  VERIFICATION
+  EXTERNAL_REFERRAL
+  PROFESSIONAL_REFERRAL
+  RECOMMENDATION
+  DECISION
+  ISSUANCE
+  NOTICE
+  WAIT
+  CUSTOM
+}
+
+enum WorkflowTransitionType {
+  NORMAL
+  CONDITIONAL
+  RETURN_FOR_CORRECTION
+  ESCALATION
+  EXTERNAL_REFERRAL
+  PROFESSIONAL_REFERRAL
+  SAFE_HALT
+  WITHDRAWAL
+  CLOSURE
+}
+
+model WorkflowDefinition {
+  id                       String             @id @default(uuid()) @db.Uuid
+  code                     String             @unique
+  name                     String
+  governmentServiceId      String             @db.Uuid
+  responsibleDepartmentId  String             @db.Uuid
+  institutionalOwnerOfficeId String?          @db.Uuid
+  description              String?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  governmentService        GovernmentService  @relation(fields: [governmentServiceId], references: [id])
+  responsibleDepartment    Department         @relation(fields: [responsibleDepartmentId], references: [id])
+  institutionalOwnerOffice Office?            @relation(fields: [institutionalOwnerOfficeId], references: [id])
+  versions                 WorkflowVersion[]
+
+  @@index([governmentServiceId])
+  @@index([responsibleDepartmentId])
+  @@index([institutionalOwnerOfficeId])
 // ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
 
 enum ApplicationStatus {
@@ -1944,6 +2035,34 @@ model WorkflowDefinition {
 }
 
 model WorkflowVersion {
+  id                                  String                   @id @default(uuid()) @db.Uuid
+  workflowDefinitionId                String                   @db.Uuid
+  version                             String
+  governmentServiceVersionId          String                   @db.Uuid
+  status                              WorkflowVersionStatus    @default(DRAFT)
+  consequenceLevel                    WorkflowConsequenceLevel @default(PROCEDURAL)
+  effectiveFrom                       DateTime?
+  effectiveUntil                      DateTime?
+  supersededByVersionId               String?                  @db.Uuid
+  activationFunctionAuthorityRecordId String?                  @db.Uuid
+  manualFallbackReference             String?
+  entryConditions                     Json                     @default("{}")
+  createdAt                           DateTime                 @default(now())
+  updatedAt                           DateTime                 @updatedAt
+  workflowDefinition                  WorkflowDefinition       @relation(fields: [workflowDefinitionId], references: [id])
+  governmentServiceVersion            GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  activationFunctionAuthority         FunctionAuthorityRecord? @relation("WorkflowActivationAuthority", fields: [activationFunctionAuthorityRecordId], references: [id])
+  supersededByVersion                 WorkflowVersion?         @relation("WorkflowVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions                  WorkflowVersion[]        @relation("WorkflowVersionSupersession")
+  stages                              WorkflowStageDefinition[]
+  steps                               WorkflowStepDefinition[]
+  transitions                         WorkflowTransitionDefinition[]
+
+  @@unique([workflowDefinitionId, version])
+  @@index([workflowDefinitionId])
+  @@index([governmentServiceVersionId])
+  @@index([status])
+  @@index([activationFunctionAuthorityRecordId])
   id                   String                         @id @default(uuid()) @db.Uuid
   workflowDefinitionId String                         @db.Uuid
   version              String
@@ -1969,6 +2088,18 @@ model WorkflowVersion {
 }
 
 model WorkflowStageDefinition {
+  id                String              @id @default(uuid()) @db.Uuid
+  workflowVersionId String              @db.Uuid
+  stageKey          String
+  name              String
+  sequence          Int
+  stageType         WorkflowStageType
+  description       String?
+  entryRules        Json                @default("{}")
+  completionRules   Json                @default("{}")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  workflowVersion   WorkflowVersion     @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
   id                String                   @id @default(uuid()) @db.Uuid
   workflowVersionId String                   @db.Uuid
   stageKey          String
@@ -1986,6 +2117,44 @@ model WorkflowStageDefinition {
 }
 
 model WorkflowStepDefinition {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  workflowVersionId         String                  @db.Uuid
+  stageId                   String                  @db.Uuid
+  stepKey                   String
+  name                      String
+  stepType                  WorkflowStepType
+  sequence                  Int
+  responsibleDepartmentId   String?                 @db.Uuid
+  responsibleOfficeId       String?                 @db.Uuid
+  functionAuthorityRecordId String?                 @db.Uuid
+  requiredAuthorityAction   AuthorityActionType?
+  requiredEvidence          Json                    @default("[]")
+  routingConfiguration      Json                    @default("{}")
+  deadlineConfiguration     Json                    @default("{}")
+  pauseConfiguration        Json                    @default("{}")
+  escalationConfiguration   Json                    @default("{}")
+  safeHaltConfiguration     Json                    @default("{}")
+  manualAllowed             Boolean                 @default(true)
+  isConsequential           Boolean                 @default(false)
+  isStartingStep            Boolean                 @default(false)
+  parallelForkGroupKey      String?
+  parallelJoinGroupKey      String?
+  permitsCycle              Boolean                 @default(false)
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  workflowVersion           WorkflowVersion         @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
+  stage                     WorkflowStageDefinition @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  responsibleDepartment     Department?             @relation(fields: [responsibleDepartmentId], references: [id])
+  responsibleOffice         Office?                 @relation(fields: [responsibleOfficeId], references: [id])
+  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+  outgoingTransitions       WorkflowTransitionDefinition[] @relation("TransitionFromStep")
+  incomingTransitions       WorkflowTransitionDefinition[] @relation("TransitionToStep")
+
+  @@unique([workflowVersionId, stepKey])
+  @@index([workflowVersionId])
+  @@index([stageId])
+  @@index([responsibleDepartmentId])
+  @@index([responsibleOfficeId])
   id                        String                         @id @default(uuid()) @db.Uuid
   workflowVersionId         String                         @db.Uuid
   workflowStageDefinitionId String?                        @db.Uuid
@@ -2017,6 +2186,19 @@ model WorkflowStepDefinition {
 }
 
 model WorkflowTransitionDefinition {
+  id                String                 @id @default(uuid()) @db.Uuid
+  workflowVersionId String                 @db.Uuid
+  fromStepId        String                 @db.Uuid
+  toStepId          String                 @db.Uuid
+  transitionType    WorkflowTransitionType @default(NORMAL)
+  conditionConfig   Json                   @default("{}")
+  priority          Int                    @default(0)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  workflowVersion   WorkflowVersion        @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
+  fromStep          WorkflowStepDefinition @relation("TransitionFromStep", fields: [fromStepId], references: [id], onDelete: Cascade)
+  toStep            WorkflowStepDefinition @relation("TransitionToStep", fields: [toStepId], references: [id], onDelete: Cascade)
+
   id                String                     @id @default(uuid()) @db.Uuid
   workflowVersionId String                     @db.Uuid
   fromStepId        String                     @db.Uuid
