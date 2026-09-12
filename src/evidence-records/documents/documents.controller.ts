@@ -118,9 +118,7 @@ export class DocumentsController {
 
   @Get('versions/*path/download')
   rejectStorageKeyDownload(): never {
-    throw new BadRequestException(
-      'Storage object keys cannot be used for download authorization',
-    );
+    throw new BadRequestException('Storage object keys cannot be used for download authorization');
   }
 
   @Post('associations')
