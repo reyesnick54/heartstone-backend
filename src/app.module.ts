@@ -41,6 +41,7 @@ import { WorkflowsModule } from './workflows/workflows.module';
     AuthorityModule,
     ApplicationsModule,
     ServiceCatalogModule,
+    ApplicationsModule,
     WorkflowsModule,
     ApplicationProcessingModule,
   ],

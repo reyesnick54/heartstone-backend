@@ -194,6 +194,8 @@ model Officeholder {
   identityLinks                IdentityOfficeholderLink[]
   functionAuthorityAssignments FunctionAuthorityAssignment[]
   ownedGovernmentServices      GovernmentService[]
+  completenessReviews          CompletenessReview[] @relation("CompletenessReviewReviewerOfficeholder")
+  deficiencyNoticesIssued      DeficiencyNotice[] @relation("DeficiencyNoticeIssuerOfficeholder")
 
   @@map("officeholders")
 }
@@ -436,6 +438,10 @@ model Identity {
   memberships               OrganizationMembership[]
   representativeAuthorities RepresentativeAuthority[]
   officeholderLinks         IdentityOfficeholderLink[]
+  applicationCases          ApplicationCase[]          @relation("ApplicationCaseApplicant")
+  applicationSubmissions    ApplicationSubmission[]    @relation("ApplicationSubmissionSubmitter")
+  completenessReviews       CompletenessReview[]       @relation("CompletenessReviewReviewer")
+  deficiencyNoticesIssued   DeficiencyNotice[]         @relation("DeficiencyNoticeIssuer")
   applications              Application[]
 
   @@index([userAccountId])
@@ -1054,6 +1060,9 @@ model AuthorityEvaluationRecord {
   contextSnapshot           Json
   explanationCodes          Json                       @default("[]")
   requestHash               String
+  functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
+  serviceActivationRecords  ServiceActivationRecord[]
+  completenessReviews       CompletenessReview[]
   functionAuthorityRecord        FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords       ServiceActivationRecord[]
   caseWorkflowStepInstances      CaseWorkflowStepInstance[]
@@ -1259,6 +1268,7 @@ model GovernmentService {
   ownerOfficeholderId      String?                    @db.Uuid
   ownerOfficeholder        Officeholder?              @relation(fields: [ownerOfficeholderId], references: [id])
   versions                 GovernmentServiceVersion[]
+  applicationCases         ApplicationCase[]
   applications             Application[]
   workflowDefinitions      WorkflowDefinition[]
 
@@ -1316,6 +1326,9 @@ model GovernmentServiceVersion {
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
   formDefinitions                     FormDefinition[]
+  applicationCases                    ApplicationCase[]
+  applicationSubmissions              ApplicationSubmission[]
+  completenessReviews                 CompletenessReview[]
   cases                               CaseRecord[]
   workflowDefinitions                 WorkflowDefinition[]
   workflowVersions                    WorkflowVersion[]
@@ -1616,6 +1629,50 @@ model ServiceActivationRecord {
   @@map("service_activation_records")
 }
 
+// ─── Phase 6: Applications, Workflow & Cases ─────────────────────────────────
+
+enum ApplicationCaseStatus {
+  OPEN
+  CLOSED
+  SAFE_HALTED
+}
+
+enum CaseWorkflowStage {
+  SUBMITTED
+  COMPLETENESS_REVIEW
+  INCOMPLETE
+  WAITING_APPLICANT
+  RESUBMITTED
+  ADMINISTRATIVELY_COMPLETE
+  SUBSTANTIVE_REVIEW
+  SAFE_HALTED
+}
+
+enum CompletenessReviewStatus {
+  PENDING
+  IN_REVIEW
+  INCOMPLETE
+  COMPLETE
+  UNRESOLVED
+  SAFE_HALTED
+}
+
+enum CompletenessReviewItemStatus {
+  PRESENT
+  MISSING
+  ILLEGIBLE
+  CORRUPTED
+  APPARENTLY_INCONSISTENT
+  SUBSTITUTION_PENDING
+  NOT_APPLICABLE
+  UNRESOLVED
+}
+
+enum DeficiencyNoticeStatus {
+  DRAFT
+  ISSUED
+  RESPONDED
+  EXPIRED
 // ─── Phase 6: Applications, Cases, and Workflow Runtime ─────────────────────
 
 enum CaseStatus {
@@ -1910,6 +1967,174 @@ enum DeficiencyNoticeStatus {
 }
 
 enum ApplicantInformationRequestStatus {
+  OPEN
+  RESPONDED
+  CLOSED
+  EXPIRED
+}
+
+enum ApplicationCaseNotificationOutboxStatus {
+  PENDING
+  DISPATCHED
+  FAILED
+}
+
+model ApplicationCase {
+  id                         String                              @id @default(uuid()) @db.Uuid
+  caseReference              String                              @unique
+  governmentServiceId        String                              @db.Uuid
+  governmentServiceVersionId String                              @db.Uuid
+  configurationFingerprint   String
+  applicantIdentityId        String                              @db.Uuid
+  status                     ApplicationCaseStatus               @default(OPEN)
+  currentWorkflowStage       CaseWorkflowStage                   @default(SUBMITTED)
+  workflowStageEnteredAt     DateTime                            @default(now())
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  governmentService          GovernmentService                   @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion   GovernmentServiceVersion            @relation(fields: [governmentServiceVersionId], references: [id])
+  applicantIdentity          Identity                            @relation("ApplicationCaseApplicant", fields: [applicantIdentityId], references: [id])
+  submissions                ApplicationSubmission[]
+  completenessReviews        CompletenessReview[]
+  deficiencyNotices          DeficiencyNotice[]
+  applicantInformationRequests ApplicantInformationRequest[]
+  workflowTransitions        CaseWorkflowTransition[]
+  notificationOutbox         ApplicationCaseNotificationOutbox[]
+
+  @@index([governmentServiceId])
+  @@index([governmentServiceVersionId])
+  @@index([applicantIdentityId])
+  @@index([currentWorkflowStage])
+  @@map("application_cases")
+}
+
+model ApplicationSubmission {
+  id                            String              @id @default(uuid()) @db.Uuid
+  caseId                        String              @db.Uuid
+  submissionSequence              Int
+  governmentServiceVersionId      String              @db.Uuid
+  formVersionId                   String?             @db.Uuid
+  configurationFingerprint        String
+  pinnedChecklistItemIds          Json
+  pinnedChecklistFingerprint      String
+  answers                         Json                @default("{}")
+  submittedAt                     DateTime
+  submittedByIdentityId           String              @db.Uuid
+  priorSubmissionId               String?             @db.Uuid
+  triggeredByDeficiencyNoticeId   String?             @db.Uuid
+  createdAt                       DateTime            @default(now())
+  case                            ApplicationCase     @relation(fields: [caseId], references: [id])
+  governmentServiceVersion        GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  submittedByIdentity             Identity            @relation("ApplicationSubmissionSubmitter", fields: [submittedByIdentityId], references: [id])
+  priorSubmission                 ApplicationSubmission? @relation("ApplicationSubmissionCorrectionChain", fields: [priorSubmissionId], references: [id])
+  correctionSubmissions           ApplicationSubmission[] @relation("ApplicationSubmissionCorrectionChain")
+  triggeredByDeficiencyNotice     DeficiencyNotice?   @relation("DeficiencyNoticeCorrectionSubmission", fields: [triggeredByDeficiencyNoticeId], references: [id])
+  completenessReviews             CompletenessReview[]
+  deficiencyNotices               DeficiencyNotice[]
+  originalInformationRequests     ApplicantInformationRequest[] @relation("ApplicantInformationRequestOriginalSubmission")
+  responseInformationRequests     ApplicantInformationRequest[] @relation("ApplicantInformationRequestResponseSubmission")
+
+  @@unique([caseId, submissionSequence])
+  @@index([caseId])
+  @@index([governmentServiceVersionId])
+  @@index([submittedByIdentityId])
+  @@index([priorSubmissionId])
+  @@map("application_submissions")
+}
+
+model CaseWorkflowTransition {
+  id              String            @id @default(uuid()) @db.Uuid
+  caseId          String            @db.Uuid
+  fromStage       CaseWorkflowStage
+  toStage         CaseWorkflowStage
+  reason          String?
+  actorIdentityId String?           @db.Uuid
+  createdAt       DateTime          @default(now())
+  case            ApplicationCase   @relation(fields: [caseId], references: [id])
+
+  @@index([caseId])
+  @@index([createdAt])
+  @@map("case_workflow_transitions")
+}
+
+model CompletenessReview {
+  id                              String                   @id @default(uuid()) @db.Uuid
+  caseId                          String                   @db.Uuid
+  applicationSubmissionId         String                   @db.Uuid
+  governmentServiceVersionId      String                   @db.Uuid
+  checklistConfigurationFingerprint String
+  reviewerIdentityId              String?                  @db.Uuid
+  reviewerOfficeholderId          String?                  @db.Uuid
+  status                          CompletenessReviewStatus @default(PENDING)
+  reviewSequence                  Int                      @default(1)
+  startedAt                       DateTime?
+  completedAt                     DateTime?
+  authorityEvaluationRecordId     String?                  @db.Uuid
+  createdAt                       DateTime                 @default(now())
+  updatedAt                       DateTime                 @updatedAt
+  case                            ApplicationCase          @relation(fields: [caseId], references: [id])
+  applicationSubmission           ApplicationSubmission    @relation(fields: [applicationSubmissionId], references: [id])
+  governmentServiceVersion        GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  reviewerIdentity                Identity?                @relation("CompletenessReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder            Officeholder?            @relation("CompletenessReviewReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  items                           CompletenessReviewItem[]
+  deficiencyNotices               DeficiencyNotice[]
+
+  @@index([caseId])
+  @@index([applicationSubmissionId])
+  @@index([governmentServiceVersionId])
+  @@index([status])
+  @@map("completeness_reviews")
+}
+
+model CompletenessReviewItem {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  completenessReviewId String                       @db.Uuid
+  checklistItemId      String                       @db.Uuid
+  checklistItemCode    String
+  label                String
+  isRequired           Boolean                      @default(true)
+  status               CompletenessReviewItemStatus @default(UNRESOLVED)
+  reviewerNotes        String?
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+  completenessReview   CompletenessReview           @relation(fields: [completenessReviewId], references: [id], onDelete: Cascade)
+  deficiencyNoticeItems DeficiencyNoticeItem[]
+
+  @@unique([completenessReviewId, checklistItemCode])
+  @@index([completenessReviewId])
+  @@index([checklistItemId])
+  @@map("completeness_review_items")
+}
+
+model DeficiencyNotice {
+  id                         String                 @id @default(uuid()) @db.Uuid
+  reference                  String                 @unique
+  caseId                     String                 @db.Uuid
+  applicationSubmissionId    String                 @db.Uuid
+  completenessReviewId       String                 @db.Uuid
+  requiredApplicantAction    String
+  responseDeadline           DateTime
+  departmentContactReference String
+  issuedByIdentityId         String                 @db.Uuid
+  issuedByOfficeholderId     String?                @db.Uuid
+  issuedAt                   DateTime
+  status                     DeficiencyNoticeStatus @default(ISSUED)
+  isProceduralNotice         Boolean                @default(true)
+  createdAt                  DateTime               @default(now())
+  case                       ApplicationCase        @relation(fields: [caseId], references: [id])
+  applicationSubmission      ApplicationSubmission    @relation(fields: [applicationSubmissionId], references: [id])
+  completenessReview         CompletenessReview     @relation(fields: [completenessReviewId], references: [id])
+  issuedByIdentity           Identity               @relation("DeficiencyNoticeIssuer", fields: [issuedByIdentityId], references: [id])
+  issuedByOfficeholder       Officeholder?          @relation("DeficiencyNoticeIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
+  items                      DeficiencyNoticeItem[]
+  applicantInformationRequests ApplicantInformationRequest[]
+  correctionSubmissions      ApplicationSubmission[] @relation("DeficiencyNoticeCorrectionSubmission")
+
+  @@index([caseId])
+  @@index([applicationSubmissionId])
+  @@index([completenessReviewId])
   ISSUED
   RESPONDED
   EXPIRED
@@ -2538,6 +2763,57 @@ model DeficiencyNotice {
   @@map("deficiency_notices")
 }
 
+model DeficiencyNoticeItem {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  deficiencyNoticeId       String                 @db.Uuid
+  completenessReviewItemId String                 @db.Uuid
+  checklistItemCode        String
+  deficiencyDescription    String
+  requiredAction           String
+  createdAt                DateTime               @default(now())
+  deficiencyNotice         DeficiencyNotice       @relation(fields: [deficiencyNoticeId], references: [id], onDelete: Cascade)
+  completenessReviewItem   CompletenessReviewItem @relation(fields: [completenessReviewItemId], references: [id])
+
+  @@index([deficiencyNoticeId])
+  @@index([completenessReviewItemId])
+  @@map("deficiency_notice_items")
+}
+
+model ApplicantInformationRequest {
+  id                     String                            @id @default(uuid()) @db.Uuid
+  caseId                 String                            @db.Uuid
+  deficiencyNoticeId     String                            @db.Uuid
+  originalSubmissionId   String                            @db.Uuid
+  responseSubmissionId   String?                           @db.Uuid
+  requestedAt            DateTime                          @default(now())
+  responseDeadline       DateTime
+  status                 ApplicantInformationRequestStatus @default(OPEN)
+  createdAt              DateTime                          @default(now())
+  updatedAt              DateTime                          @updatedAt
+  case                   ApplicationCase                   @relation(fields: [caseId], references: [id])
+  deficiencyNotice       DeficiencyNotice                  @relation(fields: [deficiencyNoticeId], references: [id])
+  originalSubmission     ApplicationSubmission             @relation("ApplicantInformationRequestOriginalSubmission", fields: [originalSubmissionId], references: [id])
+  responseSubmission     ApplicationSubmission?            @relation("ApplicantInformationRequestResponseSubmission", fields: [responseSubmissionId], references: [id])
+
+  @@index([caseId])
+  @@index([deficiencyNoticeId])
+  @@index([originalSubmissionId])
+  @@index([status])
+  @@map("applicant_information_requests")
+}
+
+model ApplicationCaseNotificationOutbox {
+  id        String                                @id @default(uuid()) @db.Uuid
+  caseId    String                                @db.Uuid
+  eventType String
+  payload   Json                                  @default("{}")
+  status    ApplicationCaseNotificationOutboxStatus @default(PENDING)
+  createdAt DateTime                              @default(now())
+  case      ApplicationCase                       @relation(fields: [caseId], references: [id])
+
+  @@index([caseId])
+  @@index([status])
+  @@map("application_case_notification_outbox")
 model ApplicantInformationRequest {
   id                      String                            @id @default(uuid()) @db.Uuid
   applicationSubmissionId String                            @db.Uuid
