@@ -1,11 +1,5 @@
 export const APPLICATION_PROCESSING_MODEL_NAMES = [
   'Application',
-  'Case',
-  'CaseWorkflowInstance',
-  'CaseWorkflowStepInstance',
-  'CaseEvent',
-  'CaseCommunication',
-  'CaseCommunicationOutbox',
   'ApplicationSubmission',
   'Case',
   'CaseStatusHistory',
@@ -14,6 +8,8 @@ export const APPLICATION_PROCESSING_MODEL_NAMES = [
   'WorkflowStageDefinition',
   'WorkflowStepDefinition',
   'WorkflowTransitionDefinition',
+  'CaseTimelineWorkflowInstance',
+  'CaseTimelineWorkflowStepInstance',
   'CaseWorkflowInstance',
   'CaseWorkflowStepInstance',
   'CompletenessReview',
@@ -27,6 +23,7 @@ export const APPLICATION_PROCESSING_MODEL_NAMES = [
   'CaseIssue',
   'CaseEvent',
   'CaseCommunication',
+  'CaseCommunicationOutbox',
   'CaseMilestone',
   'CasePublicStatusProjection',
 ] as const;
@@ -120,6 +117,8 @@ export const PHASE_7_REFERENCE_FIELDS = [
   'evidencePacketReference',
   'recordsClassificationReference',
   'retentionLegalHoldReference',
+] as const;
+
 export const FORBIDDEN_APPLICATION_AUTHORITY_FIELDS = [
   'hasAuthority',
   'authorityGranted',

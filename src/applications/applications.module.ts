@@ -7,9 +7,10 @@ import { CompletenessReviewService } from './completeness-review/completeness-re
 import { DeficiencyNoticeService } from './completeness-review/deficiency-notice.service';
 import { ApplicationSubmissionService } from './submissions/application-submission.service';
 import { CaseWorkflowService } from './workflow/case-workflow.service';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
-  imports: [AuthorityModule],
+  imports: [AuthorityModule, WorkflowModule],
   providers: [
     CaseWorkflowService,
     ApplicationSubmissionService,
@@ -25,11 +26,7 @@ import { CaseWorkflowService } from './workflow/case-workflow.service';
     CompletenessReviewService,
     DeficiencyNoticeService,
     ApplicantCorrectionService,
+    WorkflowModule,
   ],
-import { WorkflowModule } from './workflow/workflow.module';
-
-@Module({
-  imports: [WorkflowModule],
-  exports: [WorkflowModule],
 })
 export class ApplicationsModule {}

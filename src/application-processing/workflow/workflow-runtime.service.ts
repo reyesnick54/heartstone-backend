@@ -189,7 +189,7 @@ export class WorkflowRuntimeService {
     await this.advanceWorkflow(
       {
         id: caseRecord.id,
-        status: caseRecord.status,
+        status: caseRecord.caseStatus,
         workflowInstance: refreshedInstance,
       },
       stepDef.id,
