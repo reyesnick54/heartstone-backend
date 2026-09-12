@@ -1,11 +1,13 @@
 import {
   AccountStatus,
+  AppointmentStatus,
   AuthenticationMethodType,
   FormDefinitionStatus,
   FormFieldType,
   FormVersionStatus,
   GovernmentServiceMaturityStatus,
   GovernmentServicePublicAvailability,
+  IdentityOfficeholderLinkStatus,
   IdentityType,
   InstitutionType,
   JurisdictionType,
@@ -38,6 +40,8 @@ export interface ApplicationProcessingFixtureContext {
   officialIdentityId: string;
   officialSessionToken: string;
   officeholderId: string;
+  administrativeOwnerOfficeId: string;
+  recordsCustodianOfficeId: string;
 }
 
 export async function seedApplicationProcessingFixture(
@@ -68,6 +72,22 @@ export async function seedApplicationProcessingFixture(
       institutionId: institution.id,
       code: `${marker}-DEPT`,
       name: 'NON_PRODUCTION Application Processing Department',
+    },
+  });
+
+  const administrativeOwnerOffice = await prisma.office.create({
+    data: {
+      departmentId: department.id,
+      code: `${marker}-ADMIN`,
+      name: 'NON_PRODUCTION Administrative Owner Office',
+    },
+  });
+
+  const recordsCustodianOffice = await prisma.office.create({
+    data: {
+      departmentId: department.id,
+      code: `${marker}-RECORDS`,
+      name: 'NON_PRODUCTION Records Custodian Office',
     },
   });
 
@@ -227,6 +247,23 @@ export async function seedApplicationProcessingFixture(
     },
   });
 
+  await prisma.appointment.create({
+    data: {
+      officeId: administrativeOwnerOffice.id,
+      officeholderId: officeholder.id,
+      status: AppointmentStatus.ACTIVE,
+      effectiveFrom: new Date('2020-01-01'),
+    },
+  });
+
+  await prisma.identityOfficeholderLink.create({
+    data: {
+      identityId: officialIdentity.id,
+      officeholderId: officeholder.id,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    },
+  });
+
   let applicantSessionToken = '';
   let officialSessionToken = '';
 
@@ -272,6 +309,8 @@ export async function seedApplicationProcessingFixture(
     officialIdentityId: officialIdentity.id,
     officialSessionToken,
     officeholderId: officeholder.id,
+    administrativeOwnerOfficeId: administrativeOwnerOffice.id,
+    recordsCustodianOfficeId: recordsCustodianOffice.id,
   };
 }
 

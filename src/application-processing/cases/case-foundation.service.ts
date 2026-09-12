@@ -10,6 +10,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
 import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.service';
 import { CaseEventService } from './timeline/case-event.service';
 import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
@@ -27,6 +28,7 @@ export class CaseFoundationService {
     private readonly workflowDefinitions: WorkflowDefinitionsService,
     private readonly caseEventService: CaseEventService,
     private readonly projectionService: CasePublicStatusProjectionService,
+    private readonly masterFileService: MasterAdministrativeFileService,
   ) {}
 
   async openCaseFromApplication(input: OpenCaseFromApplicationInput): Promise<Case> {
@@ -100,6 +102,11 @@ export class CaseFoundationService {
     });
 
     await this.projectionService.deriveFromEvent(caseRecord.id, openedEvent);
+
+    await this.masterFileService.initializeForCase({
+      caseId: caseRecord.id,
+      actorIdentityId: input.actorIdentityId,
+    });
 
     return caseRecord;
   }

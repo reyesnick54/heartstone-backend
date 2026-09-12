@@ -9,6 +9,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
 import { CASE_NUMBER_PREFIX } from '../application-processing.constants';
 import { CaseAccessDeniedException } from '../common/exceptions/application-processing.exceptions';
 import { generateReferenceNumber } from '../common/reference-number.util';
@@ -27,6 +28,7 @@ export class CasesService {
     private readonly caseStatus: CaseStatusService,
     private readonly caseEvents: CaseEventsService,
     private readonly publicStatus: CasePublicStatusService,
+    private readonly masterFileService: MasterAdministrativeFileService,
   ) {}
 
   async createFromSubmission(application: Application, submission: ApplicationSubmission) {
@@ -93,6 +95,8 @@ export class CasesService {
     await this.caseEvents.record(caseRecord.id, CaseEventType.SLA_CLOCK_STARTED, {
       clockKey: 'PROCESSING',
     });
+
+    await this.masterFileService.initializeForCase({ caseId: caseRecord.id });
 
     return caseRecord;
   }
