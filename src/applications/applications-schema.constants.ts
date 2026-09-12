@@ -42,6 +42,8 @@ export const COMPLETENESS_REVIEW_ITEM_STATUSES = [
 ] as const;
 
 export const FORBIDDEN_COMPLETENESS_ITEM_STATUSES = ['VERIFIED'] as const;
+
+export const FORBIDDEN_LATER_PHASE_MODELS = [
   'CaseRecord',
   'WorkflowDefinition',
   'WorkflowVersion',

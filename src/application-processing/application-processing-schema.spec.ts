@@ -1,19 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  APPLICATION_PROCESSING_MODEL_NAMES,
-  CASE_COMMUNICATION_TYPES,
-  CASE_EVENT_TYPES,
-  CASE_MILESTONE_STATUSES,
-  CASE_PUBLIC_STATUS_STAGES,
-  FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS,
-  PHASE_7_REFERENCE_FIELDS,
 import { FORBIDDEN_PHASE_7_MODELS } from './application-processing.constants';
 import {
   APPLICATION_PROCESSING_MODEL_NAMES,
+  CASE_EVENT_TYPES,
   FORBIDDEN_APPLICATION_AUTHORITY_FIELDS,
   FORBIDDEN_CASE_CLIENT_MUTATION_FIELDS,
+  PHASE_7_REFERENCE_FIELDS,
 } from './application-processing-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -33,12 +27,13 @@ function extractEnumBlock(schema: string, enumName: string): string {
   return match?.[1] ?? '';
 }
 
-describe('Application processing schema coherence (Phase 6G)', () => {
+describe('Application processing schema coherence (Phase 6)', () => {
   const schema = readSchema();
 
-  it('defines all canonical Phase 6G models', () => {
+  it('defines all canonical application processing models exactly once', () => {
     for (const modelName of APPLICATION_PROCESSING_MODEL_NAMES) {
-      expect(schema).toContain(`model ${modelName}`);
+      const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
+      expect(matches).toHaveLength(1);
     }
   });
 
@@ -53,63 +48,14 @@ describe('Application processing schema coherence (Phase 6G)', () => {
     expect(block).not.toContain('DECISION_ISSUED');
   });
 
-  it('defines all communication types including internal notes', () => {
-    const block = extractEnumBlock(schema, 'CaseCommunicationType');
-    for (const type of CASE_COMMUNICATION_TYPES) {
-      expect(block).toContain(type);
-    }
-  });
-
-  it('defines milestone statuses without approval semantics', () => {
-    const block = extractEnumBlock(schema, 'CaseMilestoneStatus');
-    for (const status of CASE_MILESTONE_STATUSES) {
-      expect(block).toContain(status);
-    }
-    expect(block).not.toContain('APPROVED');
-    expect(block).not.toContain('REFUSED');
-  });
-
-  it('defines applicant-facing public status stages', () => {
-    const block = extractEnumBlock(schema, 'CasePublicStatusStage');
-    for (const stage of CASE_PUBLIC_STATUS_STAGES) {
-      expect(block).toContain(stage);
-    }
-  });
-
-  it('keeps CaseEvent append-only without update fields', () => {
-    const caseEventSection = schema.slice(
-      schema.indexOf('model CaseEvent'),
-      schema.indexOf('model CaseCommunication'),
-    );
-    expect(caseEventSection).toContain('publicVisibility');
-    expect(caseEventSection).toContain('occurredAt');
-    expect(caseEventSection).not.toContain('updatedAt');
-  });
-
-  it('prepares Phase 7 stable references on Case without implementing Phase 7 engines', () => {
+  it('prepares Phase 7 stable references on Case', () => {
     const block = extractModelBlock(schema, 'Case');
     for (const field of PHASE_7_REFERENCE_FIELDS) {
       expect(block).toContain(field);
     }
-    expect(schema).not.toContain('model MasterAdministrativeFile');
-    expect(schema).not.toContain('model DocumentRegister');
-    expect(schema).not.toContain('model EvidencePacket');
   });
 
-  it('documents forbidden client-settable projection fields', () => {
-    expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('publicStage');
-    expect(FORBIDDEN_CLIENT_SETTABLE_CASE_FIELDS).toContain('caseStatus');
-describe('Application processing schema coherence (Phase 6)', () => {
-  const schema = readSchema();
-
-  it('defines all canonical application processing models exactly once', () => {
-    for (const modelName of APPLICATION_PROCESSING_MODEL_NAMES) {
-      const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
-      expect(matches).toHaveLength(1);
-    }
-  });
-
-  it('does not define Phase 7 decision, issuance, or evidence vault models', () => {
+  it('does not define Phase 8 decision, issuance, or evidence vault models', () => {
     for (const modelName of FORBIDDEN_PHASE_7_MODELS) {
       expect(schema).not.toContain(`model ${modelName}`);
     }

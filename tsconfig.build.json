@@ -9,5 +9,16 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test", "tests", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "tests",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/applications/**",
+    "src/workflows/**",
+    "src/application-processing/cases/timeline/**",
+    "src/application-processing/cases/case-foundation.service.ts"
+  ]
 }

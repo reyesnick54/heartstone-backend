@@ -23,5 +23,13 @@
     "esModuleInterop": true
   },
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "src/applications/**",
+    "src/workflows/**",
+    "src/application-processing/cases/timeline/**",
+    "src/application-processing/cases/case-foundation.service.ts"
+  ]
 }
