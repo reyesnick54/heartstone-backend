@@ -1,5 +1,3 @@
-import { EligibilityGuidanceOutcome } from '@prisma/client';
-
 export const NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER =
   'NON_PRODUCTION_SERVICE_CATALOG_TEST_ONLY';
 
