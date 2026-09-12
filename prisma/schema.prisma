@@ -795,6 +795,7 @@ model FunctionAuthorityRecord {
   institutionalActs            InstitutionalAuthorityAct[]
   serviceFunctionMappings      ServiceFunctionMapping[]
   serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
+  workflowSteps                WorkflowStep[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1040,8 +1041,10 @@ model AuthorityEvaluationRecord {
   contextSnapshot           Json
   explanationCodes          Json                       @default("[]")
   requestHash               String
-  functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
-  serviceActivationRecords  ServiceActivationRecord[]
+  functionAuthorityRecord        FunctionAuthorityRecord         @relation(fields: [functionAuthorityRecordId], references: [id])
+  serviceActivationRecords       ServiceActivationRecord[]
+  caseWorkflowStepInstances      CaseWorkflowStepInstance[]
+  caseWorkflowTransitionEvents   CaseWorkflowTransitionEvent[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1298,6 +1301,8 @@ model GovernmentServiceVersion {
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
   formDefinitions                     FormDefinition[]
+  cases                               CaseRecord[]
+  workflowDefinitions                 WorkflowDefinition[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1587,4 +1592,264 @@ model ServiceActivationRecord {
   @@index([actorIdentityId])
   @@index([createdAt])
   @@map("service_activation_records")
+}
+
+// ─── Phase 6: Applications, Cases, and Workflow Runtime ─────────────────────
+
+enum CaseStatus {
+  OPEN
+  IN_PROGRESS
+  DECISION_PENDING
+  AWAITING_ISSUANCE
+  CLOSED
+  CANCELLED
+}
+
+enum WorkflowVersionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum WorkflowStepType {
+  ADMINISTRATIVE
+  DECISION_GATE
+  ISSUANCE_GATE
+  PARALLEL_FORK
+  PARALLEL_JOIN
+  WAITING_APPLICANT
+  WAITING_EXTERNAL
+  WAITING_PROFESSIONAL
+}
+
+enum WorkflowTransitionConditionType {
+  ALWAYS
+  STEP_COMPLETED
+  ALL_JOIN_BRANCHES_COMPLETE
+  CORRECTION_RETURN
+  ESCALATION
+}
+
+enum CaseWorkflowInstanceStatus {
+  NOT_STARTED
+  ACTIVE
+  WAITING_APPLICANT
+  WAITING_EXTERNAL
+  WAITING_PROFESSIONAL
+  PAUSED
+  SAFE_HALTED
+  SUSPENDED
+  COMPLETED
+  CANCELLED
+}
+
+enum CaseWorkflowStepInstanceStatus {
+  PENDING
+  READY
+  IN_PROGRESS
+  WAITING
+  BLOCKED
+  COMPLETED
+  SKIPPED_AUTHORIZED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum CaseWorkflowTransitionEventType {
+  WORKFLOW_STARTED
+  STEP_STARTED
+  STEP_COMPLETED
+  TRANSITION_EVALUATED
+  PARALLEL_FORK
+  PARALLEL_JOIN
+  PAUSE
+  RESUME
+  RETURN_FOR_CORRECTION
+  ESCALATION
+  SAFE_HALT
+  WORKFLOW_COMPLETED
+  WORKFLOW_CANCELLED
+}
+
+model CaseRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  caseReference              String                   @unique
+  governmentServiceVersionId String                   @db.Uuid
+  status                     CaseStatus               @default(OPEN)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  workflowInstances          CaseWorkflowInstance[]
+
+  @@index([governmentServiceVersionId])
+  @@index([status])
+  @@map("cases")
+}
+
+model WorkflowDefinition {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  code                       String                   @unique
+  name                       String
+  governmentServiceVersionId String                   @db.Uuid
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
+  versions                   WorkflowVersion[]
+
+  @@index([governmentServiceVersionId])
+  @@map("workflow_definitions")
+}
+
+model WorkflowVersion {
+  id                    String                 @id @default(uuid()) @db.Uuid
+  workflowDefinitionId  String                 @db.Uuid
+  version               Int
+  status                WorkflowVersionStatus  @default(DRAFT)
+  effectiveFrom         DateTime?
+  effectiveUntil        DateTime?
+  suspendedAt           DateTime?
+  supersededByVersionId String?                @db.Uuid
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  workflowDefinition    WorkflowDefinition     @relation(fields: [workflowDefinitionId], references: [id])
+  supersededByVersion   WorkflowVersion?       @relation("WorkflowVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions    WorkflowVersion[]      @relation("WorkflowVersionSupersession")
+  steps                 WorkflowStep[]
+  transitions           WorkflowTransition[]
+  caseInstances         CaseWorkflowInstance[]
+
+  @@unique([workflowDefinitionId, version])
+  @@index([workflowDefinitionId])
+  @@index([status])
+  @@map("workflow_versions")
+}
+
+model WorkflowStep {
+  id                        String              @id @default(uuid()) @db.Uuid
+  workflowVersionId         String              @db.Uuid
+  stepKey                   String
+  label                     String
+  stepType                  WorkflowStepType
+  stageKey                  String
+  sequenceOrder             Int                 @default(0)
+  functionAuthorityRecordId String?             @db.Uuid
+  authorityAction           AuthorityActionType?
+  isConsequential           Boolean             @default(false)
+  isHumanRequired           Boolean             @default(true)
+  parallelGroupKey          String?
+  requiredJoinBranchKeys    Json                @default("[]")
+  dependsOnStepKeys         Json                @default("[]")
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  workflowVersion           WorkflowVersion     @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
+  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+  stepInstances             CaseWorkflowStepInstance[]
+
+  @@unique([workflowVersionId, stepKey])
+  @@index([workflowVersionId])
+  @@index([functionAuthorityRecordId])
+  @@map("workflow_steps")
+}
+
+model WorkflowTransition {
+  id                String                        @id @default(uuid()) @db.Uuid
+  workflowVersionId String                        @db.Uuid
+  fromStepKey       String
+  toStepKey         String
+  transitionKey     String
+  conditionType     WorkflowTransitionConditionType @default(ALWAYS)
+  conditionRules    Json                          @default("{}")
+  isDefault         Boolean                       @default(false)
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+  workflowVersion   WorkflowVersion               @relation(fields: [workflowVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowVersionId, transitionKey])
+  @@index([workflowVersionId])
+  @@index([fromStepKey])
+  @@map("workflow_transitions")
+}
+
+model CaseWorkflowInstance {
+  id                 String                     @id @default(uuid()) @db.Uuid
+  caseId             String                     @db.Uuid
+  workflowVersionId  String                     @db.Uuid
+  status             CaseWorkflowInstanceStatus @default(NOT_STARTED)
+  currentStageKey    String?
+  currentStageLabel  String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  pausedAt           DateTime?
+  suspendedAt        DateTime?
+  safeHaltReason     String?
+  concurrencyVersion Int                        @default(0)
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  caseRecord         CaseRecord                 @relation(fields: [caseId], references: [id])
+  workflowVersion    WorkflowVersion            @relation(fields: [workflowVersionId], references: [id])
+  stepInstances      CaseWorkflowStepInstance[]
+  transitionEvents   CaseWorkflowTransitionEvent[]
+
+  @@index([caseId])
+  @@index([workflowVersionId])
+  @@index([status])
+  @@map("case_workflow_instances")
+}
+
+model CaseWorkflowStepInstance {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  caseWorkflowInstanceId      String                       @db.Uuid
+  workflowStepId              String                       @db.Uuid
+  stepKey                     String
+  status                      CaseWorkflowStepInstanceStatus @default(PENDING)
+  parallelBranchKey           String?
+  startedAt                   DateTime?
+  completedAt                 DateTime?
+  actorIdentityId             String?                      @db.Uuid
+  officeholderId              String?                      @db.Uuid
+  authorityEvaluationRecordId String?                      @db.Uuid
+  completionIdempotencyKey    String?                      @unique
+  concurrencyVersion          Int                          @default(0)
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  caseWorkflowInstance        CaseWorkflowInstance         @relation(fields: [caseWorkflowInstanceId], references: [id], onDelete: Cascade)
+  workflowStep                WorkflowStep                 @relation(fields: [workflowStepId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
+  transitionEvents            CaseWorkflowTransitionEvent[]
+
+  @@unique([caseWorkflowInstanceId, stepKey, parallelBranchKey])
+  @@index([caseWorkflowInstanceId])
+  @@index([workflowStepId])
+  @@index([status])
+  @@map("case_workflow_step_instances")
+}
+
+model CaseWorkflowTransitionEvent {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  caseWorkflowInstanceId      String                        @db.Uuid
+  caseWorkflowStepInstanceId  String?                       @db.Uuid
+  eventType                   CaseWorkflowTransitionEventType
+  fromStatus                  String?
+  toStatus                    String?
+  fromStepKey                 String?
+  toStepKey                   String?
+  actorIdentityId             String?                       @db.Uuid
+  officeholderId              String?                       @db.Uuid
+  authorityEvaluationRecordId String?                       @db.Uuid
+  reason                      String?
+  notes                       String?
+  idempotencyKey              String?                       @unique
+  metadata                    Json                          @default("{}")
+  occurredAt                  DateTime
+  createdAt                   DateTime                      @default(now())
+  caseWorkflowInstance        CaseWorkflowInstance          @relation(fields: [caseWorkflowInstanceId], references: [id], onDelete: Cascade)
+  caseWorkflowStepInstance    CaseWorkflowStepInstance?     @relation(fields: [caseWorkflowStepInstanceId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?    @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([caseWorkflowInstanceId])
+  @@index([caseWorkflowStepInstanceId])
+  @@index([occurredAt])
+  @@map("case_workflow_transition_events")
 }
