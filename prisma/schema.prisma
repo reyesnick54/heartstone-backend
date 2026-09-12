@@ -116,6 +116,7 @@ model Institution {
   caseReferrals                 CaseReferral[]
   responsibleCases              Case[]
   masterAdministrativeFiles     MasterAdministrativeFile[]
+  documentRecords               DocumentRecord[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -140,15 +141,15 @@ model GovernmentBody {
 }
 
 model Department {
-  id                            String                    @id @default(uuid()) @db.Uuid
-  institutionId                 String                    @db.Uuid
+  id                            String                     @id @default(uuid()) @db.Uuid
+  institutionId                 String                     @db.Uuid
   code                          String
   name                          String
   description                   String?
-  status                        StructuralLifecycleStatus @default(ACTIVE)
-  createdAt                     DateTime                  @default(now())
-  updatedAt                     DateTime                  @updatedAt
-  institution                   Institution               @relation(fields: [institutionId], references: [id])
+  status                        StructuralLifecycleStatus  @default(ACTIVE)
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  institution                   Institution                @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   responsibleCases              Case[]
@@ -160,22 +161,22 @@ model Department {
 }
 
 model Office {
-  id                           String                        @id @default(uuid()) @db.Uuid
-  departmentId                 String                        @db.Uuid
-  code                         String
-  name                         String
-  description                  String?
-  status                       StructuralLifecycleStatus     @default(ACTIVE)
-  createdAt                    DateTime                      @default(now())
-  updatedAt                    DateTime                      @updatedAt
-  department                   Department                    @relation(fields: [departmentId], references: [id])
-  appointments                 Appointment[]
-  delegationsAsDelegator       Delegation[]                  @relation("DelegationDelegatorOffice")
-  delegationsAsRecipient       Delegation[]                  @relation("DelegationRecipientOffice")
-  functionAuthorityRecords     FunctionAuthorityRecord[]
-  functionAuthorityAssignments FunctionAuthorityAssignment[]
-  masterFilesAsAdministrativeOwner MasterAdministrativeFile[] @relation("MasterFileAdministrativeOwner")
-  masterFilesAsRecordsCustodian MasterAdministrativeFile[] @relation("MasterFileRecordsCustodian")
+  id                               String                        @id @default(uuid()) @db.Uuid
+  departmentId                     String                        @db.Uuid
+  code                             String
+  name                             String
+  description                      String?
+  status                           StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                        DateTime                      @default(now())
+  updatedAt                        DateTime                      @updatedAt
+  department                       Department                    @relation(fields: [departmentId], references: [id])
+  appointments                     Appointment[]
+  delegationsAsDelegator           Delegation[]                  @relation("DelegationDelegatorOffice")
+  delegationsAsRecipient           Delegation[]                  @relation("DelegationRecipientOffice")
+  functionAuthorityRecords         FunctionAuthorityRecord[]
+  functionAuthorityAssignments     FunctionAuthorityAssignment[]
+  masterFilesAsAdministrativeOwner MasterAdministrativeFile[]    @relation("MasterFileAdministrativeOwner")
+  masterFilesAsRecordsCustodian    MasterAdministrativeFile[]    @relation("MasterFileRecordsCustodian")
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -258,6 +259,7 @@ model ExternalAuthority {
   externalDependencyDeterminations ExternalDependencyDetermination[]
   institutionalAuthorityActs       InstitutionalAuthorityAct[]
   caseReferrals                    CaseReferral[]
+  documentVersionsReceived         DocumentVersion[]
 
   @@map("external_authorities")
 }
@@ -445,6 +447,9 @@ model Identity {
   casesAsApplicant          Case[]                     @relation("CaseApplicant")
   caseEventsAsActor         CaseEvent[]                @relation("CaseEventActor")
   communicationsAsSender    CaseCommunication[]        @relation("CommunicationSender")
+  documentVersionsReceived  DocumentVersion[]          @relation("DocumentVersionReceivedFrom")
+  documentAssociations      DocumentAssociation[]      @relation("DocumentAssociationActor")
+  documentAuditEvents       DocumentAuditEvent[]       @relation("DocumentAuditActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -485,6 +490,7 @@ model Organization {
   memberships               OrganizationMembership[]
   representativeAuthorities RepresentativeAuthority[]
   applications              Application[]
+  documentRecords           DocumentRecord[]
 
   @@index([status])
   @@map("organizations")
@@ -1242,29 +1248,29 @@ model ServiceFamily {
 }
 
 model GovernmentService {
-  id                       String                     @id @default(uuid()) @db.Uuid
-  code                     String                     @unique
-  slug                     String                     @unique
-  officialName             String
-  publicName               String
-  summary                  String?
-  catalogServiceType       CatalogServiceType?
-  internalNotes            String?
-  sensitiveConfig          Json?
-  responsibleInstitutionId String                     @db.Uuid
-  responsibleDepartmentId  String                     @db.Uuid
-  serviceFamilyId          String                     @db.Uuid
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  responsibleInstitution   Institution                @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment    Department                 @relation(fields: [responsibleDepartmentId], references: [id])
-  serviceFamily            ServiceFamily              @relation(fields: [serviceFamilyId], references: [id])
-  ownerOfficeholderId      String?                    @db.Uuid
-  ownerOfficeholder        Officeholder?              @relation(fields: [ownerOfficeholderId], references: [id])
-  versions                 GovernmentServiceVersion[]
-  applications             Application[]
-  workflowDefinitions      WorkflowDefinition[]
-  cases                    Case[]
+  id                        String                     @id @default(uuid()) @db.Uuid
+  code                      String                     @unique
+  slug                      String                     @unique
+  officialName              String
+  publicName                String
+  summary                   String?
+  catalogServiceType        CatalogServiceType?
+  internalNotes             String?
+  sensitiveConfig           Json?
+  responsibleInstitutionId  String                     @db.Uuid
+  responsibleDepartmentId   String                     @db.Uuid
+  serviceFamilyId           String                     @db.Uuid
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  responsibleInstitution    Institution                @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment     Department                 @relation(fields: [responsibleDepartmentId], references: [id])
+  serviceFamily             ServiceFamily              @relation(fields: [serviceFamilyId], references: [id])
+  ownerOfficeholderId       String?                    @db.Uuid
+  ownerOfficeholder         Officeholder?              @relation(fields: [ownerOfficeholderId], references: [id])
+  versions                  GovernmentServiceVersion[]
+  applications              Application[]
+  workflowDefinitions       WorkflowDefinition[]
+  cases                     Case[]
   masterAdministrativeFiles MasterAdministrativeFile[]
 
   @@index([responsibleInstitutionId])
@@ -1941,29 +1947,29 @@ enum CaseMilestoneType {
 }
 
 model Application {
-  id                         String                   @id @default(uuid()) @db.Uuid
-  applicationNumber          String?                  @unique
-  applicantIdentityId        String                   @db.Uuid
-  organizationId             String?                  @db.Uuid
-  representativeAuthorityId  String?                  @db.Uuid
-  governmentServiceId        String                   @db.Uuid
-  governmentServiceVersionId String                   @db.Uuid
-  formDefinitionId           String                   @db.Uuid
-  formVersionId              String                   @db.Uuid
+  id                         String                    @id @default(uuid()) @db.Uuid
+  applicationNumber          String?                   @unique
+  applicantIdentityId        String                    @db.Uuid
+  organizationId             String?                   @db.Uuid
+  representativeAuthorityId  String?                   @db.Uuid
+  governmentServiceId        String                    @db.Uuid
+  governmentServiceVersionId String                    @db.Uuid
+  formDefinitionId           String                    @db.Uuid
+  formVersionId              String                    @db.Uuid
   configurationFingerprint   String
   applicantCategory          ApplicantCategory
-  status                     ApplicationStatus        @default(DRAFT)
-  draftAnswers               Json                     @default("{}")
+  status                     ApplicationStatus         @default(DRAFT)
+  draftAnswers               Json                      @default("{}")
   idempotencyKey             String?
-  createdAt                  DateTime                 @default(now())
-  updatedAt                  DateTime                 @updatedAt
-  applicantIdentity          Identity                 @relation(fields: [applicantIdentityId], references: [id])
-  organization               Organization?            @relation(fields: [organizationId], references: [id])
-  representativeAuthority    RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
-  governmentService          GovernmentService        @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id])
-  formDefinition             FormDefinition           @relation(fields: [formDefinitionId], references: [id])
-  formVersion                FormVersion              @relation(fields: [formVersionId], references: [id])
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  applicantIdentity          Identity                  @relation(fields: [applicantIdentityId], references: [id])
+  organization               Organization?             @relation(fields: [organizationId], references: [id])
+  representativeAuthority    RepresentativeAuthority?  @relation(fields: [representativeAuthorityId], references: [id])
+  governmentService          GovernmentService         @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion   GovernmentServiceVersion  @relation(fields: [governmentServiceVersionId], references: [id])
+  formDefinition             FormDefinition            @relation(fields: [formDefinitionId], references: [id])
+  formVersion                FormVersion               @relation(fields: [formVersionId], references: [id])
   submissions                ApplicationSubmission[]
   case                       Case?
   masterAdministrativeFile   MasterAdministrativeFile?
@@ -2006,47 +2012,51 @@ model ApplicationSubmission {
 }
 
 model Case {
-  id                               String                      @id @default(uuid()) @db.Uuid
-  caseNumber                       String                      @unique
-  applicationId                    String                      @unique @db.Uuid
-  applicantIdentityId              String                      @db.Uuid
-  governmentServiceId              String                      @db.Uuid
-  governmentServiceVersionId       String                      @db.Uuid
-  responsibleInstitutionId         String                      @db.Uuid
-  responsibleDepartmentId          String                      @db.Uuid
-  workflowVersionId                String                      @db.Uuid
-  configurationFingerprint         String
-  status                           CaseStatus                  @default(RECEIVED)
-  legalStatus                      CaseLegalStatus             @default(NONE)
-  legalStatusLabel                 String?
-  priority                         CasePriority                @default(NORMAL)
-  version                          Int                         @default(1)
-  openedAt                         DateTime                    @default(now())
-  closedAt                         DateTime?
-  currentCaseManagerOfficeholderId String?                     @db.Uuid
+  id                                String                      @id @default(uuid()) @db.Uuid
+  caseNumber                        String                      @unique
+  applicationId                     String                      @unique @db.Uuid
+  applicantIdentityId               String                      @db.Uuid
+  governmentServiceId               String                      @db.Uuid
+  governmentServiceVersionId        String                      @db.Uuid
+  responsibleInstitutionId          String                      @db.Uuid
+  responsibleDepartmentId           String                      @db.Uuid
+  workflowVersionId                 String                      @db.Uuid
+  configurationFingerprint          String
+  status                            CaseStatus                  @default(RECEIVED)
+  legalStatus                       CaseLegalStatus             @default(NONE)
+  legalStatusLabel                  String?
+  priority                          CasePriority                @default(NORMAL)
+  version                           Int                         @default(1)
+  openedAt                          DateTime                    @default(now())
+  closedAt                          DateTime?
+  currentCaseManagerOfficeholderId  String?                     @db.Uuid
   masterAdministrativeFileReference String?
-  createdAt                        DateTime                    @default(now())
-  updatedAt                        DateTime                    @updatedAt
-  application                      Application                 @relation(fields: [applicationId], references: [id])
-  applicantIdentity                Identity                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
-  governmentService                GovernmentService           @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion         GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
-  responsibleInstitution           Institution                 @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment            Department                  @relation(fields: [responsibleDepartmentId], references: [id])
-  workflowVersion                  WorkflowVersion             @relation(fields: [workflowVersionId], references: [id])
-  currentCaseManagerOfficeholder   Officeholder?               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
-  statusHistory                    CaseStatusHistory[]
-  workflowInstance                 CaseWorkflowInstance?
-  assignments                      CaseAssignment[]
-  referrals                        CaseReferral[]
-  slaClocks                        CaseSlaClock[]
-  escalations                      CaseEscalation[]
-  issues                           CaseIssue[]
-  events                           CaseEvent[]
-  communications                   CaseCommunication[]
-  milestones                       CaseMilestone[]
-  publicStatusProjection           CasePublicStatusProjection?
-  masterAdministrativeFile         MasterAdministrativeFile?
+  documentRegisterReference         String?
+  evidencePacketReference           String?
+  recordsClassificationReference    String?
+  retentionLegalHoldReference       String?
+  createdAt                         DateTime                    @default(now())
+  updatedAt                         DateTime                    @updatedAt
+  application                       Application                 @relation(fields: [applicationId], references: [id])
+  applicantIdentity                 Identity                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
+  governmentService                 GovernmentService           @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion          GovernmentServiceVersion    @relation(fields: [governmentServiceVersionId], references: [id])
+  responsibleInstitution            Institution                 @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment             Department                  @relation(fields: [responsibleDepartmentId], references: [id])
+  workflowVersion                   WorkflowVersion             @relation(fields: [workflowVersionId], references: [id])
+  currentCaseManagerOfficeholder    Officeholder?               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
+  statusHistory                     CaseStatusHistory[]
+  workflowInstance                  CaseWorkflowInstance?
+  assignments                       CaseAssignment[]
+  referrals                         CaseReferral[]
+  slaClocks                         CaseSlaClock[]
+  escalations                       CaseEscalation[]
+  issues                            CaseIssue[]
+  events                            CaseEvent[]
+  communications                    CaseCommunication[]
+  milestones                        CaseMilestone[]
+  publicStatusProjection            CasePublicStatusProjection?
+  masterAdministrativeFile          MasterAdministrativeFile?
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2600,38 +2610,38 @@ enum MasterAdministrativeFileSectionType {
 }
 
 model MasterAdministrativeFile {
-  id                                   String                                       @id @default(uuid()) @db.Uuid
-  fileNumber                           String                                       @unique
-  caseId                               String                                       @unique @db.Uuid
-  applicationId                        String                                       @unique @db.Uuid
-  governmentServiceId                  String                                       @db.Uuid
-  governmentServiceVersionId           String                                       @db.Uuid
-  responsibleInstitutionId             String                                       @db.Uuid
-  responsibleDepartmentId              String                                       @db.Uuid
-  administrativeOwnerOfficeId          String                                       @db.Uuid
-  recordsCustodianOfficeId             String                                       @db.Uuid
+  id                                   String                                         @id @default(uuid()) @db.Uuid
+  fileNumber                           String                                         @unique
+  caseId                               String                                         @unique @db.Uuid
+  applicationId                        String                                         @unique @db.Uuid
+  governmentServiceId                  String                                         @db.Uuid
+  governmentServiceVersionId           String                                         @db.Uuid
+  responsibleInstitutionId             String                                         @db.Uuid
+  responsibleDepartmentId              String                                         @db.Uuid
+  administrativeOwnerOfficeId          String                                         @db.Uuid
+  recordsCustodianOfficeId             String                                         @db.Uuid
   workflowVersionId                    String?
-  openedAt                             DateTime                                     @default(now())
+  openedAt                             DateTime                                       @default(now())
   closedAt                             DateTime?
-  lifecycleStatus                      MasterAdministrativeFileLifecycleStatus      @default(OPEN)
+  lifecycleStatus                      MasterAdministrativeFileLifecycleStatus        @default(OPEN)
   securityClassification               MasterAdministrativeFileSecurityClassification @default(OFFICIAL)
   privacyClassification                MasterAdministrativeFilePrivacyClassification  @default(STANDARD)
   retentionCategoryCode                String?
-  legalHoldIndicator                   Boolean                                      @default(false)
+  legalHoldIndicator                   Boolean                                        @default(false)
   authoritativeRecordLocationReference String
   archiveLocationReference             String?
-  integrityStatus                      MasterAdministrativeFileIntegrityStatus      @default(INTACT)
+  integrityStatus                      MasterAdministrativeFileIntegrityStatus        @default(INTACT)
   lastReviewedAt                       DateTime?
-  createdAt                            DateTime                                     @default(now())
-  updatedAt                            DateTime                                     @updatedAt
-  case                                 Case                                         @relation(fields: [caseId], references: [id])
-  application                          Application                                  @relation(fields: [applicationId], references: [id])
-  governmentService                    GovernmentService                            @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion             GovernmentServiceVersion                     @relation(fields: [governmentServiceVersionId], references: [id])
-  responsibleInstitution               Institution                                  @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment                Department                                   @relation(fields: [responsibleDepartmentId], references: [id])
-  administrativeOwnerOffice            Office                                       @relation("MasterFileAdministrativeOwner", fields: [administrativeOwnerOfficeId], references: [id])
-  recordsCustodianOffice               Office                                       @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
+  createdAt                            DateTime                                       @default(now())
+  updatedAt                            DateTime                                       @updatedAt
+  case                                 Case                                           @relation(fields: [caseId], references: [id])
+  application                          Application                                    @relation(fields: [applicationId], references: [id])
+  governmentService                    GovernmentService                              @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion             GovernmentServiceVersion                       @relation(fields: [governmentServiceVersionId], references: [id])
+  responsibleInstitution               Institution                                    @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment                Department                                     @relation(fields: [responsibleDepartmentId], references: [id])
+  administrativeOwnerOffice            Office                                         @relation("MasterFileAdministrativeOwner", fields: [administrativeOwnerOfficeId], references: [id])
+  recordsCustodianOffice               Office                                         @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
   sections                             MasterAdministrativeFileSection[]
 
   @@index([governmentServiceId])
@@ -2644,18 +2654,229 @@ model MasterAdministrativeFile {
 }
 
 model MasterAdministrativeFileSection {
-  id                         String                            @id @default(uuid()) @db.Uuid
-  masterAdministrativeFileId String                            @db.Uuid
+  id                         String                              @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId String                              @db.Uuid
   sectionType                MasterAdministrativeFileSectionType
   sectionNumber              Int
   title                      String
   description                String?
-  isRestricted               Boolean                           @default(false)
-  createdAt                  DateTime                          @default(now())
-  updatedAt                  DateTime                          @updatedAt
-  masterAdministrativeFile   MasterAdministrativeFile          @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  isRestricted               Boolean                             @default(false)
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile            @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
 
   @@unique([masterAdministrativeFileId, sectionType], map: "maf_sections_file_section_type_key")
   @@index([masterAdministrativeFileId], map: "maf_sections_file_id_idx")
   @@map("master_administrative_file_sections")
+}
+
+// ─── Phase 7B: Document Registry, Versioning, Storage and Provenance ─────────
+
+enum DocumentSourceType {
+  APPLICANT_UPLOAD
+  OFFICIAL_UPLOAD
+  EXTERNAL_AUTHORITY
+  SYSTEM_GENERATED
+  SCANNED_COUNTER
+  EMAIL_INGEST
+  API_INGEST
+  OTHER
+}
+
+enum DocumentSignatureStatus {
+  NOT_EVALUATED
+  UNSIGNED
+  SIGNED
+  SIGNATURE_INVALID
+  SIGNATURE_UNVERIFIED
+}
+
+enum DocumentSealStatus {
+  NOT_EVALUATED
+  UNSEALED
+  SEALED
+  SEAL_INVALID
+  SEAL_UNVERIFIED
+}
+
+enum DocumentAuthenticityStatus {
+  NOT_EVALUATED
+  UNVERIFIED
+  VERIFICATION_PENDING
+  AUTHENTICITY_DISPUTED
+  VERIFICATION_FAILED
+}
+
+enum DocumentSecurityClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  HIGHLY_RESTRICTED
+}
+
+enum DocumentPrivacyClassification {
+  NOT_APPLICABLE
+  PERSONAL_DATA
+  SENSITIVE_PERSONAL_DATA
+  SPECIAL_CATEGORY
+  ANONYMIZED
+}
+
+enum DocumentConfidentialityOrPrivilegeStatus {
+  NOT_EVALUATED
+  NONE
+  LEGAL_PRIVILEGE_ASSERTED
+  LEGAL_PRIVILEGE_CONFIRMED
+  STATUTORY_CONFIDENTIALITY
+  CABINET_CONFIDENTIAL
+}
+
+enum MalwareScanStatus {
+  NOT_SCANNED
+  SCAN_PENDING
+  CLEAN
+  SUSPICIOUS
+  MALICIOUS
+  SCAN_FAILED
+  QUARANTINED
+}
+
+enum DocumentAssociationTargetType {
+  MASTER_ADMINISTRATIVE_FILE
+  APPLICATION
+  APPLICATION_SUBMISSION
+  CASE
+  WORKFLOW_STEP
+  CASE_REFERRAL
+  COMMUNICATION
+  CHECKLIST_REQUIREMENT
+  EVIDENCE_ITEM
+}
+
+enum DocumentAssociationRole {
+  SUPPORTING_EVIDENCE
+  REQUIRED_SUBMISSION
+  OFFICIAL_RECORD
+  CORRESPONDENCE_ATTACHMENT
+  REFERRAL_ATTACHMENT
+  WORKFLOW_ARTIFACT
+  REFERENCE_COPY
+  OTHER
+}
+
+enum DocumentAuditEventType {
+  DOCUMENT_UPLOADED
+  DOCUMENT_VERSION_CREATED
+  CLASSIFICATION_CHANGED
+  DOCUMENT_DOWNLOADED
+  DOCUMENT_EXPORTED
+  DOCUMENT_QUARANTINED
+  DOCUMENT_ACCESS_DENIED
+}
+
+model DocumentRecord {
+  id                   String                @id @default(uuid()) @db.Uuid
+  documentNumber       String                @unique
+  title                String
+  documentType         String
+  sourceType           DocumentSourceType
+  authorOrIssuer       String?
+  recipient            String?
+  owningInstitutionId  String?               @db.Uuid
+  owningOrganizationId String?               @db.Uuid
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  owningInstitution    Institution?          @relation(fields: [owningInstitutionId], references: [id])
+  owningOrganization   Organization?         @relation(fields: [owningOrganizationId], references: [id])
+  versions             DocumentVersion[]
+  associations         DocumentAssociation[]
+  auditEvents          DocumentAuditEvent[]
+
+  @@index([owningInstitutionId])
+  @@index([owningOrganizationId])
+  @@index([documentType])
+  @@map("document_records")
+}
+
+model DocumentVersion {
+  id                               String                                   @id @default(uuid()) @db.Uuid
+  documentRecordId                 String                                   @db.Uuid
+  versionNumber                    Int
+  originalFilename                 String
+  contentType                      String
+  sizeBytes                        Int
+  storageProvider                  String
+  storageObjectKey                 String
+  storageVersionId                 String?
+  sha256                           String
+  dateCreated                      DateTime?
+  dateReceived                     DateTime                                 @default(now())
+  dateEffective                    DateTime?
+  language                         String?
+  signatureStatus                  DocumentSignatureStatus                  @default(NOT_EVALUATED)
+  sealStatus                       DocumentSealStatus                       @default(NOT_EVALUATED)
+  authenticityStatus               DocumentAuthenticityStatus               @default(NOT_EVALUATED)
+  securityClassification           DocumentSecurityClassification           @default(INTERNAL)
+  privacyClassification            DocumentPrivacyClassification            @default(NOT_APPLICABLE)
+  confidentialityOrPrivilegeStatus DocumentConfidentialityOrPrivilegeStatus @default(NOT_EVALUATED)
+  malwareScanStatus                MalwareScanStatus                        @default(NOT_SCANNED)
+  supersededById                   String?                                  @unique @db.Uuid
+  receivedFromIdentityId           String?                                  @db.Uuid
+  receivedFromExternalAuthorityId  String?                                  @db.Uuid
+  createdAt                        DateTime                                 @default(now())
+  documentRecord                   DocumentRecord                           @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  supersededBy                     DocumentVersion?                         @relation("DocumentVersionSupersession", fields: [supersededById], references: [id])
+  supersedes                       DocumentVersion?                         @relation("DocumentVersionSupersession")
+  receivedFromIdentity             Identity?                                @relation("DocumentVersionReceivedFrom", fields: [receivedFromIdentityId], references: [id])
+  receivedFromExternalAuthority    ExternalAuthority?                       @relation(fields: [receivedFromExternalAuthorityId], references: [id])
+  associations                     DocumentAssociation[]
+  auditEvents                      DocumentAuditEvent[]
+
+  @@unique([documentRecordId, versionNumber])
+  @@index([documentRecordId])
+  @@index([sha256])
+  @@index([malwareScanStatus])
+  @@index([securityClassification])
+  @@map("document_versions")
+}
+
+model DocumentAssociation {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  documentVersionId      String                        @db.Uuid
+  targetType             DocumentAssociationTargetType
+  targetId               String                        @db.Uuid
+  associationRole        DocumentAssociationRole       @default(OTHER)
+  targetReference        String?
+  associatedAt           DateTime                      @default(now())
+  associatedByIdentityId String?                       @db.Uuid
+  createdAt              DateTime                      @default(now())
+  documentVersion        DocumentVersion               @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  documentRecord         DocumentRecord                @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentRecordId       String                        @db.Uuid
+  associatedByIdentity   Identity?                     @relation("DocumentAssociationActor", fields: [associatedByIdentityId], references: [id])
+
+  @@unique([documentVersionId, targetType, targetId, associationRole])
+  @@index([targetType, targetId])
+  @@index([documentRecordId])
+  @@map("document_associations")
+}
+
+model DocumentAuditEvent {
+  id                String                 @id @default(uuid()) @db.Uuid
+  documentRecordId  String                 @db.Uuid
+  documentVersionId String?                @db.Uuid
+  eventType         DocumentAuditEventType
+  actorIdentityId   String?                @db.Uuid
+  metadata          Json                   @default("{}")
+  recordedAt        DateTime               @default(now())
+  documentRecord    DocumentRecord         @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentVersion   DocumentVersion?       @relation(fields: [documentVersionId], references: [id], onDelete: SetNull)
+  actorIdentity     Identity?              @relation("DocumentAuditActor", fields: [actorIdentityId], references: [id])
+
+  @@index([documentRecordId])
+  @@index([documentVersionId])
+  @@index([eventType])
+  @@index([recordedAt])
+  @@map("document_audit_events")
 }
