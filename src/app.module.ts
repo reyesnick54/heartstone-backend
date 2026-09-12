@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationsModule } from './applications/applications.module';
+import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import appConfig from './config/app.config';
@@ -17,6 +18,7 @@ import { IdentityModule } from './identity/identity.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { SystemModule } from './system/system.module';
     AuthorityModule,
     ApplicationsModule,
     ServiceCatalogModule,
+    WorkflowsModule,
+    ApplicationProcessingModule,
   ],
 })
 export class AppModule {}
