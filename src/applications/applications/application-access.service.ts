@@ -1,9 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  Application,
-  MembershipStatus,
-  RepresentativeAuthorityStatus,
-} from '@prisma/client';
+import { Application, MembershipStatus, RepresentativeAuthorityStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 

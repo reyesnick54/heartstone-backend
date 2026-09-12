@@ -1,8 +1,4 @@
-export const CASE_MODEL_NAMES = [
-  'Case',
-  'CaseStatusHistory',
-  'CaseRelationship',
-] as const;
+export const CASE_MODEL_NAMES = ['Case', 'CaseStatusHistory', 'CaseRelationship'] as const;
 
 export const CASE_STATUSES = [
   'RECEIVED',

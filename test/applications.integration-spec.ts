@@ -35,7 +35,9 @@ describe('Phase 6A Applications (integration)', () => {
     await app.close();
   });
 
-  async function createDraftApplication(fixture: Awaited<ReturnType<typeof seedApplicationsFixture>>) {
+  async function createDraftApplication(
+    fixture: Awaited<ReturnType<typeof seedApplicationsFixture>>,
+  ) {
     const response = await request(app.getHttpServer())
       .post('/api/v1/applications')
       .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)

@@ -7,15 +7,13 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { FormResponseValidationService } from '../../service-catalog/forms/form-response-validation.service';
-import { FormAnswers } from '../../service-catalog/forms/types/form-engine.types';
 import { InformationOnlyNotStartableException } from '../../service-catalog/common/information-only-not-startable.exception';
-import {
-  APPLICATION_STARTABLE_AVAILABILITY,
-} from '../../service-catalog/common/public-discovery.constants';
+import { APPLICATION_STARTABLE_AVAILABILITY } from '../../service-catalog/common/public-discovery.constants';
 import { isApplicationCapableAvailability } from '../../service-catalog/common/public-service.mapper';
 import { buildServiceConfigurationFingerprint } from '../../service-catalog/common/service-configuration-hash.util';
 import { VersionSupersededException } from '../../service-catalog/common/version-superseded.exception';
+import { FormResponseValidationService } from '../../service-catalog/forms/form-response-validation.service';
+import { FormAnswers } from '../../service-catalog/forms/types/form-engine.types';
 
 const serviceVersionInclude = {
   fees: true,
@@ -143,10 +141,7 @@ export class ApplicationIntakeValidationService {
     formVersionId: string,
     answers: Record<string, unknown>,
   ): Promise<void> {
-    const result = await this.formValidation.validateResponse(
-      formVersionId,
-      answers as FormAnswers,
-    );
+    const result = await this.formValidation.validateResponse(formVersionId, answers);
 
     if (result.outcome !== 'VALID') {
       throw new BadRequestException({

@@ -17,8 +17,8 @@ import {
 } from '@nestjs/swagger';
 
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ApplicationsService } from './applications.service';
 import { ApplicationResponseDto } from './dto/application-response.dto';
 import { ApplicationSubmissionResponseDto } from './dto/application-submission-response.dto';

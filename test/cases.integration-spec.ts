@@ -4,10 +4,7 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
-import {
-  createReceivedApplication,
-  seedCasesFixture,
-} from './helpers/cases-test-fixtures';
+import { createReceivedApplication, seedCasesFixture } from './helpers/cases-test-fixtures';
 import { asCaseBody, asCaseStatusHistoryBody } from './helpers/cases-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 

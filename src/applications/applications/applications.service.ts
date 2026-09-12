@@ -1,16 +1,11 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
 import {
   Application,
   ApplicationStatus,
   ApplicationSubmission,
   Prisma,
-  SubmittedCapacity,
   SubmissionChannel,
+  SubmittedCapacity,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -61,7 +56,7 @@ export class ApplicationsService {
     }
 
     let organizationId = dto.organizationId ?? null;
-    let representativeAuthorityId = dto.representativeAuthorityId ?? null;
+    const representativeAuthorityId = dto.representativeAuthorityId ?? null;
 
     if (representativeAuthorityId) {
       const authorityContext = await this.access.validateRepresentativeAuthority(
@@ -164,7 +159,9 @@ export class ApplicationsService {
 
       if (existing) {
         if (existing.applicationId !== applicationId) {
-          throw new ConflictException('Idempotency key is already associated with another application');
+          throw new ConflictException(
+            'Idempotency key is already associated with another application',
+          );
         }
 
         return this.buildAcknowledgment(existing.submission, existing.submission.application);
@@ -313,7 +310,9 @@ export class ApplicationsService {
 
       if (existing) {
         if (existing.applicationId !== applicationId) {
-          throw new ConflictException('Idempotency key is already associated with another application');
+          throw new ConflictException(
+            'Idempotency key is already associated with another application',
+          );
         }
 
         return this.buildAcknowledgment(existing.submission, existing.submission.application);

@@ -4,12 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  ApplicationStatus,
-  Case,
-  CaseLegalStatus,
-  CaseStatus,
-} from '@prisma/client';
+import { ApplicationStatus, Case, CaseLegalStatus, CaseStatus } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
 import { CaseAccessService } from './case-access.service';
@@ -176,10 +171,7 @@ export class CasesService {
     return this.mapCase(updated);
   }
 
-  async getHistory(
-    caseId: string,
-    identityId: string,
-  ): Promise<CaseStatusHistoryResponseDto[]> {
+  async getHistory(caseId: string, identityId: string): Promise<CaseStatusHistoryResponseDto[]> {
     await this.access.assertCanView(caseId, identityId);
 
     const history = await this.prisma.caseStatusHistory.findMany({
@@ -213,21 +205,19 @@ export class CasesService {
     };
   }
 
-  private mapHistory(
-    entry: {
-      id: string;
-      caseId: string;
-      previousStatus: CaseStatus | null;
-      newStatus: CaseStatus;
-      previousLegalStatus: CaseLegalStatus | null;
-      newLegalStatus: CaseLegalStatus;
-      actorIdentityId: string;
-      officeholderId: string | null;
-      reason: string | null;
-      correlationId: string | null;
-      createdAt: Date;
-    },
-  ): CaseStatusHistoryResponseDto {
+  private mapHistory(entry: {
+    id: string;
+    caseId: string;
+    previousStatus: CaseStatus | null;
+    newStatus: CaseStatus;
+    previousLegalStatus: CaseLegalStatus | null;
+    newLegalStatus: CaseLegalStatus;
+    actorIdentityId: string;
+    officeholderId: string | null;
+    reason: string | null;
+    correlationId: string | null;
+    createdAt: Date;
+  }): CaseStatusHistoryResponseDto {
     return {
       id: entry.id,
       caseId: entry.caseId,

@@ -1,10 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  AppointmentStatus,
-  Case,
-  IdentityOfficeholderLinkStatus,
-  Prisma,
-} from '@prisma/client';
+import { AppointmentStatus, Case, IdentityOfficeholderLinkStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
 import { QueryCasesDto } from './dto/query-cases.dto';
@@ -30,7 +25,9 @@ export class CaseAccessService {
       throw new ForbiddenException('Applicants cannot manage case status');
     }
 
-    if (await this.isResponsibleDepartmentOfficial(caseRecord.responsibleDepartmentId, identityId)) {
+    if (
+      await this.isResponsibleDepartmentOfficial(caseRecord.responsibleDepartmentId, identityId)
+    ) {
       return caseRecord;
     }
 
@@ -44,7 +41,9 @@ export class CaseAccessService {
       throw new ForbiddenException('Applicants cannot assign case managers');
     }
 
-    if (await this.isResponsibleDepartmentOfficial(caseRecord.responsibleDepartmentId, identityId)) {
+    if (
+      await this.isResponsibleDepartmentOfficial(caseRecord.responsibleDepartmentId, identityId)
+    ) {
       return caseRecord;
     }
 
@@ -56,9 +55,7 @@ export class CaseAccessService {
     identityId: string,
   ): Promise<void> {
     if (!(await this.isResponsibleDepartmentOfficial(responsibleDepartmentId, identityId))) {
-      throw new ForbiddenException(
-        'You are not authorized to create a case for this application',
-      );
+      throw new ForbiddenException('You are not authorized to create a case for this application');
     }
   }
 
@@ -96,9 +93,7 @@ export class CaseAccessService {
       }
     }
 
-    const visibilityClauses: Prisma.CaseWhereInput[] = [
-      { applicantIdentityId: identityId },
-    ];
+    const visibilityClauses: Prisma.CaseWhereInput[] = [{ applicantIdentityId: identityId }];
 
     if (departmentIds.length > 0) {
       visibilityClauses.push({ responsibleDepartmentId: { in: departmentIds } });

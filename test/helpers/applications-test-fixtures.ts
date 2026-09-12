@@ -16,9 +16,9 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
+import { NON_PRODUCTION_APPLICATIONS_FIXTURE_MARKER } from '../../src/applications/common/applications.constants';
 import { type PrismaService } from '../../src/database/prisma.service';
 import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/common/service-configuration-hash.util';
-import { NON_PRODUCTION_APPLICATIONS_FIXTURE_MARKER } from '../../src/applications/common/applications.constants';
 import { asLoginResponseBody } from './identity-test-types';
 
 export interface ApplicationsFixtureContext {
@@ -279,9 +279,9 @@ export async function seedApplicationsFixture(
     },
   });
 
-  for (const [account, password, loginId] of [
-    [applicantAccount, 'ApplicantPass123!', `${marker}-applicant@test.gov`],
-    [otherAccount, 'OtherPass123!', `${marker}-other@test.gov`],
+  for (const [account, password] of [
+    [applicantAccount, 'ApplicantPass123!'],
+    [otherAccount, 'OtherPass123!'],
   ] as const) {
     const identity = account.id === applicantAccount.id ? applicantIdentity : otherIdentity;
     await request(app.getHttpServer())
