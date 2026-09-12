@@ -1,8 +1,10 @@
 import {
   AccountStatus,
+  AppointmentStatus,
   AuthenticationMethodType,
   GovernmentServiceMaturityStatus,
   GovernmentServicePublicAvailability,
+  IdentityOfficeholderLinkStatus,
   IdentityType,
   InstitutionType,
   JurisdictionType,
@@ -19,6 +21,8 @@ export interface ApplicationProcessingFixtureContext {
   jurisdictionId: string;
   institutionId: string;
   departmentId: string;
+  administrativeOwnerOfficeId: string;
+  recordsCustodianOfficeId: string;
   serviceFamilyId: string;
   governmentServiceId: string;
   governmentServiceVersionId: string;
@@ -57,6 +61,22 @@ export async function seedApplicationProcessingFixture(
       institutionId: institution.id,
       code: `${marker}-DEPT`,
       name: 'NON_PRODUCTION Application Processing Department',
+    },
+  });
+
+  const administrativeOwnerOffice = await prisma.office.create({
+    data: {
+      departmentId: department.id,
+      code: `${marker}-ADMIN`,
+      name: 'Administrative Owner Office',
+    },
+  });
+
+  const recordsCustodianOffice = await prisma.office.create({
+    data: {
+      departmentId: department.id,
+      code: `${marker}-RECORDS`,
+      name: 'Records Custodian Office',
     },
   });
 
@@ -138,6 +158,23 @@ export async function seedApplicationProcessingFixture(
     },
   });
 
+  await prisma.appointment.create({
+    data: {
+      officeId: administrativeOwnerOffice.id,
+      officeholderId: officeholder.id,
+      status: AppointmentStatus.ACTIVE,
+      effectiveFrom: new Date('2020-01-01'),
+    },
+  });
+
+  await prisma.identityOfficeholderLink.create({
+    data: {
+      identityId: officialIdentity.id,
+      officeholderId: officeholder.id,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    },
+  });
+
   let applicantSessionToken = '';
   let officialSessionToken = '';
 
@@ -172,6 +209,8 @@ export async function seedApplicationProcessingFixture(
     jurisdictionId: jurisdiction.id,
     institutionId: institution.id,
     departmentId: department.id,
+    administrativeOwnerOfficeId: administrativeOwnerOffice.id,
+    recordsCustodianOfficeId: recordsCustodianOffice.id,
     serviceFamilyId: serviceFamily.id,
     governmentServiceId: service.id,
     governmentServiceVersionId: serviceVersion.id,

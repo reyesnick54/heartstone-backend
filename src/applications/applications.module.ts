@@ -26,10 +26,5 @@ import { CaseWorkflowService } from './workflow/case-workflow.service';
     DeficiencyNoticeService,
     ApplicantCorrectionService,
   ],
-import { WorkflowModule } from './workflow/workflow.module';
-
-@Module({
-  imports: [WorkflowModule],
-  exports: [WorkflowModule],
 })
 export class ApplicationsModule {}

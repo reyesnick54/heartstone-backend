@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuthorityModule } from '../../authority/authority.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { RecordsModule } from '../../records/records.module';
 import { CaseFoundationService } from './case-foundation.service';
 import { CaseCommunicationService } from './timeline/case-communication.service';
 import { CaseCommunicationOutboxService } from './timeline/case-communication-outbox.service';
@@ -11,9 +12,10 @@ import { CaseEventService } from './timeline/case-event.service';
 import { CaseMilestoneService } from './timeline/case-milestone.service';
 import { CasePublicStatusProjectionService } from './timeline/case-public-status-projection.service';
 import { CaseTimelineController } from './timeline/case-timeline.controller';
+import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
 
 @Module({
-  imports: [AuthorityModule, SessionsModule],
+  imports: [AuthorityModule, SessionsModule, RecordsModule],
   controllers: [CaseTimelineController],
   providers: [
     SessionAuthGuard,
@@ -33,42 +35,5 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CasePublicStatusProjectionService,
     CaseDashboardReadService,
   ],
-import { forwardRef, Module } from '@nestjs/common';
-
-import { AuthorityModule } from '../../authority/authority.module';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
-import { ApplicationsModule } from '../applications/applications.module';
-import { ApplicationProcessingCommonModule } from '../common/application-processing-common.module';
-import { CompletenessReviewsService } from '../completeness/completeness-reviews.service';
-import { CasePublicStatusService } from '../public-status/case-public-status.service';
-import { CaseReferralsService } from '../referrals/case-referrals.service';
-import { CaseSlaService } from '../sla/case-sla.service';
-import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.service';
-import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
-import { CaseEventsService } from './case-events.service';
-import { CaseStatusService } from './case-status.service';
-import { CasesController } from './cases.controller';
-import { CasesService } from './cases.service';
-
-@Module({
-  imports: [
-    ApplicationProcessingCommonModule,
-    SessionsModule,
-    AuthorityModule,
-    forwardRef(() => ApplicationsModule),
-  ],
-  controllers: [CasesController],
-  providers: [
-    CasesService,
-    CaseEventsService,
-    CaseStatusService,
-    CasePublicStatusService,
-    WorkflowDefinitionsService,
-    WorkflowRuntimeService,
-    CompletenessReviewsService,
-    CaseReferralsService,
-    CaseSlaService,
-  ],
-  exports: [CasesService, WorkflowDefinitionsService, WorkflowRuntimeService],
 })
 export class CasesModule {}

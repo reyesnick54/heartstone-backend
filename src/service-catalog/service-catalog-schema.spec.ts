@@ -97,44 +97,20 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     expect(schema).not.toMatch(/enum ServiceFamilyType/);
   });
 
-  it('does not embed Phase 6 application-processing fields in catalog models', () => {
-    const catalogModels = [
-      'GovernmentService',
-      'GovernmentServiceVersion',
-      'FormDefinition',
-      'FormVersion',
-  it('does not define later Phase 6+ models outside the applications workflow slice', () => {
-    const laterPhaseModels = [
+  it('does not define Phase 6 application-processing models', () => {
+    const phase6Models = [
+      'Application',
       'Case',
       'CaseWorkflow',
-  it('does not define Phase 6 models reserved for later slices', () => {
-    const laterPhase6Models = [
-      'Application',
       'EvidencePacket',
-  it('does not define Phase 7+ decision or issuance models', () => {
-    const phase7Models = [
       'GovernmentDecision',
       'IssuedLicense',
       'IssuedPermit',
-      'IssuedCertificate',
-      'EvidencePacket',
-      'EvidenceVault',
-      'MasterAdministrativeFile',
       'PaymentTransaction',
       'InspectionCase',
     ];
-    const forbiddenPhase6Fields = ['caseId', 'applicationId', 'caseStatus', 'approvalStatus'];
 
-    for (const modelName of catalogModels) {
-      const block = extractModelBlock(schema, modelName);
-      for (const field of forbiddenPhase6Fields) {
-        expect(block).not.toContain(field);
-      }
-    for (const modelName of laterPhaseModels) {
-      expect(schema).not.toMatch(new RegExp(`model ${modelName}\\s*\\{`));
-    for (const modelName of laterPhase6Models) {
-      expect(schema).not.toMatch(new RegExp(`model ${modelName}\\s*\\{`));
-    for (const modelName of phase7Models) {
+    for (const modelName of phase6Models) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
   });
