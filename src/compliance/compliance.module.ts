@@ -7,21 +7,37 @@ import { ObligationRecurrenceService } from './common/obligation-recurrence.serv
 import { ComplianceController } from './compliance.controller';
 import { ComplianceMatterService } from './matters/compliance-matter.service';
 import { ContinuingObligationService } from './obligations/continuing-obligation.service';
+import { ComplianceDashboardService } from './oversight/compliance-dashboard.service';
+import { ComplianceMonitoringService } from './oversight/compliance-monitoring.service';
+import { ComplianceProjectionService } from './oversight/compliance-projection.service';
+import { ComplianceRevalidationService } from './oversight/compliance-revalidation.service';
+import { ComplianceStatusBoundaryService } from './oversight/compliance-status-boundary.service';
+import { ComplianceStatusController } from './oversight/compliance-status.controller';
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
-  controllers: [ComplianceController],
+  controllers: [ComplianceController, ComplianceStatusController],
   providers: [
     ComplianceBoundaryService,
     ObligationRecurrenceService,
     ComplianceMatterService,
     ContinuingObligationService,
+    ComplianceStatusBoundaryService,
+    ComplianceProjectionService,
+    ComplianceMonitoringService,
+    ComplianceDashboardService,
+    ComplianceRevalidationService,
   ],
   exports: [
     ComplianceBoundaryService,
     ObligationRecurrenceService,
     ComplianceMatterService,
     ContinuingObligationService,
+    ComplianceStatusBoundaryService,
+    ComplianceProjectionService,
+    ComplianceMonitoringService,
+    ComplianceDashboardService,
+    ComplianceRevalidationService,
   ],
 })
 export class ComplianceModule {}

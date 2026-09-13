@@ -123,6 +123,8 @@ model Institution {
   instrumentNumberingRules      InstrumentNumberingRule[]
   issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
   complianceMattersResponsible ComplianceMatter[]
+  complianceStatusProjections  ComplianceStatusProjection[]
+  monitoringRules              MonitoringRule[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -164,6 +166,8 @@ model Department {
   evidencePackets               EvidencePacket[]
   governmentDecisions           GovernmentDecision[]
   complianceMattersResponsible  ComplianceMatter[]
+  complianceStatusProjections   ComplianceStatusProjection[]
+  monitoringRules               MonitoringRule[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -232,6 +236,7 @@ model Officeholder {
   instrumentLifecycleDecisions  InstrumentLifecycleDecision[] @relation("InstrumentLifecycleDecisionDecider")
   instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
   reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
 
   @@map("officeholders")
 }
@@ -515,6 +520,9 @@ model Identity {
   reviewReferencesAsAppellant        DecisionReviewReference[]     @relation("ReviewAppellant")
   complianceMattersAsHolder          ComplianceMatter[]            @relation("ComplianceMatterHolderIdentity")
   obligationStatusChanges            ObligationStatusHistory[]     @relation("ObligationStatusChangedBy")
+  complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
+  complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
+  complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -896,6 +904,7 @@ model FunctionAuthorityRecord {
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
   continuingObligations        ContinuingObligation[]           @relation("ContinuingObligationFunctionAuthority")
   instrumentLifecycleDecisions InstrumentLifecycleDecision[]  @relation("InstrumentLifecycleDecisionFunction")
+  complianceStatusProjections  ComplianceStatusProjection[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1156,6 +1165,7 @@ model AuthorityEvaluationRecord {
   governmentDecisions          GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
   issuanceEvents               IssuanceEvent[]
   instrumentLifecycleDecisions InstrumentLifecycleDecision[] @relation("InstrumentLifecycleDecisionAuthority")
+  complianceProjectionEvaluations ComplianceStatusProjection[] @relation("ComplianceProjectionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2167,6 +2177,7 @@ model Case {
   issuanceReadinessAssessments      IssuanceReadinessAssessment[]
   complianceMatters                 ComplianceMatter[]
   instrumentLifecycleDecisions      InstrumentLifecycleDecision[]
+  complianceStatusProjections       ComplianceStatusProjection[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2761,6 +2772,7 @@ model MasterAdministrativeFile {
   officialInstruments                  OfficialInstrument[]
   complianceMatters                  ComplianceMatter[]
   instrumentLifecycleDecisions       InstrumentLifecycleDecision[]
+  complianceStatusProjections        ComplianceStatusProjection[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -4944,6 +4956,7 @@ model OfficialInstrument {
   surrenderRecords             InstrumentSurrenderRecord[]
   challengedInReviews          DecisionReviewReference[]
   complianceMatters            ComplianceMatter[]
+  complianceStatusProjections  ComplianceStatusProjection[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -5798,4 +5811,260 @@ model ObligationStatusHistory {
 
   @@index([continuingObligationId, changedAt])
   @@map("obligation_status_history")
+}
+
+// ─── Phase 9G: Continuous Compliance Status and Oversight ─────────────────────
+
+enum ComplianceProjectionStatus {
+  NO_CURRENT_ASSESSMENT
+  MONITORING
+  SATISFACTORY
+  ACTION_REQUIRED
+  UNDER_CORRECTIVE_ACTION
+  UNDER_INSPECTION
+  UNDER_REVIEW
+  ESCALATED
+  REFERRED_EXTERNALLY
+  SUSPENDED_BY_SEPARATE_DECISION
+  REVOKED_BY_SEPARATE_DECISION
+  EXPIRED
+  CLOSED
+  UNRESOLVED
+}
+
+enum ComplianceDashboardAudience {
+  HOLDER
+  OFFICIAL
+  DEPARTMENT_HEAD
+  EXECUTIVE_OVERSIGHT
+}
+
+enum ComplianceIndicatorType {
+  OBLIGATIONS_DUE
+  OBLIGATIONS_OVERDUE
+  REPORTS_PENDING_REVIEW
+  OPEN_FINDINGS
+  CRITICAL_FINDINGS
+  CORRECTIVE_ACTIONS_OVERDUE
+  UPCOMING_INSPECTIONS
+  REINSPECTION_REQUIRED
+  EXPIRING_EVIDENCE
+  EXPIRING_INSTRUMENT
+  UNRESOLVED_EXTERNAL_DEPENDENCIES
+}
+
+enum MonitoringRuleType {
+  DUE_DATE_WARNING
+  EXPIRY_WARNING
+  MISSED_FILING_DETECTION
+  OPEN_FINDING_AGE
+  CORRECTIVE_ACTION_DEADLINE
+  INSPECTION_SCHEDULE
+  EVIDENCE_EXPIRY
+  REQUIRED_REVIEW_INTERVAL
+}
+
+enum MonitoringRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum ComplianceAlertLevel {
+  INFORMATION
+  ATTENTION
+  ELEVATED
+  CRITICAL
+}
+
+enum ComplianceAlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  SUPERSEDED
+}
+
+enum ComplianceMonitoringEventType {
+  RULE_EVALUATED
+  PROJECTION_REFRESHED
+  ALERT_RAISED
+  ALERT_RESOLVED
+  REVALIDATION_TRIGGERED
+  CACHE_INVALIDATED
+}
+
+enum ComplianceRevalidationTrigger {
+  MATERIAL_CONDITION_CHANGE
+  INSTRUMENT_AMENDED
+  OWNERSHIP_CONTROL_CHANGE
+  CRITICAL_INCIDENT
+  NEW_GOVERNING_REQUIREMENT
+  MATERIAL_INSPECTION_FINDING
+  PROFESSIONAL_STANDING_CHANGE
+  GOVERNMENT_DETERMINATION_CHANGE
+  SCHEDULED_REVALIDATION_REACHED
+}
+
+enum ComplianceRiskScorePurpose {
+  PRIORITIZATION_ONLY
+}
+
+model ComplianceStatusProjection {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  audience                    ComplianceDashboardAudience
+  subjectIdentityId           String?                        @db.Uuid
+  subjectOfficeholderId         String?                        @db.Uuid
+  subjectDepartmentId           String?                        @db.Uuid
+  subjectInstitutionId          String?                        @db.Uuid
+  caseId                        String?                        @db.Uuid
+  masterAdministrativeFileId    String?                        @db.Uuid
+  officialInstrumentId          String?                        @db.Uuid
+  status                        ComplianceProjectionStatus     @default(NO_CURRENT_ASSESSMENT)
+  projectionDisclaimer          String
+  underlyingAssessmentType      String?
+  underlyingAssessmentId        String?                        @db.Uuid
+  evidenceCutoffAt              DateTime?
+  openFindingRefs               Json                           @default("[]")
+  openCorrectiveActionRefs      Json                           @default("[]")
+  instrumentStatusSnapshot      String?
+  functionAuthorityRecordId     String?                        @db.Uuid
+  authorityEvaluationRecordId   String?                        @db.Uuid
+  lastReviewedAt                DateTime?
+  nextReviewAt                  DateTime?
+  projectionVersion             Int                            @default(1)
+  lastDerivedAt                 DateTime                       @default(now())
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  subjectIdentity               Identity?                      @relation("ComplianceProjectionSubjectIdentity", fields: [subjectIdentityId], references: [id])
+  subjectOfficeholder           Officeholder?                  @relation("ComplianceProjectionSubjectOfficeholder", fields: [subjectOfficeholderId], references: [id])
+  subjectDepartment             Department?                    @relation(fields: [subjectDepartmentId], references: [id])
+  subjectInstitution            Institution?                   @relation(fields: [subjectInstitutionId], references: [id])
+  case                          Case?                          @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?      @relation(fields: [masterAdministrativeFileId], references: [id])
+  officialInstrument            OfficialInstrument?            @relation(fields: [officialInstrumentId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord?       @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord?     @relation("ComplianceProjectionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  indicators                    ComplianceIndicator[]
+  alerts                        ComplianceAlert[]
+  monitoringEvents              ComplianceMonitoringEvent[]
+  revalidationRecords           ComplianceRevalidationRecord[]
+
+  @@index([audience])
+  @@index([status])
+  @@index([caseId])
+  @@index([subjectIdentityId])
+  @@index([subjectDepartmentId])
+  @@index([lastDerivedAt])
+  @@map("compliance_status_projections")
+}
+
+model ComplianceIndicator {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  projectionId        String                     @db.Uuid
+  indicatorType       ComplianceIndicatorType
+  displayLabel        String
+  countValue          Int                        @default(0)
+  drillDownReferences Json                       @default("[]")
+  computedAt          DateTime                   @default(now())
+  projection          ComplianceStatusProjection @relation(fields: [projectionId], references: [id], onDelete: Cascade)
+
+  @@unique([projectionId, indicatorType])
+  @@index([indicatorType])
+  @@map("compliance_indicators")
+}
+
+model MonitoringRule {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  code               String                      @unique
+  name               String
+  description        String?
+  ruleType           MonitoringRuleType
+  status             MonitoringRuleStatus        @default(DRAFT)
+  institutionId      String?                     @db.Uuid
+  departmentId       String?                     @db.Uuid
+  structuredConfig   Json                        @default("{}")
+  warningDaysBefore  Int?
+  criticalDaysBefore Int?
+  reviewIntervalDays Int?
+  effectiveFrom      DateTime?
+  effectiveUntil     DateTime?
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+  institution        Institution?                @relation(fields: [institutionId], references: [id])
+  department         Department?                 @relation(fields: [departmentId], references: [id])
+  monitoringEvents   ComplianceMonitoringEvent[]
+  alerts             ComplianceAlert[]
+
+  @@index([ruleType, status])
+  @@index([institutionId])
+  @@map("monitoring_rules")
+}
+
+model ComplianceMonitoringEvent {
+  id               String                        @id @default(uuid()) @db.Uuid
+  projectionId     String?                       @db.Uuid
+  monitoringRuleId String?                       @db.Uuid
+  eventType        ComplianceMonitoringEventType
+  eventSummary     String
+  sourceDataRefs   Json                          @default("[]")
+  uncertaintyNotes String?
+  occurredAt       DateTime                      @default(now())
+  projection       ComplianceStatusProjection?   @relation(fields: [projectionId], references: [id])
+  monitoringRule   MonitoringRule?               @relation(fields: [monitoringRuleId], references: [id])
+
+  @@index([projectionId])
+  @@index([monitoringRuleId])
+  @@index([eventType])
+  @@index([occurredAt])
+  @@map("compliance_monitoring_events")
+}
+
+model ComplianceAlert {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  projectionId              String                     @db.Uuid
+  monitoringRuleId          String?                    @db.Uuid
+  alertLevel                ComplianceAlertLevel
+  status                    ComplianceAlertStatus      @default(OPEN)
+  title                     String
+  summary                   String
+  sourceDataRefs            Json                       @default("[]")
+  uncertaintyNotes          String?
+  isViolation               Boolean                    @default(false)
+  isEnforcementDecision     Boolean                    @default(false)
+  methodologyVersion        String?
+  inputsSnapshot            Json                       @default("{}")
+  limitations               String?
+  humanReviewRequired       Boolean                    @default(true)
+  humanReviewedAt           DateTime?
+  humanReviewedByIdentityId String?                    @db.Uuid
+  raisedAt                  DateTime                   @default(now())
+  resolvedAt                DateTime?
+  projection                ComplianceStatusProjection @relation(fields: [projectionId], references: [id], onDelete: Cascade)
+  monitoringRule            MonitoringRule?            @relation(fields: [monitoringRuleId], references: [id])
+  humanReviewedBy           Identity?                  @relation("ComplianceAlertReviewer", fields: [humanReviewedByIdentityId], references: [id])
+
+  @@index([projectionId])
+  @@index([alertLevel])
+  @@index([status])
+  @@map("compliance_alerts")
+}
+
+model ComplianceRevalidationRecord {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  projectionId           String                        @db.Uuid
+  trigger                ComplianceRevalidationTrigger
+  triggerSummary         String
+  sourceDataRefs         Json                          @default("[]")
+  priorAssessmentId      String?                       @db.Uuid
+  priorAssessmentType    String?
+  doesNotRenewInstrument Boolean                       @default(true)
+  recordedAt             DateTime                      @default(now())
+  recordedByIdentityId   String?                       @db.Uuid
+  projection             ComplianceStatusProjection    @relation(fields: [projectionId], references: [id], onDelete: Cascade)
+  recordedBy             Identity?                     @relation("ComplianceRevalidationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([projectionId])
+  @@index([trigger])
+  @@map("compliance_revalidation_records")
 }
