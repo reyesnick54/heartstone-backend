@@ -1,6 +1,31 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.complianceFindingReopening.deleteMany();
+  await prisma.complianceFindingClosure.deleteMany();
+  await prisma.correctiveActionVerification.deleteMany();
+  await prisma.correctiveActionItem.deleteMany();
+  await prisma.correctiveActionPlan.deleteMany();
+  await prisma.noncomplianceFinding.deleteMany();
+  await prisma.inspectionFinding.deleteMany();
+  await prisma.inspectionObservation.deleteMany();
+  await prisma.inspectionSession.deleteMany();
+  await prisma.inspectionAssignment.deleteMany();
+  await prisma.inspectionPlan.deleteMany();
+  await prisma.inspectionTypeDefinition.deleteMany();
+  await prisma.complianceReview.deleteMany();
+  await prisma.complianceSubmission.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceRevalidationRecord.deleteMany();
+  await prisma.complianceAlert.deleteMany();
+  await prisma.complianceMonitoringEvent.deleteMany();
+  await prisma.complianceStatusProjection.deleteMany();
+  await prisma.emergencyInterimActionRecord.deleteMany();
+  await prisma.enforcementReferral.deleteMany();
+  await prisma.complianceEscalation.deleteMany();
+  await prisma.complianceAssessment.deleteMany();
+  await prisma.complianceMatter.deleteMany();
   await prisma.instrumentLifecycleDecisionLink.deleteMany();
   await prisma.instrumentLifecycleEvent.deleteMany();
   await prisma.decisionReviewReference.deleteMany();

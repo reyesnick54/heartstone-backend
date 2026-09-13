@@ -13,6 +13,7 @@ import securityConfig from './config/security.config';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import { ComplianceModule } from './compliance/compliance.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
@@ -51,6 +52,7 @@ import { SystemModule } from './system/system.module';
     InstrumentsModule,
     DecisionsModule,
     DecisionsIssuanceModule,
+    ComplianceModule,
   ],
 })
 export class AppModule {}
