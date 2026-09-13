@@ -11,8 +11,8 @@ import { ComplianceDashboardService } from './oversight/compliance-dashboard.ser
 import { ComplianceMonitoringService } from './oversight/compliance-monitoring.service';
 import { ComplianceProjectionService } from './oversight/compliance-projection.service';
 import { ComplianceRevalidationService } from './oversight/compliance-revalidation.service';
-import { ComplianceStatusBoundaryService } from './oversight/compliance-status-boundary.service';
 import { ComplianceStatusController } from './oversight/compliance-status.controller';
+import { ComplianceStatusBoundaryService } from './oversight/compliance-status-boundary.service';
 
 @Module({
   imports: [DatabaseModule, SessionsModule],

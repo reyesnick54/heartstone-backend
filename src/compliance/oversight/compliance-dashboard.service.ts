@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ComplianceDashboardAudience } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { HOLDER_DASHBOARD_RESTRICTED_FIELDS } from './compliance-status.constants';
 import { ComplianceProjectionService } from './compliance-projection.service';
+import { HOLDER_DASHBOARD_RESTRICTED_FIELDS } from './compliance-status.constants';
 
 @Injectable()
 export class ComplianceDashboardService {

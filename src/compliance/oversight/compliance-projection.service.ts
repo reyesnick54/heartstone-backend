@@ -336,7 +336,7 @@ export class ComplianceProjectionService {
         throw new NotFoundException(`OfficialInstrument ${input.officialInstrumentId} not found`);
       }
 
-      instrumentStatusSnapshot = instrument.lifecycleStatus ?? instrument.status;
+      instrumentStatusSnapshot = instrument.lifecycleStatus;
       status = this.applyInstrumentStatusProjection(status, instrument.status, instrument.lifecycleStatus);
 
       if (instrument.effectiveUntil && instrument.effectiveUntil <= new Date()) {

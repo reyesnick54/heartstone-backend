@@ -140,10 +140,9 @@ describe('ComplianceProjectionService', () => {
     const refreshed = await service.invalidateOnInstrumentChange('inst-2');
     expect(refreshed).toHaveLength(1);
 
-    expect(prisma.complianceMonitoringEvent.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ eventType: 'CACHE_INVALIDATED' }),
-      }),
-    );
+    const monitoringCalls = prisma.complianceMonitoringEvent.create.mock.calls as [
+      { data: { eventType: string } },
+    ][];
+    expect(monitoringCalls[0]?.[0].data.eventType).toBe('CACHE_INVALIDATED');
   });
 });
