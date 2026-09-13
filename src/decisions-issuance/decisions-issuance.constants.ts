@@ -4,9 +4,18 @@ export const NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER =
 export const PHASE_8E_BOUNDARY_DISCLAIMER =
   'Phase 8E establishes the official instrument catalog and controlled issuance engine. A government decision alone does not constitute issuance. A generated document alone is not an official instrument until the issuance event completes successfully.';
 
+export const PHASE_8F_BOUNDARY_DISCLAIMER =
+  'Issuance does not imply delivery. Delivery does not imply receipt. Receipt does not imply continuing validity.';
+
 export const INSTRUMENT_NUMBER_PREFIX = 'INST';
 
 export const DECISION_NUMBER_PREFIX = 'DEC';
+
+export const VERIFICATION_CODE_BYTES = 32;
+export const VERIFICATION_URI_PATH_PREFIX = '/api/v1/public/instruments/verify';
+
+export const PUBLIC_VERIFICATION_RATE_LIMIT_WINDOW_SECONDS = 60;
+export const PUBLIC_VERIFICATION_RATE_LIMIT_MAX_REQUESTS = 30;
 
 export const FORBIDDEN_CLIENT_ISSUANCE_FIELDS = [
   'instrumentNumber',
@@ -18,6 +27,43 @@ export const FORBIDDEN_CLIENT_ISSUANCE_FIELDS = [
   'sealRecord',
   'issuerSource',
 ] as const;
+
+export const FORBIDDEN_CLIENT_INSTRUMENT_FIELDS = [
+  'verificationCode',
+  'verificationStatus',
+  'status',
+  'deliveredAt',
+  'receivedAt',
+  'currentVersionId',
+  'issuedAt',
+] as const;
+
+export const FORBIDDEN_CLIENT_DELIVERY_FIELDS = [
+  'status',
+  'sentAt',
+  'deliveredAt',
+  'failedAt',
+  'deliveryEvidenceReference',
+] as const;
+
+export const FORBIDDEN_PUBLIC_VERIFICATION_FIELDS = [
+  'applicationDetails',
+  'evidencePacket',
+  'reasons',
+  'privateConditions',
+  'identityDocuments',
+  'internalNotes',
+  'professionalRecords',
+  'governmentReferrals',
+  'restrictedHolderData',
+  'caseId',
+  'governmentDecisionId',
+  'holderIdentityId',
+] as const;
+
+export const RESTRICTED_DELIVERY_CLASSIFICATIONS = ['RESTRICTED', 'SECRET'] as const;
+
+export const UNAPPROVED_CHANNELS_FOR_RESTRICTED = ['SECURE_EMAIL', 'PARTNER_INTEGRATION'] as const;
 
 export const FORBIDDEN_TEMPLATE_INJECTION_PATTERNS = [
   /<script\b/i,
