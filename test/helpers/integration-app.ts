@@ -4,6 +4,7 @@ import { type App } from 'supertest/types';
 
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
+import { resetDecisionsData } from '../../src/database/decisions-test-reset';
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
@@ -63,6 +64,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetDecisionsData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
