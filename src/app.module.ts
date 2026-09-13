@@ -18,7 +18,6 @@ import { EvidenceRecordsModule } from './evidence-records/evidence-records.modul
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
-import { InstrumentsModule } from './instruments/instruments.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
@@ -48,7 +47,6 @@ import { SystemModule } from './system/system.module';
     RecordsModule,
     EvidenceRecordsModule,
     EvidenceModule,
-    InstrumentsModule,
     DecisionsModule,
     DecisionsIssuanceModule,
   ],
