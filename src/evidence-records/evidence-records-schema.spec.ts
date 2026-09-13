@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { FORBIDDEN_PHASE_7C_MODELS } from './evidence-records.constants';
+import { FORBIDDEN_PHASE_7C_MODELS, PHASE_7G_MODEL_NAMES } from './evidence-records.constants';
 import {
   EVIDENCE_RECORDS_ENUM_NAMES,
   EVIDENCE_RECORDS_MODEL_NAMES,
@@ -66,5 +66,50 @@ describe('Evidence records schema (Phase 7B)', () => {
     const caseBlock = extractModelBlock(schema, 'Case');
     expect(caseBlock).toContain('documentRegisterReference');
     expect(caseBlock).toContain('masterAdministrativeFileReference');
+  });
+});
+
+describe('Evidence records schema coherence (Phase 7G)', () => {
+  it('defines all canonical Phase 7G models exactly once', () => {
+    for (const modelName of PHASE_7G_MODEL_NAMES) {
+      const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    }
+  });
+
+  it('defines controlled retention trigger types without executable code hooks', () => {
+    const block = schema.slice(
+      schema.indexOf('enum RetentionTriggerType'),
+      schema.indexOf('enum RetentionDurationUnit'),
+    );
+    expect(block).toContain('DATE_CREATED');
+    expect(block).toContain('CUSTOM_APPROVED_TRIGGER');
+    expect(block).not.toContain('EXECUTABLE');
+    expect(block).not.toContain('SCRIPT');
+  });
+
+  it('stores institutional retention authority via governingSourceId on schedules', () => {
+    expect(schema).toContain('governingSourceId');
+    expect(schema).toContain('scheduleSnapshotHash');
+  });
+
+  it('requires explicit disposition authorization records', () => {
+    expect(schema).toContain('model RecordDispositionRecord');
+    expect(schema).toContain('authorityReference         String');
+    expect(schema).toContain('manifestCertificateHash    String');
+  });
+
+  it('audits legal hold release separately from hold creation', () => {
+    expect(schema).toContain('model LegalHoldReleaseRecord');
+    expect(schema).toContain('auditManifestHash          String');
+  });
+
+  it('does not define automatic destruction fields on retention schedules', () => {
+    const scheduleBlock = schema.slice(
+      schema.indexOf('model RetentionSchedule'),
+      schema.indexOf('model RetentionRule'),
+    );
+    expect(scheduleBlock).not.toContain('autoDelete');
+    expect(scheduleBlock).not.toContain('destroyOnExpiry');
   });
 });

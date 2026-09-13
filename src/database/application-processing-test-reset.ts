@@ -1,6 +1,20 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.recordDispositionRecord.deleteMany();
+  await prisma.recordDispositionRequest.deleteMany();
+  await prisma.archivalTransferItem.deleteMany();
+  await prisma.archivalTransfer.deleteMany();
+  await prisma.preservationCollectionItem.deleteMany();
+  await prisma.preservationCollection.deleteMany();
+  await prisma.legalHoldReleaseRecord.deleteMany();
+  await prisma.legalHoldTarget.deleteMany();
+  await prisma.legalHold.deleteMany();
+  await prisma.recordRetentionAssignment.deleteMany();
+  await prisma.retentionRule.deleteMany();
+  await prisma.retentionSchedule.deleteMany();
+  await prisma.recordsClassification.deleteMany();
+  await prisma.externalRecordsRepository.deleteMany();
   await prisma.evidenceCustodyEvent.deleteMany();
   await prisma.inspectionEvidenceItem.deleteMany();
   await prisma.inspectionInspector.deleteMany();
