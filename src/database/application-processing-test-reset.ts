@@ -1,6 +1,26 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.issuanceEvent.deleteMany();
+  await prisma.issuanceReadinessAssessment.deleteMany();
+  await prisma.officialInstrument.updateMany({ data: { currentVersionId: null } });
+  await prisma.officialInstrumentVersion.deleteMany();
+  await prisma.instrumentNumberReservation.deleteMany();
+  await prisma.officialInstrument.deleteMany();
+  await prisma.instrumentTypeEligibleDecisionType.deleteMany();
+  await prisma.instrumentTemplateVersion.deleteMany();
+  await prisma.instrumentTemplate.deleteMany();
+  await prisma.instrumentTypeVersion.updateMany({ data: { requiredTemplateVersionId: null } });
+  await prisma.instrumentTypeVersion.deleteMany();
+  await prisma.instrumentTypeDefinition.deleteMany();
+  await prisma.instrumentNumberingRule.deleteMany();
+  await prisma.decisionCondition.deleteMany();
+  await prisma.decisionParticipant.deleteMany();
+  await prisma.decisionPreparationRecord.deleteMany();
+  await prisma.governmentDecision.deleteMany();
+  await prisma.decisionReadinessAssessment.deleteMany();
+  await prisma.decisionTypeVersion.deleteMany();
+  await prisma.decisionType.deleteMany();
   await prisma.recordDispositionRecord.deleteMany();
   await prisma.recordDispositionRequest.deleteMany();
   await prisma.archivalTransferItem.deleteMany();
@@ -35,6 +55,11 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.documentAssociation.deleteMany();
   await prisma.documentVersion.deleteMany();
   await prisma.documentRecord.deleteMany();
+  await prisma.evidencePacketItemExclusion.deleteMany();
+  await prisma.evidencePacketManifest.deleteMany();
+  await prisma.evidencePacketItem.deleteMany();
+  await prisma.evidencePacketVersion.deleteMany();
+  await prisma.evidencePacket.deleteMany();
   await prisma.masterAdministrativeFileSection.deleteMany();
   await prisma.masterAdministrativeFile.deleteMany();
   await prisma.decisionNoticeRight.deleteMany();

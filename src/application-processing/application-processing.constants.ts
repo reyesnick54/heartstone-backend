@@ -15,4 +15,11 @@ export const FORBIDDEN_PHASE_7_MODELS = [
   'EvidenceVault',
 ] as const;
 
+export const FORBIDDEN_PHASE_8C_MODELS = ['IssuedLicense', 'IssuedPermit', 'IssuedCertificate'] as const;
+export const FORBIDDEN_PHASE_8C_MODELS = [
+  'IssuedLicense',
+  'IssuedPermit',
+  'IssuedCertificate',
+] as const;
+
 export const FORBIDDEN_CLIENT_CASE_STATUSES = ['DECIDED', 'ISSUED', 'APPROVED', 'REFUSED'] as const;
