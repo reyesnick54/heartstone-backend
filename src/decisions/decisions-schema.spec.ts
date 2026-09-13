@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { FORBIDDEN_PHASE_8D_MODELS } from './decisions.constants';
+import { FORBIDDEN_PHASE_8C_MODELS, FORBIDDEN_PHASE_8D_MODELS } from './decisions.constants';
 import {
   DECISION_CONDITION_STATUSES,
   DECISION_CONDITION_TYPES,
@@ -9,7 +9,6 @@ import {
   PHASE_8C_ENUM_NAMES,
   PHASE_8C_MODEL_NAMES,
 } from './decisions-schema.constants';
-import { FORBIDDEN_PHASE_8C_MODELS } from './decisions.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
@@ -37,8 +36,6 @@ function extractModelBlock(source: string, modelName: string): string {
 
 describe('Decisions schema coherence (Phase 8C)', () => {
   for (const modelName of PHASE_8C_MODEL_NAMES) {
-describe('Decisions schema (Phase 8B)', () => {
-  for (const modelName of PHASE_8_MODELS) {
     it(`defines ${modelName} exactly once`, () => {
       const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
       expect(matches).toHaveLength(1);
@@ -46,7 +43,6 @@ describe('Decisions schema (Phase 8B)', () => {
   }
 
   for (const enumName of PHASE_8C_ENUM_NAMES) {
-  for (const enumName of PHASE_8_ENUMS) {
     it(`defines ${enumName} enum`, () => {
       expect(schema).toContain(`enum ${enumName}`);
     });
@@ -94,10 +90,23 @@ describe('Decisions schema (Phase 8B)', () => {
     expect(noticeBlock).toContain('noticeStatus');
     expect(noticeBlock).not.toContain('instrument');
     expect(schema).not.toContain('model IssuedLicense');
-  it('includes DECIDED case status for post-decision workflow', () => {
-    const caseStatusBlock = /enum CaseStatus \{[\s\S]*?\}/.exec(schema)?.[0] ?? '';
-    expect(caseStatusBlock).toContain('DECIDED');
-    expect(caseStatusBlock).not.toContain('ISSUED');
+  });
+});
+
+describe('Decisions schema (Phase 8B)', () => {
+  for (const modelName of PHASE_8_MODELS) {
+    it(`defines ${modelName} exactly once`, () => {
+      const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    });
+  }
+
+  for (const enumName of PHASE_8_ENUMS) {
+    it(`defines ${enumName} enum`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
   it('includes DECIDED before ISSUED in case status lifecycle', () => {
     const caseStatusBlock = /enum CaseStatus \{[\s\S]*?\}/.exec(schema)?.[0] ?? '';
     expect(caseStatusBlock).toContain('DECIDED');

@@ -14,6 +14,7 @@ import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { EvidenceModule } from './evidence/evidence.module';
+import { InspectionComplianceModule } from './inspection-compliance/inspection-compliance.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
@@ -49,6 +50,7 @@ import { SystemModule } from './system/system.module';
     EvidenceModule,
     DecisionsModule,
     DecisionsIssuanceModule,
+    InspectionComplianceModule,
   ],
 })
 export class AppModule {}

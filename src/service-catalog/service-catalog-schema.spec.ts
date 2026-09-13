@@ -114,10 +114,8 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     }
   });
 
-  it('does not define Phase 7 evidence vault or Phase 8D issuance models', () => {
+  it('does not define Phase 7 evidence vault or Phase 8 issuance models', () => {
     const forbiddenModels = [
-  it('does not define Phase 8C issuance models', () => {
-    const phase8cModels = [
       'IssuedLicense',
       'IssuedPermit',
       'IssuedCertificate',
@@ -127,7 +125,6 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     ];
 
     for (const modelName of forbiddenModels) {
-    for (const modelName of phase8cModels) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
   });

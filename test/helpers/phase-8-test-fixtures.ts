@@ -1,21 +1,42 @@
+import { type INestApplication } from '@nestjs/common';
 import {
+  AccountStatus,
   ApplicationSubmissionStatus,
+  AppointmentStatus,
+  AuthenticationMethodType,
   AuthorityActionType,
   AuthorityClassification,
+  CatalogLifecycleStatus,
   ControlledFunctionClass,
+  DecisionConditionStatus,
+  DecisionConditionType,
   DecisionNoticeEffectTiming,
+  DocumentSealStatus,
+  DocumentSignatureStatus,
   FunctionAssignmentStatus,
   FunctionAuthorityLifecycleStatus,
   GoverningSourceStatus,
   GovernmentDecisionOutcome,
+  GovernmentDecisionStatus,
+  IdentityOfficeholderLinkStatus,
+  IdentityType,
+  OfficialInstrumentKind,
 } from '@prisma/client';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/application-processing/application-processing.constants';
 import { type PrismaService } from '../../src/database/prisma.service';
+import { NON_PRODUCTION_DECISIONS_FIXTURE_MARKER } from '../../src/decisions/decisions.constants';
+import { seedPhase8bDecisionFixture } from '../../src/decisions/fixtures/phase-8b-test-fixtures';
+import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
+import { asLoginResponseBody } from './identity-test-types';
 import { seedPhase6Fixture } from './phase-6-test-fixtures';
+import { type Phase8SessionContext } from './phase-8-test-types';
 
-export interface Phase8FixtureContext {
+export const NON_PRODUCTION_PHASE_8_FIXTURE_MARKER = NON_PRODUCTION_DECISIONS_FIXTURE_MARKER;
+
+export interface Phase8DecisionFixtureContext {
   phase6: Awaited<ReturnType<typeof seedPhase6Fixture>>;
   decisionFunctionAuthorityRecordId: string;
   decisionTypeCode: string;
@@ -25,7 +46,7 @@ export interface Phase8FixtureContext {
 export async function seedPhase8DecisionFixture(
   prisma: PrismaService,
   app: { getHttpServer: () => App },
-): Promise<Phase8FixtureContext> {
+): Promise<Phase8DecisionFixtureContext> {
   const phase6 = await seedPhase6Fixture(app, prisma);
   const marker = NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER;
 
@@ -161,37 +182,8 @@ export async function seedPhase8DecisionFixture(
     decisionFunctionAuthorityRecordId: decisionFunction.id,
     decisionTypeCode: 'PERMIT_DECISION',
     caseId: caseRecord.id,
-import { type INestApplication } from '@nestjs/common';
-import {
-  AccountStatus,
-  AppointmentStatus,
-  AuthenticationMethodType,
-  AuthorityActionType,
-  AuthorityClassification,
-  CatalogLifecycleStatus,
-  ControlledFunctionClass,
-  DecisionConditionStatus,
-  DecisionConditionType,
-  DocumentSealStatus,
-  DocumentSignatureStatus,
-  FunctionAssignmentStatus,
-  FunctionAuthorityLifecycleStatus,
-  GovernmentDecisionStatus,
-  IdentityOfficeholderLinkStatus,
-  IdentityType,
-  OfficialInstrumentKind,
-} from '@prisma/client';
-import request from 'supertest';
-import { type App } from 'supertest/types';
-
-import { type PrismaService } from '../../src/database/prisma.service';
-import { NON_PRODUCTION_DECISIONS_FIXTURE_MARKER } from '../../src/decisions/decisions.constants';
-import { seedPhase8bDecisionFixture } from '../../src/decisions/fixtures/phase-8b-test-fixtures';
-import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
-import { asLoginResponseBody } from './identity-test-types';
-import { type Phase8SessionContext } from './phase-8-test-types';
-
-export const NON_PRODUCTION_PHASE_8_FIXTURE_MARKER = NON_PRODUCTION_DECISIONS_FIXTURE_MARKER;
+  };
+}
 
 export interface Phase8FixtureContext extends Phase8SessionContext {
   marker: string;

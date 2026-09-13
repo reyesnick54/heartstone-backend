@@ -229,10 +229,6 @@ export class DecisionExecutionService {
   ): void {
     for (const field of IMMUTABLE_DECISION_UPDATE_FIELDS) {
       if (update[field] !== undefined) {
-        throw new ConflictException(`GovernmentDecision field "${field}" is immutable after recording`);
-  assertDecisionImmutable(existing: GovernmentDecision, update: Record<string, unknown>): void {
-    for (const field of IMMUTABLE_DECISION_UPDATE_FIELDS) {
-      if (update[field] !== undefined) {
         throw new ConflictException(
           `GovernmentDecision field "${field}" is immutable after recording`,
         );

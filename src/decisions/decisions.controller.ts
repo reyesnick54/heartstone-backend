@@ -15,15 +15,21 @@ import { DecisionAssistanceService } from './decision-assistance.service';
 import { AddDecisionConditionDto } from './dto/add-decision-condition.dto';
 import { AddDecisionFindingDto } from './dto/add-decision-finding.dto';
 import { AddDecisionReasonDto } from './dto/add-decision-reason.dto';
+import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
+import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
 import { CreateGovernmentDecisionDto } from './dto/create-government-decision.dto';
+import { ExecuteGovernmentDecisionDto } from './dto/execute-government-decision.dto';
 import { PrepareDecisionNoticeDto } from './dto/prepare-decision-notice.dto';
+import { DecisionExecutionService } from './execution/decision-execution.service';
 import { GovernmentDecisionsService } from './government-decisions.service';
+import { DecisionPreparationService } from './preparation/decision-preparation.service';
+import { DecisionReadinessService } from './readiness/decision-readiness.service';
 
 @ApiTags('government-decisions')
 @Controller('government-decisions')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
-export class DecisionsController {
+export class GovernmentDecisionsController {
   constructor(
     private readonly decisionsService: GovernmentDecisionsService,
     private readonly assistanceService: DecisionAssistanceService,
@@ -155,18 +161,8 @@ export class DecisionsController {
   @ApiOperation({ summary: 'Check whether unsatisfied precedent conditions block later issuance' })
   issuanceReadiness(@Param('decisionId', ParseUUIDPipe) decisionId: string) {
     return this.decisionsService.assertIssuanceAllowed(decisionId);
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-
-import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
-import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
-import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
-import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
-import { ExecuteGovernmentDecisionDto } from './dto/execute-government-decision.dto';
-import { DecisionExecutionService } from './execution/decision-execution.service';
-import { DecisionPreparationService } from './preparation/decision-preparation.service';
-import { DecisionReadinessService } from './readiness/decision-readiness.service';
+  }
+}
 
 @ApiTags('decisions')
 @Controller('api/v1/decisions')
@@ -226,7 +222,6 @@ export class DecisionsController {
 
   @Post('preparation')
   @ApiOperation({
-    summary: 'Create a non-final decision preparation record (drafting only, not an official decision)',
     summary:
       'Create a non-final decision preparation record (drafting only, not an official decision)',
   })
