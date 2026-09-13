@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
+import { DecisionsIssuanceModule } from '../decisions-issuance/decisions-issuance.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { DecisionCatalogBoundaryService } from './common/decision-catalog-boundary.service';
 import { DecisionCatalogValidationService } from './common/decision-catalog-validation.service';
@@ -11,7 +12,7 @@ import { DecisionTypeVersionsController } from './versions/decision-type-version
 import { DecisionTypeVersionsService } from './versions/decision-type-versions.service';
 
 @Module({
-  imports: [SessionsModule, AuthorityModule],
+  imports: [SessionsModule, AuthorityModule, DecisionsIssuanceModule],
   controllers: [DecisionTypeDefinitionsController, DecisionTypeVersionsController],
   providers: [
     DecisionCatalogValidationService,

@@ -120,6 +120,8 @@ model Institution {
   governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
   decisionTypeDefinitions              DecisionTypeDefinition[]
   decisionRequirementConsultations     DecisionTypeRequirementElement[]
+  signatureAuthorizations              ElectronicSignatureAuthorization[] @relation("SignatureAuthorizationInstitution")
+  electronicSealDefinitions            ElectronicSealDefinition[]         @relation("SealInstitutionalOwner")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -183,6 +185,7 @@ model Office {
   functionAuthorityAssignments     FunctionAuthorityAssignment[]
   masterFilesAsAdministrativeOwner MasterAdministrativeFile[]    @relation("MasterFileAdministrativeOwner")
   masterFilesAsRecordsCustodian    MasterAdministrativeFile[]    @relation("MasterFileRecordsCustodian")
+  sealCustodyAssignments           ElectronicSealCustodyAssignment[] @relation("SealCustodianOffice")
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -218,6 +221,10 @@ model Officeholder {
   recordCorrectionsApproved    RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
   recordIntegrityEvents        RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
   recordAccessEvents           RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  signatureAuthorizations      ElectronicSignatureAuthorization[] @relation("SignatureAuthorizationOfficeholder")
+  signatureRecords             ElectronicSignatureRecord[]   @relation("SignatureRecordOfficeholder")
+  sealCustodyAssignments       ElectronicSealCustodyAssignment[] @relation("SealCustodianOfficeholder")
+  sealUseRecordsAsCustodian    ElectronicSealUseRecord[]   @relation("SealUseCustodian")
 
   @@map("officeholders")
 }
@@ -481,6 +488,12 @@ model Identity {
   recordCorrectionsApproved  RecordCorrection[]         @relation("RecordCorrectionApprover")
   recordIntegrityEvents      RecordIntegrityEvent[]     @relation("RecordIntegrityActor")
   recordAccessEvents         RecordAccessEvent[]        @relation("RecordAccessIdentity")
+  signatureAuthorizations    ElectronicSignatureAuthorization[] @relation("SignatureAuthorizationIdentity")
+  signatureRecordsAsSignatory ElectronicSignatureRecord[] @relation("SignatureRecordSignatory")
+  sealCustodyAssignments     ElectronicSealCustodyAssignment[] @relation("SealCustodianIdentity")
+  sealUseAuthorizations      ElectronicSealUseAuthorization[] @relation("SealUseAuthorizer")
+  sealUseRecordsAsPreparer   ElectronicSealUseRecord[]  @relation("SealUsePreparer")
+  sealUseRecordsAsApprover   ElectronicSealUseRecord[]  @relation("SealUseApprover")
 
   @@index([userAccountId])
   @@index([personId])
@@ -854,6 +867,9 @@ model FunctionAuthorityRecord {
   inspectionRecords            InspectionRecord[]
   recordCorrections            RecordCorrection[]
   decisionTypeVersions         DecisionTypeVersion[]
+  signatureAuthorizations      ElectronicSignatureAuthorization[]
+  signatureRecords             ElectronicSignatureRecord[]
+  signableInstrumentBindings   SignableInstrumentBinding[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1111,6 +1127,8 @@ model AuthorityEvaluationRecord {
   evidencePacketVersions      EvidencePacketVersion[]       @relation("EvidencePacketVersionAuthority")
   evidencePacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthority")
   recordCorrections           RecordCorrection[]
+  electronicSignatureRecords  ElectronicSignatureRecord[]   @relation("ElectronicSignatureAuthorityEvaluation")
+  sealUseAuthorizations       ElectronicSealUseAuthorization[] @relation("SealUseAuthorizationAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2850,6 +2868,8 @@ model DocumentRecord {
   auditEvents          DocumentAuditEvent[]
   governmentCommunicationDocuments GovernmentCommunicationDocument[]
   custodyEvents        EvidenceCustodyEvent[]
+  signatureRecords     ElectronicSignatureRecord[]
+  signableInstrumentBindings SignableInstrumentBinding[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -2892,6 +2912,9 @@ model DocumentVersion {
   auditEvents                      DocumentAuditEvent[]
   evidenceRecords                  EvidenceRecord[]
   packetItems                      EvidencePacketItem[]
+  signatureRecords                 ElectronicSignatureRecord[]
+  sealUseRecords                   ElectronicSealUseRecord[]
+  signableInstrumentBindings       SignableInstrumentBinding[]
 
   @@unique([documentRecordId, versionNumber])
   @@index([documentRecordId])
@@ -4497,4 +4520,326 @@ model DecisionTypeLifecycleTransition {
   @@index([decisionTypeVersionId])
   @@index([createdAt])
   @@map("decision_type_lifecycle_transitions")
+}
+
+// ─── Phase 8D: Electronic Signature and Seal Control ─────────────────────────
+
+enum CryptographicCredentialStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  COMPROMISED
+}
+
+enum ElectronicSignatureAuthorizationStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum SignatureValidationOutcome {
+  VALID
+  INVALID
+  IMAGE_ONLY
+  HASH_MISMATCH
+  CERTIFICATE_INVALID
+  CERTIFICATE_REVOKED
+  CERTIFICATE_EXPIRED
+  AUTHORITY_DENIED
+  AUTHORIZATION_DENIED
+  INSTRUMENT_TYPE_DENIED
+  DOCUMENT_STATE_DENIED
+  IDENTITY_ASSURANCE_INSUFFICIENT
+  APPOINTMENT_INVALID
+  DELEGATION_INVALID
+  ACTOR_NOT_HUMAN
+  SIGNATURE_NOT_BOUND
+}
+
+enum SignableInstrumentSigningState {
+  PENDING_SIGNATURE
+  SIGNING_AUTHORIZED
+  SIGNED
+  SEALING_AUTHORIZED
+  SEALED
+  SIGNING_BLOCKED
+}
+
+enum ElectronicSealDefinitionStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  COMPROMISED
+}
+
+enum SealCustodyAssignmentStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum SealUseAuthorizationStatus {
+  PENDING_APPROVAL
+  APPROVED
+  EXPIRED
+  REVOKED
+  APPLIED
+}
+
+enum KeyProtectionType {
+  HSM
+  SMART_CARD
+  CLOUD_KMS
+  SOFTWARE_TOKEN
+  REMOTE_SIGNING_SERVICE
+  TEST_ONLY
+}
+
+enum RevocationCheckMethod {
+  OCSP
+  CRL
+  PROVIDER_STATUS
+  TEST_STUB
+}
+
+model ElectronicSignatureAuthorization {
+  id                            String                               @id @default(uuid()) @db.Uuid
+  signatoryIdentityId           String                               @db.Uuid
+  officeholderId                String                               @db.Uuid
+  institutionId                 String                               @db.Uuid
+  functionAuthorityRecordId     String                               @db.Uuid
+  permittedInstrumentTypes      Json                                 @default("[]")
+  permittedDecisionTypeVersion  String?
+  effectiveFrom                 DateTime
+  effectiveUntil                DateTime?
+  status                        ElectronicSignatureAuthorizationStatus @default(ACTIVE)
+  requiredIdentityAssuranceLevel AssuranceLevel                      @default(MEDIUM)
+  requiresMfaAtSigning          Boolean                              @default(true)
+  requiresWitness               Boolean                              @default(false)
+  requiresCountersignature      Boolean                              @default(false)
+  credentialReferenceId         String?                              @db.Uuid
+  createdAt                     DateTime                             @default(now())
+  signatoryIdentity             Identity                             @relation("SignatureAuthorizationIdentity", fields: [signatoryIdentityId], references: [id])
+  officeholder                  Officeholder                         @relation("SignatureAuthorizationOfficeholder", fields: [officeholderId], references: [id])
+  institution                   Institution                          @relation("SignatureAuthorizationInstitution", fields: [institutionId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord              @relation(fields: [functionAuthorityRecordId], references: [id])
+  credentialReference           ElectronicSignatureCredentialReference? @relation(fields: [credentialReferenceId], references: [id])
+  signatureRecords              ElectronicSignatureRecord[]
+
+  @@index([signatoryIdentityId])
+  @@index([officeholderId])
+  @@index([institutionId])
+  @@index([functionAuthorityRecordId])
+  @@index([status])
+  @@map("electronic_signature_authorizations")
+}
+
+model ElectronicSignatureCredentialReference {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  credentialProvider    String
+  credentialReference   String
+  certificateSubject    String
+  certificateSerial     String
+  certificateIssuer     String
+  algorithm             String
+  keyProtectionType     KeyProtectionType
+  validFrom             DateTime
+  validUntil            DateTime
+  certificateStatus     CryptographicCredentialStatus @default(ACTIVE)
+  revocationCheckMethod RevocationCheckMethod
+  lastValidatedAt       DateTime?
+  createdAt             DateTime                      @default(now())
+  authorizations        ElectronicSignatureAuthorization[]
+  signatureRecords      ElectronicSignatureRecord[]
+  sealDefinitions       ElectronicSealDefinition[]
+
+  @@unique([credentialProvider, credentialReference])
+  @@index([certificateStatus])
+  @@map("electronic_signature_credential_references")
+}
+
+model SignableInstrumentBinding {
+  id                        String                         @id @default(uuid()) @db.Uuid
+  documentRecordId          String                         @db.Uuid
+  documentVersionId         String                         @db.Uuid
+  instrumentType            String
+  functionAuthorityRecordId String?                        @db.Uuid
+  decisionReference         String?
+  signingState              SignableInstrumentSigningState @default(PENDING_SIGNATURE)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  documentRecord            DocumentRecord                 @relation(fields: [documentRecordId], references: [id])
+  documentVersion           DocumentVersion                @relation(fields: [documentVersionId], references: [id])
+  functionAuthorityRecord   FunctionAuthorityRecord?       @relation(fields: [functionAuthorityRecordId], references: [id])
+  sealUseAuthorizations     ElectronicSealUseAuthorization[]
+
+  @@unique([documentVersionId, instrumentType])
+  @@index([documentRecordId])
+  @@index([signingState])
+  @@map("signable_instrument_bindings")
+}
+
+model ElectronicSignatureRecord {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  signatoryIdentityId         String                        @db.Uuid
+  officeholderId              String                        @db.Uuid
+  functionAuthorityRecordId   String                        @db.Uuid
+  authorizationId             String                        @db.Uuid
+  documentRecordId            String                        @db.Uuid
+  documentVersionId           String                        @db.Uuid
+  documentHash                String
+  instrumentType              String
+  signatureMethod             String
+  provider                    String
+  credentialReferenceId       String                        @db.Uuid
+  signedAt                    DateTime
+  intentStatement             String
+  signatureValueReference     String
+  timestampEvidence           Json                          @default("{}")
+  certificateStatusAtSigning  CryptographicCredentialStatus
+  revocationStatusAtSigning   CryptographicCredentialStatus
+  validationResult            SignatureValidationOutcome    @default(VALID)
+  authorityEvaluationRecordId String                        @db.Uuid
+  witnessSignatureRecordId    String?                       @db.Uuid
+  countersignatureRecordId    String?                       @db.Uuid
+  integrityEvidence           Json                          @default("{}")
+  createdAt                   DateTime                      @default(now())
+  signatoryIdentity           Identity                      @relation("SignatureRecordSignatory", fields: [signatoryIdentityId], references: [id])
+  officeholder                Officeholder                  @relation("SignatureRecordOfficeholder", fields: [officeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord       @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorization               ElectronicSignatureAuthorization @relation(fields: [authorizationId], references: [id])
+  documentRecord              DocumentRecord                @relation(fields: [documentRecordId], references: [id])
+  documentVersion             DocumentVersion               @relation(fields: [documentVersionId], references: [id])
+  credentialReference         ElectronicSignatureCredentialReference @relation(fields: [credentialReferenceId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord     @relation("ElectronicSignatureAuthorityEvaluation", fields: [authorityEvaluationRecordId], references: [id])
+  witnessSignatureRecord      ElectronicSignatureRecord?    @relation("SignatureWitness", fields: [witnessSignatureRecordId], references: [id])
+  countersignatureRecord      ElectronicSignatureRecord?    @relation("SignatureCountersignature", fields: [countersignatureRecordId], references: [id])
+  witnessedSignatures         ElectronicSignatureRecord[]   @relation("SignatureWitness")
+  countersignedSignatures     ElectronicSignatureRecord[]   @relation("SignatureCountersignature")
+  validationRecords           ElectronicSignatureValidationRecord[]
+
+  @@index([documentVersionId])
+  @@index([signatoryIdentityId])
+  @@index([officeholderId])
+  @@index([signedAt])
+  @@map("electronic_signature_records")
+}
+
+model ElectronicSignatureValidationRecord {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  signatureRecordId     String                     @db.Uuid
+  validatedAt           DateTime                   @default(now())
+  documentHashAtValidation String
+  validationOutcome     SignatureValidationOutcome
+  certificateStatus     CryptographicCredentialStatus
+  revocationStatus      CryptographicCredentialStatus
+  validationEvidence    Json                       @default("{}")
+  validatedByIdentityId String?                    @db.Uuid
+  signatureRecord       ElectronicSignatureRecord  @relation(fields: [signatureRecordId], references: [id])
+
+  @@index([signatureRecordId])
+  @@index([validatedAt])
+  @@map("electronic_signature_validation_records")
+}
+
+model ElectronicSealDefinition {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  institutionalOwnerId    String                         @db.Uuid
+  sealCode                String                         @unique
+  name                    String
+  permittedInstrumentTypes Json                          @default("[]")
+  credentialReferenceId   String                         @db.Uuid
+  status                  ElectronicSealDefinitionStatus @default(ACTIVE)
+  dualControlRequired     Boolean                        @default(true)
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  createdAt               DateTime                       @default(now())
+  institutionalOwner      Institution                    @relation("SealInstitutionalOwner", fields: [institutionalOwnerId], references: [id])
+  credentialReference     ElectronicSignatureCredentialReference @relation(fields: [credentialReferenceId], references: [id])
+  custodyAssignments      ElectronicSealCustodyAssignment[]
+  useAuthorizations       ElectronicSealUseAuthorization[]
+  useRecords              ElectronicSealUseRecord[]
+
+  @@index([institutionalOwnerId])
+  @@index([status])
+  @@map("electronic_seal_definitions")
+}
+
+model ElectronicSealCustodyAssignment {
+  id                  String                      @id @default(uuid()) @db.Uuid
+  sealId              String                      @db.Uuid
+  custodianOfficeholderId String                  @db.Uuid
+  custodianOfficeId   String?                     @db.Uuid
+  custodianIdentityId String                      @db.Uuid
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  status              SealCustodyAssignmentStatus @default(ACTIVE)
+  createdAt           DateTime                    @default(now())
+  seal                ElectronicSealDefinition    @relation(fields: [sealId], references: [id])
+  custodianOfficeholder Officeholder              @relation("SealCustodianOfficeholder", fields: [custodianOfficeholderId], references: [id])
+  custodianOffice     Office?                     @relation("SealCustodianOffice", fields: [custodianOfficeId], references: [id])
+  custodianIdentity   Identity                    @relation("SealCustodianIdentity", fields: [custodianIdentityId], references: [id])
+  useRecords          ElectronicSealUseRecord[]
+
+  @@index([sealId])
+  @@index([custodianOfficeholderId])
+  @@index([status])
+  @@map("electronic_seal_custody_assignments")
+}
+
+model ElectronicSealUseAuthorization {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  sealId                      String                     @db.Uuid
+  signableInstrumentBindingId String                     @db.Uuid
+  documentVersionId           String                     @db.Uuid
+  documentHash                String
+  instrumentType              String
+  authorizedByIdentityId      String                     @db.Uuid
+  authorityEvaluationRecordId String                     @db.Uuid
+  approvalAt                  DateTime?
+  expirationAt                DateTime
+  status                      SealUseAuthorizationStatus @default(PENDING_APPROVAL)
+  preparerIdentityId          String?                    @db.Uuid
+  createdAt                   DateTime                   @default(now())
+  seal                        ElectronicSealDefinition   @relation(fields: [sealId], references: [id])
+  signableInstrumentBinding   SignableInstrumentBinding  @relation(fields: [signableInstrumentBindingId], references: [id])
+  authorizedByIdentity        Identity                   @relation("SealUseAuthorizer", fields: [authorizedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord  @relation("SealUseAuthorizationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  useRecords                  ElectronicSealUseRecord[]
+
+  @@index([sealId])
+  @@index([documentVersionId])
+  @@index([status])
+  @@map("electronic_seal_use_authorizations")
+}
+
+model ElectronicSealUseRecord {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  sealId                      String                        @db.Uuid
+  documentVersionId           String                        @db.Uuid
+  documentHash                String
+  custodyAssignmentId         String                        @db.Uuid
+  authorizationId             String                        @db.Uuid
+  preparerIdentityId          String?                       @db.Uuid
+  approverIdentityId          String?                       @db.Uuid
+  custodianOfficeholderId     String                        @db.Uuid
+  appliedAt                   DateTime
+  validationOutcome           SignatureValidationOutcome
+  integrityEvidence           Json                          @default("{}")
+  createdAt                   DateTime                      @default(now())
+  seal                        ElectronicSealDefinition      @relation(fields: [sealId], references: [id])
+  documentVersion             DocumentVersion               @relation(fields: [documentVersionId], references: [id])
+  custodyAssignment           ElectronicSealCustodyAssignment @relation(fields: [custodyAssignmentId], references: [id])
+  authorization               ElectronicSealUseAuthorization @relation(fields: [authorizationId], references: [id])
+  preparerIdentity            Identity?                     @relation("SealUsePreparer", fields: [preparerIdentityId], references: [id])
+  approverIdentity            Identity?                     @relation("SealUseApprover", fields: [approverIdentityId], references: [id])
+  custodianOfficeholder       Officeholder                  @relation("SealUseCustodian", fields: [custodianOfficeholderId], references: [id])
+
+  @@index([sealId])
+  @@index([documentVersionId])
+  @@index([appliedAt])
+  @@map("electronic_seal_use_records")
 }
