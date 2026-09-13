@@ -6,8 +6,8 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
+import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
-import { resetCasesData } from './cases-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
@@ -45,7 +45,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
-  await resetCasesData(prisma);
+  await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
   await prisma.delegationStructuredScope.deleteMany();
@@ -63,7 +63,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
-  await resetCasesData(prisma);
+  await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
   await resetIdentityData(prisma);
