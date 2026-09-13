@@ -9,7 +9,6 @@ export const PHASE_6_BOUNDARY_DISCLAIMER =
   'Phase 6 processes applications and cases through administrative review. It does not make final government decisions or issue instruments.';
 
 export const FORBIDDEN_LEGACY_ISSUANCE_MODELS = [
-export const FORBIDDEN_PHASE_7_MODELS = [
   'IssuedLicense',
   'IssuedPermit',
   'IssuedCertificate',

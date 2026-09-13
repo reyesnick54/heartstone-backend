@@ -5,6 +5,7 @@ import {
   ComplianceMonitoringEventType,
   ComplianceProjectionStatus,
   ComplianceRevalidationOutcome,
+  Prisma,
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
@@ -113,7 +114,7 @@ export class ComplianceProjectionService {
       data: {
         complianceMatterId: input.complianceMatterId,
         eventType: input.eventType,
-        metadata: input.metadata ?? {},
+        metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
         actorIdentityId: input.actorIdentityId,
       },
     });

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import {
   ComplianceObservationClassification,
   ComplianceReviewOutcome,
@@ -75,7 +71,9 @@ export class ComplianceBoundaryService {
     }
   }
 
-  assertObservationClassificationAllowed(classification: ComplianceObservationClassification): void {
+  assertObservationClassificationAllowed(
+    classification: ComplianceObservationClassification,
+  ): void {
     if (classification === ComplianceObservationClassification.OBSERVATION) {
       return;
     }
@@ -98,19 +96,13 @@ export class ComplianceBoundaryService {
     assigneeIdentityId?: string | null;
     holderIdentityId?: string | null;
   }): void {
-    if (
-      input.holderIdentityId &&
-      input.verifierIdentityId === input.holderIdentityId
-    ) {
+    if (input.holderIdentityId && input.verifierIdentityId === input.holderIdentityId) {
       throw new ForbiddenException({
         message: 'Instrument holder cannot verify own corrective action',
         code: COMPLIANCE_EXPLANATION_CODES.HOLDER_CANNOT_VERIFY_CORRECTIVE_ACTION,
       });
     }
-    if (
-      input.assigneeIdentityId &&
-      input.verifierIdentityId === input.assigneeIdentityId
-    ) {
+    if (input.assigneeIdentityId && input.verifierIdentityId === input.assigneeIdentityId) {
       throw new ForbiddenException({
         message: 'Corrective action assignee cannot verify own corrective action',
         code: COMPLIANCE_EXPLANATION_CODES.HOLDER_CANNOT_VERIFY_CORRECTIVE_ACTION,
@@ -118,7 +110,9 @@ export class ComplianceBoundaryService {
     }
   }
 
-  assertPhase9CannotCreateSuspensionDecision(input: { isCreatingSuspensionDecision: boolean }): void {
+  assertPhase9CannotCreateSuspensionDecision(input: {
+    isCreatingSuspensionDecision: boolean;
+  }): void {
     if (input.isCreatingSuspensionDecision) {
       throw new ForbiddenException({
         message: 'Phase 9 cannot create suspension government decisions; use Phase 8 boundary path',
@@ -164,7 +158,8 @@ export class ComplianceBoundaryService {
     }
     if (!input.doesNotSuspendInstrument) {
       throw new BadRequestException({
-        message: 'Emergency interim action must explicitly record that it does not suspend instrument',
+        message:
+          'Emergency interim action must explicitly record that it does not suspend instrument',
         code: COMPLIANCE_EXPLANATION_CODES.PHASE_9_CANNOT_PATCH_INSTRUMENT_STATUS,
       });
     }

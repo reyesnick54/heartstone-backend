@@ -53,7 +53,9 @@ export class ComplianceController {
   }
 
   @Post('submissions')
-  @ApiOperation({ summary: 'Record holder compliance submission (receipt does not satisfy obligation)' })
+  @ApiOperation({
+    summary: 'Record holder compliance submission (receipt does not satisfy obligation)',
+  })
   recordSubmission(
     @CurrentSession() session: SessionContextDto,
     @Body() body: Record<string, unknown>,
@@ -88,10 +90,12 @@ export class ComplianceController {
   }
 
   @Post('inspection/sessions/start')
-  @ApiOperation({ summary: 'Start inspection session, optionally linking Phase 7 inspection record' })
+  @ApiOperation({
+    summary: 'Start inspection session, optionally linking Phase 7 inspection record',
+  })
   startInspectionSession(@Body() body: Record<string, unknown>) {
     this.boundary.assertClientPayloadDoesNotSetProtectedFields(body);
-    return this.execution.startSession(body as never);
+    return this.execution.startSession(body);
   }
 
   @Post('inspection/observations')

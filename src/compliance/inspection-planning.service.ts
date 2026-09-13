@@ -9,7 +9,10 @@ import {
 
 import { AuthorityEvaluationService } from '../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../database/prisma.service';
-import { COMPLIANCE_EXPLANATION_CODES, INSPECTION_PLAN_NUMBER_PREFIX } from './compliance.constants';
+import {
+  COMPLIANCE_EXPLANATION_CODES,
+  INSPECTION_PLAN_NUMBER_PREFIX,
+} from './compliance.constants';
 
 export interface CreateInspectionPlanInput {
   complianceMatterId?: string;
@@ -88,7 +91,7 @@ export class InspectionPlanningService {
         inspectionPlanId: input.inspectionPlanId,
         inspectorOfficeholderId: input.inspectorOfficeholderId,
         inspectorIdentityId: input.inspectorIdentityId,
-        authorityEvaluationRecordId: evaluation.evaluationRecordId,
+        authorityEvaluationRecordId: evaluation.evaluationId,
         status: InspectionAssignmentStatus.ASSIGNED,
       },
     });

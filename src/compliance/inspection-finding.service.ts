@@ -41,7 +41,9 @@ export class InspectionFindingService {
       where: { id: input.inspectionSessionId },
     });
     if (!session) {
-      throw new NotFoundException(`Inspection session "${input.inspectionSessionId}" was not found`);
+      throw new NotFoundException(
+        `Inspection session "${input.inspectionSessionId}" was not found`,
+      );
     }
 
     this.boundary.assertObservationIsNotFinding({ autoPromoteObservationToFinding: false });

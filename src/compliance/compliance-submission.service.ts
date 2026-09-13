@@ -54,7 +54,9 @@ export class ComplianceSubmissionService {
       where: { id: continuingObligationId },
     });
     if (!obligation) {
-      throw new NotFoundException(`Continuing obligation "${continuingObligationId}" was not found`);
+      throw new NotFoundException(
+        `Continuing obligation "${continuingObligationId}" was not found`,
+      );
     }
   }
 }

@@ -10,10 +10,10 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../src/database/prisma.service';
 import { ComplianceBoundaryService } from '../src/compliance/compliance-boundary.service';
 import { ComplianceReviewService } from '../src/compliance/compliance-review.service';
 import { InspectionExecutionService } from '../src/compliance/inspection-execution.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase9Fixture } from './helpers/phase-9-test-fixtures';
 

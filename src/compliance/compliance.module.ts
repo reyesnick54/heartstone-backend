@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
+import { EvidenceModule } from '../evidence/evidence.module';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
-import { EvidenceModule } from '../evidence/evidence.module';
-import { ComplianceBoundaryService } from './compliance-boundary.service';
 import { ComplianceController } from './compliance.controller';
+import { ComplianceBoundaryService } from './compliance-boundary.service';
 import { ComplianceEscalationService } from './compliance-escalation.service';
 import { ComplianceMatterService } from './compliance-matter.service';
 import { ComplianceProjectionService } from './compliance-projection.service';

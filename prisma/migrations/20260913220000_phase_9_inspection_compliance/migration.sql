@@ -1,5 +1,7 @@
 -- Phase 9: Inspection, Compliance and Corrective Action
 
+ALTER TYPE "InspectionType" ADD VALUE IF NOT EXISTS 'COMPLIANCE';
+
 CREATE TYPE "ComplianceMatterStatus" AS ENUM ('OPEN', 'UNDER_REVIEW', 'MONITORING', 'ESCALATED', 'CLOSED');
 CREATE TYPE "ContinuingObligationStatus" AS ENUM ('ACTIVE', 'PENDING_VERIFICATION', 'SATISFIED', 'WAIVED', 'BREACHED', 'SUPERSEDED');
 CREATE TYPE "ObligationScheduleFrequency" AS ENUM ('ONE_TIME', 'DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'ANNUAL', 'EVENT_DRIVEN');

@@ -7,13 +7,13 @@ import {
 } from '@prisma/client';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../../src/database/prisma.service';
 import { NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER } from '../../src/compliance/compliance.constants';
+import { type PrismaService } from '../../src/database/prisma.service';
 import {
   issueInstrumentForDecision,
+  type Phase8FixtureContext,
   requirePreRecordedDecision,
   seedPhase8Fixture,
-  type Phase8FixtureContext,
 } from './phase-8-test-fixtures';
 
 export interface Phase9FixtureContext extends Phase8FixtureContext {

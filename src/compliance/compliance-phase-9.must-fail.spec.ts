@@ -1,9 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
-import {
-  ComplianceReviewOutcome,
-  OfficialInstrumentStatus,
-} from '@prisma/client';
+import { ComplianceReviewOutcome, OfficialInstrumentStatus } from '@prisma/client';
 
 import appConfig from '../config/app.config';
 import identityConfig from '../config/identity.config';
@@ -11,13 +8,13 @@ import redisConfig from '../config/redis.config';
 import securityConfig from '../config/security.config';
 import { PrismaService } from '../database/prisma.service';
 import { InspectionService } from '../evidence/inspection/inspection.service';
+import { PHASE_9H_INVARIANTS } from './compliance.constants';
 import { ComplianceBoundaryService } from './compliance-boundary.service';
 import { ComplianceReviewService } from './compliance-review.service';
 import { ComplianceSubmissionService } from './compliance-submission.service';
 import { CorrectiveActionService } from './corrective-action.service';
 import { EmergencyInterimActionService } from './emergency-interim-action.service';
 import { InspectionFindingService } from './inspection-finding.service';
-import { PHASE_9H_INVARIANTS } from './compliance.constants';
 
 describe('Phase 9 architectural must-fail invariants', () => {
   let boundary: ComplianceBoundaryService;
@@ -62,7 +59,9 @@ describe('Phase 9 architectural must-fail invariants', () => {
   });
 
   it('1. obligation is distinct from submission', () => {
-    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 1)?.description).toMatch(/distinct from compliance submission/i);
+    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 1)?.description).toMatch(
+      /distinct from compliance submission/i,
+    );
     expect(() => {
       boundary.assertSubmissionIsNotObligation({ treatingSubmissionAsObligation: true });
     }).toThrow(/not the same as continuing obligation/i);
@@ -96,7 +95,9 @@ describe('Phase 9 architectural must-fail invariants', () => {
   });
 
   it('6. Phase 7 inspection stack is reused via optional link', () => {
-    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 6)?.description).toMatch(/Phase 7 inspection record reuse/i);
+    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 6)?.description).toMatch(
+      /Phase 7 inspection record reuse/i,
+    );
   });
 
   it('7. Phase 9 cannot create suspension decisions', () => {
@@ -107,7 +108,9 @@ describe('Phase 9 architectural must-fail invariants', () => {
 
   it('8. Phase 9 cannot PATCH instrument status', () => {
     expect(() => {
-      boundary.assertPhase9CannotPatchInstrumentStatus({ status: OfficialInstrumentStatus.SUSPENDED });
+      boundary.assertPhase9CannotPatchInstrumentStatus({
+        status: OfficialInstrumentStatus.SUSPENDED,
+      });
     }).toThrow(/cannot PATCH official instrument/i);
   });
 
@@ -143,7 +146,7 @@ describe('Phase 9 architectural must-fail invariants', () => {
   });
 
   it('29. Phase 7 NON_COMPLIANCE blocked at observation layer', () => {
-    expect(phase7Inspection.observationIsViolation('OBSERVATION' as never)).toBe(false);
+    expect(phase7Inspection.observationIsViolation('OBSERVATION')).toBe(false);
   });
 
   it('42. INSPECT authority required for assignment', () => {
@@ -151,7 +154,9 @@ describe('Phase 9 architectural must-fail invariants', () => {
   });
 
   it('50. inspectionRecordId optional link preserved', () => {
-    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 50)?.description).toMatch(/inspectionRecordId/i);
+    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 50)?.description).toMatch(
+      /inspectionRecordId/i,
+    );
   });
 
   it('review service rejects receipt-only satisfaction path at boundary', () => {

@@ -7,16 +7,16 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../src/database/prisma.service';
 import {
   FORBIDDEN_CLIENT_COMPLIANCE_FIELDS,
-  PHASE_9H_INVARIANTS,
   PHASE_9_BOUNDARY_DISCLAIMER,
+  PHASE_9H_INVARIANTS,
 } from '../src/compliance/compliance.constants';
 import { ComplianceBoundaryService } from '../src/compliance/compliance-boundary.service';
 import { ComplianceReviewService } from '../src/compliance/compliance-review.service';
 import { CorrectiveActionService } from '../src/compliance/corrective-action.service';
 import { InspectionFindingService } from '../src/compliance/inspection-finding.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase9Fixture } from './helpers/phase-9-test-fixtures';
 
@@ -203,7 +203,9 @@ describe('Phase 9 must-fail invariants (e2e)', () => {
   }
 
   it('50. inspectionRecordId optional Phase 7 link preserved in schema', () => {
-    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 50)?.description).toMatch(/inspectionRecordId/i);
+    expect(PHASE_9H_INVARIANTS.find((i) => i.id === 50)?.description).toMatch(
+      /inspectionRecordId/i,
+    );
   });
 
   it('client forbidden fields rejected on compliance endpoints', async () => {

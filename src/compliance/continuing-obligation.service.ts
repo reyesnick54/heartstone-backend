@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  ContinuingObligationStatus,
-  ObligationScheduleFrequency,
-} from '@prisma/client';
+import { ContinuingObligationStatus, ObligationScheduleFrequency } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
 

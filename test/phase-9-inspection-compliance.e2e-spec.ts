@@ -13,9 +13,9 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../src/database/prisma.service';
 import { ComplianceReviewService } from '../src/compliance/compliance-review.service';
 import { InspectionPlanningService } from '../src/compliance/inspection-planning.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase9Fixture } from './helpers/phase-9-test-fixtures';
 
@@ -194,7 +194,12 @@ describe('Phase 9 inspection and compliance (e2e)', () => {
       .send({
         complianceMatterId: fixture.complianceMatterId,
         inspectionFindingId: finding.body.id,
-        items: [{ description: 'Install compliant signage', assignedToIdentityId: fixture.applicantIdentityId }],
+        items: [
+          {
+            description: 'Install compliant signage',
+            assignedToIdentityId: fixture.applicantIdentityId,
+          },
+        ],
       })
       .expect(201);
 

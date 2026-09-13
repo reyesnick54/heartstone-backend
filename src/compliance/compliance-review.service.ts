@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  ComplianceReviewOutcome,
-  ContinuingObligationStatus,
-} from '@prisma/client';
+import { ComplianceReviewOutcome, ContinuingObligationStatus } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
 import { ComplianceBoundaryService } from './compliance-boundary.service';
@@ -28,7 +25,9 @@ export class ComplianceReviewService {
       include: { continuingObligation: true },
     });
     if (!submission) {
-      throw new NotFoundException(`Compliance submission "${input.complianceSubmissionId}" was not found`);
+      throw new NotFoundException(
+        `Compliance submission "${input.complianceSubmissionId}" was not found`,
+      );
     }
 
     this.boundary.assertReviewIsNotSubmission({ treatingReviewAsSubmission: false });

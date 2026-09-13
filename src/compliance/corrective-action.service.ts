@@ -13,7 +13,7 @@ export interface CreateCorrectiveActionPlanInput {
   complianceMatterId?: string;
   inspectionFindingId?: string;
   requiredBy?: Date;
-  items: Array<{ description: string; dueAt?: Date; assignedToIdentityId?: string }>;
+  items: { description: string; dueAt?: Date; assignedToIdentityId?: string }[];
 }
 
 export interface VerifyCorrectiveActionInput {
@@ -68,7 +68,9 @@ export class CorrectiveActionService {
       where: { id: input.correctiveActionItemId },
     });
     if (!item) {
-      throw new NotFoundException(`Corrective action item "${input.correctiveActionItemId}" was not found`);
+      throw new NotFoundException(
+        `Corrective action item "${input.correctiveActionItemId}" was not found`,
+      );
     }
 
     this.boundary.assertHolderCannotVerifyCorrectiveAction({
