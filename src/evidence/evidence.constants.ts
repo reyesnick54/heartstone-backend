@@ -59,3 +59,16 @@ export const FORBIDDEN_PACKET_DECISION_FIELDS = [
 ] as const;
 
 export const FORBIDDEN_PHASE_7D_MODELS = ['EvidenceVault', 'DocumentRegister'] as const;
+
+export const EVIDENCE_SYSTEM_COMPONENT = 'heartstone-evidence-records';
+
+export const MATERIAL_RECORD_TYPES = [
+  'DocumentVersion',
+  'EvidenceRecord',
+  'EvidencePacketVersion',
+  'MasterAdministrativeFile',
+] as const;
+
+export type MaterialRecordType = (typeof MATERIAL_RECORD_TYPES)[number];
+
+export const AI_ACTOR_IDENTITY_PREFIX = 'ai-assistant:';
