@@ -363,9 +363,7 @@ describe('EvidencePacketsService', () => {
         data: expect.objectContaining({
           qualitySummary: expect.objectContaining({
             hasInsufficient: true,
-            disclaimer: expect.stringContaining(
-              'does not prove evidence authenticity',
-            ) as unknown,
+            disclaimer: expect.stringContaining('does not prove evidence authenticity') as unknown,
           }) as Record<string, unknown>,
         }) as Record<string, unknown>,
       }),
