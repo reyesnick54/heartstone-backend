@@ -316,8 +316,8 @@ export class EvidencePacketsService {
       const hasUnresolvedGovernment = record.governmentCommunicationEvidence.some((link) =>
         UNRESOLVED_GOVERNMENT_CATEGORIES.includes(link.governmentCommunication.category),
       );
-      const hasMinorityOpinion = record.professionalReviewEvidence.some(
-        (link) => Boolean(link.professionalReview.conflictDeclaration),
+      const hasMinorityOpinion = record.professionalReviewEvidence.some((link) =>
+        Boolean(link.professionalReview.conflictDeclaration),
       );
       const mustSurface =
         ADVERSE_EVIDENCE_STATUSES.includes(record.status) ||

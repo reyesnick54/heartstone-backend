@@ -58,7 +58,4 @@ export const FORBIDDEN_PACKET_DECISION_FIELDS = [
   'approvalStatus',
 ] as const;
 
-export const FORBIDDEN_PHASE_7D_MODELS = [
-  'EvidenceVault',
-  'DocumentRegister',
-] as const;
+export const FORBIDDEN_PHASE_7D_MODELS = ['EvidenceVault', 'DocumentRegister'] as const;
