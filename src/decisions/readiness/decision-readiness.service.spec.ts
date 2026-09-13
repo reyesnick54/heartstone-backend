@@ -123,6 +123,7 @@ describe('DecisionReadinessService', () => {
       maturityStatus: 'ACTIVE',
     });
 
+    prisma.identity.findUnique.mockResolvedValue({ id: 'identity-1', type: IdentityType.INDIVIDUAL });
     prisma.identity.findUnique.mockResolvedValue({
       id: 'identity-1',
       type: IdentityType.INDIVIDUAL,
@@ -201,6 +202,7 @@ describe('DecisionReadinessService', () => {
     });
 
     const result = await service.assess(baseInput);
+    expect(result.reasonCodes).toContain(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_NOT_FROZEN);
     expect(result.reasonCodes).toContain(
       DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_NOT_FROZEN,
     );

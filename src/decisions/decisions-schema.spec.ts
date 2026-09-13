@@ -41,6 +41,10 @@ describe('Decisions schema (Phase 8B)', () => {
     });
   }
 
+  it('includes DECIDED case status for post-decision workflow', () => {
+    const caseStatusBlock = /enum CaseStatus \{[\s\S]*?\}/.exec(schema)?.[0] ?? '';
+    expect(caseStatusBlock).toContain('DECIDED');
+    expect(caseStatusBlock).not.toContain('ISSUED');
   it('includes DECIDED before ISSUED in case status lifecycle', () => {
     const caseStatusBlock = /enum CaseStatus \{[\s\S]*?\}/.exec(schema)?.[0] ?? '';
     expect(caseStatusBlock).toContain('DECIDED');

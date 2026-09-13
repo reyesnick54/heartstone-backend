@@ -11,6 +11,9 @@ import { DecisionPreparationService } from './preparation/decision-preparation.s
 import { DecisionReadinessService } from './readiness/decision-readiness.service';
 
 @Module({
+  imports: [AuthorityModule, ApplicationProcessingModule, RecordsModule],
+  controllers: [DecisionsController],
+  providers: [DecisionReadinessService, DecisionExecutionService, DecisionPreparationService],
   imports: [SessionsModule, AuthorityModule, ApplicationProcessingModule, RecordsModule],
   controllers: [DecisionsController],
   providers: [
