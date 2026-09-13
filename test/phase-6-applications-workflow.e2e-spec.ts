@@ -186,6 +186,10 @@ describe('Phase 6 Applications, Workflow & Case Management (e2e)', () => {
 
       const decisionRecords = await prisma.governmentDecision.count();
       expect(decisionRecords).toBe(0);
+      const decisionRowCount = await prisma.governmentDecision.count({
+        where: { caseId },
+      });
+      expect(decisionRowCount).toBe(0);
 
       const licenseTables = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
         `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name IN ('issued_licenses', 'issued_permits', 'issued_certificates')`,

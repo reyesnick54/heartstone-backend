@@ -42,6 +42,10 @@ describe('Phase 7H evidence records (e2e)', () => {
 
     const decisionCount = await prisma.governmentDecision.count();
     expect(decisionCount).toBe(0);
+    const decisionRowCount = await prisma.governmentDecision.count({
+      where: { caseId: fixture.caseId },
+    });
+    expect(decisionRowCount).toBe(0);
   });
 
   it('allows applicant to read own master file but not unrelated files', async () => {

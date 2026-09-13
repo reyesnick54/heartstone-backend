@@ -12,6 +12,7 @@ const PUBLIC_STATUS_LABELS: Partial<Record<CaseStatus, string>> = {
   PENDING_EXTERNAL: 'Awaiting external authority response',
   PENDING_INTERNAL: 'Under internal coordination',
   DECISION_PENDING: 'Pending final decision',
+  DECIDED: 'Final decision recorded',
   SAFE_HALTED: 'Processing paused for review',
   SUSPENDED: 'Service temporarily suspended',
 };
