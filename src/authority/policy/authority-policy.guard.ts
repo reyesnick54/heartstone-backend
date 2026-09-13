@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthorityEvaluationOutcome } from '@prisma/client';
 
+import { PrismaService } from '../../database/prisma.service';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { AuthorityEvaluationService } from '../evaluation/authority-evaluation.service';
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
@@ -18,6 +19,7 @@ export class AuthorityPolicyGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly evaluationService: AuthorityEvaluationService,
     private readonly functionRecords: FunctionAuthorityRecordsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -41,17 +43,17 @@ export class AuthorityPolicyGuard implements CanActivate {
       throw new ForbiddenException('Authenticated session required for authority evaluation');
     }
 
-    const functionAuthorityRecordId = await this.resolveFunctionId(policy);
     const body = request.body ?? {};
+    const functionAuthorityRecordId = await this.resolveFunctionId(policy, body);
 
     const result = await this.evaluationService.evaluate({
       identityId: session.identityId,
       functionAuthorityRecordId,
       action: policy.action,
-      officeholderId: body.officeholderId as string | undefined,
-      officeId: body.officeId as string | undefined,
-      appointmentId: body.appointmentId as string | undefined,
-      delegationId: body.delegationId as string | undefined,
+      officeholderId: this.readInstitutionalField(body, 'officeholderId'),
+      officeId: this.readInstitutionalField(body, 'officeId'),
+      appointmentId: this.readInstitutionalField(body, 'appointmentId'),
+      delegationId: this.readInstitutionalField(body, 'delegationId'),
       evidenceProvided: body.evidenceProvided as string[] | undefined,
       qualificationCodes: body.qualificationCodes as string[] | undefined,
       transactionAmount: body.transactionAmount as number | undefined,
@@ -79,7 +81,31 @@ export class AuthorityPolicyGuard implements CanActivate {
     return true;
   }
 
-  private async resolveFunctionId(policy: AuthorityPolicyMetadata): Promise<string> {
+  private readInstitutionalField(
+    body: Record<string, unknown>,
+    field: 'officeholderId' | 'officeId' | 'appointmentId' | 'delegationId',
+  ): string | undefined {
+    const direct = body[field];
+    if (typeof direct === 'string') {
+      return direct;
+    }
+
+    const prefixes = ['issuer', 'decisionMaker', 'proposedDecisionMaker'] as const;
+    for (const prefix of prefixes) {
+      const key = `${prefix}${field.charAt(0).toUpperCase()}${field.slice(1)}`;
+      const value = body[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+    }
+
+    return undefined;
+  }
+
+  private async resolveFunctionId(
+    policy: AuthorityPolicyMetadata,
+    body: Record<string, unknown>,
+  ): Promise<string> {
     if (policy.functionAuthorityRecordId) {
       return policy.functionAuthorityRecordId;
     }
@@ -87,6 +113,17 @@ export class AuthorityPolicyGuard implements CanActivate {
     if (policy.functionCode) {
       const record = await this.functionRecords.findByCode(policy.functionCode);
       return record.id;
+    }
+
+    const instrumentTypeVersionId = body.instrumentTypeVersionId;
+    if (typeof instrumentTypeVersionId === 'string') {
+      const typeVersion = await this.prisma.instrumentTypeVersion.findUnique({
+        where: { id: instrumentTypeVersionId },
+        select: { issuanceFunctionAuthorityRecordId: true },
+      });
+      if (typeVersion?.issuanceFunctionAuthorityRecordId) {
+        return typeVersion.issuanceFunctionAuthorityRecordId;
+      }
     }
 
     throw new ForbiddenException('Authority policy is misconfigured');
