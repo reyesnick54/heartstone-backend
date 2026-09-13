@@ -1,4 +1,3 @@
-export const DECISION_NUMBER_PREFIX = 'DEC';
 export const DECISION_NOTICE_NUMBER_PREFIX = 'DN';
 
 export const PHASE_8C_BOUNDARY_DISCLAIMER =
@@ -33,7 +32,6 @@ export const READINESS_ASSESSMENT_NUMBER_PREFIX = 'DRA';
 export const PHASE_8B_BOUNDARY_DISCLAIMER =
   'Government decisions are official institutional acts by authorized human officeholders. AI assistance, recommendations, and readiness assessments do not constitute decisions.';
 
-export const FORBIDDEN_PHASE_8C_MODELS = ['IssuedLicense', 'IssuedPermit', 'IssuedCertificate'] as const;
 export const FORBIDDEN_PHASE_8C_MODELS = [
   'IssuedLicense',
   'IssuedPermit',

@@ -112,7 +112,6 @@ describe('DecisionExecutionService', () => {
       masterAdministrativeFile: { id: 'maf-1' },
     });
 
-    prisma.identity.findUnique.mockResolvedValue({ id: 'identity-1', type: IdentityType.INDIVIDUAL });
     prisma.identity.findUnique.mockResolvedValue({
       id: 'identity-1',
       type: IdentityType.INDIVIDUAL,
@@ -183,7 +182,6 @@ describe('DecisionExecutionService', () => {
   });
 
   it('asserts immutable decision fields cannot be updated', () => {
-    expect(() => { service.assertDecisionImmutable(
     expect(() => {
       service.assertDecisionImmutable(
         {
@@ -197,8 +195,6 @@ describe('DecisionExecutionService', () => {
           decidedAt: new Date(),
         } as never,
         { outcome: 'REFUSED' },
-      ); },
-    ).toThrow(/immutable/i);
       );
     }).toThrow(/immutable/i);
   });

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,6 +24,7 @@ import {
 
 import { CaseStatusService } from '../../application-processing/cases/case-status.service';
 import { PrismaService } from '../../database/prisma.service';
+import { DOCUMENT_STORAGE_PORT, DocumentStoragePort } from '../../evidence-records/ports/document-storage.port';
 import { InstrumentNumberingService } from '../catalog/instrument-numbering.service';
 import {
   IssuanceBlockedException,
@@ -54,6 +56,8 @@ export class IssuanceService {
     private readonly readiness: IssuanceReadinessService,
     private readonly numbering: InstrumentNumberingService,
     private readonly caseStatus: CaseStatusService,
+    @Inject(DOCUMENT_STORAGE_PORT)
+    private readonly storage: DocumentStoragePort,
   ) {}
 
   rejectClientIssuanceFields(payload: Record<string, unknown>): void {
@@ -224,6 +228,17 @@ export class IssuanceService {
       });
 
       const contentBuffer = Buffer.from(renderedContent, 'utf8');
+      const storageObjectKey = `instruments/${instrument.id}/${contentHash}`;
+      const stored = await this.storage.put({
+        objectKey: storageObjectKey,
+        content: contentBuffer,
+        contentType: 'text/plain',
+        metadata: {
+          officialInstrumentId: instrument.id,
+          contentHash,
+        },
+      });
+
       const documentVersion = await tx.documentVersion.create({
         data: {
           documentRecordId: documentRecord.id,
@@ -231,8 +246,8 @@ export class IssuanceService {
           originalFilename: `${reservedNumber}.txt`,
           contentType: 'text/plain',
           sizeBytes: contentBuffer.length,
-          storageProvider: 'inline',
-          storageObjectKey: `instruments/${instrument.id}/${contentHash}`,
+          storageProvider: stored.storageProvider,
+          storageObjectKey: stored.storageObjectKey,
           sha256: contentHash,
           signatureStatus: typeVersion.signatureRequired ? 'SIGNED' : 'NOT_EVALUATED',
           sealStatus: typeVersion.sealRequired ? 'SEALED' : 'NOT_EVALUATED',
