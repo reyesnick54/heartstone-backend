@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   GovernmentCommunicationAuthenticationStatus,
   GovernmentCommunicationCategory,
@@ -69,7 +74,8 @@ export class GovernmentCommunicationService {
         effectiveUntil: input.effectiveUntil,
         limitations: input.limitations,
         caseReferralId: input.caseReferralId,
-        retainedDeterminationForExternalAuthorityId: input.retainedDeterminationForExternalAuthorityId,
+        retainedDeterminationForExternalAuthorityId:
+          input.retainedDeterminationForExternalAuthorityId,
         documentRecords: input.documentRecordIds
           ? { create: input.documentRecordIds.map((id) => ({ documentRecordId: id })) }
           : undefined,
