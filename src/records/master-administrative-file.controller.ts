@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -11,6 +11,8 @@ import { PrismaService } from '../database/prisma.service';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { MasterFileCompletenessAssessmentService } from './completeness/master-file-completeness-assessment.service';
+import { AssessMasterFileCompletenessDto } from './dto/assess-master-file-completeness.dto';
 import { MasterAdministrativeFileService } from './master-administrative-file.service';
 import {
   MasterAdministrativeFileAccessService,
@@ -27,6 +29,7 @@ export class MasterAdministrativeFileController {
     private readonly masterFileService: MasterAdministrativeFileService,
     private readonly indexService: MasterAdministrativeFileIndexService,
     private readonly accessService: MasterAdministrativeFileAccessService,
+    private readonly completenessAssessment: MasterFileCompletenessAssessmentService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -56,6 +59,26 @@ export class MasterAdministrativeFileController {
     const accessContext = await this.buildAccessContext(session.identityId);
     const accessLevel = await this.accessService.resolveAccessLevel(file, accessContext);
     return this.accessService.sanitizeFileView(accessLevel, file);
+  }
+
+  @Post(':id/completeness')
+  @ApiOperation({ summary: 'Assess Master Administrative File evidence completeness' })
+  @ApiCreatedResponse({
+    description:
+      'Completeness outcome for required evidence requirements. Does not constitute approval.',
+  })
+  async assessCompleteness(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AssessMasterFileCompletenessDto,
+  ) {
+    const accessContext = await this.buildAccessContext(session.identityId);
+    const file = await this.masterFileService.findById(id);
+    await this.accessService.resolveAccessLevel(file, accessContext);
+    return this.completenessAssessment.assess({
+      masterAdministrativeFileId: id,
+      requiredRequirementCodes: dto.requiredRequirementCodes,
+    });
   }
 
   @Get(':id/index')

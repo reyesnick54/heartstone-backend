@@ -7,6 +7,8 @@ import { TestMalwareScanningAdapter } from './adapters/test-malware-scanning.ada
 import { ArchivalTransfersService } from './archival/archival-transfers.service';
 import { DocumentAuditService } from './audit/document-audit.service';
 import { RecordsClassificationsService } from './classifications/records-classifications.service';
+import { EvidenceRecordsBoundaryService } from './common/evidence-records-boundary.service';
+import { MasterFileCompletenessService } from './completeness/master-file-completeness.service';
 import { RecordDispositionService } from './disposition/record-disposition.service';
 import { DocumentAccessService } from './documents/document-access.service';
 import { DocumentAssociationsService } from './documents/document-associations.service';
@@ -25,6 +27,8 @@ import { RetentionSchedulesService } from './retention/retention-schedules.servi
   imports: [SessionsModule],
   controllers: [DocumentsController, EvidenceRecordsController],
   providers: [
+    EvidenceRecordsBoundaryService,
+    MasterFileCompletenessService,
     DocumentRecordsService,
     DocumentVersionsService,
     DocumentAssociationsService,
@@ -54,6 +58,8 @@ import { RetentionSchedulesService } from './retention/retention-schedules.servi
     },
   ],
   exports: [
+    EvidenceRecordsBoundaryService,
+    MasterFileCompletenessService,
     DocumentRecordsService,
     DocumentVersionsService,
     DocumentAssociationsService,
