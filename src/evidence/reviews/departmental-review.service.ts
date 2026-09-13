@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityEvaluationOutcome,
@@ -97,7 +102,8 @@ export class DepartmentalReviewService {
       officeholderId: input.reviewerOfficeholderId,
       functionAuthorityRecordId: review.functionAuthorityRecordId,
       action: AuthorityActionType.REVIEW,
-      evidenceProvided: input.evidenceRecordIds ?? review.evidenceConsidered.map((e) => e.evidenceRecordId),
+      evidenceProvided:
+        input.evidenceRecordIds ?? review.evidenceConsidered.map((e) => e.evidenceRecordId),
     });
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {
