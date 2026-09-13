@@ -35,8 +35,7 @@ export class ExternalRecordsRepositoriesService {
         backupTreatment: input.backupTreatment,
         terminationExitRequirement: input.terminationExitRequirement,
         vendorDefaultDeletionPolicy: input.vendorDefaultDeletionPolicy,
-        institutionalScheduleOverridesVendor:
-          input.institutionalScheduleOverridesVendor ?? true,
+        institutionalScheduleOverridesVendor: input.institutionalScheduleOverridesVendor ?? true,
       },
     });
   }

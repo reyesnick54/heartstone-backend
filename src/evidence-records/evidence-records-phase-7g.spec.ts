@@ -129,10 +129,7 @@ describe('ExternalRecordsRepositoriesService (Phase 7G)', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        ExternalRecordsRepositoriesService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [ExternalRecordsRepositoriesService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     const service = moduleRef.get(ExternalRecordsRepositoriesService);

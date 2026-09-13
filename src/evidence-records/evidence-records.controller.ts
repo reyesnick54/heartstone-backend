@@ -42,7 +42,9 @@ export class EvidenceRecordsController {
   }
 
   @Post('disposition/evaluate')
-  evaluateDisposition(@Body() body: Parameters<RecordDispositionService['evaluateEligibility']>[0]) {
+  evaluateDisposition(
+    @Body() body: Parameters<RecordDispositionService['evaluateEligibility']>[0],
+  ) {
     return this.dispositionService.evaluateEligibility(body);
   }
 

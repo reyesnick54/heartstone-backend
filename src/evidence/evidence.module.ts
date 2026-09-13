@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
+import { IdentityCommonModule } from '../identity/common/identity-common.module';
 import { IdentityModule } from '../identity/identity.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { RecordAccessService } from './access/record-access.service';
@@ -23,7 +24,7 @@ import { DepartmentalReviewService } from './reviews/departmental-review.service
 import { EvidenceVerificationService } from './verification/evidence-verification.service';
 
 @Module({
-  imports: [SessionsModule, AuthorityModule, IdentityModule, EvidencePacketsModule],
+  imports: [SessionsModule, AuthorityModule, IdentityModule, IdentityCommonModule, EvidencePacketsModule],
   controllers: [EvidenceController, EvidenceAiController],
   providers: [
     EvidenceRecordsService,
