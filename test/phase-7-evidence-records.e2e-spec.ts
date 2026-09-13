@@ -40,6 +40,8 @@ describe('Phase 7H evidence records (e2e)', () => {
     expect(assessment.outcome).toBe('UNRESOLVED');
     expect(assessment.explanationCodes).not.toContain('GOVERNMENT_DECISION');
 
+    const decisionCount = await prisma.governmentDecision.count();
+    expect(decisionCount).toBe(0);
     const decisionRowCount = await prisma.governmentDecision.count({
       where: { caseId: fixture.caseId },
     });

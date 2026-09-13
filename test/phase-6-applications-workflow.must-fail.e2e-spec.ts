@@ -566,6 +566,9 @@ describe('Phase 6 must-fail invariants (e2e)', () => {
       .expect(422);
   });
 
+  it('49. Phase 6 cannot issue license/permit/certificate', async () => {
+    const tables = ['issued_licenses', 'issued_permits', 'issued_certificates'];
+    for (const table of tables) {
   it('49. Phase 6 cannot issue license/permit/certificate or create government decisions', async () => {
     const issuanceTables = ['issued_licenses', 'issued_permits', 'issued_certificates'];
     for (const table of issuanceTables) {
