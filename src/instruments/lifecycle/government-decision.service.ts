@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  GovernmentDecision,
-  GovernmentDecisionStatus,
-  GovernmentDecisionType,
+  InstrumentLifecycleDecision,
+  InstrumentLifecycleDecisionStatus,
+  InstrumentLifecycleDecisionType,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
-export interface CreateGovernmentDecisionInput {
+export interface CreateInstrumentLifecycleDecisionInput {
   decisionNumber: string;
-  decisionType: GovernmentDecisionType;
+  decisionType: InstrumentLifecycleDecisionType;
   decidingOfficeholderId: string;
   decidingIdentityId: string;
   outcomeSummary: string;
@@ -26,12 +26,14 @@ export interface CreateGovernmentDecisionInput {
 export class GovernmentDecisionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createDecision(input: CreateGovernmentDecisionInput): Promise<GovernmentDecision> {
-    return this.prisma.governmentDecision.create({
+  async createDecision(
+    input: CreateInstrumentLifecycleDecisionInput,
+  ): Promise<InstrumentLifecycleDecision> {
+    return this.prisma.instrumentLifecycleDecision.create({
       data: {
         decisionNumber: input.decisionNumber,
         decisionType: input.decisionType,
-        status: GovernmentDecisionStatus.DRAFT,
+        status: InstrumentLifecycleDecisionStatus.DRAFT,
         decidingOfficeholderId: input.decidingOfficeholderId,
         decidingIdentityId: input.decidingIdentityId,
         outcomeSummary: input.outcomeSummary,
@@ -46,41 +48,43 @@ export class GovernmentDecisionService {
     });
   }
 
-  async finalizeDecision(decisionId: string): Promise<GovernmentDecision> {
-    const decision = await this.prisma.governmentDecision.findUnique({
+  async finalizeDecision(decisionId: string): Promise<InstrumentLifecycleDecision> {
+    const decision = await this.prisma.instrumentLifecycleDecision.findUnique({
       where: { id: decisionId },
     });
 
     if (!decision) {
-      throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
+      throw new NotFoundException(`InstrumentLifecycleDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== GovernmentDecisionStatus.DRAFT &&
-        decision.status !== GovernmentDecisionStatus.PENDING) {
+    if (
+      decision.status !== InstrumentLifecycleDecisionStatus.DRAFT &&
+      decision.status !== InstrumentLifecycleDecisionStatus.PENDING
+    ) {
       throw new BadRequestException('Decision is not in a finalizable state');
     }
 
-    return this.prisma.governmentDecision.update({
+    return this.prisma.instrumentLifecycleDecision.update({
       where: { id: decisionId },
       data: {
-        status: GovernmentDecisionStatus.FINALIZED,
+        status: InstrumentLifecycleDecisionStatus.FINALIZED,
         finalizedAt: new Date(),
       },
     });
   }
 
-  async assertDecisionFinalized(decisionId: string): Promise<GovernmentDecision> {
-    const decision = await this.prisma.governmentDecision.findUnique({
+  async assertDecisionFinalized(decisionId: string): Promise<InstrumentLifecycleDecision> {
+    const decision = await this.prisma.instrumentLifecycleDecision.findUnique({
       where: { id: decisionId },
     });
 
     if (!decision) {
-      throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
+      throw new NotFoundException(`InstrumentLifecycleDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== GovernmentDecisionStatus.FINALIZED) {
+    if (decision.status !== InstrumentLifecycleDecisionStatus.FINALIZED) {
       throw new BadRequestException(
-        'Lifecycle action requires a finalized GovernmentDecision',
+        'Lifecycle action requires a finalized InstrumentLifecycleDecision',
       );
     }
 

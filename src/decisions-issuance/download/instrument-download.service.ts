@@ -81,6 +81,10 @@ export class InstrumentDownloadService {
     }
 
     const documentVersion = version.documentVersion;
+    if (!documentVersion) {
+      throw new InstrumentDownloadForbiddenException('Issued version has no linked document');
+    }
+
     const content = await this.storage.get(documentVersion.storageObjectKey);
     const contentType = documentVersion.contentType;
     const originalFilename =

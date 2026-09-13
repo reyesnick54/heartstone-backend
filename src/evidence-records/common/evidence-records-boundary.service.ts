@@ -402,7 +402,6 @@ export class EvidenceRecordsBoundaryService {
       'issued_permits',
       'issued_certificates',
     ];
-    const forbiddenTables = ['issued_licenses', 'issued_permits', 'issued_certificates'];
     for (const table of forbiddenTables) {
       const result = await this.prisma.$queryRawUnsafe<{ count: bigint }[]>(
         `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = '${table}'`,

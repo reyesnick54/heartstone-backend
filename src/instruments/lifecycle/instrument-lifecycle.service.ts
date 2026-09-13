@@ -2,11 +2,11 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  GovernmentDecisionType,
   InstrumentJurisdictionScope,
+  InstrumentLifecycleDecisionType,
   InstrumentLifecycleEventType,
+  InstrumentLifecycleStatus,
   OfficialInstrument,
-  OfficialInstrumentStatus,
   OfficialInstrumentType,
   PriorVersionTreatment,
   Prisma,
@@ -25,8 +25,8 @@ export interface IssueInstrumentInput {
   instrumentNumber: string;
   instrumentType: OfficialInstrumentType;
   jurisdictionScope?: InstrumentJurisdictionScope;
-  issuingInstitutionId: string;
-  originalDecisionId: string;
+  issuerInstitutionId: string;
+  lifecycleOriginalDecisionId: string;
   holderIdentityId?: string;
   caseId?: string;
   masterAdministrativeFileId?: string;
@@ -41,7 +41,7 @@ export interface IssueInstrumentInput {
 }
 
 export interface AmendInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   authorityReference: string;
   affectedScope: string;
@@ -61,7 +61,7 @@ export interface AmendInstrumentInput {
 }
 
 export interface ClericalCorrectionInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   correctedContentReference: string;
   correctedContentHash?: string;
@@ -76,7 +76,7 @@ export interface ClericalCorrectionInput {
 }
 
 export interface RenewInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   authorityReference: string;
   currentEvidenceIds: string[];
@@ -97,7 +97,7 @@ export interface RenewInstrumentInput {
 }
 
 export interface SuspendInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   authorityReference: string;
   triggerReference: string;
@@ -121,7 +121,7 @@ export interface SuspendInstrumentInput {
 }
 
 export interface RevokeInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   authorityReference: string;
   groundsReference: string;
@@ -139,7 +139,7 @@ export interface RevokeInstrumentInput {
 }
 
 export interface ReinstateInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId: string;
   authorityReference: string;
   priorSuspensionRecordId?: string;
@@ -154,7 +154,7 @@ export interface ReinstateInstrumentInput {
 }
 
 export interface SurrenderInstrumentInput {
-  instrumentId: string;
+  officialInstrumentId: string;
   controllingDecisionId?: string;
   surrenderType: SurrenderType;
   applicantRequestReference?: string;
@@ -195,7 +195,7 @@ export class InstrumentLifecycleService {
   ) {}
 
   async issueInstrument(input: IssueInstrumentInput): Promise<OfficialInstrument> {
-    await this.decisionService.assertDecisionFinalized(input.originalDecisionId);
+    await this.decisionService.assertDecisionFinalized(input.lifecycleOriginalDecisionId);
 
     const token = randomUUID();
     const contentHash = input.contentHash ?? this.hashContent(input.contentReference);
@@ -205,13 +205,14 @@ export class InstrumentLifecycleService {
         instrumentNumber: input.instrumentNumber,
         instrumentType: input.instrumentType,
         jurisdictionScope: input.jurisdictionScope ?? InstrumentJurisdictionScope.NATIONAL,
-        currentStatus: OfficialInstrumentStatus.ISSUED,
+        lifecycleStatus: InstrumentLifecycleStatus.ISSUED,
         holderIdentityId: input.holderIdentityId,
         caseId: input.caseId,
         masterAdministrativeFileId: input.masterAdministrativeFileId,
         governmentServiceVersionId: input.governmentServiceVersionId,
-        issuingInstitutionId: input.issuingInstitutionId,
-        originalDecisionId: input.originalDecisionId,
+        issuerInstitutionId: input.issuerInstitutionId,
+        issuerOfficeholderId: input.actorOfficeholderId ?? input.issuerInstitutionId,
+        lifecycleOriginalDecisionId: input.lifecycleOriginalDecisionId,
         effectiveFrom: input.effectiveFrom,
         effectiveUntil: input.effectiveUntil,
         publicVerificationToken: token,
@@ -219,13 +220,13 @@ export class InstrumentLifecycleService {
         versions: {
           create: {
             versionNumber: 1,
-            isCurrent: true,
+            isCurrentLifecycle: true,
             contentReference: input.contentReference,
             contentHash,
             scopeDescription: input.scopeDescription,
-            effectiveFrom: input.effectiveFrom,
-            effectiveUntil: input.effectiveUntil,
-            createdByDecisionId: input.originalDecisionId,
+            lifecycleEffectiveFrom: input.effectiveFrom,
+            lifecycleEffectiveUntil: input.effectiveUntil,
+            lifecycleCreatedByDecisionId: input.lifecycleOriginalDecisionId,
           },
         },
       },
@@ -243,10 +244,10 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.ISSUED,
-      controllingDecisionId: input.originalDecisionId,
-      newStatus: OfficialInstrumentStatus.ISSUED,
+      controllingDecisionId: input.lifecycleOriginalDecisionId,
+      newStatus: InstrumentLifecycleStatus.ISSUED,
       effectiveAt: input.effectiveFrom ?? new Date(),
       actorIdentityId: input.actorIdentityId,
       actorOfficeholderId: input.actorOfficeholderId,
@@ -260,7 +261,7 @@ export class InstrumentLifecycleService {
 
   async amendInstrument(input: AmendInstrumentInput): Promise<OfficialInstrument> {
     await this.guard.assertNoConflictingPendingOperations(
-      input.instrumentId,
+      input.officialInstrumentId,
       InstrumentLifecycleEventType.AMENDED,
     );
 
@@ -268,13 +269,13 @@ export class InstrumentLifecycleService {
       input.controllingDecisionId,
     );
     this.boundary.assertDecisionTypeMatchesLifecycleAction(decision.decisionType, [
-      GovernmentDecisionType.AMEND,
-      GovernmentDecisionType.APPROVE_WITH_CONDITIONS,
+      InstrumentLifecycleDecisionType.AMEND,
+      InstrumentLifecycleDecisionType.APPROVE_WITH_CONDITIONS,
     ]);
 
-    const instrument = await this.getInstrumentWithCurrentVersion(input.instrumentId);
+    const instrument = await this.getInstrumentWithCurrentVersion(input.officialInstrumentId);
     this.boundary.assertInstrumentStatusAllowsAction(
-      instrument.currentStatus,
+      instrument.lifecycleStatus,
       this.guard.getAllowedStatusesForAction(InstrumentLifecycleEventType.AMENDED),
       'amendment',
     );
@@ -289,31 +290,31 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.officialInstrumentVersion.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         versionNumber: nextVersionNumber,
-        isCurrent: true,
+        isCurrentLifecycle: true,
         contentReference: input.newContentReference,
         contentHash: newContentHash,
         scopeDescription: input.affectedScope,
         rightsAndObligations: this.asJson(input.affectedRights ?? []),
-        conditions: this.asJson(input.affectedConditions ?? []),
-        effectiveFrom: input.effectiveAt,
+        lifecycleConditions: this.asJson(input.affectedConditions ?? []),
+        lifecycleEffectiveFrom: input.effectiveAt,
         priorVersionTreatment: input.priorVersionTreatment,
-        createdByDecisionId: input.controllingDecisionId,
+        lifecycleCreatedByDecisionId: input.controllingDecisionId,
       },
     });
 
     await this.prisma.officialInstrumentVersion.update({
       where: { id: priorVersion.id },
       data: {
-        isCurrent: false,
+        isCurrentLifecycle: false,
         supersededByVersionId: newVersion.id,
       },
     });
 
     await this.prisma.instrumentAmendmentRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         priorVersionId: priorVersion.id,
         newVersionId: newVersion.id,
         controllingDecisionId: input.controllingDecisionId,
@@ -337,24 +338,24 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.AMENDED,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.AMENDED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.AMENDED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
       actorOfficeholderId: input.actorOfficeholderId,
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async correctClerical(input: ClericalCorrectionInput): Promise<OfficialInstrument> {
     this.boundary.assertClericalCorrectionScope(input);
     await this.decisionService.assertDecisionFinalized(input.controllingDecisionId);
 
-    const instrument = await this.getInstrumentWithCurrentVersion(input.instrumentId);
+    const instrument = await this.getInstrumentWithCurrentVersion(input.officialInstrumentId);
     const priorVersion = instrument.currentVersion;
     if (!priorVersion) {
       throw new BadRequestException('Instrument has no current version for clerical correction');
@@ -365,24 +366,24 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.officialInstrumentVersion.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         versionNumber: priorVersion.versionNumber + 1,
-        isCurrent: true,
+        isCurrentLifecycle: true,
         contentReference: input.correctedContentReference,
         contentHash: correctedHash,
         scopeDescription: priorVersion.scopeDescription,
         rightsAndObligations: this.asJson(priorVersion.rightsAndObligations),
-        conditions: this.asJson(priorVersion.conditions),
-        effectiveFrom: priorVersion.effectiveFrom,
-        effectiveUntil: priorVersion.effectiveUntil,
+        lifecycleConditions: this.asJson(priorVersion.lifecycleConditions),
+        lifecycleEffectiveFrom: priorVersion.lifecycleEffectiveFrom,
+        lifecycleEffectiveUntil: priorVersion.lifecycleEffectiveUntil,
         priorVersionTreatment: PriorVersionTreatment.RETAINED_HISTORICAL,
-        createdByDecisionId: input.controllingDecisionId,
+        lifecycleCreatedByDecisionId: input.controllingDecisionId,
       },
     });
 
     await this.prisma.officialInstrumentVersion.update({
       where: { id: priorVersion.id },
-      data: { isCurrent: false, supersededByVersionId: newVersion.id },
+      data: { isCurrentLifecycle: false, supersededByVersionId: newVersion.id },
     });
 
     await this.prisma.officialInstrument.update({
@@ -391,21 +392,21 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.CORRECTED_CLERICAL,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: instrument.currentStatus,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: instrument.lifecycleStatus,
       effectiveAt: new Date(),
       actorIdentityId: input.actorIdentityId,
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async renewInstrument(input: RenewInstrumentInput): Promise<OfficialInstrument> {
     await this.guard.assertNoConflictingPendingOperations(
-      input.instrumentId,
+      input.officialInstrumentId,
       InstrumentLifecycleEventType.RENEWED,
     );
 
@@ -423,7 +424,7 @@ export class InstrumentLifecycleService {
       decisionFinalized: decision.status === 'FINALIZED',
     });
 
-    const instrument = await this.getInstrumentWithCurrentVersion(input.instrumentId);
+    const instrument = await this.getInstrumentWithCurrentVersion(input.officialInstrumentId);
     const priorVersion = instrument.currentVersion;
     if (!priorVersion) {
       throw new BadRequestException('Instrument has no current version for renewal');
@@ -433,25 +434,25 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.officialInstrumentVersion.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         versionNumber: priorVersion.versionNumber + 1,
-        isCurrent: true,
+        isCurrentLifecycle: true,
         contentReference: input.newContentReference,
         contentHash: newContentHash,
-        effectiveFrom: input.newEffectiveFrom,
-        effectiveUntil: input.newEffectiveUntil,
-        createdByDecisionId: input.controllingDecisionId,
+        lifecycleEffectiveFrom: input.newEffectiveFrom,
+        lifecycleEffectiveUntil: input.newEffectiveUntil,
+        lifecycleCreatedByDecisionId: input.controllingDecisionId,
       },
     });
 
     await this.prisma.officialInstrumentVersion.update({
       where: { id: priorVersion.id },
-      data: { isCurrent: false, supersededByVersionId: newVersion.id },
+      data: { isCurrentLifecycle: false, supersededByVersionId: newVersion.id },
     });
 
     await this.prisma.instrumentRenewalRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         priorVersionId: priorVersion.id,
         newVersionId: newVersion.id,
         controllingDecisionId: input.controllingDecisionId,
@@ -481,16 +482,16 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.RENEWED,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.RENEWED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.RENEWED,
       effectiveAt: input.newEffectiveFrom,
       actorIdentityId: input.actorIdentityId,
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async suspendInstrument(input: SuspendInstrumentInput): Promise<OfficialInstrument> {
@@ -503,17 +504,17 @@ export class InstrumentLifecycleService {
       ? InstrumentLifecycleEventType.PARTIALLY_SUSPENDED
       : InstrumentLifecycleEventType.SUSPENDED;
     const newStatus = input.isPartial
-      ? OfficialInstrumentStatus.PARTIALLY_SUSPENDED
-      : OfficialInstrumentStatus.SUSPENDED;
+      ? InstrumentLifecycleStatus.PARTIALLY_SUSPENDED
+      : InstrumentLifecycleStatus.SUSPENDED;
 
-    await this.guard.assertNoConflictingPendingOperations(input.instrumentId, eventType);
+    await this.guard.assertNoConflictingPendingOperations(input.officialInstrumentId, eventType);
     await this.decisionService.assertDecisionFinalized(input.controllingDecisionId);
 
-    const instrument = await this.getInstrument(input.instrumentId);
+    const instrument = await this.getInstrument(input.officialInstrumentId);
 
     await this.prisma.instrumentSuspensionRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         controllingDecisionId: input.controllingDecisionId,
         authorityReference: input.authorityReference,
         triggerReference: input.triggerReference,
@@ -535,27 +536,27 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
+      priorStatus: instrument.lifecycleStatus,
       newStatus,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.executedByIdentityId,
       metadata: input.partialScope ? { partialScope: input.partialScope } : {},
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async revokeInstrument(input: RevokeInstrumentInput): Promise<OfficialInstrument> {
     await this.guard.assertNoConflictingPendingOperations(
-      input.instrumentId,
+      input.officialInstrumentId,
       InstrumentLifecycleEventType.REVOKED,
     );
     await this.decisionService.assertDecisionFinalized(input.controllingDecisionId);
 
-    const instrument = await this.getInstrument(input.instrumentId);
+    const instrument = await this.getInstrument(input.officialInstrumentId);
 
     this.boundary.assertAbsezRevocationNotNational({
       jurisdictionScope: instrument.jurisdictionScope,
@@ -564,7 +565,7 @@ export class InstrumentLifecycleService {
 
     await this.prisma.instrumentRevocationRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         controllingDecisionId: input.controllingDecisionId,
         authorityReference: input.authorityReference,
         groundsReference: input.groundsReference,
@@ -582,21 +583,21 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.REVOKED,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.REVOKED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.REVOKED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async reinstateInstrument(input: ReinstateInstrumentInput): Promise<OfficialInstrument> {
     await this.guard.assertNoConflictingPendingOperations(
-      input.instrumentId,
+      input.officialInstrumentId,
       InstrumentLifecycleEventType.REINSTATED,
     );
 
@@ -612,11 +613,11 @@ export class InstrumentLifecycleService {
       newDecisionFinalized: decision.status === 'FINALIZED',
     });
 
-    const instrument = await this.getInstrument(input.instrumentId);
+    const instrument = await this.getInstrument(input.officialInstrumentId);
 
     await this.prisma.instrumentReinstatementRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         controllingDecisionId: input.controllingDecisionId,
         priorSuspensionRecordId: input.priorSuspensionRecordId,
         priorRevocationRecordId: input.priorRevocationRecordId,
@@ -625,25 +626,24 @@ export class InstrumentLifecycleService {
         inspectionVerified: input.inspectionVerified,
         professionalVerified: input.professionalVerified,
         effectiveAt: input.effectiveAt,
-        continuingConditions: this.asJson(input.continuingConditions ?? []),
       },
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.REINSTATED,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.REINSTATED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.REINSTATED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
-  async expireInstrument(instrumentId: string): Promise<OfficialInstrument> {
-    const instrument = await this.getInstrument(instrumentId);
+  async expireInstrument(officialInstrumentId: string): Promise<OfficialInstrument> {
+    const instrument = await this.getInstrument(officialInstrumentId);
 
     if (!instrument.effectiveUntil) {
       throw new BadRequestException('Instrument has no explicit effectiveUntil date');
@@ -654,18 +654,18 @@ export class InstrumentLifecycleService {
     }
 
     await this.recordLifecycleEvent({
-      instrumentId,
+      officialInstrumentId,
       eventType: InstrumentLifecycleEventType.EXPIRED,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.EXPIRED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.EXPIRED,
       effectiveAt: instrument.effectiveUntil,
     });
 
-    return this.getInstrument(instrumentId);
+    return this.getInstrument(officialInstrumentId);
   }
 
   async surrenderInstrument(input: SurrenderInstrumentInput): Promise<OfficialInstrument> {
-    const instrument = await this.getInstrument(input.instrumentId);
+    const instrument = await this.getInstrument(input.officialInstrumentId);
 
     if (input.controllingDecisionId) {
       await this.decisionService.assertDecisionFinalized(input.controllingDecisionId);
@@ -673,7 +673,7 @@ export class InstrumentLifecycleService {
 
     await this.prisma.instrumentSurrenderRecord.create({
       data: {
-        instrumentId: instrument.id,
+        officialInstrumentId: instrument.id,
         controllingDecisionId: input.controllingDecisionId,
         surrenderType: input.surrenderType,
         applicantRequestReference: input.applicantRequestReference,
@@ -686,17 +686,17 @@ export class InstrumentLifecycleService {
     });
 
     await this.recordLifecycleEvent({
-      instrumentId: instrument.id,
+      officialInstrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.SURRENDERED,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.currentStatus,
-      newStatus: OfficialInstrumentStatus.SURRENDERED,
+      priorStatus: instrument.lifecycleStatus,
+      newStatus: InstrumentLifecycleStatus.SURRENDERED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
       metadata: { continuingObligations: input.continuingObligations ?? [] },
     });
 
-    return this.getInstrument(input.instrumentId);
+    return this.getInstrument(input.officialInstrumentId);
   }
 
   async fileReviewReference(input: FileReviewReferenceInput) {
@@ -742,11 +742,11 @@ export class InstrumentLifecycleService {
   }
 
   async recordLifecycleEvent(input: {
-    instrumentId: string;
+    officialInstrumentId: string;
     eventType: InstrumentLifecycleEventType;
     controllingDecisionId?: string;
-    priorStatus?: OfficialInstrumentStatus;
-    newStatus: OfficialInstrumentStatus;
+    priorStatus?: InstrumentLifecycleStatus;
+    newStatus: InstrumentLifecycleStatus;
     effectiveAt: Date;
     actorIdentityId?: string;
     actorOfficeholderId?: string;
@@ -760,7 +760,7 @@ export class InstrumentLifecycleService {
 
     const event = await this.prisma.instrumentLifecycleEvent.create({
       data: {
-        instrumentId: input.instrumentId,
+        officialInstrumentId: input.officialInstrumentId,
         eventType: input.eventType,
         controllingDecisionId: input.controllingDecisionId,
         priorStatus: input.priorStatus,
@@ -777,20 +777,20 @@ export class InstrumentLifecycleService {
       await this.prisma.instrumentLifecycleDecisionLink.create({
         data: {
           lifecycleEventId: event.id,
-          governmentDecisionId: input.controllingDecisionId,
+          instrumentLifecycleDecisionId: input.controllingDecisionId,
           linkRole: 'CONTROLLING',
         },
       });
     }
 
-    await this.verification.updateVerificationCache(input.instrumentId, input.newStatus);
+    await this.verification.updateVerificationCache(input.officialInstrumentId, input.newStatus);
 
     return event;
   }
 
-  private async getInstrument(instrumentId: string) {
+  private async getInstrument(officialInstrumentId: string) {
     const instrument = await this.prisma.officialInstrument.findUnique({
-      where: { id: instrumentId },
+      where: { id: officialInstrumentId },
       include: {
         versions: { orderBy: { versionNumber: 'asc' } },
         lifecycleEvents: { orderBy: { effectiveAt: 'asc' } },
@@ -799,20 +799,20 @@ export class InstrumentLifecycleService {
     });
 
     if (!instrument) {
-      throw new NotFoundException(`Instrument ${instrumentId} not found`);
+      throw new NotFoundException(`Instrument ${officialInstrumentId} not found`);
     }
 
     return instrument;
   }
 
-  private async getInstrumentWithCurrentVersion(instrumentId: string) {
+  private async getInstrumentWithCurrentVersion(officialInstrumentId: string) {
     const instrument = await this.prisma.officialInstrument.findUnique({
-      where: { id: instrumentId },
+      where: { id: officialInstrumentId },
       include: { currentVersion: true },
     });
 
     if (!instrument) {
-      throw new NotFoundException(`Instrument ${instrumentId} not found`);
+      throw new NotFoundException(`Instrument ${officialInstrumentId} not found`);
     }
 
     if (!instrument.currentVersion) {

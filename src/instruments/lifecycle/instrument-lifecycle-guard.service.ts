@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import {
-  GovernmentDecisionStatus,
+  InstrumentLifecycleDecisionStatus,
   InstrumentLifecycleEventType,
-  OfficialInstrumentStatus,
+  InstrumentLifecycleStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -13,11 +13,11 @@ export class InstrumentLifecycleGuardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async assertNoConflictingPendingOperations(
-    instrumentId: string,
+    officialInstrumentId: string,
     proposedEventType: InstrumentLifecycleEventType,
   ): Promise<void> {
     const instrument = await this.prisma.officialInstrument.findUnique({
-      where: { id: instrumentId },
+      where: { id: officialInstrumentId },
       include: {
         lifecycleEvents: {
           orderBy: { effectiveAt: 'desc' },
@@ -27,22 +27,22 @@ export class InstrumentLifecycleGuardService {
     });
 
     if (!instrument) {
-      throw new BadRequestException(`Instrument ${instrumentId} not found`);
+      throw new BadRequestException(`Instrument ${officialInstrumentId} not found`);
     }
 
-    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.currentStatus];
+    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.lifecycleStatus];
     if (incompatible?.includes(proposedEventType)) {
       throw new ConflictException(
-        `Cannot perform ${proposedEventType} while instrument is ${instrument.currentStatus}`,
+        `Cannot perform ${proposedEventType} while instrument is ${instrument.lifecycleStatus}`,
       );
     }
 
-    const pendingRevocation = await this.prisma.governmentDecision.findFirst({
+    const pendingRevocation = await this.prisma.instrumentLifecycleDecision.findFirst({
       where: {
-        status: GovernmentDecisionStatus.PENDING,
+        status: InstrumentLifecycleDecisionStatus.PENDING,
         decisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
         lifecycleEvents: {
-          some: { instrumentId },
+          some: { officialInstrumentId },
         },
       },
     });
@@ -58,7 +58,7 @@ export class InstrumentLifecycleGuardService {
 
     const recentDuplicate = await this.prisma.instrumentLifecycleEvent.findFirst({
       where: {
-        instrumentId,
+        officialInstrumentId,
         eventType: proposedEventType,
         createdAt: { gte: new Date(Date.now() - 60_000) },
       },
@@ -148,61 +148,61 @@ export class InstrumentLifecycleGuardService {
 
   getAllowedStatusesForAction(
     action: InstrumentLifecycleEventType,
-  ): OfficialInstrumentStatus[] {
-    const map: Partial<Record<InstrumentLifecycleEventType, OfficialInstrumentStatus[]>> = {
+  ): InstrumentLifecycleStatus[] {
+    const map: Partial<Record<InstrumentLifecycleEventType, InstrumentLifecycleStatus[]>> = {
       AMENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.REINSTATED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.AMENDED,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.REINSTATED,
       ],
       VARIED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.VARIED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.AMENDED,
+        InstrumentLifecycleStatus.VARIED,
       ],
       RENEWED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.AMENDED,
       ],
       SUSPENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.REINSTATED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.AMENDED,
+        InstrumentLifecycleStatus.REINSTATED,
       ],
       PARTIALLY_SUSPENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.AMENDED,
       ],
       REVOKED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.SUSPENDED,
-        OfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        OfficialInstrumentStatus.REVOCATION_DECIDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.SUSPENDED,
+        InstrumentLifecycleStatus.PARTIALLY_SUSPENDED,
+        InstrumentLifecycleStatus.REVOCATION_DECIDED,
       ],
       REINSTATED: [
-        OfficialInstrumentStatus.SUSPENDED,
-        OfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        OfficialInstrumentStatus.REVOKED,
-        OfficialInstrumentStatus.EXPIRED,
+        InstrumentLifecycleStatus.SUSPENDED,
+        InstrumentLifecycleStatus.PARTIALLY_SUSPENDED,
+        InstrumentLifecycleStatus.REVOKED,
+        InstrumentLifecycleStatus.EXPIRED,
       ],
       SURRENDERED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.SUSPENDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.SUSPENDED,
       ],
       REPLACED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.RENEWED,
+        InstrumentLifecycleStatus.AMENDED,
       ],
       CORRECTED_CLERICAL: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.ISSUED,
-        OfficialInstrumentStatus.AMENDED,
+        InstrumentLifecycleStatus.EFFECTIVE,
+        InstrumentLifecycleStatus.ISSUED,
+        InstrumentLifecycleStatus.AMENDED,
       ],
     };
 

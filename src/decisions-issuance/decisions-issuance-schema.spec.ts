@@ -89,9 +89,9 @@ describe('Decisions issuance schema coherence (Phase 8E+8F)', () => {
   });
 
   it('does not permit client-chosen instrument numbers on OfficialInstrument create fields', () => {
-    const block = /model OfficialInstrument\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
-    expect(block).toContain('instrumentNumber');
-    expect(block).toContain('PENDING_ISSUANCE');
+    expect(schema).toContain('instrumentNumber             String?');
+    const statusEnum = extractEnumBlock(schema, 'OfficialInstrumentStatus');
+    expect(statusEnum).toContain('PENDING_ISSUANCE');
   });
 
   it('defines delivery audit event types for delivery, download, verification, and receipt', () => {

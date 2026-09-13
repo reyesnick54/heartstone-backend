@@ -1,5 +1,5 @@
 export const PHASE_8G_MODEL_NAMES = [
-  'GovernmentDecision',
+  'InstrumentLifecycleDecision',
   'OfficialInstrument',
   'OfficialInstrumentVersion',
   'InstrumentLifecycleEvent',
@@ -15,11 +15,11 @@ export const PHASE_8G_MODEL_NAMES = [
 ] as const;
 
 export const PHASE_8G_ENUM_NAMES = [
-  'GovernmentDecisionType',
-  'GovernmentDecisionStatus',
+  'InstrumentLifecycleDecisionType',
+  'InstrumentLifecycleDecisionStatus',
   'OfficialInstrumentType',
   'InstrumentJurisdictionScope',
-  'OfficialInstrumentStatus',
+  'InstrumentLifecycleStatus',
   'InstrumentLifecycleEventType',
   'ReviewStayStatus',
   'ReviewInterimEffect',
