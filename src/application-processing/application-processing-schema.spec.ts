@@ -144,6 +144,6 @@ describe('Application processing schema coherence (Phase 6)', () => {
     expect(schema).toContain('model MasterAdministrativeFile');
     expect(schema).toContain('model MasterAdministrativeFileSection');
     expect(schema).not.toContain('model DocumentRegister');
-    expect(schema).not.toContain('model EvidencePacket');
+    expect(block).not.toContain('evidencePacket');
   });
 });

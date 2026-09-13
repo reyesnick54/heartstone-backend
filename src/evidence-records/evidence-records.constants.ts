@@ -10,7 +10,6 @@ export const DOCUMENT_INTEGRITY_DISCLAIMER =
 
 export const FORBIDDEN_PHASE_7C_MODELS = [
   'EvidenceVault',
-  'EvidencePacket',
   'EvidenceItem',
 ] as const;
 

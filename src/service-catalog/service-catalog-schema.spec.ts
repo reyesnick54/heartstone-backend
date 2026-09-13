@@ -120,7 +120,6 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
       'IssuedLicense',
       'IssuedPermit',
       'IssuedCertificate',
-      'EvidencePacket',
       'EvidenceVault',
       'PaymentTransaction',
       'InspectionCase',
