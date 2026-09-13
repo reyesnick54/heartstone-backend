@@ -89,7 +89,10 @@ model Jurisdiction {
   status       StructuralLifecycleStatus @default(ACTIVE)
   createdAt    DateTime                  @default(now())
   updatedAt    DateTime                  @updatedAt
-  institutions Institution[]
+  institutions              Institution[]
+  inspectionTypeDefinitions InspectionTypeDefinition[]
+  inspectionPlans           InspectionPlan[]
+  inspectionAssignments     InspectionAssignment[]
 
   @@map("jurisdictions")
 }
@@ -123,6 +126,7 @@ model Institution {
   instrumentNumberingRules      InstrumentNumberingRule[]
   issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
   complianceMattersResponsible ComplianceMatter[]
+  responsibleInspectionTypes   InspectionTypeDefinition[] @relation("InspectionTypeResponsibleInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -164,6 +168,7 @@ model Department {
   evidencePackets               EvidencePacket[]
   governmentDecisions           GovernmentDecision[]
   complianceMattersResponsible  ComplianceMatter[]
+  responsibleInspectionTypes  InspectionTypeDefinition[] @relation("InspectionTypeResponsibleDepartment")
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -232,6 +237,7 @@ model Officeholder {
   instrumentLifecycleDecisions  InstrumentLifecycleDecision[] @relation("InstrumentLifecycleDecisionDecider")
   instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
   reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  inspectionAssignments        InspectionAssignment[]
 
   @@map("officeholders")
 }
@@ -247,8 +253,9 @@ model Appointment {
   updatedAt            DateTime              @updatedAt
   office               Office                @relation(fields: [officeId], references: [id])
   officeholder         Officeholder          @relation(fields: [officeholderId], references: [id])
-  decisionParticipants DecisionParticipant[]
-  governmentDecisions  GovernmentDecision[]
+  decisionParticipants  DecisionParticipant[]
+  governmentDecisions   GovernmentDecision[]
+  inspectionAssignments InspectionAssignment[]
 
   @@index([officeId])
   @@index([officeholderId])
@@ -515,6 +522,11 @@ model Identity {
   reviewReferencesAsAppellant        DecisionReviewReference[]     @relation("ReviewAppellant")
   complianceMattersAsHolder          ComplianceMatter[]            @relation("ComplianceMatterHolderIdentity")
   obligationStatusChanges            ObligationStatusHistory[]     @relation("ObligationStatusChangedBy")
+  createdInspectionPlans             InspectionPlan[]              @relation("InspectionPlanCreator")
+  approvedInspectionPlans            InspectionPlan[]              @relation("InspectionPlanApprover")
+  inspectionAssignments              InspectionAssignment[]        @relation("InspectionAssignmentInspector")
+  verifiedInspectorQualifications    InspectorQualificationSnapshot[] @relation("InspectorQualificationVerifier")
+  recordedInspectionScheduleEvents   InspectionScheduleEvent[]     @relation("InspectionScheduleEventRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -895,6 +907,8 @@ model FunctionAuthorityRecord {
   governmentDecisions          GovernmentDecision[]
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
   continuingObligations        ContinuingObligation[]           @relation("ContinuingObligationFunctionAuthority")
+  inspectionTypeDefinitions  InspectionTypeDefinition[]
+  inspectionPlans              InspectionPlan[]
   instrumentLifecycleDecisions InstrumentLifecycleDecision[]  @relation("InstrumentLifecycleDecisionFunction")
 
   @@index([classification])
@@ -4722,6 +4736,7 @@ model DecisionCondition {
   updatedAt            DateTime                @updatedAt
   governmentDecision   GovernmentDecision      @relation(fields: [governmentDecisionId], references: [id], onDelete: Cascade)
   continuingObligations ContinuingObligation[]
+  inspectionPlans       InspectionPlan[]
 
   @@index([governmentDecisionId])
   @@index([conditionType, status])
@@ -5711,6 +5726,7 @@ model ComplianceMatter {
   responsibleInstitution     Institution            @relation(fields: [responsibleInstitutionId], references: [id])
   responsibleDepartment      Department             @relation(fields: [responsibleDepartmentId], references: [id])
   continuingObligations      ContinuingObligation[]
+  inspectionPlans            InspectionPlan[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5798,4 +5814,219 @@ model ObligationStatusHistory {
 
   @@index([continuingObligationId, changedAt])
   @@map("obligation_status_history")
+}
+
+// ─── Phase 9C: Inspection Planning, Assignment, and Scheduling ─────────────────
+
+enum InspectionTypeDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum InspectionPlanTriggerType {
+  SCHEDULED_PERIODIC
+  CONDITION_REQUIRED
+  RENEWAL
+  CORRECTIVE_ACTION_FOLLOW_UP
+  INCIDENT
+  COMPLAINT
+  RISK_BASED
+  RANDOMIZED_APPROVED_PROGRAM
+  GOVERNMENT_REFERRAL
+  PROFESSIONAL_REFERRAL
+  OTHER_AUTHORIZED
+}
+
+enum InspectionPlanStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InspectionNoticeStatus {
+  NOT_REQUIRED
+  PENDING
+  DELIVERED
+  WAIVED_AUTHORIZED
+}
+
+enum InspectionAssignmentStatus {
+  ACTIVE
+  ENDED
+  REVOKED
+  CONFLICT_BLOCKED
+}
+
+enum InspectorIndependenceStatus {
+  INDEPENDENT
+  DECLARED_CONFLICT
+  BLOCKED
+}
+
+enum InspectionScheduleEventType {
+  PLANNED
+  NOTICE_PREPARED
+  NOTICE_DELIVERED
+  RESCHEDULED
+  CANCELLED
+  SCOPE_AMENDED_AUTHORIZED
+}
+
+model InspectionTypeDefinition {
+  id                        String                         @id @default(uuid()) @db.Uuid
+  code                      String                         @unique
+  name                      String
+  purpose                   String
+  responsibleInstitutionId  String                         @db.Uuid
+  responsibleDepartmentId   String?                        @db.Uuid
+  functionAuthorityRecordId String                         @db.Uuid
+  requiredAuthorityAction   AuthorityActionType            @default(INSPECT)
+  jurisdictionId            String                         @db.Uuid
+  subjectMatter             String
+  requiredCompetence        String
+  professionalRequirement   String?
+  noticeRequirement         Json                           @default("{}")
+  unannouncedAllowed        Boolean                        @default(false)
+  evidenceRequirements      Json                           @default("[]")
+  status                    InspectionTypeDefinitionStatus @default(DRAFT)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  responsibleInstitution    Institution                    @relation("InspectionTypeResponsibleInstitution", fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment     Department?                    @relation("InspectionTypeResponsibleDepartment", fields: [responsibleDepartmentId], references: [id])
+  functionAuthorityRecord   FunctionAuthorityRecord        @relation(fields: [functionAuthorityRecordId], references: [id])
+  jurisdiction              Jurisdiction                   @relation(fields: [jurisdictionId], references: [id])
+  inspectionPlans           InspectionPlan[]
+
+  @@index([responsibleInstitutionId])
+  @@index([responsibleDepartmentId])
+  @@index([functionAuthorityRecordId])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("inspection_type_definitions")
+}
+
+model InspectionPlan {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  inspectionNumber           String                   @unique
+  complianceMatterId         String                   @db.Uuid
+  inspectionTypeDefinitionId String                   @db.Uuid
+  authorizedConditionId      String?                  @db.Uuid
+  functionAuthorityRecordId  String                   @db.Uuid
+  jurisdictionId             String                   @db.Uuid
+  triggerType                InspectionPlanTriggerType
+  triggerReference           String
+  scope                      String
+  location                   String?
+  scheduledFrom              DateTime?
+  scheduledTo                DateTime?
+  requirementsToExamine      Json                     @default("[]")
+  evidencePlan               Json                     @default("[]")
+  safetyRequirements         Json                     @default("[]")
+  confidentiality            Json                     @default("{}")
+  noticeStatus               InspectionNoticeStatus   @default(PENDING)
+  riskFactors                Json                     @default("[]")
+  riskScore                  Float?
+  createdByIdentityId        String                   @db.Uuid
+  approvedByIdentityId       String?                  @db.Uuid
+  status                     InspectionPlanStatus     @default(DRAFT)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  complianceMatter           ComplianceMatter         @relation(fields: [complianceMatterId], references: [id])
+  inspectionTypeDefinition   InspectionTypeDefinition @relation(fields: [inspectionTypeDefinitionId], references: [id])
+  authorizedCondition        DecisionCondition?       @relation(fields: [authorizedConditionId], references: [id])
+  functionAuthorityRecord    FunctionAuthorityRecord  @relation(fields: [functionAuthorityRecordId], references: [id])
+  jurisdiction               Jurisdiction             @relation(fields: [jurisdictionId], references: [id])
+  createdByIdentity          Identity                 @relation("InspectionPlanCreator", fields: [createdByIdentityId], references: [id])
+  approvedByIdentity         Identity?                @relation("InspectionPlanApprover", fields: [approvedByIdentityId], references: [id])
+  assignments                InspectionAssignment[]
+  scheduleEvents             InspectionScheduleEvent[]
+
+  @@index([complianceMatterId])
+  @@index([inspectionTypeDefinitionId])
+  @@index([authorizedConditionId])
+  @@index([functionAuthorityRecordId])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@index([triggerType])
+  @@map("inspection_plans")
+}
+
+model InspectionAssignment {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  inspectionPlanId       String                      @db.Uuid
+  inspectorIdentityId    String                      @db.Uuid
+  officeholderId         String                      @db.Uuid
+  appointmentId          String                      @db.Uuid
+  qualificationReference String?
+  scope                  String
+  jurisdictionId         String                      @db.Uuid
+  effectiveFrom          DateTime
+  effectiveUntil         DateTime?
+  conflictDeclaration    String?
+  independenceStatus     InspectorIndependenceStatus @default(INDEPENDENT)
+  leadInspector          Boolean                     @default(false)
+  status                 InspectionAssignmentStatus  @default(ACTIVE)
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  inspectionPlan         InspectionPlan              @relation(fields: [inspectionPlanId], references: [id], onDelete: Cascade)
+  inspectorIdentity      Identity                    @relation("InspectionAssignmentInspector", fields: [inspectorIdentityId], references: [id])
+  officeholder           Officeholder                @relation(fields: [officeholderId], references: [id])
+  appointment            Appointment                 @relation(fields: [appointmentId], references: [id])
+  jurisdiction           Jurisdiction                @relation(fields: [jurisdictionId], references: [id])
+  qualificationSnapshot  InspectorQualificationSnapshot?
+
+  @@index([inspectionPlanId])
+  @@index([inspectorIdentityId])
+  @@index([officeholderId])
+  @@index([appointmentId])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("inspection_assignments")
+}
+
+model InspectorQualificationSnapshot {
+  id                     String               @id @default(uuid()) @db.Uuid
+  inspectionAssignmentId String               @unique @db.Uuid
+  qualification          String
+  licenseAccreditation   String?
+  competence             String
+  validFrom              DateTime
+  validUntil             DateTime?
+  scope                  String
+  conflicts              String?
+  independence           String?
+  verifiedByIdentityId   String               @db.Uuid
+  verifiedAt             DateTime
+  createdAt              DateTime             @default(now())
+  inspectionAssignment   InspectionAssignment @relation(fields: [inspectionAssignmentId], references: [id], onDelete: Cascade)
+  verifiedByIdentity     Identity             @relation("InspectorQualificationVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([verifiedByIdentityId])
+  @@index([validUntil])
+  @@map("inspector_qualification_snapshots")
+}
+
+model InspectionScheduleEvent {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  inspectionPlanId     String                      @db.Uuid
+  eventType            InspectionScheduleEventType
+  scheduledAt          DateTime?
+  scopeAtEvent         String
+  noticeDetails        Json?
+  isUnannounced        Boolean                     @default(false)
+  recordedByIdentityId String                      @db.Uuid
+  createdAt            DateTime                    @default(now())
+  inspectionPlan       InspectionPlan              @relation(fields: [inspectionPlanId], references: [id], onDelete: Cascade)
+  recordedByIdentity   Identity                    @relation("InspectionScheduleEventRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([inspectionPlanId])
+  @@index([eventType])
+  @@index([scheduledAt])
+  @@map("inspection_schedule_events")
 }

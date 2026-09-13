@@ -107,4 +107,13 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.workflowStageDefinition.deleteMany();
   await prisma.workflowVersion.deleteMany();
   await prisma.workflowDefinition.deleteMany();
+  await prisma.inspectorQualificationSnapshot.deleteMany();
+  await prisma.inspectionScheduleEvent.deleteMany();
+  await prisma.inspectionAssignment.deleteMany();
+  await prisma.inspectionPlan.deleteMany();
+  await prisma.inspectionTypeDefinition.deleteMany();
+  await prisma.obligationStatusHistory.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceMatter.deleteMany();
 }
