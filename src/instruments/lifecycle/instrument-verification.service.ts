@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { OfficialInstrumentStatus } from '@prisma/client';
+import { LifecycleInstrumentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
 export interface PublicVerificationResult {
   instrumentNumber: string;
-  status: OfficialInstrumentStatus;
+  status: LifecycleInstrumentStatus;
   verificationStatus: string;
   verifiedAt: Date;
   isCurrent: boolean;
@@ -13,7 +13,7 @@ export interface PublicVerificationResult {
 
 export interface HistoricalStatusSnapshot {
   effectiveAt: Date;
-  status: OfficialInstrumentStatus;
+  status: LifecycleInstrumentStatus;
   eventType: string;
 }
 
@@ -23,22 +23,22 @@ export class InstrumentVerificationService {
 
   async updateVerificationCache(
     instrumentId: string,
-    status: OfficialInstrumentStatus,
+    status: LifecycleInstrumentStatus,
   ): Promise<void> {
     const verificationStatus = this.deriveVerificationStatus(status);
 
-    await this.prisma.officialInstrument.update({
+    await this.prisma.lifecycleOfficialInstrument.update({
       where: { id: instrumentId },
       data: {
         publicVerificationStatus: verificationStatus,
         publicVerificationUpdatedAt: new Date(),
-        currentStatus: status,
+        lifecycleStatus: status,
       },
     });
   }
 
   async getPublicVerification(token: string): Promise<PublicVerificationResult> {
-    const instrument = await this.prisma.officialInstrument.findUnique({
+    const instrument = await this.prisma.lifecycleOfficialInstrument.findUnique({
       where: { publicVerificationToken: token },
     });
 
@@ -48,10 +48,10 @@ export class InstrumentVerificationService {
 
     return {
       instrumentNumber: instrument.instrumentNumber,
-      status: instrument.currentStatus,
+      status: instrument.lifecycleStatus,
       verificationStatus: instrument.publicVerificationStatus,
       verifiedAt: instrument.publicVerificationUpdatedAt,
-      isCurrent: this.isCurrentStatus(instrument.currentStatus),
+      isCurrent: this.isCurrentStatus(instrument.lifecycleStatus),
     };
   }
 
@@ -61,7 +61,7 @@ export class InstrumentVerificationService {
   ): Promise<HistoricalStatusSnapshot[]> {
     const events = await this.prisma.instrumentLifecycleEvent.findMany({
       where: {
-        instrumentId,
+        lifecycleInstrumentId: instrumentId,
         effectiveAt: { lte: at },
       },
       orderBy: { effectiveAt: 'asc' },
@@ -74,7 +74,7 @@ export class InstrumentVerificationService {
     }));
   }
 
-  async getStatusAt(instrumentId: string, at: Date): Promise<OfficialInstrumentStatus | null> {
+  async getStatusAt(instrumentId: string, at: Date): Promise<LifecycleInstrumentStatus | null> {
     const snapshot = await this.replayHistoricalStatus(instrumentId, at);
     if (snapshot.length === 0) {
       return null;
@@ -83,45 +83,45 @@ export class InstrumentVerificationService {
     return last?.status ?? null;
   }
 
-  private deriveVerificationStatus(status: OfficialInstrumentStatus): string {
+  private deriveVerificationStatus(status: LifecycleInstrumentStatus): string {
     switch (status) {
-      case OfficialInstrumentStatus.EFFECTIVE:
-      case OfficialInstrumentStatus.ISSUED:
-      case OfficialInstrumentStatus.AMENDED:
-      case OfficialInstrumentStatus.VARIED:
-      case OfficialInstrumentStatus.RENEWED:
-      case OfficialInstrumentStatus.REINSTATED:
+      case LifecycleInstrumentStatus.EFFECTIVE:
+      case LifecycleInstrumentStatus.ISSUED:
+      case LifecycleInstrumentStatus.AMENDED:
+      case LifecycleInstrumentStatus.VARIED:
+      case LifecycleInstrumentStatus.RENEWED:
+      case LifecycleInstrumentStatus.REINSTATED:
         return 'VALID';
-      case OfficialInstrumentStatus.SUSPENDED:
-      case OfficialInstrumentStatus.PARTIALLY_SUSPENDED:
+      case LifecycleInstrumentStatus.SUSPENDED:
+      case LifecycleInstrumentStatus.PARTIALLY_SUSPENDED:
         return 'SUSPENDED';
-      case OfficialInstrumentStatus.REVOKED:
-      case OfficialInstrumentStatus.REVOCATION_DECIDED:
+      case LifecycleInstrumentStatus.REVOKED:
+      case LifecycleInstrumentStatus.REVOCATION_DECIDED:
         return 'REVOKED';
-      case OfficialInstrumentStatus.EXPIRED:
+      case LifecycleInstrumentStatus.EXPIRED:
         return 'EXPIRED';
-      case OfficialInstrumentStatus.SURRENDERED:
+      case LifecycleInstrumentStatus.SURRENDERED:
         return 'SURRENDERED';
-      case OfficialInstrumentStatus.SUPERSEDED:
-      case OfficialInstrumentStatus.REPLACED:
+      case LifecycleInstrumentStatus.SUPERSEDED:
+      case LifecycleInstrumentStatus.REPLACED:
         return 'SUPERSEDED';
-      case OfficialInstrumentStatus.CLOSED:
+      case LifecycleInstrumentStatus.CLOSED:
         return 'CLOSED';
       default:
         return 'UNKNOWN';
     }
   }
 
-  private isCurrentStatus(status: OfficialInstrumentStatus): boolean {
-    const nonCurrent: OfficialInstrumentStatus[] = [
-      OfficialInstrumentStatus.SUSPENDED,
-      OfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-      OfficialInstrumentStatus.REVOKED,
-      OfficialInstrumentStatus.EXPIRED,
-      OfficialInstrumentStatus.SURRENDERED,
-      OfficialInstrumentStatus.SUPERSEDED,
-      OfficialInstrumentStatus.REPLACED,
-      OfficialInstrumentStatus.CLOSED,
+  private isCurrentStatus(status: LifecycleInstrumentStatus): boolean {
+    const nonCurrent: LifecycleInstrumentStatus[] = [
+      LifecycleInstrumentStatus.SUSPENDED,
+      LifecycleInstrumentStatus.PARTIALLY_SUSPENDED,
+      LifecycleInstrumentStatus.REVOKED,
+      LifecycleInstrumentStatus.EXPIRED,
+      LifecycleInstrumentStatus.SURRENDERED,
+      LifecycleInstrumentStatus.SUPERSEDED,
+      LifecycleInstrumentStatus.REPLACED,
+      LifecycleInstrumentStatus.CLOSED,
     ];
     return !nonCurrent.includes(status);
   }

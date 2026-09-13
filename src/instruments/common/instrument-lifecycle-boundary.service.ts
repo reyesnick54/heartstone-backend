@@ -1,9 +1,9 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import {
-  GovernmentDecisionType,
   InstrumentJurisdictionScope,
-  OfficialInstrumentStatus,
+  InstrumentLifecycleDecisionType,
+  LifecycleInstrumentStatus,
 } from '@prisma/client';
 
 import { PROTECTED_INSTRUMENT_STATUS_FIELDS, TECHNICAL_ADMIN_ROLE_MARKER } from '../instruments.constants';
@@ -89,24 +89,24 @@ export class InstrumentLifecycleBoundaryService {
   }
 
   assertDecisionTypeMatchesLifecycleAction(
-    decisionType: GovernmentDecisionType,
-    expectedTypes: GovernmentDecisionType[],
+    lifecycleDecisionType: InstrumentLifecycleDecisionType,
+    expectedTypes: InstrumentLifecycleDecisionType[],
   ): void {
-    if (!expectedTypes.includes(decisionType)) {
+    if (!expectedTypes.includes(lifecycleDecisionType)) {
       throw new BadRequestException(
-        `Government decision type ${decisionType} is not authorized for this lifecycle action`,
+        `Instrument lifecycle decision type ${lifecycleDecisionType} is not authorized for this lifecycle action`,
       );
     }
   }
 
   assertInstrumentStatusAllowsAction(
-    currentStatus: OfficialInstrumentStatus,
-    allowedStatuses: OfficialInstrumentStatus[],
+    lifecycleStatus: LifecycleInstrumentStatus,
+    allowedStatuses: LifecycleInstrumentStatus[],
     action: string,
   ): void {
-    if (!allowedStatuses.includes(currentStatus)) {
+    if (!allowedStatuses.includes(lifecycleStatus)) {
       throw new BadRequestException(
-        `Instrument status ${currentStatus} does not permit ${action}`,
+        `Instrument status ${lifecycleStatus} does not permit ${action}`,
       );
     }
   }
