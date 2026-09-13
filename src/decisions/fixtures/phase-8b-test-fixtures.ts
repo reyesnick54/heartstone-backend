@@ -16,6 +16,7 @@ import {
   InstitutionType,
   JurisdictionType,
   Prisma,
+  type Prisma,
   WorkflowVersionStatus,
 } from '@prisma/client';
 

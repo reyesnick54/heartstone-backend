@@ -73,6 +73,12 @@ export class DecisionReadinessService {
       return this.persistAssessment(input, DecisionReadinessOutcome.NOT_READY, [
         DECISION_READINESS_REASON_CODES.CASE_NOT_FOUND,
       ], at);
+      return this.persistAssessment(
+        input,
+        DecisionReadinessOutcome.NOT_READY,
+        [DECISION_READINESS_REASON_CODES.CASE_NOT_FOUND],
+        at,
+      );
     }
 
     if (!DECISION_READY_CASE_STATUSES.includes(caseRecord.status)) {
@@ -170,6 +176,7 @@ export class DecisionReadinessService {
           CONSULTATION_CATEGORIES.includes(record.category) &&
           record.authenticationStatus ===
             GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
+          record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!consultation) {
         reasonCodes.push(DECISION_READINESS_REASON_CODES.GOVERNMENT_CONSULTATION_MISSING);
@@ -182,6 +189,7 @@ export class DecisionReadinessService {
           CONCURRENCE_CATEGORIES.includes(record.category) &&
           record.authenticationStatus ===
             GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
+          record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!concurrence) {
         reasonCodes.push(DECISION_READINESS_REASON_CODES.GOVERNMENT_CONCURRENCE_MISSING);
@@ -194,6 +202,7 @@ export class DecisionReadinessService {
           RETAINED_DETERMINATION_CATEGORIES.includes(record.category) &&
           record.authenticationStatus ===
             GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
+          record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!determination) {
         reasonCodes.push(DECISION_READINESS_REASON_CODES.RETAINED_NATIONAL_DETERMINATION_MISSING);

@@ -113,6 +113,10 @@ describe('DecisionExecutionService', () => {
     });
 
     prisma.identity.findUnique.mockResolvedValue({ id: 'identity-1', type: IdentityType.INDIVIDUAL });
+    prisma.identity.findUnique.mockResolvedValue({
+      id: 'identity-1',
+      type: IdentityType.INDIVIDUAL,
+    });
 
     prisma.appointment.findUnique.mockResolvedValue({
       id: 'appointment-1',
@@ -180,6 +184,8 @@ describe('DecisionExecutionService', () => {
 
   it('asserts immutable decision fields cannot be updated', () => {
     expect(() => { service.assertDecisionImmutable(
+    expect(() => {
+      service.assertDecisionImmutable(
         {
           id: 'decision-1',
           outcome: 'APPROVED',
@@ -193,5 +199,7 @@ describe('DecisionExecutionService', () => {
         { outcome: 'REFUSED' },
       ); },
     ).toThrow(/immutable/i);
+      );
+    }).toThrow(/immutable/i);
   });
 });
