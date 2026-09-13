@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { LegalHoldStatus, type LegalHoldTargetType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';

@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LegalHoldTargetType, PreservationCollectionPurpose, PreservationCollectionStatus } from '@prisma/client';
+import {
+  LegalHoldTargetType,
+  PreservationCollectionPurpose,
+  PreservationCollectionStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { hashRecordsPayload } from '../common/records-hash.util';

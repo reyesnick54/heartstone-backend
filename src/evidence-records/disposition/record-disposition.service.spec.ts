@@ -117,9 +117,9 @@ describe('RecordDispositionService (Phase 7G)', () => {
       targetReference: 'DOC-4',
     });
 
-    await expect(
-      service.execute('req-1', { executedByIdentityId: 'identity-1' }),
-    ).rejects.toThrow('Disposition execution requires prior authorization');
+    await expect(service.execute('req-1', { executedByIdentityId: 'identity-1' })).rejects.toThrow(
+      'Disposition execution requires prior authorization',
+    );
   });
 
   it('blocks disposition when appeal or investigation preservation is active', async () => {
@@ -169,13 +169,15 @@ describe('RecordDispositionService (Phase 7G)', () => {
 
     expect(prisma.recordDispositionRequest.create).toHaveBeenCalledTimes(1);
     const [[createArgs]] = prisma.recordDispositionRequest.create.mock.calls as [
-      [{ data: { status: DispositionRequestStatus; safeHaltReasons: DispositionSafeHaltReason[] } }],
+      [
+        {
+          data: { status: DispositionRequestStatus; safeHaltReasons: DispositionSafeHaltReason[] };
+        },
+      ],
     ];
 
     expect(createArgs.data.status).toBe(DispositionRequestStatus.SAFE_HALTED);
-    expect(createArgs.data.safeHaltReasons).toContain(
-      DispositionSafeHaltReason.LEGAL_HOLD_ACTIVE,
-    );
+    expect(createArgs.data.safeHaltReasons).toContain(DispositionSafeHaltReason.LEGAL_HOLD_ACTIVE);
   });
 
   it('requires approval permission to authorize disposition', async () => {

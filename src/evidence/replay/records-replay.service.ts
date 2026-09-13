@@ -43,10 +43,7 @@ export class RecordsReplayService {
     return this.buildHistoricalReplay(maf.id, request);
   }
 
-  private async buildCurrentView(
-    mafId: string,
-    request: ReplayRequest,
-  ): Promise<ReplaySnapshot> {
+  private async buildCurrentView(mafId: string, request: ReplayRequest): Promise<ReplaySnapshot> {
     const maf = await this.prisma.masterAdministrativeFile.findUniqueOrThrow({
       where: { id: mafId },
       include: {
@@ -171,7 +168,9 @@ export class RecordsReplayService {
     const frozenEvidencePacketVersions = await this.prisma.evidencePacketVersion.findMany({
       where: {
         frozenAt: { lte: asOf },
-        status: { in: [EvidencePacketVersionStatus.FROZEN, EvidencePacketVersionStatus.SUPERSEDED] },
+        status: {
+          in: [EvidencePacketVersionStatus.FROZEN, EvidencePacketVersionStatus.SUPERSEDED],
+        },
         packet: { masterAdministrativeFileId: mafId },
       },
       orderBy: [{ packetId: 'asc' }, { version: 'desc' }],
@@ -185,8 +184,7 @@ export class RecordsReplayService {
       },
     });
 
-    const workflowVersions =
-      caseRecord.openedAt <= asOf ? [caseRecord.workflowVersion] : [];
+    const workflowVersions = caseRecord.openedAt <= asOf ? [caseRecord.workflowVersion] : [];
 
     const currentView = await this.buildCurrentView(mafId, {
       ...request,

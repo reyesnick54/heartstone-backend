@@ -1,7 +1,4 @@
-import {
-  DispositionSafeHaltReason,
-  type LegalHoldTargetType,
-} from '@prisma/client';
+import { DispositionSafeHaltReason, type LegalHoldTargetType } from '@prisma/client';
 
 export interface DispositionContext {
   targetType: LegalHoldTargetType;

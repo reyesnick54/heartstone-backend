@@ -58,7 +58,11 @@ export class RecordCorrectionService {
       throw new ForbiddenException('AI assistants cannot request material record corrections');
     }
 
-    await this.assertTargetExists(input.targetRecordType, input.targetRecordId, input.targetVersionId);
+    await this.assertTargetExists(
+      input.targetRecordType,
+      input.targetRecordId,
+      input.targetVersionId,
+    );
 
     const correction = await this.prisma.recordCorrection.create({
       data: {
@@ -112,7 +116,9 @@ export class RecordCorrectionService {
     });
 
     if (evaluation?.outcome !== AuthorityEvaluationOutcome.ALLOW) {
-      throw new ForbiddenException('Correction approval requires a successful authority evaluation');
+      throw new ForbiddenException(
+        'Correction approval requires a successful authority evaluation',
+      );
     }
 
     const updated = await this.prisma.recordCorrection.update({
