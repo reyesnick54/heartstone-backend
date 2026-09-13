@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   DispositionEligibilityStatus,
   DispositionExecutionResult,
@@ -146,7 +151,9 @@ export class RecordDispositionService {
 
   async authorize(requestId: string, input: AuthorizeDispositionInput) {
     if (!input.actorPermissions.includes(DISPOSITION_APPROVAL_PERMISSION)) {
-      throw new ForbiddenException('Disposition authorization requires configured approval authority');
+      throw new ForbiddenException(
+        'Disposition authorization requires configured approval authority',
+      );
     }
 
     const request = await this.prisma.recordDispositionRequest.findUnique({
@@ -158,8 +165,13 @@ export class RecordDispositionService {
     if (request.status === DispositionRequestStatus.EXECUTED) {
       throw new BadRequestException('Disposition request has already been executed');
     }
-    if (request.safeHaltReasons.length > 0 || request.status === DispositionRequestStatus.SAFE_HALTED) {
-      throw new BadRequestException('Cannot authorize disposition while safe-halt conditions remain');
+    if (
+      request.safeHaltReasons.length > 0 ||
+      request.status === DispositionRequestStatus.SAFE_HALTED
+    ) {
+      throw new BadRequestException(
+        'Cannot authorize disposition while safe-halt conditions remain',
+      );
     }
 
     const manifestCertificate = {
@@ -205,7 +217,9 @@ export class RecordDispositionService {
       throw new BadRequestException('Disposition execution requires prior authorization');
     }
     if (request.dispositionRecords.length === 0) {
-      throw new BadRequestException('Disposition execution requires an authorized disposition record');
+      throw new BadRequestException(
+        'Disposition execution requires an authorized disposition record',
+      );
     }
 
     const reevaluation = await this.evaluateEligibility({
@@ -217,7 +231,9 @@ export class RecordDispositionService {
       adverseEvidenceProtected: request.adverseEvidenceProtected,
     });
     if (reevaluation.safeHaltReasons.length > 0) {
-      throw new BadRequestException('Final dependency checks failed; disposition execution blocked');
+      throw new BadRequestException(
+        'Final dependency checks failed; disposition execution blocked',
+      );
     }
 
     return this.prisma.recordDispositionRequest.update({
