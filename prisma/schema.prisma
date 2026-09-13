@@ -212,6 +212,9 @@ model Officeholder {
   custodyEventsAsWitness       EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
   assembledEvidencePackets     EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
   authorizedPacketExclusions   EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved    RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents        RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents           RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
 
   @@map("officeholders")
 }
@@ -471,6 +474,10 @@ model Identity {
   inspectionInspectors       InspectionInspector[]      @relation("InspectionInspectorIdentity")
   custodyEventsAsCustodian   EvidenceCustodyEvent[]     @relation("EvidenceCustodyCustodian")
   custodyEventsAsWitness     EvidenceCustodyEvent[]     @relation("EvidenceCustodyWitness")
+  recordCorrectionsRequested RecordCorrection[]         @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved  RecordCorrection[]         @relation("RecordCorrectionApprover")
+  recordIntegrityEvents      RecordIntegrityEvent[]     @relation("RecordIntegrityActor")
+  recordAccessEvents         RecordAccessEvent[]        @relation("RecordAccessIdentity")
 
   @@index([userAccountId])
   @@index([personId])
@@ -842,6 +849,7 @@ model FunctionAuthorityRecord {
   workflowStepDefinitions      WorkflowStepDefinition[]
   departmentalReviews          DepartmentalReviewRecord[]
   inspectionRecords            InspectionRecord[]
+  recordCorrections            RecordCorrection[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1094,6 +1102,7 @@ model AuthorityEvaluationRecord {
   departmentalReviews       DepartmentalReviewRecord[]
   evidencePacketVersions      EvidencePacketVersion[]       @relation("EvidencePacketVersionAuthority")
   evidencePacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthority")
+  recordCorrections           RecordCorrection[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -3671,4 +3680,127 @@ model EvidencePacketItemExclusion {
   @@index([packetVersionId])
   @@index([evidenceRecordId])
   @@map("evidence_packet_item_exclusions")
+}
+
+// ─── Phase 7F: Correction, Integrity, Access, and Replay ─────────────────────
+
+enum RecordCorrectionStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IMPLEMENTED
+  SUPERSEDED
+}
+
+enum RecordIntegrityEventType {
+  CREATED
+  HASHED
+  VERIFIED
+  VERSIONED
+  SUPERSEDED
+  CORRECTED
+  EXPORTED
+  RESTORED
+  ARCHIVED
+  MIGRATED
+}
+
+enum RecordAccessEventType {
+  VIEW
+  DOWNLOAD
+  EXPORT
+  PRINT_REQUEST
+  SHARE_AUTHORIZED
+  ADMIN_ACCESS
+}
+
+enum RecordAccessResult {
+  ALLOWED
+  DENIED
+}
+
+enum RecordsReplayMode {
+  HISTORICAL_REPLAY
+  CURRENT_VIEW
+}
+
+model RecordCorrection {
+  id                            String                 @id @default(uuid()) @db.Uuid
+  targetRecordType              String
+  targetRecordId                String                 @db.Uuid
+  targetVersionId               String?                @db.Uuid
+  requestedBy                   String                 @db.Uuid
+  requestedAt                   DateTime               @default(now())
+  errorOrDisputeDescription     String
+  supportingEvidenceIds         Json                   @default("[]")
+  correctionAuthorityFunctionId String?                @db.Uuid
+  authorityEvaluationRecordId   String?                @db.Uuid
+  approvedByIdentityId          String?                @db.Uuid
+  approvedByOfficeholderId      String?                @db.Uuid
+  approvedAt                    DateTime?
+  replacementRecordReference    String?
+  downstreamAffectedReferences  Json                   @default("[]")
+  reassessmentRequired          Boolean                @default(false)
+  noticeRequired                Boolean                @default(false)
+  status                        RecordCorrectionStatus @default(REQUESTED)
+  reason                        String?
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  requester                     Identity               @relation("RecordCorrectionRequester", fields: [requestedBy], references: [id])
+  approverIdentity              Identity?              @relation("RecordCorrectionApprover", fields: [approvedByIdentityId], references: [id])
+  approverOfficeholder          Officeholder?          @relation("RecordCorrectionApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  correctionAuthorityFunction   FunctionAuthorityRecord? @relation(fields: [correctionAuthorityFunctionId], references: [id])
+
+  @@index([targetRecordType, targetRecordId])
+  @@index([status])
+  @@index([requestedBy])
+  @@map("record_corrections")
+}
+
+model RecordIntegrityEvent {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  recordType              String
+  recordId                String                   @db.Uuid
+  recordVersionId         String?                  @db.Uuid
+  eventType               RecordIntegrityEventType
+  hashAlgorithm           String                   @default("SHA-256")
+  contentHash             String
+  priorIntegrityEventHash String?
+  occurredAt              DateTime                 @default(now())
+  actorIdentityId         String?                  @db.Uuid
+  actorOfficeholderId     String?                  @db.Uuid
+  systemComponent         String
+  reason                  String?
+  metadata                Json                     @default("{}")
+  createdAt               DateTime                 @default(now())
+  actorIdentity           Identity?                @relation("RecordIntegrityActor", fields: [actorIdentityId], references: [id])
+  actorOfficeholder       Officeholder?            @relation("RecordIntegrityActorOfficeholder", fields: [actorOfficeholderId], references: [id])
+
+  @@index([recordType, recordId, occurredAt])
+  @@index([eventType])
+  @@map("record_integrity_events")
+}
+
+model RecordAccessEvent {
+  id                   String                @id @default(uuid()) @db.Uuid
+  recordType           String
+  recordId             String                @db.Uuid
+  accessType           RecordAccessEventType
+  identityId           String?               @db.Uuid
+  officeholderId       String?               @db.Uuid
+  purpose              String
+  occurredAt           DateTime              @default(now())
+  result               RecordAccessResult
+  correlationId        String?
+  securityAuditEventId String?               @db.Uuid
+  createdAt            DateTime              @default(now())
+  identity             Identity?             @relation("RecordAccessIdentity", fields: [identityId], references: [id])
+  officeholder         Officeholder?         @relation("RecordAccessOfficeholder", fields: [officeholderId], references: [id])
+
+  @@index([recordType, recordId, occurredAt])
+  @@index([identityId])
+  @@index([accessType])
+  @@map("record_access_events")
 }
