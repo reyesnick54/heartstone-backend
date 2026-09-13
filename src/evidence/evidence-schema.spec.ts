@@ -8,6 +8,9 @@ import {
   EVIDENCE_QUALITY_CRITERIA,
   EVIDENCE_RECORD_STATUSES,
   EVIDENCE_VERIFICATION_CATEGORIES,
+  GOVERNMENT_COMMUNICATION_CATEGORIES,
+  INSPECTION_FINDING_CLASSIFICATIONS,
+  PHASE_7D_ATTRIBUTABLE_MODEL_NAMES,
 } from './evidence-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -84,5 +87,49 @@ describe('Evidence schema coherence (Phase 7C)', () => {
     for (const modelName of FORBIDDEN_PHASE_7D_MODELS) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
+  });
+});
+
+describe('Evidence schema coherence (Phase 7D)', () => {
+  const schema = readSchema();
+
+  it('defines all canonical Phase 7D attributable models exactly once', () => {
+    for (const modelName of PHASE_7D_ATTRIBUTABLE_MODEL_NAMES) {
+      const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    }
+  });
+
+  it('defines government communication categories without collapsing approval semantics', () => {
+    const block = extractEnumBlock(schema, 'GovernmentCommunicationCategory');
+    for (const category of GOVERNMENT_COMMUNICATION_CATEGORIES) {
+      expect(block).toContain(category);
+    }
+    expect(block).toContain('ACKNOWLEDGMENT');
+    expect(block).toContain('CONCURRENCE');
+    expect(block).not.toContain('APPROVAL');
+  });
+
+  it('links attributable records to Case without a global approved boolean', () => {
+    const departmentalBlock = schema.slice(
+      schema.indexOf('model DepartmentalReviewRecord'),
+      schema.indexOf('model DepartmentalReviewEvidence'),
+    );
+    expect(departmentalBlock).toContain('caseId');
+    expect(departmentalBlock).not.toMatch(/\bapproved\s+Boolean/);
+  });
+
+  it('defines inspection finding classifications separately from violation status', () => {
+    const block = extractEnumBlock(schema, 'InspectionFindingClassification');
+    for (const classification of INSPECTION_FINDING_CLASSIFICATIONS) {
+      expect(block).toContain(classification);
+    }
+  });
+
+  it('defines append-only custody events without scientific validity claims', () => {
+    const custodyBlock = schema.slice(schema.indexOf('model EvidenceCustodyEvent'));
+    expect(custodyBlock).toContain('eventType');
+    expect(custodyBlock).not.toContain('scientificValidity');
+    expect(custodyBlock).not.toContain('validated');
   });
 });

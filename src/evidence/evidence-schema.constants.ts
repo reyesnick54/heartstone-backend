@@ -62,3 +62,40 @@ export const EVIDENCE_QUALITY_CRITERIA = [
   'SCOPE',
   'FITNESS_FOR_PURPOSE',
 ] as const;
+
+export const PHASE_7D_ATTRIBUTABLE_MODEL_NAMES = [
+  'DepartmentalReviewRecord',
+  'DepartmentalReviewEvidence',
+  'GovernmentCommunicationRecord',
+  'GovernmentCommunicationDocument',
+  'GovernmentCommunicationEvidence',
+  'ProfessionalReviewRecord',
+  'ProfessionalReviewEvidence',
+  'InspectionRecord',
+  'InspectionInspector',
+  'InspectionEvidenceItem',
+  'EvidenceCustodyEvent',
+] as const;
+
+export const GOVERNMENT_COMMUNICATION_CATEGORIES = [
+  'RECEIPT',
+  'ACKNOWLEDGMENT',
+  'INFORMATION',
+  'GUIDANCE',
+  'CONSULTATION',
+  'REQUEST',
+  'RESPONSE',
+  'CONCURRENCE',
+  'OBJECTION',
+  'RETAINED_DETERMINATION',
+  'SUPERVISORY_FINDING',
+  'INSPECTION_FINDING',
+  'OTHER',
+] as const;
+
+export const INSPECTION_FINDING_CLASSIFICATIONS = [
+  'OBSERVATION',
+  'CONDITION',
+  'NON_COMPLIANCE',
+  'OTHER',
+] as const;

@@ -117,6 +117,7 @@ model Institution {
   responsibleCases              Case[]
   masterAdministrativeFiles     MasterAdministrativeFile[]
   documentRecords               DocumentRecord[]
+  governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -154,6 +155,7 @@ model Department {
   responsibleGovernmentServices GovernmentService[]
   responsibleCases              Case[]
   masterAdministrativeFiles     MasterAdministrativeFile[]
+  departmentalReviews           DepartmentalReviewRecord[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -203,6 +205,10 @@ model Officeholder {
   evidenceVerifications        EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
   evidencePurposeAcceptances   EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
   evidenceQualityAssessments   EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer DepartmentalReviewRecord[]   @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors         InspectionInspector[]
+  custodyEventsAsCustodian     EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness       EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
 
   @@map("officeholders")
 }
@@ -263,6 +269,7 @@ model ExternalAuthority {
   institutionalAuthorityActs       InstitutionalAuthorityAct[]
   caseReferrals                    CaseReferral[]
   documentVersionsReceived         DocumentVersion[]
+  retainedDeterminations           GovernmentCommunicationRecord[] @relation("RetainedDeterminationExternalAuthority")
 
   @@map("external_authorities")
 }
@@ -456,6 +463,11 @@ model Identity {
   evidenceVerifications     EvidenceVerification[]     @relation("EvidenceVerificationVerifier")
   evidencePurposeAcceptances EvidencePurposeAcceptance[] @relation("EvidencePurposeAcceptanceReviewer")
   evidenceQualityAssessments EvidenceQualityAssessment[] @relation("EvidenceQualityAssessor")
+  departmentalReviewsAsReviewer DepartmentalReviewRecord[] @relation("DepartmentalReviewReviewer")
+  professionalReviews        ProfessionalReviewRecord[] @relation("ProfessionalReviewIdentity")
+  inspectionInspectors       InspectionInspector[]      @relation("InspectionInspectorIdentity")
+  custodyEventsAsCustodian   EvidenceCustodyEvent[]     @relation("EvidenceCustodyCustodian")
+  custodyEventsAsWitness     EvidenceCustodyEvent[]     @relation("EvidenceCustodyWitness")
 
   @@index([userAccountId])
   @@index([personId])
@@ -825,6 +837,8 @@ model FunctionAuthorityRecord {
   serviceFunctionMappings      ServiceFunctionMapping[]
   serviceActivationAuthorities GovernmentServiceVersion[]       @relation("ServiceActivationAuthority")
   workflowStepDefinitions      WorkflowStepDefinition[]
+  departmentalReviews          DepartmentalReviewRecord[]
+  inspectionRecords            InspectionRecord[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1074,6 +1088,7 @@ model AuthorityEvaluationRecord {
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords  ServiceActivationRecord[]
   evidenceVerifications   EvidenceVerification[]
+  departmentalReviews     DepartmentalReviewRecord[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2066,6 +2081,10 @@ model Case {
   publicStatusProjection            CasePublicStatusProjection?
   masterAdministrativeFile          MasterAdministrativeFile?
   evidenceRecords                   EvidenceRecord[]
+  departmentalReviews               DepartmentalReviewRecord[]
+  governmentCommunications          GovernmentCommunicationRecord[]
+  professionalReviews               ProfessionalReviewRecord[]
+  inspectionRecords                 InspectionRecord[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2347,6 +2366,7 @@ model CaseReferral {
   institution           Institution?           @relation(fields: [institutionId], references: [id])
   authorityDependency   AuthorityDependency?   @relation(fields: [authorityDependencyId], references: [id])
   responses             CaseReferralResponse[]
+  governmentCommunications GovernmentCommunicationRecord[]
 
   @@index([caseId])
   @@index([status])
@@ -2802,6 +2822,8 @@ model DocumentRecord {
   versions             DocumentVersion[]
   associations         DocumentAssociation[]
   auditEvents          DocumentAuditEvent[]
+  governmentCommunicationDocuments GovernmentCommunicationDocument[]
+  custodyEvents        EvidenceCustodyEvent[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -3060,6 +3082,11 @@ model EvidenceRecord {
   requirementLinks              EvidenceRequirementLink[]
   purposeAcceptances            EvidencePurposeAcceptance[]
   qualityAssessments            EvidenceQualityAssessment[]
+  departmentalReviewEvidence    DepartmentalReviewEvidence[]
+  governmentCommunicationEvidence GovernmentCommunicationEvidence[]
+  professionalReviewEvidence    ProfessionalReviewEvidence[]
+  inspectionEvidenceItems       InspectionEvidenceItem[]
+  custodyEvents                 EvidenceCustodyEvent[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -3165,4 +3192,329 @@ model EvidenceQualityAssessment {
   @@index([evidenceId])
   @@index([criterion])
   @@map("evidence_quality_assessments")
+}
+
+enum DepartmentalReviewStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SUPERSEDED
+}
+
+enum GovernmentCommunicationCategory {
+  RECEIPT
+  ACKNOWLEDGMENT
+  INFORMATION
+  GUIDANCE
+  CONSULTATION
+  REQUEST
+  RESPONSE
+  CONCURRENCE
+  OBJECTION
+  RETAINED_DETERMINATION
+  SUPERVISORY_FINDING
+  INSPECTION_FINDING
+  OTHER
+}
+
+enum GovernmentCommunicationAuthenticationStatus {
+  UNAUTHENTICATED
+  AUTHENTICATED
+  REJECTED
+}
+
+enum ProfessionalOpinionStatus {
+  DRAFT
+  ISSUED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum ProfessionalSignatureSource {
+  CONTROLLED_PROFESSIONAL_ACTION
+  AI_ASSISTANCE
+  OTHER
+}
+
+enum InspectionType {
+  SITE
+  DESKTOP
+  REMOTE
+  FOLLOW_UP
+  OTHER
+}
+
+enum InspectionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InspectionFindingClassification {
+  OBSERVATION
+  CONDITION
+  NON_COMPLIANCE
+  OTHER
+}
+
+enum EvidenceCustodyEventType {
+  COLLECTED
+  RECEIVED
+  TRANSFERRED
+  OPENED
+  SAMPLED
+  COPIED
+  ANALYZED
+  SEALED
+  UNSEALED
+  RETURNED
+  ARCHIVED
+  DISPOSED_AUTHORIZED
+}
+
+enum EvidenceIntegrityState {
+  INTACT
+  COMPROMISED
+  UNKNOWN
+}
+
+model DepartmentalReviewRecord {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  caseId                      String                   @db.Uuid
+  departmentId                String                   @db.Uuid
+  reviewerIdentityId          String                   @db.Uuid
+  reviewerOfficeholderId      String                   @db.Uuid
+  reviewQuestion              String
+  functionAuthorityRecordId   String                   @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  reviewVersion               Int                      @default(1)
+  findings                    String
+  limitations                 String?
+  recommendationIfPermitted   String?
+  status                      DepartmentalReviewStatus @default(DRAFT)
+  completedAt                 DateTime?
+  supersededById              String?                  @db.Uuid
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+  case                        Case                     @relation(fields: [caseId], references: [id])
+  department                  Department               @relation(fields: [departmentId], references: [id])
+  reviewerIdentity            Identity                 @relation("DepartmentalReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder        Officeholder             @relation("DepartmentalReviewReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord  @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  supersededBy                DepartmentalReviewRecord? @relation("DepartmentalReviewSupersession", fields: [supersededById], references: [id])
+  supersedes                  DepartmentalReviewRecord[] @relation("DepartmentalReviewSupersession")
+  evidenceConsidered          DepartmentalReviewEvidence[]
+
+  @@unique([caseId, departmentId, reviewVersion])
+  @@index([caseId])
+  @@index([departmentId])
+  @@index([reviewerIdentityId])
+  @@index([status])
+  @@map("departmental_review_records")
+}
+
+model DepartmentalReviewEvidence {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  departmentalReviewId String                 @db.Uuid
+  evidenceRecordId     String                 @db.Uuid
+  createdAt            DateTime               @default(now())
+  departmentalReview   DepartmentalReviewRecord @relation(fields: [departmentalReviewId], references: [id], onDelete: Cascade)
+  evidenceRecord       EvidenceRecord         @relation(fields: [evidenceRecordId], references: [id])
+
+  @@unique([departmentalReviewId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("departmental_review_evidence")
+}
+
+model GovernmentCommunicationRecord {
+  id                                          String                                    @id @default(uuid()) @db.Uuid
+  caseId                                      String                                    @db.Uuid
+  category                                    GovernmentCommunicationCategory
+  sourceInstitutionId                         String                                    @db.Uuid
+  officialReference                           String?
+  senderReference                             String?
+  recipientReference                          String?
+  receivedAt                                  DateTime?
+  sentAt                                      DateTime?
+  authenticationStatus                        GovernmentCommunicationAuthenticationStatus @default(UNAUTHENTICATED)
+  scope                                       String?
+  effectiveFrom                               DateTime?
+  effectiveUntil                              DateTime?
+  limitations                                 String?
+  caseReferralId                              String?                                   @db.Uuid
+  retainedDeterminationForExternalAuthorityId String?                                   @db.Uuid
+  createdAt                                   DateTime                                  @default(now())
+  updatedAt                                   DateTime                                  @updatedAt
+  case                                        Case                                      @relation(fields: [caseId], references: [id])
+  sourceInstitution                           Institution                               @relation("GovernmentCommunicationSourceInstitution", fields: [sourceInstitutionId], references: [id])
+  caseReferral                                CaseReferral?                             @relation(fields: [caseReferralId], references: [id])
+  retainedDeterminationForExternalAuthority   ExternalAuthority?                      @relation("RetainedDeterminationExternalAuthority", fields: [retainedDeterminationForExternalAuthorityId], references: [id])
+  documentRecords                             GovernmentCommunicationDocument[]
+  evidenceRecords                             GovernmentCommunicationEvidence[]
+
+  @@index([caseId])
+  @@index([category])
+  @@index([sourceInstitutionId])
+  @@map("government_communication_records")
+}
+
+model GovernmentCommunicationDocument {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  governmentCommunicationId String                      @db.Uuid
+  documentRecordId          String                      @db.Uuid
+  createdAt                 DateTime                    @default(now())
+  governmentCommunication   GovernmentCommunicationRecord @relation(fields: [governmentCommunicationId], references: [id], onDelete: Cascade)
+  documentRecord            DocumentRecord              @relation(fields: [documentRecordId], references: [id])
+
+  @@unique([governmentCommunicationId, documentRecordId])
+  @@index([documentRecordId])
+  @@map("government_communication_documents")
+}
+
+model GovernmentCommunicationEvidence {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  governmentCommunicationId String                      @db.Uuid
+  evidenceRecordId          String                      @db.Uuid
+  createdAt                 DateTime                    @default(now())
+  governmentCommunication   GovernmentCommunicationRecord @relation(fields: [governmentCommunicationId], references: [id], onDelete: Cascade)
+  evidenceRecord            EvidenceRecord              @relation(fields: [evidenceRecordId], references: [id])
+
+  @@unique([governmentCommunicationId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("government_communication_evidence")
+}
+
+model ProfessionalReviewRecord {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  caseId                  String                    @db.Uuid
+  professionType          String
+  professionalIdentityId  String                    @db.Uuid
+  qualificationReference  String?
+  scopeOfEngagement       String
+  questionReviewed        String
+  methodology             String?
+  findings                String
+  limitations             String?
+  opinionStatus           ProfessionalOpinionStatus @default(DRAFT)
+  signatureReference      String?
+  signatureSource         ProfessionalSignatureSource?
+  reviewDate              DateTime?
+  validFrom               DateTime?
+  validUntil              DateTime?
+  independenceDeclaration String?
+  conflictDeclaration     String?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  case                    Case                      @relation(fields: [caseId], references: [id])
+  professionalIdentity    Identity                  @relation("ProfessionalReviewIdentity", fields: [professionalIdentityId], references: [id])
+  evidenceReviewed        ProfessionalReviewEvidence[]
+
+  @@index([caseId])
+  @@index([professionalIdentityId])
+  @@index([opinionStatus])
+  @@map("professional_review_records")
+}
+
+model ProfessionalReviewEvidence {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  professionalReviewId String                 @db.Uuid
+  evidenceRecordId     String                 @db.Uuid
+  createdAt            DateTime               @default(now())
+  professionalReview   ProfessionalReviewRecord @relation(fields: [professionalReviewId], references: [id], onDelete: Cascade)
+  evidenceRecord       EvidenceRecord         @relation(fields: [evidenceRecordId], references: [id])
+
+  @@unique([professionalReviewId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("professional_review_evidence")
+}
+
+model InspectionRecord {
+  id                        String             @id @default(uuid()) @db.Uuid
+  caseId                    String             @db.Uuid
+  inspectionType            InspectionType
+  functionAuthorityRecordId String?            @db.Uuid
+  locationSite              String?
+  inspectionDate            DateTime
+  scope                     String
+  method                    String?
+  conditionsObserved        String?
+  findings                  String?
+  limitations               String?
+  followUpRequired          Boolean            @default(false)
+  status                    InspectionStatus   @default(SCHEDULED)
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  case                      Case               @relation(fields: [caseId], references: [id])
+  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+  inspectors                InspectionInspector[]
+  evidenceItems             InspectionEvidenceItem[]
+
+  @@index([caseId])
+  @@index([status])
+  @@map("inspection_records")
+}
+
+model InspectionInspector {
+  id             String           @id @default(uuid()) @db.Uuid
+  inspectionId   String           @db.Uuid
+  officeholderId String           @db.Uuid
+  identityId     String           @db.Uuid
+  createdAt      DateTime         @default(now())
+  inspection     InspectionRecord @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  officeholder   Officeholder     @relation(fields: [officeholderId], references: [id])
+  identity       Identity         @relation("InspectionInspectorIdentity", fields: [identityId], references: [id])
+
+  @@unique([inspectionId, officeholderId])
+  @@index([identityId])
+  @@map("inspection_inspectors")
+}
+
+model InspectionEvidenceItem {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  inspectionId          String                        @db.Uuid
+  evidenceRecordId      String                        @db.Uuid
+  findingClassification InspectionFindingClassification @default(OBSERVATION)
+  observationNotes      String?
+  createdAt             DateTime                      @default(now())
+  inspection            InspectionRecord              @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  evidenceRecord        EvidenceRecord                @relation(fields: [evidenceRecordId], references: [id])
+  custodyEvents         EvidenceCustodyEvent[]
+
+  @@unique([inspectionId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("inspection_evidence_items")
+}
+
+model EvidenceCustodyEvent {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  eventType                EvidenceCustodyEventType
+  evidenceRecordId         String?                  @db.Uuid
+  documentRecordId         String?                  @db.Uuid
+  inspectionEvidenceItemId String?                  @db.Uuid
+  custodianIdentityId      String                   @db.Uuid
+  custodianOfficeholderId  String?                  @db.Uuid
+  occurredAt               DateTime                 @default(now())
+  fromLocation             String?
+  toLocation               String?
+  reason                   String?
+  integrityState           EvidenceIntegrityState   @default(UNKNOWN)
+  witnessIdentityId        String?                  @db.Uuid
+  witnessOfficeholderId    String?                  @db.Uuid
+  createdAt                DateTime                 @default(now())
+  evidenceRecord           EvidenceRecord?          @relation(fields: [evidenceRecordId], references: [id])
+  documentRecord           DocumentRecord?          @relation(fields: [documentRecordId], references: [id])
+  inspectionEvidenceItem   InspectionEvidenceItem?  @relation(fields: [inspectionEvidenceItemId], references: [id])
+  custodianIdentity        Identity                 @relation("EvidenceCustodyCustodian", fields: [custodianIdentityId], references: [id])
+  custodianOfficeholder    Officeholder?            @relation("EvidenceCustodyCustodianOfficeholder", fields: [custodianOfficeholderId], references: [id])
+  witnessIdentity          Identity?                @relation("EvidenceCustodyWitness", fields: [witnessIdentityId], references: [id])
+  witnessOfficeholder      Officeholder?            @relation("EvidenceCustodyWitnessOfficeholder", fields: [witnessOfficeholderId], references: [id])
+
+  @@index([evidenceRecordId])
+  @@index([documentRecordId])
+  @@index([inspectionEvidenceItemId])
+  @@index([custodianIdentityId])
+  @@index([occurredAt])
+  @@map("evidence_custody_events")
 }
