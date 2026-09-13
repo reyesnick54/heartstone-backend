@@ -1,0 +1,32 @@
+export const PHASE_8E_MODEL_NAMES = [
+  'DecisionCondition',
+  'InstrumentTypeDefinition',
+  'InstrumentTypeVersion',
+  'InstrumentTypeEligibleDecisionType',
+  'InstrumentTemplate',
+  'InstrumentTemplateVersion',
+  'InstrumentNumberingRule',
+  'InstrumentNumberReservation',
+  'OfficialInstrument',
+  'OfficialInstrumentVersion',
+  'IssuanceReadinessAssessment',
+  'IssuanceEvent',
+] as const;
+
+export const OFFICIAL_INSTRUMENT_KINDS = [
+  'APPROVAL_NOTICE',
+  'LICENSE',
+  'PERMIT',
+  'CERTIFICATE',
+  'REGISTRATION',
+  'AUTHORIZATION',
+  'CONDITION_NOTICE',
+  'SUSPENSION_NOTICE',
+  'REVOCATION_NOTICE',
+  'REINSTATEMENT_NOTICE',
+  'AMENDED_INSTRUMENT',
+  'REPLACEMENT_INSTRUMENT',
+  'OFFICIAL_DECISION_NOTICE',
+  'ACKNOWLEDGMENT',
+  'OTHER_AUTHORIZED_INSTRUMENT',
+] as const;

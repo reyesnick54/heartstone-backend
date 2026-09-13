@@ -119,6 +119,9 @@ model Institution {
   documentRecords               DocumentRecord[]
   governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
   governmentDecisions           GovernmentDecision[]
+  instrumentTypeVersions        InstrumentTypeVersion[]         @relation("InstrumentIssuingInstitution")
+  instrumentNumberingRules      InstrumentNumberingRule[]
+  issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -220,6 +223,8 @@ model Officeholder {
   decisionReadinessProposed    DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
   decisionParticipants         DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
   governmentDecisionsMade      GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments    OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer       IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
 
   @@map("officeholders")
 }
@@ -490,6 +495,9 @@ model Identity {
   decisionParticipants       DecisionParticipant[]      @relation("DecisionParticipantIdentity")
   decisionPreparationRecords DecisionPreparationRecord[] @relation("DecisionPreparationEditor")
   governmentDecisionsMade    GovernmentDecision[]       @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder OfficialInstrument[]      @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer     IssuanceEvent[]            @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions InstrumentTemplateVersion[] @relation("InstrumentTemplateApprover")
 
   @@index([userAccountId])
   @@index([personId])
@@ -531,6 +539,7 @@ model Organization {
   representativeAuthorities RepresentativeAuthority[]
   applications              Application[]
   documentRecords           DocumentRecord[]
+  officialInstrumentsAsHolder OfficialInstrument[]      @relation("OfficialInstrumentHolderOrganization")
 
   @@index([status])
   @@map("organizations")
@@ -864,6 +873,7 @@ model FunctionAuthorityRecord {
   recordCorrections            RecordCorrection[]
   decisionTypeVersions         DecisionTypeVersion[]
   governmentDecisions          GovernmentDecision[]
+  instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1121,6 +1131,7 @@ model AuthorityEvaluationRecord {
   recordCorrections           RecordCorrection[]
   decisionReadinessAssessments DecisionReadinessAssessment[] @relation("DecisionReadinessAuthority")
   governmentDecisions         GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
+  issuanceEvents              IssuanceEvent[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1713,6 +1724,7 @@ enum CaseStatus {
   INSPECTION
   DECISION_PENDING
   DECIDED
+  ISSUED
   SAFE_HALTED
   SAFE_HALT
   SUSPENDED
@@ -1911,6 +1923,7 @@ enum CaseEventType {
   WORKFLOW_PAUSED
   WORKFLOW_RESUMED
   DECISION_PENDING
+  INSTRUMENT_ISSUED
   WITHDRAWN
   CLOSED
 }
@@ -2124,6 +2137,8 @@ model Case {
   decisionReadinessAssessments      DecisionReadinessAssessment[]
   governmentDecisions               GovernmentDecision[]
   decisionPreparationRecords        DecisionPreparationRecord[]
+  officialInstruments               OfficialInstrument[]
+  issuanceReadinessAssessments      IssuanceReadinessAssessment[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2715,6 +2730,7 @@ model MasterAdministrativeFile {
   evidencePackets                      EvidencePacket[]
   decisionReadinessAssessments         DecisionReadinessAssessment[]
   governmentDecisions                  GovernmentDecision[]
+  officialInstruments                  OfficialInstrument[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -2824,6 +2840,7 @@ enum DocumentAssociationTargetType {
   COMMUNICATION
   CHECKLIST_REQUIREMENT
   EVIDENCE_ITEM
+  OFFICIAL_INSTRUMENT
 }
 
 enum DocumentAssociationRole {
@@ -4368,6 +4385,7 @@ model DecisionTypeVersion {
   readinessAssessments       DecisionReadinessAssessment[]
   governmentDecisions        GovernmentDecision[]
   preparationRecords         DecisionPreparationRecord[]
+  eligibleInstrumentTypes    InstrumentTypeEligibleDecisionType[]
 
   @@unique([decisionTypeId, version])
   @@index([decisionTypeId])
@@ -4492,10 +4510,380 @@ model GovernmentDecision {
   delegation                    Delegation?              @relation(fields: [delegationId], references: [id])
   institution                   Institution              @relation(fields: [institutionId], references: [id])
   department                    Department               @relation(fields: [departmentId], references: [id])
+  conditions                    DecisionCondition[]
+  officialInstruments           OfficialInstrument[]
+  issuanceReadinessAssessments  IssuanceReadinessAssessment[]
+  issuanceEvents                IssuanceEvent[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
   @@index([decisionStatus])
   @@index([decidedAt])
   @@map("government_decisions")
+}
+
+// ─── Phase 8E: Official Instrument Catalog and Controlled Issuance ───────────
+
+enum CatalogLifecycleStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+  SUSPENDED
+}
+
+enum OfficialInstrumentKind {
+  APPROVAL_NOTICE
+  LICENSE
+  PERMIT
+  CERTIFICATE
+  REGISTRATION
+  AUTHORIZATION
+  CONDITION_NOTICE
+  SUSPENSION_NOTICE
+  REVOCATION_NOTICE
+  REINSTATEMENT_NOTICE
+  AMENDED_INSTRUMENT
+  REPLACEMENT_INSTRUMENT
+  OFFICIAL_DECISION_NOTICE
+  ACKNOWLEDGMENT
+  OTHER_AUTHORIZED_INSTRUMENT
+}
+
+enum DecisionConditionType {
+  PRECEDENT_TO_ISSUANCE
+  ONGOING
+  SUSPENSION
+  REVOCATION
+}
+
+enum DecisionConditionStatus {
+  PENDING
+  SATISFIED
+  WAIVED
+  FAILED
+  SUPERSEDED
+}
+
+enum InstrumentIssuerSource {
+  ABSEZ_ISSUED
+  RETAINED_NATIONAL_COORDINATED
+  EXTERNAL_AUTHENTICATED
+}
+
+enum InstrumentNumberReservationStatus {
+  RESERVED
+  COMMITTED
+  RELEASED
+  EXPIRED
+}
+
+enum OfficialInstrumentStatus {
+  PENDING_ISSUANCE
+  ISSUED
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  SUPERSEDED
+  AMENDED
+  REPLACED
+}
+
+enum IssuanceReadinessOutcome {
+  READY
+  NOT_READY
+  BLOCKED
+}
+
+enum IssuanceEventStatus {
+  INITIATED
+  COMPLETED
+  FAILED
+  ROLLED_BACK
+}
+
+model DecisionCondition {
+  id                   String                  @id @default(uuid()) @db.Uuid
+  governmentDecisionId String                  @db.Uuid
+  conditionType        DecisionConditionType
+  status               DecisionConditionStatus @default(PENDING)
+  description          String
+  satisfiedAt          DateTime?
+  waivedAt             DateTime?
+  failedAt             DateTime?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  governmentDecision   GovernmentDecision      @relation(fields: [governmentDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([governmentDecisionId])
+  @@index([conditionType, status])
+  @@map("decision_conditions")
+}
+
+model InstrumentTypeDefinition {
+  id              String                 @id @default(uuid()) @db.Uuid
+  code            String                 @unique
+  name            String
+  kind            OfficialInstrumentKind
+  description     String?
+  lifecycleStatus CatalogLifecycleStatus @default(DRAFT)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  versions        InstrumentTypeVersion[]
+
+  @@map("instrument_type_definitions")
+}
+
+model InstrumentTypeVersion {
+  id                                String                             @id @default(uuid()) @db.Uuid
+  instrumentTypeDefinitionId        String                             @db.Uuid
+  versionNumber                     Int
+  lifecycleStatus                   CatalogLifecycleStatus             @default(DRAFT)
+  issuingInstitutionId              String                             @db.Uuid
+  issuanceFunctionAuthorityRecordId String                             @db.Uuid
+  requiredAuthorityAction           AuthorityActionType                @default(ISSUE)
+  requiredTemplateVersionId         String?                            @db.Uuid
+  signatureRequired                 Boolean                            @default(false)
+  sealRequired                      Boolean                            @default(false)
+  numberingRuleId                   String                             @db.Uuid
+  effectiveDateRule                 Json
+  durationExpiryRule                Json?
+  verificationMethod                String
+  publicationStatus                 String
+  deliveryRequirements              Json                               @default("[]")
+  correctionProcedure               Json?
+  amendmentProcedure                Json?
+  renewalProcedure                  Json?
+  suspensionProcedure               Json?
+  revocationProcedure               Json?
+  redressRoute                      Json?
+  recordsClassification             String
+  retainedNationalBoundary          Boolean                            @default(false)
+  createdAt                         DateTime                           @default(now())
+  updatedAt                         DateTime                           @updatedAt
+  instrumentTypeDefinition          InstrumentTypeDefinition           @relation(fields: [instrumentTypeDefinitionId], references: [id])
+  issuingInstitution                Institution                        @relation("InstrumentIssuingInstitution", fields: [issuingInstitutionId], references: [id])
+  issuanceFunctionAuthorityRecord   FunctionAuthorityRecord            @relation("InstrumentIssuanceFunctionAuthority", fields: [issuanceFunctionAuthorityRecordId], references: [id])
+  requiredTemplateVersion           InstrumentTemplateVersion?         @relation("InstrumentTypeRequiredTemplate", fields: [requiredTemplateVersionId], references: [id])
+  numberingRule                     InstrumentNumberingRule            @relation(fields: [numberingRuleId], references: [id])
+  eligibleDecisionTypes             InstrumentTypeEligibleDecisionType[]
+  templates                         InstrumentTemplate[]
+  officialInstruments               OfficialInstrument[]
+  issuanceReadinessAssessments      IssuanceReadinessAssessment[]
+
+  @@unique([instrumentTypeDefinitionId, versionNumber])
+  @@index([instrumentTypeDefinitionId])
+  @@index([issuingInstitutionId])
+  @@index([numberingRuleId])
+  @@map("instrument_type_versions")
+}
+
+model InstrumentTypeEligibleDecisionType {
+  id                      String                @id @default(uuid()) @db.Uuid
+  instrumentTypeVersionId String                @db.Uuid
+  decisionTypeVersionId   String                @db.Uuid
+  createdAt               DateTime              @default(now())
+  instrumentTypeVersion   InstrumentTypeVersion @relation(fields: [instrumentTypeVersionId], references: [id], onDelete: Cascade)
+  decisionTypeVersion     DecisionTypeVersion   @relation(fields: [decisionTypeVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([instrumentTypeVersionId, decisionTypeVersionId])
+  @@index([decisionTypeVersionId])
+  @@map("instrument_type_eligible_decision_types")
+}
+
+model InstrumentTemplate {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  code                    String                 @unique
+  name                    String
+  instrumentTypeVersionId String                 @db.Uuid
+  lifecycleStatus         CatalogLifecycleStatus @default(DRAFT)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  instrumentTypeVersion   InstrumentTypeVersion  @relation(fields: [instrumentTypeVersionId], references: [id])
+  versions                InstrumentTemplateVersion[]
+
+  @@index([instrumentTypeVersionId])
+  @@map("instrument_templates")
+}
+
+model InstrumentTemplateVersion {
+  id                        String                 @id @default(uuid()) @db.Uuid
+  instrumentTemplateId      String                 @db.Uuid
+  versionNumber             Int
+  lifecycleStatus           CatalogLifecycleStatus @default(DRAFT)
+  controlledFields          Json
+  computedFields            Json                   @default("[]")
+  freeFormFields            Json                   @default("[]")
+  contentTemplate           String
+  approvedAt                DateTime?
+  approvedByIdentityId      String?                @db.Uuid
+  createdAt                 DateTime               @default(now())
+  instrumentTemplate        InstrumentTemplate     @relation(fields: [instrumentTemplateId], references: [id])
+  approvedByIdentity          Identity?              @relation("InstrumentTemplateApprover", fields: [approvedByIdentityId], references: [id])
+  requiredByInstrumentTypes InstrumentTypeVersion[] @relation("InstrumentTypeRequiredTemplate")
+  officialInstrumentVersions OfficialInstrumentVersion[]
+
+  @@unique([instrumentTemplateId, versionNumber])
+  @@index([instrumentTemplateId])
+  @@map("instrument_template_versions")
+}
+
+model InstrumentNumberingRule {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  institutionId          String                        @db.Uuid
+  code                   String
+  name                   String
+  formatPattern          String
+  sequenceScope          String
+  lifecycleStatus        CatalogLifecycleStatus        @default(DRAFT)
+  allowReuseOnFailure    Boolean                       @default(false)
+  currentSequence        Int                           @default(0)
+  sequenceYear           Int?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  institution            Institution                   @relation(fields: [institutionId], references: [id])
+  instrumentTypeVersions InstrumentTypeVersion[]
+  reservations           InstrumentNumberReservation[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("instrument_numbering_rules")
+}
+
+model InstrumentNumberReservation {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  numberingRuleId      String                            @db.Uuid
+  reservedNumber       String
+  status               InstrumentNumberReservationStatus @default(RESERVED)
+  officialInstrumentId String?                           @unique @db.Uuid
+  reservedAt           DateTime                          @default(now())
+  expiresAt            DateTime?
+  committedAt            DateTime?
+  releasedAt           DateTime?
+  numberingRule        InstrumentNumberingRule           @relation(fields: [numberingRuleId], references: [id])
+  officialInstrument   OfficialInstrument?               @relation(fields: [officialInstrumentId], references: [id])
+  issuanceEvents       IssuanceEvent[]
+
+  @@unique([numberingRuleId, reservedNumber])
+  @@index([numberingRuleId, status])
+  @@map("instrument_number_reservations")
+}
+
+model OfficialInstrument {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  instrumentNumber           String?                  @unique
+  instrumentTypeVersionId    String                   @db.Uuid
+  governmentDecisionId       String                   @db.Uuid
+  caseId                     String                   @db.Uuid
+  masterAdministrativeFileId String                   @db.Uuid
+  holderIdentityId           String?                  @db.Uuid
+  holderOrganizationId       String?                  @db.Uuid
+  issuerInstitutionId        String                   @db.Uuid
+  issuerOfficeholderId       String                   @db.Uuid
+  issuerSource               InstrumentIssuerSource   @default(ABSEZ_ISSUED)
+  externalIssuerReference    String?
+  scope                      Json
+  status                     OfficialInstrumentStatus @default(PENDING_ISSUANCE)
+  effectiveFrom              DateTime?
+  effectiveUntil             DateTime?
+  currentVersionId           String?                  @unique @db.Uuid
+  verificationCode           String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  instrumentTypeVersion      InstrumentTypeVersion    @relation(fields: [instrumentTypeVersionId], references: [id])
+  governmentDecision         GovernmentDecision       @relation(fields: [governmentDecisionId], references: [id])
+  case                       Case                     @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  holderIdentity             Identity?                @relation("OfficialInstrumentHolderIdentity", fields: [holderIdentityId], references: [id])
+  holderOrganization         Organization?            @relation("OfficialInstrumentHolderOrganization", fields: [holderOrganizationId], references: [id])
+  issuerInstitution          Institution              @relation("OfficialInstrumentIssuerInstitution", fields: [issuerInstitutionId], references: [id])
+  issuerOfficeholder         Officeholder             @relation("OfficialInstrumentIssuerOfficeholder", fields: [issuerOfficeholderId], references: [id])
+  currentVersion             OfficialInstrumentVersion? @relation("OfficialInstrumentCurrentVersion", fields: [currentVersionId], references: [id])
+  versions                   OfficialInstrumentVersion[] @relation("OfficialInstrumentVersions")
+  numberReservation          InstrumentNumberReservation?
+  issuanceEvents             IssuanceEvent[]
+  issuanceReadinessAssessments IssuanceReadinessAssessment[]
+
+  @@index([caseId])
+  @@index([governmentDecisionId])
+  @@index([instrumentTypeVersionId])
+  @@index([status])
+  @@map("official_instruments")
+}
+
+model OfficialInstrumentVersion {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  officialInstrumentId String                    @db.Uuid
+  versionNumber        Int
+  templateVersionId    String                    @db.Uuid
+  documentRecordId     String                    @db.Uuid
+  documentVersionId    String                    @db.Uuid
+  contentHash          String
+  governmentDecisionId String                    @db.Uuid
+  conditionsSnapshot   Json
+  signatureRecord      Json?
+  sealRecord           Json?
+  createdAt            DateTime                  @default(now())
+  officialInstrument   OfficialInstrument        @relation("OfficialInstrumentVersions", fields: [officialInstrumentId], references: [id], onDelete: Cascade)
+  currentForInstrument OfficialInstrument?       @relation("OfficialInstrumentCurrentVersion")
+  templateVersion      InstrumentTemplateVersion @relation(fields: [templateVersionId], references: [id])
+  issuanceEvents       IssuanceEvent[]
+
+  @@unique([officialInstrumentId, versionNumber])
+  @@index([officialInstrumentId])
+  @@index([documentVersionId])
+  @@map("official_instrument_versions")
+}
+
+model IssuanceReadinessAssessment {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  officialInstrumentId        String?                  @db.Uuid
+  governmentDecisionId        String                   @db.Uuid
+  instrumentTypeVersionId     String                   @db.Uuid
+  caseId                      String                   @db.Uuid
+  outcome                     IssuanceReadinessOutcome
+  checklistResults            Json
+  assessedAt                  DateTime                 @default(now())
+  assessedByIdentityId        String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  officialInstrument          OfficialInstrument?      @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision          GovernmentDecision       @relation(fields: [governmentDecisionId], references: [id])
+  instrumentTypeVersion       InstrumentTypeVersion    @relation(fields: [instrumentTypeVersionId], references: [id])
+  case                        Case                     @relation(fields: [caseId], references: [id])
+
+  @@index([governmentDecisionId])
+  @@index([caseId])
+  @@index([officialInstrumentId])
+  @@map("issuance_readiness_assessments")
+}
+
+model IssuanceEvent {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  officialInstrumentId        String                    @db.Uuid
+  officialInstrumentVersionId String                    @db.Uuid
+  governmentDecisionId        String                    @db.Uuid
+  caseId                      String                    @db.Uuid
+  issuerOfficeholderId        String                    @db.Uuid
+  issuerIdentityId            String                    @db.Uuid
+  authorityEvaluationRecordId String                    @db.Uuid
+  instrumentNumber            String
+  numberingReservationId      String                    @db.Uuid
+  status                      IssuanceEventStatus       @default(INITIATED)
+  idempotencyKey              String?                   @unique
+  completedAt                 DateTime?
+  failureReason               String?
+  createdAt                   DateTime                  @default(now())
+  officialInstrument          OfficialInstrument        @relation(fields: [officialInstrumentId], references: [id])
+  officialInstrumentVersion   OfficialInstrumentVersion @relation(fields: [officialInstrumentVersionId], references: [id])
+  governmentDecision          GovernmentDecision        @relation(fields: [governmentDecisionId], references: [id])
+  issuerOfficeholder          Officeholder              @relation("IssuanceEventIssuerOfficeholder", fields: [issuerOfficeholderId], references: [id])
+  issuerIdentity              Identity                  @relation("IssuanceEventIssuerIdentity", fields: [issuerIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord @relation(fields: [authorityEvaluationRecordId], references: [id])
+  numberingReservation        InstrumentNumberReservation @relation(fields: [numberingReservationId], references: [id])
+
+  @@index([officialInstrumentId])
+  @@index([governmentDecisionId])
+  @@index([caseId])
+  @@index([status])
+  @@map("issuance_events")
 }

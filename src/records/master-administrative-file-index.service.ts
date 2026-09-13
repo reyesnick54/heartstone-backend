@@ -51,24 +51,40 @@ export class MasterAdministrativeFileIndexService {
       file.sections.map((section) => section.sectionType),
     );
 
-    const [application, caseRecord, submissions, events, communications, workflowInstance] =
-      await Promise.all([
-        this.prisma.application.findUnique({ where: { id: file.applicationId } }),
-        this.prisma.case.findUnique({ where: { id: file.caseId } }),
-        this.prisma.applicationSubmission.findMany({
-          where: { applicationId: file.applicationId },
-          orderBy: { sequenceNumber: 'asc' },
-        }),
-        this.prisma.caseEvent.findMany({
-          where: { caseId: file.caseId },
-          orderBy: { occurredAt: 'asc' },
-        }),
-        this.prisma.caseCommunication.findMany({
-          where: { caseId: file.caseId },
-          orderBy: { createdAt: 'asc' },
-        }),
-        this.prisma.caseWorkflowInstance.findUnique({ where: { caseId: file.caseId } }),
-      ]);
+    const [
+      application,
+      caseRecord,
+      submissions,
+      events,
+      communications,
+      workflowInstance,
+      officialInstruments,
+      governmentDecisions,
+    ] = await Promise.all([
+      this.prisma.application.findUnique({ where: { id: file.applicationId } }),
+      this.prisma.case.findUnique({ where: { id: file.caseId } }),
+      this.prisma.applicationSubmission.findMany({
+        where: { applicationId: file.applicationId },
+        orderBy: { sequenceNumber: 'asc' },
+      }),
+      this.prisma.caseEvent.findMany({
+        where: { caseId: file.caseId },
+        orderBy: { occurredAt: 'asc' },
+      }),
+      this.prisma.caseCommunication.findMany({
+        where: { caseId: file.caseId },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.caseWorkflowInstance.findUnique({ where: { caseId: file.caseId } }),
+      this.prisma.officialInstrument.findMany({
+        where: { caseId: file.caseId },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.governmentDecision.findMany({
+        where: { caseId: file.caseId },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
 
     const filteredCommunications = this.accessService.filterCommunications(
       accessLevel,
@@ -90,6 +106,8 @@ export class MasterAdministrativeFileIndexService {
           events,
           communications: filteredCommunications,
           workflowInstance,
+          officialInstruments,
+          governmentDecisions,
         }),
       }));
 
@@ -115,6 +133,8 @@ export class MasterAdministrativeFileIndexService {
       events: Awaited<ReturnType<PrismaService['caseEvent']['findMany']>>;
       communications: Awaited<ReturnType<PrismaService['caseCommunication']['findMany']>>;
       workflowInstance: Awaited<ReturnType<PrismaService['caseWorkflowInstance']['findUnique']>>;
+      officialInstruments: Awaited<ReturnType<PrismaService['officialInstrument']['findMany']>>;
+      governmentDecisions: Awaited<ReturnType<PrismaService['governmentDecision']['findMany']>>;
     },
   ): MasterFileIndexReference[] {
     switch (sectionType) {
@@ -262,6 +282,28 @@ export class MasterAdministrativeFileIndexService {
           referenceId: event.id,
           label: event.eventType,
           occurredAt: event.occurredAt.toISOString(),
+        }));
+      case MasterAdministrativeFileSectionType.ISSUANCE:
+        return context.officialInstruments.map((instrument) => ({
+          referenceType: 'OfficialInstrument',
+          referenceId: instrument.id,
+          label: instrument.instrumentNumber ?? instrument.id,
+          occurredAt: instrument.createdAt.toISOString(),
+          metadata: {
+            status: instrument.status,
+            issuerSource: instrument.issuerSource,
+          },
+        }));
+      case MasterAdministrativeFileSectionType.RECOMMENDATION_AND_DECISION:
+        return context.governmentDecisions.map((decision) => ({
+          referenceType: 'GovernmentDecision',
+          referenceId: decision.id,
+          label: decision.decisionNumber,
+          occurredAt: decision.formalizedAt?.toISOString() ?? decision.createdAt.toISOString(),
+          metadata: {
+            outcome: decision.outcome,
+            status: decision.status,
+          },
         }));
       default:
         return [];
