@@ -23,4 +23,11 @@ export function asDecisionTypeVersionBody(body: unknown): DecisionTypeVersionBod
 
 export function asDecisionTypeVersionList(body: unknown): DecisionTypeVersionBody[] {
   return body as DecisionTypeVersionBody[];
+export interface Phase8SessionContext {
+  applicantSessionToken: string;
+  applicantIdentityId: string;
+  officialSessionToken: string;
+  officialIdentityId: string;
+  approverSessionToken: string;
+  approverIdentityId: string;
 }

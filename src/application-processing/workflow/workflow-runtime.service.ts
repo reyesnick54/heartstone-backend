@@ -6,6 +6,8 @@ import {
   CaseStatus,
   CaseWorkflowInstanceStatus,
   CaseWorkflowStepInstanceStatus,
+  GovernmentDecisionStatus,
+  OfficialInstrumentStatus,
   WorkflowStepConsequenceLevel,
   WorkflowStepType,
   WorkflowTransitionJoinType,
@@ -211,15 +213,57 @@ export class WorkflowRuntimeService {
     input: CompleteStepInput,
   ) {
     if (stepDef.stepType === WorkflowStepType.DECISION_GATE) {
-      throw new WorkflowGateBlockedException(
-        'Decision gate cannot make final government decision in Phase 6',
-      );
+      const recordedDecision = await this.prisma.governmentDecision.findFirst({
+        where: {
+          caseId: input.caseId,
+          decisionStatus: {
+            in: [GovernmentDecisionStatus.RECORDED, GovernmentDecisionStatus.EFFECTIVE],
+          },
+        },
+      });
+
+      if (!recordedDecision) {
+        throw new WorkflowGateBlockedException(
+          'Decision gate requires a recorded government decision through Phase 8',
+        );
+      }
+
+      if (input.actorIdentityId) {
+        await this.caseStatus.transition(
+          input.caseId,
+          CaseStatus.DECIDED,
+          `Workflow decision gate completed for decision ${recordedDecision.decisionNumber}`,
+          input.actorIdentityId,
+        );
+      }
+
+      return;
     }
 
     if (stepDef.stepType === WorkflowStepType.ISSUANCE_GATE) {
-      throw new WorkflowGateBlockedException(
-        'Issuance gate cannot issue license/permit/certificate in Phase 6',
-      );
+      const issuedInstrument = await this.prisma.officialInstrument.findFirst({
+        where: {
+          caseId: input.caseId,
+          status: OfficialInstrumentStatus.ISSUED,
+        },
+      });
+
+      if (!issuedInstrument) {
+        throw new WorkflowGateBlockedException(
+          'Issuance gate requires an official instrument issued through Phase 8',
+        );
+      }
+
+      if (input.actorIdentityId) {
+        await this.caseStatus.transition(
+          input.caseId,
+          CaseStatus.ISSUED,
+          `Workflow issuance gate completed for instrument ${issuedInstrument.instrumentNumber ?? issuedInstrument.id}`,
+          input.actorIdentityId,
+        );
+      }
+
+      return;
     }
 
     if (
