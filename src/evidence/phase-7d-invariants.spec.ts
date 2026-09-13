@@ -87,12 +87,12 @@ describe('Phase 7D institutional invariants', () => {
   });
 
   it('inspection observation is not automatically a violation', () => {
-    expect(
-      inspection.observationIsViolation(InspectionFindingClassification.OBSERVATION),
-    ).toBe(false);
-    expect(
-      inspection.observationIsViolation(InspectionFindingClassification.NON_COMPLIANCE),
-    ).toBe(true);
+    expect(inspection.observationIsViolation(InspectionFindingClassification.OBSERVATION)).toBe(
+      false,
+    );
+    expect(inspection.observationIsViolation(InspectionFindingClassification.NON_COMPLIANCE)).toBe(
+      true,
+    );
   });
 
   it('custody events do not claim scientific validity', () => {

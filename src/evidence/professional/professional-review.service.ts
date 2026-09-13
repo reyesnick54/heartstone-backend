@@ -1,8 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ProfessionalOpinionStatus,
-  ProfessionalSignatureSource,
-} from '@prisma/client';
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ProfessionalOpinionStatus, ProfessionalSignatureSource } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
@@ -71,7 +73,9 @@ export class ProfessionalReviewService {
     }
 
     if (review.professionalIdentityId !== input.professionalIdentityId) {
-      throw new ForbiddenException('Professional record requires attributable professional identity');
+      throw new ForbiddenException(
+        'Professional record requires attributable professional identity',
+      );
     }
 
     if (input.signatureSource === ProfessionalSignatureSource.AI_ASSISTANCE) {
@@ -103,7 +107,9 @@ export class ProfessionalReviewService {
     attemptedEnforcementLanguage: boolean,
   ) {
     if (attemptedEnforcementLanguage && !scopeOfEngagement.toLowerCase().includes('enforcement')) {
-      throw new BadRequestException('Professional finding cannot exceed recorded scope of engagement');
+      throw new BadRequestException(
+        'Professional finding cannot exceed recorded scope of engagement',
+      );
     }
     if (!findings.trim()) {
       throw new BadRequestException('Professional findings are required');
