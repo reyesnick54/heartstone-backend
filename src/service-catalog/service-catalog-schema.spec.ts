@@ -114,9 +114,8 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     }
   });
 
-  it('does not define Phase 7+ decision or issuance models', () => {
-    const phase7Models = [
-      'GovernmentDecision',
+  it('does not define Phase 7+ issuance models outside canonical Phase 8 instruments', () => {
+    const forbiddenModels = [
       'IssuedLicense',
       'IssuedPermit',
       'IssuedCertificate',
@@ -125,7 +124,7 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
       'InspectionCase',
     ];
 
-    for (const modelName of phase7Models) {
+    for (const modelName of forbiddenModels) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
   });

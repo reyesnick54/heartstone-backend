@@ -40,10 +40,8 @@ describe('Phase 7H evidence records (e2e)', () => {
     expect(assessment.outcome).toBe('UNRESOLVED');
     expect(assessment.explanationCodes).not.toContain('GOVERNMENT_DECISION');
 
-    const decisionTables = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
-      `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = 'government_decisions'`,
-    );
-    expect(Number(decisionTables[0]?.count ?? 0)).toBe(0);
+    const decisionCount = await prisma.governmentDecision.count();
+    expect(decisionCount).toBe(0);
   });
 
   it('allows applicant to read own master file but not unrelated files', async () => {

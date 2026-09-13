@@ -567,12 +567,7 @@ describe('Phase 6 must-fail invariants (e2e)', () => {
   });
 
   it('49. Phase 6 cannot issue license/permit/certificate', async () => {
-    const tables = [
-      'issued_licenses',
-      'issued_permits',
-      'issued_certificates',
-      'government_decisions',
-    ];
+    const tables = ['issued_licenses', 'issued_permits', 'issued_certificates'];
     for (const table of tables) {
       const result = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
         `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = '${table}'`,

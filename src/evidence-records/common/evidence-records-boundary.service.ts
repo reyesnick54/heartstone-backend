@@ -398,7 +398,6 @@ export class EvidenceRecordsBoundaryService {
 
   async assertPhase7TablesAbsent(): Promise<void> {
     const forbiddenTables = [
-      'government_decisions',
       'issued_licenses',
       'issued_permits',
       'issued_certificates',
