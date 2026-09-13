@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { FORBIDDEN_PHASE_7_MODELS } from './application-processing.constants';
+import { FORBIDDEN_LEGACY_ISSUANCE_MODELS } from './application-processing.constants';
 import {
   APPLICATION_PROCESSING_MODEL_NAMES,
   CASE_COMMUNICATION_TYPES,
@@ -84,7 +84,7 @@ describe('Application processing schema coherence (Phase 6)', () => {
   });
 
   it('does not define legacy issuance or evidence vault models outside canonical Phase 8 instruments', () => {
-    for (const modelName of FORBIDDEN_PHASE_7_MODELS) {
+    for (const modelName of FORBIDDEN_LEGACY_ISSUANCE_MODELS) {
       expect(schema).not.toContain(`model ${modelName}`);
     }
     expect(schema).toContain('model OfficialInstrument');
