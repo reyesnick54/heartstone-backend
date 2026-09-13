@@ -8,7 +8,6 @@ export async function resetServiceCatalogData(prisma: PrismaService): Promise<vo
   await prisma.workflowDefinition.deleteMany();
   await prisma.serviceActivationRecord.deleteMany();
   await prisma.governmentServiceRedressRoute.deleteMany();
-  await prisma.governmentServiceDecisionTypeDefinition.deleteMany();
   await prisma.governmentServiceOutputDefinition.deleteMany();
   await prisma.governmentServiceChecklistItem.deleteMany();
   await prisma.governmentServiceEligibilityRule.deleteMany();

@@ -2932,6 +2932,7 @@ model DocumentVersion {
   auditEvents                      DocumentAuditEvent[]
   evidenceRecords                  EvidenceRecord[]
   packetItems                      EvidencePacketItem[]
+  officialInstrumentVersions       OfficialInstrumentVersion[]
 
   @@unique([documentRecordId, versionNumber])
   @@index([documentRecordId])
@@ -4922,6 +4923,7 @@ model OfficialInstrumentVersion {
   officialInstrument   OfficialInstrument        @relation("OfficialInstrumentVersions", fields: [officialInstrumentId], references: [id], onDelete: Cascade)
   currentForInstrument OfficialInstrument?       @relation("OfficialInstrumentCurrentVersion")
   templateVersion      InstrumentTemplateVersion @relation(fields: [templateVersionId], references: [id])
+  documentVersion      DocumentVersion           @relation(fields: [documentVersionId], references: [id])
   issuanceEvents       IssuanceEvent[]
   deliveries           InstrumentDelivery[]
   receiptAcknowledgments InstrumentReceiptAcknowledgment[]
