@@ -200,6 +200,9 @@ model Officeholder {
   managedCases                 Case[]                        @relation("CaseManager")
   caseEvents                   CaseEvent[]                   @relation("CaseEventOfficeholder")
   communicationsAsSender       CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications        EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances   EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments   EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
 
   @@map("officeholders")
 }
@@ -450,6 +453,9 @@ model Identity {
   documentVersionsReceived  DocumentVersion[]          @relation("DocumentVersionReceivedFrom")
   documentAssociations      DocumentAssociation[]      @relation("DocumentAssociationActor")
   documentAuditEvents       DocumentAuditEvent[]       @relation("DocumentAuditActor")
+  evidenceVerifications     EvidenceVerification[]     @relation("EvidenceVerificationVerifier")
+  evidencePurposeAcceptances EvidencePurposeAcceptance[] @relation("EvidencePurposeAcceptanceReviewer")
+  evidenceQualityAssessments EvidenceQualityAssessment[] @relation("EvidenceQualityAssessor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1067,6 +1073,7 @@ model AuthorityEvaluationRecord {
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords  ServiceActivationRecord[]
+  evidenceVerifications   EvidenceVerification[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1528,6 +1535,7 @@ model GovernmentServiceChecklistItem {
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
   governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  evidenceRequirementLinks   EvidenceRequirementLink[]
 
   @@unique([governmentServiceVersionId, itemCode])
   @@index([governmentServiceVersionId])
@@ -2057,6 +2065,7 @@ model Case {
   milestones                        CaseMilestone[]
   publicStatusProjection            CasePublicStatusProjection?
   masterAdministrativeFile          MasterAdministrativeFile?
+  evidenceRecords                   EvidenceRecord[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2643,6 +2652,7 @@ model MasterAdministrativeFile {
   administrativeOwnerOffice            Office                                         @relation("MasterFileAdministrativeOwner", fields: [administrativeOwnerOfficeId], references: [id])
   recordsCustodianOffice               Office                                         @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
   sections                             MasterAdministrativeFileSection[]
+  evidenceRecords                      EvidenceRecord[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -2832,6 +2842,7 @@ model DocumentVersion {
   receivedFromExternalAuthority    ExternalAuthority?                       @relation(fields: [receivedFromExternalAuthorityId], references: [id])
   associations                     DocumentAssociation[]
   auditEvents                      DocumentAuditEvent[]
+  evidenceRecords                  EvidenceRecord[]
 
   @@unique([documentRecordId, versionNumber])
   @@index([documentRecordId])
@@ -2879,4 +2890,279 @@ model DocumentAuditEvent {
   @@index([eventType])
   @@index([recordedAt])
   @@map("document_audit_events")
+}
+
+// ─── Phase 7C: Evidence Registry and Verification Engine ────────────────────
+
+enum EvidenceRecordStatus {
+  REQUESTED
+  RECEIVED
+  UNREADABLE
+  INCOMPLETE
+  DUPLICATE
+  APPLICANT_ASSERTED
+  EXTERNALLY_ISSUED
+  PENDING_VERIFICATION
+  VERIFIED
+  PARTIALLY_VERIFIED
+  DISPUTED
+  EXPIRED
+  SUPERSEDED
+  WITHDRAWN
+  REJECTED_FOR_STATED_PURPOSE
+  ACCEPTED_FOR_LIMITED_RELIANCE
+  ACCEPTED_FOR_ADMINISTRATIVE_PURPOSE
+}
+
+enum EvidenceType {
+  DOCUMENT
+  DATA_EXTRACT
+  REGISTRY_RECORD
+  PROFESSIONAL_CERTIFICATION
+  PHOTOGRAPH
+  STATEMENT
+  OTHER
+}
+
+enum EvidenceSource {
+  APPLICANT
+  THIRD_PARTY
+  GOVERNMENT_REGISTRY
+  PROFESSIONAL_BODY
+  INTERNAL
+  OTHER
+}
+
+enum EvidenceVerificationCategory {
+  INTEGRITY
+  ISSUER
+  SIGNATURE
+  SEAL
+  IDENTITY
+  DATE
+  REGISTRY_MATCH
+  CONTENT_FACT
+  PROFESSIONAL
+  OTHER_CONTROLLED_METHOD
+}
+
+enum EvidenceVerificationResult {
+  CONFIRMED
+  NOT_CONFIRMED
+  INCONCLUSIVE
+  COULD_NOT_VERIFY
+}
+
+enum EvidenceVerificationMethod {
+  CHECKSUM_MATCH
+  DIGITAL_SIGNATURE_VALIDATION
+  REGISTRY_LOOKUP
+  ISSUER_CONFIRMATION
+  PROFESSIONAL_REGISTER_LOOKUP
+  VISUAL_INSPECTION
+  OTHER_CONTROLLED_METHOD
+  UNKNOWN
+}
+
+enum EvidenceRequirementRelationship {
+  SATISFIES
+  PARTIALLY_SATISFIES
+  DOES_NOT_SATISFY
+  UNDER_REVIEW
+  NOT_APPLICABLE
+}
+
+enum EvidenceRequirementLinkStatus {
+  LINKED
+  UNDER_REVIEW
+  SATISFIED
+  PARTIALLY_SATISFIED
+  NOT_SATISFIED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum EvidenceAcceptancePurpose {
+  COMPLETENESS
+  SUBSTANTIVE_REVIEW
+  PROFESSIONAL_REVIEW
+  INSPECTION
+  EXTERNAL_REFERRAL
+  FUTURE_DECISION_PACKET
+  COMPLIANCE
+  OTHER_APPROVED_PURPOSE
+}
+
+enum EvidenceAcceptanceDecision {
+  ACCEPTED
+  REJECTED
+  LIMITED
+}
+
+enum EvidenceQualityCriterion {
+  RELEVANCE
+  PROVENANCE
+  AUTHENTICITY
+  COMPLETENESS
+  CURRENCY
+  INDEPENDENCE
+  RELIABILITY
+  INTEGRITY
+  SCOPE
+  FITNESS_FOR_PURPOSE
+}
+
+enum EvidenceQualityRating {
+  STRONG
+  ADEQUATE
+  WEAK
+  INSUFFICIENT
+  UNASSESSED
+}
+
+enum EvidenceQualityAssessmentSource {
+  OFFICIAL
+  AI_PROPOSED
+}
+
+model EvidenceRecord {
+  id                            String               @id @default(uuid()) @db.Uuid
+  evidenceNumber                String               @unique
+  masterAdministrativeFileId    String               @db.Uuid
+  caseId                        String               @db.Uuid
+  documentVersionId             String?              @db.Uuid
+  externalRecordReference       String?
+  title                         String
+  description                   String?
+  evidenceType                  EvidenceType
+  source                        EvidenceSource
+  submittingParty               String
+  authorOrIssuingBody           String?
+  dateCreated                   DateTime?
+  dateReceived                  DateTime
+  periodCovered                 String?
+  status                        EvidenceRecordStatus @default(RECEIVED)
+  validFrom                     DateTime?
+  validUntil                    DateTime?
+  confidentialityClassification String
+  integrityReference            String
+  limitations                   String?
+  retentionRuleReference        String?
+  supersededByEvidenceId        String?              @db.Uuid
+  createdAt                     DateTime             @default(now())
+  updatedAt                     DateTime             @updatedAt
+  masterAdministrativeFile      MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                          Case                 @relation(fields: [caseId], references: [id])
+  documentVersion               DocumentVersion?     @relation(fields: [documentVersionId], references: [id])
+  supersededByEvidence          EvidenceRecord?      @relation("EvidenceSupersession", fields: [supersededByEvidenceId], references: [id])
+  supersededEvidence            EvidenceRecord[]     @relation("EvidenceSupersession")
+  verifications                 EvidenceVerification[]
+  requirementLinks              EvidenceRequirementLink[]
+  purposeAcceptances            EvidencePurposeAcceptance[]
+  qualityAssessments            EvidenceQualityAssessment[]
+
+  @@index([masterAdministrativeFileId])
+  @@index([caseId])
+  @@index([documentVersionId])
+  @@index([status])
+  @@index([supersededByEvidenceId])
+  @@map("evidence_records")
+}
+
+model EvidenceVerification {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  evidenceId                  String                       @db.Uuid
+  category                    EvidenceVerificationCategory
+  whatWasVerified             String
+  verificationMethod          EvidenceVerificationMethod
+  verificationSource          String
+  result                      EvidenceVerificationResult
+  verifiedByIdentityId        String                       @db.Uuid
+  verifiedByOfficeholderId    String?                      @db.Uuid
+  professionalReference       String?
+  externalAuthorityReference  String?
+  performedAt                 DateTime
+  limitations                 String?
+  expiresAt                   DateTime?
+  authorityEvaluationRecordId String?                      @db.Uuid
+  isAiProposed                Boolean                      @default(false)
+  finalizedAt                 DateTime?
+  createdAt                   DateTime                     @default(now())
+  evidence                    EvidenceRecord               @relation(fields: [evidenceId], references: [id])
+  verifiedByIdentity          Identity                     @relation("EvidenceVerificationVerifier", fields: [verifiedByIdentityId], references: [id])
+  verifiedByOfficeholder      Officeholder?                @relation("EvidenceVerificationVerifierOfficeholder", fields: [verifiedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([evidenceId])
+  @@index([category])
+  @@index([verifiedByIdentityId])
+  @@index([performedAt])
+  @@map("evidence_verifications")
+}
+
+model EvidenceRequirementLink {
+  id              String                          @id @default(uuid()) @db.Uuid
+  evidenceId      String                          @db.Uuid
+  checklistItemId String                          @db.Uuid
+  relationship    EvidenceRequirementRelationship
+  status          EvidenceRequirementLinkStatus   @default(LINKED)
+  effectiveFrom   DateTime                        @default(now())
+  effectiveUntil  DateTime?
+  limitations     String?
+  createdAt       DateTime                        @default(now())
+  updatedAt       DateTime                        @updatedAt
+  evidence        EvidenceRecord                  @relation(fields: [evidenceId], references: [id])
+  checklistItem   GovernmentServiceChecklistItem  @relation(fields: [checklistItemId], references: [id])
+
+  @@index([evidenceId])
+  @@index([checklistItemId])
+  @@index([status])
+  @@map("evidence_requirement_links")
+}
+
+model EvidencePurposeAcceptance {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  evidenceId             String                    @db.Uuid
+  purpose                EvidenceAcceptancePurpose
+  decision               EvidenceAcceptanceDecision
+  reviewerIdentityId     String                    @db.Uuid
+  reviewerOfficeholderId String?                   @db.Uuid
+  decidedAt              DateTime
+  reason                 String?
+  scope                  String?
+  limitations            String?
+  isAiProposed           Boolean                   @default(false)
+  finalizedAt            DateTime?
+  createdAt              DateTime                  @default(now())
+  evidence               EvidenceRecord            @relation(fields: [evidenceId], references: [id])
+  reviewerIdentity       Identity                  @relation("EvidencePurposeAcceptanceReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder   Officeholder?             @relation("EvidencePurposeAcceptanceReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+
+  @@index([evidenceId])
+  @@index([purpose])
+  @@index([reviewerIdentityId])
+  @@map("evidence_purpose_acceptances")
+}
+
+model EvidenceQualityAssessment {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  evidenceId               String                          @db.Uuid
+  criterion                EvidenceQualityCriterion
+  rating                   EvidenceQualityRating
+  notes                    String?
+  assessedByIdentityId     String                          @db.Uuid
+  assessedByOfficeholderId String?                         @db.Uuid
+  assessmentSource         EvidenceQualityAssessmentSource @default(OFFICIAL)
+  assessedAt               DateTime
+  limitations              String?
+  finalizedAt              DateTime?
+  createdAt                DateTime                        @default(now())
+  evidence                 EvidenceRecord                  @relation(fields: [evidenceId], references: [id])
+  assessedByIdentity       Identity                        @relation("EvidenceQualityAssessor", fields: [assessedByIdentityId], references: [id])
+  assessedByOfficeholder   Officeholder?                   @relation("EvidenceQualityAssessorOfficeholder", fields: [assessedByOfficeholderId], references: [id])
+
+  @@unique([evidenceId, criterion, assessmentSource, assessedAt])
+  @@index([evidenceId])
+  @@index([criterion])
+  @@map("evidence_quality_assessments")
 }
