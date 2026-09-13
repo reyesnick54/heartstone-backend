@@ -11,6 +11,7 @@ import {
   GovernmentDecisionStatus,
   InstrumentIssuerSource,
   IssuanceReadinessOutcome,
+  Prisma,
 } from '@prisma/client';
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
@@ -130,7 +131,7 @@ export class IssuanceReadinessService {
         instrumentTypeVersionId: input.instrumentTypeVersionId,
         caseId: input.caseId,
         outcome,
-        checklistResults: checklistResults as unknown as object,
+        checklistResults: checklistResults as unknown as Prisma.InputJsonValue,
         assessedByIdentityId: input.assessedByIdentityId,
         authorityEvaluationRecordId,
       },

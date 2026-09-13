@@ -41,10 +41,11 @@ describe('Decisions schema (Phase 8B)', () => {
     });
   }
 
-  it('includes DECIDED case status for post-decision workflow', () => {
+  it('includes DECIDED before ISSUED in case status lifecycle', () => {
     const caseStatusBlock = /enum CaseStatus \{[\s\S]*?\}/.exec(schema)?.[0] ?? '';
     expect(caseStatusBlock).toContain('DECIDED');
-    expect(caseStatusBlock).not.toContain('ISSUED');
+    expect(caseStatusBlock).toContain('ISSUED');
+    expect(caseStatusBlock.indexOf('DECIDED')).toBeLessThan(caseStatusBlock.indexOf('ISSUED'));
   });
 
   it('GovernmentDecision has immutable snapshot fields', () => {

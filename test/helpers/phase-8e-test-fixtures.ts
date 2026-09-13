@@ -13,9 +13,9 @@ import {
   OfficialInstrumentKind,
 } from '@prisma/client';
 
-import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
 import { type PrismaService } from '../../src/database/prisma.service';
 import { seedPhase8bDecisionFixture } from '../../src/decisions/fixtures/phase-8b-test-fixtures';
+import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
 
 export interface Phase8eFixtureContext {
   caseId: string;
@@ -40,6 +40,15 @@ export async function seedPhase8eIssuanceFixture(
   const marker = NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER;
   const base = await seedPhase8bDecisionFixture(prisma);
 
+  const decideFunction = await prisma.functionAuthorityRecord.findUniqueOrThrow({
+    where: { id: base.functionAuthorityRecordId },
+    include: { governingSources: true },
+  });
+  const governingSourceId = decideFunction.governingSources[0]?.governingSourceId;
+  if (!governingSourceId) {
+    throw new Error('Expected governing source on decision function in Phase 8E fixture');
+  }
+
   const issueFunction = await prisma.functionAuthorityRecord.create({
     data: {
       code: `${marker}-ISSUE-FUNC`,
@@ -48,15 +57,21 @@ export async function seedPhase8eIssuanceFixture(
       functionClass: ControlledFunctionClass.LICENSING,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: base.institutionId,
+      officeId: base.officeId,
+      activatedAt: new Date('2020-01-01'),
       requiresAppointment: true,
+      governingSources: {
+        create: { governingSourceId, isPrimary: true },
+      },
       actionRights: {
-        create: [{ action: AuthorityActionType.ISSUE, permitted: true }],
+        create: [{ action: AuthorityActionType.ISSUE, permitted: true, requiresHumanActor: true }],
       },
       assignments: {
         create: [
           {
             officeholderId: base.officeholderId,
             officeId: base.officeId,
+            institutionId: base.institutionId,
             status: FunctionAssignmentStatus.ACTIVE,
             effectiveFrom: new Date('2020-01-01'),
           },

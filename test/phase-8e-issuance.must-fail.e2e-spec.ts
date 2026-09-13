@@ -3,6 +3,7 @@ import { OfficialInstrumentKind } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
+import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../src/decisions-issuance/decisions-issuance.constants';
 import { type PrismaService } from '../src/database/prisma.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase8eIssuanceFixture } from './helpers/phase-8e-test-fixtures';
@@ -56,6 +57,8 @@ describe('Phase 8E issuance must-fail invariants (e2e)', () => {
   });
 
   it('2. acknowledgment kind cannot masquerade as license based on title alone', async () => {
+    await seedPhase8eIssuanceFixture(prisma);
+
     const ackType = await prisma.instrumentTypeDefinition.findFirst({
       where: { kind: OfficialInstrumentKind.ACKNOWLEDGMENT },
     });
@@ -63,7 +66,7 @@ describe('Phase 8E issuance must-fail invariants (e2e)', () => {
     expect(ackType).toBeNull();
 
     const licenseType = await prisma.instrumentTypeDefinition.findFirst({
-      where: { code: { contains: 'LICENSE' } },
+      where: { code: `${NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER}-LICENSE` },
     });
 
     expect(licenseType?.kind).toBe(OfficialInstrumentKind.LICENSE);

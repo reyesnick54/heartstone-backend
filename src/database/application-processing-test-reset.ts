@@ -15,6 +15,8 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.instrumentTypeDefinition.deleteMany();
   await prisma.instrumentNumberingRule.deleteMany();
   await prisma.decisionCondition.deleteMany();
+  await prisma.decisionParticipant.deleteMany();
+  await prisma.decisionPreparationRecord.deleteMany();
   await prisma.governmentDecision.deleteMany();
   await prisma.decisionReadinessAssessment.deleteMany();
   await prisma.decisionTypeVersion.deleteMany();
@@ -53,6 +55,11 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.documentAssociation.deleteMany();
   await prisma.documentVersion.deleteMany();
   await prisma.documentRecord.deleteMany();
+  await prisma.evidencePacketItemExclusion.deleteMany();
+  await prisma.evidencePacketManifest.deleteMany();
+  await prisma.evidencePacketItem.deleteMany();
+  await prisma.evidencePacketVersion.deleteMany();
+  await prisma.evidencePacket.deleteMany();
   await prisma.masterAdministrativeFileSection.deleteMany();
   await prisma.masterAdministrativeFile.deleteMany();
   await prisma.caseCommunicationOutbox.deleteMany();
