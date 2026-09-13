@@ -22,6 +22,7 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.instrumentDeliveryAttempt.deleteMany();
   await prisma.instrumentDelivery.deleteMany();
   await prisma.issuanceEvent.deleteMany();
+  await prisma.issuanceReadinessAssessment.updateMany({ data: { officialInstrumentId: null } });
   await prisma.issuanceReadinessAssessment.deleteMany();
   await prisma.officialInstrument.updateMany({ data: { currentVersionId: null } });
   await prisma.officialInstrumentVersion.deleteMany();
