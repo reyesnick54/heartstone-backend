@@ -184,10 +184,10 @@ describe('Phase 6 Applications, Workflow & Case Management (e2e)', () => {
       const caseRecord = await prisma.case.findUnique({ where: { id: caseId } });
       expect(caseRecord?.status).toBe(CaseStatus.DECISION_PENDING);
 
-      const decisionCount = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
-        `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = 'government_decisions'`,
-      );
-      expect(Number(decisionCount[0]?.count ?? 0)).toBe(0);
+      const decisionRowCount = await prisma.governmentDecision.count({
+        where: { caseId },
+      });
+      expect(decisionRowCount).toBe(0);
 
       const licenseTables = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
         `SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name IN ('issued_licenses', 'issued_permits', 'issued_certificates')`,

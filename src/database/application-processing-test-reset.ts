@@ -37,6 +37,13 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.documentRecord.deleteMany();
   await prisma.masterAdministrativeFileSection.deleteMany();
   await prisma.masterAdministrativeFile.deleteMany();
+  await prisma.decisionNoticeRight.deleteMany();
+  await prisma.decisionNotice.deleteMany();
+  await prisma.decisionAssistanceRecord.deleteMany();
+  await prisma.decisionCondition.deleteMany();
+  await prisma.decisionReason.deleteMany();
+  await prisma.decisionFinding.deleteMany();
+  await prisma.governmentDecision.deleteMany();
   await prisma.caseCommunicationOutbox.deleteMany();
   await prisma.casePublicStatusProjection.deleteMany();
   await prisma.caseMilestone.deleteMany();

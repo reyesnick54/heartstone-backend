@@ -414,7 +414,7 @@ describe('Phase 7H architectural must-fail invariants', () => {
     ).rejects.toThrow();
   });
 
-  it('50. Phase 7 packet freeze does not issue instruments', async () => {
+  it('50. Phase 7 packet freeze does not create issuance instrument tables', async () => {
     await expect(boundary.assertPhase7TablesAbsent()).resolves.toBeUndefined();
   });
 });
