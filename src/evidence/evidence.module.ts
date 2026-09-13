@@ -6,6 +6,7 @@ import { GovernmentCommunicationService } from './communications/government-comm
 import { EvidenceCustodyService } from './custody/evidence-custody.service';
 import { EvidenceAiController, EvidenceController } from './evidence.controller';
 import { InspectionService } from './inspection/inspection.service';
+import { EvidencePacketsModule } from './packets/evidence-packets.module';
 import { ProfessionalReviewService } from './professional/professional-review.service';
 import { EvidenceRecordsService } from './records/evidence-records.service';
 import {
@@ -17,7 +18,7 @@ import { DepartmentalReviewService } from './reviews/departmental-review.service
 import { EvidenceVerificationService } from './verification/evidence-verification.service';
 
 @Module({
-  imports: [SessionsModule, AuthorityModule],
+  imports: [SessionsModule, AuthorityModule, EvidencePacketsModule],
   controllers: [EvidenceController, EvidenceAiController],
   providers: [
     EvidenceRecordsService,
@@ -42,6 +43,7 @@ import { EvidenceVerificationService } from './verification/evidence-verificatio
     ProfessionalReviewService,
     InspectionService,
     EvidenceCustodyService,
+    EvidencePacketsModule,
   ],
 })
 export class EvidenceModule {}

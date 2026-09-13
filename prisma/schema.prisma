@@ -156,6 +156,7 @@ model Department {
   responsibleCases              Case[]
   masterAdministrativeFiles     MasterAdministrativeFile[]
   departmentalReviews           DepartmentalReviewRecord[]
+  evidencePackets               EvidencePacket[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -209,6 +210,8 @@ model Officeholder {
   inspectionInspectors         InspectionInspector[]
   custodyEventsAsCustodian     EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
   custodyEventsAsWitness       EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets     EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions   EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
 
   @@map("officeholders")
 }
@@ -1087,8 +1090,10 @@ model AuthorityEvaluationRecord {
   requestHash               String
   functionAuthorityRecord   FunctionAuthorityRecord    @relation(fields: [functionAuthorityRecordId], references: [id])
   serviceActivationRecords  ServiceActivationRecord[]
-  evidenceVerifications   EvidenceVerification[]
-  departmentalReviews     DepartmentalReviewRecord[]
+  evidenceVerifications     EvidenceVerification[]
+  departmentalReviews       DepartmentalReviewRecord[]
+  evidencePacketVersions      EvidencePacketVersion[]       @relation("EvidencePacketVersionAuthority")
+  evidencePacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2085,6 +2090,7 @@ model Case {
   governmentCommunications          GovernmentCommunicationRecord[]
   professionalReviews               ProfessionalReviewRecord[]
   inspectionRecords                 InspectionRecord[]
+  evidencePackets                   EvidencePacket[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2673,6 +2679,7 @@ model MasterAdministrativeFile {
   recordsCustodianOffice               Office                                         @relation("MasterFileRecordsCustodian", fields: [recordsCustodianOfficeId], references: [id])
   sections                             MasterAdministrativeFileSection[]
   evidenceRecords                      EvidenceRecord[]
+  evidencePackets                      EvidencePacket[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -2865,6 +2872,7 @@ model DocumentVersion {
   associations                     DocumentAssociation[]
   auditEvents                      DocumentAuditEvent[]
   evidenceRecords                  EvidenceRecord[]
+  packetItems                      EvidencePacketItem[]
 
   @@unique([documentRecordId, versionNumber])
   @@index([documentRecordId])
@@ -3087,6 +3095,8 @@ model EvidenceRecord {
   professionalReviewEvidence    ProfessionalReviewEvidence[]
   inspectionEvidenceItems       InspectionEvidenceItem[]
   custodyEvents                 EvidenceCustodyEvent[]
+  packetItems                   EvidencePacketItem[]
+  packetExclusions              EvidencePacketItemExclusion[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -3119,6 +3129,7 @@ model EvidenceVerification {
   verifiedByIdentity          Identity                     @relation("EvidenceVerificationVerifier", fields: [verifiedByIdentityId], references: [id])
   verifiedByOfficeholder      Officeholder?                @relation("EvidenceVerificationVerifierOfficeholder", fields: [verifiedByOfficeholderId], references: [id])
   authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
+  packetItems                 EvidencePacketItem[]         @relation("PacketItemVerifications")
 
   @@index([evidenceId])
   @@index([category])
@@ -3164,6 +3175,7 @@ model EvidencePurposeAcceptance {
   evidence               EvidenceRecord            @relation(fields: [evidenceId], references: [id])
   reviewerIdentity       Identity                  @relation("EvidencePurposeAcceptanceReviewer", fields: [reviewerIdentityId], references: [id])
   reviewerOfficeholder   Officeholder?             @relation("EvidencePurposeAcceptanceReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  packetItems            EvidencePacketItem[]      @relation("PacketItemAcceptances")
 
   @@index([evidenceId])
   @@index([purpose])
@@ -3306,6 +3318,7 @@ model DepartmentalReviewRecord {
   supersededBy                DepartmentalReviewRecord? @relation("DepartmentalReviewSupersession", fields: [supersededById], references: [id])
   supersedes                  DepartmentalReviewRecord[] @relation("DepartmentalReviewSupersession")
   evidenceConsidered          DepartmentalReviewEvidence[]
+  packetItems                 EvidencePacketItem[]
 
   @@unique([caseId, departmentId, reviewVersion])
   @@index([caseId])
@@ -3353,6 +3366,7 @@ model GovernmentCommunicationRecord {
   retainedDeterminationForExternalAuthority   ExternalAuthority?                      @relation("RetainedDeterminationExternalAuthority", fields: [retainedDeterminationForExternalAuthorityId], references: [id])
   documentRecords                             GovernmentCommunicationDocument[]
   evidenceRecords                             GovernmentCommunicationEvidence[]
+  packetItems                                 EvidencePacketItem[]
 
   @@index([caseId])
   @@index([category])
@@ -3410,6 +3424,7 @@ model ProfessionalReviewRecord {
   case                    Case                      @relation(fields: [caseId], references: [id])
   professionalIdentity    Identity                  @relation("ProfessionalReviewIdentity", fields: [professionalIdentityId], references: [id])
   evidenceReviewed        ProfessionalReviewEvidence[]
+  packetItems             EvidencePacketItem[]
 
   @@index([caseId])
   @@index([professionalIdentityId])
@@ -3450,6 +3465,7 @@ model InspectionRecord {
   functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
   inspectors                InspectionInspector[]
   evidenceItems             InspectionEvidenceItem[]
+  packetItems               EvidencePacketItem[]
 
   @@index([caseId])
   @@index([status])
@@ -3517,4 +3533,142 @@ model EvidenceCustodyEvent {
   @@index([custodianIdentityId])
   @@index([occurredAt])
   @@map("evidence_custody_events")
+}
+
+// ─── Phase 7E: Evidence Packets and Decision-Support Snapshots ─────────────────
+
+enum EvidencePacketPurpose {
+  SUBSTANTIVE_REVIEW
+  PROFESSIONAL_REVIEW
+  INSPECTION_REVIEW
+  EXTERNAL_REFERRAL
+  DECISION_SUPPORT
+  APPEAL_RECORD
+  COMPLIANCE_REVIEW
+  PROJECT_READINESS
+  OTHER_CONTROLLED_PURPOSE
+}
+
+enum EvidencePacketVersionStatus {
+  DRAFT
+  ASSEMBLED
+  UNDER_REVIEW
+  FROZEN
+  SUPERSEDED
+  ARCHIVED
+}
+
+model EvidencePacket {
+  id                         String                @id @default(uuid()) @db.Uuid
+  packetNumber               String                @unique
+  masterAdministrativeFileId String                @db.Uuid
+  caseId                     String?               @db.Uuid
+  purpose                    EvidencePacketPurpose
+  questionOrIssue            String
+  responsibleDepartmentId    String                @db.Uuid
+  externalProjectReference   String?
+  createdAt                  DateTime              @default(now())
+  updatedAt                  DateTime              @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                       Case?                 @relation(fields: [caseId], references: [id])
+  responsibleDepartment      Department            @relation(fields: [responsibleDepartmentId], references: [id])
+  versions                   EvidencePacketVersion[]
+
+  @@index([masterAdministrativeFileId])
+  @@index([caseId])
+  @@index([responsibleDepartmentId])
+  @@map("evidence_packets")
+}
+
+model EvidencePacketVersion {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  packetId                    String                      @db.Uuid
+  version                     Int
+  status                      EvidencePacketVersionStatus @default(DRAFT)
+  evidenceCutoffAt            DateTime?
+  assembledByIdentityId       String                      @db.Uuid
+  assembledByOfficeholderId   String?                     @db.Uuid
+  authorityEvaluationRecordId String?                     @db.Uuid
+  frozenAt                    DateTime?
+  manifestHash                String?
+  supersededById              String?                     @db.Uuid
+  readyForDecisionReview      Boolean                     @default(false)
+  qualitySummary              Json                        @default("{}")
+  createdAt                   DateTime                    @default(now())
+  packet                      EvidencePacket              @relation(fields: [packetId], references: [id])
+  assembledByOfficeholder     Officeholder?               @relation("EvidencePacketAssembler", fields: [assembledByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?  @relation("EvidencePacketVersionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  supersededBy                EvidencePacketVersion?      @relation("PacketVersionSupersession", fields: [supersededById], references: [id])
+  supersedes                  EvidencePacketVersion[]     @relation("PacketVersionSupersession")
+  items                       EvidencePacketItem[]
+  manifest                    EvidencePacketManifest?
+  exclusionRecords            EvidencePacketItemExclusion[]
+
+  @@unique([packetId, version])
+  @@index([packetId])
+  @@index([status])
+  @@map("evidence_packet_versions")
+}
+
+model EvidencePacketItem {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  packetVersionId             String                        @db.Uuid
+  evidenceRecordId            String                        @db.Uuid
+  evidenceStatusAtInclusion   EvidenceRecordStatus
+  documentVersionId           String                        @db.Uuid
+  inclusionOrder              Int
+  limitations                 String?
+  departmentalReviewId        String?                       @db.Uuid
+  governmentCommunicationId   String?                       @db.Uuid
+  professionalReviewId        String?                       @db.Uuid
+  inspectionRecordId          String?                       @db.Uuid
+  isExplicitlyExcluded        Boolean                       @default(false)
+  exclusionRecordId           String?                       @unique @db.Uuid
+  createdAt                   DateTime                      @default(now())
+  packetVersion               EvidencePacketVersion         @relation(fields: [packetVersionId], references: [id], onDelete: Cascade)
+  evidenceRecord              EvidenceRecord                @relation(fields: [evidenceRecordId], references: [id])
+  documentVersion             DocumentVersion               @relation(fields: [documentVersionId], references: [id])
+  departmentalReview          DepartmentalReviewRecord?     @relation(fields: [departmentalReviewId], references: [id])
+  governmentCommunication     GovernmentCommunicationRecord? @relation(fields: [governmentCommunicationId], references: [id])
+  professionalReview          ProfessionalReviewRecord?     @relation(fields: [professionalReviewId], references: [id])
+  inspectionRecord            InspectionRecord?             @relation(fields: [inspectionRecordId], references: [id])
+  exclusionRecord             EvidencePacketItemExclusion?  @relation(fields: [exclusionRecordId], references: [id])
+  verificationRecords         EvidenceVerification[]        @relation("PacketItemVerifications")
+  acceptanceRecords           EvidencePurposeAcceptance[]   @relation("PacketItemAcceptances")
+
+  @@unique([packetVersionId, evidenceRecordId])
+  @@index([packetVersionId])
+  @@index([evidenceRecordId])
+  @@map("evidence_packet_items")
+}
+
+model EvidencePacketManifest {
+  id                String                @id @default(uuid()) @db.Uuid
+  packetVersionId   String                @unique @db.Uuid
+  canonicalManifest Json
+  manifestHash      String
+  generatedAt       DateTime              @default(now())
+  packetVersion     EvidencePacketVersion @relation(fields: [packetVersionId], references: [id], onDelete: Cascade)
+
+  @@map("evidence_packet_manifests")
+}
+
+model EvidencePacketItemExclusion {
+  id                          String                @id @default(uuid()) @db.Uuid
+  packetVersionId             String                @db.Uuid
+  evidenceRecordId            String                @db.Uuid
+  exclusionReason             String
+  authorizedByIdentityId      String                @db.Uuid
+  authorizedByOfficeholderId  String?               @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  createdAt                   DateTime              @default(now())
+  packetVersion               EvidencePacketVersion @relation(fields: [packetVersionId], references: [id])
+  evidenceRecord              EvidenceRecord        @relation(fields: [evidenceRecordId], references: [id])
+  authorizedByOfficeholder    Officeholder?         @relation("EvidencePacketExclusionAuthorizer", fields: [authorizedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("EvidencePacketExclusionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  excludedItem                EvidencePacketItem?
+
+  @@index([packetVersionId])
+  @@index([evidenceRecordId])
+  @@map("evidence_packet_item_exclusions")
 }
