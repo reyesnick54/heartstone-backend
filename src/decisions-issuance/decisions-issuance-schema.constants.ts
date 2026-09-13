@@ -1,4 +1,10 @@
 export const PHASE_8E_MODEL_NAMES = [
+  'EvidencePacket',
+  'EvidencePacketVersion',
+  'DecisionType',
+  'DecisionTypeVersion',
+  'DecisionReadinessAssessment',
+  'GovernmentDecision',
   'DecisionCondition',
   'InstrumentTypeDefinition',
   'InstrumentTypeVersion',
@@ -30,3 +36,5 @@ export const OFFICIAL_INSTRUMENT_KINDS = [
   'ACKNOWLEDGMENT',
   'OTHER_AUTHORIZED_INSTRUMENT',
 ] as const;
+
+export const EVIDENCE_PACKET_VERSION_STATUSES = ['DRAFT', 'FROZEN', 'SUPERSEDED'] as const;

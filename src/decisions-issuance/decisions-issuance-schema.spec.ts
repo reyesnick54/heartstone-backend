@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
+  EVIDENCE_PACKET_VERSION_STATUSES,
   OFFICIAL_INSTRUMENT_KINDS,
   PHASE_8E_MODEL_NAMES,
 } from './decisions-issuance-schema.constants';
@@ -22,11 +23,28 @@ describe('Decisions issuance schema coherence (Phase 8E)', () => {
     }
   });
 
+  it('does not reference removed EvidencePacketVersionItem model', () => {
+    expect(schema).not.toContain('model EvidencePacketVersionItem');
+  });
+
   it('defines all official instrument kinds', () => {
     const block = (/enum OfficialInstrumentKind\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
     for (const kind of OFFICIAL_INSTRUMENT_KINDS) {
       expect(block).toContain(kind);
     }
+  });
+
+  it('defines frozen evidence packet version statuses used by decisions', () => {
+    const block = (/enum EvidencePacketVersionStatus\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    for (const status of EVIDENCE_PACKET_VERSION_STATUSES) {
+      expect(block).toContain(status);
+    }
+  });
+
+  it('links GovernmentDecision to frozen EvidencePacketVersion', () => {
+    const block = (/model GovernmentDecision\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    expect(block).toContain('evidencePacketVersionId');
+    expect(block).toContain('evidencePacketVersion');
   });
 
   it('adds ISSUED case status for post-issuance transition only', () => {
