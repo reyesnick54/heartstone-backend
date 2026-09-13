@@ -30,10 +30,10 @@ export class GovernmentDecisionService {
     return this.prisma.governmentDecision.create({
       data: {
         decisionNumber: input.decisionNumber,
-        decisionType: input.decisionType,
-        status: GovernmentDecisionStatus.DRAFT,
-        decidingOfficeholderId: input.decidingOfficeholderId,
-        decidingIdentityId: input.decidingIdentityId,
+        lifecycleDecisionType: input.decisionType,
+        decisionStatus: GovernmentDecisionStatus.DRAFT,
+        decisionMakerOfficeholderId: input.decidingOfficeholderId,
+        decisionMakerIdentityId: input.decidingIdentityId,
         outcomeSummary: input.outcomeSummary,
         caseId: input.caseId,
         masterAdministrativeFileId: input.masterAdministrativeFileId,
@@ -55,15 +55,17 @@ export class GovernmentDecisionService {
       throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== GovernmentDecisionStatus.DRAFT &&
-        decision.status !== GovernmentDecisionStatus.PENDING) {
+    if (
+      decision.decisionStatus !== GovernmentDecisionStatus.DRAFT &&
+      decision.decisionStatus !== GovernmentDecisionStatus.PENDING
+    ) {
       throw new BadRequestException('Decision is not in a finalizable state');
     }
 
     return this.prisma.governmentDecision.update({
       where: { id: decisionId },
       data: {
-        status: GovernmentDecisionStatus.FINALIZED,
+        decisionStatus: GovernmentDecisionStatus.FINALIZED,
         finalizedAt: new Date(),
       },
     });
@@ -78,10 +80,8 @@ export class GovernmentDecisionService {
       throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== GovernmentDecisionStatus.FINALIZED) {
-      throw new BadRequestException(
-        'Lifecycle action requires a finalized GovernmentDecision',
-      );
+    if (decision.decisionStatus !== GovernmentDecisionStatus.FINALIZED) {
+      throw new BadRequestException('Lifecycle action requires a finalized GovernmentDecision');
     }
 
     return decision;

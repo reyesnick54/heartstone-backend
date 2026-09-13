@@ -30,6 +30,13 @@ export class InstrumentNumberingService {
     numberingRuleId: string,
     institutionCode: string,
   ): Promise<{ reservationId: string; reservedNumber: string }> {
+    await tx.$executeRaw`
+      SELECT id
+      FROM instrument_numbering_rules
+      WHERE id = ${numberingRuleId}::uuid
+      FOR UPDATE
+    `;
+
     const rule = await tx.instrumentNumberingRule.findUnique({
       where: { id: numberingRuleId },
     });

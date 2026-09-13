@@ -11,9 +11,6 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.instrumentReinstatementRecord.deleteMany();
   await prisma.instrumentReplacementRecord.deleteMany();
   await prisma.instrumentSurrenderRecord.deleteMany();
-  await prisma.officialInstrumentVersion.deleteMany();
-  await prisma.officialInstrument.deleteMany();
-  await prisma.governmentDecision.deleteMany();
   await prisma.instrumentDownloadEvent.deleteMany();
   await prisma.instrumentDeliveryAuditEvent.deleteMany();
   await prisma.instrumentVerificationEvent.deleteMany();

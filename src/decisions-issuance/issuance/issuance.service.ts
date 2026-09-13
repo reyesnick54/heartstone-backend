@@ -24,7 +24,10 @@ import {
 
 import { CaseStatusService } from '../../application-processing/cases/case-status.service';
 import { PrismaService } from '../../database/prisma.service';
-import { DOCUMENT_STORAGE_PORT, DocumentStoragePort } from '../../evidence-records/ports/document-storage.port';
+import {
+  DOCUMENT_STORAGE_PORT,
+  DocumentStoragePort,
+} from '../../evidence-records/ports/document-storage.port';
 import { InstrumentNumberingService } from '../catalog/instrument-numbering.service';
 import {
   IssuanceBlockedException,
@@ -172,7 +175,7 @@ export class IssuanceService {
       instrumentType: typeVersion.instrumentTypeDefinition.kind,
       instrumentTypeName: typeVersion.instrumentTypeDefinition.name,
       decisionNumber: decision.decisionNumber,
-      matterDecided: decision.matterDecided,
+      matterDecided: decision.matterDecided ?? '',
       caseNumber: caseRecord.caseNumber,
     };
 

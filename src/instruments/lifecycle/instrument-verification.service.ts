@@ -32,7 +32,7 @@ export class InstrumentVerificationService {
       data: {
         publicVerificationStatus: verificationStatus,
         publicVerificationUpdatedAt: new Date(),
-        currentStatus: status,
+        status,
       },
     });
   }
@@ -47,11 +47,11 @@ export class InstrumentVerificationService {
     }
 
     return {
-      instrumentNumber: instrument.instrumentNumber,
-      status: instrument.currentStatus,
-      verificationStatus: instrument.publicVerificationStatus,
-      verifiedAt: instrument.publicVerificationUpdatedAt,
-      isCurrent: this.isCurrentStatus(instrument.currentStatus),
+      instrumentNumber: instrument.instrumentNumber ?? '',
+      status: instrument.status,
+      verificationStatus: instrument.publicVerificationStatus ?? 'UNKNOWN',
+      verifiedAt: instrument.publicVerificationUpdatedAt ?? instrument.updatedAt,
+      isCurrent: this.isCurrentStatus(instrument.status),
     };
   }
 
