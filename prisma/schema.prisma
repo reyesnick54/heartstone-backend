@@ -118,6 +118,8 @@ model Institution {
   masterAdministrativeFiles     MasterAdministrativeFile[]
   documentRecords               DocumentRecord[]
   governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
+  decisionTypeDefinitions              DecisionTypeDefinition[]
+  decisionRequirementConsultations     DecisionTypeRequirementElement[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -157,6 +159,7 @@ model Department {
   masterAdministrativeFiles     MasterAdministrativeFile[]
   departmentalReviews           DepartmentalReviewRecord[]
   evidencePackets               EvidencePacket[]
+  responsibleDecisionTypes      DecisionTypeDefinition[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -850,6 +853,7 @@ model FunctionAuthorityRecord {
   departmentalReviews          DepartmentalReviewRecord[]
   inspectionRecords            InspectionRecord[]
   recordCorrections            RecordCorrection[]
+  decisionTypeVersions         DecisionTypeVersion[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -878,6 +882,8 @@ model GoverningSource {
   functionLinks             FunctionGoverningSource[]
   recordsClassifications    RecordsClassification[]
   retentionSchedules        RetentionSchedule[]
+  decisionTypeDefinitions   DecisionTypeDefinition[]
+  decisionTypeVersions      DecisionTypeVersion[]
 
   @@index([status])
   @@index([effectiveFrom])
@@ -1310,6 +1316,7 @@ model GovernmentService {
   workflowDefinitions       WorkflowDefinition[]
   cases                     Case[]
   masterAdministrativeFiles MasterAdministrativeFile[]
+  decisionTypeDefinitions   DecisionTypeDefinition[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -1369,6 +1376,7 @@ model GovernmentServiceVersion {
   applicationSubmissions              ApplicationSubmission[]
   cases                               Case[]
   masterAdministrativeFiles           MasterAdministrativeFile[]
+  decisionTypeVersions              DecisionTypeVersion[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -4262,4 +4270,231 @@ model RecordDispositionRecord {
   @@index([dispositionRequestId])
   @@index([dispositionDate])
   @@map("record_disposition_records")
+}
+
+enum DecisionTypeLifecycleStatus {
+  DRAFT
+  AUTHORITY_REVIEW
+  APPROVED
+  CONFIGURED
+  TESTED
+  ACCEPTED
+  ACTIVE
+  SUSPENDED
+  SUPERSEDED
+  RETIRED
+}
+
+enum DecisionOutcomeCode {
+  APPROVED
+  APPROVED_WITH_CONDITIONS
+  PARTIALLY_APPROVED
+  REFUSED
+  DEFERRED
+  RETURNED_FOR_FURTHER_INFORMATION
+  WITHDRAWN
+  LAPSED
+  TRANSFERRED
+  REFERRED_TO_OTHER_INSTITUTION
+  CLOSED_WITHOUT_DECISION
+  OTHER_AUTHORIZED_OUTCOME
+}
+
+enum DecisionSignatureTiming {
+  BEFORE_DECISION_RECORDED
+  WITH_DECISION_RECORDED
+  BEFORE_INSTRUMENT_ISSUANCE
+  WITH_INSTRUMENT_ISSUANCE
+}
+
+enum DecisionPublicationStatus {
+  NOT_PUBLISHED
+  PUBLISH_ON_DECISION
+  PUBLISH_ON_INSTRUMENT_ISSUANCE
+  RESTRICTED_PUBLICATION
+}
+
+enum DecisionEffectiveDateRule {
+  ON_DECISION_RECORDED
+  ON_INSTRUMENT_ISSUANCE
+  FIXED_DATE
+  BUSINESS_DAYS_AFTER_DECISION
+  AS_SPECIFIED_IN_REASONS
+}
+
+enum DecisionRequirementElementType {
+  MANDATORY_EVIDENCE_PACKET
+  PROFESSIONAL_REVIEW
+  GOVERNMENT_CONSULTATION
+  GOVERNMENT_CONCURRENCE
+  INSPECTION
+  DEPARTMENTAL_FINDING
+  RECOMMENDATION
+  CONFLICT_RECUSAL_CHECK
+  QUORUM_CO_APPROVAL
+  CONDITIONS_PRECEDENT
+  SIGNATURE
+  SEAL
+  NOTICE
+  REVIEW_APPEAL_RIGHTS
+}
+
+enum DecisionMakerActorType {
+  OFFICEHOLDER
+  PANEL
+  DUAL_CONTROL_PAIR
+}
+
+enum DecisionTypeTransitionBasis {
+  CONFIGURATION_COMPLETE
+  AUTHORITY_REVIEW_COMPLETE
+  INSTITUTIONAL_ACCEPTANCE
+  OPERATIONAL_ACTIVATION
+  SUSPENSION
+  SUPERSESSION
+  RETIREMENT
+}
+
+model DecisionTypeDefinition {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  code                     String                    @unique
+  name                     String
+  description              String?
+  responsibleInstitutionId String                    @db.Uuid
+  responsibleDepartmentId  String?                   @db.Uuid
+  status                   StructuralLifecycleStatus @default(ACTIVE)
+  governingSourceId        String?                   @db.Uuid
+  governmentServiceId      String?                   @db.Uuid
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  responsibleInstitution   Institution               @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment    Department?               @relation(fields: [responsibleDepartmentId], references: [id])
+  governingSource          GoverningSource?          @relation(fields: [governingSourceId], references: [id])
+  governmentService        GovernmentService?        @relation(fields: [governmentServiceId], references: [id])
+  versions                 DecisionTypeVersion[]
+
+  @@index([responsibleInstitutionId])
+  @@index([responsibleDepartmentId])
+  @@index([governingSourceId])
+  @@index([governmentServiceId])
+  @@index([status])
+  @@map("decision_type_definitions")
+}
+
+model DecisionTypeVersion {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  decisionTypeDefinitionId      String                      @db.Uuid
+  version                       Int
+  functionAuthorityRecordId     String                      @db.Uuid
+  requiredAuthorityAction       AuthorityActionType
+  governmentServiceVersionId    String?                     @db.Uuid
+  governingSourceId             String?                     @db.Uuid
+  decisionStandardDescription   String
+  matterScopeDescription        String
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  status                        DecisionTypeLifecycleStatus @default(DRAFT)
+  requiresFrozenEvidencePacket  Boolean                     @default(false)
+  requiredEvidencePacketPurpose EvidencePacketPurpose?
+  requiresIndependentReviewer   Boolean                     @default(false)
+  requiresConflictCheck         Boolean                     @default(false)
+  requiresProfessionalReview    Boolean                     @default(false)
+  requiresGovernmentConsultation Boolean                    @default(false)
+  requiresConcurrence           Boolean                     @default(false)
+  requiresDualControl           Boolean                     @default(false)
+  requiresPanelOrQuorum         Boolean                     @default(false)
+  requiresReasons               Boolean                     @default(true)
+  requiresNotice                Boolean                     @default(false)
+  requiresSignature             Boolean                     @default(true)
+  requiresSeal                  Boolean                     @default(false)
+  signatureTiming               DecisionSignatureTiming?
+  effectiveDateRule             DecisionEffectiveDateRule?
+  publicationStatus             DecisionPublicationStatus   @default(NOT_PUBLISHED)
+  reviewOrAppealConfiguration   Json?
+  instrumentIssuanceExpected    Boolean                     @default(false)
+  authorizedDecisionMakerType   DecisionMakerActorType      @default(OFFICEHOLDER)
+  supersededByVersionId         String?                     @unique @db.Uuid
+  institutionallyAcceptedAt     DateTime?
+  operationallyActivatedAt      DateTime?
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  decisionTypeDefinition        DecisionTypeDefinition      @relation(fields: [decisionTypeDefinitionId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord     @relation(fields: [functionAuthorityRecordId], references: [id])
+  governmentServiceVersion      GovernmentServiceVersion?   @relation(fields: [governmentServiceVersionId], references: [id])
+  governingSource               GoverningSource?            @relation(fields: [governingSourceId], references: [id])
+  supersededByVersion           DecisionTypeVersion?        @relation("DecisionTypeVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions            DecisionTypeVersion[]       @relation("DecisionTypeVersionSupersession")
+  permissibleOutcomes           DecisionTypePermissibleOutcome[]
+  requirementElements           DecisionTypeRequirementElement[]
+  lifecycleTransitions          DecisionTypeLifecycleTransition[]
+
+  @@unique([decisionTypeDefinitionId, version])
+  @@index([decisionTypeDefinitionId])
+  @@index([functionAuthorityRecordId])
+  @@index([governmentServiceVersionId])
+  @@index([governingSourceId])
+  @@index([status])
+  @@map("decision_type_versions")
+}
+
+model DecisionPermissibleOutcomeDefinition {
+  id          String              @id @default(uuid()) @db.Uuid
+  code        DecisionOutcomeCode @unique
+  name        String
+  description String?
+  isTerminal  Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  typeLinks   DecisionTypePermissibleOutcome[]
+
+  @@map("decision_permissible_outcome_definitions")
+}
+
+model DecisionTypePermissibleOutcome {
+  id                             String                             @id @default(uuid()) @db.Uuid
+  decisionTypeVersionId          String                             @db.Uuid
+  permissibleOutcomeDefinitionId String                             @db.Uuid
+  createdAt                      DateTime                           @default(now())
+  decisionTypeVersion            DecisionTypeVersion                @relation(fields: [decisionTypeVersionId], references: [id], onDelete: Cascade)
+  permissibleOutcomeDefinition   DecisionPermissibleOutcomeDefinition @relation(fields: [permissibleOutcomeDefinitionId], references: [id])
+
+  @@unique([decisionTypeVersionId, permissibleOutcomeDefinitionId])
+  @@index([decisionTypeVersionId])
+  @@index([permissibleOutcomeDefinitionId])
+  @@map("decision_type_permissible_outcomes")
+}
+
+model DecisionTypeRequirementElement {
+  id                        String                       @id @default(uuid()) @db.Uuid
+  decisionTypeVersionId     String                       @db.Uuid
+  elementType               DecisionRequirementElementType
+  isRequired                Boolean                      @default(true)
+  configuration             Json?
+  evidencePacketPurpose     EvidencePacketPurpose?
+  consultationInstitutionId String?                      @db.Uuid
+  createdAt                 DateTime                     @default(now())
+  updatedAt                 DateTime                     @updatedAt
+  decisionTypeVersion       DecisionTypeVersion          @relation(fields: [decisionTypeVersionId], references: [id], onDelete: Cascade)
+  consultationInstitution   Institution?                 @relation(fields: [consultationInstitutionId], references: [id])
+
+  @@index([decisionTypeVersionId])
+  @@index([consultationInstitutionId])
+  @@map("decision_type_requirement_elements")
+}
+
+model DecisionTypeLifecycleTransition {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  decisionTypeVersionId String                      @db.Uuid
+  priorStatus           DecisionTypeLifecycleStatus
+  newStatus             DecisionTypeLifecycleStatus
+  transitionBasis       DecisionTypeTransitionBasis
+  actorIdentityId       String                      @db.Uuid
+  officeholderId        String?                     @db.Uuid
+  reason                String?
+  createdAt             DateTime                    @default(now())
+  decisionTypeVersion   DecisionTypeVersion         @relation(fields: [decisionTypeVersionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionTypeVersionId])
+  @@index([createdAt])
+  @@map("decision_type_lifecycle_transitions")
 }
