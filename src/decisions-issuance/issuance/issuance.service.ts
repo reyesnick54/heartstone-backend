@@ -35,7 +35,10 @@ import {
   FORBIDDEN_CLIENT_ISSUANCE_FIELDS,
   INSTRUMENT_NUMBER_PREFIX,
 } from '../decisions-issuance.constants';
-import { type IssuanceReadinessInput,IssuanceReadinessService } from './issuance-readiness.service';
+import {
+  type IssuanceReadinessInput,
+  IssuanceReadinessService,
+} from './issuance-readiness.service';
 
 export interface IssueOfficialInstrumentInput extends IssuanceReadinessInput {
   idempotencyKey?: string;

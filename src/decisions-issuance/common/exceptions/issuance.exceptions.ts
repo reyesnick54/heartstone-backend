@@ -1,4 +1,8 @@
-import { ConflictException, ForbiddenException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 export class IssuanceNotReadyException extends UnprocessableEntityException {
   constructor(
@@ -10,7 +14,10 @@ export class IssuanceNotReadyException extends UnprocessableEntityException {
 }
 
 export class IssuanceBlockedException extends ForbiddenException {
-  constructor(message: string, public readonly code: string) {
+  constructor(
+    message: string,
+    public readonly code: string,
+  ) {
     super({ message, code });
   }
 }

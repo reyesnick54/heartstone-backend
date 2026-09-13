@@ -82,7 +82,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       proposedOutcome: 'APPROVED',
     });
 
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
     expect(record.isNonFinal).toBe(true);
   });
@@ -92,11 +94,15 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
   });
 
   it('3. technical readiness is distinct from institutional acceptance', () => {
-    expect(PHASE_8H_INVARIANTS.find((item) => item.id === 3)?.description).toMatch(/technical readiness/i);
+    expect(PHASE_8H_INVARIANTS.find((item) => item.id === 3)?.description).toMatch(
+      /technical readiness/i,
+    );
   });
 
   it('4. institutional acceptance is distinct from production-active issuance', () => {
-    expect(PHASE_8E_BOUNDARY_DISCLAIMER).toMatch(/government decision alone does not constitute issuance/i);
+    expect(PHASE_8E_BOUNDARY_DISCLAIMER).toMatch(
+      /government decision alone does not constitute issuance/i,
+    );
   });
 
   it('5. access does not equal authority to decide', () => {
@@ -105,7 +111,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
 
   it('6. case DECISION_PENDING does not create a government decision', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
   });
 
@@ -115,7 +123,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       where: { id: fixture.evidencePacketVersionId },
     });
     expect(packet).toBeTruthy();
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
   });
 
@@ -127,7 +137,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       editorIdentityId: fixture.officialIdentityId,
       proposedFindings: 'Draft findings only',
     });
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
   });
 
@@ -143,14 +155,18 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
         findings: 'Professional recommendation only',
       },
     });
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
   });
 
   it('10. readiness assessment alone does not create a government decision', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
     await assessDecisionReadiness(app, fixture);
-    const decisions = await prisma.governmentDecision.findMany({ where: { caseId: fixture.caseId } });
+    const decisions = await prisma.governmentDecision.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(decisions).toHaveLength(0);
   });
 
@@ -364,9 +380,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.ISSUE_AUTHORITY_ALLOW)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find(
+        (c) => c.code === ISSUANCE_READINESS_CHECK_CODES.ISSUE_AUTHORITY_ALLOW,
+      )?.passed,
+    ).toBe(false);
   });
 
   it('31. SUSPEND action requires authority evaluation ALLOW', async () => {
@@ -396,11 +414,17 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
   it('33. HEAR_REVIEW action requires authority evaluation ALLOW', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
     await prisma.authorityActionRight.updateMany({
-      where: { functionAuthorityRecordId: fixture.functionAuthorityRecordId, action: 'HEAR_REVIEW' },
+      where: {
+        functionAuthorityRecordId: fixture.functionAuthorityRecordId,
+        action: 'HEAR_REVIEW',
+      },
       data: { permitted: false },
     });
     const right = await prisma.authorityActionRight.findFirst({
-      where: { functionAuthorityRecordId: fixture.functionAuthorityRecordId, action: 'HEAR_REVIEW' },
+      where: {
+        functionAuthorityRecordId: fixture.functionAuthorityRecordId,
+        action: 'HEAR_REVIEW',
+      },
     });
     expect(right?.permitted).toBe(false);
   });
@@ -464,15 +488,17 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       data: {
         caseNumber: `${fixture.marker}-OTHER-CASE`,
         applicationId: (
-          await prisma.application.findFirstOrThrow({ where: { applicantIdentityId: fixture.applicantIdentityId } })
+          await prisma.application.findFirstOrThrow({
+            where: { applicantIdentityId: fixture.applicantIdentityId },
+          })
         ).id,
         applicantIdentityId: fixture.applicantIdentityId,
         governmentServiceId: (
-          await prisma.governmentService.findFirstOrThrow({ where: { code: `${fixture.marker}-SVC` } })
+          await prisma.governmentService.findFirstOrThrow({
+            where: { code: `${fixture.marker}-SVC` },
+          })
         ).id,
-        governmentServiceVersionId: (
-          await prisma.governmentServiceVersion.findFirstOrThrow()
-        ).id,
+        governmentServiceVersionId: (await prisma.governmentServiceVersion.findFirstOrThrow()).id,
         responsibleInstitutionId: fixture.institutionId,
         responsibleDepartmentId: fixture.departmentId,
         workflowVersionId: (await prisma.workflowVersion.findFirstOrThrow()).id,
@@ -534,11 +560,13 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
   it('40. recorded government decisions are immutable', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
     const decision = await executeGovernmentDecision(app, fixture, 'APPROVED');
-    const stored = await prisma.governmentDecision.findUniqueOrThrow({ where: { id: decision.id } });
+    const stored = await prisma.governmentDecision.findUniqueOrThrow({
+      where: { id: decision.id },
+    });
 
-    expect(() => { execution.assertDecisionImmutable(stored, { outcome: 'REFUSED' }); }).toThrow(
-      /immutable/i,
-    );
+    expect(() => {
+      execution.assertDecisionImmutable(stored, { outcome: 'REFUSED' });
+    }).toThrow(/immutable/i);
   });
 
   it('41. decision execution requires explicit intent confirmation', async () => {
@@ -570,7 +598,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
 
   it('43. recused decision-maker blocked from execution', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
-    await expect(executeGovernmentDecision(app, fixture, 'APPROVED', { isRecused: true })).rejects.toThrow();
+    await expect(
+      executeGovernmentDecision(app, fixture, 'APPROVED', { isRecused: true }),
+    ).rejects.toThrow();
   });
 
   it('44. REFUSED outcome does not permit approval instrument issuance', async () => {
@@ -589,9 +619,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.OUTCOME_PERMITS_ISSUANCE)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find(
+        (c) => c.code === ISSUANCE_READINESS_CHECK_CODES.OUTCOME_PERMITS_ISSUANCE,
+      )?.passed,
+    ).toBe(false);
   });
 
   it('45. invalid signature document blocks issuance when required', async () => {
@@ -618,9 +650,10 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       signatureDocumentVersionId: fixture.signatureDocumentVersionId,
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_VALID)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_VALID)
+        ?.passed,
+    ).toBe(false);
   });
 
   it('46. missing signature blocks issuance when required', async () => {
@@ -642,9 +675,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_PRESENT)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find(
+        (c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_PRESENT,
+      )?.passed,
+    ).toBe(false);
   });
 
   it('47. generated document alone is not a valid signature record for issuance', async () => {
@@ -735,9 +770,10 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       signatureDocumentVersionId: fixture.signatureDocumentVersionId,
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_VALID)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_VALID)
+        ?.passed,
+    ).toBe(false);
   });
 
   it('51. invalid seal document blocks issuance when required', async () => {
@@ -764,9 +800,10 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       sealDocumentVersionId: fixture.sealDocumentVersionId,
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_VALID)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_VALID)
+        ?.passed,
+    ).toBe(false);
   });
 
   it('52. missing seal blocks issuance when required', async () => {
@@ -788,9 +825,10 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_PRESENT)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_PRESENT)
+        ?.passed,
+    ).toBe(false);
   });
 
   it('53. seal dual control requires distinct approver when configured', async () => {
@@ -819,9 +857,10 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       sealDocumentVersionId: fixture.sealDocumentVersionId,
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_VALID)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.SEAL_VALID)
+        ?.passed,
+    ).toBe(false);
   });
 
   it('55. SEAL_INVALID blocks issuance readiness', async () => {
@@ -878,9 +917,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.PRECEDENT_CONDITIONS_SATISFIED)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find(
+        (c) => c.code === ISSUANCE_READINESS_CHECK_CODES.PRECEDENT_CONDITIONS_SATISFIED,
+      )?.passed,
+    ).toBe(false);
   });
 
   it('59. issuance readiness must be READY before issue', async () => {
@@ -946,9 +987,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       effectiveFrom: new Date('2026-01-01'),
     });
 
-    expect(result.checklistResults.find((c) => c.code === ISSUANCE_READINESS_CHECK_CODES.NUMBERING_RULE_ACTIVE)?.passed).toBe(
-      false,
-    );
+    expect(
+      result.checklistResults.find(
+        (c) => c.code === ISSUANCE_READINESS_CHECK_CODES.NUMBERING_RULE_ACTIVE,
+      )?.passed,
+    ).toBe(false);
   });
 
   it('62. duplicate instrument numbers are impossible per numbering rule', async () => {
@@ -1077,7 +1120,9 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
               code: `${fixture.marker}-WF-GATE`,
               name: 'Gate Workflow',
               governmentServiceId: (
-                await prisma.governmentService.findFirstOrThrow({ where: { code: `${fixture.marker}-SVC` } })
+                await prisma.governmentService.findFirstOrThrow({
+                  where: { code: `${fixture.marker}-SVC` },
+                })
               ).id,
             },
           })

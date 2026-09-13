@@ -69,7 +69,8 @@ export class DecisionsController {
 
   @Post('preparation')
   @ApiOperation({
-    summary: 'Create a non-final decision preparation record (drafting only, not an official decision)',
+    summary:
+      'Create a non-final decision preparation record (drafting only, not an official decision)',
   })
   createPreparation(
     @CurrentSession() session: SessionContextDto,

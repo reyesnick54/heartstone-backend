@@ -64,7 +64,9 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
 
     expect(decision.outcome).toBe('REFUSED');
 
-    const instruments = await prisma.officialInstrument.findMany({ where: { caseId: fixture.caseId } });
+    const instruments = await prisma.officialInstrument.findMany({
+      where: { caseId: fixture.caseId },
+    });
     expect(instruments).toHaveLength(0);
 
     const caseRecord = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
@@ -97,9 +99,11 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
       where: { id: decision.id },
       include: { conditions: true },
     });
-    expect(refreshed.conditions.some((c) => c.conditionType === DecisionConditionType.PRECEDENT_TO_ISSUANCE)).toBe(
-      true,
-    );
+    expect(
+      refreshed.conditions.some(
+        (c) => c.conditionType === DecisionConditionType.PRECEDENT_TO_ISSUANCE,
+      ),
+    ).toBe(true);
   });
 
   it('E2E 4. retained national instrument type blocks ABSEZ issuance', async () => {
@@ -153,7 +157,9 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
     });
 
     expect(readiness.outcome).toBe('NOT_READY');
-    expect(readiness.checklistResults.find((c) => c.code === 'SIGNATURE_VALID')?.passed).toBe(false);
+    expect(readiness.checklistResults.find((c) => c.code === 'SIGNATURE_VALID')?.passed).toBe(
+      false,
+    );
   });
 
   it('E2E 6. seal dual control requires distinct approver seal document before issuance', async () => {
@@ -216,15 +222,22 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
       sealDocumentVersionId: fixture.sealDocumentVersionId,
     });
 
-    expect(approverReadiness.checklistResults.find((c) => c.code === 'SEAL_VALID')?.passed).toBe(true);
+    expect(approverReadiness.checklistResults.find((c) => c.code === 'SEAL_VALID')?.passed).toBe(
+      true,
+    );
     expect(fixture.approverOfficeholderId).not.toBe(fixture.officialOfficeholderId);
   });
 
   it('E2E 7. suspension notice kind is distinct from license kind', async () => {
     const fixture = await seedPhase8Fixture(app, prisma, { includePreRecordedDecision: true });
-    const issued = await issueInstrumentForDecision(app, fixture, requirePreRecordedDecision(fixture), {
-      sealDocumentVersionId: fixture.sealDocumentVersionId,
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture,
+      requirePreRecordedDecision(fixture),
+      {
+        sealDocumentVersionId: fixture.sealDocumentVersionId,
+      },
+    );
 
     const suspensionType = await prisma.instrumentTypeDefinition.create({
       data: {
@@ -246,15 +259,22 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
     });
 
     expect(instrument.status).toBe(OfficialInstrumentStatus.SUSPENDED);
-    expect(instrument.instrumentTypeVersion.instrumentTypeDefinition.kind).toBe(OfficialInstrumentKind.LICENSE);
+    expect(instrument.instrumentTypeVersion.instrumentTypeDefinition.kind).toBe(
+      OfficialInstrumentKind.LICENSE,
+    );
     expect(suspensionType.kind).toBe(OfficialInstrumentKind.SUSPENSION_NOTICE);
   });
 
   it('E2E 8. revocation is distinct from suspension', async () => {
     const fixture = await seedPhase8Fixture(app, prisma, { includePreRecordedDecision: true });
-    const issued = await issueInstrumentForDecision(app, fixture, requirePreRecordedDecision(fixture), {
-      sealDocumentVersionId: fixture.sealDocumentVersionId,
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture,
+      requirePreRecordedDecision(fixture),
+      {
+        sealDocumentVersionId: fixture.sealDocumentVersionId,
+      },
+    );
 
     await prisma.officialInstrument.update({
       where: { id: issued.instrument.id },
@@ -276,9 +296,14 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
 
   it('E2E 9. reinstatement returns instrument to issued state', async () => {
     const fixture = await seedPhase8Fixture(app, prisma, { includePreRecordedDecision: true });
-    const issued = await issueInstrumentForDecision(app, fixture, requirePreRecordedDecision(fixture), {
-      sealDocumentVersionId: fixture.sealDocumentVersionId,
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture,
+      requirePreRecordedDecision(fixture),
+      {
+        sealDocumentVersionId: fixture.sealDocumentVersionId,
+      },
+    );
 
     await prisma.officialInstrument.update({
       where: { id: issued.instrument.id },
@@ -298,9 +323,14 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
 
   it('E2E 10. amended instrument preserves prior version history', async () => {
     const fixture = await seedPhase8Fixture(app, prisma, { includePreRecordedDecision: true });
-    const issued = await issueInstrumentForDecision(app, fixture, requirePreRecordedDecision(fixture), {
-      sealDocumentVersionId: fixture.sealDocumentVersionId,
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture,
+      requirePreRecordedDecision(fixture),
+      {
+        sealDocumentVersionId: fixture.sealDocumentVersionId,
+      },
+    );
 
     const currentVersion = await prisma.officialInstrumentVersion.findFirstOrThrow({
       where: { officialInstrumentId: issued.instrument.id },

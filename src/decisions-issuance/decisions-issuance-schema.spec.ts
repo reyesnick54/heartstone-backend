@@ -28,38 +28,38 @@ describe('Decisions issuance schema coherence (Phase 8E)', () => {
   });
 
   it('defines all official instrument kinds', () => {
-    const block = (/enum OfficialInstrumentKind\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /enum OfficialInstrumentKind\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     for (const kind of OFFICIAL_INSTRUMENT_KINDS) {
       expect(block).toContain(kind);
     }
   });
 
   it('defines frozen evidence packet version statuses used by decisions', () => {
-    const block = (/enum EvidencePacketVersionStatus\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /enum EvidencePacketVersionStatus\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     for (const status of EVIDENCE_PACKET_VERSION_STATUSES) {
       expect(block).toContain(status);
     }
   });
 
   it('links GovernmentDecision to frozen EvidencePacketVersion', () => {
-    const block = (/model GovernmentDecision\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /model GovernmentDecision\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(block).toContain('evidencePacketVersionId');
     expect(block).toContain('evidencePacketVersion');
   });
 
   it('adds ISSUED case status for post-issuance transition only', () => {
-    const block = (/enum CaseStatus\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /enum CaseStatus\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(block).toContain('ISSUED');
   });
 
   it('adds INSTRUMENT_ISSUED case event without bare ISSUED event type', () => {
-    const block = (/enum CaseEventType\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /enum CaseEventType\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(block).toContain('INSTRUMENT_ISSUED');
     expect(block).not.toMatch(/^\s*ISSUED\s*$/m);
   });
 
   it('does not permit client-chosen instrument numbers on OfficialInstrument create fields', () => {
-    const block = (/model OfficialInstrument\s*\{([^}]*)\}/s.exec(schema))?.[1] ?? '';
+    const block = /model OfficialInstrument\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(block).toContain('instrumentNumber');
     expect(block).toContain('PENDING_ISSUANCE');
   });

@@ -6,7 +6,11 @@ export const READINESS_ASSESSMENT_NUMBER_PREFIX = 'DRA';
 export const PHASE_8B_BOUNDARY_DISCLAIMER =
   'Government decisions are official institutional acts by authorized human officeholders. AI assistance, recommendations, and readiness assessments do not constitute decisions.';
 
-export const FORBIDDEN_PHASE_8C_MODELS = ['IssuedLicense', 'IssuedPermit', 'IssuedCertificate'] as const;
+export const FORBIDDEN_PHASE_8C_MODELS = [
+  'IssuedLicense',
+  'IssuedPermit',
+  'IssuedCertificate',
+] as const;
 
 export const FORBIDDEN_CLIENT_DECISION_FIELDS = [
   'draft',

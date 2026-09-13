@@ -3,8 +3,8 @@ import { OfficialInstrumentKind } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../src/decisions-issuance/decisions-issuance.constants';
 import { type PrismaService } from '../src/database/prisma.service';
+import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../src/decisions-issuance/decisions-issuance.constants';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase8eIssuanceFixture } from './helpers/phase-8e-test-fixtures';
 

@@ -180,23 +180,25 @@ export async function seedPhase8eIssuanceFixture(
       masterAdministrativeFileId: base.masterAdministrativeFileId,
       decisionTypeVersionId: base.decisionTypeVersionId,
       functionAuthorityRecordId: base.functionAuthorityRecordId,
-      authorityEvaluationRecordId: (
-        await prisma.authorityEvaluationRecord.findFirst({
-          orderBy: { evaluatedAt: 'desc' },
-        })
-      )?.id ?? (
-        await prisma.authorityEvaluationRecord.create({
-          data: {
-            functionAuthorityRecordId: base.functionAuthorityRecordId,
-            identityId: base.decisionMakerIdentityId,
-            officeholderId: base.officeholderId,
-            action: AuthorityActionType.DECIDE,
-            outcome: 'ALLOW',
-            requestHash: `${marker}-hash`,
-            contextSnapshot: {},
-          },
-        })
-      ).id,
+      authorityEvaluationRecordId:
+        (
+          await prisma.authorityEvaluationRecord.findFirst({
+            orderBy: { evaluatedAt: 'desc' },
+          })
+        )?.id ??
+        (
+          await prisma.authorityEvaluationRecord.create({
+            data: {
+              functionAuthorityRecordId: base.functionAuthorityRecordId,
+              identityId: base.decisionMakerIdentityId,
+              officeholderId: base.officeholderId,
+              action: AuthorityActionType.DECIDE,
+              outcome: 'ALLOW',
+              requestHash: `${marker}-hash`,
+              contextSnapshot: {},
+            },
+          })
+        ).id,
       decisionReadinessAssessmentId: readiness.id,
       evidencePacketVersionId: base.evidencePacketVersionId,
       decisionMakerIdentityId: base.decisionMakerIdentityId,
