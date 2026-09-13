@@ -57,6 +57,7 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CasesService,
     CaseFoundationService,
     CaseEventService,
+    CaseStatusService,
     CasePublicStatusProjectionService,
     WorkflowDefinitionsService,
     WorkflowRuntimeService,

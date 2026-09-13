@@ -118,6 +118,7 @@ model Institution {
   masterAdministrativeFiles     MasterAdministrativeFile[]
   documentRecords               DocumentRecord[]
   governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
+  governmentDecisions           GovernmentDecision[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -157,6 +158,7 @@ model Department {
   masterAdministrativeFiles     MasterAdministrativeFile[]
   departmentalReviews           DepartmentalReviewRecord[]
   evidencePackets               EvidencePacket[]
+  governmentDecisions           GovernmentDecision[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -215,6 +217,9 @@ model Officeholder {
   recordCorrectionsApproved    RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
   recordIntegrityEvents        RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
   recordAccessEvents           RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed    DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants         DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade      GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
 
   @@map("officeholders")
 }
@@ -230,6 +235,8 @@ model Appointment {
   updatedAt      DateTime          @updatedAt
   office         Office            @relation(fields: [officeId], references: [id])
   officeholder   Officeholder      @relation(fields: [officeholderId], references: [id])
+  decisionParticipants DecisionParticipant[]
+  governmentDecisions  GovernmentDecision[]
 
   @@index([officeId])
   @@index([officeholderId])
@@ -255,6 +262,7 @@ model Delegation {
   recipientOffice         Office?                     @relation("DelegationRecipientOffice", fields: [recipientOfficeId], references: [id])
   recipientOfficeholder   Officeholder?               @relation("DelegationRecipientOfficeholder", fields: [recipientOfficeholderId], references: [id])
   structuredScopes        DelegationStructuredScope[]
+  governmentDecisions     GovernmentDecision[]
 
   @@index([institutionId])
   @@map("delegations")
@@ -478,6 +486,10 @@ model Identity {
   recordCorrectionsApproved  RecordCorrection[]         @relation("RecordCorrectionApprover")
   recordIntegrityEvents      RecordIntegrityEvent[]     @relation("RecordIntegrityActor")
   recordAccessEvents         RecordAccessEvent[]        @relation("RecordAccessIdentity")
+  decisionReadinessProposed  DecisionReadinessAssessment[] @relation("DecisionReadinessProposedMaker")
+  decisionParticipants       DecisionParticipant[]      @relation("DecisionParticipantIdentity")
+  decisionPreparationRecords DecisionPreparationRecord[] @relation("DecisionPreparationEditor")
+  governmentDecisionsMade    GovernmentDecision[]       @relation("GovernmentDecisionMaker")
 
   @@index([userAccountId])
   @@index([personId])
@@ -850,6 +862,8 @@ model FunctionAuthorityRecord {
   departmentalReviews          DepartmentalReviewRecord[]
   inspectionRecords            InspectionRecord[]
   recordCorrections            RecordCorrection[]
+  decisionTypeVersions         DecisionTypeVersion[]
+  governmentDecisions          GovernmentDecision[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1105,6 +1119,8 @@ model AuthorityEvaluationRecord {
   evidencePacketVersions      EvidencePacketVersion[]       @relation("EvidencePacketVersionAuthority")
   evidencePacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthority")
   recordCorrections           RecordCorrection[]
+  decisionReadinessAssessments DecisionReadinessAssessment[] @relation("DecisionReadinessAuthority")
+  governmentDecisions         GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1310,6 +1326,7 @@ model GovernmentService {
   workflowDefinitions       WorkflowDefinition[]
   cases                     Case[]
   masterAdministrativeFiles MasterAdministrativeFile[]
+  decisionTypes             DecisionType[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -1369,6 +1386,7 @@ model GovernmentServiceVersion {
   applicationSubmissions              ApplicationSubmission[]
   cases                               Case[]
   masterAdministrativeFiles           MasterAdministrativeFile[]
+  decisionTypeVersions                DecisionTypeVersion[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -1694,6 +1712,7 @@ enum CaseStatus {
   PROFESSIONAL_REVIEW
   INSPECTION
   DECISION_PENDING
+  DECIDED
   SAFE_HALTED
   SAFE_HALT
   SUSPENDED
@@ -2102,6 +2121,9 @@ model Case {
   professionalReviews               ProfessionalReviewRecord[]
   inspectionRecords                 InspectionRecord[]
   evidencePackets                   EvidencePacket[]
+  decisionReadinessAssessments      DecisionReadinessAssessment[]
+  governmentDecisions               GovernmentDecision[]
+  decisionPreparationRecords        DecisionPreparationRecord[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2691,6 +2713,8 @@ model MasterAdministrativeFile {
   sections                             MasterAdministrativeFileSection[]
   evidenceRecords                      EvidenceRecord[]
   evidencePackets                      EvidencePacket[]
+  decisionReadinessAssessments         DecisionReadinessAssessment[]
+  governmentDecisions                  GovernmentDecision[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -3614,6 +3638,8 @@ model EvidencePacketVersion {
   items                       EvidencePacketItem[]
   manifest                    EvidencePacketManifest?
   exclusionRecords            EvidencePacketItemExclusion[]
+  decisionReadinessAssessments DecisionReadinessAssessment[]
+  governmentDecisions         GovernmentDecision[]
 
   @@unique([packetId, version])
   @@index([packetId])
@@ -4262,4 +4288,214 @@ model RecordDispositionRecord {
   @@index([dispositionRequestId])
   @@index([dispositionDate])
   @@map("record_disposition_records")
+}
+
+// ─── Phase 8A/8B: Decision Catalog, Readiness, and Authorized Decisions ────────
+
+enum DecisionTypeVersionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  SUPERSEDED
+  RETIRED
+}
+
+enum DecisionReadinessOutcome {
+  READY
+  NOT_READY
+  BLOCKED
+  SAFE_HALT
+  REQUIRES_EXTERNAL_DETERMINATION
+  REQUIRES_PROFESSIONAL_REVIEW
+  REQUIRES_ADDITIONAL_EVIDENCE
+  REQUIRES_CO_APPROVAL
+}
+
+enum GovernmentDecisionStatus {
+  RECORDED
+  FORMALIZATION_PENDING
+  SIGNATURE_PENDING
+  SEAL_PENDING
+  NOTICE_PENDING
+  CONDITIONS_PRECEDENT_PENDING
+  EFFECTIVE
+  SUPERSEDED
+  SET_ASIDE
+  WITHDRAWN_BY_AUTHORIZED_PROCESS
+}
+
+enum DecisionParticipantRole {
+  DECISION_MAKER
+  CO_APPROVER
+  RECUSED
+  OBSERVER
+}
+
+model DecisionType {
+  id                  String               @id @default(uuid()) @db.Uuid
+  code                String               @unique
+  name                String
+  description         String?
+  governmentServiceId String               @db.Uuid
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  governmentService   GovernmentService    @relation(fields: [governmentServiceId], references: [id])
+  versions            DecisionTypeVersion[]
+
+  @@index([governmentServiceId])
+  @@map("decision_types")
+}
+
+model DecisionTypeVersion {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  decisionTypeId             String                    @db.Uuid
+  version                    String
+  status                     DecisionTypeVersionStatus @default(DRAFT)
+  governmentServiceVersionId String                    @db.Uuid
+  functionAuthorityRecordId  String                    @db.Uuid
+  permissibleOutcomes        Json                      @default("[]")
+  requirementsConfig         Json                      @default("{}")
+  effectiveFrom              DateTime?
+  effectiveUntil             DateTime?
+  supersededById             String?                   @db.Uuid
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  decisionType               DecisionType              @relation(fields: [decisionTypeId], references: [id])
+  governmentServiceVersion   GovernmentServiceVersion  @relation(fields: [governmentServiceVersionId], references: [id])
+  functionAuthorityRecord    FunctionAuthorityRecord   @relation(fields: [functionAuthorityRecordId], references: [id])
+  supersededBy               DecisionTypeVersion?      @relation("DecisionTypeVersionSupersession", fields: [supersededById], references: [id])
+  supersedes                 DecisionTypeVersion[]     @relation("DecisionTypeVersionSupersession")
+  readinessAssessments       DecisionReadinessAssessment[]
+  governmentDecisions        GovernmentDecision[]
+  preparationRecords         DecisionPreparationRecord[]
+
+  @@unique([decisionTypeId, version])
+  @@index([decisionTypeId])
+  @@index([governmentServiceVersionId])
+  @@index([functionAuthorityRecordId])
+  @@index([status])
+  @@map("decision_type_versions")
+}
+
+model DecisionReadinessAssessment {
+  id                            String                   @id @default(uuid()) @db.Uuid
+  assessmentNumber              String                   @unique
+  caseId                        String                   @db.Uuid
+  decisionTypeVersionId         String                   @db.Uuid
+  proposedDecisionMakerIdentityId String                 @db.Uuid
+  proposedDecisionMakerOfficeholderId String?            @db.Uuid
+  requestedOutcome              String
+  assessedAt                    DateTime                 @default(now())
+  outcome                       DecisionReadinessOutcome
+  reasonCodes                   Json                     @default("[]")
+  contextSnapshot               Json                     @default("{}")
+  evidencePacketVersionId       String?                  @db.Uuid
+  masterAdministrativeFileId    String?                  @db.Uuid
+  authorityEvaluationRecordId   String?                  @db.Uuid
+  createdAt                     DateTime                 @default(now())
+  case                          Case                     @relation(fields: [caseId], references: [id])
+  decisionTypeVersion           DecisionTypeVersion      @relation(fields: [decisionTypeVersionId], references: [id])
+  proposedDecisionMakerIdentity Identity                 @relation("DecisionReadinessProposedMaker", fields: [proposedDecisionMakerIdentityId], references: [id])
+  proposedDecisionMakerOfficeholder Officeholder?        @relation("DecisionReadinessProposedOfficeholder", fields: [proposedDecisionMakerOfficeholderId], references: [id])
+  evidencePacketVersion         EvidencePacketVersion?   @relation(fields: [evidencePacketVersionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord? @relation("DecisionReadinessAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  participants                  DecisionParticipant[]
+  governmentDecisions           GovernmentDecision[]
+
+  @@index([caseId])
+  @@index([decisionTypeVersionId])
+  @@index([outcome])
+  @@index([assessedAt])
+  @@map("decision_readiness_assessments")
+}
+
+model DecisionParticipant {
+  id                            String                    @id @default(uuid()) @db.Uuid
+  readinessAssessmentId         String                    @db.Uuid
+  identityId                    String                    @db.Uuid
+  officeholderId                String?                   @db.Uuid
+  appointmentId                 String?                   @db.Uuid
+  role                          DecisionParticipantRole
+  isConflicted                  Boolean                   @default(false)
+  isRecused                     Boolean                   @default(false)
+  hasApproved                   Boolean                   @default(false)
+  approvedAt                    DateTime?
+  createdAt                     DateTime                  @default(now())
+  readinessAssessment           DecisionReadinessAssessment @relation(fields: [readinessAssessmentId], references: [id], onDelete: Cascade)
+  identity                      Identity                  @relation("DecisionParticipantIdentity", fields: [identityId], references: [id])
+  officeholder                  Officeholder?             @relation("DecisionParticipantOfficeholder", fields: [officeholderId], references: [id])
+  appointment                   Appointment?              @relation(fields: [appointmentId], references: [id])
+
+  @@index([readinessAssessmentId])
+  @@index([identityId])
+  @@map("decision_participants")
+}
+
+model DecisionPreparationRecord {
+  id                    String              @id @default(uuid()) @db.Uuid
+  caseId                String              @db.Uuid
+  decisionTypeVersionId String              @db.Uuid
+  editorIdentityId      String              @db.Uuid
+  proposedFindings      String?
+  proposedReasons       String?
+  proposedOutcome       String?
+  recommendation        String?
+  aiAssistanceMetadata  Json                @default("{}")
+  isNonFinal            Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  case                  Case                @relation(fields: [caseId], references: [id])
+  decisionTypeVersion   DecisionTypeVersion @relation(fields: [decisionTypeVersionId], references: [id])
+  editorIdentity        Identity            @relation("DecisionPreparationEditor", fields: [editorIdentityId], references: [id])
+
+  @@index([caseId])
+  @@index([decisionTypeVersionId])
+  @@map("decision_preparation_records")
+}
+
+model GovernmentDecision {
+  id                            String                   @id @default(uuid()) @db.Uuid
+  decisionNumber                String                   @unique
+  caseId                        String                   @db.Uuid
+  masterAdministrativeFileId    String                   @db.Uuid
+  decisionTypeVersionId         String                   @db.Uuid
+  functionAuthorityRecordId     String                   @db.Uuid
+  authorityEvaluationRecordId   String                   @db.Uuid
+  decisionReadinessAssessmentId String                   @db.Uuid
+  evidencePacketVersionId       String                   @db.Uuid
+  decisionMakerIdentityId       String                   @db.Uuid
+  decisionMakerOfficeholderId   String                   @db.Uuid
+  appointmentId                 String                   @db.Uuid
+  delegationId                  String?                  @db.Uuid
+  institutionId                 String                   @db.Uuid
+  departmentId                  String                   @db.Uuid
+  matterDecided                 String
+  outcome                       String
+  decisionStatus                GovernmentDecisionStatus @default(RECORDED)
+  decidedAt                     DateTime
+  effectiveAt                   DateTime?
+  effectiveUntil                DateTime?
+  integrityHash                 String
+  explicitIntentConfirmed       Boolean                  @default(true)
+  createdAt                     DateTime                 @default(now())
+  case                          Case                     @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  decisionTypeVersion           DecisionTypeVersion      @relation(fields: [decisionTypeVersionId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord  @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord @relation("GovernmentDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  decisionReadinessAssessment   DecisionReadinessAssessment @relation(fields: [decisionReadinessAssessmentId], references: [id])
+  evidencePacketVersion         EvidencePacketVersion    @relation(fields: [evidencePacketVersionId], references: [id])
+  decisionMakerIdentity         Identity                 @relation("GovernmentDecisionMaker", fields: [decisionMakerIdentityId], references: [id])
+  decisionMakerOfficeholder     Officeholder             @relation("GovernmentDecisionOfficeholder", fields: [decisionMakerOfficeholderId], references: [id])
+  appointment                   Appointment              @relation(fields: [appointmentId], references: [id])
+  delegation                    Delegation?              @relation(fields: [delegationId], references: [id])
+  institution                   Institution              @relation(fields: [institutionId], references: [id])
+  department                    Department               @relation(fields: [departmentId], references: [id])
+
+  @@index([caseId])
+  @@index([decisionTypeVersionId])
+  @@index([decisionStatus])
+  @@index([decidedAt])
+  @@map("government_decisions")
 }
