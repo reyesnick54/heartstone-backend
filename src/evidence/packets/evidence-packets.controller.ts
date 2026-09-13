@@ -36,10 +36,7 @@ export class EvidencePacketsController {
   @Post()
   @ApiOperation({ summary: 'Create a new evidence packet with initial draft version' })
   @ApiCreatedResponse()
-  create(
-    @CurrentSession() session: SessionContextDto,
-    @Body() dto: CreateEvidencePacketDto,
-  ) {
+  create(@CurrentSession() session: SessionContextDto, @Body() dto: CreateEvidencePacketDto) {
     return this.packetsService.createPacket(session.identityId, dto);
   }
 
@@ -108,7 +105,9 @@ export class EvidencePacketsController {
   }
 
   @Post(':packetId/versions')
-  @ApiOperation({ summary: 'Create new draft version from frozen packet, superseding prior version' })
+  @ApiOperation({
+    summary: 'Create new draft version from frozen packet, superseding prior version',
+  })
   createVersion(
     @CurrentSession() session: SessionContextDto,
     @Param('packetId', ParseUUIDPipe) packetId: string,

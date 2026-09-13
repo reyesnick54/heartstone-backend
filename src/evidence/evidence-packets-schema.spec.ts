@@ -80,4 +80,10 @@ describe('Evidence packet schema coherence (Phase 7E)', () => {
     expect(schema).not.toContain('model Project');
     expect(extractModelBlock(schema, 'EvidencePacket')).toContain('externalProjectReference');
   });
+
+  it('links evidence packets to Case without embedding decision outcome fields', () => {
+    const caseBlock = extractModelBlock(schema, 'Case');
+    expect(caseBlock).toContain('evidencePackets');
+    expect(caseBlock).not.toContain('decisionOutcome');
+  });
 });
