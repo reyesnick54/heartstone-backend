@@ -27,13 +27,11 @@ export const NOTICE_DOES_NOT_ISSUE_INSTRUMENT_MESSAGE =
   'DecisionNotice preparation does not issue an instrument; issuance belongs to a later phase';
 export const NON_PRODUCTION_DECISIONS_FIXTURE_MARKER = 'NON_PRODUCTION_PHASE_8B_TEST_ONLY';
 
-export const DECISION_NUMBER_PREFIX = 'DEC';
 export const READINESS_ASSESSMENT_NUMBER_PREFIX = 'DRA';
 
 export const PHASE_8B_BOUNDARY_DISCLAIMER =
   'Government decisions are official institutional acts by authorized human officeholders. AI assistance, recommendations, and readiness assessments do not constitute decisions.';
 
-export const FORBIDDEN_PHASE_8C_MODELS = ['IssuedLicense', 'IssuedPermit', 'IssuedCertificate'] as const;
 export const FORBIDDEN_PHASE_8C_MODELS = [
   'IssuedLicense',
   'IssuedPermit',
