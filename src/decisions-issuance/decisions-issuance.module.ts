@@ -8,12 +8,12 @@ import { SessionsModule } from '../identity/sessions/sessions.module';
 import { InstrumentDeliveryAuditService } from './audit/instrument-delivery-audit.service';
 import { InstrumentCatalogService } from './catalog/instrument-catalog.service';
 import { InstrumentNumberingService } from './catalog/instrument-numbering.service';
+import { IssuanceController } from './controllers/issuance.controller';
 import {
   ControlledDownloadDeliveryAdapter,
   PortalDeliveryAdapter,
 } from './delivery/adapters/delivery-channel.adapters';
 import { InstrumentDeliveryService } from './delivery/instrument-delivery.service';
-import { IssuanceController } from './controllers/issuance.controller';
 import { InstrumentDownloadController } from './download/instrument-download.controller';
 import { InstrumentDownloadService } from './download/instrument-download.service';
 import { IssuanceService } from './issuance/issuance.service';

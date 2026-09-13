@@ -95,10 +95,27 @@ export async function seedPhase8fDeliveryFixture(
     },
   });
 
+  const applicantPerson = await prisma.person.create({
+    data: { givenName: 'Applicant', familyName: 'Holder' },
+  });
+
+  const applicantIdentity = await prisma.identity.create({
+    data: {
+      type: IdentityType.INDIVIDUAL,
+      personId: applicantPerson.id,
+      displayName: 'Phase 8F Applicant',
+    },
+  });
+
+  await prisma.case.update({
+    where: { id: base.caseId },
+    data: { applicantIdentityId: applicantIdentity.id },
+  });
+
   const applicantSessionToken = await ensureIdentitySession(
     app,
     prisma,
-    base.applicantIdentityId,
+    applicantIdentity.id,
     `${marker}-applicant`,
   );
   const officialSessionToken = await ensureIdentitySession(
@@ -110,6 +127,7 @@ export async function seedPhase8fDeliveryFixture(
 
   return {
     ...base,
+    applicantIdentityId: applicantIdentity.id,
     applicantSessionToken,
     officialSessionToken,
     restrictedInstrumentTypeVersionId: restrictedTypeVersion.id,
@@ -122,21 +140,42 @@ async function ensureIdentitySession(
   identityId: string,
   loginPrefix: string,
 ): Promise<string> {
-  const identity = await prisma.identity.findUniqueOrThrow({
+  let identity = await prisma.identity.findUniqueOrThrow({
     where: { id: identityId },
     include: { userAccount: true, person: true },
   });
 
-  if (!identity.userAccountId || !identity.personId) {
-    throw new Error(`Expected user account and person on identity ${identityId}`);
+  if (!identity.personId) {
+    const person = await prisma.person.create({
+      data: { givenName: 'Phase', familyName: '8F' },
+    });
+    identity = await prisma.identity.update({
+      where: { id: identityId },
+      data: { personId: person.id },
+      include: { userAccount: true, person: true },
+    });
   }
 
   const loginIdentifier = `${loginPrefix}@test.gov`;
 
-  await prisma.userAccount.update({
-    where: { id: identity.userAccountId },
-    data: { loginIdentifier, status: AccountStatus.ACTIVE },
-  });
+  if (!identity.userAccountId) {
+    const userAccount = await prisma.userAccount.create({
+      data: {
+        loginIdentifier,
+        status: AccountStatus.ACTIVE,
+      },
+    });
+    identity = await prisma.identity.update({
+      where: { id: identityId },
+      data: { userAccountId: userAccount.id },
+      include: { userAccount: true, person: true },
+    });
+  } else {
+    await prisma.userAccount.update({
+      where: { id: identity.userAccountId },
+      data: { loginIdentifier, status: AccountStatus.ACTIVE },
+    });
+  }
 
   const existingCredential = await prisma.credential.findFirst({
     where: { identityId },

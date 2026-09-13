@@ -80,17 +80,12 @@ export class InstrumentDownloadService {
       throw new InstrumentVersionNotFoundException(instrumentVersionId ?? officialInstrumentId);
     }
 
-    let content: Buffer;
-    let contentType = 'application/octet-stream';
-    let originalFilename = `instrument-${instrument.instrumentNumber}-v${String(version.versionNumber)}`;
-
-    if (!version.documentVersion) {
-      throw new InstrumentVersionNotFoundException(version.id);
-    }
-
-    content = await this.storage.get(version.documentVersion.storageObjectKey);
-    contentType = version.documentVersion.contentType;
-    originalFilename = version.documentVersion.originalFilename;
+    const documentVersion = version.documentVersion;
+    const content = await this.storage.get(documentVersion.storageObjectKey);
+    const contentType = documentVersion.contentType;
+    const originalFilename =
+      documentVersion.originalFilename ||
+      `instrument-${String(instrument.instrumentNumber)}-v${String(version.versionNumber)}`;
 
     const actualSha256 = hashDocumentContent(content);
     if (actualSha256 !== version.contentHash) {

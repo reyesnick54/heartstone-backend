@@ -12,7 +12,7 @@ import { DecisionPreparationService } from './preparation/decision-preparation.s
 import { DecisionReadinessService } from './readiness/decision-readiness.service';
 
 @ApiTags('decisions')
-@Controller('api/v1/decisions')
+@Controller('decisions')
 @UseGuards(SessionAuthGuard)
 export class DecisionsController {
   constructor(

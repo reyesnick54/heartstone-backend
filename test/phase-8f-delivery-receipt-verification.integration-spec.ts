@@ -170,8 +170,10 @@ describe('Phase 8F delivery, receipt, and verification (integration)', () => {
       issuerOfficeholderId: fixture.officialOfficeholderId,
       issuerOfficeId: fixture.officeId,
       issuerAppointmentId: fixture.appointmentId,
+      holderIdentityId: fixture.applicantIdentityId,
       scope: { summary: 'Restricted scope' },
       effectiveFrom: new Date('2026-01-01'),
+      freeFormFields: { holderName: 'Restricted Holder' },
       idempotencyKey: 'phase-8f-restricted-1',
     });
 
