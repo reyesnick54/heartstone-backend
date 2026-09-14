@@ -32,8 +32,8 @@ export class ReviewerIndependenceService {
 
     const originalDecisionMakerBlocked =
       input.originalDecisionMakerBlocked ??
-      (assignment.matter.challengedDecision?.decisionMakerOfficeholderId ===
-        assignment.reviewerOfficeholderId);
+      assignment.matter.challengedDecision?.decisionMakerOfficeholderId ===
+        assignment.reviewerOfficeholderId;
 
     const priorInvolvementBlocked = input.priorInvolvementBlocked ?? false;
     const conflictBlocked = input.conflictBlocked ?? false;

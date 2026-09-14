@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { RedressRouteCategory } from '@prisma/client';
 
+import { RedressBoundaryService } from './common/redress-boundary.service';
 import {
   APPEAL_ROUTE_CATEGORIES,
   COMPLAINT_ROUTE_CATEGORIES,
@@ -8,7 +9,6 @@ import {
   FORBIDDEN_CLIENT_REDIST_FIELDS,
   PHASE_10H_INVARIANTS,
 } from './redress.constants';
-import { RedressBoundaryService } from './common/redress-boundary.service';
 
 describe('Redress architectural must-fail invariants (Phase 10H unit)', () => {
   const boundary = new RedressBoundaryService();
@@ -22,71 +22,79 @@ describe('Redress architectural must-fail invariants (Phase 10H unit)', () => {
 
   it('rejects every forbidden client redress field', () => {
     for (const field of FORBIDDEN_CLIENT_REDIST_FIELDS) {
-      expect(() => boundary.rejectClientProtectedFields({ [field]: true })).toThrow(
-        `Client may not set "${field}"`,
-      );
+      expect(() => {
+        boundary.rejectClientProtectedFields({ [field]: true });
+      }).toThrow(`Client may not set "${field}"`);
     }
   });
 
   it('rejects AI adjudication actions', () => {
     for (const action of FORBIDDEN_AI_REDIST_ACTIONS) {
-      expect(() => boundary.assertAiCannotAdjudicate(action)).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertAiCannotAdjudicate(action);
+      }).toThrow(ForbiddenException);
     }
   });
 
   it('rejects appeal categories on complaint routes', () => {
     for (const category of APPEAL_ROUTE_CATEGORIES) {
-      expect(() => boundary.assertComplaintNotAppeal(category)).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertComplaintNotAppeal(category);
+      }).toThrow(BadRequestException);
     }
   });
 
   it('rejects complaint categories on appeal routes', () => {
     for (const category of COMPLAINT_ROUTE_CATEGORIES) {
-      expect(() => boundary.assertAppealNotComplaint(category)).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertAppealNotComplaint(category);
+      }).toThrow(BadRequestException);
     }
   });
 
   it('rejects substantive correction mutations', () => {
-    expect(() =>
+    expect(() => {
       boundary.assertNonSubstantiveCorrection({
         altersSubstantiveOutcome: true,
         altersMaterialReasons: true,
         removesReviewRights: true,
-      }),
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
   });
 
   it('rejects recommendation marked as final disposition', () => {
-    expect(() => boundary.assertRecommendationNotFinal(true, true)).toThrow(
-      'Recommendation does not equal final redress disposition',
-    );
+    expect(() => {
+      boundary.assertRecommendationNotFinal(true, true);
+    }).toThrow('Recommendation does not equal final redress disposition');
   });
 
   it('rejects auto-granted stay without route configuration', () => {
-    expect(() => boundary.assertNoAutoStay(false, true)).toThrow(
-      'Interim stay requires explicit authorized action',
-    );
-    expect(() => boundary.assertNoAutoStay(false, false)).not.toThrow();
+    expect(() => {
+      boundary.assertNoAutoStay(false, true);
+    }).toThrow('Interim stay requires explicit authorized action');
+    expect(() => {
+      boundary.assertNoAutoStay(false, false);
+    }).not.toThrow();
   });
 
   it('rejects substantive remedy on non-substantive routes', () => {
-    expect(() => boundary.assertSubstantiveRemedyPermitted(false, true)).toThrow(
-      'Route does not permit substantive remedy',
-    );
+    expect(() => {
+      boundary.assertSubstantiveRemedyPermitted(false, true);
+    }).toThrow('Route does not permit substantive remedy');
   });
 
   it('rejects nonsubstantive correction on routes that do not permit it', () => {
-    expect(() => boundary.assertNonSubstantiveRouteOnly(false, true)).toThrow(
-      'Route does not permit nonsubstantive correction',
-    );
+    expect(() => {
+      boundary.assertNonSubstantiveRouteOnly(false, true);
+    }).toThrow('Route does not permit nonsubstantive correction');
   });
 
   it('rejects route category mismatch on filing', () => {
-    expect(() =>
+    expect(() => {
       boundary.assertRouteCategoryMatches(
         RedressRouteCategory.RECONSIDERATION,
         RedressRouteCategory.SERVICE_COMPLAINT,
-      ),
-    ).toThrow('does not match route definition');
+      );
+    }).toThrow('does not match route definition');
   });
 });

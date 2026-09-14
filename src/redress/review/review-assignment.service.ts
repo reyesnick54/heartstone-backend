@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AppointmentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -36,10 +41,7 @@ export class ReviewAssignmentService {
       input.originalDecisionMakerOfficeholderId ??
       matter.challengedDecision?.decisionMakerOfficeholderId;
 
-    if (
-      originalDecisionMakerId &&
-      originalDecisionMakerId === input.reviewerOfficeholderId
-    ) {
+    if (originalDecisionMakerId && originalDecisionMakerId === input.reviewerOfficeholderId) {
       throw new ForbiddenException('Original decision-maker cannot be assigned as reviewer');
     }
 

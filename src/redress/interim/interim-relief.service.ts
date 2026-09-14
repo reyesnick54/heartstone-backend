@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityEvaluationOutcome,
@@ -55,10 +60,7 @@ export class InterimReliefService {
       throw new NotFoundException(`RedressMatter ${input.matterId} not found`);
     }
 
-    this.boundary.assertNoAutoStay(
-      matter.routeVersion?.automaticStayOnFiling ?? false,
-      false,
-    );
+    this.boundary.assertNoAutoStay(matter.routeVersion?.automaticStayOnFiling ?? false, false);
 
     return this.prisma.interimReliefRequest.create({
       data: {

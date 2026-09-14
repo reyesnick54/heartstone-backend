@@ -19,6 +19,20 @@ import {
   recordRedressDecision,
   seedPhase10Fixture,
 } from './helpers/phase-10-test-fixtures';
+import {
+  asAdministrativeCorrectionResponse,
+  asAutomationChallengeDispositionResponse,
+  asAutomationChallengeResponse,
+  asComplaintClassificationResponse,
+  asComplaintInvestigationResponse,
+  asDeadlineExtensionResponse,
+  asExternalReferralResponse,
+  asInterimReliefResponse,
+  asReconsiderationProceedingResponse,
+  asReviewAssignmentResponse,
+  asReviewIndependenceResponse,
+  asReviewSnapshotResponse,
+} from './helpers/phase-10-test-types';
 
 describe('Phase 10 redress lifecycle (e2e)', () => {
   let app: INestApplication<App>;
@@ -42,31 +56,41 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
 
   it('E2E 1 Administrative correction records nonsubstantive fix without altering decision outcome', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
-    const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'administrativeCorrection' });
-    await createRedressFiling(app, fixture, matter.id, 'administrativeCorrection', { submit: true });
+    const matter = await openRedressMatter(app, prisma, fixture, {
+      routeKey: 'administrativeCorrection',
+    });
+    await createRedressFiling(app, fixture, matter.id, 'administrativeCorrection', {
+      submit: true,
+    });
 
-    const correction = await request(app.getHttpServer())
-      .post('/api/v1/redress/corrections')
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
-      .send({
-        matterId: matter.id,
-        originalNoticeReference: 'NOTICE-REFUSED-001',
-        errorDescription: 'Spelling error in applicant address line',
-      })
-      .expect(201);
+    const correction = asAdministrativeCorrectionResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/corrections')
+          .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+          .send({
+            matterId: matter.id,
+            originalNoticeReference: 'NOTICE-REFUSED-001',
+            errorDescription: 'Spelling error in applicant address line',
+          })
+          .expect(201)
+      ).body,
+    );
 
     const originalDecision = await prisma.governmentDecision.findUniqueOrThrow({
       where: { id: fixture.governmentDecisionId },
     });
 
-    expect(correction.body.altersSubstantiveOutcome).toBe(false);
-    expect(correction.body.originalPreserved).toBe(true);
+    expect(correction.altersSubstantiveOutcome).toBe(false);
+    expect(correction.originalPreserved).toBe(true);
     expect(originalDecision.outcome).toBe('REFUSED');
   });
 
   it('E2E 2 Correction boundary rejects REFUSED to APPROVED substantive reversal', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
-    const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'administrativeCorrection' });
+    const matter = await openRedressMatter(app, prisma, fixture, {
+      routeKey: 'administrativeCorrection',
+    });
 
     await request(app.getHttpServer())
       .post('/api/v1/redress/corrections')
@@ -93,30 +117,38 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
     });
     await classifyFiling(app, fixture, filing.id, 'serviceComplaint');
 
-    const classification = await request(app.getHttpServer())
-      .post('/api/v1/redress/complaints/classify')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        matterId: matter.id,
-        classificationType: 'SERVICE',
-        classifiedByOfficeholderId: fixture.reviewerOfficeholderId,
-      })
-      .expect(201);
+    const classification = asComplaintClassificationResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/complaints/classify')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            matterId: matter.id,
+            classificationType: 'SERVICE',
+            classifiedByOfficeholderId: fixture.reviewerOfficeholderId,
+          })
+          .expect(201)
+      ).body,
+    );
 
-    const investigation = await request(app.getHttpServer())
-      .post('/api/v1/redress/complaints/investigations')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        matterId: matter.id,
-        classificationId: classification.body.id,
-        investigatorIdentityId: fixture.reviewerIdentityId,
-        investigatorOfficeholderId: fixture.reviewerOfficeholderId,
-      })
-      .expect(201);
+    const investigation = asComplaintInvestigationResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/complaints/investigations')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            matterId: matter.id,
+            classificationId: classification.id,
+            investigatorIdentityId: fixture.reviewerIdentityId,
+            investigatorOfficeholderId: fixture.reviewerOfficeholderId,
+          })
+          .expect(201)
+      ).body,
+    );
 
     const remedy = await prisma.complaintCorrectiveAction.create({
       data: {
-        investigationId: investigation.body.id,
+        investigationId: investigation.id,
         actionSummary: 'Apology letter and callback within 5 business days',
         isServiceRemedy: true,
       },
@@ -130,10 +162,16 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
 
   it('E2E 4 Complaint and appeal matters can both remain open on the same case', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
-    const complaintMatter = await openRedressMatter(app, prisma, fixture, { routeKey: 'serviceComplaint' });
-    const appealMatter = await openRedressMatter(app, prisma, fixture, { routeKey: 'reconsideration' });
+    const complaintMatter = await openRedressMatter(app, prisma, fixture, {
+      routeKey: 'serviceComplaint',
+    });
+    const appealMatter = await openRedressMatter(app, prisma, fixture, {
+      routeKey: 'reconsideration',
+    });
 
-    await createRedressFiling(app, fixture, complaintMatter.id, 'serviceComplaint', { submit: true });
+    await createRedressFiling(app, fixture, complaintMatter.id, 'serviceComplaint', {
+      submit: true,
+    });
     await createRedressFiling(app, fixture, appealMatter.id, 'reconsideration', { submit: true });
 
     const matters = await prisma.redressMatter.findMany({
@@ -153,29 +191,37 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'reconsideration' });
     await createRedressFiling(app, fixture, matter.id, 'reconsideration', { submit: true });
 
-    const snapshot = await request(app.getHttpServer())
-      .post('/api/v1/redress/review/snapshots')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        matterId: matter.id,
-        snapshotReference: 'snapshot://original-decision',
-        originalDecisionReference: fixture.governmentDecisionId,
-      })
-      .expect(201);
+    const snapshot = asReviewSnapshotResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/review/snapshots')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            matterId: matter.id,
+            snapshotReference: 'snapshot://original-decision',
+            originalDecisionReference: fixture.governmentDecisionId,
+          })
+          .expect(201)
+      ).body,
+    );
 
-    const proceeding = await request(app.getHttpServer())
-      .post('/api/v1/redress/reconsideration')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({ matterId: matter.id, snapshotId: snapshot.body.id })
-      .expect(201);
+    const proceeding = asReconsiderationProceedingResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/reconsideration')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({ matterId: matter.id, snapshotId: snapshot.id })
+          .expect(201)
+      ).body,
+    );
 
     const original = await prisma.governmentDecision.findUniqueOrThrow({
       where: { id: fixture.governmentDecisionId },
     });
 
-    expect(proceeding.body.originalPreserved).toBe(true);
+    expect(proceeding.originalPreserved).toBe(true);
     expect(original.outcome).toBe('REFUSED');
-    expect(snapshot.body.isImmutable).toBe(true);
+    expect(snapshot.isImmutable).toBe(true);
   });
 
   it('E2E 6 Internal review independence blocks original decision-maker', async () => {
@@ -194,24 +240,32 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
       })
       .expect(403);
 
-    const assignment = await request(app.getHttpServer())
-      .post('/api/v1/redress/review/assignments')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        matterId: matter.id,
-        reviewerIdentityId: fixture.reviewerIdentityId,
-        reviewerOfficeholderId: fixture.reviewerOfficeholderId,
-        appointmentId: fixture.reviewerAppointmentId,
-      })
-      .expect(201);
+    const assignment = asReviewAssignmentResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/review/assignments')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            matterId: matter.id,
+            reviewerIdentityId: fixture.reviewerIdentityId,
+            reviewerOfficeholderId: fixture.reviewerOfficeholderId,
+            appointmentId: fixture.reviewerAppointmentId,
+          })
+          .expect(201)
+      ).body,
+    );
 
-    const independence = await request(app.getHttpServer())
-      .post(`/api/v1/redress/review/assignments/${assignment.body.id}/independence`)
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({})
-      .expect(201);
+    const independence = asReviewIndependenceResponse(
+      (
+        await request(app.getHttpServer())
+          .post(`/api/v1/redress/review/assignments/${assignment.id}/independence`)
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({})
+          .expect(201)
+      ).body,
+    );
 
-    expect(independence.body.outcome).toBe('INDEPENDENCE_ESTABLISHED');
+    expect(independence.outcome).toBe('INDEPENDENCE_ESTABLISHED');
   });
 
   it('E2E 7 Late filing extension granted after timeliness assessment', async () => {
@@ -225,77 +279,105 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
       outcome: 'LATE',
     });
 
-    const extension = await request(app.getHttpServer())
-      .post('/api/v1/redress/deadline-extensions')
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
-      .send({ matterId: matter.id, reason: 'Medical emergency delayed filing' })
-      .expect(201);
+    const extension = asDeadlineExtensionResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/deadline-extensions')
+          .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+          .send({ matterId: matter.id, reason: 'Medical emergency delayed filing' })
+          .expect(201)
+      ).body,
+    );
 
-    const decided = await request(app.getHttpServer())
-      .post(`/api/v1/redress/deadline-extensions/${extension.body.id}/decide`)
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        deciderOfficeholderId: fixture.reviewerOfficeholderId,
-        functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
-        appointmentId: fixture.reviewerAppointmentId,
-        outcome: 'GRANTED',
-      })
-      .expect(201);
+    const decided = asDeadlineExtensionResponse(
+      (
+        await request(app.getHttpServer())
+          .post(`/api/v1/redress/deadline-extensions/${extension.id}/decide`)
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            deciderOfficeholderId: fixture.reviewerOfficeholderId,
+            functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
+            appointmentId: fixture.reviewerAppointmentId,
+            outcome: 'GRANTED',
+          })
+          .expect(201)
+      ).body,
+    );
 
-    expect(decided.body.outcome).toBe('GRANTED');
+    expect(decided.outcome).toBe('GRANTED');
   });
 
   it('E2E 8 Appeal without stay leaves instrument lifecycle unchanged', async () => {
-    const fixture = await seedPhase10Fixture(app, prisma, { governmentDecisionOutcome: 'APPROVED' });
+    const fixture = await seedPhase10Fixture(app, prisma, {
+      governmentDecisionOutcome: 'APPROVED',
+    });
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'statutoryAppeal' });
     await createRedressFiling(app, fixture, matter.id, 'statutoryAppeal', { submit: true });
 
-    const relief = await request(app.getHttpServer())
-      .post('/api/v1/redress/interim-relief')
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
-      .send({ matterId: matter.id, scopeDescription: 'Stay instrument effect' })
-      .expect(201);
+    const relief = asInterimReliefResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/interim-relief')
+          .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+          .send({ matterId: matter.id, scopeDescription: 'Stay instrument effect' })
+          .expect(201)
+      ).body,
+    );
 
-    const decided = await request(app.getHttpServer())
-      .post(`/api/v1/redress/interim-relief/${relief.body.id}/decide`)
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        deciderOfficeholderId: fixture.reviewerOfficeholderId,
-        functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
-        appointmentId: fixture.reviewerAppointmentId,
-        outcome: 'DENIED',
-      })
-      .expect(201);
+    const decided = asInterimReliefResponse(
+      (
+        await request(app.getHttpServer())
+          .post(`/api/v1/redress/interim-relief/${relief.id}/decide`)
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            deciderOfficeholderId: fixture.reviewerOfficeholderId,
+            functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
+            appointmentId: fixture.reviewerAppointmentId,
+            outcome: 'DENIED',
+          })
+          .expect(201)
+      ).body,
+    );
 
     const stays = await prisma.reviewStayRecord.findMany({ where: { matterId: matter.id } });
-    expect(decided.body.request?.outcome ?? decided.body.outcome).toBe('DENIED');
+    expect(decided.request?.outcome ?? decided.outcome).toBe('DENIED');
     expect(stays).toHaveLength(0);
   });
 
   it('E2E 9 Authorized stay records explicit stay with authority evaluation', async () => {
-    const fixture = await seedPhase10Fixture(app, prisma, { governmentDecisionOutcome: 'APPROVED' });
+    const fixture = await seedPhase10Fixture(app, prisma, {
+      governmentDecisionOutcome: 'APPROVED',
+    });
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'statutoryAppeal' });
     await createRedressFiling(app, fixture, matter.id, 'statutoryAppeal', { submit: true });
 
-    const relief = await request(app.getHttpServer())
-      .post('/api/v1/redress/interim-relief')
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
-      .send({ matterId: matter.id, scopeDescription: 'Suspend license effect pending review' })
-      .expect(201);
+    const relief = asInterimReliefResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/interim-relief')
+          .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+          .send({ matterId: matter.id, scopeDescription: 'Suspend license effect pending review' })
+          .expect(201)
+      ).body,
+    );
 
-    const decided = await request(app.getHttpServer())
-      .post(`/api/v1/redress/interim-relief/${relief.body.id}/decide`)
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        deciderOfficeholderId: fixture.reviewerOfficeholderId,
-        functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
-        appointmentId: fixture.reviewerAppointmentId,
-        outcome: 'GRANTED',
-      })
-      .expect(201);
+    const decided = asInterimReliefResponse(
+      (
+        await request(app.getHttpServer())
+          .post(`/api/v1/redress/interim-relief/${relief.id}/decide`)
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            deciderOfficeholderId: fixture.reviewerOfficeholderId,
+            functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
+            appointmentId: fixture.reviewerAppointmentId,
+            outcome: 'GRANTED',
+          })
+          .expect(201)
+      ).body,
+    );
 
     const stays = await prisma.reviewStayRecord.findMany({ where: { matterId: matter.id } });
-    expect(decided.body.request?.outcome ?? decided.body.outcome).toBe('GRANTED');
+    expect(decided.request?.outcome ?? decided.outcome).toBe('GRANTED');
     expect(stays).toHaveLength(1);
     expect(stays[0]?.stayGranted).toBe(true);
     expect(stays[0]?.authorityEvaluationRecordId).toBeTruthy();
@@ -306,14 +388,18 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'statutoryAppeal' });
     await createRedressFiling(app, fixture, matter.id, 'statutoryAppeal', { submit: true });
 
-    const referral = await request(app.getHttpServer())
-      .post('/api/v1/redress/external/referrals')
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({ matterId: matter.id, externalAuthorityLabel: 'Statutory Review Tribunal' })
-      .expect(201);
+    const referral = asExternalReferralResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/external/referrals')
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({ matterId: matter.id, externalAuthorityLabel: 'Statutory Review Tribunal' })
+          .expect(201)
+      ).body,
+    );
 
     const determination = await externalReview.recordDetermination({
-      referralId: referral.body.id,
+      referralId: referral.id,
       determinationReference: 'EXT-DET-001',
       authenticity: ExternalDeterminationAuthenticity.AUTHENTICATED,
     });
@@ -335,18 +421,22 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'aiChallenge' });
     await createRedressFiling(app, fixture, matter.id, 'aiChallenge', { submit: true });
 
-    const challenge = await request(app.getHttpServer())
-      .post('/api/v1/redress/automation/challenges')
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
-      .send({
-        matterId: matter.id,
-        challengedOutputReference: 'ai-output://denial-reason',
-        challengedInputReference: 'ai-input://application-summary',
-      })
-      .expect(201);
+    const challenge = asAutomationChallengeResponse(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/redress/automation/challenges')
+          .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+          .send({
+            matterId: matter.id,
+            challengedOutputReference: 'ai-output://denial-reason',
+            challengedInputReference: 'ai-input://application-summary',
+          })
+          .expect(201)
+      ).body,
+    );
 
     await request(app.getHttpServer())
-      .post(`/api/v1/redress/automation/challenges/${challenge.body.id}/disposition`)
+      .post(`/api/v1/redress/automation/challenges/${challenge.id}/disposition`)
       .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
       .send({
         deciderOfficeholderId: fixture.reviewerOfficeholderId,
@@ -358,33 +448,37 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
 
     await prisma.automationExplanationRecord.create({
       data: {
-        challengeId: challenge.body.id,
+        challengeId: challenge.id,
         approvedUseSummary: 'Risk scoring model v2',
         inputSummary: 'Application fields',
         outputSummary: 'Denial rationale draft',
       },
     });
     await prisma.automationChallenge.update({
-      where: { id: challenge.body.id },
+      where: { id: challenge.id },
       data: { explanationDisclosed: true },
     });
 
-    const disposition = await request(app.getHttpServer())
-      .post(`/api/v1/redress/automation/challenges/${challenge.body.id}/disposition`)
-      .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
-      .send({
-        deciderOfficeholderId: fixture.reviewerOfficeholderId,
-        functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
-        appointmentId: fixture.reviewerAppointmentId,
-        outcome: 'REPROCESSING_ORDERED',
-        explanation: 'Human reviewer orders reprocessing without AI adjudication',
-      })
-      .expect(201);
+    const disposition = asAutomationChallengeDispositionResponse(
+      (
+        await request(app.getHttpServer())
+          .post(`/api/v1/redress/automation/challenges/${challenge.id}/disposition`)
+          .set('Authorization', `Bearer ${fixture.reviewerSessionToken}`)
+          .send({
+            deciderOfficeholderId: fixture.reviewerOfficeholderId,
+            functionAuthorityRecordId: fixture.reviewFunctionAuthorityRecordId,
+            appointmentId: fixture.reviewerAppointmentId,
+            outcome: 'REPROCESSING_ORDERED',
+            explanation: 'Human reviewer orders reprocessing without AI adjudication',
+          })
+          .expect(201)
+      ).body,
+    );
 
-    expect(disposition.body.outcome).toBe('REPROCESSING_ORDERED');
+    expect(disposition.outcome).toBe('REPROCESSING_ORDERED');
 
     const updatedChallenge = await prisma.automationChallenge.findUniqueOrThrow({
-      where: { id: challenge.body.id },
+      where: { id: challenge.id },
     });
     expect(updatedChallenge.aiAdjudicated).toBe(false);
   });
@@ -394,9 +488,15 @@ describe('Phase 10 redress lifecycle (e2e)', () => {
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'reconsideration' });
     await createRedressFiling(app, fixture, matter.id, 'reconsideration', { submit: true });
 
-    const decision = await recordRedressDecision(app, fixture, matter.id, RedressDecisionOutcome.VARIED, {
-      isFinalDisposition: true,
-    });
+    const decision = await recordRedressDecision(
+      app,
+      fixture,
+      matter.id,
+      RedressDecisionOutcome.VARIED,
+      {
+        isFinalDisposition: true,
+      },
+    );
 
     const plan = await implementation.createPlan({
       matterId: matter.id,

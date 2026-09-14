@@ -1,6 +1,11 @@
 import { createHash } from 'node:crypto';
 
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityEvaluationOutcome,

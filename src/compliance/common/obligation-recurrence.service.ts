@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-  ALLOWED_RECURRENCE_RULE_TYPES,
-  type ControlledRecurrenceConfiguration,
-} from '../compliance.constants';
+import { type ControlledRecurrenceConfiguration } from '../compliance.constants';
 import { ComplianceBoundaryService } from './compliance-boundary.service';
 
 export interface GeneratedOccurrence {

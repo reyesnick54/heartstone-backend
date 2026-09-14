@@ -55,9 +55,7 @@ export class AdministrativeCorrectionService {
     });
 
     if (!correction) {
-      throw new NotFoundException(
-        `AdministrativeCorrectionMatter ${input.correctionId} not found`,
-      );
+      throw new NotFoundException(`AdministrativeCorrectionMatter ${input.correctionId} not found`);
     }
 
     if (

@@ -50,20 +50,14 @@ export class ComplaintService {
     await this.safeHalt.assertMatterNotSafeHalted(input.matterId, 'complaint classification');
 
     if (input.requestedRouteCategory) {
-      if (
-        APPEAL_ROUTE_CATEGORIES.includes(
-          input.requestedRouteCategory,
-        )
-      ) {
+      if (APPEAL_ROUTE_CATEGORIES.includes(input.requestedRouteCategory)) {
         throw new BadRequestException('Complaint does not equal appeal');
       }
     }
 
     const isAppealMislabel =
       input.requestedRouteCategory != null &&
-      APPEAL_ROUTE_CATEGORIES.includes(
-        input.requestedRouteCategory,
-      );
+      APPEAL_ROUTE_CATEGORIES.includes(input.requestedRouteCategory);
 
     const classification = await this.prisma.complaintClassification.create({
       data: {
@@ -97,7 +91,9 @@ export class ComplaintService {
     }
 
     if (classification.classificationType === ComplaintClassificationType.NOT_A_COMPLAINT) {
-      throw new BadRequestException('Investigation cannot start for NOT_A_COMPLAINT classification');
+      throw new BadRequestException(
+        'Investigation cannot start for NOT_A_COMPLAINT classification',
+      );
     }
 
     const investigation = await this.prisma.complaintInvestigation.create({

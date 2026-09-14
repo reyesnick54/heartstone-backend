@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityEvaluationOutcome,
@@ -96,7 +101,9 @@ export class DeadlineExtensionService {
     });
 
     if (authorityResult.outcome !== AuthorityEvaluationOutcome.ALLOW) {
-      throw new ForbiddenException('Deadline extension decision requires authority evaluation ALLOW');
+      throw new ForbiddenException(
+        'Deadline extension decision requires authority evaluation ALLOW',
+      );
     }
 
     const updated = await this.prisma.deadlineExtensionRequest.update({

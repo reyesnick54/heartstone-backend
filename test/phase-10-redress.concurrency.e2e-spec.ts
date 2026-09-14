@@ -7,12 +7,12 @@ import {
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
-import { ExternalReviewService } from '../src/redress/external/external-review.service';
+import { AdministrativeCorrectionService } from '../src/redress/correction/administrative-correction.service';
 import { RedressDecisionService } from '../src/redress/decisions/redress-decision.service';
+import { ExternalReviewService } from '../src/redress/external/external-review.service';
 import { RedressImplementationService } from '../src/redress/implementation/redress-implementation.service';
 import { InterimReliefService } from '../src/redress/interim/interim-relief.service';
 import { ReconsiderationService } from '../src/redress/review/reconsideration.service';
-import { AdministrativeCorrectionService } from '../src/redress/correction/administrative-correction.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   createRedressFiling,
@@ -83,7 +83,9 @@ describe('Phase 10 redress concurrency (e2e)', () => {
   });
 
   it('stay granted while instrument lifecycle changes does not auto-reverse stay record', async () => {
-    const fixture = await seedPhase10Fixture(app, prisma, { governmentDecisionOutcome: 'APPROVED' });
+    const fixture = await seedPhase10Fixture(app, prisma, {
+      governmentDecisionOutcome: 'APPROVED',
+    });
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'statutoryAppeal' });
     await createRedressFiling(app, fixture, matter.id, 'statutoryAppeal', { submit: true });
 
@@ -148,7 +150,9 @@ describe('Phase 10 redress concurrency (e2e)', () => {
     const correctionMatter = await openRedressMatter(app, prisma, fixture, {
       routeKey: 'administrativeCorrection',
     });
-    const appealMatter = await openRedressMatter(app, prisma, fixture, { routeKey: 'reconsideration' });
+    const appealMatter = await openRedressMatter(app, prisma, fixture, {
+      routeKey: 'reconsideration',
+    });
 
     const [correction, proceeding] = await Promise.all([
       corrections.createCorrection({
@@ -189,9 +193,9 @@ describe('Phase 10 redress concurrency (e2e)', () => {
     const storedDecisions = await prisma.redressDecision.count({ where: { matterId: matter.id } });
 
     expect(['WITHDRAWN', 'SUBMITTED', 'CLASSIFIED']).toContain(storedFiling.status);
-    expect(decision.status === 'fulfilled' ? storedDecisions : storedDecisions).toBeGreaterThanOrEqual(
-      decision.status === 'fulfilled' ? 1 : 0,
-    );
+    expect(
+      decision.status === 'fulfilled' ? storedDecisions : storedDecisions,
+    ).toBeGreaterThanOrEqual(decision.status === 'fulfilled' ? 1 : 0);
   });
 
   it('implementation retry while Phase 8 partial success keeps failure visible until completion', async () => {

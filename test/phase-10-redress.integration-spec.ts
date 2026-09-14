@@ -165,8 +165,8 @@ describe('Phase 10 redress (integration)', () => {
   });
 
   it('boundary service rejects protected client fields on matter creation payloads', () => {
-    expect(() => boundary.rejectClientProtectedFields({ status: RedressMatterStatus.CLOSED })).toThrow(
-      'Client may not set "status"',
-    );
+    expect(() => {
+      boundary.rejectClientProtectedFields({ status: RedressMatterStatus.CLOSED });
+    }).toThrow('Client may not set "status"');
   });
 });

@@ -25,9 +25,7 @@ export class RedressMatterService {
       });
 
       if (!decision) {
-        throw new NotFoundException(
-          `GovernmentDecision ${input.challengedDecisionId} not found`,
-        );
+        throw new NotFoundException(`GovernmentDecision ${input.challengedDecisionId} not found`);
       }
 
       if (input.caseId && decision.caseId !== input.caseId) {
@@ -41,9 +39,7 @@ export class RedressMatterService {
       });
 
       if (!instrument) {
-        throw new NotFoundException(
-          `OfficialInstrument ${input.challengedInstrumentId} not found`,
-        );
+        throw new NotFoundException(`OfficialInstrument ${input.challengedInstrumentId} not found`);
       }
     }
 

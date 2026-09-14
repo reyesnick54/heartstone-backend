@@ -10,10 +10,10 @@ import {
   FunctionAuthorityLifecycleStatus,
   IdentityOfficeholderLinkStatus,
   IdentityType,
-  RedressDecisionOutcome,
+  type RedressDecisionOutcome,
   RedressRouteCategory,
-  RedressStandingOutcome,
-  RedressTimelinessOutcome,
+  type RedressStandingOutcome,
+  type RedressTimelinessOutcome,
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
@@ -260,7 +260,11 @@ async function seedRedressRoutes(
       effectiveFrom: new Date('2020-01-01'),
     });
 
-    await routeCatalog.addEligibleMatter(version.id, 'LICENSE_APPLICATION', 'License application matters');
+    await routeCatalog.addEligibleMatter(
+      version.id,
+      'LICENSE_APPLICATION',
+      'License application matters',
+    );
     await routeCatalog.addGround(version.id, 'ERROR', 'Procedural or factual error');
     const activated = await routeCatalog.activateVersion(version.id);
 

@@ -35,10 +35,7 @@ describe('ComplianceProjectionService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ComplianceProjectionService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [ComplianceProjectionService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get(ComplianceProjectionService);
@@ -56,7 +53,10 @@ describe('ComplianceProjectionService', () => {
       status: OfficialInstrumentStatus.SUSPENDED,
       effectiveUntil: null,
     });
-    prisma.complianceStatusProjection.create.mockResolvedValue({ id: 'proj-1', projectionVersion: 1 });
+    prisma.complianceStatusProjection.create.mockResolvedValue({
+      id: 'proj-1',
+      projectionVersion: 1,
+    });
     prisma.complianceStatusProjection.findUniqueOrThrow.mockResolvedValue({
       id: 'proj-1',
       status: ComplianceProjectionStatus.SUSPENDED_BY_SEPARATE_DECISION,
@@ -88,7 +88,10 @@ describe('ComplianceProjectionService', () => {
       status: OfficialInstrumentStatus.REVOKED,
       effectiveUntil: null,
     });
-    prisma.complianceStatusProjection.create.mockResolvedValue({ id: 'proj-2', projectionVersion: 1 });
+    prisma.complianceStatusProjection.create.mockResolvedValue({
+      id: 'proj-2',
+      projectionVersion: 1,
+    });
     prisma.complianceStatusProjection.findUniqueOrThrow.mockResolvedValue({
       id: 'proj-2',
       status: ComplianceProjectionStatus.REVOKED_BY_SEPARATE_DECISION,
@@ -125,7 +128,10 @@ describe('ComplianceProjectionService', () => {
     prisma.decisionCondition.findMany.mockResolvedValue([]);
     prisma.continuingObligation.findMany.mockResolvedValue([]);
     prisma.evidenceRecord.findMany.mockResolvedValue([]);
-    prisma.complianceStatusProjection.update.mockResolvedValue({ id: 'proj-3', projectionVersion: 3 });
+    prisma.complianceStatusProjection.update.mockResolvedValue({
+      id: 'proj-3',
+      projectionVersion: 3,
+    });
     prisma.complianceStatusProjection.findUniqueOrThrow.mockResolvedValue({
       id: 'proj-3',
       projectionVersion: 3,

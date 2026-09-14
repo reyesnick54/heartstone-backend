@@ -37,7 +37,9 @@ export class RedressBoundaryService {
   }
 
   assertAiCannotAdjudicate(action: string): void {
-    if (FORBIDDEN_AI_REDIST_ACTIONS.includes(action as (typeof FORBIDDEN_AI_REDIST_ACTIONS)[number])) {
+    if (
+      FORBIDDEN_AI_REDIST_ACTIONS.includes(action as (typeof FORBIDDEN_AI_REDIST_ACTIONS)[number])
+    ) {
       throw new ForbiddenException(`AI cannot perform redress action: ${action}`);
     }
   }
@@ -48,10 +50,7 @@ export class RedressBoundaryService {
     }
   }
 
-  assertClassificationNotDisposition(
-    classifiedOnly: boolean,
-    dispositionRequested: boolean,
-  ): void {
+  assertClassificationNotDisposition(classifiedOnly: boolean, dispositionRequested: boolean): void {
     if (classifiedOnly && dispositionRequested) {
       throw new BadRequestException('Classification does not equal disposition');
     }
@@ -63,9 +62,7 @@ export class RedressBoundaryService {
     removesReviewRights?: boolean;
   }): void {
     if (input.altersSubstantiveOutcome) {
-      throw new BadRequestException(
-        'Administrative correction cannot alter substantive outcome',
-      );
+      throw new BadRequestException('Administrative correction cannot alter substantive outcome');
     }
     if (input.altersMaterialReasons) {
       throw new BadRequestException('Administrative correction cannot alter material reasons');
@@ -89,7 +86,9 @@ export class RedressBoundaryService {
 
   assertOriginalPreserved(originalPreserved: boolean): void {
     if (!originalPreserved) {
-      throw new BadRequestException('Original government decision must be preserved during redress');
+      throw new BadRequestException(
+        'Original government decision must be preserved during redress',
+      );
     }
   }
 

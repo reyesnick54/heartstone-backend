@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityEvaluationOutcome,
@@ -106,7 +111,8 @@ export class RedressDecisionService {
         decisionNumber,
         outcome: input.outcome,
         status: RedressDecisionStatus.RECORDED,
-        isRecommendation: input.isRecommendation ?? input.outcome === RedressDecisionOutcome.RECOMMENDATION,
+        isRecommendation:
+          input.isRecommendation ?? input.outcome === RedressDecisionOutcome.RECOMMENDATION,
         isFinalDisposition: input.isFinalDisposition ?? false,
         isImplemented: false,
         deciderIdentityId: input.deciderIdentityId,
@@ -114,12 +120,8 @@ export class RedressDecisionService {
         authorityEvaluationRecordId: authorityResult.evaluationId,
         originalDecisionPreserved: true,
         decidedAt: new Date(),
-        findings: input.findings
-          ? { create: input.findings }
-          : undefined,
-        reasons: input.reasons
-          ? { create: input.reasons }
-          : undefined,
+        findings: input.findings ? { create: input.findings } : undefined,
+        reasons: input.reasons ? { create: input.reasons } : undefined,
         remedies: input.remedies
           ? {
               create: input.remedies.map((r) => ({

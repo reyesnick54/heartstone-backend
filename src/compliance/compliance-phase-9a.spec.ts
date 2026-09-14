@@ -160,10 +160,13 @@ describe('Phase 9A compliance foundation', () => {
       expect(occurrences).toHaveLength(3);
       expect(occurrences[0]?.lawfulDueDate.toISOString()).toBe('2026-01-31T00:00:00.000Z');
       expect(occurrences[1]?.occurrenceNumber).toBe(2);
+      const secondOccurrence = occurrences[1];
       expect(occurrences[2]?.occurrenceNumber).toBe(3);
-      expect(occurrences[2]?.lawfulDueDate.getTime()).toBeGreaterThan(
-        occurrences[1]!.lawfulDueDate.getTime(),
-      );
+      if (secondOccurrence) {
+        expect(occurrences[2]?.lawfulDueDate.getTime()).toBeGreaterThan(
+          secondOccurrence.lawfulDueDate.getTime(),
+        );
+      }
     });
   });
 
@@ -230,7 +233,7 @@ describe('Phase 9A compliance foundation', () => {
           data: expect.objectContaining({
             description: 'Submit quarterly environmental reports.',
             approvedConditionText: 'Submit quarterly environmental reports.',
-          }),
+          }) as Record<string, unknown>,
         }),
       );
       expect(result.description).toBe('Submit quarterly environmental reports.');

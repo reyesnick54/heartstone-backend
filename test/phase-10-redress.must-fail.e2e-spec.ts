@@ -11,15 +11,10 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
-import {
-  FORBIDDEN_AI_REDIST_ACTIONS,
-  FORBIDDEN_CLIENT_REDIST_FIELDS,
-  PHASE_10H_BOUNDARY_DISCLAIMER,
-  PHASE_10H_INVARIANTS,
-} from '../src/redress/redress.constants';
 import { AutomationChallengeService } from '../src/redress/automation/automation-challenge.service';
 import { RedressBoundaryService } from '../src/redress/common/redress-boundary.service';
 import { RedressSafeHaltService } from '../src/redress/common/redress-safe-halt.service';
+import { ComplaintService } from '../src/redress/complaints/complaint.service';
 import { AdministrativeCorrectionService } from '../src/redress/correction/administrative-correction.service';
 import { RedressDecisionService } from '../src/redress/decisions/redress-decision.service';
 import { ExternalReviewService } from '../src/redress/external/external-review.service';
@@ -30,7 +25,12 @@ import { RedressImplementationService } from '../src/redress/implementation/redr
 import { InterimReliefService } from '../src/redress/interim/interim-relief.service';
 import { RedressMatterService } from '../src/redress/matters/redress-matter.service';
 import { RedressNoticeService } from '../src/redress/notices/redress-notice.service';
-import { ComplaintService } from '../src/redress/complaints/complaint.service';
+import {
+  FORBIDDEN_AI_REDIST_ACTIONS,
+  FORBIDDEN_CLIENT_REDIST_FIELDS,
+  PHASE_10H_BOUNDARY_DISCLAIMER,
+  PHASE_10H_INVARIANTS,
+} from '../src/redress/redress.constants';
 import { ReviewAssignmentService } from '../src/redress/review/review-assignment.service';
 import { ReviewerIndependenceService } from '../src/redress/review/reviewer-independence.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
@@ -114,13 +114,17 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
     const fixture = await seedPhase10Fixture(app, prisma);
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'serviceComplaint' });
     await createRedressFiling(app, fixture, matter.id, 'serviceComplaint', { submit: true });
-    const assessments = await prisma.redressStandingAssessment.findMany({ where: { matterId: matter.id } });
+    const assessments = await prisma.redressStandingAssessment.findMany({
+      where: { matterId: matter.id },
+    });
     expect(assessments).toHaveLength(0);
   });
 
   it('3. AI assistance does not equal redress decision', () => {
     expect(PHASE_10H_BOUNDARY_DISCLAIMER).toMatch(/AI assistance cannot adjudicate/i);
-    expect(() => boundary.assertAiCannotDecide(true)).toThrow();
+    expect(() => {
+      boundary.assertAiCannotDecide(true);
+    }).toThrow();
   });
 
   it('4. access does not equal authority to review', async () => {
@@ -141,7 +145,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   it('5. classification does not equal disposition', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'serviceComplaint' });
-    const filing = await createRedressFiling(app, fixture, matter.id, 'serviceComplaint', { submit: true });
+    const filing = await createRedressFiling(app, fixture, matter.id, 'serviceComplaint', {
+      submit: true,
+    });
     await filings.classifyFiling({
       filingId: filing.id,
       classifiedRouteCategory: RedressRouteCategory.SERVICE_COMPLAINT,
@@ -149,9 +155,10 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
     expect(await prisma.redressDecision.count({ where: { matterId: matter.id } })).toBe(0);
   });
 
-  it('6. service complaint route does not permit substantive reversal', async () => {
-    const fixture = await seedPhase10Fixture(app, prisma);
-    expect(() => boundary.assertSubstantiveRemedyPermitted(false, true)).toThrow();
+  it('6. service complaint route does not permit substantive reversal', () => {
+    expect(() => {
+      boundary.assertSubstantiveRemedyPermitted(false, true);
+    }).toThrow();
   });
 
   it('7. administrative correction does not alter substantive outcome', async () => {
@@ -172,11 +179,15 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   });
 
   it('8. clarification does not alter substantive decision', () => {
-    expect(() => boundary.assertClarificationNotSubstantive(true)).toThrow();
+    expect(() => {
+      boundary.assertClarificationNotSubstantive(true);
+    }).toThrow();
   });
 
   it('9. recommendation does not equal final redress disposition', () => {
-    expect(() => boundary.assertRecommendationNotFinal(true, true)).toThrow();
+    expect(() => {
+      boundary.assertRecommendationNotFinal(true, true);
+    }).toThrow();
   });
 
   it('10. timeliness assessment does not equal standing assessment', async () => {
@@ -192,8 +203,12 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
       actualFilingDate: new Date('2026-01-15'),
       outcome: 'TIMELY',
     });
-    const standingCount = await prisma.redressStandingAssessment.count({ where: { matterId: matter.id } });
-    const timelinessCount = await prisma.redressTimelinessAssessment.count({ where: { matterId: matter.id } });
+    const standingCount = await prisma.redressStandingAssessment.count({
+      where: { matterId: matter.id },
+    });
+    const timelinessCount = await prisma.redressTimelinessAssessment.count({
+      where: { matterId: matter.id },
+    });
     expect(timelinessCount).toBe(1);
     expect(standingCount).toBe(0);
   });
@@ -245,7 +260,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   it('15. route filing does not auto-classify', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'serviceComplaint' });
-    const filing = await createRedressFiling(app, fixture, matter.id, 'serviceComplaint', { submit: true });
+    const filing = await createRedressFiling(app, fixture, matter.id, 'serviceComplaint', {
+      submit: true,
+    });
     const stored = await prisma.redressFiling.findUniqueOrThrow({ where: { id: filing.id } });
     expect(stored.classifiedRouteCategory).toBeNull();
   });
@@ -360,9 +377,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
 
     for (const field of clientInvariantFields) {
       expect(FORBIDDEN_CLIENT_REDIST_FIELDS).toContain(field);
-      expect(() => boundary.rejectClientProtectedFields({ [field]: 'x' })).toThrow(
-        `Client may not set "${field}"`,
-      );
+      expect(() => {
+        boundary.rejectClientProtectedFields({ [field]: 'x' });
+      }).toThrow(`Client may not set "${field}"`);
     }
   });
 
@@ -494,9 +511,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   });
 
   it('42. interim stay requires explicit authorized action', () => {
-    expect(() => boundary.assertNoAutoStay(false, true)).toThrow(
-      'Interim stay requires explicit authorized action',
-    );
+    expect(() => {
+      boundary.assertNoAutoStay(false, true);
+    }).toThrow('Interim stay requires explicit authorized action');
   });
 
   it('43. automation challenge disposition requires human authority', async () => {
@@ -753,7 +770,6 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
 
   it('54. superseded route version triggers safe halt on active matters', async () => {
     const fixture = await seedPhase10Fixture(app, prisma);
-    const route = requireRoute(fixture, 'serviceComplaint');
     const matter = await openRedressMatter(app, prisma, fixture, { routeKey: 'serviceComplaint' });
     await safeHalt.triggerSafeHalt({
       matterId: matter.id,
@@ -765,7 +781,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   });
 
   it('55. non-substantive correction route forbids substantive remedy', () => {
-    expect(() => boundary.assertSubstantiveRemedyPermitted(false, true)).toThrow();
+    expect(() => {
+      boundary.assertSubstantiveRemedyPermitted(false, true);
+    }).toThrow();
   });
 
   it('56. original decision-maker blocked from review assignment', async () => {
@@ -782,9 +800,9 @@ describe('Phase 10 must-fail invariants (e2e)', () => {
   });
 
   it('57. reviewer independence must be established before proceeding', () => {
-    expect(() =>
-      independence.assertIndependenceEstablished(ReviewIndependenceOutcome.INDEPENDENCE_BLOCKED),
-    ).toThrow('Reviewer independence must be established before proceeding');
+    expect(() => {
+      independence.assertIndependenceEstablished(ReviewIndependenceOutcome.INDEPENDENCE_BLOCKED);
+    }).toThrow('Reviewer independence must be established before proceeding');
   });
 
   it('58. review record snapshot pinned before substantive review', async () => {

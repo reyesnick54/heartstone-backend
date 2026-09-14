@@ -126,7 +126,8 @@ export class ComplianceMonitoringService {
     return this.prisma.complianceAlert.create({
       data: {
         projectionId: input.projectionId,
-        alertLevel: input.score >= 80 ? ComplianceAlertLevel.CRITICAL : ComplianceAlertLevel.ATTENTION,
+        alertLevel:
+          input.score >= 80 ? ComplianceAlertLevel.CRITICAL : ComplianceAlertLevel.ATTENTION,
         status: ComplianceAlertStatus.OPEN,
         title: 'Risk prioritization score (non-sanctioning)',
         summary: COMPLIANCE_RISK_SCORE_DISCLAIMER,
@@ -171,7 +172,9 @@ export class ComplianceMonitoringService {
 
     const record = config as Record<string, unknown>;
     if ('expression' in record || 'executable' in record || 'script' in record) {
-      throw new BadRequestException('Arbitrary executable monitoring expressions are not permitted');
+      throw new BadRequestException(
+        'Arbitrary executable monitoring expressions are not permitted',
+      );
     }
   }
 }

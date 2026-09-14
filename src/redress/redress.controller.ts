@@ -313,9 +313,7 @@ export class RedressController {
 
   @Post('clarifications')
   @ApiOperation({ summary: 'Request clarification without substantive change' })
-  createClarification(
-    @Body() dto: { matterId: string; questionSummary: string },
-  ) {
+  createClarification(@Body() dto: { matterId: string; questionSummary: string }) {
     this.boundary.rejectClientProtectedFields(dto);
     return this.clarifications.createRequest(dto);
   }
@@ -417,9 +415,7 @@ export class RedressController {
 
   @Post('external/referrals')
   @ApiOperation({ summary: 'Create external review referral' })
-  createExternalReferral(
-    @Body() dto: { matterId: string; externalAuthorityLabel: string },
-  ) {
+  createExternalReferral(@Body() dto: { matterId: string; externalAuthorityLabel: string }) {
     return this.externalReview.createReferral(dto);
   }
 
