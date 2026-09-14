@@ -23,6 +23,7 @@ import { InspectionComplianceModule } from './inspection-compliance/inspection-c
 import { InstrumentsModule } from './instruments/instruments.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
+import { RedressModule } from './redress/redress.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
 
@@ -55,6 +56,7 @@ import { SystemModule } from './system/system.module';
     DecisionsIssuanceModule,
     InspectionComplianceModule,
     ComplianceModule,
+    RedressModule,
   ],
 })
 export class AppModule {}

@@ -7,13 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Phase 3: Identity & Access ─────────────────────────────────────────────
+
+// ─── Phase 4: Authority & Policy Engine ──────────────────────────────────────
+
+// ─── Phase 5A: Government Service Catalog ────────────────────────────────────
+
+// ─── Phase 5F: Service Activation & Publication Governance ───────────────────
+
+// ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
+
+// ─── Phase 7A: Master Administrative File Foundation ─────────────────────────
+
+// ─── Phase 7B: Document Registry, Versioning, Storage and Provenance ─────────
+
+// ─── Phase 7C: Evidence Registry and Verification Engine ────────────────────
+
+// ─── Phase 7E: Evidence Packets and Decision-Support Snapshots ─────────────────
+
+// ─── Phase 7F: Correction, Integrity, Access, and Replay ─────────────────────
+
+// ─── Phase 7G: Records Retention, Legal Hold, Archival & Disposition ─────────
+
+// ─── Phase 8: Government Decisions — Findings, Reasons, Conditions & Notice ──
+
+// ─── Phase 8A/8B: Decision Catalog, Readiness, and Authorized Decisions ────────
+
+// ─── Phase 8E: Official Instrument Catalog and Controlled Issuance ───────────
+
+// ─── Phase 8F: Official delivery, receipt, and instrument verification ───────────
+
+// ─── Phase 8G: Instrument Lifecycle (renamed to avoid 8E collision) ────────────
+
+// ─── Phase 9A: Continuing Obligations and Compliance Foundation ───────────────
+
+// ─── Phase 9B: Compliance Reporting and Monitoring Evidence ───────────────────
+
+// ─── Phase 9G: Continuous Compliance Status and Oversight ─────────────────────
+
+// ─── Phase 9C: Inspection Planning, Assignment, and Scheduling ─────────────────
+
+// ─── Phase 9D: Inspection Execution, Findings, and Evidence ────────────────────
+
+// ─── Phase 9: Inspection & Compliance ──────────────────────────────────────────
+
 enum StructuralLifecycleStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
   ARCHIVED
 }
-
 enum JurisdictionType {
   NATIONAL
   SUBNATIONAL
@@ -23,7 +66,6 @@ enum JurisdictionType {
   SUBJECT_MATTER
   OTHER
 }
-
 enum InstitutionType {
   GOVERNMENT
   MINISTRY
@@ -35,7 +77,6 @@ enum InstitutionType {
   PUBLIC_BODY
   OTHER
 }
-
 enum GovernmentBodyType {
   GOVERNING
   SUPERVISORY
@@ -44,7 +85,6 @@ enum GovernmentBodyType {
   DECISION_MAKING
   OTHER
 }
-
 enum AppointmentStatus {
   PENDING
   ACTIVE
@@ -52,7 +92,6 @@ enum AppointmentStatus {
   ENDED
   REVOKED
 }
-
 enum DelegationStatus {
   PENDING
   ACTIVE
@@ -60,7 +99,6 @@ enum DelegationStatus {
   REVOKED
   ENDED
 }
-
 enum ExternalAuthorityType {
   GOVERNMENT
   REGULATORY
@@ -69,7 +107,6 @@ enum ExternalAuthorityType {
   INSTITUTIONAL
   OTHER
 }
-
 model SystemMetadata {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -79,7 +116,6 @@ model SystemMetadata {
 
   @@map("system_metadata")
 }
-
 model Jurisdiction {
   id           String                    @id @default(uuid()) @db.Uuid
   code         String                    @unique
@@ -97,9 +133,10 @@ model Jurisdiction {
 
   inspectionSessions InspectionSession[]
 
+
+  redressRouteDefinitions RedressRouteDefinition[]
   @@map("jurisdictions")
 }
-
 model Institution {
   id                            String                          @id @default(uuid()) @db.Uuid
   jurisdictionId                String                          @db.Uuid
@@ -136,11 +173,12 @@ model Institution {
 
   responsibleInspectionTypes InspectionTypeDefinition[] @relation("InspectionTypeResponsibleInstitution")
 
+
+  redressRouteDefinitions       RedressRouteDefinition[]
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
   @@map("institutions")
 }
-
 model GovernmentBody {
   id            String                    @id @default(uuid()) @db.Uuid
   institutionId String                    @db.Uuid
@@ -157,7 +195,6 @@ model GovernmentBody {
   @@index([institutionId])
   @@map("government_bodies")
 }
-
 model Department {
   id                            String                       @id @default(uuid()) @db.Uuid
   institutionId                 String                       @db.Uuid
@@ -185,7 +222,6 @@ model Department {
   @@index([institutionId])
   @@map("departments")
 }
-
 model Office {
   id                               String                        @id @default(uuid()) @db.Uuid
   departmentId                     String                        @db.Uuid
@@ -209,7 +245,6 @@ model Office {
   @@index([departmentId])
   @@map("offices")
 }
-
 model Officeholder {
   id                            String                        @id @default(uuid()) @db.Uuid
   code                          String                        @unique
@@ -275,9 +310,18 @@ model Officeholder {
   protectiveActionRecommendations ProtectiveActionRecommendation[] @relation("ProtectiveActionRecommendedByOfficeholder")
   emergencyInterimActions         EmergencyInterimActionRecord[]   @relation("EmergencyInterimActionActorOfficeholder")
 
+
+  redressStandingAssessments      RedressStandingAssessment[]      @relation("RedressStandingAssessorOfficeholder")
+  redressTimelinessAssessments    RedressTimelinessAssessment[]    @relation("RedressTimelinessAssessorOfficeholder")
+  deadlineExtensionDecisions      DeadlineExtensionRequest[]       @relation("DeadlineExtensionDeciderOfficeholder")
+  complaintClassifications        ComplaintClassification[]        @relation("ComplaintClassifierOfficeholder")
+  complaintInvestigations         ComplaintInvestigation[]         @relation("ComplaintInvestigatorOfficeholder")
+  automationChallengeDispositions AutomationChallengeDisposition[] @relation("AutomationChallengeDeciderOfficeholder")
+  reviewAssignments               ReviewAssignment[]               @relation("ReviewAssigneeOfficeholder")
+  redressDecisionsMade            RedressDecision[]                @relation("RedressDecisionDeciderOfficeholder")
+  interimReliefDecisions          InterimReliefRequest[]           @relation("InterimReliefDeciderOfficeholder")
   @@map("officeholders")
 }
-
 model Appointment {
   id                   String                @id @default(uuid()) @db.Uuid
   officeId             String                @db.Uuid
@@ -294,11 +338,12 @@ model Appointment {
 
   inspectionAssignments InspectionAssignment[]
 
+
+  reviewAssignments    ReviewAssignment[]
   @@index([officeId])
   @@index([officeholderId])
   @@map("appointments")
 }
-
 model Delegation {
   id                      String                      @id @default(uuid()) @db.Uuid
   institutionId           String                      @db.Uuid
@@ -323,7 +368,6 @@ model Delegation {
   @@index([institutionId])
   @@map("delegations")
 }
-
 model ExternalAuthority {
   id                               String                            @id @default(uuid()) @db.Uuid
   code                             String                            @unique
@@ -345,7 +389,6 @@ model ExternalAuthority {
 
   @@map("external_authorities")
 }
-
 model InstitutionExternalAuthority {
   id                  String                    @id @default(uuid()) @db.Uuid
   institutionId       String                    @db.Uuid
@@ -364,63 +407,52 @@ model InstitutionExternalAuthority {
   @@index([externalAuthorityId])
   @@map("institution_external_authorities")
 }
-
-// ─── Phase 3: Identity & Access ─────────────────────────────────────────────
-
 enum AccountStatus {
   PENDING
   ACTIVE
   SUSPENDED
   REVOKED
 }
-
 enum IdentityType {
   INDIVIDUAL
   ORGANIZATION
   SERVICE
 }
-
 enum CredentialType {
   PASSWORD
   OIDC
   API_KEY
   MFA_TOTP
 }
-
 enum CredentialStatus {
   PENDING
   ACTIVE
   REVOKED
 }
-
 enum AuthenticationMethodType {
   PASSWORD
   OIDC
   SERVICE_API_KEY
   MFA_TOTP
 }
-
 enum AssuranceLevel {
   NONE
   LOW
   MEDIUM
   HIGH
 }
-
 enum OrganizationStatus {
   PENDING
   ACTIVE
   SUSPENDED
   REVOKED
 }
-
 enum MembershipStatus {
   PENDING
   ACTIVE
   SUSPENDED
   REVOKED
 }
-
 enum RepresentativeAuthorityStatus {
   PENDING
   ACTIVE
@@ -428,13 +460,11 @@ enum RepresentativeAuthorityStatus {
   REVOKED
   ENDED
 }
-
 enum SessionStatus {
   ACTIVE
   REVOKED
   EXPIRED
 }
-
 enum SessionRevocationReason {
   USER_LOGOUT
   ADMIN_REVOCATION
@@ -443,13 +473,11 @@ enum SessionRevocationReason {
   REPLACED
   EXPIRED
 }
-
 enum IdentityOfficeholderLinkStatus {
   PENDING
   ACTIVE
   REVOKED
 }
-
 enum SecurityAuditEventType {
   PERSON_CREATED
   USER_ACCOUNT_CREATED
@@ -478,7 +506,6 @@ enum SecurityAuditEventType {
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
 }
-
 model Person {
   id          String       @id @default(uuid()) @db.Uuid
   givenName   String
@@ -491,7 +518,6 @@ model Person {
 
   @@map("persons")
 }
-
 model UserAccount {
   id              String        @id @default(uuid()) @db.Uuid
   personId        String?       @unique @db.Uuid
@@ -506,7 +532,6 @@ model UserAccount {
   @@index([status])
   @@map("user_accounts")
 }
-
 model Identity {
   id                                  String                            @id @default(uuid()) @db.Uuid
   type                                IdentityType
@@ -597,13 +622,30 @@ model Identity {
   protectiveActionRecommendations ProtectiveActionRecommendation[] @relation("ProtectiveActionRecommendedByIdentity")
   emergencyInterimActions         EmergencyInterimActionRecord[]   @relation("EmergencyInterimActionActorIdentity")
 
+
+  redressMattersAsFiler               RedressMatter[]                     @relation("RedressMatterFiler")
+  redressFilingsAsFiler               RedressFiling[]                     @relation("RedressFilingFiler")
+  redressStandingAssessments          RedressStandingAssessment[]         @relation("RedressStandingAssessor")
+  redressTimelinessAssessments        RedressTimelinessAssessment[]       @relation("RedressTimelinessAssessor")
+  deadlineExtensionRequests           DeadlineExtensionRequest[]          @relation("DeadlineExtensionRequester")
+  deadlineExtensionDecisions          DeadlineExtensionRequest[]          @relation("DeadlineExtensionDecider")
+  complaintClassifications            ComplaintClassification[]           @relation("ComplaintClassifier")
+  complaintInvestigations             ComplaintInvestigation[]            @relation("ComplaintInvestigator")
+  automationChallengeDispositions     AutomationChallengeDisposition[]    @relation("AutomationChallengeDecider")
+  reviewAssignments                   ReviewAssignment[]                  @relation("ReviewAssignee")
+  independenceAssessments             ReviewerIndependenceAssessment[]    @relation("IndependenceAssessor")
+  reviewSubmissionsAttributable       ReviewSubmission[]                  @relation("ReviewSubmissionAttributable")
+  redressDecisionsMade                RedressDecision[]                   @relation("RedressDecisionDecider")
+  interimReliefRequests               InterimReliefRequest[]              @relation("InterimReliefRequester")
+  interimReliefDecisions              InterimReliefRequest[]              @relation("InterimReliefDecider")
+  redressImplementationVerifications  RedressImplementationVerification[] @relation("RedressImplementationVerifier")
+  redressNoticesReceived              RedressNotice[]                     @relation("RedressNoticeRecipient")
   @@index([userAccountId])
   @@index([personId])
   @@index([organizationId])
   @@index([type])
   @@map("identities")
 }
-
 model Credential {
   id           String           @id @default(uuid()) @db.Uuid
   identityId   String           @db.Uuid
@@ -623,7 +665,6 @@ model Credential {
   @@index([status])
   @@map("credentials")
 }
-
 model Organization {
   id                              String                            @id @default(uuid()) @db.Uuid
   code                            String                            @unique
@@ -645,7 +686,6 @@ model Organization {
   @@index([status])
   @@map("organizations")
 }
-
 model OrganizationMembership {
   id             String           @id @default(uuid()) @db.Uuid
   organizationId String           @db.Uuid
@@ -664,7 +704,6 @@ model OrganizationMembership {
   @@index([identityId])
   @@map("organization_memberships")
 }
-
 model RepresentativeAuthority {
   id                    String                        @id @default(uuid()) @db.Uuid
   organizationId        String                        @db.Uuid
@@ -680,11 +719,13 @@ model RepresentativeAuthority {
   applications          Application[]
   complianceSubmissions ComplianceSubmission[]
 
+
+  redressMatters   RedressMatter[]
+  redressFilings   RedressFiling[]
   @@index([organizationId])
   @@index([identityId])
   @@map("representative_authorities")
 }
-
 model AuthenticationMethod {
   id             String                   @id @default(uuid()) @db.Uuid
   identityId     String                   @db.Uuid
@@ -701,7 +742,6 @@ model AuthenticationMethod {
   @@index([identityId])
   @@map("authentication_methods")
 }
-
 model Session {
   id               String                   @id @default(uuid()) @db.Uuid
   identityId       String                   @db.Uuid
@@ -727,7 +767,6 @@ model Session {
   @@index([expiresAt])
   @@map("sessions")
 }
-
 model IdentityOfficeholderLink {
   id                 String                         @id @default(uuid()) @db.Uuid
   identityId         String                         @db.Uuid
@@ -746,7 +785,6 @@ model IdentityOfficeholderLink {
   @@index([officeholderId])
   @@map("identity_officeholder_links")
 }
-
 model SecurityAuditEvent {
   id              String                 @id @default(uuid()) @db.Uuid
   eventType       SecurityAuditEventType
@@ -764,9 +802,6 @@ model SecurityAuditEvent {
   @@index([createdAt])
   @@map("security_audit_events")
 }
-
-// ─── Phase 4: Authority & Policy Engine ──────────────────────────────────────
-
 enum AuthorityClassification {
   ABSEZ_OWNED
   ABSEZ_DELEGATED
@@ -777,7 +812,6 @@ enum AuthorityClassification {
   TECHNOLOGY_ASSISTED
   PROHIBITED_OR_UNAUTHORIZED
 }
-
 enum ControlledFunctionClass {
   LICENSING
   APPROVAL
@@ -789,7 +823,6 @@ enum ControlledFunctionClass {
   INFORMATIONAL
   OTHER
 }
-
 enum FunctionAuthorityLifecycleStatus {
   DRAFT
   PENDING_ACTIVATION
@@ -798,7 +831,6 @@ enum FunctionAuthorityLifecycleStatus {
   INACTIVE
   ARCHIVED
 }
-
 enum AuthorityActionType {
   RETRIEVE
   SUMMARIZE
@@ -823,7 +855,6 @@ enum AuthorityActionType {
   SUPERVISE
   LIAISE
 }
-
 enum GoverningSourceStatus {
   DRAFT
   AUTHENTICATED
@@ -831,7 +862,6 @@ enum GoverningSourceStatus {
   SUPERSEDED
   CONFLICT_DETECTED
 }
-
 enum GoverningSourceRelationshipType {
   SUPERSEDES
   AMENDS
@@ -839,7 +869,6 @@ enum GoverningSourceRelationshipType {
   COORDINATES_WITH
   CONFLICTS_WITH
 }
-
 enum AuthorityConditionType {
   EVIDENCE_REQUIRED
   QUALIFICATION_REQUIRED
@@ -853,7 +882,6 @@ enum AuthorityConditionType {
   CONFLICT_CHECK
   RECUSAL_CHECK
 }
-
 enum AuthorityDependencyType {
   RETAINED_NATIONAL_DETERMINATION
   PROFESSIONAL_QUALIFICATION
@@ -868,18 +896,15 @@ enum AuthorityDependencyType {
   LIAISON
   OTHER_AUTHENTICATED_DEPENDENCY
 }
-
 enum AuthorityDependencyBlockingStatus {
   BLOCKING
   NON_BLOCKING
 }
-
 enum AuthorityDependencyStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
 }
-
 enum ExternalDeterminationStatus {
   PENDING
   GRANTED
@@ -888,7 +913,6 @@ enum ExternalDeterminationStatus {
   WITHDRAWN
   EXPIRED
 }
-
 enum InstitutionalActType {
   DECISION
   CONCURRENCE
@@ -899,7 +923,6 @@ enum InstitutionalActType {
   COORDINATED_ACTION
   DATA_EXCHANGE
 }
-
 enum ProfessionalAttestationSource {
   QUALIFIED_PROFESSIONAL
   AI_ASSISTANCE
@@ -907,7 +930,6 @@ enum ProfessionalAttestationSource {
   GOVERNMENT_OFFICIAL
   OTHER
 }
-
 enum AuthorityEvaluationOutcome {
   ALLOW
   DENY
@@ -915,13 +937,11 @@ enum AuthorityEvaluationOutcome {
   REQUIRES_EXTERNAL_DETERMINATION
   SAFE_HALT
 }
-
 enum SodRuleType {
   SEGREGATION_OF_DUTY
   SELF_APPROVAL
   MISSING_SECOND_APPROVAL
 }
-
 enum FunctionAssignmentStatus {
   PENDING
   ACTIVE
@@ -929,14 +949,12 @@ enum FunctionAssignmentStatus {
   REVOKED
   ENDED
 }
-
 enum RetainedNationalDeterminationStatus {
   PENDING
   ACTIVE
   REVOKED
   EXPIRED
 }
-
 model FunctionAuthorityRecord {
   id                           String                           @id @default(uuid()) @db.Uuid
   code                         String                           @unique
@@ -989,13 +1007,15 @@ model FunctionAuthorityRecord {
   noncomplianceFindings   NoncomplianceFinding[]
   emergencyInterimActions EmergencyInterimActionRecord[]
 
+
+  redressRouteReviewAuthorities RedressRouteVersion[]            @relation("RedressRouteReviewAuthority")
+  reviewAuthorityAssessments    ReviewAuthorityAssessment[]      @relation("ReviewAuthorityFunction")
   @@index([classification])
   @@index([lifecycleStatus])
   @@index([institutionId])
   @@index([officeId])
   @@map("function_authority_records")
 }
-
 model GoverningSource {
   id                        String                        @id @default(uuid()) @db.Uuid
   code                      String                        @unique
@@ -1024,7 +1044,6 @@ model GoverningSource {
   @@index([effectiveFrom])
   @@map("governing_sources")
 }
-
 model GoverningSourceVersion {
   id                   String          @id @default(uuid()) @db.Uuid
   governingSourceId    String          @db.Uuid
@@ -1038,7 +1057,6 @@ model GoverningSourceVersion {
   @@index([governingSourceId])
   @@map("governing_source_versions")
 }
-
 model GoverningSourceRelationship {
   id               String                          @id @default(uuid()) @db.Uuid
   fromSourceId     String                          @db.Uuid
@@ -1054,7 +1072,6 @@ model GoverningSourceRelationship {
   @@index([toSourceId])
   @@map("governing_source_relationships")
 }
-
 model FunctionGoverningSource {
   id                        String                  @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                  @db.Uuid
@@ -1069,7 +1086,6 @@ model FunctionGoverningSource {
   @@index([governingSourceId])
   @@map("function_governing_sources")
 }
-
 model FunctionAuthorityAssignment {
   id                        String                   @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                   @db.Uuid
@@ -1092,7 +1108,6 @@ model FunctionAuthorityAssignment {
   @@index([institutionId])
   @@map("function_authority_assignments")
 }
-
 model AuthorityActionRight {
   id                        String                  @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                  @db.Uuid
@@ -1107,7 +1122,6 @@ model AuthorityActionRight {
   @@index([functionAuthorityRecordId])
   @@map("authority_action_rights")
 }
-
 model AuthorityCondition {
   id                        String                  @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                  @db.Uuid
@@ -1121,7 +1135,6 @@ model AuthorityCondition {
   @@index([functionAuthorityRecordId])
   @@map("authority_conditions")
 }
-
 model AuthorityDependency {
   id                        String                            @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                            @db.Uuid
@@ -1149,7 +1162,6 @@ model AuthorityDependency {
   @@index([dependencyType])
   @@map("authority_dependencies")
 }
-
 model ExternalDependencyDetermination {
   id                     String                      @id @default(uuid()) @db.Uuid
   authorityDependencyId  String                      @db.Uuid
@@ -1174,7 +1186,6 @@ model ExternalDependencyDetermination {
   @@index([externalAuthorityId])
   @@map("external_dependency_determinations")
 }
-
 model InstitutionalAuthorityAct {
   id                        String                  @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                  @db.Uuid
@@ -1196,7 +1207,6 @@ model InstitutionalAuthorityAct {
   @@index([functionAuthorityRecordId])
   @@map("institutional_authority_acts")
 }
-
 model SegregationOfDutyRule {
   id                        String                  @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                  @db.Uuid
@@ -1210,7 +1220,6 @@ model SegregationOfDutyRule {
   @@index([functionAuthorityRecordId])
   @@map("segregation_of_duty_rules")
 }
-
 model RetainedNationalDetermination {
   id                        String                              @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                              @db.Uuid
@@ -1225,7 +1234,6 @@ model RetainedNationalDetermination {
   @@index([functionAuthorityRecordId])
   @@map("retained_national_determinations")
 }
-
 model AuthorityEvaluationRecord {
   id                              String                        @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId       String                        @db.Uuid
@@ -1268,13 +1276,22 @@ model AuthorityEvaluationRecord {
   protectiveActionRecommendations ProtectiveActionRecommendation[]
   emergencyInterimActions         EmergencyInterimActionRecord[]
 
+
+  redressStandingEvaluations       RedressStandingAssessment[]      @relation("RedressStandingAuthority")
+  redressTimelinessEvaluations     RedressTimelinessAssessment[]    @relation("RedressTimelinessAuthority")
+  deadlineExtensionEvaluations     DeadlineExtensionRequest[]       @relation("DeadlineExtensionAuthority")
+  automationChallengeEvaluations   AutomationChallengeDisposition[] @relation("AutomationChallengeAuthority")
+  reviewAuthorityEvaluations       ReviewAuthorityAssessment[]      @relation("ReviewAuthorityEvaluation")
+  externalDeterminationEvaluations ExternalReviewDetermination[]    @relation("ExternalDeterminationAuthority")
+  redressDecisionEvaluations       RedressDecision[]                @relation("RedressDecisionAuthority")
+  interimReliefEvaluations         InterimReliefRequest[]           @relation("InterimReliefAuthority")
+  reviewStayEvaluations            ReviewStayRecord[]               @relation("ReviewStayAuthority")
   @@index([functionAuthorityRecordId])
   @@index([identityId])
   @@index([evaluatedAt])
   @@index([requestHash])
   @@map("authority_evaluation_records")
 }
-
 model FunctionActivationAudit {
   id                        String                           @id @default(uuid()) @db.Uuid
   functionAuthorityRecordId String                           @db.Uuid
@@ -1288,7 +1305,6 @@ model FunctionActivationAudit {
   @@index([functionAuthorityRecordId])
   @@map("function_activation_audits")
 }
-
 model DelegationStructuredScope {
   id                        String                  @id @default(uuid()) @db.Uuid
   delegationId              String                  @db.Uuid
@@ -1304,9 +1320,6 @@ model DelegationStructuredScope {
   @@index([functionAuthorityRecordId])
   @@map("delegation_structured_scopes")
 }
-
-// ─── Phase 5A: Government Service Catalog ────────────────────────────────────
-
 enum GovernmentServiceMaturityStatus {
   DRAFT
   RECOGNIZED
@@ -1319,7 +1332,6 @@ enum GovernmentServiceMaturityStatus {
   SUPERSEDED
   RETIRED
 }
-
 enum GovernmentServicePublicAvailability {
   HIDDEN
   INFORMATION_ONLY
@@ -1330,7 +1342,6 @@ enum GovernmentServicePublicAvailability {
   UNAVAILABLE
   UNDER_DEVELOPMENT
 }
-
 enum ApplicantCategory {
   INDIVIDUAL
   CITIZEN
@@ -1347,13 +1358,11 @@ enum ApplicantCategory {
   PARTNER_ORGANIZATION
   OTHER
 }
-
 enum ServiceFunctionMappingStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
 }
-
 enum CatalogServiceType {
   APPLICATION
   REGISTRATION
@@ -1363,21 +1372,18 @@ enum CatalogServiceType {
   INFORMATION
   OTHER
 }
-
 enum FormDefinitionStatus {
   DRAFT
   ACTIVE
   INACTIVE
   ARCHIVED
 }
-
 enum FormVersionStatus {
   DRAFT
   PUBLISHED
   SUPERSEDED
   ARCHIVED
 }
-
 enum FormFieldType {
   TEXT
   TEXTAREA
@@ -1401,26 +1407,22 @@ enum FormFieldType {
   DECLARATION
   INFORMATION_DISPLAY
 }
-
 enum FormDataClassification {
   PUBLIC
   INTERNAL
   RESTRICTED
   SENSITIVE
 }
-
 enum FormConditionalAction {
   SHOW
   HIDE
   REQUIRE
   OPTIONAL
 }
-
 enum FormConditionalLogic {
   AND
   OR
 }
-
 enum FormConditionalOperator {
   EQUALS
   NOT_EQUALS
@@ -1433,7 +1435,6 @@ enum FormConditionalOperator {
   GREATER_THAN_OR_EQUAL
   LESS_THAN_OR_EQUAL
 }
-
 model ServiceFamily {
   id          String                    @id @default(uuid()) @db.Uuid
   code        String                    @unique
@@ -1446,7 +1447,6 @@ model ServiceFamily {
 
   @@map("service_families")
 }
-
 model GovernmentService {
   id                        String                     @id @default(uuid()) @db.Uuid
   code                      String                     @unique
@@ -1481,7 +1481,6 @@ model GovernmentService {
   @@index([catalogServiceType])
   @@map("government_services")
 }
-
 model GovernmentServiceVersion {
   id                                  String                                      @id @default(uuid()) @db.Uuid
   governmentServiceId                 String                                      @db.Uuid
@@ -1549,7 +1548,6 @@ model GovernmentServiceVersion {
   @@index([activationFunctionAuthorityRecordId])
   @@map("government_service_versions")
 }
-
 model GovernmentServiceVersionApplicantCategory {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
@@ -1561,7 +1559,6 @@ model GovernmentServiceVersionApplicantCategory {
   @@index([governmentServiceVersionId])
   @@map("government_service_version_applicant_categories")
 }
-
 model ServiceFunctionMapping {
   id                         String                       @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                       @db.Uuid
@@ -1582,7 +1579,6 @@ model ServiceFunctionMapping {
   @@index([functionAuthorityRecordId])
   @@map("service_function_mappings")
 }
-
 model FormDefinition {
   id                         String                     @id @default(uuid()) @db.Uuid
   code                       String                     @unique
@@ -1602,7 +1598,6 @@ model FormDefinition {
   @@index([status])
   @@map("form_definitions")
 }
-
 model FormVersion {
   id                        String                     @id @default(uuid()) @db.Uuid
   formDefinitionId          String                     @db.Uuid
@@ -1629,7 +1624,6 @@ model FormVersion {
   @@index([status])
   @@map("form_versions")
 }
-
 model FormSection {
   id            String      @id @default(uuid()) @db.Uuid
   formVersionId String      @db.Uuid
@@ -1646,7 +1640,6 @@ model FormSection {
   @@index([formVersionId])
   @@map("form_sections")
 }
-
 model FormField {
   id                   String                     @id @default(uuid()) @db.Uuid
   formSectionId        String                     @db.Uuid
@@ -1671,7 +1664,6 @@ model FormField {
   @@index([formSectionId])
   @@map("form_fields")
 }
-
 model FormFieldConditionalRule {
   id           String                @id @default(uuid()) @db.Uuid
   formFieldId  String                @db.Uuid
@@ -1686,7 +1678,6 @@ model FormFieldConditionalRule {
   @@index([formFieldId])
   @@map("form_field_conditional_rules")
 }
-
 model GovernmentServiceFeeDefinition {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
@@ -1705,7 +1696,6 @@ model GovernmentServiceFeeDefinition {
   @@index([governmentServiceVersionId])
   @@map("government_service_fee_definitions")
 }
-
 model GovernmentServiceEligibilityRule {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
@@ -1723,7 +1713,6 @@ model GovernmentServiceEligibilityRule {
   @@index([governmentServiceVersionId])
   @@map("government_service_eligibility_rules")
 }
-
 model GovernmentServiceChecklistItem {
   id                         String                    @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                    @db.Uuid
@@ -1742,7 +1731,6 @@ model GovernmentServiceChecklistItem {
   @@index([governmentServiceVersionId])
   @@map("government_service_checklist_items")
 }
-
 model GovernmentServiceOutputDefinition {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
@@ -1759,7 +1747,6 @@ model GovernmentServiceOutputDefinition {
   @@index([governmentServiceVersionId])
   @@map("government_service_output_definitions")
 }
-
 model GovernmentServiceRedressRoute {
   id                         String                   @id @default(uuid()) @db.Uuid
   governmentServiceVersionId String                   @db.Uuid
@@ -1776,9 +1763,6 @@ model GovernmentServiceRedressRoute {
   @@index([governmentServiceVersionId])
   @@map("government_service_redress_routes")
 }
-
-// ─── Phase 5F: Service Activation & Publication Governance ───────────────────
-
 enum ServiceTestReadinessStatus {
   NOT_TESTED
   TESTS_IN_PROGRESS
@@ -1786,21 +1770,18 @@ enum ServiceTestReadinessStatus {
   INSTITUTIONAL_REVIEW_PENDING
   INSTITUTIONAL_REVIEW_PASSED
 }
-
 enum ServiceReadinessLevel {
   NOT_READY
   TECHNICALLY_READY
   INSTITUTIONALLY_ACCEPTED
   OPERATIONALLY_ACTIVE
 }
-
 enum ServiceReadinessCheckOutcome {
   PASS
   FAIL
   REQUIRES_CONFIGURATION
   BLOCKED
 }
-
 enum ServiceActivationOutcome {
   ACTIVATED
   BLOCKED
@@ -1808,7 +1789,6 @@ enum ServiceActivationOutcome {
   REQUIRES_READINESS
   DENIED
 }
-
 model ServiceActivationRecord {
   id                          String                              @id @default(uuid()) @db.Uuid
   governmentServiceVersionId  String                              @db.Uuid
@@ -1833,9 +1813,6 @@ model ServiceActivationRecord {
   @@index([createdAt])
   @@map("service_activation_records")
 }
-
-// ─── Phase 6: Applications, Workflow & Case Management ─────────────────────
-
 enum ApplicationStatus {
   DRAFT
   SUBMITTED
@@ -1843,13 +1820,11 @@ enum ApplicationStatus {
   WITHDRAWN
   CLOSED
 }
-
 enum ApplicationSubmissionStatus {
   SUBMITTED
   ACKNOWLEDGED
   SUPERSEDED
 }
-
 enum CaseStatus {
   RECEIVED
   INTAKE
@@ -1873,21 +1848,18 @@ enum CaseStatus {
   CLOSED
   ARCHIVED
 }
-
 enum CaseLegalStatus {
   NONE
   PENDING
   UNRESOLVED
   EXTERNAL_STATUS_PENDING
 }
-
 enum CasePriority {
   LOW
   NORMAL
   HIGH
   URGENT
 }
-
 enum CaseWorkflowInstanceStatus {
   PENDING
   ACTIVE
@@ -1897,7 +1869,6 @@ enum CaseWorkflowInstanceStatus {
   COMPLETED
   SUSPENDED
 }
-
 enum CaseWorkflowStepInstanceStatus {
   PENDING
   ACTIVE
@@ -1908,7 +1879,6 @@ enum CaseWorkflowStepInstanceStatus {
   WAITING_EXTERNAL
   SAFE_HALTED
 }
-
 enum WorkflowDefinitionStatus {
   DRAFT
   APPROVED
@@ -1916,14 +1886,12 @@ enum WorkflowDefinitionStatus {
   ARCHIVED
   SUSPENDED
 }
-
 enum WorkflowVersionStatus {
   DRAFT
   APPROVED
   SUPERSEDED
   SUSPENDED
 }
-
 enum WorkflowStepType {
   INTAKE
   COMPLETENESS_REVIEW
@@ -1935,57 +1903,48 @@ enum WorkflowStepType {
   ISSUANCE_GATE
   PARALLEL_JOIN
 }
-
 enum WorkflowTransitionJoinType {
   ALL_REQUIRED
   ANY
   FIRST_COMPLETED
 }
-
 enum WorkflowStepConsequenceLevel {
   INFORMATIONAL
   ADMINISTRATIVE
   CONSEQUENTIAL
 }
-
 enum CompletenessReviewOutcome {
   PENDING
   INCOMPLETE
   COMPLETE
 }
-
 enum ChecklistItemReviewStatus {
   PRESENT
   MISSING
   NOT_APPLICABLE
 }
-
 enum DeficiencyNoticeStatus {
   ISSUED
   RESPONDED
   SUPERSEDED
   WITHDRAWN
 }
-
 enum ApplicantInformationRequestStatus {
   ISSUED
   RESPONDED
   EXPIRED
   WITHDRAWN
 }
-
 enum CaseAssignmentStatus {
   ACTIVE
   SUPERSEDED
   COMPLETED
 }
-
 enum CaseReferralType {
   EXTERNAL_AUTHORITY
   INTERNAL_DEPARTMENT
   PROFESSIONAL
 }
-
 enum CaseReferralStatus {
   PENDING
   ACKNOWLEDGED
@@ -1993,39 +1952,33 @@ enum CaseReferralStatus {
   CLOSED
   WITHDRAWN
 }
-
 enum CaseReferralResponseAuthStatus {
   UNAUTHENTICATED
   AUTHENTICATED
   REJECTED
 }
-
 enum CaseSlaClockStatus {
   RUNNING
   PAUSED
   BREACHED
   COMPLETED
 }
-
 enum CaseEscalationStatus {
   OPEN
   RESOLVED
   WITHDRAWN
 }
-
 enum CaseIssueSeverity {
   LOW
   MEDIUM
   HIGH
   CRITICAL
 }
-
 enum CaseIssueStatus {
   OPEN
   RESOLVED
   WITHDRAWN
 }
-
 enum CaseEventType {
   APPLICATION_RECEIVED
   ACKNOWLEDGMENT_ISSUED
@@ -2068,13 +2021,11 @@ enum CaseEventType {
   WITHDRAWN
   CLOSED
 }
-
 enum CaseEventPublicVisibility {
   INTERNAL
   OFFICIAL
   APPLICANT_VISIBLE
 }
-
 enum CaseCommunicationType {
   APPLICANT_MESSAGE
   DEFICIENCY_NOTICE
@@ -2085,7 +2036,6 @@ enum CaseCommunicationType {
   EXTERNAL_CORRESPONDENCE
   SYSTEM_NOTICE
 }
-
 enum CaseCommunicationChannel {
   PORTAL
   EMAIL
@@ -2094,7 +2044,6 @@ enum CaseCommunicationChannel {
   COUNTER
   SYSTEM
 }
-
 enum CaseCommunicationDeliveryStatus {
   DRAFT
   QUEUED
@@ -2103,7 +2052,6 @@ enum CaseCommunicationDeliveryStatus {
   FAILED
   RECEIVED
 }
-
 enum CaseRecipientType {
   APPLICANT
   OFFICEHOLDER
@@ -2112,7 +2060,6 @@ enum CaseRecipientType {
   INTERNAL
   SYSTEM
 }
-
 enum CaseRecordClassification {
   PUBLIC
   OFFICIAL
@@ -2120,7 +2067,6 @@ enum CaseRecordClassification {
   RESTRICTED
   PRIVILEGED
 }
-
 enum CaseMilestoneStatus {
   UPCOMING
   IN_PROGRESS
@@ -2129,7 +2075,6 @@ enum CaseMilestoneStatus {
   COMPLETED
   CANCELLED
 }
-
 enum CasePublicStatusStage {
   RECEIVED
   CHECKING_SUBMISSION
@@ -2142,13 +2087,11 @@ enum CasePublicStatusStage {
   COMPLETED
   CLOSED
 }
-
 enum CaseCommunicationVisibility {
   INTERNAL
   APPLICANT
   EXTERNAL
 }
-
 enum CaseMilestoneType {
   RECEIPT
   ACKNOWLEDGMENT
@@ -2157,7 +2100,6 @@ enum CaseMilestoneType {
   EXTERNAL_REFERRAL
   DECISION_PENDING
 }
-
 model Application {
   id                         String                    @id @default(uuid()) @db.Uuid
   applicationNumber          String?                   @unique
@@ -2193,7 +2135,6 @@ model Application {
   @@index([status])
   @@map("applications")
 }
-
 model ApplicationSubmission {
   id                           String                        @id @default(uuid()) @db.Uuid
   applicationId                String                        @db.Uuid
@@ -2222,7 +2163,6 @@ model ApplicationSubmission {
   @@index([status])
   @@map("application_submissions")
 }
-
 model Case {
   id                                String                          @id @default(uuid()) @db.Uuid
   caseNumber                        String                          @unique
@@ -2293,6 +2233,8 @@ model Case {
   protectiveActionRecommendations ProtectiveActionRecommendation[]
   emergencyInterimActionRecords   EmergencyInterimActionRecord[]
 
+
+  redressMatters                    RedressMatter[]
   @@index([status])
   @@index([applicantIdentityId])
   @@index([governmentServiceId])
@@ -2302,7 +2244,6 @@ model Case {
   @@index([currentCaseManagerOfficeholderId])
   @@map("cases")
 }
-
 model CaseStatusHistory {
   id              String      @id @default(uuid()) @db.Uuid
   caseId          String      @db.Uuid
@@ -2317,7 +2258,6 @@ model CaseStatusHistory {
   @@index([recordedAt])
   @@map("case_status_history")
 }
-
 model WorkflowDefinition {
   id                  String                   @id @default(uuid()) @db.Uuid
   code                String                   @unique
@@ -2334,7 +2274,6 @@ model WorkflowDefinition {
   @@index([status])
   @@map("workflow_definitions")
 }
-
 model WorkflowVersion {
   id                   String                         @id @default(uuid()) @db.Uuid
   workflowDefinitionId String                         @db.Uuid
@@ -2359,7 +2298,6 @@ model WorkflowVersion {
   @@index([status])
   @@map("workflow_versions")
 }
-
 model WorkflowStageDefinition {
   id                String                   @id @default(uuid()) @db.Uuid
   workflowVersionId String                   @db.Uuid
@@ -2376,7 +2314,6 @@ model WorkflowStageDefinition {
   @@index([workflowVersionId])
   @@map("workflow_stage_definitions")
 }
-
 model WorkflowStepDefinition {
   id                        String                         @id @default(uuid()) @db.Uuid
   workflowVersionId         String                         @db.Uuid
@@ -2407,7 +2344,6 @@ model WorkflowStepDefinition {
   @@index([functionAuthorityRecordId])
   @@map("workflow_step_definitions")
 }
-
 model WorkflowTransitionDefinition {
   id                String                     @id @default(uuid()) @db.Uuid
   workflowVersionId String                     @db.Uuid
@@ -2430,7 +2366,6 @@ model WorkflowTransitionDefinition {
   @@index([toStepId])
   @@map("workflow_transition_definitions")
 }
-
 model CaseWorkflowInstance {
   id                String                     @id @default(uuid()) @db.Uuid
   caseId            String                     @unique @db.Uuid
@@ -2452,7 +2387,6 @@ model CaseWorkflowInstance {
   @@index([status])
   @@map("case_workflow_instances")
 }
-
 model CaseWorkflowStepInstance {
   id                       String                         @id @default(uuid()) @db.Uuid
   caseWorkflowInstanceId   String                         @db.Uuid
@@ -2477,7 +2411,6 @@ model CaseWorkflowStepInstance {
   @@index([status])
   @@map("case_workflow_step_instances")
 }
-
 model CompletenessReview {
   id                         String                    @id @default(uuid()) @db.Uuid
   applicationSubmissionId    String                    @db.Uuid
@@ -2497,7 +2430,6 @@ model CompletenessReview {
   @@index([outcome])
   @@map("completeness_reviews")
 }
-
 model DeficiencyNotice {
   id                      String                 @id @default(uuid()) @db.Uuid
   applicationSubmissionId String                 @db.Uuid
@@ -2516,7 +2448,6 @@ model DeficiencyNotice {
   @@index([status])
   @@map("deficiency_notices")
 }
-
 model ApplicantInformationRequest {
   id                      String                            @id @default(uuid()) @db.Uuid
   applicationSubmissionId String                            @db.Uuid
@@ -2534,7 +2465,6 @@ model ApplicantInformationRequest {
   @@index([status])
   @@map("applicant_information_requests")
 }
-
 model CaseAssignment {
   id                     String               @id @default(uuid()) @db.Uuid
   caseId                 String               @db.Uuid
@@ -2555,7 +2485,6 @@ model CaseAssignment {
   @@index([status])
   @@map("case_assignments")
 }
-
 model CaseReferral {
   id                       String                          @id @default(uuid()) @db.Uuid
   caseId                   String                          @db.Uuid
@@ -2581,7 +2510,6 @@ model CaseReferral {
   @@index([status])
   @@map("case_referrals")
 }
-
 model CaseReferralResponse {
   id                   String                         @id @default(uuid()) @db.Uuid
   caseReferralId       String                         @db.Uuid
@@ -2597,7 +2525,6 @@ model CaseReferralResponse {
   @@index([caseReferralId])
   @@map("case_referral_responses")
 }
-
 model CaseSlaClock {
   id               String             @id @default(uuid()) @db.Uuid
   caseId           String             @db.Uuid
@@ -2620,7 +2547,6 @@ model CaseSlaClock {
   @@index([status])
   @@map("case_sla_clocks")
 }
-
 model CaseEscalation {
   id               String               @id @default(uuid()) @db.Uuid
   caseId           String               @db.Uuid
@@ -2637,7 +2563,6 @@ model CaseEscalation {
   @@index([status])
   @@map("case_escalations")
 }
-
 model CaseIssue {
   id          String            @id @default(uuid()) @db.Uuid
   caseId      String            @db.Uuid
@@ -2654,7 +2579,6 @@ model CaseIssue {
   @@index([status])
   @@map("case_issues")
 }
-
 model CaseEvent {
   id                 String                       @id @default(uuid()) @db.Uuid
   caseId             String                       @db.Uuid
@@ -2688,7 +2612,6 @@ model CaseEvent {
   @@index([correlationId])
   @@map("case_events")
 }
-
 model CaseCommunication {
   id                   String                          @id @default(uuid()) @db.Uuid
   caseId               String                          @db.Uuid
@@ -2725,7 +2648,6 @@ model CaseCommunication {
   @@index([publicVisibility])
   @@map("case_communications")
 }
-
 model CaseCommunicationOutbox {
   id              String                   @id @default(uuid()) @db.Uuid
   communicationId String                   @db.Uuid
@@ -2741,7 +2663,6 @@ model CaseCommunicationOutbox {
   @@index([status])
   @@map("case_communication_outbox")
 }
-
 model CaseMilestone {
   id                      String                       @id @default(uuid()) @db.Uuid
   caseId                  String                       @db.Uuid
@@ -2763,7 +2684,6 @@ model CaseMilestone {
   @@index([status])
   @@map("case_milestones")
 }
-
 model CasePublicStatusProjection {
   id                  String                 @id @default(uuid()) @db.Uuid
   caseId              String                 @unique @db.Uuid
@@ -2790,9 +2710,6 @@ model CasePublicStatusProjection {
   @@index([publicStage])
   @@map("case_public_status_projections")
 }
-
-// ─── Phase 7A: Master Administrative File Foundation ─────────────────────────
-
 enum MasterAdministrativeFileLifecycleStatus {
   OPEN
   ACTIVE
@@ -2802,7 +2719,6 @@ enum MasterAdministrativeFileLifecycleStatus {
   CLOSED
   ARCHIVED
 }
-
 enum MasterAdministrativeFileSecurityClassification {
   PUBLIC
   OFFICIAL
@@ -2810,20 +2726,17 @@ enum MasterAdministrativeFileSecurityClassification {
   RESTRICTED
   SECRET
 }
-
 enum MasterAdministrativeFilePrivacyClassification {
   STANDARD
   PERSONAL
   SENSITIVE_PERSONAL
   SPECIAL_CATEGORY
 }
-
 enum MasterAdministrativeFileIntegrityStatus {
   INTACT
   INTEGRITY_REVIEW_REQUIRED
   INTEGRITY_COMPROMISED
 }
-
 enum MasterAdministrativeFileSectionType {
   FILE_CONTROL_AND_INDEX
   AUTHORITY_AND_PROCEDURE
@@ -2846,7 +2759,6 @@ enum MasterAdministrativeFileSectionType {
   CLOSURE_AND_ARCHIVE
   AUDIT_AND_TECHNICAL_HISTORY
 }
-
 model MasterAdministrativeFile {
   id                                   String                                         @id @default(uuid()) @db.Uuid
   fileNumber                           String                                         @unique
@@ -2892,6 +2804,8 @@ model MasterAdministrativeFile {
   instrumentControllingDecisions InstrumentControllingDecision[]
   lifecycleOfficialInstruments   LifecycleOfficialInstrument[]
 
+
+  redressMatters                       RedressMatter[]
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
   @@index([responsibleDepartmentId])
@@ -2900,7 +2814,6 @@ model MasterAdministrativeFile {
   @@index([lifecycleStatus])
   @@map("master_administrative_files")
 }
-
 model MasterAdministrativeFileSection {
   id                         String                              @id @default(uuid()) @db.Uuid
   masterAdministrativeFileId String                              @db.Uuid
@@ -2917,9 +2830,6 @@ model MasterAdministrativeFileSection {
   @@index([masterAdministrativeFileId], map: "maf_sections_file_id_idx")
   @@map("master_administrative_file_sections")
 }
-
-// ─── Phase 7B: Document Registry, Versioning, Storage and Provenance ─────────
-
 enum DocumentSourceType {
   APPLICANT_UPLOAD
   OFFICIAL_UPLOAD
@@ -2930,7 +2840,6 @@ enum DocumentSourceType {
   API_INGEST
   OTHER
 }
-
 enum DocumentSignatureStatus {
   NOT_EVALUATED
   UNSIGNED
@@ -2938,7 +2847,6 @@ enum DocumentSignatureStatus {
   SIGNATURE_INVALID
   SIGNATURE_UNVERIFIED
 }
-
 enum DocumentSealStatus {
   NOT_EVALUATED
   UNSEALED
@@ -2946,7 +2854,6 @@ enum DocumentSealStatus {
   SEAL_INVALID
   SEAL_UNVERIFIED
 }
-
 enum DocumentAuthenticityStatus {
   NOT_EVALUATED
   UNVERIFIED
@@ -2954,7 +2861,6 @@ enum DocumentAuthenticityStatus {
   AUTHENTICITY_DISPUTED
   VERIFICATION_FAILED
 }
-
 enum DocumentSecurityClassification {
   PUBLIC
   INTERNAL
@@ -2962,7 +2868,6 @@ enum DocumentSecurityClassification {
   RESTRICTED
   HIGHLY_RESTRICTED
 }
-
 enum DocumentPrivacyClassification {
   NOT_APPLICABLE
   PERSONAL_DATA
@@ -2970,7 +2875,6 @@ enum DocumentPrivacyClassification {
   SPECIAL_CATEGORY
   ANONYMIZED
 }
-
 enum DocumentConfidentialityOrPrivilegeStatus {
   NOT_EVALUATED
   NONE
@@ -2979,7 +2883,6 @@ enum DocumentConfidentialityOrPrivilegeStatus {
   STATUTORY_CONFIDENTIALITY
   CABINET_CONFIDENTIAL
 }
-
 enum MalwareScanStatus {
   NOT_SCANNED
   SCAN_PENDING
@@ -2989,7 +2892,6 @@ enum MalwareScanStatus {
   SCAN_FAILED
   QUARANTINED
 }
-
 enum DocumentAssociationTargetType {
   MASTER_ADMINISTRATIVE_FILE
   APPLICATION
@@ -3002,7 +2904,6 @@ enum DocumentAssociationTargetType {
   EVIDENCE_ITEM
   OFFICIAL_INSTRUMENT
 }
-
 enum DocumentAssociationRole {
   SUPPORTING_EVIDENCE
   REQUIRED_SUBMISSION
@@ -3013,7 +2914,6 @@ enum DocumentAssociationRole {
   REFERENCE_COPY
   OTHER
 }
-
 enum DocumentAuditEventType {
   DOCUMENT_UPLOADED
   DOCUMENT_VERSION_CREATED
@@ -3023,7 +2923,6 @@ enum DocumentAuditEventType {
   DOCUMENT_QUARANTINED
   DOCUMENT_ACCESS_DENIED
 }
-
 model DocumentRecord {
   id                               String                            @id @default(uuid()) @db.Uuid
   documentNumber                   String                            @unique
@@ -3049,7 +2948,6 @@ model DocumentRecord {
   @@index([documentType])
   @@map("document_records")
 }
-
 model DocumentVersion {
   id                               String                                   @id @default(uuid()) @db.Uuid
   documentRecordId                 String                                   @db.Uuid
@@ -3094,7 +2992,6 @@ model DocumentVersion {
   @@index([securityClassification])
   @@map("document_versions")
 }
-
 model DocumentAssociation {
   id                     String                        @id @default(uuid()) @db.Uuid
   documentVersionId      String                        @db.Uuid
@@ -3115,7 +3012,6 @@ model DocumentAssociation {
   @@index([documentRecordId])
   @@map("document_associations")
 }
-
 model DocumentAuditEvent {
   id                String                 @id @default(uuid()) @db.Uuid
   documentRecordId  String                 @db.Uuid
@@ -3134,9 +3030,6 @@ model DocumentAuditEvent {
   @@index([recordedAt])
   @@map("document_audit_events")
 }
-
-// ─── Phase 7C: Evidence Registry and Verification Engine ────────────────────
-
 enum EvidenceRecordStatus {
   REQUESTED
   RECEIVED
@@ -3156,7 +3049,6 @@ enum EvidenceRecordStatus {
   ACCEPTED_FOR_LIMITED_RELIANCE
   ACCEPTED_FOR_ADMINISTRATIVE_PURPOSE
 }
-
 enum EvidenceType {
   DOCUMENT
   DATA_EXTRACT
@@ -3166,7 +3058,6 @@ enum EvidenceType {
   STATEMENT
   OTHER
 }
-
 enum EvidenceSource {
   APPLICANT
   THIRD_PARTY
@@ -3175,7 +3066,6 @@ enum EvidenceSource {
   INTERNAL
   OTHER
 }
-
 enum EvidenceVerificationCategory {
   INTEGRITY
   ISSUER
@@ -3188,14 +3078,12 @@ enum EvidenceVerificationCategory {
   PROFESSIONAL
   OTHER_CONTROLLED_METHOD
 }
-
 enum EvidenceVerificationResult {
   CONFIRMED
   NOT_CONFIRMED
   INCONCLUSIVE
   COULD_NOT_VERIFY
 }
-
 enum EvidenceVerificationMethod {
   CHECKSUM_MATCH
   DIGITAL_SIGNATURE_VALIDATION
@@ -3206,7 +3094,6 @@ enum EvidenceVerificationMethod {
   OTHER_CONTROLLED_METHOD
   UNKNOWN
 }
-
 enum EvidenceRequirementRelationship {
   SATISFIES
   PARTIALLY_SATISFIES
@@ -3214,7 +3101,6 @@ enum EvidenceRequirementRelationship {
   UNDER_REVIEW
   NOT_APPLICABLE
 }
-
 enum EvidenceRequirementLinkStatus {
   LINKED
   UNDER_REVIEW
@@ -3224,7 +3110,6 @@ enum EvidenceRequirementLinkStatus {
   SUPERSEDED
   WITHDRAWN
 }
-
 enum EvidenceAcceptancePurpose {
   COMPLETENESS
   SUBSTANTIVE_REVIEW
@@ -3235,13 +3120,11 @@ enum EvidenceAcceptancePurpose {
   COMPLIANCE
   OTHER_APPROVED_PURPOSE
 }
-
 enum EvidenceAcceptanceDecision {
   ACCEPTED
   REJECTED
   LIMITED
 }
-
 enum EvidenceQualityCriterion {
   RELEVANCE
   PROVENANCE
@@ -3254,7 +3137,6 @@ enum EvidenceQualityCriterion {
   SCOPE
   FITNESS_FOR_PURPOSE
 }
-
 enum EvidenceQualityRating {
   STRONG
   ADEQUATE
@@ -3262,12 +3144,10 @@ enum EvidenceQualityRating {
   INSUFFICIENT
   UNASSESSED
 }
-
 enum EvidenceQualityAssessmentSource {
   OFFICIAL
   AI_PROPOSED
 }
-
 model EvidenceRecord {
   id                              String                            @id @default(uuid()) @db.Uuid
   evidenceNumber                  String                            @unique
@@ -3326,7 +3206,6 @@ model EvidenceRecord {
   @@index([supersededByEvidenceId])
   @@map("evidence_records")
 }
-
 model EvidenceVerification {
   id                          String                       @id @default(uuid()) @db.Uuid
   evidenceId                  String                       @db.Uuid
@@ -3359,7 +3238,6 @@ model EvidenceVerification {
   @@index([performedAt])
   @@map("evidence_verifications")
 }
-
 model EvidenceRequirementLink {
   id              String                          @id @default(uuid()) @db.Uuid
   evidenceId      String                          @db.Uuid
@@ -3379,7 +3257,6 @@ model EvidenceRequirementLink {
   @@index([status])
   @@map("evidence_requirement_links")
 }
-
 model EvidencePurposeAcceptance {
   id                      String                     @id @default(uuid()) @db.Uuid
   evidenceId              String                     @db.Uuid
@@ -3405,7 +3282,6 @@ model EvidencePurposeAcceptance {
   @@index([reviewerIdentityId])
   @@map("evidence_purpose_acceptances")
 }
-
 model EvidenceQualityAssessment {
   id                       String                          @id @default(uuid()) @db.Uuid
   evidenceId               String                          @db.Uuid
@@ -3428,14 +3304,12 @@ model EvidenceQualityAssessment {
   @@index([criterion])
   @@map("evidence_quality_assessments")
 }
-
 enum DepartmentalReviewStatus {
   DRAFT
   IN_PROGRESS
   COMPLETED
   SUPERSEDED
 }
-
 enum GovernmentCommunicationCategory {
   RECEIPT
   ACKNOWLEDGMENT
@@ -3451,26 +3325,22 @@ enum GovernmentCommunicationCategory {
   INSPECTION_FINDING
   OTHER
 }
-
 enum GovernmentCommunicationAuthenticationStatus {
   UNAUTHENTICATED
   AUTHENTICATED
   REJECTED
 }
-
 enum ProfessionalOpinionStatus {
   DRAFT
   ISSUED
   SUPERSEDED
   WITHDRAWN
 }
-
 enum ProfessionalSignatureSource {
   CONTROLLED_PROFESSIONAL_ACTION
   AI_ASSISTANCE
   OTHER
 }
-
 enum InspectionType {
   SITE
   DESKTOP
@@ -3478,21 +3348,18 @@ enum InspectionType {
   FOLLOW_UP
   OTHER
 }
-
 enum InspectionStatus {
   SCHEDULED
   IN_PROGRESS
   COMPLETED
   CANCELLED
 }
-
 enum InspectionFindingClassification {
   OBSERVATION
   CONDITION
   NON_COMPLIANCE
   OTHER
 }
-
 enum EvidenceCustodyEventType {
   COLLECTED
   RECEIVED
@@ -3507,13 +3374,11 @@ enum EvidenceCustodyEventType {
   ARCHIVED
   DISPOSED_AUTHORIZED
 }
-
 enum EvidenceIntegrityState {
   INTACT
   COMPROMISED
   UNKNOWN
 }
-
 model DepartmentalReviewRecord {
   id                          String                       @id @default(uuid()) @db.Uuid
   caseId                      String                       @db.Uuid
@@ -3550,7 +3415,6 @@ model DepartmentalReviewRecord {
   @@index([status])
   @@map("departmental_review_records")
 }
-
 model DepartmentalReviewEvidence {
   id                   String                   @id @default(uuid()) @db.Uuid
   departmentalReviewId String                   @db.Uuid
@@ -3563,7 +3427,6 @@ model DepartmentalReviewEvidence {
   @@index([evidenceRecordId])
   @@map("departmental_review_evidence")
 }
-
 model GovernmentCommunicationRecord {
   id                                          String                                      @id @default(uuid()) @db.Uuid
   caseId                                      String                                      @db.Uuid
@@ -3596,7 +3459,6 @@ model GovernmentCommunicationRecord {
   @@index([sourceInstitutionId])
   @@map("government_communication_records")
 }
-
 model GovernmentCommunicationDocument {
   id                        String                        @id @default(uuid()) @db.Uuid
   governmentCommunicationId String                        @db.Uuid
@@ -3609,7 +3471,6 @@ model GovernmentCommunicationDocument {
   @@index([documentRecordId])
   @@map("government_communication_documents")
 }
-
 model GovernmentCommunicationEvidence {
   id                        String                        @id @default(uuid()) @db.Uuid
   governmentCommunicationId String                        @db.Uuid
@@ -3622,7 +3483,6 @@ model GovernmentCommunicationEvidence {
   @@index([evidenceRecordId])
   @@map("government_communication_evidence")
 }
-
 model ProfessionalReviewRecord {
   id                      String                       @id @default(uuid()) @db.Uuid
   caseId                  String                       @db.Uuid
@@ -3654,7 +3514,6 @@ model ProfessionalReviewRecord {
   @@index([opinionStatus])
   @@map("professional_review_records")
 }
-
 model ProfessionalReviewEvidence {
   id                   String                   @id @default(uuid()) @db.Uuid
   professionalReviewId String                   @db.Uuid
@@ -3667,7 +3526,6 @@ model ProfessionalReviewEvidence {
   @@index([evidenceRecordId])
   @@map("professional_review_evidence")
 }
-
 model InspectionRecord {
   id                        String                   @id @default(uuid()) @db.Uuid
   caseId                    String                   @db.Uuid
@@ -3699,7 +3557,6 @@ model InspectionRecord {
   @@index([status])
   @@map("inspection_records")
 }
-
 model InspectionInspector {
   id             String           @id @default(uuid()) @db.Uuid
   inspectionId   String           @db.Uuid
@@ -3714,7 +3571,6 @@ model InspectionInspector {
   @@index([identityId])
   @@map("inspection_inspectors")
 }
-
 model InspectionEvidenceItem {
   id                    String                          @id @default(uuid()) @db.Uuid
   inspectionId          String                          @db.Uuid
@@ -3730,7 +3586,6 @@ model InspectionEvidenceItem {
   @@index([evidenceRecordId])
   @@map("inspection_evidence_items")
 }
-
 model EvidenceCustodyEvent {
   id                       String                   @id @default(uuid()) @db.Uuid
   eventType                EvidenceCustodyEventType
@@ -3762,9 +3617,6 @@ model EvidenceCustodyEvent {
   @@index([occurredAt])
   @@map("evidence_custody_events")
 }
-
-// ─── Phase 7E: Evidence Packets and Decision-Support Snapshots ─────────────────
-
 enum EvidencePacketPurpose {
   SUBSTANTIVE_REVIEW
   PROFESSIONAL_REVIEW
@@ -3776,7 +3628,6 @@ enum EvidencePacketPurpose {
   PROJECT_READINESS
   OTHER_CONTROLLED_PURPOSE
 }
-
 enum EvidencePacketVersionStatus {
   DRAFT
   ASSEMBLED
@@ -3785,7 +3636,6 @@ enum EvidencePacketVersionStatus {
   SUPERSEDED
   ARCHIVED
 }
-
 model EvidencePacket {
   id                         String                   @id @default(uuid()) @db.Uuid
   packetNumber               String                   @unique
@@ -3811,7 +3661,6 @@ model EvidencePacket {
   @@index([responsibleDepartmentId])
   @@map("evidence_packets")
 }
-
 model EvidencePacketVersion {
   id                           String                        @id @default(uuid()) @db.Uuid
   packetId                     String                        @db.Uuid
@@ -3843,7 +3692,6 @@ model EvidencePacketVersion {
   @@index([status])
   @@map("evidence_packet_versions")
 }
-
 model EvidencePacketItem {
   id                        String                         @id @default(uuid()) @db.Uuid
   packetVersionId           String                         @db.Uuid
@@ -3875,7 +3723,6 @@ model EvidencePacketItem {
   @@index([evidenceRecordId])
   @@map("evidence_packet_items")
 }
-
 model EvidencePacketManifest {
   id                String                @id @default(uuid()) @db.Uuid
   packetVersionId   String                @unique @db.Uuid
@@ -3886,7 +3733,6 @@ model EvidencePacketManifest {
 
   @@map("evidence_packet_manifests")
 }
-
 model EvidencePacketItemExclusion {
   id                          String                     @id @default(uuid()) @db.Uuid
   packetVersionId             String                     @db.Uuid
@@ -3906,9 +3752,6 @@ model EvidencePacketItemExclusion {
   @@index([evidenceRecordId])
   @@map("evidence_packet_item_exclusions")
 }
-
-// ─── Phase 7F: Correction, Integrity, Access, and Replay ─────────────────────
-
 enum RecordCorrectionStatus {
   REQUESTED
   UNDER_REVIEW
@@ -3917,7 +3760,6 @@ enum RecordCorrectionStatus {
   IMPLEMENTED
   SUPERSEDED
 }
-
 enum RecordIntegrityEventType {
   CREATED
   HASHED
@@ -3930,7 +3772,6 @@ enum RecordIntegrityEventType {
   ARCHIVED
   MIGRATED
 }
-
 enum RecordAccessEventType {
   VIEW
   DOWNLOAD
@@ -3939,17 +3780,14 @@ enum RecordAccessEventType {
   SHARE_AUTHORIZED
   ADMIN_ACCESS
 }
-
 enum RecordAccessResult {
   ALLOWED
   DENIED
 }
-
 enum RecordsReplayMode {
   HISTORICAL_REPLAY
   CURRENT_VIEW
 }
-
 model RecordCorrection {
   id                            String                     @id @default(uuid()) @db.Uuid
   targetRecordType              String
@@ -3983,7 +3821,6 @@ model RecordCorrection {
   @@index([requestedBy])
   @@map("record_corrections")
 }
-
 model RecordIntegrityEvent {
   id                      String                   @id @default(uuid()) @db.Uuid
   recordType              String
@@ -4007,7 +3844,6 @@ model RecordIntegrityEvent {
   @@index([eventType])
   @@map("record_integrity_events")
 }
-
 model RecordAccessEvent {
   id                   String                @id @default(uuid()) @db.Uuid
   recordType           String
@@ -4029,9 +3865,6 @@ model RecordAccessEvent {
   @@index([accessType])
   @@map("record_access_events")
 }
-
-// ─── Phase 7G: Records Retention, Legal Hold, Archival & Disposition ─────────
-
 enum RecordsClassificationStatus {
   DRAFT
   ACTIVE
@@ -4039,7 +3872,6 @@ enum RecordsClassificationStatus {
   ARCHIVED
   SUSPENDED
 }
-
 enum RetentionScheduleStatus {
   DRAFT
   APPROVED
@@ -4048,7 +3880,6 @@ enum RetentionScheduleStatus {
   SUSPENDED
   ARCHIVED
 }
-
 enum RetentionTriggerType {
   DATE_CREATED
   DATE_RECEIVED
@@ -4061,7 +3892,6 @@ enum RetentionTriggerType {
   COMPLETION_OF_APPEAL
   CUSTOM_APPROVED_TRIGGER
 }
-
 enum RetentionDurationUnit {
   DAYS
   MONTHS
@@ -4069,27 +3899,23 @@ enum RetentionDurationUnit {
   INDEFINITE
   EVENT_DRIVEN
 }
-
 enum LegalHoldStatus {
   DRAFT
   ACTIVE
   RELEASED
   SUPERSEDED
 }
-
 enum LegalHoldScope {
   NARROW
   STANDARD
   INSTITUTION_WIDE
   CROSS_INSTITUTION
 }
-
 enum LegalHoldConfidentiality {
   STANDARD
   RESTRICTED
   PRIVILEGED
 }
-
 enum LegalHoldTargetType {
   MASTER_ADMINISTRATIVE_FILE
   CASE
@@ -4099,7 +3925,6 @@ enum LegalHoldTargetType {
   RECORD_CLASS
   PRESERVATION_COLLECTION
 }
-
 enum PreservationCollectionPurpose {
   APPEAL
   INVESTIGATION
@@ -4109,13 +3934,11 @@ enum PreservationCollectionPurpose {
   INSTITUTIONAL_REVIEW
   OTHER_APPROVED
 }
-
 enum PreservationCollectionStatus {
   ACTIVE
   RELEASED
   ARCHIVED
 }
-
 enum ArchivalTransferStatus {
   DRAFT
   MANIFEST_PREPARED
@@ -4125,14 +3948,12 @@ enum ArchivalTransferStatus {
   REJECTED
   CANCELLED
 }
-
 enum DispositionEligibilityStatus {
   NOT_EVALUATED
   NOT_ELIGIBLE
   ELIGIBLE_FOR_REVIEW
   BLOCKED
 }
-
 enum DispositionRequestStatus {
   DRAFT
   SUBMITTED
@@ -4143,7 +3964,6 @@ enum DispositionRequestStatus {
   CANCELLED
   SAFE_HALTED
 }
-
 enum DispositionSafeHaltReason {
   LEGAL_HOLD_ACTIVE
   RETENTION_AUTHORITY_UNRESOLVED
@@ -4158,7 +3978,6 @@ enum DispositionSafeHaltReason {
   VENDOR_POLICY_CONFLICT
   ADVERSE_EVIDENCE_PROTECTED
 }
-
 enum DispositionMethod {
   SECURE_DESTRUCTION
   TRANSFER_TO_NATIONAL_ARCHIVES
@@ -4166,20 +3985,17 @@ enum DispositionMethod {
   DEACCESSION
   OTHER_APPROVED
 }
-
 enum DispositionExecutionResult {
   COMPLETED
   PARTIALLY_COMPLETED
   FAILED
   ABORTED
 }
-
 enum ExternalRecordsRepositoryStatus {
   ACTIVE
   SUSPENDED
   DECOMMISSIONED
 }
-
 model RecordsClassification {
   id                       String                      @id @default(uuid()) @db.Uuid
   code                     String                      @unique
@@ -4205,7 +4021,6 @@ model RecordsClassification {
   @@index([status])
   @@map("records_classifications")
 }
-
 model RetentionSchedule {
   id                      String                      @id @default(uuid()) @db.Uuid
   code                    String
@@ -4241,7 +4056,6 @@ model RetentionSchedule {
   @@index([status])
   @@map("retention_schedules")
 }
-
 model RetentionRule {
   id                   String                 @id @default(uuid()) @db.Uuid
   retentionScheduleId  String                 @db.Uuid
@@ -4260,7 +4074,6 @@ model RetentionRule {
   @@index([retentionScheduleId])
   @@map("retention_rules")
 }
-
 model RecordRetentionAssignment {
   id                      String                @id @default(uuid()) @db.Uuid
   targetType              LegalHoldTargetType
@@ -4283,7 +4096,6 @@ model RecordRetentionAssignment {
   @@index([targetType, targetReference])
   @@map("record_retention_assignments")
 }
-
 model LegalHold {
   id                 String                   @id @default(uuid()) @db.Uuid
   holdNumber         String                   @unique
@@ -4306,7 +4118,6 @@ model LegalHold {
   @@index([effectiveFrom])
   @@map("legal_holds")
 }
-
 model LegalHoldTarget {
   id                      String                 @id @default(uuid()) @db.Uuid
   legalHoldId             String                 @db.Uuid
@@ -4323,7 +4134,6 @@ model LegalHoldTarget {
   @@index([legalHoldId])
   @@map("legal_hold_targets")
 }
-
 model LegalHoldReleaseRecord {
   id                        String    @id @default(uuid()) @db.Uuid
   legalHoldId               String    @db.Uuid
@@ -4339,7 +4149,6 @@ model LegalHoldReleaseRecord {
   @@index([releasedAt])
   @@map("legal_hold_release_records")
 }
-
 model PreservationCollection {
   id                  String                        @id @default(uuid()) @db.Uuid
   collectionReference String                        @unique
@@ -4360,7 +4169,6 @@ model PreservationCollection {
   @@index([purpose])
   @@map("preservation_collections")
 }
-
 model PreservationCollectionItem {
   id                       String                 @id @default(uuid()) @db.Uuid
   preservationCollectionId String                 @db.Uuid
@@ -4375,7 +4183,6 @@ model PreservationCollectionItem {
   @@index([preservationCollectionId])
   @@map("preservation_collection_items")
 }
-
 model ExternalRecordsRepository {
   id                                   String                          @id @default(uuid()) @db.Uuid
   code                                 String                          @unique
@@ -4398,7 +4205,6 @@ model ExternalRecordsRepository {
 
   @@map("external_records_repositories")
 }
-
 model ArchivalTransfer {
   id                           String                    @id @default(uuid()) @db.Uuid
   transferNumber               String                    @unique
@@ -4425,7 +4231,6 @@ model ArchivalTransfer {
   @@index([destinationRepositoryId])
   @@map("archival_transfers")
 }
-
 model ArchivalTransferItem {
   id                 String              @id @default(uuid()) @db.Uuid
   archivalTransferId String              @db.Uuid
@@ -4441,7 +4246,6 @@ model ArchivalTransferItem {
   @@index([archivalTransferId])
   @@map("archival_transfer_items")
 }
-
 model RecordDispositionRequest {
   id                       String                       @id @default(uuid()) @db.Uuid
   requestReference         String                       @unique
@@ -4468,7 +4272,6 @@ model RecordDispositionRequest {
   @@index([retentionScheduleId])
   @@map("record_disposition_requests")
 }
-
 model RecordDispositionRecord {
   id                      String                     @id @default(uuid()) @db.Uuid
   dispositionRequestId    String                     @db.Uuid
@@ -4487,9 +4290,6 @@ model RecordDispositionRecord {
   @@index([dispositionDate])
   @@map("record_disposition_records")
 }
-
-// ─── Phase 8: Government Decisions — Findings, Reasons, Conditions & Notice ──
-
 enum GovernmentDecisionOutcome {
   APPROVED
   REFUSED
@@ -4498,26 +4298,22 @@ enum GovernmentDecisionOutcome {
   WITHDRAWN
   OTHER_AUTHORIZED_OUTCOME
 }
-
 enum DecisionFindingStatus {
   ACTIVE
   SUPERSEDED
   WITHDRAWN
 }
-
 enum DecisionAssistanceStatus {
   DRAFT
   ACCEPTED
   REJECTED
   REVISED
 }
-
 enum DecisionNoticeStatus {
   DRAFT
   FINALIZED
   SUPERSEDED
 }
-
 enum DecisionNoticeRightType {
   ADMINISTRATIVE_CORRECTION
   CLARIFICATION
@@ -4531,15 +4327,11 @@ enum DecisionNoticeRightType {
   JUDICIAL_REVIEW_INFORMATION
   OTHER_AUTHORIZED_ROUTE
 }
-
 enum DecisionNoticeEffectTiming {
   REQUIRED_BEFORE_EFFECTIVENESS
   REQUIRED_AFTER_DECISION
   INFORMATIONAL_ONLY
 }
-
-// ─── Phase 8A/8B: Decision Catalog, Readiness, and Authorized Decisions ────────
-
 enum DecisionTypeVersionStatus {
   DRAFT
   ACTIVE
@@ -4547,7 +4339,6 @@ enum DecisionTypeVersionStatus {
   SUPERSEDED
   RETIRED
 }
-
 enum DecisionReadinessOutcome {
   READY
   NOT_READY
@@ -4558,7 +4349,6 @@ enum DecisionReadinessOutcome {
   REQUIRES_ADDITIONAL_EVIDENCE
   REQUIRES_CO_APPROVAL
 }
-
 enum GovernmentDecisionStatus {
   DRAFT
   PENDING
@@ -4575,7 +4365,6 @@ enum GovernmentDecisionStatus {
   WITHDRAWN
   WITHDRAWN_BY_AUTHORIZED_PROCESS
 }
-
 enum GovernmentDecisionType {
   APPROVE
   APPROVE_WITH_CONDITIONS
@@ -4595,14 +4384,12 @@ enum GovernmentDecisionType {
   CLOSE
   OTHER
 }
-
 enum DecisionParticipantRole {
   DECISION_MAKER
   CO_APPROVER
   RECUSED
   OBSERVER
 }
-
 model DecisionType {
   id                  String                @id @default(uuid()) @db.Uuid
   code                String                @unique
@@ -4617,7 +4404,6 @@ model DecisionType {
   @@index([governmentServiceId])
   @@map("decision_types")
 }
-
 model DecisionTypeVersion {
   id                         String                               @id @default(uuid()) @db.Uuid
   decisionTypeId             String                               @db.Uuid
@@ -4649,7 +4435,6 @@ model DecisionTypeVersion {
   @@index([status])
   @@map("decision_type_versions")
 }
-
 model DecisionReadinessAssessment {
   id                                  String                     @id @default(uuid()) @db.Uuid
   assessmentNumber                    String                     @unique
@@ -4682,7 +4467,6 @@ model DecisionReadinessAssessment {
   @@index([assessedAt])
   @@map("decision_readiness_assessments")
 }
-
 model DecisionParticipant {
   id                    String                      @id @default(uuid()) @db.Uuid
   readinessAssessmentId String                      @db.Uuid
@@ -4704,7 +4488,6 @@ model DecisionParticipant {
   @@index([identityId])
   @@map("decision_participants")
 }
-
 model DecisionPreparationRecord {
   id                    String              @id @default(uuid()) @db.Uuid
   caseId                String              @db.Uuid
@@ -4726,7 +4509,6 @@ model DecisionPreparationRecord {
   @@index([decisionTypeVersionId])
   @@map("decision_preparation_records")
 }
-
 model GovernmentDecision {
   id                            String                        @id @default(uuid()) @db.Uuid
   decisionNumber                String                        @unique
@@ -4781,13 +4563,15 @@ model GovernmentDecision {
   issuanceReadinessAssessments  IssuanceReadinessAssessment[]
   issuanceEvents                IssuanceEvent[]
 
+
+  lifecycleDecisionType         GovernmentDecisionType?
+  redressChallengedMatters      RedressMatter[]                   @relation("RedressChallengedDecision")
   @@index([caseId])
   @@index([decisionTypeVersionId])
   @@index([decisionStatus])
   @@index([decidedAt])
   @@map("government_decisions")
 }
-
 model GovernmentServiceDecisionTypeDefinition {
   id                                         String                     @id @default(uuid()) @db.Uuid
   governmentServiceVersionId                 String                     @db.Uuid
@@ -4811,7 +4595,6 @@ model GovernmentServiceDecisionTypeDefinition {
   @@index([governmentServiceVersionId])
   @@map("government_service_decision_type_definitions")
 }
-
 model DecisionFinding {
   id                           String                @id @default(uuid()) @db.Uuid
   governmentDecisionId         String                @db.Uuid
@@ -4830,7 +4613,6 @@ model DecisionFinding {
   @@index([governmentDecisionId])
   @@map("decision_findings")
 }
-
 model DecisionReason {
   id                          String                     @id @default(uuid()) @db.Uuid
   governmentDecisionId        String                     @db.Uuid
@@ -4852,7 +4634,6 @@ model DecisionReason {
   @@index([decisionMakerOfficeholderId])
   @@map("decision_reasons")
 }
-
 model DecisionAssistanceRecord {
   id                          String                   @id @default(uuid()) @db.Uuid
   governmentDecisionId        String                   @db.Uuid
@@ -4876,7 +4657,6 @@ model DecisionAssistanceRecord {
   @@index([decisionReasonId])
   @@map("decision_assistance_records")
 }
-
 model DecisionNotice {
   id                               String                @id @default(uuid()) @db.Uuid
   governmentDecisionId             String                @db.Uuid
@@ -4904,7 +4684,6 @@ model DecisionNotice {
   @@index([noticeStatus])
   @@map("decision_notices")
 }
-
 model DecisionNoticeRight {
   id                String                  @id @default(uuid()) @db.Uuid
   decisionNoticeId  String                  @db.Uuid
@@ -4924,9 +4703,6 @@ model DecisionNoticeRight {
   @@index([decisionNoticeId])
   @@map("decision_notice_rights")
 }
-
-// ─── Phase 8E: Official Instrument Catalog and Controlled Issuance ───────────
-
 enum CatalogLifecycleStatus {
   DRAFT
   ACTIVE
@@ -4934,7 +4710,6 @@ enum CatalogLifecycleStatus {
   ARCHIVED
   SUSPENDED
 }
-
 enum OfficialInstrumentKind {
   APPROVAL_NOTICE
   LICENSE
@@ -4952,7 +4727,6 @@ enum OfficialInstrumentKind {
   ACKNOWLEDGMENT
   OTHER_AUTHORIZED_INSTRUMENT
 }
-
 enum DecisionConditionType {
   PRECEDENT_TO_ISSUANCE
   PRECEDENT_TO_ACTIVITY
@@ -4964,7 +4738,6 @@ enum DecisionConditionType {
   PROFESSIONAL_CONFIRMATION
   OTHER_AUTHORIZED_CONDITION
 }
-
 enum DecisionConditionStatus {
   NOT_YET_EFFECTIVE
   PENDING
@@ -4977,20 +4750,17 @@ enum DecisionConditionStatus {
   SUPERSEDED
   CLOSED
 }
-
 enum InstrumentIssuerSource {
   ABSEZ_ISSUED
   RETAINED_NATIONAL_COORDINATED
   EXTERNAL_AUTHENTICATED
 }
-
 enum InstrumentNumberReservationStatus {
   RESERVED
   COMMITTED
   RELEASED
   EXPIRED
 }
-
 enum OfficialInstrumentType {
   LICENSE
   PERMIT
@@ -5000,14 +4770,12 @@ enum OfficialInstrumentType {
   APPROVAL
   OTHER
 }
-
 enum InstrumentJurisdictionScope {
   NATIONAL
   ABSEZ
   INSTITUTIONAL
   OTHER
 }
-
 enum OfficialInstrumentStatus {
   DRAFT
   PENDING_ISSUANCE
@@ -5027,7 +4795,6 @@ enum OfficialInstrumentStatus {
   REPLACED
   CLOSED
 }
-
 enum InstrumentLifecycleEventType {
   ISSUED
   BECAME_EFFECTIVE
@@ -5046,7 +4813,6 @@ enum InstrumentLifecycleEventType {
   SUPERSEDED
   CLOSED
 }
-
 enum ReviewStayStatus {
   NONE
   INTERIM_STAY_AUTHORIZED
@@ -5054,46 +4820,39 @@ enum ReviewStayStatus {
   STAY_EXPIRED
   STAY_LIFTED
 }
-
 enum ReviewInterimEffect {
   NONE
   PARTIAL_STAY
   FULL_STAY
   OPERATIONAL_CONTINUATION
 }
-
 enum SurrenderType {
   APPLICANT_REQUEST
   INSTITUTIONAL_ACCEPTANCE
   VOLUNTARY_CESSATION
 }
-
 enum PriorVersionTreatment {
   SUPERSEDED
   PARTIALLY_SUPERSEDED
   RETAINED_HISTORICAL
   REPLACED
 }
-
 enum IssuanceReadinessOutcome {
   READY
   NOT_READY
   BLOCKED
 }
-
 enum IssuanceEventStatus {
   INITIATED
   COMPLETED
   FAILED
   ROLLED_BACK
 }
-
 enum InstrumentTypePublicVerificationMode {
   NOT_PERMITTED
   LIMITED
   FULL
 }
-
 enum InstrumentDeliveryChannel {
   PORTAL
   SECURE_EMAIL
@@ -5102,7 +4861,6 @@ enum InstrumentDeliveryChannel {
   CONTROLLED_DOWNLOAD
   PHYSICAL_OR_MANUAL_REFERENCE
 }
-
 enum InstrumentDeliveryStatus {
   PREPARED
   QUEUED
@@ -5111,14 +4869,12 @@ enum InstrumentDeliveryStatus {
   FAILED
   CANCELLED
 }
-
 enum InstrumentDeliveryClassification {
   PUBLIC
   OFFICIAL
   RESTRICTED
   SECRET
 }
-
 enum InstrumentAcknowledgmentMethod {
   PORTAL_CONFIRMATION
   SECURE_LINK_CONFIRMATION
@@ -5127,7 +4883,6 @@ enum InstrumentAcknowledgmentMethod {
   MANUAL_COUNTERSIGN
   OTHER_CONTROLLED
 }
-
 enum InstrumentVerificationStatus {
   CURRENT
   NOT_YET_EFFECTIVE
@@ -5141,18 +4896,15 @@ enum InstrumentVerificationStatus {
   VALID_REFERENCE
   NOT_PUBLICLY_DISCLOSABLE
 }
-
 enum InstrumentVerificationEventType {
   VERIFICATION_REQUEST
   INTERNAL_VERIFICATION
 }
-
 enum InstrumentVerificationRequestSource {
   PUBLIC
   INTERNAL
   SYSTEM
 }
-
 enum InstrumentDeliveryAuditEventType {
   DELIVERY_PREPARED
   DELIVERY_SENT
@@ -5163,7 +4915,6 @@ enum InstrumentDeliveryAuditEventType {
   VERIFICATION_REQUEST
   RECEIPT_ACKNOWLEDGMENT
 }
-
 model DecisionCondition {
   id                          String                  @id @default(uuid()) @db.Uuid
   governmentDecisionId        String                  @db.Uuid
@@ -5194,7 +4945,6 @@ model DecisionCondition {
   @@index([status])
   @@map("decision_conditions")
 }
-
 model InstrumentTypeDefinition {
   id              String                  @id @default(uuid()) @db.Uuid
   code            String                  @unique
@@ -5208,7 +4958,6 @@ model InstrumentTypeDefinition {
 
   @@map("instrument_type_definitions")
 }
-
 model InstrumentTypeVersion {
   id                                String                               @id @default(uuid()) @db.Uuid
   instrumentTypeDefinitionId        String                               @db.Uuid
@@ -5258,7 +5007,6 @@ model InstrumentTypeVersion {
   @@index([numberingRuleId])
   @@map("instrument_type_versions")
 }
-
 model InstrumentTypeEligibleDecisionType {
   id                      String                @id @default(uuid()) @db.Uuid
   instrumentTypeVersionId String                @db.Uuid
@@ -5271,7 +5019,6 @@ model InstrumentTypeEligibleDecisionType {
   @@index([decisionTypeVersionId])
   @@map("instrument_type_eligible_decision_types")
 }
-
 model InstrumentTemplate {
   id                      String                      @id @default(uuid()) @db.Uuid
   code                    String                      @unique
@@ -5286,7 +5033,6 @@ model InstrumentTemplate {
   @@index([instrumentTypeVersionId])
   @@map("instrument_templates")
 }
-
 model InstrumentTemplateVersion {
   id                         String                      @id @default(uuid()) @db.Uuid
   instrumentTemplateId       String                      @db.Uuid
@@ -5308,7 +5054,6 @@ model InstrumentTemplateVersion {
   @@index([instrumentTemplateId])
   @@map("instrument_template_versions")
 }
-
 model InstrumentNumberingRule {
   id                     String                        @id @default(uuid()) @db.Uuid
   institutionId          String                        @db.Uuid
@@ -5330,7 +5075,6 @@ model InstrumentNumberingRule {
   @@index([institutionId])
   @@map("instrument_numbering_rules")
 }
-
 model InstrumentNumberReservation {
   id                   String                            @id @default(uuid()) @db.Uuid
   numberingRuleId      String                            @db.Uuid
@@ -5349,7 +5093,6 @@ model InstrumentNumberReservation {
   @@index([numberingRuleId, status])
   @@map("instrument_number_reservations")
 }
-
 model OfficialInstrument {
   id                           String                            @id @default(uuid()) @db.Uuid
   instrumentNumber             String?                           @unique
@@ -5404,6 +5147,9 @@ model OfficialInstrument {
   complianceEscalations           ComplianceEscalation[]
   protectiveActionRecommendations ProtectiveActionRecommendation[]
 
+
+  redressChallengedMatters     RedressMatter[]                   @relation("RedressChallengedInstrument")
+  redressStayRecords           ReviewStayRecord[]                @relation("RedressStayInstrument")
   @@index([caseId])
   @@index([governmentDecisionId])
   @@index([instrumentTypeVersionId])
@@ -5414,7 +5160,6 @@ model OfficialInstrument {
   @@index([publicVerificationToken])
   @@map("official_instruments")
 }
-
 model OfficialInstrumentVersion {
   id                          String                            @id @default(uuid()) @db.Uuid
   officialInstrumentId        String                            @db.Uuid
@@ -5457,7 +5202,6 @@ model OfficialInstrumentVersion {
   @@index([isCurrent])
   @@map("official_instrument_versions")
 }
-
 model IssuanceReadinessAssessment {
   id                          String                   @id @default(uuid()) @db.Uuid
   officialInstrumentId        String?                  @db.Uuid
@@ -5479,7 +5223,6 @@ model IssuanceReadinessAssessment {
   @@index([officialInstrumentId])
   @@map("issuance_readiness_assessments")
 }
-
 model IssuanceEvent {
   id                          String                      @id @default(uuid()) @db.Uuid
   officialInstrumentId        String                      @db.Uuid
@@ -5510,9 +5253,6 @@ model IssuanceEvent {
   @@index([status])
   @@map("issuance_events")
 }
-
-// ─── Phase 8F: Official delivery, receipt, and instrument verification ───────────
-
 model InstrumentDelivery {
   id                        String                            @id @default(uuid()) @db.Uuid
   officialInstrumentId      String                            @db.Uuid
@@ -5546,7 +5286,6 @@ model InstrumentDelivery {
   @@index([deliveryChannel])
   @@map("instrument_deliveries")
 }
-
 model InstrumentDeliveryAttempt {
   id                        String                            @id @default(uuid()) @db.Uuid
   instrumentDeliveryId      String                            @db.Uuid
@@ -5569,7 +5308,6 @@ model InstrumentDeliveryAttempt {
   @@index([status])
   @@map("instrument_delivery_attempts")
 }
-
 model InstrumentReceiptAcknowledgment {
   id                          String                         @id @default(uuid()) @db.Uuid
   officialInstrumentId        String                         @db.Uuid
@@ -5597,7 +5335,6 @@ model InstrumentReceiptAcknowledgment {
   @@index([receivedAt])
   @@map("instrument_receipt_acknowledgments")
 }
-
 model InstrumentVerificationRecord {
   id                   String                        @id @default(uuid()) @db.Uuid
   officialInstrumentId String                        @db.Uuid
@@ -5613,7 +5350,6 @@ model InstrumentVerificationRecord {
   @@index([instrumentVersionId])
   @@map("instrument_verification_records")
 }
-
 model InstrumentVerificationEvent {
   id                   String                              @id @default(uuid()) @db.Uuid
   verificationRecordId String                              @db.Uuid
@@ -5631,7 +5367,6 @@ model InstrumentVerificationEvent {
   @@index([clientReferenceHash])
   @@map("instrument_verification_events")
 }
-
 model InstrumentDeliveryAuditEvent {
   id                   String                           @id @default(uuid()) @db.Uuid
   officialInstrumentId String                           @db.Uuid
@@ -5652,7 +5387,6 @@ model InstrumentDeliveryAuditEvent {
   @@index([recordedAt])
   @@map("instrument_delivery_audit_events")
 }
-
 model InstrumentDownloadEvent {
   id                   String                    @id @default(uuid()) @db.Uuid
   officialInstrumentId String                    @db.Uuid
@@ -5671,9 +5405,6 @@ model InstrumentDownloadEvent {
   @@index([downloadedAt])
   @@map("instrument_download_events")
 }
-
-// ─── Phase 8G: Instrument Lifecycle (renamed to avoid 8E collision) ────────────
-
 enum InstrumentControllingDecisionType {
   APPROVE
   APPROVE_WITH_CONDITIONS
@@ -5693,7 +5424,6 @@ enum InstrumentControllingDecisionType {
   CLOSE
   OTHER
 }
-
 enum InstrumentControllingDecisionStatus {
   DRAFT
   PENDING
@@ -5701,7 +5431,6 @@ enum InstrumentControllingDecisionStatus {
   SUPERSEDED
   WITHDRAWN
 }
-
 enum LifecycleOfficialInstrumentType {
   LICENSE
   PERMIT
@@ -5711,7 +5440,6 @@ enum LifecycleOfficialInstrumentType {
   APPROVAL
   OTHER
 }
-
 enum LifecycleOfficialInstrumentStatus {
   DRAFT
   ISSUED
@@ -5730,7 +5458,6 @@ enum LifecycleOfficialInstrumentStatus {
   REPLACED
   CLOSED
 }
-
 model InstrumentControllingDecision {
   id                          String                               @id @default(uuid()) @db.Uuid
   decisionNumber              String                               @unique
@@ -5775,7 +5502,6 @@ model InstrumentControllingDecision {
   @@index([decidingOfficeholderId])
   @@map("instrument_controlling_decisions")
 }
-
 model LifecycleOfficialInstrument {
   id                          String                               @id @default(uuid()) @db.Uuid
   instrumentNumber            String                               @unique
@@ -5824,7 +5550,6 @@ model LifecycleOfficialInstrument {
   @@index([publicVerificationToken])
   @@map("lifecycle_official_instruments")
 }
-
 model LifecycleOfficialInstrumentVersion {
   id                        String                              @id @default(uuid()) @db.Uuid
   instrumentId              String                              @db.Uuid
@@ -5858,7 +5583,6 @@ model LifecycleOfficialInstrumentVersion {
   @@index([isCurrent])
   @@map("lifecycle_official_instrument_versions")
 }
-
 model InstrumentLifecycleEvent {
   id                    String                             @id @default(uuid()) @db.Uuid
   instrumentId          String                             @db.Uuid
@@ -5883,7 +5607,6 @@ model InstrumentLifecycleEvent {
   @@index([controllingDecisionId])
   @@map("instrument_lifecycle_events")
 }
-
 model InstrumentLifecycleDecisionLink {
   id                   String                        @id @default(uuid()) @db.Uuid
   lifecycleEventId     String                        @db.Uuid
@@ -5897,7 +5620,6 @@ model InstrumentLifecycleDecisionLink {
   @@index([governmentDecisionId])
   @@map("instrument_lifecycle_decision_links")
 }
-
 model InstrumentAmendmentRecord {
   id                    String                             @id @default(uuid()) @db.Uuid
   instrumentId          String                             @db.Uuid
@@ -5925,7 +5647,6 @@ model InstrumentAmendmentRecord {
   @@index([controllingDecisionId])
   @@map("instrument_amendment_records")
 }
-
 model InstrumentRenewalRecord {
   id                            String                              @id @default(uuid()) @db.Uuid
   instrumentId                  String                              @db.Uuid
@@ -5955,7 +5676,6 @@ model InstrumentRenewalRecord {
   @@index([controllingDecisionId])
   @@map("instrument_renewal_records")
 }
-
 model InstrumentSuspensionRecord {
   id                           String                        @id @default(uuid()) @db.Uuid
   instrumentId                 String                        @db.Uuid
@@ -5985,7 +5705,6 @@ model InstrumentSuspensionRecord {
   @@index([controllingDecisionId])
   @@map("instrument_suspension_records")
 }
-
 model InstrumentRevocationRecord {
   id                           String                        @id @default(uuid()) @db.Uuid
   instrumentId                 String                        @db.Uuid
@@ -6010,7 +5729,6 @@ model InstrumentRevocationRecord {
   @@index([controllingDecisionId])
   @@map("instrument_revocation_records")
 }
-
 model InstrumentReinstatementRecord {
   id                      String                        @id @default(uuid()) @db.Uuid
   instrumentId            String                        @db.Uuid
@@ -6031,7 +5749,6 @@ model InstrumentReinstatementRecord {
   @@index([controllingDecisionId])
   @@map("instrument_reinstatement_records")
 }
-
 model InstrumentReplacementRecord {
   id                    String                             @id @default(uuid()) @db.Uuid
   instrumentId          String                             @db.Uuid
@@ -6052,7 +5769,6 @@ model InstrumentReplacementRecord {
   @@index([controllingDecisionId])
   @@map("instrument_replacement_records")
 }
-
 model InstrumentSurrenderRecord {
   id                               String                         @id @default(uuid()) @db.Uuid
   instrumentId                     String                         @db.Uuid
@@ -6071,7 +5787,6 @@ model InstrumentSurrenderRecord {
   @@index([instrumentId])
   @@map("instrument_surrender_records")
 }
-
 model DecisionReviewReference {
   id                        String                        @id @default(uuid()) @db.Uuid
   challengedDecisionId      String                        @db.Uuid
@@ -6098,9 +5813,6 @@ model DecisionReviewReference {
   @@index([stayStatus])
   @@map("decision_review_references")
 }
-
-// ─── Phase 9A: Continuing Obligations and Compliance Foundation ───────────────
-
 enum ComplianceMatterStatus {
   OPEN
   MONITORING
@@ -6115,14 +5827,12 @@ enum ComplianceMatterStatus {
   ROUTED_IMMEDIATE_ACTION
   CLOSED
 }
-
 enum ContinuingObligationSourceType {
   DECISION_CONDITION
   INSTRUMENT_VERSION
   GOVERNING_SOURCE
   AUTHORIZED_REQUIREMENT
 }
-
 enum ContinuingObligationType {
   REPORTING
   FINANCIAL
@@ -6142,7 +5852,6 @@ enum ContinuingObligationType {
   GOVERNMENT_CONFIRMATION
   OTHER_AUTHORIZED
 }
-
 enum ContinuingObligationStatus {
   NOT_YET_DUE
   DUE
@@ -6156,7 +5865,6 @@ enum ContinuingObligationStatus {
   SUPERSEDED
   CLOSED
 }
-
 enum ObligationScheduleStatus {
   SCHEDULED
   REMINDER_SENT
@@ -6166,7 +5874,6 @@ enum ObligationScheduleStatus {
   SUPERSEDED
   CLOSED
 }
-
 enum ObligationStatusChangeActor {
   COMPLIANCE_ADMIN
   REVIEWER
@@ -6175,7 +5882,6 @@ enum ObligationStatusChangeActor {
   AI_ASSISTANCE
   PAYMENT_SYSTEM
 }
-
 model ComplianceMatter {
   id                         String                         @id @default(uuid()) @db.Uuid
   complianceMatterNumber     String                         @unique
@@ -6216,7 +5922,6 @@ model ComplianceMatter {
   @@index([status])
   @@map("compliance_matters")
 }
-
 model ContinuingObligation {
   id                                String                         @id @default(uuid()) @db.Uuid
   complianceMatterId                String                         @db.Uuid
@@ -6267,7 +5972,6 @@ model ContinuingObligation {
   @@index([status])
   @@map("continuing_obligations")
 }
-
 model ObligationSchedule {
   id                     String                   @id @default(uuid()) @db.Uuid
   continuingObligationId String                   @db.Uuid
@@ -6286,7 +5990,6 @@ model ObligationSchedule {
   @@index([status])
   @@map("obligation_schedules")
 }
-
 model ObligationStatusHistory {
   id                     String                      @id @default(uuid()) @db.Uuid
   continuingObligationId String                      @db.Uuid
@@ -6303,9 +6006,6 @@ model ObligationStatusHistory {
   @@index([continuingObligationId, changedAt])
   @@map("obligation_status_history")
 }
-
-// ─── Phase 9B: Compliance Reporting and Monitoring Evidence ───────────────────
-
 enum ComplianceSubmissionStatus {
   RECEIVED
   INCOMPLETE
@@ -6315,7 +6015,6 @@ enum ComplianceSubmissionStatus {
   WITHDRAWN
   SUPERSEDED
 }
-
 enum ObligationEvidenceLinkRole {
   HOLDER_SUBMITTED
   INDEPENDENTLY_VERIFIED
@@ -6323,7 +6022,6 @@ enum ObligationEvidenceLinkRole {
   GOVERNMENT_OBSERVATION
   OTHER_REFERENCE
 }
-
 enum ComplianceReviewOutcome {
   PENDING
   OBLIGATION_NOT_SATISFIED
@@ -6331,14 +6029,12 @@ enum ComplianceReviewOutcome {
   ADDITIONAL_EVIDENCE_REQUIRED
   REFERRED
 }
-
 enum ComplianceObservationClassification {
   OBSERVATION
   CONDITION_NOTED
   POSITIVE_INDICATOR
   INFORMATION_REQUESTED
 }
-
 enum ComplianceReviewStatus {
   PENDING
   IN_REVIEW
@@ -6348,7 +6044,6 @@ enum ComplianceReviewStatus {
   DISPUTED
   SAFE_HALTED
 }
-
 model ComplianceSubmission {
   id                        String                        @id @default(uuid()) @db.Uuid
   submissionNumber          String                        @unique
@@ -6378,7 +6073,6 @@ model ComplianceSubmission {
   @@index([submittedAt])
   @@map("compliance_submissions")
 }
-
 model ComplianceSubmissionVersion {
   id                   String                        @id @default(uuid()) @db.Uuid
   submissionId         String                        @db.Uuid
@@ -6401,7 +6095,6 @@ model ComplianceSubmissionVersion {
   @@index([submittedAt])
   @@map("compliance_submission_versions")
 }
-
 model ObligationEvidenceLink {
   id                          String                     @id @default(uuid()) @db.Uuid
   continuingObligationId      String                     @db.Uuid
@@ -6424,7 +6117,6 @@ model ObligationEvidenceLink {
   @@index([isHolderSubmitted])
   @@map("obligation_evidence_links")
 }
-
 model ComplianceReview {
   id                          String                      @id @default(uuid()) @db.Uuid
   reviewNumber                String                      @unique
@@ -6459,7 +6151,6 @@ model ComplianceReview {
   @@index([reviewerIdentityId])
   @@map("compliance_reviews")
 }
-
 model ComplianceReviewItem {
   id                 String           @id @default(uuid()) @db.Uuid
   complianceReviewId String           @db.Uuid
@@ -6476,9 +6167,6 @@ model ComplianceReviewItem {
   @@index([complianceReviewId])
   @@map("compliance_review_items")
 }
-
-// ─── Phase 9G: Continuous Compliance Status and Oversight ─────────────────────
-
 enum ComplianceProjectionStatus {
   NO_CURRENT_ASSESSMENT
   MONITORING
@@ -6495,14 +6183,12 @@ enum ComplianceProjectionStatus {
   CLOSED
   UNRESOLVED
 }
-
 enum ComplianceDashboardAudience {
   HOLDER
   OFFICIAL
   DEPARTMENT_HEAD
   EXECUTIVE_OVERSIGHT
 }
-
 enum ComplianceIndicatorType {
   OBLIGATIONS_DUE
   OBLIGATIONS_OVERDUE
@@ -6516,7 +6202,6 @@ enum ComplianceIndicatorType {
   EXPIRING_INSTRUMENT
   UNRESOLVED_EXTERNAL_DEPENDENCIES
 }
-
 enum MonitoringRuleType {
   DUE_DATE_WARNING
   EXPIRY_WARNING
@@ -6527,28 +6212,24 @@ enum MonitoringRuleType {
   EVIDENCE_EXPIRY
   REQUIRED_REVIEW_INTERVAL
 }
-
 enum MonitoringRuleStatus {
   DRAFT
   ACTIVE
   SUSPENDED
   RETIRED
 }
-
 enum ComplianceAlertLevel {
   INFORMATION
   ATTENTION
   ELEVATED
   CRITICAL
 }
-
 enum ComplianceAlertStatus {
   OPEN
   ACKNOWLEDGED
   RESOLVED
   SUPERSEDED
 }
-
 enum ComplianceMonitoringEventType {
   RULE_EVALUATED
   PROJECTION_REFRESHED
@@ -6557,7 +6238,6 @@ enum ComplianceMonitoringEventType {
   REVALIDATION_TRIGGERED
   CACHE_INVALIDATED
 }
-
 enum ComplianceRevalidationTrigger {
   MATERIAL_CONDITION_CHANGE
   INSTRUMENT_AMENDED
@@ -6569,11 +6249,9 @@ enum ComplianceRevalidationTrigger {
   GOVERNMENT_DETERMINATION_CHANGE
   SCHEDULED_REVALIDATION_REACHED
 }
-
 enum ComplianceRiskScorePurpose {
   PRIORITIZATION_ONLY
 }
-
 model ComplianceStatusProjection {
   id                          String                         @id @default(uuid()) @db.Uuid
   audience                    ComplianceDashboardAudience
@@ -6622,7 +6300,6 @@ model ComplianceStatusProjection {
   @@index([lastDerivedAt])
   @@map("compliance_status_projections")
 }
-
 model ComplianceIndicator {
   id                  String                     @id @default(uuid()) @db.Uuid
   projectionId        String                     @db.Uuid
@@ -6637,7 +6314,6 @@ model ComplianceIndicator {
   @@index([indicatorType])
   @@map("compliance_indicators")
 }
-
 model MonitoringRule {
   id                 String                      @id @default(uuid()) @db.Uuid
   code               String                      @unique
@@ -6664,7 +6340,6 @@ model MonitoringRule {
   @@index([institutionId])
   @@map("monitoring_rules")
 }
-
 model ComplianceMonitoringEvent {
   id               String                        @id @default(uuid()) @db.Uuid
   projectionId     String?                       @db.Uuid
@@ -6683,7 +6358,6 @@ model ComplianceMonitoringEvent {
   @@index([occurredAt])
   @@map("compliance_monitoring_events")
 }
-
 model ComplianceAlert {
   id                        String                     @id @default(uuid()) @db.Uuid
   projectionId              String                     @db.Uuid
@@ -6713,7 +6387,6 @@ model ComplianceAlert {
   @@index([status])
   @@map("compliance_alerts")
 }
-
 model ComplianceRevalidationRecord {
   id                     String                        @id @default(uuid()) @db.Uuid
   projectionId           String                        @db.Uuid
@@ -6732,16 +6405,12 @@ model ComplianceRevalidationRecord {
   @@index([trigger])
   @@map("compliance_revalidation_records")
 }
-
-// ─── Phase 9C: Inspection Planning, Assignment, and Scheduling ─────────────────
-
 enum InspectionTypeDefinitionStatus {
   DRAFT
   ACTIVE
   SUSPENDED
   RETIRED
 }
-
 enum InspectionPlanTriggerType {
   SCHEDULED_PERIODIC
   CONDITION_REQUIRED
@@ -6755,7 +6424,6 @@ enum InspectionPlanTriggerType {
   PROFESSIONAL_REFERRAL
   OTHER_AUTHORIZED
 }
-
 enum InspectionPlanStatus {
   DRAFT
   PENDING_APPROVAL
@@ -6765,27 +6433,23 @@ enum InspectionPlanStatus {
   COMPLETED
   CANCELLED
 }
-
 enum InspectionNoticeStatus {
   NOT_REQUIRED
   PENDING
   DELIVERED
   WAIVED_AUTHORIZED
 }
-
 enum InspectionAssignmentStatus {
   ACTIVE
   ENDED
   REVOKED
   CONFLICT_BLOCKED
 }
-
 enum InspectorIndependenceStatus {
   INDEPENDENT
   DECLARED_CONFLICT
   BLOCKED
 }
-
 enum InspectionScheduleEventType {
   PLANNED
   NOTICE_PREPARED
@@ -6794,7 +6458,6 @@ enum InspectionScheduleEventType {
   CANCELLED
   SCOPE_AMENDED_AUTHORIZED
 }
-
 model InspectionTypeDefinition {
   id                        String                         @id @default(uuid()) @db.Uuid
   code                      String                         @unique
@@ -6827,7 +6490,6 @@ model InspectionTypeDefinition {
   @@index([status])
   @@map("inspection_type_definitions")
 }
-
 model InspectionPlan {
   id                         String                    @id @default(uuid()) @db.Uuid
   inspectionNumber           String                    @unique
@@ -6873,7 +6535,6 @@ model InspectionPlan {
   @@index([triggerType])
   @@map("inspection_plans")
 }
-
 model InspectionAssignment {
   id                     String                          @id @default(uuid()) @db.Uuid
   inspectionPlanId       String                          @db.Uuid
@@ -6906,7 +6567,6 @@ model InspectionAssignment {
   @@index([status])
   @@map("inspection_assignments")
 }
-
 model InspectorQualificationSnapshot {
   id                     String               @id @default(uuid()) @db.Uuid
   inspectionAssignmentId String               @unique @db.Uuid
@@ -6928,7 +6588,6 @@ model InspectorQualificationSnapshot {
   @@index([validUntil])
   @@map("inspector_qualification_snapshots")
 }
-
 model InspectionScheduleEvent {
   id                   String                      @id @default(uuid()) @db.Uuid
   inspectionPlanId     String                      @db.Uuid
@@ -6947,16 +6606,12 @@ model InspectionScheduleEvent {
   @@index([scheduledAt])
   @@map("inspection_schedule_events")
 }
-
-// ─── Phase 9D: Inspection Execution, Findings, and Evidence ────────────────────
-
 enum InspectionSessionStatus {
   PENDING_START
   IN_PROGRESS
   COMPLETED
   CANCELLED
 }
-
 enum InspectionFindingSeverity {
   INFORMATIONAL
   MINOR
@@ -6964,7 +6619,6 @@ enum InspectionFindingSeverity {
   MAJOR
   CRITICAL
 }
-
 enum InspectionFindingStatus {
   DRAFT
   UNDER_REVIEW
@@ -6976,7 +6630,6 @@ enum InspectionFindingStatus {
   REOPENED
   SUPERSEDED
 }
-
 enum InspectionResponseType {
   COMMENT
   DISPUTED_FACTS
@@ -6984,7 +6637,6 @@ enum InspectionResponseType {
   CORRECTION
   CONTEXT
 }
-
 model InspectionSession {
   id                                     String                      @id @default(uuid()) @db.Uuid
   inspectionRecordId                     String                      @unique @db.Uuid
@@ -7023,7 +6675,6 @@ model InspectionSession {
   @@index([jurisdictionId])
   @@map("inspection_sessions")
 }
-
 model InspectionObservation {
   id                      String                          @id @default(uuid()) @db.Uuid
   inspectionSessionId     String                          @db.Uuid
@@ -7046,7 +6697,6 @@ model InspectionObservation {
   @@index([inspectorIdentityId])
   @@map("inspection_observations")
 }
-
 model InspectionObservationEvidence {
   id                      String                @id @default(uuid()) @db.Uuid
   inspectionObservationId String                @db.Uuid
@@ -7059,7 +6709,6 @@ model InspectionObservationEvidence {
   @@index([evidenceRecordId])
   @@map("inspection_observation_evidence")
 }
-
 model InspectionFinding {
   id                                      String                      @id @default(uuid()) @db.Uuid
   inspectionSessionId                     String                      @db.Uuid
@@ -7104,7 +6753,6 @@ model InspectionFinding {
   @@index([status])
   @@map("inspection_findings")
 }
-
 model FindingRequirementLink {
   id                   String            @id @default(uuid()) @db.Uuid
   inspectionFindingId  String            @db.Uuid
@@ -7119,7 +6767,6 @@ model FindingRequirementLink {
   @@index([governingSourceId])
   @@map("finding_requirement_links")
 }
-
 model InspectionFindingEvidence {
   id                  String            @id @default(uuid()) @db.Uuid
   inspectionFindingId String            @db.Uuid
@@ -7132,7 +6779,6 @@ model InspectionFindingEvidence {
   @@index([evidenceRecordId])
   @@map("inspection_finding_evidence")
 }
-
 model InspectionResponse {
   id                      String                       @id @default(uuid()) @db.Uuid
   inspectionSessionId     String                       @db.Uuid
@@ -7156,7 +6802,6 @@ model InspectionResponse {
   @@index([inspectionObservationId])
   @@map("inspection_responses")
 }
-
 model InspectionResponseEvidence {
   id                   String             @id @default(uuid()) @db.Uuid
   inspectionResponseId String             @db.Uuid
@@ -7169,7 +6814,6 @@ model InspectionResponseEvidence {
   @@index([evidenceRecordId])
   @@map("inspection_response_evidence")
 }
-
 model InspectionCompletionRecord {
   id                                                 String                     @id @default(uuid()) @db.Uuid
   inspectionSessionId                                String                     @unique @db.Uuid
@@ -7199,16 +6843,12 @@ model InspectionCompletionRecord {
   @@index([completedAt])
   @@map("inspection_completion_records")
 }
-
-// ─── Phase 9: Inspection & Compliance ──────────────────────────────────────────
-
 enum ComplianceRiskLevel {
   LOW
   MODERATE
   HIGH
   CRITICAL
 }
-
 enum ComplianceImmediateActionRoute {
   NONE
   IMMEDIATE_RESTRICTION
@@ -7217,7 +6857,6 @@ enum ComplianceImmediateActionRoute {
   RETAINED_NATIONAL_REFERRAL
   EMERGENCY_ACTION
 }
-
 enum CorrectiveActionPlanStatus {
   PROPOSED
   REVIEW_REQUIRED
@@ -7233,7 +6872,6 @@ enum CorrectiveActionPlanStatus {
   SUPERSEDED
   CLOSED
 }
-
 enum CorrectiveActionItemStatus {
   PENDING
   IN_PROGRESS
@@ -7243,14 +6881,12 @@ enum CorrectiveActionItemStatus {
   FAILED
   OVERDUE
 }
-
 enum CorrectiveActionSubmissionStatus {
   SUBMITTED
   UNDER_REVIEW
   ACCEPTED_FOR_VERIFICATION
   REJECTED
 }
-
 enum CorrectiveActionVerificationResult {
   VERIFIED
   PARTIALLY_VERIFIED
@@ -7258,19 +6894,16 @@ enum CorrectiveActionVerificationResult {
   UNRESOLVED
   REINSPECTION_REQUIRED
 }
-
 enum ReinspectionRequirementStatus {
   REQUIRED
   SCHEDULED
   COMPLETED
   WAIVED_BY_AUTHORIZED_DECISION
 }
-
 enum ComplianceFindingClosureStatus {
   ACTIVE
   SUPERSEDED_BY_REOPENING
 }
-
 enum ComplianceFindingReopeningReason {
   MATERIAL_NEW_EVIDENCE
   FALSE_OR_MISLEADING_EVIDENCE
@@ -7278,7 +6911,6 @@ enum ComplianceFindingReopeningReason {
   RECURRENCE
   AUTHORIZED_REVIEW_MATERIAL_DEFECT
 }
-
 enum RootCauseAnalysisMethod {
   STRUCTURED_FIVE_WHY
   STRUCTURED_FISHBONE
@@ -7287,7 +6919,6 @@ enum RootCauseAnalysisMethod {
   AI_ASSISTED_DRAFT
   OTHER_CONTROLLED
 }
-
 model CorrectiveActionPlan {
   id                          String                         @id @default(uuid()) @db.Uuid
   planNumber                  String                         @unique
@@ -7326,7 +6957,6 @@ model CorrectiveActionPlan {
   @@index([dueDate])
   @@map("corrective_action_plans")
 }
-
 model CorrectiveActionItem {
   id                     String                         @id @default(uuid()) @db.Uuid
   correctiveActionPlanId String                         @db.Uuid
@@ -7347,7 +6977,6 @@ model CorrectiveActionItem {
   @@index([status])
   @@map("corrective_action_items")
 }
-
 model CorrectiveActionSubmission {
   id                     String                               @id @default(uuid()) @db.Uuid
   correctiveActionPlanId String                               @db.Uuid
@@ -7367,7 +6996,6 @@ model CorrectiveActionSubmission {
   @@index([submittedByIdentityId])
   @@map("corrective_action_submissions")
 }
-
 model CorrectiveActionSubmissionEvidence {
   id               String                     @id @default(uuid()) @db.Uuid
   submissionId     String                     @db.Uuid
@@ -7380,7 +7008,6 @@ model CorrectiveActionSubmissionEvidence {
   @@index([evidenceRecordId])
   @@map("corrective_action_submission_evidence")
 }
-
 model CorrectiveActionVerification {
   id                          String                                 @id @default(uuid()) @db.Uuid
   correctiveActionPlanId      String                                 @db.Uuid
@@ -7409,7 +7036,6 @@ model CorrectiveActionVerification {
   @@index([result])
   @@map("corrective_action_verifications")
 }
-
 model CorrectiveActionVerificationEvidence {
   id               String                       @id @default(uuid()) @db.Uuid
   verificationId   String                       @db.Uuid
@@ -7422,7 +7048,6 @@ model CorrectiveActionVerificationEvidence {
   @@index([evidenceRecordId])
   @@map("corrective_action_verification_evidence")
 }
-
 model ReinspectionRequirement {
   id                          String                        @id @default(uuid()) @db.Uuid
   inspectionFindingId         String                        @db.Uuid
@@ -7444,7 +7069,6 @@ model ReinspectionRequirement {
   @@index([status])
   @@map("reinspection_requirements")
 }
-
 model ComplianceFindingClosure {
   id                          String                         @id @default(uuid()) @db.Uuid
   inspectionFindingId         String                         @db.Uuid
@@ -7472,7 +7096,6 @@ model ComplianceFindingClosure {
   @@index([status])
   @@map("compliance_finding_closures")
 }
-
 model ComplianceFindingReopening {
   id                     String                           @id @default(uuid()) @db.Uuid
   inspectionFindingId    String                           @db.Uuid
@@ -7493,14 +7116,12 @@ model ComplianceFindingReopening {
   @@index([inspectionFindingId])
   @@map("compliance_finding_reopenings")
 }
-
 enum ComplianceAssessmentStatus {
   DRAFT
   IN_PROGRESS
   COMPLETED
   SUPERSEDED
 }
-
 enum ComplianceRecommendedNextStep {
   MONITOR
   ESCALATE
@@ -7509,7 +7130,6 @@ enum ComplianceRecommendedNextStep {
   PROTECTIVE_ACTION_REVIEW
   NO_ACTION
 }
-
 enum NoncomplianceFindingStatus {
   DRAFT
   PROPOSED
@@ -7518,26 +7138,22 @@ enum NoncomplianceFindingStatus {
   WITHDRAWN
   SUPERSEDED
 }
-
 enum NoncomplianceSeverity {
   LOW
   MEDIUM
   HIGH
   CRITICAL
 }
-
 enum NoncomplianceRepetition {
   FIRST_OCCURRENCE
   REPEAT
   PATTERN
 }
-
 enum NoncomplianceMateriality {
   IMMATERIAL
   MATERIAL
   SIGNIFICANT
 }
-
 enum ComplianceEscalationType {
   INTERNAL_SUPERVISORY
   DEPARTMENT_HEAD
@@ -7549,7 +7165,6 @@ enum ComplianceEscalationType {
   PHASE_8_SUSPENSION_REVIEW
   PHASE_8_REVOCATION_REVIEW
 }
-
 enum ComplianceEscalationStatus {
   PENDING
   ACKNOWLEDGED
@@ -7557,7 +7172,6 @@ enum ComplianceEscalationStatus {
   RESOLVED
   CLOSED
 }
-
 enum EnforcementReferralStatus {
   DRAFT
   PENDING_SEND
@@ -7567,7 +7181,6 @@ enum EnforcementReferralStatus {
   CLOSED
   WITHDRAWN
 }
-
 enum RetainedEnforcementAuthorityClass {
   CRIMINAL
   NATIONAL_REGULATORY
@@ -7575,7 +7188,6 @@ enum RetainedEnforcementAuthorityClass {
   JUDICIAL
   OTHER_RETAINED
 }
-
 enum ProtectiveActionRecommendationType {
   ENHANCED_MONITORING
   REINSPECTION
@@ -7586,7 +7198,6 @@ enum ProtectiveActionRecommendationType {
   GOVERNMENT_REFERRAL
   EMERGENCY_REVIEW
 }
-
 enum ProtectiveActionRecommendationStatus {
   DRAFT
   SUBMITTED
@@ -7595,14 +7206,12 @@ enum ProtectiveActionRecommendationStatus {
   REJECTED
   SUPERSEDED
 }
-
 enum EmergencyInterimActionStatus {
   ACTIVE
   EXPIRED
   REVIEWED
   SUPERSEDED
 }
-
 model ComplianceAssessment {
   id                              String                           @id @default(uuid()) @db.Uuid
   assessmentNumber                String                           @unique
@@ -7646,7 +7255,6 @@ model ComplianceAssessment {
   @@index([reviewerIdentityId])
   @@map("compliance_assessments")
 }
-
 model NoncomplianceFinding {
   id                              String                           @id @default(uuid()) @db.Uuid
   findingNumber                   String                           @unique
@@ -7687,7 +7295,6 @@ model NoncomplianceFinding {
   @@index([status])
   @@map("noncompliance_findings")
 }
-
 model ComplianceEscalation {
   id                          String                     @id @default(uuid()) @db.Uuid
   caseId                      String                     @db.Uuid
@@ -7719,7 +7326,6 @@ model ComplianceEscalation {
   @@index([escalationType, status])
   @@map("compliance_escalations")
 }
-
 model EnforcementReferral {
   id                          String                             @id @default(uuid()) @db.Uuid
   referralNumber              String                             @unique
@@ -7756,7 +7362,6 @@ model EnforcementReferral {
   @@index([externalAuthorityId])
   @@map("enforcement_referrals")
 }
-
 model ProtectiveActionRecommendation {
   id                          String                               @id @default(uuid()) @db.Uuid
   recommendationNumber        String                               @unique
@@ -7786,7 +7391,6 @@ model ProtectiveActionRecommendation {
   @@index([recommendationType, status])
   @@map("protective_action_recommendations")
 }
-
 model EmergencyInterimActionRecord {
   id                          String                       @id @default(uuid()) @db.Uuid
   recordNumber                String                       @unique
@@ -7817,4 +7421,932 @@ model EmergencyInterimActionRecord {
   @@index([status])
   @@index([effectiveUntil])
   @@map("emergency_interim_action_records")
+}
+enum RedressRouteCategory {
+  ADMINISTRATIVE_CORRECTION
+  CLARIFICATION
+  SERVICE_COMPLAINT
+  CONDUCT_COMPLAINT
+  PRIVACY_SECURITY_COMPLAINT
+  AI_AUTOMATION_CHALLENGE
+  RECONSIDERATION
+  INTERNAL_ADMINISTRATIVE_REVIEW
+  STATUTORY_APPEAL
+  PROFESSIONAL_CHALLENGE
+  REGULATORY_REVIEW
+  OMBUDS_OVERSIGHT
+  JUDICIAL_REVIEW_COORDINATION
+}
+enum RedressRouteVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+enum RedressMatterStatus {
+  OPEN
+  INTAKE
+  STANDING_ASSESSMENT
+  TIMELINESS_ASSESSMENT
+  CLASSIFICATION
+  INVESTIGATION
+  REVIEW
+  EXTERNAL_REFERRAL
+  DECISION_PENDING
+  IMPLEMENTATION
+  CLOSED
+  SAFE_HALTED
+}
+enum RedressFilingStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  CLASSIFIED
+  REJECTED
+  WITHDRAWN
+}
+enum RedressStandingOutcome {
+  NOT_ASSESSED
+  STANDING_ESTABLISHED
+  STANDING_DENIED
+  STANDING_CONDITIONAL
+  REQUIRES_HUMAN_DETERMINATION
+}
+enum RedressTimelinessOutcome {
+  NOT_ASSESSED
+  TIMELY
+  LATE
+  EXTENSION_REQUESTED
+  EXTENSION_GRANTED
+  EXTENSION_DENIED
+  REQUIRES_HUMAN_DETERMINATION
+}
+enum DeadlineExtensionOutcome {
+  PENDING
+  GRANTED
+  DENIED
+  WITHDRAWN
+}
+enum ComplaintClassificationType {
+  SERVICE
+  CONDUCT
+  PRIVACY_SECURITY
+  NOT_A_COMPLAINT
+}
+enum ComplaintInvestigationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SUSPENDED
+}
+enum ComplaintClosureReason {
+  RESOLVED
+  WITHDRAWN
+  DISMISSED
+  REFERRED
+  DUPLICATE
+}
+enum RedressReviewType {
+  RECONSIDERATION
+  INTERNAL_ADMINISTRATIVE_REVIEW
+  STATUTORY_APPEAL
+  PROFESSIONAL_CHALLENGE
+  REGULATORY_REVIEW
+  OMBUDS_OVERSIGHT
+  JUDICIAL_REVIEW_COORDINATION
+}
+enum ReviewIndependenceOutcome {
+  NOT_ASSESSED
+  INDEPENDENCE_ESTABLISHED
+  INDEPENDENCE_BLOCKED
+  REQUIRES_HUMAN_DETERMINATION
+}
+enum ReviewAuthorityOutcome {
+  NOT_ASSESSED
+  AUTHORITY_ESTABLISHED
+  AUTHORITY_DENIED
+  REQUIRES_HUMAN_DETERMINATION
+}
+enum ExternalReviewReferralStatus {
+  PREPARING
+  TRANSMITTED
+  ACKNOWLEDGED
+  DETERMINATION_RECEIVED
+  IMPLEMENTED
+  CLOSED
+}
+enum ExternalDeterminationAuthenticity {
+  UNVERIFIED
+  AUTHENTICATED
+  REJECTED
+}
+enum AutomationChallengeDispositionOutcome {
+  PENDING
+  UPHELD
+  VARIED
+  DISMISSED
+  REPROCESSING_ORDERED
+}
+enum RedressDecisionOutcome {
+  RECOMMENDATION
+  UPHELD
+  VARIED
+  REVERSED
+  REMANDED
+  DISMISSED
+  CORRECTED_NONSUBSTANTIVE
+  CLARIFIED
+  SERVICE_REMEDY
+  EXTERNAL_REFERRAL
+}
+enum RedressDecisionStatus {
+  DRAFT
+  RECORDED
+  IMPLEMENTED
+  SUPERSEDED
+}
+enum InterimReliefOutcome {
+  PENDING
+  GRANTED
+  DENIED
+  WITHDRAWN
+}
+enum RedressImplementationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  VERIFIED
+}
+enum RedressSafeHaltReason {
+  AUTHORITY_UNRESOLVED
+  REVIEWER_APPOINTMENT_INVALID
+  INDEPENDENCE_NOT_ESTABLISHED
+  SNAPSHOT_NOT_RECONSTRUCTABLE
+  EVIDENCE_INTEGRITY_COMPROMISED
+  ROUTE_SUPERSEDED
+  EXTERNAL_AUTHENTICITY_UNRESOLVED
+  NOTICE_CANNOT_BE_PROVIDED
+  IMPLEMENTATION_AUTHORITY_BYPASS
+  LEGAL_HOLD_PREVENTS_HANDLING
+}
+enum RedressNoticeType {
+  ACKNOWLEDGMENT
+  CLASSIFICATION
+  INVESTIGATION_UPDATE
+  DECISION
+  IMPLEMENTATION
+  STAY
+  EXTERNAL_REFERRAL
+  CORRECTION
+  CLARIFICATION
+}
+model RedressRouteDefinition {
+  id              String               @id @default(uuid()) @db.Uuid
+  code            String               @unique
+  name            String
+  category        RedressRouteCategory
+  institutionId   String?              @db.Uuid
+  jurisdictionId  String?              @db.Uuid
+  description     String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  institution     Institution?         @relation(fields: [institutionId], references: [id])
+  jurisdiction    Jurisdiction?        @relation(fields: [jurisdictionId], references: [id])
+  versions        RedressRouteVersion[]
+
+  @@index([category])
+  @@index([institutionId])
+  @@map("redress_route_definitions")
+}
+model RedressRouteVersion {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  routeDefinitionId           String                    @db.Uuid
+  versionNumber               Int
+  status                      RedressRouteVersionStatus @default(DRAFT)
+  filingDeadlineDays          Int?
+  permitsDeadlineExtension    Boolean                   @default(false)
+  requiresIndependence        Boolean                   @default(false)
+  automaticStayOnFiling       Boolean                   @default(false)
+  permitsSubstantiveChange    Boolean                   @default(true)
+  permitsNonSubstantiveCorrection Boolean               @default(false)
+  reviewFunctionAuthorityRecordId String?               @db.Uuid
+  effectiveFrom               DateTime?
+  effectiveUntil              DateTime?
+  configuration               Json                      @default("{}")
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  routeDefinition             RedressRouteDefinition    @relation(fields: [routeDefinitionId], references: [id], onDelete: Cascade)
+  reviewFunctionAuthorityRecord FunctionAuthorityRecord? @relation("RedressRouteReviewAuthority", fields: [reviewFunctionAuthorityRecordId], references: [id])
+  eligibleMatters             RedressRouteEligibleMatter[]
+  grounds                     RedressRouteGround[]
+  remedyDefinitions           RedressRouteRemedyDefinition[]
+  filings                     RedressFiling[]
+  matters                     RedressMatter[]
+
+  @@unique([routeDefinitionId, versionNumber])
+  @@index([routeDefinitionId, status])
+  @@map("redress_route_versions")
+}
+model RedressRouteEligibleMatter {
+  id                String              @id @default(uuid()) @db.Uuid
+  routeVersionId    String              @db.Uuid
+  matterTypeCode    String
+  description       String?
+  createdAt         DateTime            @default(now())
+  routeVersion      RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([routeVersionId, matterTypeCode])
+  @@map("redress_route_eligible_matters")
+}
+model RedressRouteGround {
+  id             String              @id @default(uuid()) @db.Uuid
+  routeVersionId String              @db.Uuid
+  groundCode     String
+  label          String
+  description    String?
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  routeVersion   RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([routeVersionId, groundCode])
+  @@map("redress_route_grounds")
+}
+model RedressRouteRemedyDefinition {
+  id             String              @id @default(uuid()) @db.Uuid
+  routeVersionId String              @db.Uuid
+  remedyCode     String
+  label          String
+  description    String?
+  isSubstantive  Boolean             @default(false)
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  routeVersion   RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+  remedies       RedressRemedy[]
+
+  @@unique([routeVersionId, remedyCode])
+  @@map("redress_route_remedy_definitions")
+}
+model RedressMatter {
+  id                          String              @id @default(uuid()) @db.Uuid
+  matterNumber                String              @unique
+  status                      RedressMatterStatus @default(OPEN)
+  routeVersionId              String?             @db.Uuid
+  caseId                      String?             @db.Uuid
+  masterAdministrativeFileId  String?             @db.Uuid
+  challengedDecisionId        String?             @db.Uuid
+  challengedInstrumentId      String?             @db.Uuid
+  filerIdentityId             String              @db.Uuid
+  representativeAuthorityId   String?             @db.Uuid
+  safeHaltReason              RedressSafeHaltReason?
+  safeHaltAt                  DateTime?
+  openedAt                    DateTime            @default(now())
+  closedAt                    DateTime?
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
+  routeVersion                RedressRouteVersion? @relation(fields: [routeVersionId], references: [id])
+  case                        Case?               @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile    MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  challengedDecision          GovernmentDecision? @relation("RedressChallengedDecision", fields: [challengedDecisionId], references: [id])
+  challengedInstrument        OfficialInstrument? @relation("RedressChallengedInstrument", fields: [challengedInstrumentId], references: [id])
+  filerIdentity               Identity            @relation("RedressMatterFiler", fields: [filerIdentityId], references: [id])
+  representativeAuthority     RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
+  filings                     RedressFiling[]
+  standingAssessments         RedressStandingAssessment[]
+  timelinessAssessments       RedressTimelinessAssessment[]
+  deadlineExtensionRequests   DeadlineExtensionRequest[]
+  acknowledgments             RedressAcknowledgment[]
+  complaintClassifications    ComplaintClassification[]
+  complaintInvestigations     ComplaintInvestigation[]
+  administrativeCorrections   AdministrativeCorrectionMatter[]
+  clarificationRequests       ClarificationRequest[]
+  automationChallenges        AutomationChallenge[]
+  reviewAssignments           ReviewAssignment[]
+  reviewSnapshots             ReviewRecordSnapshot[]
+  reconsiderationProceedings  ReconsiderationProceeding[]
+  internalAdministrativeReviews InternalAdministrativeReview[]
+  externalReviewReferrals     ExternalReviewReferral[]
+  redressDecisions            RedressDecision[]
+  interimReliefRequests       InterimReliefRequest[]
+  reviewStayRecords           ReviewStayRecord[]
+  implementationPlans         RedressImplementationPlan[]
+  notices                     RedressNotice[]
+
+  @@index([status])
+  @@index([caseId])
+  @@index([filerIdentityId])
+  @@index([challengedDecisionId])
+  @@map("redress_matters")
+}
+model RedressFiling {
+  id                          String              @id @default(uuid()) @db.Uuid
+  filingNumber                String              @unique
+  matterId                    String              @db.Uuid
+  routeVersionId              String              @db.Uuid
+  status                      RedressFilingStatus @default(DRAFT)
+  filerIdentityId             String              @db.Uuid
+  representativeAuthorityId   String?             @db.Uuid
+  groundsReference            String?
+  summary                     String?
+  requestedRouteCategory      RedressRouteCategory?
+  classifiedRouteCategory     RedressRouteCategory?
+  submittedAt                 DateTime?
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
+  matter                      RedressMatter       @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  routeVersion                RedressRouteVersion @relation(fields: [routeVersionId], references: [id])
+  filerIdentity               Identity            @relation("RedressFilingFiler", fields: [filerIdentityId], references: [id])
+  representativeAuthority     RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
+  versions                    RedressFilingVersion[]
+
+  @@index([matterId])
+  @@index([status])
+  @@map("redress_filings")
+}
+model RedressFilingVersion {
+  id              String        @id @default(uuid()) @db.Uuid
+  filingId        String        @db.Uuid
+  versionNumber   Int
+  contentReference String?
+  contentHash     String?
+  submittedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  filing          RedressFiling @relation(fields: [filingId], references: [id], onDelete: Cascade)
+
+  @@unique([filingId, versionNumber])
+  @@map("redress_filing_versions")
+}
+model RedressStandingAssessment {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  matterId                    String                 @db.Uuid
+  outcome                     RedressStandingOutcome @default(NOT_ASSESSED)
+  assessedByIdentityId        String?                @db.Uuid
+  assessedByOfficeholderId    String?                @db.Uuid
+  authorityEvaluationRecordId String?                @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime               @default(now())
+  matter                      RedressMatter          @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assessedByIdentity          Identity?              @relation("RedressStandingAssessor", fields: [assessedByIdentityId], references: [id])
+  assessedByOfficeholder      Officeholder?          @relation("RedressStandingAssessorOfficeholder", fields: [assessedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressStandingAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_standing_assessments")
+}
+model RedressTimelinessAssessment {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  matterId                    String                   @db.Uuid
+  outcome                     RedressTimelinessOutcome @default(NOT_ASSESSED)
+  filingDeadline              DateTime?
+  actualFilingDate            DateTime?
+  assessedByIdentityId        String?                  @db.Uuid
+  assessedByOfficeholderId    String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime                 @default(now())
+  matter                      RedressMatter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assessedByIdentity          Identity?                @relation("RedressTimelinessAssessor", fields: [assessedByIdentityId], references: [id])
+  assessedByOfficeholder      Officeholder?            @relation("RedressTimelinessAssessorOfficeholder", fields: [assessedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressTimelinessAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_timeliness_assessments")
+}
+model DeadlineExtensionRequest {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  matterId                    String                   @db.Uuid
+  requestedByIdentityId       String                   @db.Uuid
+  reason                      String
+  outcome                     DeadlineExtensionOutcome @default(PENDING)
+  decidedByIdentityId         String?                  @db.Uuid
+  decidedByOfficeholderId     String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  requestedAt                 DateTime                 @default(now())
+  decidedAt                   DateTime?
+  createdAt                   DateTime                 @default(now())
+  matter                      RedressMatter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  requestedBy                 Identity                 @relation("DeadlineExtensionRequester", fields: [requestedByIdentityId], references: [id])
+  decidedBy                   Identity?                @relation("DeadlineExtensionDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?            @relation("DeadlineExtensionDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("DeadlineExtensionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("deadline_extension_requests")
+}
+model RedressAcknowledgment {
+  id              String        @id @default(uuid()) @db.Uuid
+  matterId        String        @db.Uuid
+  acknowledgmentReference String @unique
+  acknowledgedAt  DateTime      @default(now())
+  noticeReference String?
+  createdAt       DateTime      @default(now())
+  matter          RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("redress_acknowledgments")
+}
+model ComplaintClassification {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  matterId                    String                      @db.Uuid
+  classificationType          ComplaintClassificationType
+  classifiedByIdentityId      String?                     @db.Uuid
+  classifiedByOfficeholderId  String?                     @db.Uuid
+  isAppealMislabel            Boolean                     @default(false)
+  explanation                 String?
+  classifiedAt                DateTime?
+  createdAt                   DateTime                    @default(now())
+  matter                      RedressMatter               @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  classifiedByIdentity        Identity?                   @relation("ComplaintClassifier", fields: [classifiedByIdentityId], references: [id])
+  classifiedByOfficeholder    Officeholder?               @relation("ComplaintClassifierOfficeholder", fields: [classifiedByOfficeholderId], references: [id])
+  investigations              ComplaintInvestigation[]
+
+  @@index([matterId])
+  @@map("complaint_classifications")
+}
+model ComplaintInvestigation {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  matterId              String                       @db.Uuid
+  classificationId      String                       @db.Uuid
+  status                ComplaintInvestigationStatus @default(NOT_STARTED)
+  investigatorIdentityId String?                     @db.Uuid
+  investigatorOfficeholderId String?                 @db.Uuid
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  matter                RedressMatter                @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  classification        ComplaintClassification      @relation(fields: [classificationId], references: [id])
+  investigatorIdentity  Identity?                    @relation("ComplaintInvestigator", fields: [investigatorIdentityId], references: [id])
+  investigatorOfficeholder Officeholder?             @relation("ComplaintInvestigatorOfficeholder", fields: [investigatorOfficeholderId], references: [id])
+  findings              ComplaintFinding[]
+  responses             ComplaintResponse[]
+  correctiveActions     ComplaintCorrectiveAction[]
+  closure               ComplaintClosure?
+
+  @@index([matterId])
+  @@map("complaint_investigations")
+}
+model ComplaintFinding {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  findingSummary   String
+  isSubstantive    Boolean                @default(false)
+  recordedAt       DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_findings")
+}
+model ComplaintResponse {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  responseSummary  String
+  issuedAt         DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_responses")
+}
+model ComplaintCorrectiveAction {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  actionSummary    String
+  isServiceRemedy  Boolean                @default(true)
+  recordedAt       DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_corrective_actions")
+}
+model ComplaintClosure {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @unique @db.Uuid
+  reason           ComplaintClosureReason
+  closedAt         DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@map("complaint_closures")
+}
+model AdministrativeCorrectionMatter {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  originalNoticeReference     String
+  correctedNoticeReference    String?
+  errorDescription            String
+  isNonSubstantive            Boolean       @default(true)
+  altersSubstantiveOutcome    Boolean       @default(false)
+  altersMaterialReasons       Boolean       @default(false)
+  removesReviewRights         Boolean       @default(false)
+  originalPreserved           Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("administrative_correction_matters")
+}
+model ClarificationRequest {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  matterId              String                  @db.Uuid
+  questionSummary       String
+  altersSubstantiveDecision Boolean             @default(false)
+  createdAt             DateTime                @default(now())
+  matter                RedressMatter           @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  responses             ClarificationResponse[]
+
+  @@index([matterId])
+  @@map("clarification_requests")
+}
+model ClarificationResponse {
+  id              String               @id @default(uuid()) @db.Uuid
+  requestId       String               @db.Uuid
+  responseSummary String
+  issuedAt        DateTime             @default(now())
+  request         ClarificationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("clarification_responses")
+}
+model AutomationChallenge {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  matterId                    String                            @db.Uuid
+  challengedOutputReference   String
+  challengedInputReference    String?
+  explanationDisclosed        Boolean                           @default(false)
+  faultyOutputExcluded        Boolean                           @default(false)
+  reprocessingOrdered         Boolean                           @default(false)
+  aiAdjudicated               Boolean                           @default(false)
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  matter                      RedressMatter                     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  explanationRecords          AutomationExplanationRecord[]
+  dispositions                AutomationChallengeDisposition[]
+
+  @@index([matterId])
+  @@map("automation_challenges")
+}
+model AutomationExplanationRecord {
+  id                    String              @id @default(uuid()) @db.Uuid
+  challengeId           String              @db.Uuid
+  approvedUseSummary    String
+  inputSummary          String?
+  outputSummary         String?
+  confidentialityLevel  String              @default("STANDARD")
+  disclosedAt           DateTime            @default(now())
+  challenge             AutomationChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId])
+  @@map("automation_explanation_records")
+}
+model AutomationChallengeDisposition {
+  id                          String                              @id @default(uuid()) @db.Uuid
+  challengeId                 String                              @db.Uuid
+  outcome                     AutomationChallengeDispositionOutcome @default(PENDING)
+  decidedByIdentityId         String?                             @db.Uuid
+  decidedByOfficeholderId     String?                             @db.Uuid
+  authorityEvaluationRecordId String?                             @db.Uuid
+  explanation                 String?
+  decidedAt                   DateTime?
+  createdAt                   DateTime                            @default(now())
+  challenge                   AutomationChallenge                 @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  decidedByIdentity           Identity?                           @relation("AutomationChallengeDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?                       @relation("AutomationChallengeDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?          @relation("AutomationChallengeAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([challengeId])
+  @@map("automation_challenge_dispositions")
+}
+model ReviewAssignment {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  reviewerIdentityId          String        @db.Uuid
+  reviewerOfficeholderId      String        @db.Uuid
+  appointmentId               String?       @db.Uuid
+  assignedAt                  DateTime      @default(now())
+  blockedReason               String?
+  isBlocked                   Boolean       @default(false)
+  createdAt                   DateTime      @default(now())
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  reviewerIdentity            Identity      @relation("ReviewAssignee", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder        Officeholder  @relation("ReviewAssigneeOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  appointment                 Appointment?  @relation(fields: [appointmentId], references: [id])
+  independenceAssessment      ReviewerIndependenceAssessment?
+  authorityAssessment         ReviewAuthorityAssessment?
+
+  @@index([matterId])
+  @@map("review_assignments")
+}
+model ReviewerIndependenceAssessment {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  assignmentId                String                    @unique @db.Uuid
+  outcome                     ReviewIndependenceOutcome @default(NOT_ASSESSED)
+  originalDecisionMakerBlocked Boolean                  @default(false)
+  priorInvolvementBlocked     Boolean                   @default(false)
+  conflictBlocked             Boolean                   @default(false)
+  assessedByIdentityId        String?                   @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime                  @default(now())
+  assignment                  ReviewAssignment          @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assessedBy                  Identity?                 @relation("IndependenceAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@map("reviewer_independence_assessments")
+}
+model ReviewAuthorityAssessment {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  assignmentId                String                 @unique @db.Uuid
+  outcome                     ReviewAuthorityOutcome @default(NOT_ASSESSED)
+  functionAuthorityRecordId   String?                @db.Uuid
+  authorityEvaluationRecordId String?                @db.Uuid
+  jurisdictionBlocked         Boolean                @default(false)
+  appointmentExpired          Boolean                @default(false)
+  delegationRevoked           Boolean                @default(false)
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime               @default(now())
+  assignment                  ReviewAssignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  functionAuthorityRecord     FunctionAuthorityRecord? @relation("ReviewAuthorityFunction", fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReviewAuthorityEvaluation", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@map("review_authority_assessments")
+}
+model ReviewRecordSnapshot {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  snapshotReference           String
+  snapshotHash                String
+  originalDecisionReference   String?
+  pinnedAt                    DateTime      @default(now())
+  isImmutable                 Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  reviewIssues                ReviewIssue[]
+  reviewSubmissions           ReviewSubmission[]
+
+  @@index([matterId])
+  @@map("review_record_snapshots")
+}
+model ReconsiderationProceeding {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  snapshotId                  String?       @db.Uuid
+  newEvidenceSeparated        Boolean       @default(true)
+  originalPreserved           Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("reconsideration_proceedings")
+}
+model InternalAdministrativeReview {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  reviewType                  RedressReviewType @default(INTERNAL_ADMINISTRATIVE_REVIEW)
+  independenceRequired        Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("internal_administrative_reviews")
+}
+model ReviewIssue {
+  id              String               @id @default(uuid()) @db.Uuid
+  snapshotId      String               @db.Uuid
+  issueSummary    String
+  sortOrder       Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  snapshot        ReviewRecordSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@index([snapshotId])
+  @@map("review_issues")
+}
+model ReviewSubmission {
+  id                    String               @id @default(uuid()) @db.Uuid
+  snapshotId            String               @db.Uuid
+  submissionReference   String
+  isLaterEvidence       Boolean              @default(false)
+  attributableToIdentityId String?           @db.Uuid
+  submittedAt           DateTime             @default(now())
+  snapshot              ReviewRecordSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  attributableTo        Identity?            @relation("ReviewSubmissionAttributable", fields: [attributableToIdentityId], references: [id])
+
+  @@index([snapshotId])
+  @@map("review_submissions")
+}
+model ExternalReviewReferral {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  matterId                    String                       @db.Uuid
+  externalAuthorityLabel      String
+  status                      ExternalReviewReferralStatus @default(PREPARING)
+  transmittedAt               DateTime?
+  acknowledgedAt              DateTime?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  matter                      RedressMatter                @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  packages                    ExternalReviewPackage[]
+  determinations              ExternalReviewDetermination[]
+
+  @@index([matterId])
+  @@map("external_review_referrals")
+}
+model ExternalReviewPackage {
+  id              String                 @id @default(uuid()) @db.Uuid
+  referralId      String                 @db.Uuid
+  versionNumber   Int
+  packageReference String
+  packageHash     String
+  transmittedAt   DateTime?
+  createdAt       DateTime               @default(now())
+  referral        ExternalReviewReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@unique([referralId, versionNumber])
+  @@map("external_review_packages")
+}
+model ExternalReviewDetermination {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  referralId                  String                          @db.Uuid
+  determinationReference      String
+  authenticity                ExternalDeterminationAuthenticity @default(UNVERIFIED)
+  receivedAt                  DateTime?
+  implementedAt               DateTime?
+  authorityEvaluationRecordId String?                         @db.Uuid
+  createdAt                   DateTime                        @default(now())
+  referral                    ExternalReviewReferral          @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  authorityEvaluationRecord   AuthorityEvaluationRecord?      @relation("ExternalDeterminationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([referralId])
+  @@map("external_review_determinations")
+}
+model RedressDecision {
+  id                          String                @id @default(uuid()) @db.Uuid
+  matterId                    String                @db.Uuid
+  decisionNumber              String                @unique
+  outcome                     RedressDecisionOutcome
+  status                      RedressDecisionStatus @default(DRAFT)
+  isRecommendation            Boolean               @default(false)
+  isFinalDisposition          Boolean               @default(false)
+  isImplemented               Boolean               @default(false)
+  deciderIdentityId           String                @db.Uuid
+  deciderOfficeholderId       String                @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  originalDecisionPreserved   Boolean               @default(true)
+  decidedAt                   DateTime?
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  matter                      RedressMatter         @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  deciderIdentity             Identity              @relation("RedressDecisionDecider", fields: [deciderIdentityId], references: [id])
+  deciderOfficeholder         Officeholder          @relation("RedressDecisionDeciderOfficeholder", fields: [deciderOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  findings                    RedressFinding[]
+  reasons                     RedressReason[]
+  remedies                    RedressRemedy[]
+  implementationPlans         RedressImplementationPlan[]
+
+  @@index([matterId])
+  @@index([status])
+  @@map("redress_decisions")
+}
+model RedressFinding {
+  id              String          @id @default(uuid()) @db.Uuid
+  decisionId      String          @db.Uuid
+  findingSummary  String
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  decision        RedressDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId])
+  @@map("redress_findings")
+}
+model RedressReason {
+  id              String          @id @default(uuid()) @db.Uuid
+  decisionId      String          @db.Uuid
+  reasonSummary   String
+  isMaterial      Boolean         @default(true)
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  decision        RedressDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId])
+  @@map("redress_reasons")
+}
+model RedressRemedy {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  decisionId            String                       @db.Uuid
+  remedyDefinitionId    String?                      @db.Uuid
+  remedySummary         String
+  isAuthorized          Boolean                      @default(false)
+  isSubstantive         Boolean                      @default(false)
+  createdAt             DateTime                     @default(now())
+  decision              RedressDecision              @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  remedyDefinition      RedressRouteRemedyDefinition? @relation(fields: [remedyDefinitionId], references: [id])
+
+  @@index([decisionId])
+  @@map("redress_remedies")
+}
+model InterimReliefRequest {
+  id                          String               @id @default(uuid()) @db.Uuid
+  matterId                    String               @db.Uuid
+  requestedByIdentityId       String               @db.Uuid
+  outcome                     InterimReliefOutcome @default(PENDING)
+  scopeDescription            String?
+  decidedByIdentityId         String?              @db.Uuid
+  decidedByOfficeholderId     String?              @db.Uuid
+  authorityEvaluationRecordId String?              @db.Uuid
+  requestedAt                 DateTime             @default(now())
+  decidedAt                   DateTime?
+  createdAt                   DateTime             @default(now())
+  matter                      RedressMatter        @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  requestedBy                 Identity             @relation("InterimReliefRequester", fields: [requestedByIdentityId], references: [id])
+  decidedBy                   Identity?            @relation("InterimReliefDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?        @relation("InterimReliefDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("InterimReliefAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  stayRecords                 ReviewStayRecord[]
+
+  @@index([matterId])
+  @@map("interim_relief_requests")
+}
+model ReviewStayRecord {
+  id                          String               @id @default(uuid()) @db.Uuid
+  matterId                    String               @db.Uuid
+  interimReliefRequestId      String?              @db.Uuid
+  challengedInstrumentId      String?              @db.Uuid
+  stayGranted                 Boolean              @default(false)
+  isReversal                  Boolean              @default(false)
+  scopeDescription            String?
+  effectiveAt                 DateTime?
+  authorityEvaluationRecordId String?              @db.Uuid
+  createdAt                   DateTime             @default(now())
+  matter                      RedressMatter        @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  interimReliefRequest        InterimReliefRequest? @relation(fields: [interimReliefRequestId], references: [id])
+  challengedInstrument        OfficialInstrument?  @relation("RedressStayInstrument", fields: [challengedInstrumentId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReviewStayAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("review_stay_records")
+}
+model RedressImplementationPlan {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  matterId                    String                      @db.Uuid
+  decisionId                  String                      @db.Uuid
+  status                      RedressImplementationStatus @default(PENDING)
+  markedImplementedAt         DateTime?
+  failureVisible              Boolean                     @default(false)
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  matter                      RedressMatter               @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  decision                    RedressDecision             @relation(fields: [decisionId], references: [id])
+  actions                     RedressImplementationAction[]
+  verifications               RedressImplementationVerification[]
+
+  @@index([matterId])
+  @@index([decisionId])
+  @@map("redress_implementation_plans")
+}
+model RedressImplementationAction {
+  id              String                      @id @default(uuid()) @db.Uuid
+  planId          String                      @db.Uuid
+  actionType      String
+  actionSummary   String
+  status          RedressImplementationStatus @default(PENDING)
+  phase8Controlled Boolean                    @default(true)
+  phase9Controlled Boolean                    @default(false)
+  completedAt     DateTime?
+  failureReason   String?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  plan            RedressImplementationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@map("redress_implementation_actions")
+}
+model RedressImplementationVerification {
+  id              String                    @id @default(uuid()) @db.Uuid
+  planId          String                    @db.Uuid
+  verifiedByIdentityId String?              @db.Uuid
+  verificationSummary String
+  verifiedAt      DateTime                  @default(now())
+  plan            RedressImplementationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  verifiedBy      Identity?                 @relation("RedressImplementationVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([planId])
+  @@map("redress_implementation_verifications")
+}
+model RedressNotice {
+  id              String            @id @default(uuid()) @db.Uuid
+  matterId        String            @db.Uuid
+  noticeType      RedressNoticeType
+  noticeReference String            @unique
+  recipientIdentityId String?       @db.Uuid
+  isPrivileged    Boolean           @default(false)
+  issuedAt        DateTime          @default(now())
+  createdAt       DateTime          @default(now())
+  matter          RedressMatter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  recipient       Identity?         @relation("RedressNoticeRecipient", fields: [recipientIdentityId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_notices")
 }
