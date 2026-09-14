@@ -32,14 +32,7 @@ export class RedressBoundaryService {
       return;
     }
 
-    const dispositionTypes = [
-      'AFFIRM',
-      'REVERSE',
-      'VARY',
-      'REMAND',
-      'SET_ASIDE',
-      'DISMISS',
-    ];
+    const dispositionTypes = ['AFFIRM', 'REVERSE', 'VARY', 'REMAND', 'SET_ASIDE', 'DISMISS'];
 
     if (dispositionTypes.includes(recommendationType)) {
       throw new ForbiddenException(

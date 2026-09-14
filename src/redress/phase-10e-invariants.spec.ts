@@ -10,9 +10,13 @@ import {
 
 describe('Phase 10E invariants', () => {
   it('documents boundary disclaimer', () => {
-    expect(PHASE_10E_BOUNDARY_DISCLAIMER).toContain('does not alter the original government decision');
+    expect(PHASE_10E_BOUNDARY_DISCLAIMER).toContain(
+      'does not alter the original government decision',
+    );
     expect(PHASE_10E_BOUNDARY_DISCLAIMER).toContain('non-final');
-    expect(PHASE_10E_BOUNDARY_DISCLAIMER).toContain('Technical permission never creates review authority');
+    expect(PHASE_10E_BOUNDARY_DISCLAIMER).toContain(
+      'Technical permission never creates review authority',
+    );
   });
 
   it('forbids client-supplied protected fields including admin override', () => {

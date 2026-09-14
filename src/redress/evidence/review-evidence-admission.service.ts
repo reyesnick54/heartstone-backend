@@ -23,7 +23,10 @@ export class ReviewEvidenceAdmissionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async admitEvidence(input: AdmitReviewEvidenceInput) {
-    if (input.isPostDecision && input.classification !== ReviewEvidenceClassification.POST_DECISION_EVIDENCE) {
+    if (
+      input.isPostDecision &&
+      input.classification !== ReviewEvidenceClassification.POST_DECISION_EVIDENCE
+    ) {
       throw new BadRequestException(REDRESS_REASON_CODES.POST_DECISION_EVIDENCE_REQUIRED_LABEL);
     }
 
