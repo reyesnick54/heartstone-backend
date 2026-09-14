@@ -160,13 +160,14 @@ describe('Phase 9A compliance foundation', () => {
       expect(occurrences).toHaveLength(3);
       expect(occurrences[0]?.lawfulDueDate.toISOString()).toBe('2026-01-31T00:00:00.000Z');
       expect(occurrences[1]?.occurrenceNumber).toBe(2);
-      const secondOccurrence = occurrences[1];
       expect(occurrences[2]?.occurrenceNumber).toBe(3);
-      if (secondOccurrence) {
-        expect(occurrences[2]?.lawfulDueDate.getTime()).toBeGreaterThan(
-          secondOccurrence.lawfulDueDate.getTime(),
-        );
+      const secondOccurrence = occurrences[1];
+      if (!secondOccurrence) {
+        throw new Error('Expected second occurrence');
       }
+      expect(occurrences[2]?.lawfulDueDate.getTime()).toBeGreaterThan(
+        secondOccurrence.lawfulDueDate.getTime(),
+      );
     });
   });
 
@@ -195,9 +196,9 @@ describe('Phase 9A compliance foundation', () => {
     it('materializes obligations without changing approved condition text', async () => {
       prisma.decisionCondition.findUnique.mockResolvedValue({
         id: 'cond-1',
-        conditionType: DecisionConditionType.ONGOING,
+        conditionType: DecisionConditionType.CONTINUING,
         status: DecisionConditionStatus.PENDING,
-        description: 'Submit quarterly environmental reports.',
+        requiredActionOrRestraint: 'Submit quarterly environmental reports.',
       });
       prisma.continuingObligation.create.mockResolvedValue({
         id: 'obl-1',
@@ -211,7 +212,7 @@ describe('Phase 9A compliance foundation', () => {
         schedules: [],
         statusHistory: [],
         sourceDecisionCondition: {
-          description: 'Submit quarterly environmental reports.',
+          requiredActionOrRestraint: 'Submit quarterly environmental reports.',
         },
         supersededByObligation: null,
         supersedesObligation: null,
@@ -228,14 +229,11 @@ describe('Phase 9A compliance foundation', () => {
         dueDate: new Date('2026-03-31T00:00:00.000Z'),
       });
 
-      expect(prisma.continuingObligation.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            description: 'Submit quarterly environmental reports.',
-            approvedConditionText: 'Submit quarterly environmental reports.',
-          }) as Record<string, unknown>,
-        }),
-      );
+      const [[createCall]] = prisma.continuingObligation.create.mock.calls as [
+        [{ data: { description: string; approvedConditionText: string } }],
+      ];
+      expect(createCall.data.description).toBe('Submit quarterly environmental reports.');
+      expect(createCall.data.approvedConditionText).toBe('Submit quarterly environmental reports.');
       expect(result.description).toBe('Submit quarterly environmental reports.');
     });
 

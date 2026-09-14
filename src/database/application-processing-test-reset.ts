@@ -1,6 +1,31 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.complianceFindingReopening.deleteMany();
+  await prisma.complianceFindingClosure.deleteMany();
+  await prisma.correctiveActionVerification.deleteMany();
+  await prisma.correctiveActionItem.deleteMany();
+  await prisma.correctiveActionPlan.deleteMany();
+  await prisma.noncomplianceFinding.deleteMany();
+  await prisma.inspectionFinding.deleteMany();
+  await prisma.inspectionObservation.deleteMany();
+  await prisma.inspectionSession.deleteMany();
+  await prisma.inspectionAssignment.deleteMany();
+  await prisma.inspectionPlan.deleteMany();
+  await prisma.inspectionTypeDefinition.deleteMany();
+  await prisma.complianceReview.deleteMany();
+  await prisma.complianceSubmission.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceRevalidationRecord.deleteMany();
+  await prisma.complianceAlert.deleteMany();
+  await prisma.complianceMonitoringEvent.deleteMany();
+  await prisma.complianceStatusProjection.deleteMany();
+  await prisma.emergencyInterimActionRecord.deleteMany();
+  await prisma.enforcementReferral.deleteMany();
+  await prisma.complianceEscalation.deleteMany();
+  await prisma.complianceAssessment.deleteMany();
+  await prisma.complianceMatter.deleteMany();
   await prisma.instrumentLifecycleDecisionLink.deleteMany();
   await prisma.instrumentLifecycleEvent.deleteMany();
   await prisma.decisionReviewReference.deleteMany();
@@ -53,6 +78,15 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.recordsClassification.deleteMany();
   await prisma.externalRecordsRepository.deleteMany();
   await prisma.evidenceCustodyEvent.deleteMany();
+  await prisma.inspectionResponseEvidence.deleteMany();
+  await prisma.inspectionResponse.deleteMany();
+  await prisma.inspectionFindingEvidence.deleteMany();
+  await prisma.findingRequirementLink.deleteMany();
+  await prisma.inspectionFinding.deleteMany();
+  await prisma.inspectionObservationEvidence.deleteMany();
+  await prisma.inspectionObservation.deleteMany();
+  await prisma.inspectionCompletionRecord.deleteMany();
+  await prisma.inspectionSession.deleteMany();
   await prisma.inspectionEvidenceItem.deleteMany();
   await prisma.inspectionInspector.deleteMany();
   await prisma.inspectionRecord.deleteMany();
@@ -104,4 +138,13 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.workflowStageDefinition.deleteMany();
   await prisma.workflowVersion.deleteMany();
   await prisma.workflowDefinition.deleteMany();
+  await prisma.inspectorQualificationSnapshot.deleteMany();
+  await prisma.inspectionScheduleEvent.deleteMany();
+  await prisma.inspectionAssignment.deleteMany();
+  await prisma.inspectionPlan.deleteMany();
+  await prisma.inspectionTypeDefinition.deleteMany();
+  await prisma.obligationStatusHistory.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceMatter.deleteMany();
 }

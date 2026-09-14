@@ -331,12 +331,26 @@ async function seedComplianceContext(
     },
   });
 
-  await prisma.decisionCondition.create({
-    data: {
+  await prisma.decisionCondition.upsert({
+    where: {
+      governmentDecisionId_conditionNumber: {
+        governmentDecisionId: fixture.governmentDecisionId,
+        conditionNumber: 2,
+      },
+    },
+    create: {
       governmentDecisionId: fixture.governmentDecisionId,
-      conditionType: 'ONGOING',
+      conditionNumber: 2,
+      conditionType: 'CONTINUING',
       status: 'PENDING',
-      description: 'Submit annual compliance report',
+      responsibleParty: 'Holder',
+      requiredActionOrRestraint: 'Submit annual compliance report',
+    },
+    update: {
+      conditionType: 'CONTINUING',
+      status: 'PENDING',
+      responsibleParty: 'Holder',
+      requiredActionOrRestraint: 'Submit annual compliance report',
     },
   });
 

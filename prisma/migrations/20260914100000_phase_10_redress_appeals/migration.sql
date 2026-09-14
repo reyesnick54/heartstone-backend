@@ -1,238 +1,72 @@
+-- Phase 10: Redress and appeals (idempotent against Phase 9 migrations on main)
 -- CreateEnum
-CREATE TYPE "ComplianceMatterStatus" AS ENUM ('OPEN', 'MONITORING', 'AWAITING_REPORT', 'UNDER_REVIEW', 'INSPECTION_REQUIRED', 'CORRECTIVE_ACTION', 'ESCALATED', 'REFERRED_EXTERNALLY', 'SAFE_HALTED', 'CLOSED');
-
--- CreateEnum
-CREATE TYPE "ContinuingObligationSourceType" AS ENUM ('DECISION_CONDITION', 'INSTRUMENT_VERSION', 'GOVERNING_SOURCE', 'AUTHORIZED_REQUIREMENT');
+DO $$ BEGIN CREATE TYPE "ComplianceRiskScorePurpose" AS ENUM ('PRIORITIZATION_ONLY'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ContinuingObligationType" AS ENUM ('REPORTING', 'FINANCIAL', 'INSURANCE', 'PROFESSIONAL_STATUS', 'ACTIVITY_RESTRICTION', 'OPERATING_CONDITION', 'WORKFORCE', 'ENVIRONMENTAL', 'SAFETY', 'CYBERSECURITY', 'MAINTENANCE', 'MILESTONE', 'INCIDENT_NOTIFICATION', 'INSPECTION', 'RECORDKEEPING', 'GOVERNMENT_CONFIRMATION', 'OTHER_AUTHORIZED');
+DO $$ BEGIN CREATE TYPE "RedressRouteCategory" AS ENUM ('ADMINISTRATIVE_CORRECTION', 'CLARIFICATION', 'SERVICE_COMPLAINT', 'CONDUCT_COMPLAINT', 'PRIVACY_SECURITY_COMPLAINT', 'AI_AUTOMATION_CHALLENGE', 'RECONSIDERATION', 'INTERNAL_ADMINISTRATIVE_REVIEW', 'STATUTORY_APPEAL', 'PROFESSIONAL_CHALLENGE', 'REGULATORY_REVIEW', 'OMBUDS_OVERSIGHT', 'JUDICIAL_REVIEW_COORDINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ContinuingObligationStatus" AS ENUM ('NOT_YET_DUE', 'DUE', 'SUBMITTED', 'UNDER_REVIEW', 'SATISFIED', 'PARTIALLY_SATISFIED', 'OVERDUE', 'DISPUTED', 'EXEMPTED_BY_AUTHORIZED_ACTION', 'SUPERSEDED', 'CLOSED');
+DO $$ BEGIN CREATE TYPE "RedressRouteVersionStatus" AS ENUM ('DRAFT', 'ACTIVE', 'SUPERSEDED', 'ARCHIVED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ObligationScheduleStatus" AS ENUM ('SCHEDULED', 'REMINDER_SENT', 'DUE', 'FULFILLED', 'MISSED', 'SUPERSEDED', 'CLOSED');
+DO $$ BEGIN CREATE TYPE "RedressMatterStatus" AS ENUM ('OPEN', 'INTAKE', 'STANDING_ASSESSMENT', 'TIMELINESS_ASSESSMENT', 'CLASSIFICATION', 'INVESTIGATION', 'REVIEW', 'EXTERNAL_REFERRAL', 'DECISION_PENDING', 'IMPLEMENTATION', 'CLOSED', 'SAFE_HALTED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ObligationStatusChangeActor" AS ENUM ('COMPLIANCE_ADMIN', 'REVIEWER', 'SYSTEM', 'HOLDER', 'AI_ASSISTANCE', 'PAYMENT_SYSTEM');
+DO $$ BEGIN CREATE TYPE "RedressFilingStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'ACKNOWLEDGED', 'CLASSIFIED', 'REJECTED', 'WITHDRAWN'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ComplianceRiskScorePurpose" AS ENUM ('PRIORITIZATION_ONLY');
+DO $$ BEGIN CREATE TYPE "RedressStandingOutcome" AS ENUM ('NOT_ASSESSED', 'STANDING_ESTABLISHED', 'STANDING_DENIED', 'STANDING_CONDITIONAL', 'REQUIRES_HUMAN_DETERMINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressRouteCategory" AS ENUM ('ADMINISTRATIVE_CORRECTION', 'CLARIFICATION', 'SERVICE_COMPLAINT', 'CONDUCT_COMPLAINT', 'PRIVACY_SECURITY_COMPLAINT', 'AI_AUTOMATION_CHALLENGE', 'RECONSIDERATION', 'INTERNAL_ADMINISTRATIVE_REVIEW', 'STATUTORY_APPEAL', 'PROFESSIONAL_CHALLENGE', 'REGULATORY_REVIEW', 'OMBUDS_OVERSIGHT', 'JUDICIAL_REVIEW_COORDINATION');
+DO $$ BEGIN CREATE TYPE "RedressTimelinessOutcome" AS ENUM ('NOT_ASSESSED', 'TIMELY', 'LATE', 'EXTENSION_REQUESTED', 'EXTENSION_GRANTED', 'EXTENSION_DENIED', 'REQUIRES_HUMAN_DETERMINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressRouteVersionStatus" AS ENUM ('DRAFT', 'ACTIVE', 'SUPERSEDED', 'ARCHIVED');
+DO $$ BEGIN CREATE TYPE "DeadlineExtensionOutcome" AS ENUM ('PENDING', 'GRANTED', 'DENIED', 'WITHDRAWN'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressMatterStatus" AS ENUM ('OPEN', 'INTAKE', 'STANDING_ASSESSMENT', 'TIMELINESS_ASSESSMENT', 'CLASSIFICATION', 'INVESTIGATION', 'REVIEW', 'EXTERNAL_REFERRAL', 'DECISION_PENDING', 'IMPLEMENTATION', 'CLOSED', 'SAFE_HALTED');
+DO $$ BEGIN CREATE TYPE "ComplaintClassificationType" AS ENUM ('SERVICE', 'CONDUCT', 'PRIVACY_SECURITY', 'NOT_A_COMPLAINT'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressFilingStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'ACKNOWLEDGED', 'CLASSIFIED', 'REJECTED', 'WITHDRAWN');
+DO $$ BEGIN CREATE TYPE "ComplaintInvestigationStatus" AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressStandingOutcome" AS ENUM ('NOT_ASSESSED', 'STANDING_ESTABLISHED', 'STANDING_DENIED', 'STANDING_CONDITIONAL', 'REQUIRES_HUMAN_DETERMINATION');
+DO $$ BEGIN CREATE TYPE "ComplaintClosureReason" AS ENUM ('RESOLVED', 'WITHDRAWN', 'DISMISSED', 'REFERRED', 'DUPLICATE'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressTimelinessOutcome" AS ENUM ('NOT_ASSESSED', 'TIMELY', 'LATE', 'EXTENSION_REQUESTED', 'EXTENSION_GRANTED', 'EXTENSION_DENIED', 'REQUIRES_HUMAN_DETERMINATION');
+DO $$ BEGIN CREATE TYPE "RedressReviewType" AS ENUM ('RECONSIDERATION', 'INTERNAL_ADMINISTRATIVE_REVIEW', 'STATUTORY_APPEAL', 'PROFESSIONAL_CHALLENGE', 'REGULATORY_REVIEW', 'OMBUDS_OVERSIGHT', 'JUDICIAL_REVIEW_COORDINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "DeadlineExtensionOutcome" AS ENUM ('PENDING', 'GRANTED', 'DENIED', 'WITHDRAWN');
+DO $$ BEGIN CREATE TYPE "ReviewIndependenceOutcome" AS ENUM ('NOT_ASSESSED', 'INDEPENDENCE_ESTABLISHED', 'INDEPENDENCE_BLOCKED', 'REQUIRES_HUMAN_DETERMINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ComplaintClassificationType" AS ENUM ('SERVICE', 'CONDUCT', 'PRIVACY_SECURITY', 'NOT_A_COMPLAINT');
+DO $$ BEGIN CREATE TYPE "ReviewAuthorityOutcome" AS ENUM ('NOT_ASSESSED', 'AUTHORITY_ESTABLISHED', 'AUTHORITY_DENIED', 'REQUIRES_HUMAN_DETERMINATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ComplaintInvestigationStatus" AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED');
+DO $$ BEGIN CREATE TYPE "ExternalReviewReferralStatus" AS ENUM ('PREPARING', 'TRANSMITTED', 'ACKNOWLEDGED', 'DETERMINATION_RECEIVED', 'IMPLEMENTED', 'CLOSED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ComplaintClosureReason" AS ENUM ('RESOLVED', 'WITHDRAWN', 'DISMISSED', 'REFERRED', 'DUPLICATE');
+DO $$ BEGIN CREATE TYPE "ExternalDeterminationAuthenticity" AS ENUM ('UNVERIFIED', 'AUTHENTICATED', 'REJECTED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressReviewType" AS ENUM ('RECONSIDERATION', 'INTERNAL_ADMINISTRATIVE_REVIEW', 'STATUTORY_APPEAL', 'PROFESSIONAL_CHALLENGE', 'REGULATORY_REVIEW', 'OMBUDS_OVERSIGHT', 'JUDICIAL_REVIEW_COORDINATION');
+DO $$ BEGIN CREATE TYPE "AutomationChallengeDispositionOutcome" AS ENUM ('PENDING', 'UPHELD', 'VARIED', 'DISMISSED', 'REPROCESSING_ORDERED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ReviewIndependenceOutcome" AS ENUM ('NOT_ASSESSED', 'INDEPENDENCE_ESTABLISHED', 'INDEPENDENCE_BLOCKED', 'REQUIRES_HUMAN_DETERMINATION');
+DO $$ BEGIN CREATE TYPE "RedressDecisionOutcome" AS ENUM ('RECOMMENDATION', 'UPHELD', 'VARIED', 'REVERSED', 'REMANDED', 'DISMISSED', 'CORRECTED_NONSUBSTANTIVE', 'CLARIFIED', 'SERVICE_REMEDY', 'EXTERNAL_REFERRAL'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ReviewAuthorityOutcome" AS ENUM ('NOT_ASSESSED', 'AUTHORITY_ESTABLISHED', 'AUTHORITY_DENIED', 'REQUIRES_HUMAN_DETERMINATION');
+DO $$ BEGIN CREATE TYPE "RedressDecisionStatus" AS ENUM ('DRAFT', 'RECORDED', 'IMPLEMENTED', 'SUPERSEDED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ExternalReviewReferralStatus" AS ENUM ('PREPARING', 'TRANSMITTED', 'ACKNOWLEDGED', 'DETERMINATION_RECEIVED', 'IMPLEMENTED', 'CLOSED');
+DO $$ BEGIN CREATE TYPE "InterimReliefOutcome" AS ENUM ('PENDING', 'GRANTED', 'DENIED', 'WITHDRAWN'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ExternalDeterminationAuthenticity" AS ENUM ('UNVERIFIED', 'AUTHENTICATED', 'REJECTED');
+DO $$ BEGIN CREATE TYPE "RedressImplementationStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'VERIFIED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "AutomationChallengeDispositionOutcome" AS ENUM ('PENDING', 'UPHELD', 'VARIED', 'DISMISSED', 'REPROCESSING_ORDERED');
+DO $$ BEGIN CREATE TYPE "RedressSafeHaltReason" AS ENUM ('AUTHORITY_UNRESOLVED', 'REVIEWER_APPOINTMENT_INVALID', 'INDEPENDENCE_NOT_ESTABLISHED', 'SNAPSHOT_NOT_RECONSTRUCTABLE', 'EVIDENCE_INTEGRITY_COMPROMISED', 'ROUTE_SUPERSEDED', 'EXTERNAL_AUTHENTICITY_UNRESOLVED', 'NOTICE_CANNOT_BE_PROVIDED', 'IMPLEMENTATION_AUTHORITY_BYPASS', 'LEGAL_HOLD_PREVENTS_HANDLING'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "RedressDecisionOutcome" AS ENUM ('RECOMMENDATION', 'UPHELD', 'VARIED', 'REVERSED', 'REMANDED', 'DISMISSED', 'CORRECTED_NONSUBSTANTIVE', 'CLARIFIED', 'SERVICE_REMEDY', 'EXTERNAL_REFERRAL');
-
--- CreateEnum
-CREATE TYPE "RedressDecisionStatus" AS ENUM ('DRAFT', 'RECORDED', 'IMPLEMENTED', 'SUPERSEDED');
-
--- CreateEnum
-CREATE TYPE "InterimReliefOutcome" AS ENUM ('PENDING', 'GRANTED', 'DENIED', 'WITHDRAWN');
-
--- CreateEnum
-CREATE TYPE "RedressImplementationStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'VERIFIED');
-
--- CreateEnum
-CREATE TYPE "RedressSafeHaltReason" AS ENUM ('AUTHORITY_UNRESOLVED', 'REVIEWER_APPOINTMENT_INVALID', 'INDEPENDENCE_NOT_ESTABLISHED', 'SNAPSHOT_NOT_RECONSTRUCTABLE', 'EVIDENCE_INTEGRITY_COMPROMISED', 'ROUTE_SUPERSEDED', 'EXTERNAL_AUTHENTICITY_UNRESOLVED', 'NOTICE_CANNOT_BE_PROVIDED', 'IMPLEMENTATION_AUTHORITY_BYPASS', 'LEGAL_HOLD_PREVENTS_HANDLING');
-
--- CreateEnum
-CREATE TYPE "RedressNoticeType" AS ENUM ('ACKNOWLEDGMENT', 'CLASSIFICATION', 'INVESTIGATION_UPDATE', 'DECISION', 'IMPLEMENTATION', 'STAY', 'EXTERNAL_REFERRAL', 'CORRECTION', 'CLARIFICATION');
-
--- DropForeignKey
-ALTER TABLE "_PacketItemAcceptances" DROP CONSTRAINT "_PacketItemAcceptances_A_fkey";
-
--- DropForeignKey
-ALTER TABLE "_PacketItemAcceptances" DROP CONSTRAINT "_PacketItemAcceptances_B_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_appointmentId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_authorityEvaluationRecordId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_caseId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_decisionReadinessAssessmentId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_decisionTypeVersionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_departmentId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_evidencePacketVersionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_functionAuthorityRecordId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_institutionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "government_decisions" DROP CONSTRAINT "government_decisions_masterAdministrativeFileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "official_instrument_versions" DROP CONSTRAINT "official_instrument_versions_templateVersionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "official_instruments" DROP CONSTRAINT "official_instruments_caseId_fkey";
-
--- DropForeignKey
-ALTER TABLE "official_instruments" DROP CONSTRAINT "official_instruments_instrumentTypeVersionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "official_instruments" DROP CONSTRAINT "official_instruments_issuerOfficeholderId_fkey";
-
--- DropForeignKey
-ALTER TABLE "official_instruments" DROP CONSTRAINT "official_instruments_masterAdministrativeFileId_fkey";
-
--- AlterTable
-ALTER TABLE "case_communications" ALTER COLUMN "updatedAt" DROP DEFAULT;
-
--- AlterTable
-ALTER TABLE "case_milestones" ALTER COLUMN "reachedAt" DROP DEFAULT,
-ALTER COLUMN "updatedAt" DROP DEFAULT;
-
--- AlterTable
-ALTER TABLE "case_public_status_projections" ALTER COLUMN "publicStatusLabel" DROP NOT NULL,
-ALTER COLUMN "updatedAt" DROP DEFAULT;
-
--- AlterTable
-ALTER TABLE "government_decisions" ALTER COLUMN "updatedAt" DROP DEFAULT;
-
--- AlterTable
-ALTER TABLE "official_instruments" ALTER COLUMN "scope" DROP DEFAULT;
-
--- CreateTable
-CREATE TABLE "compliance_matters" (
-    "id" UUID NOT NULL,
-    "complianceMatterNumber" TEXT NOT NULL,
-    "masterAdministrativeFileId" UUID NOT NULL,
-    "caseId" UUID,
-    "officialInstrumentId" UUID NOT NULL,
-    "holderIdentityId" UUID,
-    "holderOrganizationId" UUID,
-    "responsibleInstitutionId" UUID NOT NULL,
-    "responsibleDepartmentId" UUID NOT NULL,
-    "status" "ComplianceMatterStatus" NOT NULL DEFAULT 'OPEN',
-    "openedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "closedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "compliance_matters_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "continuing_obligations" (
-    "id" UUID NOT NULL,
-    "complianceMatterId" UUID NOT NULL,
-    "sourceType" "ContinuingObligationSourceType" NOT NULL,
-    "sourceDecisionConditionId" UUID,
-    "sourceInstrumentVersionId" UUID NOT NULL,
-    "governingSourceId" UUID,
-    "obligationCode" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "approvedConditionText" TEXT,
-    "approvedConditionTextHash" TEXT,
-    "responsibleParty" TEXT NOT NULL,
-    "obligationType" "ContinuingObligationType" NOT NULL,
-    "frequency" TEXT,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "dueDate" TIMESTAMP(3),
-    "recurrenceConfiguration" JSONB,
-    "evidenceStandard" TEXT,
-    "reviewingOfficeId" UUID,
-    "functionAuthorityRecordId" UUID,
-    "noncomplianceConsequenceReference" TEXT,
-    "exceptionProcedureReference" TEXT,
-    "status" "ContinuingObligationStatus" NOT NULL DEFAULT 'NOT_YET_DUE',
-    "supersededByObligationId" UUID,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "continuing_obligations_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "obligation_schedules" (
-    "id" UUID NOT NULL,
-    "continuingObligationId" UUID NOT NULL,
-    "occurrenceNumber" INTEGER NOT NULL,
-    "scheduledDueDate" TIMESTAMP(3) NOT NULL,
-    "lawfulDueDate" TIMESTAMP(3) NOT NULL,
-    "reminderSentAt" TIMESTAMP(3),
-    "status" "ObligationScheduleStatus" NOT NULL DEFAULT 'SCHEDULED',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "obligation_schedules_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "obligation_status_history" (
-    "id" UUID NOT NULL,
-    "continuingObligationId" UUID NOT NULL,
-    "fromStatus" "ContinuingObligationStatus",
-    "toStatus" "ContinuingObligationStatus" NOT NULL,
-    "changedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "changedByIdentityId" UUID,
-    "actorClassification" "ObligationStatusChangeActor" NOT NULL,
-    "reason" TEXT,
-    "metadata" JSONB NOT NULL DEFAULT '{}',
-
-    CONSTRAINT "obligation_status_history_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN CREATE TYPE "RedressNoticeType" AS ENUM ('ACKNOWLEDGMENT', 'CLASSIFICATION', 'INVESTIGATION_UPDATE', 'DECISION', 'IMPLEMENTATION', 'STAY', 'EXTERNAL_REFERRAL', 'CORRECTION', 'CLARIFICATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateTable
 CREATE TABLE "redress_route_definitions" (
@@ -879,52 +713,36 @@ CREATE TABLE "redress_notices" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "compliance_matters_complianceMatterNumber_key" ON "compliance_matters"("complianceMatterNumber");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_masterAdministrativeFileId_idx" ON "compliance_matters"("masterAdministrativeFileId");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_caseId_idx" ON "compliance_matters"("caseId");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_officialInstrumentId_idx" ON "compliance_matters"("officialInstrumentId");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_status_idx" ON "compliance_matters"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "continuing_obligations_supersededByObligationId_key" ON "continuing_obligations"("supersededByObligationId");
 
 -- CreateIndex
-CREATE INDEX "continuing_obligations_complianceMatterId_idx" ON "continuing_obligations"("complianceMatterId");
 
 -- CreateIndex
-CREATE INDEX "continuing_obligations_sourceDecisionConditionId_idx" ON "continuing_obligations"("sourceDecisionConditionId");
 
 -- CreateIndex
-CREATE INDEX "continuing_obligations_sourceInstrumentVersionId_idx" ON "continuing_obligations"("sourceInstrumentVersionId");
 
 -- CreateIndex
-CREATE INDEX "continuing_obligations_status_idx" ON "continuing_obligations"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "continuing_obligations_complianceMatterId_obligationCode_key" ON "continuing_obligations"("complianceMatterId", "obligationCode");
 
 -- CreateIndex
-CREATE INDEX "obligation_schedules_continuingObligationId_idx" ON "obligation_schedules"("continuingObligationId");
 
 -- CreateIndex
-CREATE INDEX "obligation_schedules_scheduledDueDate_idx" ON "obligation_schedules"("scheduledDueDate");
 
 -- CreateIndex
-CREATE INDEX "obligation_schedules_status_idx" ON "obligation_schedules"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "obligation_schedules_continuingObligationId_occurrenceNumbe_key" ON "obligation_schedules"("continuingObligationId", "occurrenceNumber");
 
 -- CreateIndex
-CREATE INDEX "obligation_status_history_continuingObligationId_changedAt_idx" ON "obligation_status_history"("continuingObligationId", "changedAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "redress_route_definitions_code_key" ON "redress_route_definitions"("code");
@@ -1032,7 +850,6 @@ CREATE INDEX "automation_challenge_dispositions_challengeId_idx" ON "automation_
 CREATE INDEX "review_assignments_matterId_idx" ON "review_assignments"("matterId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "reviewer_independence_assessments_assignmentId_key" ON "reviewer_independence_assessments"("assignmentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "review_authority_assessments_assignmentId_key" ON "review_authority_assessments"("assignmentId");
@@ -1104,283 +921,170 @@ CREATE UNIQUE INDEX "redress_notices_noticeReference_key" ON "redress_notices"("
 CREATE INDEX "redress_notices_matterId_idx" ON "redress_notices"("matterId");
 
 -- CreateIndex
-CREATE INDEX "archival_transfer_items_archivalTransferId_idx" ON "archival_transfer_items"("archivalTransferId");
 
 -- CreateIndex
-CREATE INDEX "archival_transfers_status_idx" ON "archival_transfers"("status");
 
 -- CreateIndex
-CREATE INDEX "archival_transfers_sourceRepositoryId_idx" ON "archival_transfers"("sourceRepositoryId");
 
 -- CreateIndex
-CREATE INDEX "archival_transfers_destinationRepositoryId_idx" ON "archival_transfers"("destinationRepositoryId");
 
 -- CreateIndex
-CREATE INDEX "decision_conditions_governmentDecisionId_idx" ON "decision_conditions"("governmentDecisionId");
 
 -- CreateIndex
-CREATE INDEX "decision_conditions_conditionType_status_idx" ON "decision_conditions"("conditionType", "status");
 
 -- CreateIndex
-CREATE INDEX "instrument_number_reservations_numberingRuleId_status_idx" ON "instrument_number_reservations"("numberingRuleId", "status");
 
 -- CreateIndex
-CREATE INDEX "instrument_numbering_rules_institutionId_idx" ON "instrument_numbering_rules"("institutionId");
 
 -- CreateIndex
-CREATE INDEX "instrument_template_versions_instrumentTemplateId_idx" ON "instrument_template_versions"("instrumentTemplateId");
 
 -- CreateIndex
-CREATE INDEX "instrument_templates_instrumentTypeVersionId_idx" ON "instrument_templates"("instrumentTypeVersionId");
 
 -- CreateIndex
-CREATE INDEX "instrument_type_eligible_decision_types_decisionTypeVersion_idx" ON "instrument_type_eligible_decision_types"("decisionTypeVersionId");
 
 -- CreateIndex
-CREATE INDEX "instrument_type_versions_instrumentTypeDefinitionId_idx" ON "instrument_type_versions"("instrumentTypeDefinitionId");
 
 -- CreateIndex
-CREATE INDEX "instrument_type_versions_issuingInstitutionId_idx" ON "instrument_type_versions"("issuingInstitutionId");
 
 -- CreateIndex
-CREATE INDEX "instrument_type_versions_numberingRuleId_idx" ON "instrument_type_versions"("numberingRuleId");
 
 -- CreateIndex
-CREATE INDEX "issuance_events_officialInstrumentId_idx" ON "issuance_events"("officialInstrumentId");
 
 -- CreateIndex
-CREATE INDEX "issuance_events_governmentDecisionId_idx" ON "issuance_events"("governmentDecisionId");
 
 -- CreateIndex
-CREATE INDEX "issuance_events_caseId_idx" ON "issuance_events"("caseId");
 
 -- CreateIndex
-CREATE INDEX "issuance_events_status_idx" ON "issuance_events"("status");
 
 -- CreateIndex
-CREATE INDEX "issuance_readiness_assessments_governmentDecisionId_idx" ON "issuance_readiness_assessments"("governmentDecisionId");
 
 -- CreateIndex
-CREATE INDEX "issuance_readiness_assessments_caseId_idx" ON "issuance_readiness_assessments"("caseId");
 
 -- CreateIndex
-CREATE INDEX "issuance_readiness_assessments_officialInstrumentId_idx" ON "issuance_readiness_assessments"("officialInstrumentId");
 
 -- CreateIndex
-CREATE INDEX "legal_hold_release_records_legalHoldId_idx" ON "legal_hold_release_records"("legalHoldId");
 
 -- CreateIndex
-CREATE INDEX "legal_hold_release_records_releasedAt_idx" ON "legal_hold_release_records"("releasedAt");
 
 -- CreateIndex
-CREATE INDEX "legal_hold_targets_targetType_targetReference_idx" ON "legal_hold_targets"("targetType", "targetReference");
 
 -- CreateIndex
-CREATE INDEX "legal_hold_targets_legalHoldId_idx" ON "legal_hold_targets"("legalHoldId");
 
 -- CreateIndex
-CREATE INDEX "legal_holds_status_idx" ON "legal_holds"("status");
 
 -- CreateIndex
-CREATE INDEX "legal_holds_effectiveFrom_idx" ON "legal_holds"("effectiveFrom");
 
 -- CreateIndex
-CREATE INDEX "official_instrument_versions_officialInstrumentId_idx" ON "official_instrument_versions"("officialInstrumentId");
 
 -- CreateIndex
-CREATE INDEX "official_instrument_versions_documentVersionId_idx" ON "official_instrument_versions"("documentVersionId");
 
 -- CreateIndex
-CREATE INDEX "official_instruments_caseId_idx" ON "official_instruments"("caseId");
 
 -- CreateIndex
-CREATE INDEX "official_instruments_governmentDecisionId_idx" ON "official_instruments"("governmentDecisionId");
 
 -- CreateIndex
-CREATE INDEX "official_instruments_instrumentTypeVersionId_idx" ON "official_instruments"("instrumentTypeVersionId");
 
 -- CreateIndex
-CREATE INDEX "official_instruments_status_idx" ON "official_instruments"("status");
 
 -- CreateIndex
-CREATE INDEX "preservation_collection_items_preservationCollectionId_idx" ON "preservation_collection_items"("preservationCollectionId");
 
 -- CreateIndex
-CREATE INDEX "preservation_collections_status_idx" ON "preservation_collections"("status");
 
 -- CreateIndex
-CREATE INDEX "preservation_collections_purpose_idx" ON "preservation_collections"("purpose");
 
 -- CreateIndex
-CREATE INDEX "record_disposition_records_dispositionRequestId_idx" ON "record_disposition_records"("dispositionRequestId");
 
 -- CreateIndex
-CREATE INDEX "record_disposition_records_dispositionDate_idx" ON "record_disposition_records"("dispositionDate");
 
 -- CreateIndex
-CREATE INDEX "record_disposition_requests_targetType_targetReference_idx" ON "record_disposition_requests"("targetType", "targetReference");
 
 -- CreateIndex
-CREATE INDEX "record_disposition_requests_status_idx" ON "record_disposition_requests"("status");
 
 -- CreateIndex
-CREATE INDEX "record_disposition_requests_retentionScheduleId_idx" ON "record_disposition_requests"("retentionScheduleId");
 
 -- CreateIndex
-CREATE INDEX "record_retention_assignments_recordsClassificationId_idx" ON "record_retention_assignments"("recordsClassificationId");
 
 -- CreateIndex
-CREATE INDEX "record_retention_assignments_retentionScheduleId_idx" ON "record_retention_assignments"("retentionScheduleId");
 
 -- CreateIndex
-CREATE INDEX "record_retention_assignments_targetType_targetReference_idx" ON "record_retention_assignments"("targetType", "targetReference");
 
 -- CreateIndex
-CREATE INDEX "records_classifications_governingSourceId_idx" ON "records_classifications"("governingSourceId");
 
 -- CreateIndex
-CREATE INDEX "records_classifications_status_idx" ON "records_classifications"("status");
 
 -- CreateIndex
-CREATE INDEX "retention_rules_retentionScheduleId_idx" ON "retention_rules"("retentionScheduleId");
 
 -- CreateIndex
-CREATE INDEX "retention_schedules_recordsClassificationId_idx" ON "retention_schedules"("recordsClassificationId");
 
 -- CreateIndex
-CREATE INDEX "retention_schedules_governingSourceId_idx" ON "retention_schedules"("governingSourceId");
 
 -- CreateIndex
-CREATE INDEX "retention_schedules_status_idx" ON "retention_schedules"("status");
-
--- RenameForeignKey
-ALTER TABLE "decision_readiness_assessments" RENAME CONSTRAINT "decision_readiness_assessments_proposedDecisionMakerIdentityId_" TO "decision_readiness_assessments_proposedDecisionMakerIdenti_fkey";
-
--- RenameForeignKey
-ALTER TABLE "decision_readiness_assessments" RENAME CONSTRAINT "decision_readiness_assessments_proposedDecisionMakerOfficeholde" TO "decision_readiness_assessments_proposedDecisionMakerOffice_fkey";
-
--- RenameForeignKey
-ALTER TABLE "evidence_packet_item_exclusions" RENAME CONSTRAINT "evidence_packet_item_exclusions_authorityEvaluationRecordId_fke" TO "evidence_packet_item_exclusions_authorityEvaluationRecordI_fkey";
-
--- RenameForeignKey
-ALTER TABLE "government_communication_documents" RENAME CONSTRAINT "government_communication_documents_governmentCommunicationId_fk" TO "government_communication_documents_governmentCommunication_fkey";
-
--- RenameForeignKey
-ALTER TABLE "government_communication_evidence" RENAME CONSTRAINT "government_communication_evidence_governmentCommunicationId_fke" TO "government_communication_evidence_governmentCommunicationI_fkey";
-
--- RenameForeignKey
-ALTER TABLE "government_communication_records" RENAME CONSTRAINT "government_communication_records_retainedDeterminationForExtern" TO "government_communication_records_retainedDeterminationForE_fkey";
-
--- RenameForeignKey
-ALTER TABLE "instrument_receipt_acknowledgments" RENAME CONSTRAINT "instrument_receipt_acknowledgments_instrumentDeliveryAttemptId_" TO "instrument_receipt_acknowledgments_instrumentDeliveryAttem_fkey";
-
--- RenameForeignKey
-ALTER TABLE "instrument_type_eligible_decision_types" RENAME CONSTRAINT "instrument_type_eligible_decision_types_decisionTypeVersionId_f" TO "instrument_type_eligible_decision_types_decisionTypeVersio_fkey";
-
--- RenameForeignKey
-ALTER TABLE "instrument_type_eligible_decision_types" RENAME CONSTRAINT "instrument_type_eligible_decision_types_instrumentTypeVersionId" TO "instrument_type_eligible_decision_types_instrumentTypeVers_fkey";
-
--- RenameForeignKey
-ALTER TABLE "master_administrative_file_sections" RENAME CONSTRAINT "master_administrative_file_sections_masterAdministrativeFileId_" TO "master_administrative_file_sections_masterAdministrativeFi_fkey";
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_masterAdministrativeFileId_fkey" FOREIGN KEY ("masterAdministrativeFileId") REFERENCES "master_administrative_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_decisionTypeVersionId_fkey" FOREIGN KEY ("decisionTypeVersionId") REFERENCES "decision_type_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_functionAuthorityRecordId_fkey" FOREIGN KEY ("functionAuthorityRecordId") REFERENCES "function_authority_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_authorityEvaluationRecordId_fkey" FOREIGN KEY ("authorityEvaluationRecordId") REFERENCES "authority_evaluation_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_decisionReadinessAssessmentId_fkey" FOREIGN KEY ("decisionReadinessAssessmentId") REFERENCES "decision_readiness_assessments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_evidencePacketVersionId_fkey" FOREIGN KEY ("evidencePacketVersionId") REFERENCES "evidence_packet_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_appointmentId_fkey" FOREIGN KEY ("appointmentId") REFERENCES "appointments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "government_decisions" ADD CONSTRAINT "government_decisions_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instruments" ADD CONSTRAINT "official_instruments_instrumentTypeVersionId_fkey" FOREIGN KEY ("instrumentTypeVersionId") REFERENCES "instrument_type_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instruments" ADD CONSTRAINT "official_instruments_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instruments" ADD CONSTRAINT "official_instruments_masterAdministrativeFileId_fkey" FOREIGN KEY ("masterAdministrativeFileId") REFERENCES "master_administrative_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instruments" ADD CONSTRAINT "official_instruments_issuerOfficeholderId_fkey" FOREIGN KEY ("issuerOfficeholderId") REFERENCES "officeholders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instrument_versions" ADD CONSTRAINT "official_instrument_versions_templateVersionId_fkey" FOREIGN KEY ("templateVersionId") REFERENCES "instrument_template_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "official_instrument_versions" ADD CONSTRAINT "official_instrument_versions_documentVersionId_fkey" FOREIGN KEY ("documentVersionId") REFERENCES "document_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_masterAdministrativeFileId_fkey" FOREIGN KEY ("masterAdministrativeFileId") REFERENCES "master_administrative_files"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_officialInstrumentId_fkey" FOREIGN KEY ("officialInstrumentId") REFERENCES "official_instruments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_holderIdentityId_fkey" FOREIGN KEY ("holderIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_holderOrganizationId_fkey" FOREIGN KEY ("holderOrganizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_responsibleInstitutionId_fkey" FOREIGN KEY ("responsibleInstitutionId") REFERENCES "institutions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_responsibleDepartmentId_fkey" FOREIGN KEY ("responsibleDepartmentId") REFERENCES "departments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_complianceMatterId_fkey" FOREIGN KEY ("complianceMatterId") REFERENCES "compliance_matters"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_sourceDecisionConditionId_fkey" FOREIGN KEY ("sourceDecisionConditionId") REFERENCES "decision_conditions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_sourceInstrumentVersionId_fkey" FOREIGN KEY ("sourceInstrumentVersionId") REFERENCES "official_instrument_versions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_governingSourceId_fkey" FOREIGN KEY ("governingSourceId") REFERENCES "governing_sources"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_reviewingOfficeId_fkey" FOREIGN KEY ("reviewingOfficeId") REFERENCES "offices"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_functionAuthorityRecordId_fkey" FOREIGN KEY ("functionAuthorityRecordId") REFERENCES "function_authority_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "continuing_obligations" ADD CONSTRAINT "continuing_obligations_supersededByObligationId_fkey" FOREIGN KEY ("supersededByObligationId") REFERENCES "continuing_obligations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "obligation_schedules" ADD CONSTRAINT "obligation_schedules_continuingObligationId_fkey" FOREIGN KEY ("continuingObligationId") REFERENCES "continuing_obligations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "obligation_status_history" ADD CONSTRAINT "obligation_status_history_continuingObligationId_fkey" FOREIGN KEY ("continuingObligationId") REFERENCES "continuing_obligations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "obligation_status_history" ADD CONSTRAINT "obligation_status_history_changedByIdentityId_fkey" FOREIGN KEY ("changedByIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "redress_route_definitions" ADD CONSTRAINT "redress_route_definitions_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1413,10 +1117,8 @@ ALTER TABLE "redress_matters" ADD CONSTRAINT "redress_matters_caseId_fkey" FOREI
 ALTER TABLE "redress_matters" ADD CONSTRAINT "redress_matters_masterAdministrativeFileId_fkey" FOREIGN KEY ("masterAdministrativeFileId") REFERENCES "master_administrative_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "redress_matters" ADD CONSTRAINT "redress_matters_challengedDecisionId_fkey" FOREIGN KEY ("challengedDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "redress_matters" ADD CONSTRAINT "redress_matters_challengedInstrumentId_fkey" FOREIGN KEY ("challengedInstrumentId") REFERENCES "official_instruments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "redress_matters" ADD CONSTRAINT "redress_matters_filerIdentityId_fkey" FOREIGN KEY ("filerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1644,7 +1346,6 @@ ALTER TABLE "review_stay_records" ADD CONSTRAINT "review_stay_records_matterId_f
 ALTER TABLE "review_stay_records" ADD CONSTRAINT "review_stay_records_interimReliefRequestId_fkey" FOREIGN KEY ("interimReliefRequestId") REFERENCES "interim_relief_requests"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "review_stay_records" ADD CONSTRAINT "review_stay_records_challengedInstrumentId_fkey" FOREIGN KEY ("challengedInstrumentId") REFERENCES "official_instruments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "review_stay_records" ADD CONSTRAINT "review_stay_records_authorityEvaluationRecordId_fkey" FOREIGN KEY ("authorityEvaluationRecordId") REFERENCES "authority_evaluation_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1671,59 +1372,5 @@ ALTER TABLE "redress_notices" ADD CONSTRAINT "redress_notices_matterId_fkey" FOR
 ALTER TABLE "redress_notices" ADD CONSTRAINT "redress_notices_recipientIdentityId_fkey" FOREIGN KEY ("recipientIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_PacketItemAcceptances" ADD CONSTRAINT "_PacketItemAcceptances_A_fkey" FOREIGN KEY ("A") REFERENCES "evidence_packet_items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_PacketItemAcceptances" ADD CONSTRAINT "_PacketItemAcceptances_B_fkey" FOREIGN KEY ("B") REFERENCES "evidence_purpose_acceptances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- RenameIndex
-ALTER INDEX "archival_transfer_items_archivalTransferId_targetType_targetRef" RENAME TO "archival_transfer_items_archivalTransferId_targetType_targe_key";
-
--- RenameIndex
-ALTER INDEX "departmental_review_evidence_departmentalReviewId_evidenceRecor" RENAME TO "departmental_review_evidence_departmentalReviewId_evidenceR_key";
-
--- RenameIndex
-ALTER INDEX "departmental_review_records_caseId_departmentId_reviewVersion_k" RENAME TO "departmental_review_records_caseId_departmentId_reviewVersi_key";
-
--- RenameIndex
-ALTER INDEX "document_associations_documentVersionId_targetType_targetId_ass" RENAME TO "document_associations_documentVersionId_targetType_targetId_key";
-
--- RenameIndex
-ALTER INDEX "evidence_quality_assessments_evidenceId_criterion_assessmentSou" RENAME TO "evidence_quality_assessments_evidenceId_criterion_assessmen_key";
-
--- RenameIndex
-ALTER INDEX "government_communication_documents_governmentCommunicationId_do" RENAME TO "government_communication_documents_governmentCommunicationI_key";
-
--- RenameIndex
-ALTER INDEX "government_communication_evidence_governmentCommunicationId_evi" RENAME TO "government_communication_evidence_governmentCommunicationId_key";
-
--- RenameIndex
-ALTER INDEX "instrument_delivery_attempts_instrumentDeliveryId_attemptNumber" RENAME TO "instrument_delivery_attempts_instrumentDeliveryId_attemptNu_key";
-
--- RenameIndex
-ALTER INDEX "instrument_lifecycle_decision_links_lifecycleEventId_governme_k" RENAME TO "instrument_lifecycle_decision_links_lifecycleEventId_govern_key";
-
--- RenameIndex
-ALTER INDEX "instrument_number_reservations_numberingRuleId_reservedNumber_k" RENAME TO "instrument_number_reservations_numberingRuleId_reservedNumb_key";
-
--- RenameIndex
-ALTER INDEX "instrument_template_versions_instrumentTemplateId_versionNumber" RENAME TO "instrument_template_versions_instrumentTemplateId_versionNu_key";
-
--- RenameIndex
-ALTER INDEX "instrument_type_eligible_decision_types_instrumentTypeVersionId" RENAME TO "instrument_type_eligible_decision_types_instrumentTypeVersi_key";
-
--- RenameIndex
-ALTER INDEX "instrument_type_versions_instrumentTypeDefinitionId_versionNumb" RENAME TO "instrument_type_versions_instrumentTypeDefinitionId_version_key";
-
--- RenameIndex
-ALTER INDEX "official_instrument_versions_officialInstrumentId_versionNumber" RENAME TO "official_instrument_versions_officialInstrumentId_versionNu_key";
-
--- RenameIndex
-ALTER INDEX "preservation_collection_items_preservationCollectionId_targetTy" RENAME TO "preservation_collection_items_preservationCollectionId_targ_key";
-
--- RenameIndex
-ALTER INDEX "professional_review_evidence_professionalReviewId_evidenceRecor" RENAME TO "professional_review_evidence_professionalReviewId_evidenceR_key";
-
--- RenameIndex
-ALTER INDEX "record_retention_assignments_targetType_targetReference_retenti" RENAME TO "record_retention_assignments_targetType_targetReference_ret_key";
-
