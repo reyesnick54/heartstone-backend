@@ -1,0 +1,47 @@
+export const PHASE_8G_MODEL_NAMES = [
+  'GovernmentDecision',
+  'OfficialInstrument',
+  'OfficialInstrumentVersion',
+  'InstrumentLifecycleEvent',
+  'InstrumentLifecycleDecisionLink',
+  'InstrumentAmendmentRecord',
+  'InstrumentRenewalRecord',
+  'InstrumentSuspensionRecord',
+  'InstrumentRevocationRecord',
+  'InstrumentReinstatementRecord',
+  'InstrumentReplacementRecord',
+  'InstrumentSurrenderRecord',
+  'DecisionReviewReference',
+] as const;
+
+export const PHASE_8G_ENUM_NAMES = [
+  'GovernmentDecisionType',
+  'GovernmentDecisionStatus',
+  'OfficialInstrumentType',
+  'InstrumentJurisdictionScope',
+  'OfficialInstrumentStatus',
+  'InstrumentLifecycleEventType',
+  'ReviewStayStatus',
+  'ReviewInterimEffect',
+  'SurrenderType',
+  'PriorVersionTreatment',
+] as const;
+
+export const INSTRUMENT_LIFECYCLE_EVENT_TYPES = [
+  'ISSUED',
+  'BECAME_EFFECTIVE',
+  'AMENDED',
+  'VARIED',
+  'RENEWED',
+  'CORRECTED_CLERICAL',
+  'REPLACED',
+  'SUSPENDED',
+  'PARTIALLY_SUSPENDED',
+  'REVOCATION_DECIDED',
+  'REVOKED',
+  'REINSTATED',
+  'EXPIRED',
+  'SURRENDERED',
+  'SUPERSEDED',
+  'CLOSED',
+] as const;

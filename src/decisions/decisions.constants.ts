@@ -1,4 +1,3 @@
-export const DECISION_NUMBER_PREFIX = 'DEC';
 export const DECISION_NOTICE_NUMBER_PREFIX = 'DN';
 
 export const PHASE_8C_BOUNDARY_DISCLAIMER =
