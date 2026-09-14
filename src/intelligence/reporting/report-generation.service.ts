@@ -115,7 +115,9 @@ export class ReportGenerationService {
 
   private async assertMetricsCalculated(metricIds: string[]): Promise<void> {
     if (metricIds.length === 0) {
-      throw new BadRequestException('Report generation requires at least one metric calculation run');
+      throw new BadRequestException(
+        'Report generation requires at least one metric calculation run',
+      );
     }
 
     const runs = await this.prisma.metricCalculationRun.findMany({
@@ -132,10 +134,7 @@ export class ReportGenerationService {
     }
   }
 
-  private async assertClaimsValidAtCutoff(
-    claimIds: string[],
-    dataCutoffAt: Date,
-  ): Promise<void> {
+  private async assertClaimsValidAtCutoff(claimIds: string[], dataCutoffAt: Date): Promise<void> {
     const claims = await this.prisma.institutionalMetricClaim.findMany({
       where: { id: { in: claimIds } },
     });

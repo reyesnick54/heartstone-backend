@@ -71,10 +71,7 @@ export class ReportPublicationService {
     this.assertApprovedClaimsOnly(run.sections);
     this.assertNoExpiredClaims(run.sections, run.dataCutoffAt);
     this.assertSupportedMetrics(run.metricPins);
-    this.assertAdverseFindingsPresent(
-      run.frozenContent as Record<string, unknown>,
-      run.sections,
-    );
+    this.assertAdverseFindingsPresent(run.frozenContent as Record<string, unknown>, run.sections);
     this.assertPublicReportConstraints(
       definition.reportType,
       input.classification,
@@ -186,7 +183,9 @@ export class ReportPublicationService {
     for (const claim of claims) {
       const pc = claim.institutionalMetricClaim;
       if (pc.status === InstitutionalMetricClaimStatus.EXPIRED) {
-        throw new BadRequestException('Report cannot publish expired institutional metric claim as current');
+        throw new BadRequestException(
+          'Report cannot publish expired institutional metric claim as current',
+        );
       }
       if (pc.validUntil && pc.validUntil < dataCutoffAt) {
         throw new BadRequestException(
@@ -201,12 +200,14 @@ export class ReportPublicationService {
     }
   }
 
-  private assertSupportedMetrics(
-    metricPins: { metricCalculationRun: { status: string } }[],
-  ): void {
-    const unsupported = metricPins.filter((pin) => pin.metricCalculationRun.status !== 'CALCULATED');
+  private assertSupportedMetrics(metricPins: { metricCalculationRun: { status: string } }[]): void {
+    const unsupported = metricPins.filter(
+      (pin) => pin.metricCalculationRun.status !== 'CALCULATED',
+    );
     if (unsupported.length > 0) {
-      throw new BadRequestException('Report cannot publish unsupported or failed metric calculations');
+      throw new BadRequestException(
+        'Report cannot publish unsupported or failed metric calculations',
+      );
     }
   }
 

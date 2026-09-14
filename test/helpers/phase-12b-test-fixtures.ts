@@ -72,7 +72,10 @@ export async function seedPhase12BFixture(prisma: PrismaService): Promise<Phase1
       data: { givenName: name, familyName: 'Phase12B' },
     });
     const account = await prisma.userAccount.create({
-      data: { loginIdentifier: `${name.toLowerCase().replace(/\s+/g, '-')}@phase12b.test`, personId: person.id },
+      data: {
+        loginIdentifier: `${name.toLowerCase().replace(/\s+/g, '-')}@phase12b.test`,
+        personId: person.id,
+      },
     });
     return prisma.identity.create({
       data: {

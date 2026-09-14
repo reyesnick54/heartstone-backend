@@ -110,7 +110,6 @@ export class IntelligenceController {
     return this.consequentialUse.proposeLiveTransition(body);
   }
 
-
   @Post('analysis/requests')
   createAnalysisRequest(@Body() body: Parameters<AnalysisService['createRequest']>[0]) {
     return this.analysisService.createRequest(body);
