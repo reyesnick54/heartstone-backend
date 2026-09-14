@@ -16,6 +16,7 @@ import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
+import { FinancialAdministrationModule } from './financial-administration/financial-administration.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
@@ -55,6 +56,7 @@ import { SystemModule } from './system/system.module';
     DecisionsIssuanceModule,
     ComplianceModule,
     RedressModule,
+    FinancialAdministrationModule,
   ],
 })
 export class AppModule {}
