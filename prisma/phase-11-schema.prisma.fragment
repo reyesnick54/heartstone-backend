@@ -1,0 +1,272 @@
+// Phase 11: Financial Administration, Notifications and Government Integrations
+// Append to schema.prisma
+
+// ─── Phase 11A: Fee Schedules and Assessment ───────────────────────────────
+
+enum FeeScheduleStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum FeeAssessmentStatus {
+  CALCULATED
+  INVOICED
+  WAIVED
+  ADJUSTED
+  SUPERSEDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  WRITTEN_OFF
+}
+
+enum FinancialApprovalType {
+  FEE_SCHEDULE_ACTIVATION
+  FEE_WAIVER
+  FEE_ADJUSTMENT
+  REFUND_AUTHORIZATION
+  RECONCILIATION_CLOSURE
+  ARREARS_ACTION
+}
+
+enum FinancialApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUPERSEDED
+}
+
+// ─── Phase 11B: Payments ─────────────────────────────────────────────────────
+
+enum PaymentChannelType {
+  CARD
+  BANK_TRANSFER
+  CASH_COUNTER
+  GOVERNMENT_TREASURY
+  MOBILE_WALLET
+  OTHER
+}
+
+enum PaymentIntentStatus {
+  CREATED
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  AUTHORIZED
+  SETTLED
+  FAILED
+  REVERSED
+  CHARGEBACK
+}
+
+enum PaymentWebhookProcessingStatus {
+  RECEIVED
+  AUTHENTICATED
+  PROCESSED
+  DUPLICATE
+  REJECTED
+  FAILED
+}
+
+// ─── Phase 11C: Refunds, Adjustments, Reconciliation ─────────────────────────
+
+enum FeeAdjustmentRequestStatus {
+  PENDING
+  DECIDED
+  WITHDRAWN
+}
+
+enum RefundRequestStatus {
+  PENDING
+  AUTHORIZED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
+}
+
+enum ReconciliationBatchStatus {
+  OPEN
+  IN_PROGRESS
+  EXCEPTION
+  CLOSED
+}
+
+enum ReconciliationItemStatus {
+  MATCHED
+  MISMATCH
+  EXCEPTION
+  RESOLVED
+}
+
+enum FinancialDisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  ESCALATED
+}
+
+enum ArrearsRecordStatus {
+  OUTSTANDING
+  PARTIALLY_PAID
+  PAID
+  WRITTEN_OFF
+  DISPUTED
+}
+
+// ─── Phase 11D: Communications ─────────────────────────────────────────────────
+
+enum CommunicationTemplateStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum CommunicationChannelType {
+  EMAIL
+  SMS
+  PORTAL
+  POSTAL
+  IN_PERSON
+  GOVERNMENT_SECURE_MESSAGING
+  OTHER
+}
+
+enum CommunicationMessageStatus {
+  DRAFT
+  APPROVED
+  QUEUED
+  DELIVERING
+  DELIVERED
+  PARTIALLY_DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum CommunicationDeliveryStatus {
+  PENDING
+  IN_PROGRESS
+  DELIVERED
+  FAILED
+  BOUNCED
+  SUPERSEDED
+}
+
+enum CommunicationReceiptType {
+  DELIVERY_CONFIRMATION
+  READ_RECEIPT
+  LEGAL_ACKNOWLEDGMENT
+  SIGNATURE_CAPTURE
+}
+
+enum MandatoryCommunicationRuleStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ─── Phase 11E: Integrations ─────────────────────────────────────────────────
+
+enum IntegrationAcceptanceStatus {
+  TECHNICALLY_CONNECTED
+  TESTED
+  TECHNICALLY_READY
+  INSTITUTIONALLY_ACCEPTED
+  OPERATIONALLY_ACTIVE
+  SUSPENDED
+  REVALIDATION_REQUIRED
+}
+
+enum IntegrationDefinitionStatus {
+  DRAFT
+  PENDING_ACCEPTANCE
+  ACCEPTED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum IntegrationEndpointDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum DataExchangeFieldDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum AuthoritativeSourceStatus {
+  AUTHORITATIVE
+  SUPPORTING
+  MODELED
+  UNVERIFIED
+  STALE
+}
+
+enum IntegrationRequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum IntegrationExchangeStatus {
+  INITIATED
+  SENT
+  ACKNOWLEDGED
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+}
+
+enum SourceDiscrepancyStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  SAFE_HALTED
+}
+
+enum IntegrationOutageStatus {
+  DETECTED
+  CONFIRMED
+  RECOVERING
+  RESOLVED
+}
+
+enum IntegrationFallbackStatus {
+  ACTIVATED
+  IN_USE
+  RECONCILING
+  DEACTIVATED
+}
+
+enum RegistryQueryStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  TIMEOUT
+  SAFE_HALTED
+}
