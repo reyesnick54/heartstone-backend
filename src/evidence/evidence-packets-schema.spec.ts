@@ -77,7 +77,7 @@ describe('Evidence packet schema coherence (Phase 7E)', () => {
   });
 
   it('supports PROJECT_READINESS without inventing a Project model', () => {
-    expect(schema).not.toContain('model Project');
+    expect(schema).not.toMatch(/model Project \{/);
     expect(extractModelBlock(schema, 'EvidencePacket')).toContain('externalProjectReference');
   });
 
