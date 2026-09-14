@@ -299,7 +299,7 @@ export class MasterAdministrativeFileIndexService {
           referenceType: 'GovernmentDecision',
           referenceId: decision.id,
           label: decision.decisionNumber,
-          occurredAt: decision.decidedAt.toISOString(),
+          occurredAt: (decision.decidedAt ?? decision.createdAt).toISOString(),
           metadata: {
             outcome: decision.outcome,
             status: decision.decisionStatus,

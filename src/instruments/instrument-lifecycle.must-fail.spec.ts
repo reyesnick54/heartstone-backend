@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import {
   InstrumentJurisdictionScope,
-  OfficialInstrumentStatus,
+  LifecycleOfficialInstrumentStatus,
   ReviewInterimEffect,
   ReviewStayStatus,
 } from '@prisma/client';
@@ -48,7 +48,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
 
   it('1. ordinary PATCH cannot change legal instrument status', () => {
     expect(() => {
-      boundary.assertClientCannotPatchInstrumentStatus({ currentStatus: 'REVOKED' });
+      boundary.assertClientCannotPatchInstrumentStatus({ status: 'REVOKED' });
     }).toThrow(/ordinary PATCH/i);
   });
 
@@ -131,13 +131,13 @@ describe('Phase 8G architectural must-fail invariants', () => {
 
   it('9. suspension may be scoped where authorized', () => {
     const allowed = guard.getAllowedStatusesForAction('SUSPENDED');
-    expect(allowed).toContain(OfficialInstrumentStatus.EFFECTIVE);
+    expect(allowed).toContain(LifecycleOfficialInstrumentStatus.EFFECTIVE);
   });
 
   it('10. revocation requires decision and authority', () => {
     expect(() => {
       guard.assertConsequentialEventHasDecision('REVOKED');
-    }).toThrow(/controlling GovernmentDecision/i);
+    }).toThrow(/controlling InstrumentControllingDecision/i);
   });
 
   it('11. ABSEZ revocation cannot masquerade as national revocation', () => {
@@ -174,9 +174,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
   });
 
   it('14. expiration preserves record (no deletion invariant)', () => {
-    expect(PHASE_8G_INVARIANTS.find((i) => i.id === 14)?.description).toContain(
-      'preserves record',
-    );
+    expect(PHASE_8G_INVARIANTS.find((i) => i.id === 14)?.description).toContain('preserves record');
   });
 
   it('15. surrender preserves obligations (metadata invariant)', () => {
@@ -209,7 +207,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
   it('20. consequential lifecycle event requires controlling decision', () => {
     expect(() => {
       guard.assertConsequentialEventHasDecision('SUSPENDED');
-    }).toThrow(/controlling GovernmentDecision/i);
+    }).toThrow(/controlling InstrumentControllingDecision/i);
 
     expect(() => {
       guard.assertConsequentialEventHasDecision('EXPIRED');

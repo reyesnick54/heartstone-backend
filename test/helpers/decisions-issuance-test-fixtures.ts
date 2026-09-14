@@ -14,10 +14,7 @@ import { type App } from 'supertest/types';
 import { type PrismaService } from '../../src/database/prisma.service';
 import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
 import { asLoginResponseBody } from './identity-test-types';
-import {
-  type Phase8eFixtureContext,
-  seedPhase8eIssuanceFixture,
-} from './phase-8e-test-fixtures';
+import { type Phase8eFixtureContext, seedPhase8eIssuanceFixture } from './phase-8e-test-fixtures';
 
 export interface Phase8fFixtureContext extends Phase8eFixtureContext {
   applicantSessionToken: string;
