@@ -2,11 +2,16 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
+import { CreateExternalReviewReferralDto } from './dto/create-external-review-referral.dto';
+import { RecordExternalDeterminationDto } from './dto/record-external-determination.dto';
+import { ExternalReviewDeterminationService } from './external-review/external-review-determination.service';
+import { ExternalReviewPackageService } from './external-review/external-review-package.service';
+import { ExternalReviewReferralService } from './external-review/external-review-referral.service';
 import { RedressImplementationService } from './implementation/redress-implementation.service';
 import { InterimReliefService } from './interim-relief/interim-relief.service';
 import { RedressMatterService } from './matters/redress-matter.service';
 import { RedressNoticeService } from './notices/redress-notice.service';
-import { PHASE_10G_BOUNDARY_DISCLAIMER } from './redress.constants';
+import { PHASE_10F_BOUNDARY_DISCLAIMER, PHASE_10G_BOUNDARY_DISCLAIMER } from './redress.constants';
 
 @Controller('redress')
 export class RedressController {
@@ -17,11 +22,17 @@ export class RedressController {
     private readonly interimRelief: InterimReliefService,
     private readonly implementation: RedressImplementationService,
     private readonly notices: RedressNoticeService,
+    private readonly externalReferrals: ExternalReviewReferralService,
+    private readonly externalPackages: ExternalReviewPackageService,
+    private readonly externalDeterminations: ExternalReviewDeterminationService,
   ) {}
 
   @Get('boundary')
-  getBoundaryDisclaimer(): { disclaimer: string } {
-    return { disclaimer: PHASE_10G_BOUNDARY_DISCLAIMER };
+  getBoundaryDisclaimer(): { disclaimer: string; externalDisclaimer: string } {
+    return {
+      disclaimer: PHASE_10G_BOUNDARY_DISCLAIMER,
+      externalDisclaimer: PHASE_10F_BOUNDARY_DISCLAIMER,
+    };
   }
 
   @Post('matters')
@@ -60,5 +71,54 @@ export class RedressController {
   @Post('notices/prepare')
   prepareNotice(@Body() body: Parameters<RedressNoticeService['prepareNotice']>[0]) {
     return this.notices.prepareNotice(body);
+  }
+
+  @Post('external-referrals')
+  createExternalReferral(@Body() body: CreateExternalReviewReferralDto) {
+    return this.externalReferrals.create(body);
+  }
+
+  @Get('external-referrals/:id')
+  getExternalReferral(@Param('id') id: string) {
+    return this.externalReferrals.getReferral(id);
+  }
+
+  @Post('external-referrals/:id/packages')
+  createExternalPackage(
+    @Param('id') referralId: string,
+    @Body('evidencePacketVersionId') evidencePacketVersionId: string,
+  ) {
+    return this.externalPackages.createPinnedPackage({
+      referralId,
+      evidencePacketVersionId,
+    });
+  }
+
+  @Post('external-referrals/:id/determinations')
+  recordExternalDetermination(
+    @Param('id') referralId: string,
+    @Body() body: RecordExternalDeterminationDto,
+  ) {
+    return this.externalDeterminations.record({
+      referralId,
+      sourceAuthority: body.sourceAuthority,
+      outcomeText: body.outcomeText,
+      receivedDate: new Date(body.receivedDate),
+      officialReference: body.officialReference,
+      decisionDate: body.decisionDate ? new Date(body.decisionDate) : undefined,
+      effectiveDate: body.effectiveDate ? new Date(body.effectiveDate) : undefined,
+      reasonsReference: body.reasonsReference,
+      stayInterimEffect: body.stayInterimEffect,
+      remedyText: body.remedyText,
+      furtherRightsText: body.furtherRightsText,
+      instrumentOrderReference: body.instrumentOrderReference,
+      conditionsText: body.conditionsText,
+      implementationRequirements: body.implementationRequirements,
+      verificationMethod: body.verificationMethod,
+      bindingClass: body.bindingClass,
+      authenticityStatus: body.authenticityStatus,
+      authenticityVerificationRef: body.authenticityVerificationRef,
+      isAuthenticated: body.isAuthenticated,
+    });
   }
 }
