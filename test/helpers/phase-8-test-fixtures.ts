@@ -393,26 +393,25 @@ export async function seedPhase8Fixture(
     });
     officialAppointmentId = officialAppointment.id;
 
-    await prisma.functionAuthorityAssignment.create({
-      data: {
-        functionAuthorityRecordId: base.functionAuthorityRecordId,
-        officeholderId: official.officeholderId,
-        officeId: base.officeId,
-        institutionId: base.institutionId,
-        status: FunctionAssignmentStatus.ACTIVE,
-        effectiveFrom: new Date('2020-01-01'),
-      },
-    });
-
-    await prisma.functionAuthorityAssignment.create({
-      data: {
-        functionAuthorityRecordId: catalog.issueFunctionAuthorityRecordId,
-        officeholderId: official.officeholderId,
-        officeId: base.officeId,
-        institutionId: base.institutionId,
-        status: FunctionAssignmentStatus.ACTIVE,
-        effectiveFrom: new Date('2020-01-01'),
-      },
+    await prisma.functionAuthorityAssignment.createMany({
+      data: [
+        {
+          functionAuthorityRecordId: base.functionAuthorityRecordId,
+          officeholderId: official.officeholderId,
+          officeId: base.officeId,
+          institutionId: base.institutionId,
+          status: FunctionAssignmentStatus.ACTIVE,
+          effectiveFrom: new Date('2020-01-01'),
+        },
+        {
+          functionAuthorityRecordId: catalog.issueFunctionAuthorityRecordId,
+          officeholderId: official.officeholderId,
+          officeId: base.officeId,
+          institutionId: base.institutionId,
+          status: FunctionAssignmentStatus.ACTIVE,
+          effectiveFrom: new Date('2020-01-01'),
+        },
+      ],
     });
   }
 

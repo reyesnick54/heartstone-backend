@@ -1,6 +1,16 @@
 import { type PrismaService } from './prisma.service';
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await prisma.instrumentLifecycleDecisionLink.deleteMany();
+  await prisma.instrumentLifecycleEvent.deleteMany();
+  await prisma.decisionReviewReference.deleteMany();
+  await prisma.instrumentAmendmentRecord.deleteMany();
+  await prisma.instrumentRenewalRecord.deleteMany();
+  await prisma.instrumentSuspensionRecord.deleteMany();
+  await prisma.instrumentRevocationRecord.deleteMany();
+  await prisma.instrumentReinstatementRecord.deleteMany();
+  await prisma.instrumentReplacementRecord.deleteMany();
+  await prisma.instrumentSurrenderRecord.deleteMany();
   await prisma.instrumentDownloadEvent.deleteMany();
   await prisma.instrumentDeliveryAuditEvent.deleteMany();
   await prisma.instrumentVerificationEvent.deleteMany();
@@ -9,7 +19,6 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.instrumentDeliveryAttempt.deleteMany();
   await prisma.instrumentDelivery.deleteMany();
   await prisma.issuanceEvent.deleteMany();
-  await prisma.issuanceReadinessAssessment.updateMany({ data: { officialInstrumentId: null } });
   await prisma.issuanceReadinessAssessment.deleteMany();
   await prisma.officialInstrument.updateMany({ data: { currentVersionId: null } });
   await prisma.officialInstrumentVersion.deleteMany();

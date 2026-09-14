@@ -259,7 +259,7 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
     });
 
     expect(instrument.status).toBe(OfficialInstrumentStatus.SUSPENDED);
-    expect(instrument.instrumentTypeVersion.instrumentTypeDefinition.kind).toBe(
+    expect(instrument.instrumentTypeVersion?.instrumentTypeDefinition.kind).toBe(
       OfficialInstrumentKind.LICENSE,
     );
     expect(suspensionType.kind).toBe(OfficialInstrumentKind.SUSPENSION_NOTICE);

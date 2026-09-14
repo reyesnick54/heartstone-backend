@@ -121,6 +121,7 @@ export class AuthorityPolicyGuard implements CanActivate {
         where: { id: instrumentTypeVersionId },
         select: { issuanceFunctionAuthorityRecordId: true },
       });
+
       if (typeVersion?.issuanceFunctionAuthorityRecordId) {
         return typeVersion.issuanceFunctionAuthorityRecordId;
       }

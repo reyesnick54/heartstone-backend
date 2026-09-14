@@ -495,7 +495,7 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
         governmentServiceVersionId: sourceApplication.governmentServiceVersionId,
         formDefinitionId: sourceApplication.formDefinitionId,
         formVersionId: sourceApplication.formVersionId,
-        configurationFingerprint: 'other-application-fingerprint',
+        configurationFingerprint: 'other-fingerprint',
         applicantCategory: sourceApplication.applicantCategory,
         status: 'SUBMITTED',
       },
@@ -505,15 +505,11 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
         caseNumber: `${fixture.marker}-OTHER-CASE`,
         applicationId: otherApplication.id,
         applicantIdentityId: sourceCase.applicantIdentityId,
-        governmentServiceId: (
-          await prisma.governmentService.findFirstOrThrow({
-            where: { code: `${fixture.marker}-SVC` },
-          })
-        ).id,
-        governmentServiceVersionId: (await prisma.governmentServiceVersion.findFirstOrThrow()).id,
+        governmentServiceId: sourceCase.governmentServiceId,
+        governmentServiceVersionId: sourceCase.governmentServiceVersionId,
         responsibleInstitutionId: fixture.institutionId,
         responsibleDepartmentId: fixture.departmentId,
-        workflowVersionId: (await prisma.workflowVersion.findFirstOrThrow()).id,
+        workflowVersionId: sourceCase.workflowVersionId,
         configurationFingerprint: 'other-fingerprint',
         status: 'DECISION_PENDING',
       },

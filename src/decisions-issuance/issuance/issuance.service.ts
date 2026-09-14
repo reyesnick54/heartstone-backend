@@ -175,7 +175,7 @@ export class IssuanceService {
       instrumentType: typeVersion.instrumentTypeDefinition.kind,
       instrumentTypeName: typeVersion.instrumentTypeDefinition.name,
       decisionNumber: decision.decisionNumber,
-      matterDecided: decision.matterDecided,
+      matterDecided: decision.matterDecided ?? '',
       caseNumber: caseRecord.caseNumber,
     };
 
