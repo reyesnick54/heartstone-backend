@@ -58,10 +58,7 @@ export class ReportingBoundaryService {
     }
   }
 
-  assertAdverseFindingsNotSuppressed(
-    requiredOutcomes: string[],
-    includedOutcomes: string[],
-  ): void {
+  assertAdverseFindingsNotSuppressed(requiredOutcomes: string[], includedOutcomes: string[]): void {
     const suppressed = requiredOutcomes.filter(
       (outcome) =>
         ['ADVERSE', 'NEUTRAL', 'INCONCLUSIVE'].includes(outcome) &&
