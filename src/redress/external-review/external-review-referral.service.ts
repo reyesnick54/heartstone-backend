@@ -145,7 +145,9 @@ export class ExternalReviewReferralService {
   async recordStatus(input: RecordExternalReviewStatusInput) {
     const referral = await this.getReferral(input.referralId);
     if (!this.boundary.canTransitionStatus(referral.status, input.status)) {
-      throw new BadRequestException(`Cannot transition external review status from ${referral.status} to ${input.status}`);
+      throw new BadRequestException(
+        `Cannot transition external review status from ${referral.status} to ${input.status}`,
+      );
     }
 
     await this.prisma.externalReviewStatusRecord.create({
