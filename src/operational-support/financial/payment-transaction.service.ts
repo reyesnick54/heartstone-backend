@@ -48,7 +48,6 @@ export class PaymentTransactionService {
   }
 
   async settlePayment(input: SettlePaymentInput) {
-    this.boundary.rejectClientPaymentTransactionFields(input as unknown as Record<string, unknown>);
     this.boundary.rejectPaymentSideEffects(input as unknown as Record<string, unknown>);
     this.boundary.assertPaymentDoesNotAlterCaseStatus(false);
     this.boundary.assertPaymentDoesNotAlterGovernmentDecision(false);
