@@ -1,0 +1,1569 @@
+// Phase 12: Intelligence, Analytics, and AI Command Layer
+// Append to schema.prisma
+//
+// Back-relations required on existing models when merging:
+//   Institution, Identity, Case, EvidencePacket, EvidencePacketVersion,
+//   GovernmentDecision, OfficialInstrument, MonitoringRule
+
+// ─── Phase 12A: Performance Framework and Metrics ────────────────────────────
+
+enum MetricDefinitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum MetricCalculationRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum MetricDataQualityStatus {
+  NOT_ASSESSED
+  ACCEPTABLE
+  DEGRADED
+  UNRELIABLE
+  REJECTED
+}
+
+enum PerformanceClaimStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum PerformanceClaimReviewOutcome {
+  CONFIRMED
+  PARTIALLY_CONFIRMED
+  REJECTED
+  REQUIRES_REVALIDATION
+}
+
+// ─── Phase 12B: Dashboards and Projections ───────────────────────────────────
+
+enum DashboardDefinitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum DashboardIndicatorStatus {
+  CURRENT
+  STALE
+  UNAVAILABLE
+  SAFE_HALTED
+}
+
+// ─── Phase 12C: Strategic Projects and Delivery Evidence ─────────────────────
+
+enum StrategicProjectMilestoneStatus {
+  REPORTED
+  VERIFIED
+  COMPLETED
+}
+
+// ─── Phase 12D: AI Models, Agents, and Execution ─────────────────────────────
+
+enum AIModelStatus {
+  DRAFT
+  EVALUATION
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AIUseCaseStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AIAgentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AIExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum AISuspensionReason {
+  SAFETY_INCIDENT
+  EVALUATION_FAILURE
+  DATA_ENTITLEMENT_VIOLATION
+  POLICY_CHANGE
+  HUMAN_OVERSIGHT_REQUIRED
+  OPERATIONAL_RISK
+  OTHER
+}
+
+enum AIHumanDispositionType {
+  ACCEPTED
+  ACCEPTED_WITH_MODIFICATION
+  REJECTED
+  ESCALATED
+  DEFERRED
+  NO_ACTION_REQUIRED
+}
+
+// ─── Phase 12E: Analysis, Monitoring, and Risk ───────────────────────────────
+
+enum AnalysisRequestStatus {
+  DRAFT
+  SUBMITTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  SAFE_HALTED
+}
+
+enum AnalysisRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum MonitoringAlertStatus {
+  OPEN
+  VERIFIED
+  CLOSED
+}
+
+enum AlertVerificationOutcome {
+  CONFIRMED
+  PARTIALLY_CONFIRMED
+  NOT_CONFIRMED
+  INCONCLUSIVE
+  REQUIRES_FURTHER_MONITORING
+}
+
+enum RiskAssessmentStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SUPERSEDED
+  SAFE_HALTED
+}
+
+// ─── Phase 12F: Digital Twins and Simulation ─────────────────────────────────
+
+enum DigitalTwinStatus {
+  ACTIVE
+  STALE
+  SAFE_HALTED
+}
+
+enum SimulationRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum SimulationOutputType {
+  PROJECTION
+  SCENARIO_COMPARISON
+  SENSITIVITY_ANALYSIS
+  RISK_INDICATOR
+  RECOMMENDATION
+  DIAGNOSTIC
+}
+
+// ─── Phase 12G: Reports and Decision Traceability ────────────────────────────
+
+enum ReportDefinitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum ReportGenerationRunStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum ReportClaimStatus {
+  DRAFT
+  ASSERTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUPERSEDED
+}
+
+enum ReportPublicationStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PUBLISHED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum ProcessingTimeComponent {
+  ABSEZ
+  APPLICANT
+  EXTERNAL_DEPENDENCY
+}
+
+// ─── Phase 12A Models: Performance Framework and Metrics ─────────────────────
+
+model PerformanceFramework {
+  id            String             @id @default(uuid()) @db.Uuid
+  institutionId String             @db.Uuid
+  code          String
+  name          String
+  description   String?
+  effectiveFrom DateTime?
+  effectiveUntil DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  institution   Institution        @relation("PerformanceFrameworkInstitution", fields: [institutionId], references: [id])
+  metrics       MetricDefinition[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("performance_frameworks")
+}
+
+model MetricDefinition {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  performanceFrameworkId String                   @db.Uuid
+  institutionId         String                    @db.Uuid
+  code                  String
+  name                  String
+  description           String?
+  unit                  String?
+  status                MetricDefinitionStatus    @default(DRAFT)
+  currentVersionId      String?                   @unique @db.Uuid
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  performanceFramework  PerformanceFramework      @relation(fields: [performanceFrameworkId], references: [id])
+  institution           Institution               @relation("MetricDefinitionInstitution", fields: [institutionId], references: [id])
+  currentVersion        MetricDefinitionVersion?  @relation("MetricDefinitionCurrentVersion", fields: [currentVersionId], references: [id])
+  versions              MetricDefinitionVersion[] @relation("MetricDefinitionVersions")
+  baselines             MetricBaseline[]
+  performanceClaims     PerformanceClaim[]
+  dashboardIndicators   DashboardIndicatorDefinition[]
+
+  @@unique([institutionId, code])
+  @@index([performanceFrameworkId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("metric_definitions")
+}
+
+model MetricDefinitionVersion {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  metricDefinitionId  String                  @db.Uuid
+  versionNumber       Int
+  definitionConfig    Json                    @default("{}")
+  methodology         String?
+  limitations         String?
+  uncertaintyNotes    String?
+  effectiveFrom       DateTime?
+  effectiveUntil      DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  metricDefinition    MetricDefinition        @relation("MetricDefinitionVersions", fields: [metricDefinitionId], references: [id], onDelete: Cascade)
+  currentForDefinition MetricDefinition?      @relation("MetricDefinitionCurrentVersion")
+  baselines           MetricBaseline[]
+  calculationRuns     MetricCalculationRun[]
+  observations        MetricObservation[]
+
+  @@unique([metricDefinitionId, versionNumber])
+  @@index([metricDefinitionId])
+  @@map("metric_definition_versions")
+}
+
+model MetricBaseline {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  metricDefinitionId        String                  @db.Uuid
+  metricDefinitionVersionId String                  @db.Uuid
+  institutionId             String                  @db.Uuid
+  baselineValue             Decimal                 @db.Decimal(20, 6)
+  baselinePeriodStart       DateTime
+  baselinePeriodEnd         DateTime
+  methodology               String?
+  uncertaintyNotes          String?
+  sourceDataRefs            Json                    @default("[]")
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  metricDefinition          MetricDefinition        @relation(fields: [metricDefinitionId], references: [id])
+  metricDefinitionVersion   MetricDefinitionVersion @relation(fields: [metricDefinitionVersionId], references: [id])
+  institution               Institution             @relation("MetricBaselineInstitution", fields: [institutionId], references: [id])
+
+  @@index([metricDefinitionId])
+  @@index([metricDefinitionVersionId])
+  @@index([institutionId])
+  @@map("metric_baselines")
+}
+
+model MetricCalculationRun {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  metricDefinitionVersionId String                     @db.Uuid
+  institutionId             String                     @db.Uuid
+  runReference              String                     @unique
+  status                    MetricCalculationRunStatus @default(PENDING)
+  startedAt                 DateTime?
+  completedAt               DateTime?
+  inputsSnapshot            Json                       @default("{}")
+  limitations               String?
+  uncertaintyNotes          String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  metricDefinitionVersion   MetricDefinitionVersion    @relation(fields: [metricDefinitionVersionId], references: [id])
+  institution               Institution                @relation("MetricCalculationRunInstitution", fields: [institutionId], references: [id])
+  observations              MetricObservation[]
+  dataQualityAssessments    MetricDataQualityAssessment[]
+
+  @@index([metricDefinitionVersionId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("metric_calculation_runs")
+}
+
+model MetricObservation {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  metricCalculationRunId    String?                 @db.Uuid
+  metricDefinitionVersionId String                  @db.Uuid
+  institutionId             String                  @db.Uuid
+  observedValue             Decimal                 @db.Decimal(20, 6)
+  observedAt                DateTime
+  periodStart               DateTime?
+  periodEnd                 DateTime?
+  uncertaintyNotes          String?
+  sourceDataRefs            Json                    @default("[]")
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  metricCalculationRun      MetricCalculationRun?   @relation(fields: [metricCalculationRunId], references: [id])
+  metricDefinitionVersion   MetricDefinitionVersion @relation(fields: [metricDefinitionVersionId], references: [id])
+  institution               Institution             @relation("MetricObservationInstitution", fields: [institutionId], references: [id])
+  dataQualityAssessments    MetricDataQualityAssessment[]
+  performanceClaims         PerformanceClaim[]
+
+  @@index([metricCalculationRunId])
+  @@index([metricDefinitionVersionId])
+  @@index([institutionId])
+  @@index([observedAt])
+  @@map("metric_observations")
+}
+
+model MetricDataQualityAssessment {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  metricObservationId    String?                 @db.Uuid
+  metricCalculationRunId String?                 @db.Uuid
+  institutionId          String                  @db.Uuid
+  status                 MetricDataQualityStatus @default(NOT_ASSESSED)
+  assessedAt             DateTime                @default(now())
+  assessedByIdentityId   String?                 @db.Uuid
+  findings               String?
+  limitations            String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  metricObservation      MetricObservation?      @relation(fields: [metricObservationId], references: [id])
+  metricCalculationRun   MetricCalculationRun?   @relation(fields: [metricCalculationRunId], references: [id])
+  institution            Institution             @relation("MetricDataQualityAssessmentInstitution", fields: [institutionId], references: [id])
+  assessedBy             Identity?               @relation("MetricDataQualityAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@index([metricObservationId])
+  @@index([metricCalculationRunId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("metric_data_quality_assessments")
+}
+
+model PerformanceClaim {
+  id                        String                @id @default(uuid()) @db.Uuid
+  institutionId             String                @db.Uuid
+  metricDefinitionId        String?               @db.Uuid
+  metricObservationId       String?               @db.Uuid
+  evidencePacketId          String?               @db.Uuid
+  evidencePacketVersionId   String?               @db.Uuid
+  governmentDecisionId      String?               @db.Uuid
+  caseId                    String?               @db.Uuid
+  claimReference            String                @unique
+  status                    PerformanceClaimStatus @default(DRAFT)
+  claimStatement            String
+  claimedValue              Decimal?              @db.Decimal(20, 6)
+  claimedAt                 DateTime?
+  sourceDataRefs            Json                  @default("[]")
+  evidenceTraceabilityRefs  Json                  @default("[]")
+  underlyingRecordRefs      Json                  @default("[]")
+  methodologyVersion        String?
+  limitations               String?
+  uncertaintyNotes          String?
+  createdByIdentityId       String?               @db.Uuid
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  institution               Institution           @relation("PerformanceClaimInstitution", fields: [institutionId], references: [id])
+  metricDefinition          MetricDefinition?     @relation(fields: [metricDefinitionId], references: [id])
+  metricObservation         MetricObservation?    @relation(fields: [metricObservationId], references: [id])
+  evidencePacket            EvidencePacket?       @relation("PerformanceClaimEvidencePacket", fields: [evidencePacketId], references: [id])
+  evidencePacketVersion     EvidencePacketVersion? @relation("PerformanceClaimEvidencePacketVersion", fields: [evidencePacketVersionId], references: [id])
+  governmentDecision        GovernmentDecision?   @relation("PerformanceClaimGovernmentDecision", fields: [governmentDecisionId], references: [id])
+  case                      Case?                 @relation("PerformanceClaimCase", fields: [caseId], references: [id])
+  createdBy                 Identity?             @relation("PerformanceClaimCreator", fields: [createdByIdentityId], references: [id])
+  reviews                   PerformanceClaimReview[]
+  revalidations             PerformanceClaimRevalidation[]
+
+  @@index([institutionId])
+  @@index([metricDefinitionId])
+  @@index([metricObservationId])
+  @@index([evidencePacketId])
+  @@index([evidencePacketVersionId])
+  @@index([governmentDecisionId])
+  @@index([caseId])
+  @@index([status])
+  @@map("performance_claims")
+}
+
+model PerformanceClaimReview {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  performanceClaimId  String                        @db.Uuid
+  reviewerIdentityId  String                        @db.Uuid
+  outcome             PerformanceClaimReviewOutcome
+  reviewedAt          DateTime                      @default(now())
+  findings            String?
+  limitations         String?
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+  performanceClaim    PerformanceClaim              @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
+  reviewer            Identity                      @relation("PerformanceClaimReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([performanceClaimId])
+  @@index([reviewerIdentityId])
+  @@map("performance_claim_reviews")
+}
+
+model PerformanceClaimRevalidation {
+  id                     String               @id @default(uuid()) @db.Uuid
+  performanceClaimId     String               @db.Uuid
+  trigger                String
+  revalidatedAt          DateTime             @default(now())
+  revalidatedByIdentityId  String?              @db.Uuid
+  priorStatus            PerformanceClaimStatus
+  newStatus              PerformanceClaimStatus
+  notes                  String?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  performanceClaim       PerformanceClaim     @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
+  revalidatedBy          Identity?            @relation("PerformanceClaimRevalidator", fields: [revalidatedByIdentityId], references: [id])
+
+  @@index([performanceClaimId])
+  @@index([revalidatedByIdentityId])
+  @@map("performance_claim_revalidations")
+}
+
+// ─── Phase 12B Models: Dashboards and Projections ────────────────────────────
+
+model DashboardDefinition {
+  id            String                    @id @default(uuid()) @db.Uuid
+  institutionId String                    @db.Uuid
+  code          String
+  name          String
+  description   String?
+  status        DashboardDefinitionStatus @default(DRAFT)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  institution   Institution               @relation("DashboardDefinitionInstitution", fields: [institutionId], references: [id])
+  versions      DashboardVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([status])
+  @@map("dashboard_definitions")
+}
+
+model DashboardVersion {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  dashboardDefinitionId String                      @db.Uuid
+  versionNumber         Int
+  layoutConfig          Json                        @default("{}")
+  status                DashboardDefinitionStatus   @default(DRAFT)
+  publishedAt           DateTime?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  dashboardDefinition   DashboardDefinition         @relation(fields: [dashboardDefinitionId], references: [id], onDelete: Cascade)
+  widgets               DashboardWidgetDefinition[]
+  indicators            DashboardIndicatorDefinition[]
+  snapshots             DashboardSnapshot[]
+
+  @@unique([dashboardDefinitionId, versionNumber])
+  @@index([dashboardDefinitionId])
+  @@map("dashboard_versions")
+}
+
+model DashboardWidgetDefinition {
+  id                 String           @id @default(uuid()) @db.Uuid
+  dashboardVersionId String           @db.Uuid
+  widgetType         String
+  title              String
+  config             Json             @default("{}")
+  sortOrder          Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  dashboardVersion   DashboardVersion @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dashboardVersionId])
+  @@map("dashboard_widget_definitions")
+}
+
+model DashboardIndicatorDefinition {
+  id                 String           @id @default(uuid()) @db.Uuid
+  dashboardVersionId String           @db.Uuid
+  metricDefinitionId String?          @db.Uuid
+  indicatorCode      String
+  label              String
+  config             Json             @default("{}")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  dashboardVersion   DashboardVersion @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  metricDefinition   MetricDefinition? @relation(fields: [metricDefinitionId], references: [id])
+  projections        DashboardIndicatorProjection[]
+
+  @@unique([dashboardVersionId, indicatorCode])
+  @@index([dashboardVersionId])
+  @@index([metricDefinitionId])
+  @@map("dashboard_indicator_definitions")
+}
+
+model DashboardIndicatorProjection {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  dashboardIndicatorDefinitionId String                 @db.Uuid
+  institutionId              String                   @db.Uuid
+  status                     DashboardIndicatorStatus @default(CURRENT)
+  computedValue              Decimal?                 @db.Decimal(20, 6)
+  displayValue               String?
+  computedAt                 DateTime                 @default(now())
+  sourceStaleAt              DateTime?
+  isStale                    Boolean                  @default(false)
+  disclaimer                 String?
+  sourceDataRefs             Json                     @default("[]")
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  dashboardIndicatorDefinition DashboardIndicatorDefinition @relation(fields: [dashboardIndicatorDefinitionId], references: [id], onDelete: Cascade)
+  institution                Institution              @relation("DashboardIndicatorProjectionInstitution", fields: [institutionId], references: [id])
+
+  @@index([dashboardIndicatorDefinitionId])
+  @@index([institutionId])
+  @@index([status])
+  @@index([isStale])
+  @@map("dashboard_indicator_projections")
+}
+
+model DashboardSnapshot {
+  id                 String           @id @default(uuid()) @db.Uuid
+  dashboardVersionId String           @db.Uuid
+  institutionId      String           @db.Uuid
+  snapshotAt         DateTime         @default(now())
+  snapshotData       Json             @default("{}")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  dashboardVersion   DashboardVersion @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  institution        Institution      @relation("DashboardSnapshotInstitution", fields: [institutionId], references: [id])
+  decisionTraces     EvidenceDashboardDecisionTrace[]
+
+  @@index([dashboardVersionId])
+  @@index([institutionId])
+  @@index([snapshotAt])
+  @@map("dashboard_snapshots")
+}
+
+model DashboardStatusDictionaryEntry {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  label       String
+  description String?
+  sortOrder   Int      @default(0)
+  isTerminal  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("dashboard_status_dictionary_entries")
+}
+
+// ─── Phase 12C Models: Strategic Projects and Delivery Evidence ──────────────
+
+model StrategicProjectProfile {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  institutionId         String                        @db.Uuid
+  sponsorInstitutionId  String?                       @db.Uuid
+  projectCode           String
+  title                 String
+  description           String?
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  institution           Institution                   @relation("StrategicProjectProfileInstitution", fields: [institutionId], references: [id])
+  sponsorInstitution    Institution?                  @relation("StrategicProjectProfileSponsor", fields: [sponsorInstitutionId], references: [id])
+  milestones            StrategicProjectMilestone[]
+  capitalEvidence       CapitalEvidenceRecord[]
+  employmentEvidence    EmploymentEvidenceRecord[]
+  infrastructureRecords InfrastructureDeliveryRecord[]
+  statusProjections     ProjectStatusProjection[]
+
+  @@unique([institutionId, projectCode])
+  @@index([institutionId])
+  @@index([sponsorInstitutionId])
+  @@map("strategic_project_profiles")
+}
+
+model StrategicProjectMilestone {
+  id                      String                          @id @default(uuid()) @db.Uuid
+  strategicProjectProfileId String                        @db.Uuid
+  milestoneCode           String
+  title                   String
+  description             String?
+  status                  StrategicProjectMilestoneStatus @default(REPORTED)
+  reportedAt              DateTime?
+  verifiedAt              DateTime?
+  completedAt             DateTime?
+  sortOrder               Int                             @default(0)
+  createdAt               DateTime                        @default(now())
+  updatedAt               DateTime                        @updatedAt
+  strategicProjectProfile StrategicProjectProfile         @relation(fields: [strategicProjectProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([strategicProjectProfileId, milestoneCode])
+  @@index([strategicProjectProfileId])
+  @@index([status])
+  @@map("strategic_project_milestones")
+}
+
+model CapitalEvidenceRecord {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  strategicProjectProfileId String                @db.Uuid
+  institutionId           String                  @db.Uuid
+  evidenceType            String
+  amount                  Decimal?                @db.Decimal(20, 2)
+  currency                String                  @default("XCD")
+  periodStart             DateTime?
+  periodEnd               DateTime?
+  sourceDataRefs          Json                    @default("[]")
+  evidencePacketVersionId String?                 @db.Uuid
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  strategicProjectProfile StrategicProjectProfile @relation(fields: [strategicProjectProfileId], references: [id], onDelete: Cascade)
+  institution             Institution             @relation("CapitalEvidenceRecordInstitution", fields: [institutionId], references: [id])
+  evidencePacketVersion   EvidencePacketVersion?  @relation("CapitalEvidenceRecordPacketVersion", fields: [evidencePacketVersionId], references: [id])
+
+  @@index([strategicProjectProfileId])
+  @@index([institutionId])
+  @@index([evidencePacketVersionId])
+  @@map("capital_evidence_records")
+}
+
+model EmploymentEvidenceRecord {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  strategicProjectProfileId String                @db.Uuid
+  institutionId           String                  @db.Uuid
+  jobsCreated             Int?
+  jobsRetained            Int?
+  reportingPeriodStart    DateTime?
+  reportingPeriodEnd      DateTime?
+  sourceDataRefs          Json                    @default("[]")
+  evidencePacketVersionId String?                 @db.Uuid
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  strategicProjectProfile StrategicProjectProfile @relation(fields: [strategicProjectProfileId], references: [id], onDelete: Cascade)
+  institution             Institution             @relation("EmploymentEvidenceRecordInstitution", fields: [institutionId], references: [id])
+  evidencePacketVersion   EvidencePacketVersion?  @relation("EmploymentEvidenceRecordPacketVersion", fields: [evidencePacketVersionId], references: [id])
+
+  @@index([strategicProjectProfileId])
+  @@index([institutionId])
+  @@index([evidencePacketVersionId])
+  @@map("employment_evidence_records")
+}
+
+model InfrastructureDeliveryRecord {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  strategicProjectProfileId String                @db.Uuid
+  institutionId           String                  @db.Uuid
+  deliveryType            String
+  deliveryStatus          String
+  reportedCompletion      Decimal?                @db.Decimal(5, 2)
+  verifiedCompletion      Decimal?                @db.Decimal(5, 2)
+  sourceDataRefs          Json                    @default("[]")
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  strategicProjectProfile StrategicProjectProfile @relation(fields: [strategicProjectProfileId], references: [id], onDelete: Cascade)
+  institution             Institution             @relation("InfrastructureDeliveryRecordInstitution", fields: [institutionId], references: [id])
+
+  @@index([strategicProjectProfileId])
+  @@index([institutionId])
+  @@map("infrastructure_delivery_records")
+}
+
+model ProjectStatusProjection {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  strategicProjectProfileId String                @db.Uuid
+  institutionId           String                  @db.Uuid
+  projectedStatus         String
+  computedAt              DateTime                @default(now())
+  sourceStaleAt           DateTime?
+  isStale                 Boolean                 @default(false)
+  disclaimer              String?
+  sourceDataRefs          Json                    @default("[]")
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  strategicProjectProfile StrategicProjectProfile @relation(fields: [strategicProjectProfileId], references: [id], onDelete: Cascade)
+  institution             Institution             @relation("ProjectStatusProjectionInstitution", fields: [institutionId], references: [id])
+
+  @@index([strategicProjectProfileId])
+  @@index([institutionId])
+  @@index([isStale])
+  @@map("project_status_projections")
+}
+
+// ─── Phase 12D Models: AI Models, Agents, and Execution ──────────────────────
+
+model AIModelDefinition {
+  id            String           @id @default(uuid()) @db.Uuid
+  institutionId String           @db.Uuid
+  code          String
+  name          String
+  description   String?
+  provider      String?
+  status        AIModelStatus    @default(DRAFT)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  institution   Institution      @relation("AIModelDefinitionInstitution", fields: [institutionId], references: [id])
+  versions      AIModelVersion[]
+  useCases      AIUseCase[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([status])
+  @@map("ai_model_definitions")
+}
+
+model AIModelVersion {
+  id                  String            @id @default(uuid()) @db.Uuid
+  aiModelDefinitionId String            @db.Uuid
+  versionNumber       Int
+  modelIdentifier     String
+  limitations         String?
+  uncertaintyNotes    String?
+  capabilitySummary   String?
+  trainingDataCutoff  DateTime?
+  status              AIModelStatus     @default(DRAFT)
+  effectiveFrom       DateTime?
+  effectiveUntil      DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  aiModelDefinition   AIModelDefinition @relation(fields: [aiModelDefinitionId], references: [id], onDelete: Cascade)
+  dataEntitlements    AIDataEntitlement[]
+  evaluations         AIEvaluation[]
+  incidents           AIIncident[]
+  suspensionRecords   AISuspensionRecord[]
+  executionRecords    AIExecutionRecord[]
+
+  @@unique([aiModelDefinitionId, versionNumber])
+  @@index([aiModelDefinitionId])
+  @@index([status])
+  @@map("ai_model_versions")
+}
+
+model AIUseCase {
+  id                  String            @id @default(uuid()) @db.Uuid
+  institutionId       String            @db.Uuid
+  aiModelDefinitionId String?           @db.Uuid
+  code                String
+  name                String
+  description         String?
+  status              AIUseCaseStatus   @default(DRAFT)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  institution         Institution       @relation("AIUseCaseInstitution", fields: [institutionId], references: [id])
+  aiModelDefinition   AIModelDefinition? @relation(fields: [aiModelDefinitionId], references: [id])
+  versions            AIUseCaseVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([aiModelDefinitionId])
+  @@index([status])
+  @@map("ai_use_cases")
+}
+
+model AIUseCaseVersion {
+  id                     String              @id @default(uuid()) @db.Uuid
+  aiUseCaseId            String              @db.Uuid
+  versionNumber          Int
+  purpose                String
+  scope                  String?
+  limitations            String?
+  uncertaintyNotes       String?
+  humanOversightRequired Boolean             @default(true)
+  status                 AIUseCaseStatus     @default(DRAFT)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  aiUseCase              AIUseCase           @relation(fields: [aiUseCaseId], references: [id], onDelete: Cascade)
+  dataEntitlements       AIDataEntitlement[]
+  suspensionRecords      AISuspensionRecord[]
+  executionRecords       AIExecutionRecord[]
+
+  @@unique([aiUseCaseId, versionNumber])
+  @@index([aiUseCaseId])
+  @@map("ai_use_case_versions")
+}
+
+model AIAgentDefinition {
+  id            String            @id @default(uuid()) @db.Uuid
+  institutionId String            @db.Uuid
+  code          String
+  name          String
+  description   String?
+  status        AIAgentStatus     @default(DRAFT)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  institution   Institution       @relation("AIAgentDefinitionInstitution", fields: [institutionId], references: [id])
+  versions      AIAgentVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([status])
+  @@map("ai_agent_definitions")
+}
+
+model AIAgentVersion {
+  id                  String              @id @default(uuid()) @db.Uuid
+  aiAgentDefinitionId String              @db.Uuid
+  versionNumber       Int
+  agentConfig         Json                @default("{}")
+  toolsAllowed        Json                @default("[]")
+  limitations         String?
+  uncertaintyNotes    String?
+  status              AIAgentStatus       @default(DRAFT)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  aiAgentDefinition   AIAgentDefinition   @relation(fields: [aiAgentDefinitionId], references: [id], onDelete: Cascade)
+  toolEntitlements    AIToolEntitlement[]
+  evaluations         AIEvaluation[]
+  incidents           AIIncident[]
+  suspensionRecords   AISuspensionRecord[]
+  executionRecords    AIExecutionRecord[]
+
+  @@unique([aiAgentDefinitionId, versionNumber])
+  @@index([aiAgentDefinitionId])
+  @@map("ai_agent_versions")
+}
+
+model AIDataEntitlement {
+  id                 String            @id @default(uuid()) @db.Uuid
+  aiModelVersionId   String?           @db.Uuid
+  aiUseCaseVersionId String?           @db.Uuid
+  institutionId      String?           @db.Uuid
+  identityId         String?           @db.Uuid
+  entitlementScope   String
+  dataDomain         String
+  effectiveFrom      DateTime?
+  effectiveUntil     DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  aiModelVersion     AIModelVersion?   @relation(fields: [aiModelVersionId], references: [id])
+  aiUseCaseVersion   AIUseCaseVersion? @relation(fields: [aiUseCaseVersionId], references: [id])
+  institution        Institution?      @relation("AIDataEntitlementInstitution", fields: [institutionId], references: [id])
+  identity           Identity?         @relation("AIDataEntitlementIdentity", fields: [identityId], references: [id])
+
+  @@index([aiModelVersionId])
+  @@index([aiUseCaseVersionId])
+  @@index([institutionId])
+  @@index([identityId])
+  @@map("ai_data_entitlements")
+}
+
+model AIToolEntitlement {
+  id               String         @id @default(uuid()) @db.Uuid
+  aiAgentVersionId String         @db.Uuid
+  institutionId    String?        @db.Uuid
+  toolCode         String
+  entitlementScope String
+  effectiveFrom    DateTime?
+  effectiveUntil   DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  aiAgentVersion   AIAgentVersion @relation(fields: [aiAgentVersionId], references: [id], onDelete: Cascade)
+  institution      Institution?   @relation("AIToolEntitlementInstitution", fields: [institutionId], references: [id])
+
+  @@index([aiAgentVersionId])
+  @@index([institutionId])
+  @@map("ai_tool_entitlements")
+}
+
+model AIEvaluation {
+  id                 String          @id @default(uuid()) @db.Uuid
+  aiModelVersionId   String?         @db.Uuid
+  aiAgentVersionId   String?         @db.Uuid
+  evaluationType     String
+  score              Decimal?        @db.Decimal(10, 4)
+  findings           String?
+  limitations        String?
+  uncertaintyNotes   String?
+  evaluatedAt        DateTime        @default(now())
+  evaluatorIdentityId String?        @db.Uuid
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  aiModelVersion     AIModelVersion? @relation(fields: [aiModelVersionId], references: [id])
+  aiAgentVersion     AIAgentVersion? @relation(fields: [aiAgentVersionId], references: [id])
+  evaluator          Identity?       @relation("AIEvaluationEvaluator", fields: [evaluatorIdentityId], references: [id])
+
+  @@index([aiModelVersionId])
+  @@index([aiAgentVersionId])
+  @@index([evaluatorIdentityId])
+  @@map("ai_evaluations")
+}
+
+model AIIncident {
+  id                 String          @id @default(uuid()) @db.Uuid
+  institutionId      String          @db.Uuid
+  aiExecutionRecordId String?        @db.Uuid
+  aiModelVersionId   String?         @db.Uuid
+  aiAgentVersionId   String?         @db.Uuid
+  incidentType       String
+  severity           String
+  description        String
+  reportedAt         DateTime        @default(now())
+  resolvedAt         DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  institution        Institution     @relation("AIIncidentInstitution", fields: [institutionId], references: [id])
+  aiExecutionRecord  AIExecutionRecord? @relation(fields: [aiExecutionRecordId], references: [id])
+  aiModelVersion     AIModelVersion? @relation(fields: [aiModelVersionId], references: [id])
+  aiAgentVersion     AIAgentVersion? @relation(fields: [aiAgentVersionId], references: [id])
+
+  @@index([institutionId])
+  @@index([aiExecutionRecordId])
+  @@index([aiModelVersionId])
+  @@index([aiAgentVersionId])
+  @@map("ai_incidents")
+}
+
+model AISuspensionRecord {
+  id                 String            @id @default(uuid()) @db.Uuid
+  aiModelVersionId   String?           @db.Uuid
+  aiAgentVersionId   String?           @db.Uuid
+  aiUseCaseVersionId String?           @db.Uuid
+  reason             AISuspensionReason
+  suspendedAt        DateTime          @default(now())
+  suspendedByIdentityId String?        @db.Uuid
+  liftedAt           DateTime?
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  aiModelVersion     AIModelVersion?   @relation(fields: [aiModelVersionId], references: [id])
+  aiAgentVersion     AIAgentVersion?   @relation(fields: [aiAgentVersionId], references: [id])
+  aiUseCaseVersion   AIUseCaseVersion? @relation(fields: [aiUseCaseVersionId], references: [id])
+  suspendedBy        Identity?         @relation("AISuspensionRecorder", fields: [suspendedByIdentityId], references: [id])
+
+  @@index([aiModelVersionId])
+  @@index([aiAgentVersionId])
+  @@index([aiUseCaseVersionId])
+  @@index([suspendedByIdentityId])
+  @@map("ai_suspension_records")
+}
+
+model AIExecutionRecord {
+  id                   String            @id @default(uuid()) @db.Uuid
+  institutionId        String            @db.Uuid
+  executionReference   String            @unique
+  aiUseCaseVersionId   String?           @db.Uuid
+  aiAgentVersionId     String?           @db.Uuid
+  aiModelVersionId     String?           @db.Uuid
+  caseId               String?           @db.Uuid
+  status               AIExecutionStatus @default(PENDING)
+  startedAt            DateTime?
+  completedAt          DateTime?
+  inputsSnapshot       Json              @default("{}")
+  outputsSnapshot      Json              @default("{}")
+  limitations          String?
+  uncertaintyNotes     String?
+  isRecommendatoryOnly Boolean           @default(true)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  institution          Institution       @relation("AIExecutionRecordInstitution", fields: [institutionId], references: [id])
+  aiUseCaseVersion     AIUseCaseVersion? @relation(fields: [aiUseCaseVersionId], references: [id])
+  aiAgentVersion       AIAgentVersion?   @relation(fields: [aiAgentVersionId], references: [id])
+  aiModelVersion       AIModelVersion?   @relation(fields: [aiModelVersionId], references: [id])
+  case                 Case?             @relation("AIExecutionRecordCase", fields: [caseId], references: [id])
+  incidents            AIIncident[]
+  humanDispositions    AIHumanDisposition[]
+
+  @@index([institutionId])
+  @@index([aiUseCaseVersionId])
+  @@index([aiAgentVersionId])
+  @@index([aiModelVersionId])
+  @@index([caseId])
+  @@index([status])
+  @@map("ai_execution_records")
+}
+
+model AIHumanDisposition {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  aiExecutionRecordId String                 @db.Uuid
+  dispositionType     AIHumanDispositionType
+  disposedByIdentityId String                @db.Uuid
+  disposedAt          DateTime               @default(now())
+  rationale           String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  aiExecutionRecord   AIExecutionRecord      @relation(fields: [aiExecutionRecordId], references: [id], onDelete: Cascade)
+  disposedBy          Identity               @relation("AIHumanDispositionActor", fields: [disposedByIdentityId], references: [id])
+
+  @@index([aiExecutionRecordId])
+  @@index([disposedByIdentityId])
+  @@map("ai_human_dispositions")
+}
+
+// ─── Phase 12E Models: Analysis, Monitoring, and Risk ────────────────────────
+
+model AnalysisRequest {
+  id                   String                @id @default(uuid()) @db.Uuid
+  institutionId        String                @db.Uuid
+  caseId               String?               @db.Uuid
+  requestReference     String                @unique
+  requestType          String
+  status               AnalysisRequestStatus @default(DRAFT)
+  requestedByIdentityId String               @db.Uuid
+  requestedAt          DateTime              @default(now())
+  scope                String?
+  limitations          String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  institution          Institution           @relation("AnalysisRequestInstitution", fields: [institutionId], references: [id])
+  case                 Case?                 @relation("AnalysisRequestCase", fields: [caseId], references: [id])
+  requestedBy          Identity              @relation("AnalysisRequestRequester", fields: [requestedByIdentityId], references: [id])
+  runs                 AnalysisRun[]
+
+  @@index([institutionId])
+  @@index([caseId])
+  @@index([requestedByIdentityId])
+  @@index([status])
+  @@map("analysis_requests")
+}
+
+model AnalysisRun {
+  id                String            @id @default(uuid()) @db.Uuid
+  analysisRequestId String            @db.Uuid
+  institutionId     String            @db.Uuid
+  runReference      String            @unique
+  status            AnalysisRunStatus @default(PENDING)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  methodology       String?
+  inputsSnapshot    Json              @default("{}")
+  limitations       String?
+  uncertaintyNotes  String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  analysisRequest   AnalysisRequest   @relation(fields: [analysisRequestId], references: [id], onDelete: Cascade)
+  institution       Institution       @relation("AnalysisRunInstitution", fields: [institutionId], references: [id])
+  findings          AnalysisFinding[]
+  options           AnalysisOption[]
+  riskAssessments   RiskAssessment[]
+
+  @@index([analysisRequestId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("analysis_runs")
+}
+
+model AnalysisFinding {
+  id               String      @id @default(uuid()) @db.Uuid
+  analysisRunId    String      @db.Uuid
+  findingType      String
+  severity         String?
+  title            String
+  description      String
+  sourceDataRefs   Json        @default("[]")
+  uncertaintyNotes String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  analysisRun      AnalysisRun @relation(fields: [analysisRunId], references: [id], onDelete: Cascade)
+
+  @@index([analysisRunId])
+  @@map("analysis_findings")
+}
+
+model AnalysisOption {
+  id               String      @id @default(uuid()) @db.Uuid
+  analysisRunId    String      @db.Uuid
+  optionLabel      String
+  description      String
+  tradeoffs        String?
+  uncertaintyNotes String?
+  sortOrder        Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  analysisRun      AnalysisRun @relation(fields: [analysisRunId], references: [id], onDelete: Cascade)
+
+  @@index([analysisRunId])
+  @@map("analysis_options")
+}
+
+model MonitoringObservation {
+  id               String          @id @default(uuid()) @db.Uuid
+  institutionId    String          @db.Uuid
+  monitoringRuleId String?         @db.Uuid
+  observationType  String
+  observedAt       DateTime        @default(now())
+  summary          String
+  sourceDataRefs   Json            @default("[]")
+  uncertaintyNotes String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  institution      Institution     @relation("MonitoringObservationInstitution", fields: [institutionId], references: [id])
+  monitoringRule   MonitoringRule? @relation("Phase12MonitoringRuleObservations", fields: [monitoringRuleId], references: [id])
+  alerts           MonitoringAlert[]
+
+  @@index([institutionId])
+  @@index([monitoringRuleId])
+  @@index([observedAt])
+  @@map("monitoring_observations")
+}
+
+model MonitoringAlert {
+  id                      String                @id @default(uuid()) @db.Uuid
+  institutionId           String                @db.Uuid
+  monitoringRuleId        String?               @db.Uuid
+  monitoringObservationId String?               @db.Uuid
+  alertReference          String                @unique
+  status                  MonitoringAlertStatus @default(OPEN)
+  title                   String
+  summary                 String
+  raisedAt                DateTime              @default(now())
+  verifiedAt              DateTime?
+  closedAt                DateTime?
+  isViolation             Boolean               @default(false)
+  sourceDataRefs          Json                  @default("[]")
+  limitations             String?
+  uncertaintyNotes        String?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  institution             Institution           @relation("MonitoringAlertInstitution", fields: [institutionId], references: [id])
+  monitoringRule          MonitoringRule?       @relation("Phase12MonitoringRuleAlerts", fields: [monitoringRuleId], references: [id])
+  monitoringObservation   MonitoringObservation? @relation(fields: [monitoringObservationId], references: [id])
+  verifications           AlertVerification[]
+
+  @@index([institutionId])
+  @@index([monitoringRuleId])
+  @@index([monitoringObservationId])
+  @@index([status])
+  @@map("monitoring_alerts")
+}
+
+model AlertVerification {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  monitoringAlertId  String                   @db.Uuid
+  verifierIdentityId String                   @db.Uuid
+  outcome            AlertVerificationOutcome
+  verifiedAt         DateTime                 @default(now())
+  findings           String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  monitoringAlert    MonitoringAlert          @relation(fields: [monitoringAlertId], references: [id], onDelete: Cascade)
+  verifier           Identity                 @relation("AlertVerificationVerifier", fields: [verifierIdentityId], references: [id])
+
+  @@index([monitoringAlertId])
+  @@index([verifierIdentityId])
+  @@map("alert_verifications")
+}
+
+model RiskAssessment {
+  id               String               @id @default(uuid()) @db.Uuid
+  institutionId    String               @db.Uuid
+  caseId           String?              @db.Uuid
+  analysisRunId    String?              @db.Uuid
+  assessmentReference String            @unique
+  status           RiskAssessmentStatus @default(DRAFT)
+  assessedAt       DateTime?
+  riskLevel        String?
+  methodology      String?
+  findings         String?
+  uncertaintyNotes String?
+  limitations      String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  institution      Institution          @relation("RiskAssessmentInstitution", fields: [institutionId], references: [id])
+  case             Case?                @relation("RiskAssessmentCase", fields: [caseId], references: [id])
+  analysisRun      AnalysisRun?         @relation(fields: [analysisRunId], references: [id])
+
+  @@index([institutionId])
+  @@index([caseId])
+  @@index([analysisRunId])
+  @@index([status])
+  @@map("risk_assessments")
+}
+
+// ─── Phase 12F Models: Digital Twins and Simulation ──────────────────────────
+
+model DigitalTwinDefinition {
+  id            String              @id @default(uuid()) @db.Uuid
+  institutionId String              @db.Uuid
+  code          String
+  name          String
+  description   String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  institution   Institution         @relation("DigitalTwinDefinitionInstitution", fields: [institutionId], references: [id])
+  versions      DigitalTwinVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("digital_twin_definitions")
+}
+
+model DigitalTwinVersion {
+  id                      String                @id @default(uuid()) @db.Uuid
+  digitalTwinDefinitionId String                @db.Uuid
+  versionNumber           Int
+  twinConfig              Json                  @default("{}")
+  status                  DigitalTwinStatus     @default(ACTIVE)
+  staleAt                 DateTime?
+  isStale                 Boolean               @default(false)
+  consequentialUseHalted  Boolean               @default(false)
+  limitations             String?
+  uncertaintyNotes        String?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  digitalTwinDefinition   DigitalTwinDefinition @relation(fields: [digitalTwinDefinitionId], references: [id], onDelete: Cascade)
+  snapshots               DigitalTwinSnapshot[]
+  scenarios               SimulationScenario[]
+  consequentialUseReviews ConsequentialUseReview[]
+  liveTransitionRecords   SimulationToLiveTransitionRecord[] @relation("DigitalTwinVersionLiveTransitions")
+
+  @@unique([digitalTwinDefinitionId, versionNumber])
+  @@index([digitalTwinDefinitionId])
+  @@index([status])
+  @@index([isStale])
+  @@map("digital_twin_versions")
+}
+
+model DigitalTwinSnapshot {
+  id                   String             @id @default(uuid()) @db.Uuid
+  digitalTwinVersionId String             @db.Uuid
+  snapshotAt           DateTime           @default(now())
+  snapshotData         Json               @default("{}")
+  staleAt              DateTime?
+  isStale              Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  digitalTwinVersion   DigitalTwinVersion @relation(fields: [digitalTwinVersionId], references: [id], onDelete: Cascade)
+
+  @@index([digitalTwinVersionId])
+  @@index([snapshotAt])
+  @@map("digital_twin_snapshots")
+}
+
+model SimulationScenario {
+  id                   String             @id @default(uuid()) @db.Uuid
+  digitalTwinVersionId String             @db.Uuid
+  scenarioCode         String
+  title                String
+  description          String?
+  parameters           Json               @default("{}")
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  digitalTwinVersion   DigitalTwinVersion @relation(fields: [digitalTwinVersionId], references: [id], onDelete: Cascade)
+  runs                 SimulationRun[]
+
+  @@unique([digitalTwinVersionId, scenarioCode])
+  @@index([digitalTwinVersionId])
+  @@map("simulation_scenarios")
+}
+
+model SimulationRun {
+  id                   String              @id @default(uuid()) @db.Uuid
+  simulationScenarioId String              @db.Uuid
+  institutionId        String              @db.Uuid
+  runReference         String              @unique
+  status               SimulationRunStatus @default(PENDING)
+  startedAt            DateTime?
+  completedAt          DateTime?
+  runConfig            Json                @default("{}")
+  limitations          String?
+  uncertaintyNotes     String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  simulationScenario   SimulationScenario  @relation(fields: [simulationScenarioId], references: [id], onDelete: Cascade)
+  institution          Institution         @relation("SimulationRunInstitution", fields: [institutionId], references: [id])
+  outputs              SimulationOutput[]
+  consequentialUseReviews ConsequentialUseReview[]
+  liveTransitionRecords SimulationToLiveTransitionRecord[] @relation("SimulationRunLiveTransitions")
+
+  @@index([simulationScenarioId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("simulation_runs")
+}
+
+model SimulationOutput {
+  id               String               @id @default(uuid()) @db.Uuid
+  simulationRunId  String               @db.Uuid
+  outputType       SimulationOutputType
+  outputData       Json                 @default("{}")
+  uncertaintyNotes String?
+  generatedAt      DateTime             @default(now())
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  simulationRun    SimulationRun        @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+
+  @@index([simulationRunId])
+  @@index([outputType])
+  @@map("simulation_outputs")
+}
+
+model ConsequentialUseReview {
+  id                      String              @id @default(uuid()) @db.Uuid
+  simulationRunId         String?             @db.Uuid
+  digitalTwinVersionId    String?             @db.Uuid
+  reviewerIdentityId      String              @db.Uuid
+  reviewOutcome           String
+  reviewedAt              DateTime            @default(now())
+  rationale               String?
+  consequentialUseApproved Boolean              @default(false)
+  limitations             String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  simulationRun           SimulationRun?      @relation(fields: [simulationRunId], references: [id])
+  digitalTwinVersion      DigitalTwinVersion? @relation(fields: [digitalTwinVersionId], references: [id])
+  reviewer                Identity            @relation("ConsequentialUseReviewer", fields: [reviewerIdentityId], references: [id])
+  liveTransitionRecords   SimulationToLiveTransitionRecord[]
+
+  @@index([simulationRunId])
+  @@index([digitalTwinVersionId])
+  @@index([reviewerIdentityId])
+  @@map("consequential_use_reviews")
+}
+
+model SimulationToLiveTransitionRecord {
+  id                   String             @id @default(uuid()) @db.Uuid
+  simulationRunId      String             @db.Uuid
+  digitalTwinVersionId String             @db.Uuid
+  transitionedAt       DateTime           @default(now())
+  transitionedByIdentityId String?        @db.Uuid
+  consequentialUseReviewId String?          @db.Uuid
+  liveConfigSnapshot       Json             @default("{}")
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  simulationRun            SimulationRun    @relation("SimulationRunLiveTransitions", fields: [simulationRunId], references: [id])
+  digitalTwinVersion       DigitalTwinVersion @relation("DigitalTwinVersionLiveTransitions", fields: [digitalTwinVersionId], references: [id])
+  consequentialUseReview   ConsequentialUseReview? @relation(fields: [consequentialUseReviewId], references: [id])
+  transitionedBy           Identity?        @relation("SimulationToLiveTransitionActor", fields: [transitionedByIdentityId], references: [id])
+
+  @@index([simulationRunId])
+  @@index([digitalTwinVersionId])
+  @@index([transitionedByIdentityId])
+  @@map("simulation_to_live_transition_records")
+}
+
+// ─── Phase 12G Models: Reports and Decision Traceability ─────────────────────
+
+model ReportDefinition {
+  id            String                 @id @default(uuid()) @db.Uuid
+  institutionId String                 @db.Uuid
+  code          String
+  name          String
+  description   String?
+  status        ReportDefinitionStatus @default(DRAFT)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  institution   Institution            @relation("ReportDefinitionInstitution", fields: [institutionId], references: [id])
+  generationRuns ReportGenerationRun[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([status])
+  @@map("report_definitions")
+}
+
+model ReportGenerationRun {
+  id                 String                    @id @default(uuid()) @db.Uuid
+  reportDefinitionId String                    @db.Uuid
+  institutionId      String                    @db.Uuid
+  runReference       String                    @unique
+  status             ReportGenerationRunStatus @default(PENDING)
+  startedAt          DateTime?
+  completedAt        DateTime?
+  inputsSnapshot     Json                      @default("{}")
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  reportDefinition   ReportDefinition          @relation(fields: [reportDefinitionId], references: [id])
+  institution        Institution               @relation("ReportGenerationRunInstitution", fields: [institutionId], references: [id])
+  claims             ReportClaim[]
+  reviews            ReportReview[]
+  approvals          ReportApproval[]
+  publications       ReportPublication[]
+
+  @@index([reportDefinitionId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("report_generation_runs")
+}
+
+model ReportClaim {
+  id                       String            @id @default(uuid()) @db.Uuid
+  reportGenerationRunId    String            @db.Uuid
+  claimReference           String            @unique
+  status                   ReportClaimStatus @default(DRAFT)
+  claimStatement           String
+  claimedValue             String?
+  sourceDataRefs           Json              @default("[]")
+  evidencePacketVersionId  String?           @db.Uuid
+  evidenceTraceabilityRefs Json              @default("[]")
+  underlyingRecordRefs     Json              @default("[]")
+  limitations              String?
+  uncertaintyNotes         String?
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+  reportGenerationRun      ReportGenerationRun @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  evidencePacketVersion    EvidencePacketVersion? @relation("ReportClaimEvidencePacketVersion", fields: [evidencePacketVersionId], references: [id])
+  reviews                  ReportReview[]
+
+  @@index([reportGenerationRunId])
+  @@index([evidencePacketVersionId])
+  @@index([status])
+  @@map("report_claims")
+}
+
+model ReportReview {
+  id                    String            @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String?           @db.Uuid
+  reportClaimId         String?           @db.Uuid
+  reviewerIdentityId    String            @db.Uuid
+  reviewedAt            DateTime          @default(now())
+  outcome               String
+  findings              String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  reportGenerationRun   ReportGenerationRun? @relation(fields: [reportGenerationRunId], references: [id])
+  reportClaim           ReportClaim?      @relation(fields: [reportClaimId], references: [id])
+  reviewer              Identity          @relation("ReportReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([reportGenerationRunId])
+  @@index([reportClaimId])
+  @@index([reviewerIdentityId])
+  @@map("report_reviews")
+}
+
+model ReportApproval {
+  id                    String            @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String            @db.Uuid
+  approverIdentityId    String            @db.Uuid
+  approvedAt            DateTime          @default(now())
+  conditions            String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  reportGenerationRun   ReportGenerationRun @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  approver              Identity          @relation("ReportApprover", fields: [approverIdentityId], references: [id])
+
+  @@index([reportGenerationRunId])
+  @@index([approverIdentityId])
+  @@map("report_approvals")
+}
+
+model ReportPublication {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String                  @db.Uuid
+  publicationReference  String                  @unique
+  status                ReportPublicationStatus @default(DRAFT)
+  publishedAt           DateTime?
+  audience              String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  reportGenerationRun   ReportGenerationRun     @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  corrections           ReportCorrection[]
+
+  @@index([reportGenerationRunId])
+  @@index([status])
+  @@map("report_publications")
+}
+
+model ReportCorrection {
+  id                    String            @id @default(uuid()) @db.Uuid
+  reportPublicationId   String            @db.Uuid
+  correctionStatement   String
+  correctedAt           DateTime          @default(now())
+  correctedByIdentityId String?           @db.Uuid
+  supersedesPublicationId String?        @db.Uuid
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  reportPublication     ReportPublication @relation(fields: [reportPublicationId], references: [id], onDelete: Cascade)
+  correctedBy           Identity?         @relation("ReportCorrectionActor", fields: [correctedByIdentityId], references: [id])
+
+  @@index([reportPublicationId])
+  @@index([correctedByIdentityId])
+  @@map("report_corrections")
+}
+
+model EvidenceDashboardDecisionTrace {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  institutionId           String                  @db.Uuid
+  caseId                  String?                 @db.Uuid
+  governmentDecisionId    String?                 @db.Uuid
+  officialInstrumentId    String?                 @db.Uuid
+  evidencePacketId        String?                 @db.Uuid
+  evidencePacketVersionId String?                 @db.Uuid
+  dashboardSnapshotId     String?                 @db.Uuid
+  traceReference          String                  @unique
+  decisionTrace           Json                    @default("{}")
+  processingTimeBreakdown Json                    @default("{}")
+  absezProcessingMinutes  Int?
+  applicantProcessingMinutes Int?
+  externalDependencyProcessingMinutes Int?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  institution             Institution             @relation("EvidenceDashboardDecisionTraceInstitution", fields: [institutionId], references: [id])
+  case                    Case?                   @relation("EvidenceDashboardDecisionTraceCase", fields: [caseId], references: [id])
+  governmentDecision      GovernmentDecision?     @relation("EvidenceDashboardDecisionTraceGovernmentDecision", fields: [governmentDecisionId], references: [id])
+  officialInstrument      OfficialInstrument?     @relation("EvidenceDashboardDecisionTraceOfficialInstrument", fields: [officialInstrumentId], references: [id])
+  evidencePacket          EvidencePacket?         @relation("EvidenceDashboardDecisionTraceEvidencePacket", fields: [evidencePacketId], references: [id])
+  evidencePacketVersion   EvidencePacketVersion?  @relation("EvidenceDashboardDecisionTraceEvidencePacketVersion", fields: [evidencePacketVersionId], references: [id])
+  dashboardSnapshot       DashboardSnapshot?      @relation(fields: [dashboardSnapshotId], references: [id])
+
+  @@index([institutionId])
+  @@index([caseId])
+  @@index([governmentDecisionId])
+  @@index([officialInstrumentId])
+  @@index([evidencePacketId])
+  @@index([evidencePacketVersionId])
+  @@index([dashboardSnapshotId])
+  @@map("evidence_dashboard_decision_traces")
+}
