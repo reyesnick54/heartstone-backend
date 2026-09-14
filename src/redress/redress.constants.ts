@@ -6,8 +6,16 @@ export const REVIEW_SUBMISSION_NUMBER_PREFIX = 'RSB';
 export const REVIEW_EVIDENCE_ADMISSION_NUMBER_PREFIX = 'REA';
 export const REVIEW_RECOMMENDATION_NUMBER_PREFIX = 'RRC';
 
+export const REDRESS_MATTER_NUMBER_PREFIX = 'RM';
+export const REDRESS_DECISION_NUMBER_PREFIX = 'RD';
+
 export const PHASE_10E_BOUNDARY_DISCLAIMER =
   'Phase 10E records reconsideration and internal administrative review proceedings. Opening review does not alter the original government decision. Staff recommendations and AI assistance are non-final. Technical permission never creates review authority.';
+
+export const PHASE_10G_BOUNDARY_DISCLAIMER =
+  'Phase 10G records final redress disposition, interim relief, stays, remedy implementation, and notices. Filing an appeal does not create an automatic stay unless route configuration explicitly permits it. A stay is not a reversal.';
+
+export const TECHNICAL_ADMIN_ROLE_MARKER = 'TECHNICAL_ADMIN';
 
 export const FORBIDDEN_CLIENT_REVIEW_FIELDS = [
   'isFinal',
@@ -16,6 +24,17 @@ export const FORBIDDEN_CLIENT_REVIEW_FIELDS = [
   'adminOverride',
   'independenceOverride',
   'systemAdministratorOverride',
+] as const;
+
+export const FORBIDDEN_CLIENT_REDRESS_FIELDS = [
+  'outcome',
+  'decidedAt',
+  'effectiveAt',
+  'integrityHash',
+  'authorityEvaluationRecordId',
+  'implementationStatus',
+  'stayStatus',
+  'isReversal',
 ] as const;
 
 export const REDRESS_REASON_CODES = {
@@ -80,4 +99,75 @@ export const FORBIDDEN_AI_REVIEW_ACTIONS = [
   'set_aside',
   'decide_credibility',
   'decide_appeal',
+] as const;
+
+export const FORBIDDEN_AI_REDRESS_ACTORS = ['AI_ASSISTANCE', 'SERVICE'] as const;
+
+export const REDRESS_DECISION_OUTCOMES = [
+  'AFFIRMED',
+  'VARIED',
+  'RETURNED_OR_REMANDED',
+  'CORRECTED',
+  'SET_ASIDE',
+  'REVERSED',
+  'PARTIALLY_AFFIRMED',
+  'PARTIALLY_VARIED',
+  'DISMISSED_BY_AUTHORIZED_DETERMINATION',
+  'WITHDRAWN',
+  'REFERRED',
+  'OTHER_AUTHORIZED_OUTCOME',
+] as const;
+
+export const REDRESS_REMEDY_TYPES = [
+  'CORRECT_RECORD',
+  'REISSUE_NOTICE',
+  'RECONSIDER',
+  'REPROCESS',
+  'REOPEN_EVIDENCE_REVIEW',
+  'NEW_DECISION_REQUIRED',
+  'AMEND_INSTRUMENT',
+  'REINSTATE_INSTRUMENT',
+  'SUSPEND_EFFECT',
+  'REFUND_IF_AUTHORIZED',
+  'REFER_EXTERNALLY',
+  'OTHER_AUTHORIZED_REMEDY',
+] as const;
+
+export const INTERIM_RELIEF_REQUEST_TYPES = [
+  'STAY',
+  'PARTIAL_STAY',
+  'TEMPORARY_REINSTATEMENT',
+  'PRESERVATION_ORDER',
+  'TEMPORARY_ACCESS',
+  'INTERIM_OPERATIONAL_PROTECTION',
+  'OTHER_AUTHORIZED_INTERIM_RELIEF',
+] as const;
+
+export const REDRESS_IMPLEMENTATION_STATUSES = [
+  'PENDING',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'FAILED',
+  'BLOCKED',
+  'SAFE_HALTED',
+  'SUPERSEDED',
+] as const;
+
+export const REDRESS_REASON_SECTION_TYPES = [
+  'ISSUES',
+  'FINDINGS',
+  'AUTHORITY',
+  'EVIDENCE',
+  'STANDARD_OF_REVIEW',
+  'DISPUTED_EVIDENCE_TREATMENT',
+  'NEW_EVIDENCE',
+  'REASONS',
+  'LIMITATIONS',
+  'REMEDY',
+] as const;
+
+export const INSTRUMENT_REMEDY_TYPES = [
+  'AMEND_INSTRUMENT',
+  'REINSTATE_INSTRUMENT',
+  'SUSPEND_EFFECT',
 ] as const;

@@ -241,6 +241,9 @@ model Officeholder {
   complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
   complianceReviewsAsReviewer   ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
   reviewAssignmentsAsReviewer   ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
+  redressDecisionsAsReviewer    RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
+  interimReliefDecisionsAsReviewer InterimReliefDecision[]    @relation("InterimReliefDecisionReviewerOfficeholder")
+  reviewStayRecordsAsDecider    ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
 
   @@map("officeholders")
 }
@@ -536,6 +539,11 @@ model Identity {
   reviewRecommendationsAuthored      ReviewRecommendation[]        @relation("ReviewRecommendationAuthor")
   reviewSubmissionsSubmitted         ReviewSubmission[]            @relation("ReviewSubmissionSubmitter")
   reviewEvidenceAdmissionsRecorded   ReviewEvidenceAdmission[]     @relation("ReviewEvidenceAdmissionRecorder")
+  redressDecisionsAsReviewer         RedressDecision[]             @relation("RedressDecisionReviewer")
+  interimReliefDecisionsAsReviewer   InterimReliefDecision[]       @relation("InterimReliefDecisionReviewer")
+  reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
+  redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
+  redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
 
   @@index([userAccountId])
   @@index([personId])
@@ -922,6 +930,10 @@ model FunctionAuthorityRecord {
   reconsiderationProceedings   ReconsiderationProceeding[]
   internalAdministrativeReviews InternalAdministrativeReview[]
   reviewAssignments            ReviewAssignment[]
+  redressRouteVersions         RedressRouteVersion[]
+  redressDecisions             RedressDecision[]                @relation("RedressDecisionFunctionAuthority")
+  interimReliefDecisions       InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
+  reviewStayRecords            ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1186,6 +1198,9 @@ model AuthorityEvaluationRecord {
   reviewAssignments               ReviewAssignment[]            @relation("ReviewAssignmentAuthority")
   reviewAuthorityAssessments      ReviewAuthorityAssessment[]
   reviewRecommendations           ReviewRecommendation[]        @relation("ReviewRecommendationAuthority")
+  redressDecisions                RedressDecision[]             @relation("RedressDecisionAuthority")
+  interimReliefDecisions          InterimReliefDecision[]       @relation("InterimReliefDecisionAuthority")
+  reviewStayRecords               ReviewStayRecord[]            @relation("ReviewStayAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1686,6 +1701,7 @@ model GovernmentServiceRedressRoute {
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
   governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  routeVersions              RedressRouteVersion[]
 
   @@unique([governmentServiceVersionId, routeCode])
   @@index([governmentServiceVersionId])
@@ -2199,6 +2215,7 @@ model Case {
   complianceStatusProjections       ComplianceStatusProjection[]
   reconsiderationProceedings        ReconsiderationProceeding[]
   internalAdministrativeReviews     InternalAdministrativeReview[]
+  redressMatters                    RedressMatter[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2793,6 +2810,7 @@ model MasterAdministrativeFile {
   officialInstruments                  OfficialInstrument[]
   complianceMatters                  ComplianceMatter[]
   complianceStatusProjections        ComplianceStatusProjection[]
+  redressMatters                     RedressMatter[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -4626,6 +4644,8 @@ model GovernmentDecision {
   reinstatementRecords          InstrumentReinstatementRecord[]
   replacementRecords            InstrumentReplacementRecord[]
   surrenderRecords              InstrumentSurrenderRecord[]
+  redressMattersChallenged      RedressMatter[]               @relation("RedressChallengedDecision")
+  redressDecisionsSuperseding   RedressDecision[]             @relation("RedressSupersededDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5095,6 +5115,7 @@ model OfficialInstrument {
   replacementRecords           InstrumentReplacementRecord[]
   surrenderRecords             InstrumentSurrenderRecord[]
   challengedInReviews          DecisionReviewReference[]
+  redressMattersChallenged     RedressMatter[]                  @relation("RedressChallengedInstrument")
   complianceMatters            ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
 
@@ -5609,6 +5630,8 @@ model DecisionReviewReference {
   challengedInstrument      OfficialInstrument? @relation(fields: [challengedInstrumentId], references: [id])
   appellantIdentity         Identity?           @relation("ReviewAppellant", fields: [appellantIdentityId], references: [id])
   appellantOfficeholder     Officeholder?       @relation("ReviewAppellantOfficeholder", fields: [appellantOfficeholderId], references: [id])
+  redressMatter             RedressMatter?
+  reviewStayRecords         ReviewStayRecord[]
 
   @@index([challengedDecisionId])
   @@index([challengedInstrumentId])
@@ -6550,4 +6573,460 @@ model ReviewRecommendation {
   @@index([isFinal])
   @@index([aiGenerated])
   @@map("review_recommendations")
+}
+// ─── Phase 10G: Review Disposition, Remedies, Stays and Implementation ───────
+
+enum RedressRouteVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum RedressMatterStatus {
+  FILED
+  UNDER_REVIEW
+  INTERIM_RELIEF_PENDING
+  DECISION_PENDING
+  DECIDED
+  IMPLEMENTATION_PENDING
+  IMPLEMENTATION_IN_PROGRESS
+  IMPLEMENTED
+  CLOSED
+  WITHDRAWN
+}
+
+enum RedressDecisionOutcome {
+  AFFIRMED
+  VARIED
+  RETURNED_OR_REMANDED
+  CORRECTED
+  SET_ASIDE
+  REVERSED
+  PARTIALLY_AFFIRMED
+  PARTIALLY_VARIED
+  DISMISSED_BY_AUTHORIZED_DETERMINATION
+  WITHDRAWN
+  REFERRED
+  OTHER_AUTHORIZED_OUTCOME
+}
+
+enum RedressReasonSectionType {
+  ISSUES
+  FINDINGS
+  AUTHORITY
+  EVIDENCE
+  STANDARD_OF_REVIEW
+  DISPUTED_EVIDENCE_TREATMENT
+  NEW_EVIDENCE
+  REASONS
+  LIMITATIONS
+  REMEDY
+}
+
+enum RedressRemedyType {
+  CORRECT_RECORD
+  REISSUE_NOTICE
+  RECONSIDER
+  REPROCESS
+  REOPEN_EVIDENCE_REVIEW
+  NEW_DECISION_REQUIRED
+  AMEND_INSTRUMENT
+  REINSTATE_INSTRUMENT
+  SUSPEND_EFFECT
+  REFUND_IF_AUTHORIZED
+  REFER_EXTERNALLY
+  OTHER_AUTHORIZED_REMEDY
+}
+
+enum InterimReliefRequestType {
+  STAY
+  PARTIAL_STAY
+  TEMPORARY_REINSTATEMENT
+  PRESERVATION_ORDER
+  TEMPORARY_ACCESS
+  INTERIM_OPERATIONAL_PROTECTION
+  OTHER_AUTHORIZED_INTERIM_RELIEF
+}
+
+enum InterimReliefRequestStatus {
+  PENDING
+  DECIDED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum InterimReliefDecisionOutcome {
+  GRANTED
+  PARTIALLY_GRANTED
+  DENIED
+  DEFERRED
+}
+
+enum ReviewStayRecordStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  LIFTED
+  SUPERSEDED
+}
+
+enum RedressImplementationTargetType {
+  APPLICATION_CASE
+  GOVERNMENT_DECISION
+  OFFICIAL_INSTRUMENT
+  PUBLIC_VERIFICATION
+  DECISION_CONDITION
+  FEE
+  COMMUNICATION
+  NOTIFICATION
+  GOVERNMENT_INTEGRATION
+  COMPLIANCE_MATTER
+  ENFORCEMENT_STATUS
+  MASTER_ADMINISTRATIVE_FILE
+  PUBLIC_REGISTER
+  HISTORICAL_RECORD
+  OTHER_AUTHORIZED_TARGET
+}
+
+enum RedressImplementationActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  BLOCKED
+  SAFE_HALTED
+  SUPERSEDED
+}
+
+enum RedressImplementationVerificationOutcome {
+  VERIFIED
+  FAILED
+  PARTIAL
+  DEFERRED
+}
+
+enum RedressNoticeStatus {
+  DRAFT
+  PREPARED
+  DELIVERED
+  SUPERSEDED
+}
+
+model RedressRouteVersion {
+  id                                    String                      @id @default(uuid()) @db.Uuid
+  governmentServiceRedressRouteId       String                      @db.Uuid
+  routeCode                             String
+  versionNumber                         Int
+  status                                RedressRouteVersionStatus   @default(DRAFT)
+  permissibleOutcomes                   Json                        @default("[]")
+  permissibleRemedies                   Json                        @default("[]")
+  permissibleInterimReliefTypes         Json                        @default("[]")
+  furtherReviewRights                   Json                        @default("[]")
+  automaticStayOnFiling                 Boolean                     @default(false)
+  requiresReasonedDetermination         Boolean                     @default(true)
+  requiresIndependenceFromOriginalReviewer Boolean                  @default(false)
+  functionAuthorityRecordId             String                      @db.Uuid
+  effectiveFrom                         DateTime?
+  effectiveUntil                        DateTime?
+  createdAt                             DateTime                    @default(now())
+  updatedAt                             DateTime                    @updatedAt
+  governmentServiceRedressRoute         GovernmentServiceRedressRoute @relation(fields: [governmentServiceRedressRouteId], references: [id])
+  functionAuthorityRecord               FunctionAuthorityRecord     @relation(fields: [functionAuthorityRecordId], references: [id])
+  redressMatters                        RedressMatter[]
+  redressDecisions                      RedressDecision[]
+
+  @@unique([governmentServiceRedressRouteId, versionNumber])
+  @@index([routeCode, status])
+  @@index([functionAuthorityRecordId])
+  @@map("redress_route_versions")
+}
+
+model RedressMatter {
+  id                                 String                 @id @default(uuid()) @db.Uuid
+  redressMatterNumber                String                 @unique
+  routeVersionId                     String                 @db.Uuid
+  decisionReviewReferenceId          String?                @unique @db.Uuid
+  challengedDecisionId               String                 @db.Uuid
+  challengedInstrumentId             String?                @db.Uuid
+  caseId                             String?                @db.Uuid
+  masterAdministrativeFileId         String?                @db.Uuid
+  appellantIdentityId                String?                @db.Uuid
+  appellantOfficeholderId            String?                @db.Uuid
+  originalDecisionMakerOfficeholderId String?               @db.Uuid
+  status                             RedressMatterStatus    @default(FILED)
+  filedAt                            DateTime               @default(now())
+  closedAt                           DateTime?
+  createdAt                          DateTime               @default(now())
+  updatedAt                          DateTime               @updatedAt
+  routeVersion                       RedressRouteVersion    @relation(fields: [routeVersionId], references: [id])
+  decisionReviewReference            DecisionReviewReference? @relation(fields: [decisionReviewReferenceId], references: [id])
+  challengedDecision                 GovernmentDecision     @relation("RedressChallengedDecision", fields: [challengedDecisionId], references: [id])
+  challengedInstrument               OfficialInstrument?    @relation("RedressChallengedInstrument", fields: [challengedInstrumentId], references: [id])
+  case                               Case?                  @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile           MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  redressReviewRecordSnapshots     RedressReviewRecordSnapshot[]
+  redressDecisions                   RedressDecision[]
+  interimReliefRequests              InterimReliefRequest[]
+  reviewStayRecords                  ReviewStayRecord[]
+  redressNotices                     RedressNotice[]
+
+  @@index([routeVersionId])
+  @@index([challengedDecisionId])
+  @@index([challengedInstrumentId])
+  @@index([status])
+  @@map("redress_matters")
+}
+
+model RedressReviewRecordSnapshot {
+  id                  String        @id @default(uuid()) @db.Uuid
+  redressMatterId     String        @db.Uuid
+  snapshotData        Json
+  capturedAt          DateTime      @default(now())
+  capturedByIdentityId String?      @db.Uuid
+  redressMatter       RedressMatter @relation(fields: [redressMatterId], references: [id], onDelete: Cascade)
+  capturedBy          Identity?     @relation("RedressReviewRecordSnapshotCapturer", fields: [capturedByIdentityId], references: [id])
+  redressDecisions    RedressDecision[]
+
+  @@index([redressMatterId])
+  @@map("redress_review_record_snapshots")
+}
+
+model RedressDecision {
+  id                            String                 @id @default(uuid()) @db.Uuid
+  redressDecisionNumber         String                 @unique
+  redressMatterId               String                 @db.Uuid
+  routeVersionId                String                 @db.Uuid
+  reviewerIdentityId            String                 @db.Uuid
+  reviewerOfficeholderId        String                 @db.Uuid
+  functionAuthorityRecordId     String                 @db.Uuid
+  authorityEvaluationRecordId   String                 @db.Uuid
+  redressReviewRecordSnapshotId        String                 @db.Uuid
+  additionalEvidenceCutoff      DateTime?
+  outcome                       RedressDecisionOutcome
+  decidedAt                     DateTime
+  effectiveAt                   DateTime?
+  supersededDecisionId          String?                @db.Uuid
+  remandScope                   Json?
+  remandIssues                  Json                   @default("[]")
+  remandAuthorityReference      String?
+  remandEvidenceConstraints     Json?
+  remandDeadline                DateTime?
+  originalDecisionStatusPreserved String?
+  remandInterimEffect           Json?
+  integrityHash                 String?
+  createdAt                     DateTime               @default(now())
+  redressMatter                 RedressMatter          @relation(fields: [redressMatterId], references: [id])
+  reviewerIdentity              Identity               @relation("RedressDecisionReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder          Officeholder           @relation("RedressDecisionReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord @relation("RedressDecisionFunctionAuthority", fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord @relation("RedressDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  routeVersion                  RedressRouteVersion    @relation(fields: [routeVersionId], references: [id])
+  redressReviewRecordSnapshot   RedressReviewRecordSnapshot   @relation(fields: [redressReviewRecordSnapshotId], references: [id])
+  supersededDecision            GovernmentDecision?    @relation("RedressSupersededDecision", fields: [supersededDecisionId], references: [id])
+  findings                      RedressFinding[]
+  reasons                       RedressReason[]
+  remedies                      RedressRemedy[]
+  implementationPlan            RedressImplementationPlan?
+  notice                        RedressNotice?
+
+  @@index([redressMatterId])
+  @@index([outcome])
+  @@index([decidedAt])
+  @@map("redress_decisions")
+}
+
+model RedressFinding {
+  id                String         @id @default(uuid()) @db.Uuid
+  redressDecisionId String         @db.Uuid
+  issueReference    String
+  findingSummary    String
+  disposition       String?
+  sortOrder         Int            @default(0)
+  createdAt         DateTime       @default(now())
+  redressDecision   RedressDecision @relation(fields: [redressDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([redressDecisionId])
+  @@map("redress_findings")
+}
+
+model RedressReason {
+  id                String                   @id @default(uuid()) @db.Uuid
+  redressDecisionId String                   @db.Uuid
+  sectionType       RedressReasonSectionType
+  content           String
+  aiDrafted         Boolean                  @default(false)
+  humanConfirmed    Boolean                  @default(true)
+  sortOrder         Int                      @default(0)
+  createdAt         DateTime                 @default(now())
+  redressDecision   RedressDecision          @relation(fields: [redressDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([redressDecisionId])
+  @@index([sectionType])
+  @@map("redress_reasons")
+}
+
+model RedressRemedy {
+  id                String            @id @default(uuid()) @db.Uuid
+  redressDecisionId String            @db.Uuid
+  remedyType        RedressRemedyType
+  description       String
+  targetReference   String?
+  sortOrder         Int               @default(0)
+  createdAt         DateTime          @default(now())
+  redressDecision   RedressDecision   @relation(fields: [redressDecisionId], references: [id], onDelete: Cascade)
+
+  @@index([redressDecisionId])
+  @@map("redress_remedies")
+}
+
+model InterimReliefRequest {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  redressMatterId     String                     @db.Uuid
+  requestType         InterimReliefRequestType
+  groundsSummary      String
+  status              InterimReliefRequestStatus @default(PENDING)
+  requestedAt         DateTime                   @default(now())
+  requestedByIdentityId String?                  @db.Uuid
+  redressMatter       RedressMatter              @relation(fields: [redressMatterId], references: [id], onDelete: Cascade)
+  decision            InterimReliefDecision?
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@map("interim_relief_requests")
+}
+
+model InterimReliefDecision {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  interimReliefRequestId      String                       @unique @db.Uuid
+  outcome                     InterimReliefDecisionOutcome
+  reviewerIdentityId          String                       @db.Uuid
+  reviewerOfficeholderId      String                       @db.Uuid
+  functionAuthorityRecordId   String                       @db.Uuid
+  authorityEvaluationRecordId String                       @db.Uuid
+  reasonsSummary              String?
+  decidedAt                   DateTime                     @default(now())
+  interimReliefRequest        InterimReliefRequest         @relation(fields: [interimReliefRequestId], references: [id], onDelete: Cascade)
+  reviewerIdentity            Identity                     @relation("InterimReliefDecisionReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder        Officeholder                 @relation("InterimReliefDecisionReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord      @relation("InterimReliefDecisionFunctionAuthority", fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord    @relation("InterimReliefDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  reviewStayRecord            ReviewStayRecord?
+
+  @@index([outcome])
+  @@map("interim_relief_decisions")
+}
+
+model ReviewStayRecord {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  redressMatterId             String                 @db.Uuid
+  decisionReviewReferenceId   String?                @db.Uuid
+  interimReliefDecisionId     String?                @unique @db.Uuid
+  challengedDecisionId        String                 @db.Uuid
+  challengedInstrumentId      String?                @db.Uuid
+  scope                       String
+  authorityReference          String
+  groundsSummary              String
+  effectiveAt                 DateTime
+  expiresAt                   DateTime?
+  conditions                  Json                   @default("[]")
+  status                      ReviewStayRecordStatus @default(PENDING)
+  deciderIdentityId           String                 @db.Uuid
+  deciderOfficeholderId       String                 @db.Uuid
+  functionAuthorityRecordId   String                 @db.Uuid
+  authorityEvaluationRecordId String                 @db.Uuid
+  isReversal                  Boolean                @default(false)
+  createdAt                   DateTime               @default(now())
+  updatedAt                   DateTime               @updatedAt
+  redressMatter               RedressMatter          @relation(fields: [redressMatterId], references: [id], onDelete: Cascade)
+  decisionReviewReference     DecisionReviewReference? @relation(fields: [decisionReviewReferenceId], references: [id])
+  interimReliefDecision       InterimReliefDecision? @relation(fields: [interimReliefDecisionId], references: [id])
+  deciderIdentity             Identity               @relation("ReviewStayDecider", fields: [deciderIdentityId], references: [id])
+  deciderOfficeholder         Officeholder           @relation("ReviewStayDeciderOfficeholder", fields: [deciderOfficeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord @relation("ReviewStayFunctionAuthority", fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord @relation("ReviewStayAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@index([challengedDecisionId])
+  @@map("review_stay_records")
+}
+
+model RedressImplementationPlan {
+  id                String                      @id @default(uuid()) @db.Uuid
+  redressDecisionId String                      @unique @db.Uuid
+  status            RedressImplementationActionStatus @default(PENDING)
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  redressDecision   RedressDecision             @relation(fields: [redressDecisionId], references: [id], onDelete: Cascade)
+  actions           RedressImplementationAction[]
+
+  @@index([status])
+  @@map("redress_implementation_plans")
+}
+
+model RedressImplementationAction {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  implementationPlanId        String                            @db.Uuid
+  targetType                  RedressImplementationTargetType
+  targetReference             String
+  requiredOperation           String
+  responsibleOfficeId         String?                           @db.Uuid
+  responsibleIdentityId       String?                           @db.Uuid
+  functionAuthorityRecordId   String?                           @db.Uuid
+  status                      RedressImplementationActionStatus @default(PENDING)
+  completedAt                 DateTime?
+  errorMessage                String?
+  retryCount                  Int                               @default(0)
+  escalationReference         String?
+  lifecycleServiceReference   String?
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  implementationPlan          RedressImplementationPlan         @relation(fields: [implementationPlanId], references: [id], onDelete: Cascade)
+  responsibleIdentity         Identity?                         @relation("RedressImplementationActionResponsible", fields: [responsibleIdentityId], references: [id])
+  verification                RedressImplementationVerification?
+
+  @@index([implementationPlanId])
+  @@index([status])
+  @@index([targetType])
+  @@map("redress_implementation_actions")
+}
+
+model RedressImplementationVerification {
+  id                String                                   @id @default(uuid()) @db.Uuid
+  actionId          String                                   @unique @db.Uuid
+  outcome           RedressImplementationVerificationOutcome
+  verifiedAt        DateTime                                 @default(now())
+  verifiedByIdentityId String?                               @db.Uuid
+  notes             String?
+  action            RedressImplementationAction              @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@index([outcome])
+  @@map("redress_implementation_verifications")
+}
+
+model RedressNotice {
+  id                        String              @id @default(uuid()) @db.Uuid
+  redressDecisionId         String              @unique @db.Uuid
+  redressMatterId           String              @db.Uuid
+  outcomeSummary            String
+  reasonsSummary            String
+  remedySummary             String
+  effectiveDate             DateTime?
+  implementationStatus      String
+  furtherReviewRights       Json                @default("[]")
+  filingRoute               String?
+  filingDeadline            DateTime?
+  stayEffectSummary         String?
+  contactReference          String?
+  status                    RedressNoticeStatus @default(DRAFT)
+  deliveredAt               DateTime?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  redressDecision           RedressDecision     @relation(fields: [redressDecisionId], references: [id], onDelete: Cascade)
+  redressMatter             RedressMatter       @relation(fields: [redressMatterId], references: [id])
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@map("redress_notices")
 }
