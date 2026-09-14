@@ -141,7 +141,7 @@ CREATE TABLE "public"."reporting_dashboard_indicators" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."dashboard_snapshots" (
+CREATE TABLE "public"."reporting_dashboard_snapshots" (
     "id" UUID NOT NULL,
     "snapshotNumber" TEXT NOT NULL,
     "institutionId" UUID NOT NULL,
@@ -156,7 +156,7 @@ CREATE TABLE "public"."dashboard_snapshots" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "dashboard_snapshots_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "reporting_dashboard_snapshots_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -261,7 +261,7 @@ CREATE TABLE "public"."report_generation_run_metric_pins" (
 CREATE TABLE "public"."report_generation_run_dashboard_pins" (
     "id" UUID NOT NULL,
     "reportGenerationRunId" UUID NOT NULL,
-    "dashboardIndicatorId" UUID NOT NULL,
+    "reportingDashboardIndicatorId" UUID NOT NULL,
     "pinnedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "report_generation_run_dashboard_pins_pkey" PRIMARY KEY ("id")
@@ -271,7 +271,7 @@ CREATE TABLE "public"."report_generation_run_dashboard_pins" (
 CREATE TABLE "public"."report_generation_run_snapshot_pins" (
     "id" UUID NOT NULL,
     "reportGenerationRunId" UUID NOT NULL,
-    "dashboardSnapshotId" UUID NOT NULL,
+    "reportingDashboardSnapshotId" UUID NOT NULL,
     "pinnedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "report_generation_run_snapshot_pins_pkey" PRIMARY KEY ("id")
@@ -281,7 +281,7 @@ CREATE TABLE "public"."report_generation_run_snapshot_pins" (
 CREATE TABLE "public"."report_generation_run_claim_pins" (
     "id" UUID NOT NULL,
     "reportGenerationRunId" UUID NOT NULL,
-    "performanceClaimId" UUID NOT NULL,
+    "institutionalMetricClaimId" UUID NOT NULL,
     "pinnedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "report_generation_run_claim_pins_pkey" PRIMARY KEY ("id")
@@ -302,7 +302,7 @@ CREATE TABLE "public"."report_claims" (
     "id" UUID NOT NULL,
     "reportGenerationRunId" UUID NOT NULL,
     "reportSectionId" UUID,
-    "performanceClaimId" UUID NOT NULL,
+    "institutionalMetricClaimId" UUID NOT NULL,
     "generatedSentence" TEXT NOT NULL,
     "claimText" TEXT NOT NULL,
     "status" "public"."ReportClaimStatus" NOT NULL DEFAULT 'GENERATED',
@@ -325,7 +325,7 @@ CREATE TABLE "public"."report_evidence_manifests" (
     "manifestContent" JSONB NOT NULL DEFAULT '{}',
     "manifestHash" TEXT NOT NULL,
     "evidenceRecordIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "performanceClaimIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "institutionalMetricClaimIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "report_evidence_manifests_pkey" PRIMARY KEY ("id")
@@ -421,8 +421,8 @@ CREATE TABLE "public"."evidence_dashboard_decision_traces" (
     "sourceRecordId" UUID NOT NULL,
     "evidenceRecordId" UUID,
     "metricCalculationRunId" UUID,
-    "performanceClaimId" UUID,
-    "dashboardIndicatorId" UUID,
+    "institutionalMetricClaimId" UUID,
+    "reportingDashboardIndicatorId" UUID,
     "reportGenerationRunId" UUID,
     "reportClaimId" UUID,
     "reportReviewId" UUID,
@@ -505,19 +505,19 @@ CREATE INDEX "reporting_dashboard_indicators_indicatorCode_idx" ON "public"."rep
 CREATE INDEX "reporting_dashboard_indicators_status_idx" ON "public"."reporting_dashboard_indicators"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "dashboard_snapshots_snapshotNumber_key" ON "public"."dashboard_snapshots"("snapshotNumber");
+CREATE UNIQUE INDEX "reporting_dashboard_snapshots_snapshotNumber_key" ON "public"."reporting_dashboard_snapshots"("snapshotNumber");
 
 -- CreateIndex
-CREATE INDEX "dashboard_snapshots_institutionId_idx" ON "public"."dashboard_snapshots"("institutionId");
+CREATE INDEX "reporting_dashboard_snapshots_institutionId_idx" ON "public"."reporting_dashboard_snapshots"("institutionId");
 
 -- CreateIndex
-CREATE INDEX "dashboard_snapshots_departmentId_idx" ON "public"."dashboard_snapshots"("departmentId");
+CREATE INDEX "reporting_dashboard_snapshots_departmentId_idx" ON "public"."reporting_dashboard_snapshots"("departmentId");
 
 -- CreateIndex
-CREATE INDEX "dashboard_snapshots_capturedByIdentityId_idx" ON "public"."dashboard_snapshots"("capturedByIdentityId");
+CREATE INDEX "reporting_dashboard_snapshots_capturedByIdentityId_idx" ON "public"."reporting_dashboard_snapshots"("capturedByIdentityId");
 
 -- CreateIndex
-CREATE INDEX "dashboard_snapshots_dataCutoffAt_idx" ON "public"."dashboard_snapshots"("dataCutoffAt");
+CREATE INDEX "reporting_dashboard_snapshots_dataCutoffAt_idx" ON "public"."reporting_dashboard_snapshots"("dataCutoffAt");
 
 -- CreateIndex
 CREATE INDEX "report_definitions_institutionId_idx" ON "public"."report_definitions"("institutionId");
@@ -577,28 +577,28 @@ CREATE UNIQUE INDEX "report_generation_run_metric_pins_reportGenerationRunId_met
 CREATE INDEX "report_generation_run_dashboard_pins_reportGenerationRunId_idx" ON "public"."report_generation_run_dashboard_pins"("reportGenerationRunId");
 
 -- CreateIndex
-CREATE INDEX "report_generation_run_dashboard_pins_dashboardIndicatorId_idx" ON "public"."report_generation_run_dashboard_pins"("dashboardIndicatorId");
+CREATE INDEX "report_generation_run_dashboard_pins_reportingDashboardIndicatorId_idx" ON "public"."report_generation_run_dashboard_pins"("reportingDashboardIndicatorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "report_generation_run_dashboard_pins_reportGenerationRunId__key" ON "public"."report_generation_run_dashboard_pins"("reportGenerationRunId", "dashboardIndicatorId");
+CREATE UNIQUE INDEX "report_generation_run_dashboard_pins_reportGenerationRunId__key" ON "public"."report_generation_run_dashboard_pins"("reportGenerationRunId", "reportingDashboardIndicatorId");
 
 -- CreateIndex
 CREATE INDEX "report_generation_run_snapshot_pins_reportGenerationRunId_idx" ON "public"."report_generation_run_snapshot_pins"("reportGenerationRunId");
 
 -- CreateIndex
-CREATE INDEX "report_generation_run_snapshot_pins_dashboardSnapshotId_idx" ON "public"."report_generation_run_snapshot_pins"("dashboardSnapshotId");
+CREATE INDEX "report_generation_run_snapshot_pins_reportingDashboardSnapshotId_idx" ON "public"."report_generation_run_snapshot_pins"("reportingDashboardSnapshotId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "report_generation_run_snapshot_pins_reportGenerationRunId_d_key" ON "public"."report_generation_run_snapshot_pins"("reportGenerationRunId", "dashboardSnapshotId");
+CREATE UNIQUE INDEX "report_generation_run_snapshot_pins_reportGenerationRunId_d_key" ON "public"."report_generation_run_snapshot_pins"("reportGenerationRunId", "reportingDashboardSnapshotId");
 
 -- CreateIndex
 CREATE INDEX "report_generation_run_claim_pins_reportGenerationRunId_idx" ON "public"."report_generation_run_claim_pins"("reportGenerationRunId");
 
 -- CreateIndex
-CREATE INDEX "report_generation_run_claim_pins_performanceClaimId_idx" ON "public"."report_generation_run_claim_pins"("performanceClaimId");
+CREATE INDEX "report_generation_run_claim_pins_institutionalMetricClaimId_idx" ON "public"."report_generation_run_claim_pins"("institutionalMetricClaimId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "report_generation_run_claim_pins_reportGenerationRunId_perf_key" ON "public"."report_generation_run_claim_pins"("reportGenerationRunId", "performanceClaimId");
+CREATE UNIQUE INDEX "report_generation_run_claim_pins_reportGenerationRunId_perf_key" ON "public"."report_generation_run_claim_pins"("reportGenerationRunId", "institutionalMetricClaimId");
 
 -- CreateIndex
 CREATE INDEX "report_generation_run_evidence_pins_reportGenerationRunId_idx" ON "public"."report_generation_run_evidence_pins"("reportGenerationRunId");
@@ -616,7 +616,7 @@ CREATE INDEX "report_claims_reportGenerationRunId_idx" ON "public"."report_claim
 CREATE INDEX "report_claims_reportSectionId_idx" ON "public"."report_claims"("reportSectionId");
 
 -- CreateIndex
-CREATE INDEX "report_claims_performanceClaimId_idx" ON "public"."report_claims"("performanceClaimId");
+CREATE INDEX "report_claims_institutionalMetricClaimId_idx" ON "public"."report_claims"("institutionalMetricClaimId");
 
 -- CreateIndex
 CREATE INDEX "report_claims_status_idx" ON "public"."report_claims"("status");
@@ -691,10 +691,10 @@ CREATE INDEX "evidence_dashboard_decision_traces_evidenceRecordId_idx" ON "publi
 CREATE INDEX "evidence_dashboard_decision_traces_metricCalculationRunId_idx" ON "public"."evidence_dashboard_decision_traces"("metricCalculationRunId");
 
 -- CreateIndex
-CREATE INDEX "evidence_dashboard_decision_traces_performanceClaimId_idx" ON "public"."evidence_dashboard_decision_traces"("performanceClaimId");
+CREATE INDEX "evidence_dashboard_decision_traces_institutionalMetricClaimId_idx" ON "public"."evidence_dashboard_decision_traces"("institutionalMetricClaimId");
 
 -- CreateIndex
-CREATE INDEX "evidence_dashboard_decision_traces_dashboardIndicatorId_idx" ON "public"."evidence_dashboard_decision_traces"("dashboardIndicatorId");
+CREATE INDEX "evidence_dashboard_decision_traces_reportingDashboardIndicatorId_idx" ON "public"."evidence_dashboard_decision_traces"("reportingDashboardIndicatorId");
 
 -- CreateIndex
 CREATE INDEX "evidence_dashboard_decision_traces_reportGenerationRunId_idx" ON "public"."evidence_dashboard_decision_traces"("reportGenerationRunId");
@@ -736,13 +736,13 @@ ALTER TABLE "public"."reporting_dashboard_indicators" ADD CONSTRAINT "reporting_
 ALTER TABLE "public"."reporting_dashboard_indicators" ADD CONSTRAINT "reporting_dashboard_indicators_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "public"."departments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."dashboard_snapshots" ADD CONSTRAINT "dashboard_snapshots_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "public"."institutions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."reporting_dashboard_snapshots" ADD CONSTRAINT "reporting_dashboard_snapshots_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "public"."institutions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."dashboard_snapshots" ADD CONSTRAINT "dashboard_snapshots_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "public"."departments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."reporting_dashboard_snapshots" ADD CONSTRAINT "reporting_dashboard_snapshots_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "public"."departments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."dashboard_snapshots" ADD CONSTRAINT "dashboard_snapshots_capturedByIdentityId_fkey" FOREIGN KEY ("capturedByIdentityId") REFERENCES "public"."identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."reporting_dashboard_snapshots" ADD CONSTRAINT "reporting_dashboard_snapshots_capturedByIdentityId_fkey" FOREIGN KEY ("capturedByIdentityId") REFERENCES "public"."identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."report_definitions" ADD CONSTRAINT "report_definitions_ownerIdentityId_fkey" FOREIGN KEY ("ownerIdentityId") REFERENCES "public"."identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -787,19 +787,19 @@ ALTER TABLE "public"."report_generation_run_metric_pins" ADD CONSTRAINT "report_
 ALTER TABLE "public"."report_generation_run_dashboard_pins" ADD CONSTRAINT "report_generation_run_dashboard_pins_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."report_generation_run_dashboard_pins" ADD CONSTRAINT "report_generation_run_dashboard_pins_dashboardIndicatorId_fkey" FOREIGN KEY ("dashboardIndicatorId") REFERENCES "public"."reporting_dashboard_indicators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."report_generation_run_dashboard_pins" ADD CONSTRAINT "report_generation_run_dashboard_pins_reportingDashboardIndicatorId_fkey" FOREIGN KEY ("reportingDashboardIndicatorId") REFERENCES "public"."reporting_dashboard_indicators"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."report_generation_run_snapshot_pins" ADD CONSTRAINT "report_generation_run_snapshot_pins_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."report_generation_run_snapshot_pins" ADD CONSTRAINT "report_generation_run_snapshot_pins_dashboardSnapshotId_fkey" FOREIGN KEY ("dashboardSnapshotId") REFERENCES "public"."dashboard_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."report_generation_run_snapshot_pins" ADD CONSTRAINT "report_generation_run_snapshot_pins_reportingDashboardSnapshotId_fkey" FOREIGN KEY ("reportingDashboardSnapshotId") REFERENCES "public"."reporting_dashboard_snapshots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."report_generation_run_claim_pins" ADD CONSTRAINT "report_generation_run_claim_pins_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."report_generation_run_claim_pins" ADD CONSTRAINT "report_generation_run_claim_pins_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."report_generation_run_claim_pins" ADD CONSTRAINT "report_generation_run_claim_pins_institutionalMetricClaimId_fkey" FOREIGN KEY ("institutionalMetricClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."report_generation_run_evidence_pins" ADD CONSTRAINT "report_generation_run_evidence_pins_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -814,7 +814,7 @@ ALTER TABLE "public"."report_claims" ADD CONSTRAINT "report_claims_reportGenerat
 ALTER TABLE "public"."report_claims" ADD CONSTRAINT "report_claims_reportSectionId_fkey" FOREIGN KEY ("reportSectionId") REFERENCES "public"."report_sections"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."report_claims" ADD CONSTRAINT "report_claims_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."report_claims" ADD CONSTRAINT "report_claims_institutionalMetricClaimId_fkey" FOREIGN KEY ("institutionalMetricClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."report_evidence_manifests" ADD CONSTRAINT "report_evidence_manifests_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -874,10 +874,10 @@ ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "eviden
 ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_metricCalculationRunId_fkey" FOREIGN KEY ("metricCalculationRunId") REFERENCES "public"."metric_calculation_runs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_institutionalMetricClaimId_fkey" FOREIGN KEY ("institutionalMetricClaimId") REFERENCES "public"."institutional_metric_claims"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_dashboardIndicatorId_fkey" FOREIGN KEY ("dashboardIndicatorId") REFERENCES "public"."reporting_dashboard_indicators"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_reportingDashboardIndicatorId_fkey" FOREIGN KEY ("reportingDashboardIndicatorId") REFERENCES "public"."reporting_dashboard_indicators"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."evidence_dashboard_decision_traces" ADD CONSTRAINT "evidence_dashboard_decision_traces_reportGenerationRunId_fkey" FOREIGN KEY ("reportGenerationRunId") REFERENCES "public"."report_generation_runs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
