@@ -128,6 +128,9 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  ownedIntegrationDefinitions  IntegrationDefinition[]         @relation("IntegrationInstitutionalOwner")
+  integrationInstitutionOwners IntegrationInstitutionOwner[]
+  authoritativeSourceDesignations AuthoritativeSourceDesignation[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -547,6 +550,9 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  authoritativeDesignationsDesignated AuthoritativeSourceDesignation[] @relation("AuthoritativeDesignationDesignator")
+  integrationApprovalsApproved       IntegrationApproval[]         @relation("IntegrationApprovalApprover")
+  integrationAcceptanceRecordsAchieved IntegrationAcceptanceRecord[] @relation("IntegrationAcceptanceAchiever")
 
   @@index([userAccountId])
   @@index([personId])
@@ -7335,4 +7341,426 @@ model JudicialReviewInformationRecord {
 
   @@index([redressMatterId])
   @@map("judicial_review_information_records")
+}
+
+// ─── Phase 11E: Integration Registry, Dependencies & Authoritative Source Catalog ─
+
+enum TechnologyDependencyCategory {
+  IDENTITY
+  APPLICATION
+  CASE_MANAGEMENT
+  GOVERNMENT_REGISTRY
+  PROFESSIONAL_REGISTRY
+  PAYMENT_BANKING
+  DOCUMENT_RECORDS
+  GEOSPATIAL_LAND
+  PLANNING
+  ENVIRONMENT
+  CUSTOMS
+  TAX
+  IMMIGRATION
+  CORPORATE
+  LABOUR
+  HEALTH
+  MARITIME
+  TOURISM
+  LICENSING
+  SIGNATURE_SEAL_TIMESTAMP
+  NOTIFICATION
+  HOSTING
+  TELECOM
+  CYBERSECURITY
+  DIGITAL_TWIN
+  ANALYTICS
+  AI_MODEL
+  BACKUP_ARCHIVAL
+  SOURCE_CODE_DEPLOYMENT
+  VENDOR
+  OTHER
+}
+
+enum IntegrationDefinitionStatus {
+  DRAFT
+  REGISTERED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum IntegrationVersionStatus {
+  DRAFT
+  CONFIGURED
+  TESTING
+  ACTIVE
+  SUPERSEDED
+  SUSPENDED
+  RETIRED
+}
+
+enum IntegrationDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+  QUERY_ONLY
+  EVENT_ONLY
+}
+
+enum AuthoritativeSourceStatus {
+  AUTHORITATIVE
+  IMPLEMENTING
+  SUPPORTING
+  REFERENCE_ONLY
+  APPLICANT_PROVIDED
+  PROFESSIONALLY_ISSUED
+  THIRD_PARTY_REPORTED
+  DERIVED
+  MODELED
+  UNVERIFIED
+}
+
+enum IntegrationAcceptanceState {
+  DISCOVERED
+  DESIGNED
+  CONFIGURED
+  TECHNICALLY_CONNECTED
+  TESTED
+  SECURITY_APPROVED
+  PRIVACY_APPROVED
+  INSTITUTIONALLY_ACCEPTED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum IntegrationApprovalType {
+  INSTITUTIONAL
+  SECURITY
+  PRIVACY
+  RECORDS
+  LEGAL
+  TECHNICAL
+  DATA_OWNER
+  VENDOR
+  GOVERNMENT
+}
+
+enum IntegrationApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum DataExchangeFieldClassification {
+  PERMITTED
+  PROHIBITED
+}
+
+enum FieldAuthorityConflictBehavior {
+  REJECT_CONFLICT
+  FLAG_FOR_REVIEW
+  PREFER_DESIGNATED_SOURCE
+  DEFER_TO_INSTITUTIONAL_DECISION
+}
+
+enum CredentialRotationStatus {
+  CURRENT
+  DUE_FOR_ROTATION
+  ROTATION_IN_PROGRESS
+  EXPIRED
+  REVOKED
+}
+
+enum AuthoritativeDesignationStatus {
+  DRAFT
+  PROPOSED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  SUPERSEDED
+}
+
+enum TechnologyDependencyStatus {
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+model TechnologyDependency {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  code                  String                       @unique
+  name                  String
+  description           String?
+  category              TechnologyDependencyCategory
+  vendor                String?
+  versionLabel          String?
+  status                TechnologyDependencyStatus   @default(ACTIVE)
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  integrationDependencies IntegrationDependency[]
+
+  @@index([category])
+  @@index([status])
+  @@map("technology_dependencies")
+}
+
+model IntegrationDefinition {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  integrationCode       String                       @unique
+  officialName          String
+  description           String?
+  institutionalOwnerId  String                       @db.Uuid
+  systemOwner           String
+  provider              String
+  dependencyCategory    TechnologyDependencyCategory
+  businessPurpose       String
+  status                IntegrationDefinitionStatus  @default(DRAFT)
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  institutionalOwner    Institution                  @relation("IntegrationInstitutionalOwner", fields: [institutionalOwnerId], references: [id])
+  versions              IntegrationVersion[]
+  institutionOwners     IntegrationInstitutionOwner[]
+  integrationDependencies IntegrationDependency[]
+
+  @@index([institutionalOwnerId])
+  @@index([dependencyCategory])
+  @@index([status])
+  @@map("integration_definitions")
+}
+
+model IntegrationVersion {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                       @db.Uuid
+  version                 String
+  sourceSystem            String
+  destinationSystem       String
+  direction               IntegrationDirection
+  protocol                String
+  dataContractVersion     String?
+  securityProfile         String?
+  privacyProfile          String?
+  retentionProfile        String?
+  availabilityExpectation String?
+  recoveryExpectation     String?
+  fallbackProcedure       String?
+  effectiveFrom           DateTime?
+  effectiveUntil          DateTime?
+  status                  IntegrationVersionStatus     @default(DRAFT)
+  currentAcceptanceState  IntegrationAcceptanceState   @default(DISCOVERED)
+  supersededByVersionId   String?                      @db.Uuid
+  acceptedAt              DateTime?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  integrationDefinition   IntegrationDefinition        @relation(fields: [integrationDefinitionId], references: [id])
+  supersededByVersion     IntegrationVersion?          @relation("IntegrationVersionSupersession", fields: [supersededByVersionId], references: [id])
+  supersededVersions      IntegrationVersion[]           @relation("IntegrationVersionSupersession")
+  endpoints               IntegrationEndpoint[]
+  dataExchangeContracts   DataExchangeContract[]
+  credentialReferences    IntegrationCredentialReference[]
+  approvals               IntegrationApproval[]
+  acceptanceRecords       IntegrationAcceptanceRecord[]
+  authoritativeDesignations AuthoritativeSourceDesignation[]
+
+  @@unique([integrationDefinitionId, version])
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@index([currentAcceptanceState])
+  @@index([supersededByVersionId])
+  @@map("integration_versions")
+}
+
+model IntegrationEndpoint {
+  id                   String             @id @default(uuid()) @db.Uuid
+  integrationVersionId String             @db.Uuid
+  endpointCode         String
+  pathOrIdentifier     String
+  method               String?
+  description          String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  integrationVersion   IntegrationVersion @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationVersionId, endpointCode])
+  @@index([integrationVersionId])
+  @@map("integration_endpoints")
+}
+
+model DataExchangeContract {
+  id                   String             @id @default(uuid()) @db.Uuid
+  integrationVersionId String             @db.Uuid
+  schemaIdentifier     String
+  schemaVersion        String
+  classification       String
+  purpose              String
+  minimumNecessaryRule String
+  validationRules      Json               @default("[]")
+  transformationRules  Json               @default("[]")
+  retention            String?
+  loggingRestrictions  String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  integrationVersion   IntegrationVersion @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  fields               DataExchangeField[]
+
+  @@unique([integrationVersionId, schemaIdentifier, schemaVersion])
+  @@index([integrationVersionId])
+  @@map("data_exchange_contracts")
+}
+
+model DataExchangeField {
+  id                     String                          @id @default(uuid()) @db.Uuid
+  dataExchangeContractId String                          @db.Uuid
+  fieldName              String
+  classification         DataExchangeFieldClassification
+  description            String?
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  dataExchangeContract   DataExchangeContract            @relation(fields: [dataExchangeContractId], references: [id], onDelete: Cascade)
+
+  @@unique([dataExchangeContractId, fieldName, classification])
+  @@index([dataExchangeContractId])
+  @@map("data_exchange_fields")
+}
+
+model AuthoritativeSourceDesignation {
+  id                            String                         @id @default(uuid()) @db.Uuid
+  integrationVersionId          String                         @db.Uuid
+  institutionId                 String                         @db.Uuid
+  datasetResource               String
+  authoritySource               String
+  scope                         String
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  designatingAuthorityIdentityId String?                       @db.Uuid
+  designatingOfficeholderId     String?                        @db.Uuid
+  acceptanceRecordId            String?                        @db.Uuid
+  sourceStatus                  AuthoritativeSourceStatus      @default(UNVERIFIED)
+  designationStatus             AuthoritativeDesignationStatus @default(DRAFT)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  integrationVersion            IntegrationVersion             @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  institution                   Institution                    @relation(fields: [institutionId], references: [id])
+  designatingAuthority          Identity?                      @relation("AuthoritativeDesignationDesignator", fields: [designatingAuthorityIdentityId], references: [id])
+  acceptanceRecord              IntegrationAcceptanceRecord?   @relation(fields: [acceptanceRecordId], references: [id])
+  fieldAuthorityMappings        FieldAuthorityMapping[]
+
+  @@index([integrationVersionId])
+  @@index([institutionId])
+  @@index([sourceStatus])
+  @@index([designationStatus])
+  @@map("authoritative_source_designations")
+}
+
+model FieldAuthorityMapping {
+  id                               String                         @id @default(uuid()) @db.Uuid
+  authoritativeSourceDesignationId String                         @db.Uuid
+  field                            String
+  source                           String
+  sourceStatus                     AuthoritativeSourceStatus      @default(UNVERIFIED)
+  scope                            String?
+  validity                         String?
+  conflictBehavior                 FieldAuthorityConflictBehavior @default(FLAG_FOR_REVIEW)
+  createdAt                        DateTime                       @default(now())
+  updatedAt                        DateTime                       @updatedAt
+  authoritativeSourceDesignation   AuthoritativeSourceDesignation @relation(fields: [authoritativeSourceDesignationId], references: [id], onDelete: Cascade)
+
+  @@unique([authoritativeSourceDesignationId, field])
+  @@index([authoritativeSourceDesignationId])
+  @@map("field_authority_mappings")
+}
+
+model IntegrationCredentialReference {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  integrationVersionId String                   @db.Uuid
+  credentialType       String
+  secretReference      String?
+  certificateReference String?
+  serviceIdentity      String?
+  effectiveFrom        DateTime?
+  expiration           DateTime?
+  rotationStatus       CredentialRotationStatus @default(CURRENT)
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  integrationVersion   IntegrationVersion       @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+
+  @@index([integrationVersionId])
+  @@index([rotationStatus])
+  @@index([expiration])
+  @@map("integration_credential_references")
+}
+
+model IntegrationInstitutionOwner {
+  id                      String                @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  institutionId           String                @db.Uuid
+  ownershipRole           String
+  effectiveFrom           DateTime?
+  effectiveUntil          DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  integrationDefinition   IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id], onDelete: Cascade)
+  institution             Institution           @relation(fields: [institutionId], references: [id])
+
+  @@unique([integrationDefinitionId, institutionId, ownershipRole])
+  @@index([integrationDefinitionId])
+  @@index([institutionId])
+  @@map("integration_institution_owners")
+}
+
+model IntegrationDependency {
+  id                      String                @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  technologyDependencyId  String                @db.Uuid
+  relationshipType        String
+  isRequired              Boolean               @default(true)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  integrationDefinition   IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id], onDelete: Cascade)
+  technologyDependency    TechnologyDependency  @relation(fields: [technologyDependencyId], references: [id])
+
+  @@unique([integrationDefinitionId, technologyDependencyId])
+  @@index([integrationDefinitionId])
+  @@index([technologyDependencyId])
+  @@map("integration_dependencies")
+}
+
+model IntegrationApproval {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  integrationVersionId    String                    @db.Uuid
+  approvalType            IntegrationApprovalType
+  status                  IntegrationApprovalStatus @default(PENDING)
+  approvedByIdentityId    String?                   @db.Uuid
+  approvedByOfficeholderId String?                  @db.Uuid
+  approvedAt              DateTime?
+  notes                   String?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  integrationVersion      IntegrationVersion        @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  approvedByIdentity      Identity?                 @relation("IntegrationApprovalApprover", fields: [approvedByIdentityId], references: [id])
+
+  @@unique([integrationVersionId, approvalType])
+  @@index([integrationVersionId])
+  @@index([approvalType])
+  @@index([status])
+  @@map("integration_approvals")
+}
+
+model IntegrationAcceptanceRecord {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  integrationVersionId    String                     @db.Uuid
+  acceptanceState         IntegrationAcceptanceState
+  achievedAt              DateTime                   @default(now())
+  achievedByIdentityId    String?                    @db.Uuid
+  achievedByOfficeholderId String?                   @db.Uuid
+  previousState           IntegrationAcceptanceState?
+  notes                   String?
+  createdAt               DateTime                   @default(now())
+  integrationVersion      IntegrationVersion         @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  achievedByIdentity      Identity?                  @relation("IntegrationAcceptanceAchiever", fields: [achievedByIdentityId], references: [id])
+  authoritativeDesignations AuthoritativeSourceDesignation[]
+
+  @@index([integrationVersionId])
+  @@index([acceptanceState])
+  @@index([achievedAt])
+  @@map("integration_acceptance_records")
 }
