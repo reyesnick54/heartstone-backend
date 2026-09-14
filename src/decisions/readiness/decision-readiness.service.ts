@@ -171,6 +171,8 @@ export class DecisionReadinessService {
       const consultation = caseRecord.governmentCommunications.find(
         (record) =>
           CONSULTATION_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!consultation) {
@@ -182,6 +184,8 @@ export class DecisionReadinessService {
       const concurrence = caseRecord.governmentCommunications.find(
         (record) =>
           CONCURRENCE_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!concurrence) {
@@ -193,6 +197,8 @@ export class DecisionReadinessService {
       const determination = caseRecord.governmentCommunications.find(
         (record) =>
           RETAINED_DETERMINATION_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!determination) {

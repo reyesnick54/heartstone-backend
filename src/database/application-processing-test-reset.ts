@@ -53,6 +53,15 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.recordsClassification.deleteMany();
   await prisma.externalRecordsRepository.deleteMany();
   await prisma.evidenceCustodyEvent.deleteMany();
+  await prisma.inspectionResponseEvidence.deleteMany();
+  await prisma.inspectionResponse.deleteMany();
+  await prisma.inspectionFindingEvidence.deleteMany();
+  await prisma.findingRequirementLink.deleteMany();
+  await prisma.inspectionFinding.deleteMany();
+  await prisma.inspectionObservationEvidence.deleteMany();
+  await prisma.inspectionObservation.deleteMany();
+  await prisma.inspectionCompletionRecord.deleteMany();
+  await prisma.inspectionSession.deleteMany();
   await prisma.inspectionEvidenceItem.deleteMany();
   await prisma.inspectionInspector.deleteMany();
   await prisma.inspectionRecord.deleteMany();

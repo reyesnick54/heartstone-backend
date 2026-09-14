@@ -1,3 +1,7 @@
+import {
+  type EvidencePacketPurpose,
+  type GovernmentCommunicationCategory,
+} from '@prisma/client';
 import { type EvidencePacketPurpose, type GovernmentCommunicationCategory } from '@prisma/client';
 
 export interface DecisionRequirementsConfig {
