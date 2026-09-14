@@ -34,10 +34,6 @@ export class InstrumentControllingDecisionService {
         status: InstrumentControllingDecisionStatus.DRAFT,
         decidingOfficeholderId: input.decidingOfficeholderId,
         decidingIdentityId: input.decidingIdentityId,
-        lifecycleDecisionType: input.decisionType,
-        decisionStatus: GovernmentDecisionStatus.DRAFT,
-        decisionMakerOfficeholderId: input.decidingOfficeholderId,
-        decisionMakerIdentityId: input.decidingIdentityId,
         outcomeSummary: input.outcomeSummary,
         caseId: input.caseId,
         masterAdministrativeFileId: input.masterAdministrativeFileId,
@@ -59,11 +55,9 @@ export class InstrumentControllingDecisionService {
       throw new NotFoundException(`InstrumentControllingDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== InstrumentControllingDecisionStatus.DRAFT &&
-        decision.status !== InstrumentControllingDecisionStatus.PENDING) {
     if (
-      decision.decisionStatus !== GovernmentDecisionStatus.DRAFT &&
-      decision.decisionStatus !== GovernmentDecisionStatus.PENDING
+      decision.status !== InstrumentControllingDecisionStatus.DRAFT &&
+      decision.status !== InstrumentControllingDecisionStatus.PENDING
     ) {
       throw new BadRequestException('Decision is not in a finalizable state');
     }
@@ -72,7 +66,6 @@ export class InstrumentControllingDecisionService {
       where: { id: decisionId },
       data: {
         status: InstrumentControllingDecisionStatus.FINALIZED,
-        decisionStatus: GovernmentDecisionStatus.FINALIZED,
         finalizedAt: new Date(),
       },
     });
@@ -91,8 +84,6 @@ export class InstrumentControllingDecisionService {
       throw new BadRequestException(
         'Lifecycle action requires a finalized InstrumentControllingDecision',
       );
-    if (decision.decisionStatus !== GovernmentDecisionStatus.FINALIZED) {
-      throw new BadRequestException('Lifecycle action requires a finalized GovernmentDecision');
     }
 
     return decision;
