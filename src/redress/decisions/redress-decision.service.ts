@@ -260,9 +260,7 @@ export class RedressDecisionService {
             targetReference: remedy.targetReference ?? matter.challengedDecisionId,
             requiredOperation: remedy.remedyType,
             status: RedressImplementationActionStatus.PENDING,
-            lifecycleServiceReference: this.isInstrumentRemedy(remedy.remedyType)
-              ? 'InstrumentLifecycleService'
-              : null,
+            lifecycleServiceReference: this.resolveLifecycleServiceReference(remedy.remedyType),
           })),
         },
       },
@@ -279,12 +277,25 @@ export class RedressDecisionService {
     );
   }
 
+  private resolveLifecycleServiceReference(remedyType: RedressRemedyType): string | null {
+    if (this.isInstrumentRemedy(remedyType)) {
+      return 'InstrumentLifecycleService';
+    }
+    if (remedyType === RedressRemedyType.REFUND_IF_AUTHORIZED) {
+      return 'PaymentsRefundLifecycleService';
+    }
+    return null;
+  }
+
   private mapRemedyToTarget(remedyType: RedressRemedyType): RedressImplementationTargetType {
     if (this.isInstrumentRemedy(remedyType)) {
       return RedressImplementationTargetType.OFFICIAL_INSTRUMENT;
     }
     if (remedyType === RedressRemedyType.CORRECT_RECORD) {
       return RedressImplementationTargetType.MASTER_ADMINISTRATIVE_FILE;
+    }
+    if (remedyType === RedressRemedyType.REFUND_IF_AUTHORIZED) {
+      return RedressImplementationTargetType.FEE;
     }
     return RedressImplementationTargetType.GOVERNMENT_DECISION;
   }

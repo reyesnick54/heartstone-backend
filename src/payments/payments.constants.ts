@@ -1,0 +1,118 @@
+export const PAYMENTS_REASON_CODES = {
+  WAIVER_ROUTE_NOT_PERMITTED: 'PAY-001',
+  AI_CANNOT_APPROVE_FINANCIAL_ACTION: 'PAY-002',
+  TECHNICAL_ADMIN_CANNOT_WAIVE: 'PAY-003',
+  REFUND_EXCEEDS_REFUNDABLE_BALANCE: 'PAY-004',
+  DUPLICATE_REFUND_BLOCKED: 'PAY-005',
+  CHARGEBACK_NOT_AUTHORIZED_REFUND: 'PAY-006',
+  RECONCILIATION_MISMATCH_PRESERVED: 'PAY-007',
+  CANNOT_FABRICATE_BANK_RECORD: 'PAY-008',
+  ARREARS_NOT_SANCTION: 'PAY-009',
+  DISPUTE_DOES_NOT_ERASE_TRANSACTION: 'PAY-010',
+  FINANCIAL_CORRECTION_PRESERVES_ORIGINAL: 'PAY-011',
+  ADJUSTMENT_CANNOT_CHANGE_GOVERNMENT_DECISION: 'PAY-012',
+  SELF_APPROVAL_BLOCKED: 'PAY-013',
+  SEGREGATION_REQUIRED: 'PAY-014',
+  PROVIDER_REFUND_FAILED_NOT_SETTLED: 'PAY-015',
+  SUBSTANTIVE_DISPUTE_REQUIRES_PHASE_10_ROUTE: 'PAY-016',
+  NO_PROVIDER_INTEGRATION_PENDING_EXTERNAL: 'PAY-017',
+} as const;
+
+export const FORBIDDEN_CLIENT_PAYMENT_FIELDS = [
+  'status',
+  'settledAt',
+  'settledAmountCents',
+  'approvedAmountCents',
+  'authorizedAmountCents',
+  'matchStatus',
+  'decision',
+  'daysPastDue',
+] as const;
+
+export const FORBIDDEN_AI_FINANCIAL_ACTIONS = [
+  'APPROVE_REFUND',
+  'APPROVE_WAIVER',
+  'APPROVE_WRITE_OFF',
+  'APPROVE_PAYMENT',
+  'APPROVE_PUBLIC_EXPENDITURE',
+] as const;
+
+export const TECHNICAL_ADMIN_ROLE_MARKER = 'TECHNICAL_ADMIN';
+
+export const FEE_ADJUSTMENT_TYPES = [
+  'WAIVER',
+  'REDUCTION',
+  'EXEMPTION',
+  'CREDIT',
+  'CORRECTION',
+  'AUTHORIZED_SURCHARGE',
+  'OTHER_APPROVED_ADJUSTMENT',
+] as const;
+
+export const REFUND_REQUEST_STATUSES = [
+  'REQUESTED',
+  'UNDER_REVIEW',
+  'APPROVED',
+  'REJECTED',
+  'PENDING_PROVIDER',
+  'PROCESSING',
+  'SETTLED',
+  'FAILED',
+  'CANCELLED',
+  'PARTIALLY_SETTLED',
+] as const;
+
+export const RECONCILIATION_MATCH_STATUSES = [
+  'MATCHED',
+  'AMOUNT_MISMATCH',
+  'CURRENCY_MISMATCH',
+  'MISSING_INTERNAL',
+  'MISSING_EXTERNAL',
+  'DUPLICATE',
+  'TIMING_DIFFERENCE',
+  'UNKNOWN_REFERENCE',
+  'UNDER_REVIEW',
+  'RESOLVED',
+] as const;
+
+export const PAYMENTS_REFUND_LIFECYCLE_SERVICE = 'PaymentsRefundLifecycleService';
+export const INVOICE_NUMBER_PREFIX = 'INV';
+export const PAYMENT_INTENT_NUMBER_PREFIX = 'PINT';
+export const PAYMENT_TRANSACTION_NUMBER_PREFIX = 'PTXN';
+export const PAYMENT_RECEIPT_NUMBER_PREFIX = 'PRCP';
+
+export const DETERMINISTIC_TEST_PROVIDER_CODE = 'DETERMINISTIC_TEST';
+
+export const FORBIDDEN_CLIENT_PAYMENT_FIELDS = [
+  'status',
+  'paidAmountCents',
+  'providerIntentReference',
+  'providerTransactionReference',
+  'settlementReference',
+  'providerPayloadHash',
+  'isManualConfirmation',
+] as const;
+
+export const FORBIDDEN_CLIENT_INVOICE_FIELDS = ['status', 'paidAmountCents', 'issuedAt'] as const;
+
+export const FORBIDDEN_PROVIDER_CONFIG_RESPONSE_FIELDS = [
+  'credentialReference',
+] as const;
+
+export const FORBIDDEN_PCI_FIELDS = ['pan', 'cvv', 'cvc', 'cardNumber', 'pin', 'magneticStripe'] as const;
+
+export const FORBIDDEN_AI_PAYMENT_ACTIONS = [
+  'CREATE_PAYMENT_INTENT',
+  'CONFIRM_MANUAL_PAYMENT',
+  'PROCESS_WEBHOOK',
+  'MARK_SETTLED',
+  'ISSUE_RECEIPT',
+] as const;
+
+export const PAYMENT_BOUNDARY_DISCLAIMER =
+  'Payment receipt records financial collection only; it does not approve an application, issue an instrument, satisfy compliance, or waive evidence.';
+
+export const WEBHOOK_TIMESTAMP_TOLERANCE_SECONDS = 300;
+
+export const PAYMENT_REDIRECT_DISCLAIMER =
+  'Client redirect callbacks are not proof of payment; settlement requires provider webhook or server reconciliation.';
