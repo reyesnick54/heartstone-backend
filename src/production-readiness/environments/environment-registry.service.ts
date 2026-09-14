@@ -13,6 +13,7 @@ import {
   NON_PRODUCTION_CLASSIFICATIONS,
   PRODUCTION_CAPABLE_CLASSIFICATIONS,
 } from '../production-readiness.constants';
+import { ReleaseRevalidationService } from '../releases/release-revalidation.service';
 
 export interface RegisterEnvironmentInput {
   code: string;
@@ -32,6 +33,7 @@ export class EnvironmentRegistryService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: ProductionReadinessBoundaryService,
+    private readonly revalidation: ReleaseRevalidationService,
   ) {}
 
   async registerEnvironment(input: RegisterEnvironmentInput): Promise<EnvironmentDefinition> {
@@ -139,7 +141,7 @@ export class EnvironmentRegistryService {
       environment.classification,
     );
 
-    return this.prisma.environmentIntegrationEndpoint.create({
+    const endpoint = await this.prisma.environmentIntegrationEndpoint.create({
       data: {
         environmentDefinitionId,
         endpointKey,
@@ -148,5 +150,19 @@ export class EnvironmentRegistryService {
         isLiveGovernmentEndpoint,
       },
     });
+
+    if (
+      PRODUCTION_CAPABLE_CLASSIFICATIONS.includes(environment.classification) ||
+      isLiveGovernmentEndpoint
+    ) {
+      await this.revalidation.recordTrigger({
+        triggerType: 'INTEGRATION_ENDPOINT_CHANGE',
+        sourceRecordType: 'EnvironmentIntegrationEndpoint',
+        sourceRecordId: endpoint.id,
+        reason: `Integration endpoint ${endpointKey} registered or changed`,
+      });
+    }
+
+    return endpoint;
   }
 }

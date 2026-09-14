@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
+import { AiModelGovernanceService } from './ai/ai-model-governance.service';
 import { ChangeManagementService } from './changes/change-management.service';
 import { EmergencyChangeService } from './changes/emergency-change.service';
 import { CiGovernanceService } from './ci/ci-governance.service';
@@ -21,6 +22,7 @@ import { RollbackService } from './releases/rollback.service';
   controllers: [ProductionReadinessController],
   providers: [
     ProductionReadinessBoundaryService,
+    AiModelGovernanceService,
     EnvironmentRegistryService,
     EnvironmentSeparationService,
     ReleaseGovernanceService,

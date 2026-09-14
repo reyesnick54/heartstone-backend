@@ -9,6 +9,7 @@ import {
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
+import { AiModelGovernanceService } from '../src/production-readiness/ai/ai-model-governance.service';
 import { EmergencyChangeService } from '../src/production-readiness/changes/emergency-change.service';
 import { ProductionReadinessBoundaryService } from '../src/production-readiness/common/production-readiness-boundary.service';
 import { ConfigurationGovernanceService } from '../src/production-readiness/configuration/configuration-governance.service';
@@ -285,6 +286,44 @@ describe('Phase 13E production readiness (integration)', () => {
     });
     expect(triggers.length).toBeGreaterThan(0);
     expect(triggers[0]?.triggerType).toBe('MATERIAL_CONFIGURATION_CHANGE');
+  });
+
+  it('triggers revalidation when AI model update targets production', async () => {
+    const fixture = await seedPhase13EFixture(app, prisma);
+    const aiGovernance = app.get(AiModelGovernanceService);
+
+    const result = await aiGovernance.recordModelUpdate({
+      modelIdentifier: `${NON_PRODUCTION_PHASE_13E_FIXTURE_MARKER}-risk-model`,
+      environmentDefinitionId: fixture.productionEnvironmentId,
+      version: '2.0.0',
+      requiresInstitutionalAcceptance: true,
+    });
+
+    expect(result.silentlyEnteredProduction).toBe(false);
+    expect(result.requiresRevalidation).toBe(true);
+
+    const triggers = await prisma.releaseRevalidationTrigger.findMany({
+      where: { triggerType: 'AI_MODEL_UPDATE' },
+    });
+    expect(triggers.length).toBeGreaterThan(0);
+  });
+
+  it('triggers revalidation when integration endpoint changes in production', async () => {
+    const fixture = await seedPhase13EFixture(app, prisma);
+    const registry = app.get(EnvironmentRegistryService);
+
+    await registry.registerIntegrationEndpoint(
+      fixture.productionEnvironmentId,
+      'payments-gateway',
+      'https://api.government.local/payments',
+      'LIVE',
+      true,
+    );
+
+    const triggers = await prisma.releaseRevalidationTrigger.findMany({
+      where: { triggerType: 'INTEGRATION_ENDPOINT_CHANGE' },
+    });
+    expect(triggers.length).toBeGreaterThan(0);
   });
 
   it('registers all required platform environment classifications', async () => {
