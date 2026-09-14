@@ -22,6 +22,7 @@ import { IdentityModule } from './identity/identity.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
+import { ProductionReliabilityModule } from './production-reliability/production-reliability.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -59,6 +60,7 @@ import { SystemModule } from './system/system.module';
     RedressModule,
     IntelligenceModule,
     OperationalSupportModule,
+    ProductionReliabilityModule,
   ],
 })
 export class AppModule {}
