@@ -17,6 +17,7 @@ export const FORBIDDEN_LEGACY_ISSUANCE_MODELS = [
 
 /** @deprecated Use FORBIDDEN_LEGACY_ISSUANCE_MODELS */
 export const FORBIDDEN_PHASE_7_MODELS = FORBIDDEN_LEGACY_ISSUANCE_MODELS;
+
 export const FORBIDDEN_PHASE_8C_MODELS = [
   'IssuedLicense',
   'IssuedPermit',

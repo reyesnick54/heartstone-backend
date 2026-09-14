@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import {
   InstrumentJurisdictionScope,
-  InstrumentLifecycleStatus,
+  OfficialInstrumentStatus,
   ReviewInterimEffect,
   ReviewStayStatus,
 } from '@prisma/client';
@@ -48,7 +48,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
 
   it('1. ordinary PATCH cannot change legal instrument status', () => {
     expect(() => {
-      boundary.assertClientCannotPatchInstrumentStatus({ lifecycleStatus: 'REVOKED' });
+      boundary.assertClientCannotPatchInstrumentStatus({ status: 'REVOKED' });
     }).toThrow(/ordinary PATCH/i);
   });
 
@@ -131,7 +131,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
 
   it('9. suspension may be scoped where authorized', () => {
     const allowed = guard.getAllowedStatusesForAction('SUSPENDED');
-    expect(allowed).toContain(InstrumentLifecycleStatus.EFFECTIVE);
+    expect(allowed).toContain(OfficialInstrumentStatus.EFFECTIVE);
   });
 
   it('10. revocation requires decision and authority', () => {
@@ -174,9 +174,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
   });
 
   it('14. expiration preserves record (no deletion invariant)', () => {
-    expect(PHASE_8G_INVARIANTS.find((i) => i.id === 14)?.description).toContain(
-      'preserves record',
-    );
+    expect(PHASE_8G_INVARIANTS.find((i) => i.id === 14)?.description).toContain('preserves record');
   });
 
   it('15. surrender preserves obligations (metadata invariant)', () => {

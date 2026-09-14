@@ -3,7 +3,6 @@ import {
   ComplianceDashboardAudience,
   ComplianceProjectionStatus,
   InspectionStatus,
-  InstrumentLifecycleStatus,
   MonitoringRuleType,
   OfficialInstrumentStatus,
 } from '@prisma/client';
@@ -154,7 +153,6 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
       where: { id: fixture.officialInstrumentId },
       data: {
         status: OfficialInstrumentStatus.REVOKED,
-        lifecycleStatus: InstrumentLifecycleStatus.REVOKED,
       },
     });
 
@@ -219,7 +217,6 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
     });
 
     expect(revalidation.doesNotRenewInstrument).toBe(true);
-    expect(after.lifecycleStatus).toBe(before.lifecycleStatus);
     expect(after.status).toBe(before.status);
   });
 
@@ -280,19 +277,6 @@ async function seedComplianceContext(
     throw new Error('Phase 8 fixture must include a pre-recorded government decision');
   }
 
-  const lifecycleDecision = await prisma.instrumentLifecycleDecision.create({
-    data: {
-      decisionNumber: `${fixture.marker}-ILD-001`,
-      decisionType: 'APPROVE',
-      decidingOfficeholderId: fixture.officialOfficeholderId,
-      decidingIdentityId: fixture.officialIdentityId,
-      outcomeSummary: 'Issue lifecycle instrument',
-      caseId: fixture.caseId,
-      status: 'FINALIZED',
-      finalizedAt: new Date(),
-    },
-  });
-
   const officialInstrument = await prisma.officialInstrument.create({
     data: {
       instrumentTypeVersionId: fixture.instrumentTypeVersionId,
@@ -304,8 +288,6 @@ async function seedComplianceContext(
       issuerOfficeholderId: fixture.officialOfficeholderId,
       scope: { activity: 'regulated' },
       status: OfficialInstrumentStatus.ISSUED,
-      lifecycleStatus: InstrumentLifecycleStatus.ISSUED,
-      lifecycleOriginalDecisionId: lifecycleDecision.id,
       publicVerificationToken: `${fixture.marker}-verify`,
       publicVerificationStatus: 'CURRENT',
       effectiveUntil: new Date('2025-01-01'),

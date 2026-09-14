@@ -5,7 +5,6 @@ import {
   ComplianceProjectionStatus,
   ContinuingObligationStatus,
   InspectionStatus,
-  InstrumentLifecycleStatus,
   OfficialInstrumentStatus,
   Prisma,
 } from '@prisma/client';
@@ -336,8 +335,8 @@ export class ComplianceProjectionService {
         throw new NotFoundException(`OfficialInstrument ${input.officialInstrumentId} not found`);
       }
 
-      instrumentStatusSnapshot = instrument.lifecycleStatus;
-      status = this.applyInstrumentStatusProjection(status, instrument.status, instrument.lifecycleStatus);
+      instrumentStatusSnapshot = instrument.status;
+      status = this.applyInstrumentStatusProjection(status, instrument.status);
 
       if (instrument.effectiveUntil && instrument.effectiveUntil <= new Date()) {
         indicators.push({
@@ -407,29 +406,23 @@ export class ComplianceProjectionService {
 
   private applyInstrumentStatusProjection(
     currentStatus: ComplianceProjectionStatus,
-    issuanceStatus: OfficialInstrumentStatus,
-    lifecycleStatus: InstrumentLifecycleStatus,
+    instrumentStatus: OfficialInstrumentStatus,
   ): ComplianceProjectionStatus {
     if (
-      issuanceStatus === OfficialInstrumentStatus.SUSPENDED ||
-      lifecycleStatus === InstrumentLifecycleStatus.SUSPENDED ||
-      lifecycleStatus === InstrumentLifecycleStatus.PARTIALLY_SUSPENDED
+      instrumentStatus === OfficialInstrumentStatus.SUSPENDED ||
+      instrumentStatus === OfficialInstrumentStatus.PARTIALLY_SUSPENDED
     ) {
       return ComplianceProjectionStatus.SUSPENDED_BY_SEPARATE_DECISION;
     }
 
     if (
-      issuanceStatus === OfficialInstrumentStatus.REVOKED ||
-      lifecycleStatus === InstrumentLifecycleStatus.REVOKED ||
-      lifecycleStatus === InstrumentLifecycleStatus.REVOCATION_DECIDED
+      instrumentStatus === OfficialInstrumentStatus.REVOKED ||
+      instrumentStatus === OfficialInstrumentStatus.REVOCATION_DECIDED
     ) {
       return ComplianceProjectionStatus.REVOKED_BY_SEPARATE_DECISION;
     }
 
-    if (
-      issuanceStatus === OfficialInstrumentStatus.EXPIRED ||
-      lifecycleStatus === InstrumentLifecycleStatus.EXPIRED
-    ) {
+    if (instrumentStatus === OfficialInstrumentStatus.EXPIRED) {
       return ComplianceProjectionStatus.EXPIRED;
     }
 

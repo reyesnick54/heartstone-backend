@@ -82,7 +82,7 @@ export class InstrumentDownloadService {
 
     const documentVersion = version.documentVersion;
     if (!documentVersion) {
-      throw new InstrumentDownloadForbiddenException('Issued version has no linked document');
+      throw new InstrumentVersionNotFoundException(instrumentVersionId ?? officialInstrumentId);
     }
 
     const content = await this.storage.get(documentVersion.storageObjectKey);

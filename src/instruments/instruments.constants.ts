@@ -2,7 +2,6 @@ export const NON_PRODUCTION_INSTRUMENT_FIXTURE_MARKER = 'NON_PRODUCTION_INSTRUME
 
 export const PROTECTED_INSTRUMENT_STATUS_FIELDS = [
   'status',
-  'lifecycleStatus',
   'publicVerificationStatus',
   'currentVersionId',
   'effectiveUntil',

@@ -20,8 +20,9 @@ export class InstrumentNumberingService {
       return this.reserveInTransaction(tx, numberingRuleId, institutionCode);
     }
 
-    return this.prisma.$transaction((transaction) =>
-      this.reserveInTransaction(transaction, numberingRuleId, institutionCode),
+    return this.prisma.$transaction(
+      (transaction) => this.reserveInTransaction(transaction, numberingRuleId, institutionCode),
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
   }
 
@@ -30,6 +31,8 @@ export class InstrumentNumberingService {
     numberingRuleId: string,
     institutionCode: string,
   ): Promise<{ reservationId: string; reservedNumber: string }> {
+    await tx.$executeRaw`SELECT id FROM instrument_numbering_rules WHERE id = ${numberingRuleId}::uuid FOR UPDATE`;
+
     const rule = await tx.instrumentNumberingRule.findUnique({
       where: { id: numberingRuleId },
     });

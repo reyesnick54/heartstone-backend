@@ -2,7 +2,6 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import {
   ComplianceDashboardAudience,
   ComplianceProjectionStatus,
-  InstrumentLifecycleStatus,
   OfficialInstrumentStatus,
 } from '@prisma/client';
 
@@ -46,7 +45,7 @@ describe('ComplianceProjectionService', () => {
     jest.clearAllMocks();
   });
 
-  it('derives suspended instrument status from official instrument lifecycle records', async () => {
+  it('derives suspended instrument status from official instrument status', async () => {
     prisma.complianceStatusProjection.findFirst.mockResolvedValue(null);
     prisma.inspectionRecord.findMany.mockResolvedValue([]);
     prisma.decisionCondition.findMany.mockResolvedValue([]);
@@ -54,8 +53,7 @@ describe('ComplianceProjectionService', () => {
     prisma.evidenceRecord.findMany.mockResolvedValue([]);
     prisma.officialInstrument.findUnique.mockResolvedValue({
       id: 'inst-1',
-      status: OfficialInstrumentStatus.ISSUED,
-      lifecycleStatus: InstrumentLifecycleStatus.SUSPENDED,
+      status: OfficialInstrumentStatus.SUSPENDED,
       effectiveUntil: null,
     });
     prisma.complianceStatusProjection.create.mockResolvedValue({ id: 'proj-1', projectionVersion: 1 });
@@ -76,7 +74,7 @@ describe('ComplianceProjectionService', () => {
       { data: { instrumentStatusSnapshot: string } },
     ][];
     const createCall = createCalls[0]?.[0];
-    expect(createCall?.data.instrumentStatusSnapshot).toBe(InstrumentLifecycleStatus.SUSPENDED);
+    expect(createCall?.data.instrumentStatusSnapshot).toBe(OfficialInstrumentStatus.SUSPENDED);
   });
 
   it('reflects revoked issuance instrument status', async () => {
@@ -88,7 +86,6 @@ describe('ComplianceProjectionService', () => {
     prisma.officialInstrument.findUnique.mockResolvedValue({
       id: 'issued-1',
       status: OfficialInstrumentStatus.REVOKED,
-      lifecycleStatus: InstrumentLifecycleStatus.REVOKED,
       effectiveUntil: null,
     });
     prisma.complianceStatusProjection.create.mockResolvedValue({ id: 'proj-2', projectionVersion: 1 });
@@ -118,7 +115,6 @@ describe('ComplianceProjectionService', () => {
     prisma.officialInstrument.findUnique.mockResolvedValue({
       id: 'inst-2',
       status: OfficialInstrumentStatus.ISSUED,
-      lifecycleStatus: InstrumentLifecycleStatus.ISSUED,
       effectiveUntil: null,
     });
     prisma.complianceStatusProjection.findFirst.mockResolvedValue({
