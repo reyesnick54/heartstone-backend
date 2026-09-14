@@ -119,6 +119,18 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.dashboardVersion.deleteMany();
   await prisma.dashboardDefinition.deleteMany();
   await prisma.dashboardStatusDictionaryEntry.deleteMany();
+  await prisma.projectStatusProjection.deleteMany();
+  await prisma.sectorDevelopmentObservation.deleteMany();
+  await prisma.infrastructureDeliveryRecord.deleteMany();
+  await prisma.employmentEvidenceRecord.deleteMany();
+  await prisma.capitalEvidenceRecord.deleteMany();
+  await prisma.strategicProjectEconomicClaim.deleteMany();
+  await prisma.strategicProjectRisk.deleteMany();
+  await prisma.strategicProjectDependency.deleteMany();
+  await prisma.strategicProjectMilestone.deleteMany();
+  await prisma.strategicProjectStage.deleteMany();
+  await prisma.strategicProjectProfile.deleteMany();
+  await prisma.performanceClaim.deleteMany();
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {

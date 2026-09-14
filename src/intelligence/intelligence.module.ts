@@ -12,12 +12,18 @@ import { DashboardQueryService } from './command-console/dashboard-query.service
 import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
 import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
+import { ReportingBoundaryService } from './common/reporting-boundary.service';
 import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { IntelligenceController } from './intelligence.controller';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
 import { PerformanceClaimService } from './performance-claims/performance-claim.service';
+import { EvidenceDashboardTraceService } from './reporting/evidence-dashboard-trace.service';
+import { ReportCorrectionService } from './reporting/report-correction.service';
+import { ReportGenerationService } from './reporting/report-generation.service';
+import { ReportPublicationService } from './reporting/report-publication.service';
+import { ReportingController } from './reporting/reporting.controller';
 import { RiskAssessmentService } from './risk/risk-assessment.service';
 import { SimulationService } from './simulation/simulation.service';
 import { CapitalEvidenceService } from './strategic-projects/capital-evidence.service';
@@ -35,23 +41,17 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
-  controllers: [IntelligenceController, CommandConsoleController, StrategicProjectController],
+  controllers: [IntelligenceController, StrategicProjectController, CommandConsoleController, ReportingController],
   providers: [
     IntelligenceBoundaryService,
-    DigitalTwinService,
-    SimulationService,
-    ConsequentialUseService,
+    StrategicProjectBoundaryService,
+    ReportingBoundaryService,
     AnalysisService,
     IntelligenceMonitoringService,
     RiskAssessmentService,
-    DashboardBoundaryService,
-    DashboardStatusDictionaryService,
-    DashboardDefinitionService,
-    DashboardAccessPolicyService,
-    DashboardIndicatorProjectionService,
-    DashboardSnapshotService,
-    DashboardQueryService,
-    StrategicProjectBoundaryService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     PerformanceClaimService,
     StrategicProjectProfileService,
     StrategicProjectStageService,
@@ -64,23 +64,28 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     InfrastructureDeliveryService,
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
+    DashboardBoundaryService,
+    DashboardStatusDictionaryService,
+    DashboardDefinitionService,
+    DashboardAccessPolicyService,
+    DashboardIndicatorProjectionService,
+    DashboardSnapshotService,
+    DashboardQueryService,
+    ReportGenerationService,
+    ReportPublicationService,
+    ReportCorrectionService,
+    EvidenceDashboardTraceService,
   ],
   exports: [
     IntelligenceBoundaryService,
-    DigitalTwinService,
-    SimulationService,
-    ConsequentialUseService,
+    StrategicProjectBoundaryService,
+    ReportingBoundaryService,
     AnalysisService,
     IntelligenceMonitoringService,
     RiskAssessmentService,
-    DashboardBoundaryService,
-    DashboardStatusDictionaryService,
-    DashboardDefinitionService,
-    DashboardAccessPolicyService,
-    DashboardIndicatorProjectionService,
-    DashboardSnapshotService,
-    DashboardQueryService,
-    StrategicProjectBoundaryService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     PerformanceClaimService,
     StrategicProjectProfileService,
     StrategicProjectStageService,
@@ -93,6 +98,17 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     InfrastructureDeliveryService,
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
+    DashboardBoundaryService,
+    DashboardStatusDictionaryService,
+    DashboardDefinitionService,
+    DashboardAccessPolicyService,
+    DashboardIndicatorProjectionService,
+    DashboardSnapshotService,
+    DashboardQueryService,
+    ReportGenerationService,
+    ReportPublicationService,
+    ReportCorrectionService,
+    EvidenceDashboardTraceService,
   ],
 })
 export class IntelligenceModule {}

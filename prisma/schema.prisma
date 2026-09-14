@@ -149,6 +149,10 @@ model Institution {
   aiAgentDefinitions           AIAgentDefinition[]          @relation("AIAgentInstitutionalOwner")
   aiCapabilityDefinitions      AICapabilityDefinition[]     @relation("AICapabilityInstitutionalOwner")
   ownedDigitalTwinDefinitions  DigitalTwinDefinition[]
+  metricDefinitions                MetricDefinition[]              @relation("MetricDefinitionInstitution")
+  reportingDashboardIndicators     ReportingDashboardIndicator[]   @relation("ReportingDashboardIndicatorInstitution")
+  reportingDashboardSnapshots      ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotInstitution")
+  reportDefinitions                ReportDefinition[]              @relation("ReportDefinitionInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -196,6 +200,10 @@ model Department {
   dashboardAccessPolicies       DashboardAccessPolicy[]
   dashboardIndicatorProjections DashboardIndicatorProjection[]
   strategicProjectProfiles      StrategicProjectProfile[]
+  metricDefinitions             MetricDefinition[]             @relation("MetricDefinitionDepartment")
+  reportingDashboardIndicators  ReportingDashboardIndicator[]  @relation("ReportingDashboardIndicatorDepartment")
+  reportingDashboardSnapshots   ReportingDashboardSnapshot[]   @relation("ReportingDashboardSnapshotDepartment")
+  reportDefinitions             ReportDefinition[]             @relation("ReportDefinitionDepartment")
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -273,6 +281,12 @@ model Officeholder {
   digitalTwinSourcesOwned          DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
   simulationReviewsConducted       SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
   consequentialUseReviewsConducted ConsequentialUseReview[]      @relation("ConsequentialUseOfficeholderReviewer")
+  institutionalMetricClaimsApproved InstitutionalMetricClaim[] @relation("InstitutionalMetricClaimApproverOfficeholder")
+  reportDefinitionsOwned          ReportDefinition[]         @relation("ReportDefinitionOwnerOfficeholder")
+  reportDefinitionVersionsOwned   ReportDefinitionVersion[]  @relation("ReportDefinitionVersionOwnerOfficeholder")
+  reportApprovalsAsApprover       ReportApproval[]           @relation("ReportApproverOfficeholder")
+  reportPublicationsAsPublisher   ReportPublication[]        @relation("ReportPublisherOfficeholder")
+  reportCorrectionsAsCorrector    ReportCorrection[]         @relation("ReportCorrectionOfficeholder")
 
   @@map("officeholders")
 }
@@ -626,6 +640,16 @@ model Identity {
   digitalTwinModeRecords             DigitalTwinModeRecord[]       @relation("DigitalTwinModeRecorder")
   simulationReviewsConducted         SimulationReview[]            @relation("SimulationReviewReviewer")
   consequentialUseReviewsConducted ConsequentialUseReview[]      @relation("ConsequentialUseReviewer")
+  metricCalculationRunsExecuted        MetricCalculationRun[]            @relation("MetricCalculationRunner")
+  reportingDashboardSnapshotsCaptured  ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotCapturer")
+  reportDefinitionsOwned               ReportDefinition[]                @relation("ReportDefinitionOwner")
+  reportDefinitionVersionsOwned        ReportDefinitionVersion[]         @relation("ReportDefinitionVersionOwner")
+  reportGenerationRunsInitiated        ReportGenerationRun[]             @relation("ReportGenerationRunInitiator")
+  reportReviewsConducted               ReportReview[]                    @relation("ReportReviewer")
+  reportApprovalsAsApprover            ReportApproval[]                  @relation("ReportApprover")
+  reportPublicationsAsPublisher        ReportPublication[]               @relation("ReportPublisher")
+  reportCorrectionsRecorded            ReportCorrection[]                @relation("ReportCorrectionRecorder")
+  reportClaimRevalidationsRecorded     ReportClaimRevalidationRecord[]   @relation("ReportClaimRevalidationRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1014,6 +1038,7 @@ model FunctionAuthorityRecord {
   redressDecisions             RedressDecision[]                @relation("RedressDecisionFunctionAuthority")
   interimReliefDecisions       InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
   reviewStayRecords            ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
+  reportPublicationAuthorities ReportDefinitionVersion[]        @relation("ReportPublicationAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1281,6 +1306,9 @@ model AuthorityEvaluationRecord {
   redressDecisions                RedressDecision[]             @relation("RedressDecisionAuthority")
   interimReliefDecisions          InterimReliefDecision[]       @relation("InterimReliefDecisionAuthority")
   reviewStayRecords               ReviewStayRecord[]            @relation("ReviewStayAuthority")
+  reportApprovals                 ReportApproval[]              @relation("ReportApprovalAuthority")
+  reportPublications              ReportPublication[]           @relation("ReportPublicationAuthority")
+  reportCorrections               ReportCorrection[]            @relation("ReportCorrectionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -3315,6 +3343,7 @@ model EvidenceRecord {
   packetItems                     EvidencePacketItem[]
   packetExclusions                EvidencePacketItemExclusion[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
+  evidenceDashboardDecisionTraces EvidenceDashboardDecisionTrace[] @relation("TraceEvidenceRecord")
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -3825,6 +3854,7 @@ model EvidencePacketVersion {
   decisionReadinessAssessments DecisionReadinessAssessment[]
   governmentDecisions          GovernmentDecision[]
   externalReviewPackages       ExternalReviewPackage[]
+  reportGenerationEvidencePins ReportGenerationRunEvidencePin[] @relation("ReportGenerationEvidencePin")
 
   @@unique([packetId, version])
   @@index([packetId])
@@ -4725,6 +4755,7 @@ model GovernmentDecision {
   redressMattersChallenged      RedressMatter[]               @relation("RedressChallengedDecision")
   externalReviewReferralsChallenged ExternalReviewReferral[]  @relation("ExternalReviewChallengedDecision")
   redressDecisionsSuperseding   RedressDecision[]             @relation("RedressSupersededDecision")
+  evidenceDashboardDecisionTraces EvidenceDashboardDecisionTrace[] @relation("TraceGovernmentDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -10632,6 +10663,721 @@ model SimulationToLiveTransitionRecord {
   @@index([twinVersionId])
   @@index([status])
   @@map("simulation_to_live_transition_records")
+}
+
+enum MetricDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum MetricCalculationRunStatus {
+  PENDING
+  CALCULATED
+  FAILED
+  SUPERSEDED
+}
+
+enum InstitutionalMetricClaimStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  EXPIRED
+  INVALIDATED
+  SUPERSEDED
+}
+
+enum InstitutionalMetricClaimRevalidationState {
+  CURRENT
+  FLAGGED_FOR_REVALIDATION
+  INVALIDATED
+}
+
+enum ReportingDashboardIndicatorStatus {
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum ReportingDashboardSnapshotStatus {
+  CAPTURED
+  SUPERSEDED
+  ARCHIVED
+}
+
+// ─── Phase 12G: Institutional Reporting and Publication ──────────────────────
+
+enum ReportType {
+  INTERNAL_OPERATIONAL
+  DEPARTMENTAL
+  EXECUTIVE
+  MANAGEMENT_COMMITTEE
+  ASSURANCE
+  PERFORMANCE
+  COMPLIANCE
+  AI_GOVERNANCE
+  SECURITY
+  CONTINUITY
+  ECONOMIC_DEVELOPMENT
+  PUBLIC
+  GOVERNMENT_SUBMISSION
+  OTHER_APPROVED
+}
+
+enum ReportDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum ReportClassification {
+  PUBLIC
+  INTERNAL
+  RESTRICTED
+  CONFIDENTIAL
+  PROTECTED_PERSONAL
+}
+
+enum ReportFrequency {
+  AD_HOC
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+  ON_DEMAND
+}
+
+enum ReportDefinitionVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+  RETIRED
+}
+
+enum ReportGenerationRunStatus {
+  DRAFT
+  GENERATING
+  GENERATED
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  CORRECTED
+  FAILED
+  CANCELLED
+}
+
+enum ReportOutcomeClassification {
+  POSITIVE
+  NEUTRAL
+  ADVERSE
+  MIXED
+  INCONCLUSIVE
+}
+
+enum ReportClaimStatus {
+  GENERATED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+  SUPERSEDED
+}
+
+enum ReportReviewType {
+  CONTENT
+  PRIVACY
+  SECURITY
+  RECORDS
+}
+
+enum ReportReviewStatus {
+  PENDING
+  IN_REVIEW
+  SATISFACTORY
+  DEFICIENCY_IDENTIFIED
+  REJECTED
+}
+
+enum ReportApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUPERSEDED
+}
+
+enum ReportPublicationStatus {
+  DRAFT
+  PUBLISHED
+  CORRECTED
+  WITHDRAWN
+}
+
+enum ReportCorrectionStatus {
+  REQUESTED
+  APPROVED
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum ReportRevalidationTrigger {
+  LAW_OR_POLICY_CHANGE
+  AUTHORITY_CHANGE
+  WORKFLOW_CHANGE
+  STAFFING_CHANGE
+  DATA_SOURCE_CHANGE
+  MEASUREMENT_METHOD_CHANGE
+  TECHNOLOGY_CHANGE
+  INTEGRATION_CHANGE
+  AI_MODEL_CHANGE
+  POPULATION_CHANGE
+  ECONOMIC_CONDITIONS_CHANGE
+  DEPARTMENT_CHANGE
+  PROFESSIONAL_REQUIREMENT_CHANGE
+}
+
+model MetricDefinition {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  code                String
+  name                String
+  description         String?
+  methodologyVersion  String
+  institutionId       String                 @db.Uuid
+  departmentId        String?                @db.Uuid
+  status              MetricDefinitionStatus @default(DRAFT)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  institution         Institution            @relation("MetricDefinitionInstitution", fields: [institutionId], references: [id])
+  department          Department?            @relation("MetricDefinitionDepartment", fields: [departmentId], references: [id])
+  calculationRuns     MetricCalculationRun[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([status])
+  @@map("metric_definitions")
+}
+
+model MetricCalculationRun {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  metricDefinitionId    String                     @db.Uuid
+  runNumber             String
+  methodologyVersion    String
+  inputsSnapshot        Json                       @default("{}")
+  resultValue           Json                       @default("{}")
+  resultNumeric         Decimal?                   @db.Decimal(20, 6)
+  dataCutoffAt          DateTime
+  sourceVersions        Json                       @default("{}")
+  calculatedAt          DateTime                   @default(now())
+  calculatedByIdentityId String                    @db.Uuid
+  status                MetricCalculationRunStatus @default(CALCULATED)
+  integrityHash         String
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  metricDefinition      MetricDefinition           @relation(fields: [metricDefinitionId], references: [id])
+  calculatedBy          Identity                   @relation("MetricCalculationRunner", fields: [calculatedByIdentityId], references: [id])
+  institutionalMetricClaims     InstitutionalMetricClaim[]
+  reportingDashboardIndicators   ReportingDashboardIndicator[]
+  reportGenerationRuns  ReportGenerationRunMetricPin[]
+  decisionTraces        EvidenceDashboardDecisionTrace[] @relation("TraceMetricCalculationRun")
+
+  @@unique([metricDefinitionId, runNumber])
+  @@index([metricDefinitionId])
+  @@index([calculatedByIdentityId])
+  @@index([dataCutoffAt])
+  @@index([status])
+  @@map("metric_calculation_runs")
+}
+
+model InstitutionalMetricClaim {
+  id                           String                          @id @default(uuid()) @db.Uuid
+  claimNumber                  String                          @unique
+  metricCalculationRunId       String                          @db.Uuid
+  claimText                    String
+  status                       InstitutionalMetricClaimStatus            @default(DRAFT)
+  outcomeClassification        ReportOutcomeClassification
+  validFrom                    DateTime
+  validUntil                   DateTime?
+  revalidationState            InstitutionalMetricClaimRevalidationState @default(CURRENT)
+  representsGovernmentStatistic Boolean                        @default(false)
+  governmentStatisticConfirmed Boolean                         @default(false)
+  isApproved                   Boolean                         @default(false)
+  approvedAt                   DateTime?
+  approvedByOfficeholderId     String?                         @db.Uuid
+  associationOnly              Boolean                         @default(true)
+  causationDeclared            Boolean                         @default(false)
+  createdAt                    DateTime                        @default(now())
+  updatedAt                    DateTime                        @updatedAt
+  metricCalculationRun         MetricCalculationRun            @relation(fields: [metricCalculationRunId], references: [id])
+  approvedByOfficeholder       Officeholder?                   @relation("InstitutionalMetricClaimApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
+  reportClaims                 ReportClaim[]
+  reportGenerationRuns         ReportGenerationRunClaimPin[]
+  decisionTraces               EvidenceDashboardDecisionTrace[] @relation("TraceInstitutionalMetricClaim")
+
+  @@index([metricCalculationRunId])
+  @@index([status])
+  @@index([revalidationState])
+  @@index([validUntil])
+  @@map("institutional_metric_claims")
+}
+
+model ReportingDashboardIndicator {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  indicatorCode         String
+  label                 String
+  metricCalculationRunId String                  @db.Uuid
+  countValue            Int?
+  displayValue          String?
+  drillDownReferences   Json                     @default("[]")
+  methodologyVersion    String
+  audience              ComplianceDashboardAudience
+  institutionId         String                   @db.Uuid
+  departmentId          String?                  @db.Uuid
+  snapshotAt            DateTime
+  status                ReportingDashboardIndicatorStatus @default(ACTIVE)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  metricCalculationRun  MetricCalculationRun     @relation(fields: [metricCalculationRunId], references: [id])
+  institution           Institution              @relation("ReportingDashboardIndicatorInstitution", fields: [institutionId], references: [id])
+  department            Department?              @relation("ReportingDashboardIndicatorDepartment", fields: [departmentId], references: [id])
+  reportGenerationRuns  ReportGenerationRunDashboardPin[]
+  decisionTraces        EvidenceDashboardDecisionTrace[] @relation("TraceReportingDashboardIndicator")
+
+  @@index([metricCalculationRunId])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([indicatorCode])
+  @@index([status])
+  @@map("reporting_dashboard_indicators")
+}
+
+model ReportingDashboardSnapshot {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  snapshotNumber        String                  @unique
+  institutionId         String                  @db.Uuid
+  departmentId          String?                 @db.Uuid
+  audience              ComplianceDashboardAudience
+  indicatorsSnapshot    Json                    @default("[]")
+  contentHash           String
+  capturedAt            DateTime                @default(now())
+  capturedByIdentityId  String                  @db.Uuid
+  dataCutoffAt          DateTime
+  status                ReportingDashboardSnapshotStatus @default(CAPTURED)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  institution           Institution             @relation("ReportingDashboardSnapshotInstitution", fields: [institutionId], references: [id])
+  department            Department?             @relation("ReportingDashboardSnapshotDepartment", fields: [departmentId], references: [id])
+  capturedBy            Identity                @relation("ReportingDashboardSnapshotCapturer", fields: [capturedByIdentityId], references: [id])
+  reportGenerationRuns  ReportGenerationRunSnapshotPin[]
+
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([capturedByIdentityId])
+  @@index([dataCutoffAt])
+  @@map("reporting_dashboard_snapshots")
+}
+
+model ReportDefinition {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  code                    String
+  name                    String
+  reportType              ReportType
+  purpose                 String
+  audience                String
+  ownerIdentityId         String                 @db.Uuid
+  ownerOfficeholderId     String?                @db.Uuid
+  institutionId           String                 @db.Uuid
+  departmentId            String?                @db.Uuid
+  classification          ReportClassification
+  frequency               ReportFrequency
+  retentionPolicy         String
+  requiresPrivacyReview   Boolean                @default(false)
+  requiresSecurityReview  Boolean                @default(false)
+  requiresRecordsReview   Boolean                @default(true)
+  status                  ReportDefinitionStatus @default(DRAFT)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  ownerIdentity           Identity               @relation("ReportDefinitionOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder       Officeholder?          @relation("ReportDefinitionOwnerOfficeholder", fields: [ownerOfficeholderId], references: [id])
+  institution             Institution            @relation("ReportDefinitionInstitution", fields: [institutionId], references: [id])
+  department              Department?            @relation("ReportDefinitionDepartment", fields: [departmentId], references: [id])
+  versions                ReportDefinitionVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([reportType])
+  @@index([status])
+  @@map("report_definitions")
+}
+
+model ReportDefinitionVersion {
+  id                            String                        @id @default(uuid()) @db.Uuid
+  reportDefinitionId            String                        @db.Uuid
+  versionNumber                 String
+  purpose                       String
+  audience                      String
+  ownerIdentityId               String                        @db.Uuid
+  ownerOfficeholderId           String?                       @db.Uuid
+  classification                ReportClassification
+  metricsConfig                 Json                          @default("[]")
+  claimsConfig                  Json                          @default("[]")
+  requiredSources               Json                          @default("[]")
+  reviewersConfig               Json                          @default("[]")
+  publicationAuthorityFunctionId String?                      @db.Uuid
+  frequency                     ReportFrequency
+  retentionPolicy               String
+  redactionRules                Json                          @default("[]")
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  status                        ReportDefinitionVersionStatus @default(DRAFT)
+  createdAt                     DateTime                      @default(now())
+  updatedAt                     DateTime                      @updatedAt
+  reportDefinition              ReportDefinition              @relation(fields: [reportDefinitionId], references: [id], onDelete: Cascade)
+  ownerIdentity                 Identity                      @relation("ReportDefinitionVersionOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder             Officeholder?                 @relation("ReportDefinitionVersionOwnerOfficeholder", fields: [ownerOfficeholderId], references: [id])
+  publicationAuthorityFunction  FunctionAuthorityRecord?      @relation("ReportPublicationAuthority", fields: [publicationAuthorityFunctionId], references: [id])
+  sections                      ReportSection[]
+  generationRuns                ReportGenerationRun[]
+
+  @@unique([reportDefinitionId, versionNumber])
+  @@index([reportDefinitionId])
+  @@index([status])
+  @@map("report_definition_versions")
+}
+
+model ReportSection {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  reportDefinitionVersionId String                  @db.Uuid
+  sectionKey                String
+  title                     String
+  orderIndex                Int
+  contentTemplate           String?
+  allowOutcomeClassification ReportOutcomeClassification?
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  reportDefinitionVersion   ReportDefinitionVersion @relation(fields: [reportDefinitionVersionId], references: [id], onDelete: Cascade)
+  reportClaims              ReportClaim[]
+
+  @@unique([reportDefinitionVersionId, sectionKey])
+  @@index([reportDefinitionVersionId])
+  @@map("report_sections")
+}
+
+model ReportGenerationRun {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  runNumber                   String                    @unique
+  reportDefinitionVersionId   String                    @db.Uuid
+  status                      ReportGenerationRunStatus @default(DRAFT)
+  dataCutoffAt                DateTime
+  sourceVersions              Json                      @default("{}")
+  aiAssistanceRecord          Json                      @default("{}")
+  frozenContent               Json                      @default("{}")
+  contentHash                 String?
+  redactedContent             Json                      @default("{}")
+  initiatedByIdentityId       String                    @db.Uuid
+  startedAt                   DateTime                  @default(now())
+  completedAt                 DateTime?
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  reportDefinitionVersion     ReportDefinitionVersion   @relation(fields: [reportDefinitionVersionId], references: [id])
+  initiatedBy                 Identity                  @relation("ReportGenerationRunInitiator", fields: [initiatedByIdentityId], references: [id])
+  metricPins                  ReportGenerationRunMetricPin[]
+  dashboardPins               ReportGenerationRunDashboardPin[]
+  snapshotPins                ReportGenerationRunSnapshotPin[]
+  claimPins                   ReportGenerationRunClaimPin[]
+  evidencePacketVersionPins   ReportGenerationRunEvidencePin[]
+  sections                    ReportClaim[]
+  evidenceManifests           ReportEvidenceManifest[]
+  reviews                     ReportReview[]
+  approvals                   ReportApproval[]
+  publications                ReportPublication[]
+  decisionTraces              EvidenceDashboardDecisionTrace[] @relation("TraceReportGenerationRun")
+
+  @@index([reportDefinitionVersionId])
+  @@index([initiatedByIdentityId])
+  @@index([dataCutoffAt])
+  @@index([status])
+  @@map("report_generation_runs")
+}
+
+model ReportGenerationRunMetricPin {
+  id                    String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String               @db.Uuid
+  metricCalculationRunId String              @db.Uuid
+  pinnedAt              DateTime             @default(now())
+  reportGenerationRun   ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  metricCalculationRun  MetricCalculationRun @relation(fields: [metricCalculationRunId], references: [id])
+
+  @@unique([reportGenerationRunId, metricCalculationRunId])
+  @@index([reportGenerationRunId])
+  @@index([metricCalculationRunId])
+  @@map("report_generation_run_metric_pins")
+}
+
+model ReportGenerationRunDashboardPin {
+  id                    String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String               @db.Uuid
+  reportingDashboardIndicatorId  String               @db.Uuid
+  pinnedAt              DateTime             @default(now())
+  reportGenerationRun   ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  reportingDashboardIndicator    ReportingDashboardIndicator   @relation(fields: [reportingDashboardIndicatorId], references: [id])
+
+  @@unique([reportGenerationRunId, reportingDashboardIndicatorId])
+  @@index([reportGenerationRunId])
+  @@index([reportingDashboardIndicatorId])
+  @@map("report_generation_run_dashboard_pins")
+}
+
+model ReportGenerationRunSnapshotPin {
+  id                    String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String               @db.Uuid
+  reportingDashboardSnapshotId   String               @db.Uuid
+  pinnedAt              DateTime             @default(now())
+  reportGenerationRun   ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  reportingDashboardSnapshot     ReportingDashboardSnapshot    @relation(fields: [reportingDashboardSnapshotId], references: [id])
+
+  @@unique([reportGenerationRunId, reportingDashboardSnapshotId])
+  @@index([reportGenerationRunId])
+  @@index([reportingDashboardSnapshotId])
+  @@map("report_generation_run_snapshot_pins")
+}
+
+model ReportGenerationRunClaimPin {
+  id                    String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String               @db.Uuid
+  institutionalMetricClaimId    String               @db.Uuid
+  pinnedAt              DateTime             @default(now())
+  reportGenerationRun   ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  institutionalMetricClaim      InstitutionalMetricClaim     @relation(fields: [institutionalMetricClaimId], references: [id])
+
+  @@unique([reportGenerationRunId, institutionalMetricClaimId])
+  @@index([reportGenerationRunId])
+  @@index([institutionalMetricClaimId])
+  @@map("report_generation_run_claim_pins")
+}
+
+model ReportGenerationRunEvidencePin {
+  id                      String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId     String               @db.Uuid
+  evidencePacketVersionId   String               @db.Uuid
+  pinnedAt                  DateTime             @default(now())
+  reportGenerationRun       ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  evidencePacketVersion     EvidencePacketVersion @relation("ReportGenerationEvidencePin", fields: [evidencePacketVersionId], references: [id])
+
+  @@unique([reportGenerationRunId, evidencePacketVersionId])
+  @@index([reportGenerationRunId])
+  @@index([evidencePacketVersionId])
+  @@map("report_generation_run_evidence_pins")
+}
+
+model ReportClaim {
+  id                           String                      @id @default(uuid()) @db.Uuid
+  reportGenerationRunId        String                      @db.Uuid
+  reportSectionId              String?                     @db.Uuid
+  institutionalMetricClaimId           String                      @db.Uuid
+  generatedSentence            String
+  claimText                    String
+  status                       ReportClaimStatus           @default(GENERATED)
+  outcomeClassification        ReportOutcomeClassification
+  isOfficialClaim              Boolean                     @default(false)
+  causationDeclared            Boolean                     @default(false)
+  representsGovernmentStatistic Boolean                    @default(false)
+  governmentStatisticConfirmed Boolean                     @default(false)
+  redactedSentence             String?
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @updatedAt
+  reportGenerationRun          ReportGenerationRun         @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  reportSection                ReportSection?              @relation(fields: [reportSectionId], references: [id])
+  institutionalMetricClaim             InstitutionalMetricClaim            @relation(fields: [institutionalMetricClaimId], references: [id])
+  decisionTraces               EvidenceDashboardDecisionTrace[] @relation("TraceReportClaim")
+  correctionsAsAffected        ReportCorrectionAffectedClaim[]
+
+  @@index([reportGenerationRunId])
+  @@index([reportSectionId])
+  @@index([institutionalMetricClaimId])
+  @@index([status])
+  @@map("report_claims")
+}
+
+model ReportEvidenceManifest {
+  id                    String              @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String              @db.Uuid
+  manifestContent       Json                @default("{}")
+  manifestHash          String
+  evidenceRecordIds     String[]            @default([])
+  institutionalMetricClaimIds   String[]            @default([])
+  createdAt             DateTime            @default(now())
+  reportGenerationRun   ReportGenerationRun @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+
+  @@index([reportGenerationRunId])
+  @@index([manifestHash])
+  @@map("report_evidence_manifests")
+}
+
+model ReportReview {
+  id                    String             @id @default(uuid()) @db.Uuid
+  reportGenerationRunId String             @db.Uuid
+  reviewerIdentityId    String             @db.Uuid
+  reviewType            ReportReviewType
+  status                ReportReviewStatus @default(PENDING)
+  findings              String?
+  isAiProposed          Boolean            @default(false)
+  reviewedAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  reportGenerationRun   ReportGenerationRun @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  reviewer              Identity           @relation("ReportReviewer", fields: [reviewerIdentityId], references: [id])
+  decisionTraces        EvidenceDashboardDecisionTrace[] @relation("TraceReportReview")
+
+  @@index([reportGenerationRunId])
+  @@index([reviewerIdentityId])
+  @@index([reviewType])
+  @@index([status])
+  @@map("report_reviews")
+}
+
+model ReportApproval {
+  id                          String               @id @default(uuid()) @db.Uuid
+  reportGenerationRunId       String               @db.Uuid
+  approverIdentityId          String               @db.Uuid
+  approverOfficeholderId      String?              @db.Uuid
+  authorityEvaluationRecordId String?              @db.Uuid
+  status                      ReportApprovalStatus @default(PENDING)
+  isAiActor                   Boolean              @default(false)
+  approvedAt                  DateTime?
+  notes                       String?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  reportGenerationRun         ReportGenerationRun  @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  approverIdentity            Identity             @relation("ReportApprover", fields: [approverIdentityId], references: [id])
+  approverOfficeholder        Officeholder?        @relation("ReportApproverOfficeholder", fields: [approverOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReportApprovalAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([reportGenerationRunId])
+  @@index([approverIdentityId])
+  @@index([status])
+  @@map("report_approvals")
+}
+
+model ReportPublication {
+  id                          String                  @id @default(uuid()) @db.Uuid
+  reportGenerationRunId       String                  @db.Uuid
+  publisherIdentityId         String                  @db.Uuid
+  publisherOfficeholderId     String?                 @db.Uuid
+  authorityEvaluationRecordId String?                 @db.Uuid
+  classification              ReportClassification
+  publishedAt                 DateTime?
+  publicationReference        String?                 @unique
+  frozenSnapshotHash          String
+  frozenContent               Json                    @default("{}")
+  status                      ReportPublicationStatus @default(DRAFT)
+  createdAt                   DateTime                @default(now())
+  updatedAt                   DateTime                @updatedAt
+  reportGenerationRun         ReportGenerationRun     @relation(fields: [reportGenerationRunId], references: [id], onDelete: Cascade)
+  publisherIdentity           Identity                @relation("ReportPublisher", fields: [publisherIdentityId], references: [id])
+  publisherOfficeholder       Officeholder?           @relation("ReportPublisherOfficeholder", fields: [publisherOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReportPublicationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  corrections                 ReportCorrection[]
+
+  @@index([reportGenerationRunId])
+  @@index([publisherIdentityId])
+  @@index([status])
+  @@map("report_publications")
+}
+
+model ReportCorrection {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  reportPublicationId         String                 @db.Uuid
+  originalContent             Json
+  correctedContent            Json
+  reason                      String
+  authorityEvaluationRecordId String?                @db.Uuid
+  correctedByIdentityId       String                 @db.Uuid
+  correctedByOfficeholderId   String?                @db.Uuid
+  correctedAt                 DateTime               @default(now())
+  notificationSent            Boolean                @default(false)
+  notificationSentAt          DateTime?
+  status                      ReportCorrectionStatus @default(REQUESTED)
+  createdAt                   DateTime               @default(now())
+  updatedAt                   DateTime               @updatedAt
+  reportPublication           ReportPublication      @relation(fields: [reportPublicationId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReportCorrectionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  correctedByIdentity         Identity               @relation("ReportCorrectionRecorder", fields: [correctedByIdentityId], references: [id])
+  correctedByOfficeholder     Officeholder?          @relation("ReportCorrectionOfficeholder", fields: [correctedByOfficeholderId], references: [id])
+  affectedClaims              ReportCorrectionAffectedClaim[]
+
+  @@index([reportPublicationId])
+  @@index([correctedByIdentityId])
+  @@index([status])
+  @@map("report_corrections")
+}
+
+model ReportCorrectionAffectedClaim {
+  id                 String           @id @default(uuid()) @db.Uuid
+  reportCorrectionId String           @db.Uuid
+  reportClaimId      String           @db.Uuid
+  createdAt          DateTime         @default(now())
+  reportCorrection   ReportCorrection @relation(fields: [reportCorrectionId], references: [id], onDelete: Cascade)
+  reportClaim        ReportClaim      @relation(fields: [reportClaimId], references: [id])
+
+  @@unique([reportCorrectionId, reportClaimId])
+  @@index([reportCorrectionId])
+  @@index([reportClaimId])
+  @@map("report_correction_affected_claims")
+}
+
+model EvidenceDashboardDecisionTrace {
+  id                      String               @id @default(uuid()) @db.Uuid
+  traceNumber             String               @unique
+  sourceRecordType        String
+  sourceRecordId          String               @db.Uuid
+  evidenceRecordId        String?              @db.Uuid
+  metricCalculationRunId  String?              @db.Uuid
+  institutionalMetricClaimId      String?              @db.Uuid
+  reportingDashboardIndicatorId    String?              @db.Uuid
+  reportGenerationRunId   String?              @db.Uuid
+  reportClaimId           String?              @db.Uuid
+  reportReviewId          String?              @db.Uuid
+  governmentDecisionId    String?              @db.Uuid
+  traceSnapshot           Json                 @default("{}")
+  createdAt               DateTime             @default(now())
+  evidenceRecord          EvidenceRecord?      @relation("TraceEvidenceRecord", fields: [evidenceRecordId], references: [id])
+  metricCalculationRun    MetricCalculationRun? @relation("TraceMetricCalculationRun", fields: [metricCalculationRunId], references: [id])
+  institutionalMetricClaim        InstitutionalMetricClaim?    @relation("TraceInstitutionalMetricClaim", fields: [institutionalMetricClaimId], references: [id])
+  reportingDashboardIndicator      ReportingDashboardIndicator?  @relation("TraceReportingDashboardIndicator", fields: [reportingDashboardIndicatorId], references: [id])
+  reportGenerationRun     ReportGenerationRun? @relation("TraceReportGenerationRun", fields: [reportGenerationRunId], references: [id])
+  reportClaim             ReportClaim?         @relation("TraceReportClaim", fields: [reportClaimId], references: [id])
+  reportReview            ReportReview?        @relation("TraceReportReview", fields: [reportReviewId], references: [id])
+  governmentDecision      GovernmentDecision?  @relation("TraceGovernmentDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([sourceRecordType, sourceRecordId])
+  @@index([evidenceRecordId])
+  @@index([metricCalculationRunId])
+  @@index([institutionalMetricClaimId])
+  @@index([reportingDashboardIndicatorId])
+  @@index([reportGenerationRunId])
+  @@index([reportClaimId])
+  @@map("evidence_dashboard_decision_traces")
+}
+
+model ReportClaimRevalidationRecord {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  reportClaimId         String                    @db.Uuid
+  trigger               ReportRevalidationTrigger
+  reason                String
+  priorRevalidationState InstitutionalMetricClaimRevalidationState
+  newRevalidationState  InstitutionalMetricClaimRevalidationState
+  recordedByIdentityId  String                    @db.Uuid
+  recordedAt            DateTime                  @default(now())
+  recordedBy            Identity                  @relation("ReportClaimRevalidationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([reportClaimId])
+  @@index([recordedByIdentityId])
+  @@map("report_claim_revalidation_records")
 }
 
 enum AIRiskClass {
