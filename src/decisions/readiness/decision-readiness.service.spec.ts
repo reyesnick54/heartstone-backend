@@ -123,7 +123,10 @@ describe('DecisionReadinessService', () => {
       maturityStatus: 'ACTIVE',
     });
 
-    prisma.identity.findUnique.mockResolvedValue({ id: 'identity-1', type: IdentityType.INDIVIDUAL });
+    prisma.identity.findUnique.mockResolvedValue({
+      id: 'identity-1',
+      type: IdentityType.INDIVIDUAL,
+    });
     prisma.identity.findUnique.mockResolvedValue({
       id: 'identity-1',
       type: IdentityType.INDIVIDUAL,
@@ -189,6 +192,23 @@ describe('DecisionReadinessService', () => {
     expect(result.reasonCodes).toContain(DECISION_READINESS_REASON_CODES.MASTER_FILE_SAFE_HALTED);
   });
 
+  it('fails when evidence packet belongs to a different case', async () => {
+    prisma.evidencePacketVersion.findUnique.mockResolvedValue({
+      id: 'packet-version-1',
+      status: EvidencePacketVersionStatus.FROZEN,
+      readyForDecisionReview: true,
+      packet: {
+        purpose: 'DECISION_SUPPORT',
+        masterAdministrativeFileId: 'maf-1',
+        caseId: 'other-case',
+      },
+    });
+
+    const result = await service.assess(baseInput);
+    expect(result.outcome).not.toBe(DecisionReadinessOutcome.READY);
+    expect(result.reasonCodes).toContain(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_MISSING);
+  });
+
   it('fails when evidence packet is not frozen', async () => {
     prisma.evidencePacketVersion.findUnique.mockResolvedValue({
       id: 'packet-version-1',
@@ -202,7 +222,9 @@ describe('DecisionReadinessService', () => {
     });
 
     const result = await service.assess(baseInput);
-    expect(result.reasonCodes).toContain(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_NOT_FROZEN);
+    expect(result.reasonCodes).toContain(
+      DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_NOT_FROZEN,
+    );
     expect(result.reasonCodes).toContain(
       DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_NOT_FROZEN,
     );

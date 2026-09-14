@@ -234,6 +234,16 @@ export class InstrumentVerificationService {
     const verificationTimestamp = new Date().toISOString();
     const scopeSummary = this.extractScopeSummary(instrument.scope);
 
+    if (!typeVersion) {
+      return {
+        verificationStatus: InstrumentVerificationStatus.UNKNOWN_OR_UNVERIFIABLE,
+        verificationTimestamp,
+        verificationUri: record.verificationUri,
+        qrReferenceDisclaimer:
+          'A QR code or verification reference alone does not prove authenticity. Authenticity is established by the verification service against the signed or sealed official record.',
+      };
+    }
+
     if (
       typeVersion.publicVerificationMode === InstrumentTypePublicVerificationMode.NOT_PERMITTED ||
       typeVersion.restrictedClassification

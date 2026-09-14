@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
+import { ComplianceModule } from './compliance/compliance.module';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
 import identityConfig from './config/identity.config';
@@ -14,6 +15,7 @@ import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { EvidenceModule } from './evidence/evidence.module';
+import { InspectionComplianceModule } from './inspection-compliance/inspection-compliance.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
@@ -53,6 +55,8 @@ import { SystemModule } from './system/system.module';
     InspectionComplianceModule,
     DecisionsModule,
     DecisionsIssuanceModule,
+    InspectionComplianceModule,
+    ComplianceModule,
   ],
 })
 export class AppModule {}

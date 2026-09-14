@@ -380,14 +380,38 @@ export async function seedPhase8Fixture(
   const official = await createSessionIdentity(app, marker, 'official', prisma);
   const approver = await createSessionIdentity(app, marker, 'approver', prisma);
 
+  let officialAppointmentId = base.appointmentId;
+
   if (official.officeholderId) {
-    await prisma.appointment.create({
+    const officialAppointment = await prisma.appointment.create({
       data: {
         officeId: base.officeId,
         officeholderId: official.officeholderId,
         status: AppointmentStatus.ACTIVE,
         effectiveFrom: new Date('2020-01-01'),
       },
+    });
+    officialAppointmentId = officialAppointment.id;
+
+    await prisma.functionAuthorityAssignment.createMany({
+      data: [
+        {
+          functionAuthorityRecordId: base.functionAuthorityRecordId,
+          officeholderId: official.officeholderId,
+          officeId: base.officeId,
+          institutionId: base.institutionId,
+          status: FunctionAssignmentStatus.ACTIVE,
+          effectiveFrom: new Date('2020-01-01'),
+        },
+        {
+          functionAuthorityRecordId: catalog.issueFunctionAuthorityRecordId,
+          officeholderId: official.officeholderId,
+          officeId: base.officeId,
+          institutionId: base.institutionId,
+          status: FunctionAssignmentStatus.ACTIVE,
+          effectiveFrom: new Date('2020-01-01'),
+        },
+      ],
     });
   }
 
@@ -484,7 +508,7 @@ export async function seedPhase8Fixture(
     departmentId: base.departmentId,
     officeId: base.officeId,
     officialOfficeholderId: official.officeholderId ?? base.officeholderId,
-    appointmentId: base.appointmentId,
+    appointmentId: officialAppointmentId,
     caseId: base.caseId,
     masterAdministrativeFileId: base.masterAdministrativeFileId,
     decisionTypeVersionId: base.decisionTypeVersionId,

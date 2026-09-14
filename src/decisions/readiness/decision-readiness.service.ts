@@ -171,6 +171,8 @@ export class DecisionReadinessService {
       const consultation = caseRecord.governmentCommunications.find(
         (record) =>
           CONSULTATION_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!consultation) {
@@ -182,6 +184,8 @@ export class DecisionReadinessService {
       const concurrence = caseRecord.governmentCommunications.find(
         (record) =>
           CONCURRENCE_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!concurrence) {
@@ -193,6 +197,8 @@ export class DecisionReadinessService {
       const determination = caseRecord.governmentCommunications.find(
         (record) =>
           RETAINED_DETERMINATION_CATEGORIES.includes(record.category) &&
+          record.authenticationStatus ===
+            GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
           record.authenticationStatus === GovernmentCommunicationAuthenticationStatus.AUTHENTICATED,
       );
       if (!determination) {
@@ -367,6 +373,10 @@ export class DecisionReadinessService {
 
     if (packetVersion.packet.purpose !== requiredPurpose) {
       reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_WRONG_PURPOSE);
+    }
+
+    if (packetVersion.packet.caseId !== caseId) {
+      reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_MISSING);
     }
 
     if (masterFileId && packetVersion.packet.masterAdministrativeFileId !== masterFileId) {

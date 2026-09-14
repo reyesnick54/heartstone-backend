@@ -30,10 +30,10 @@ export class InstrumentLifecycleGuardService {
       throw new BadRequestException(`Instrument ${instrumentId} not found`);
     }
 
-    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.currentStatus];
+    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.status];
     if (incompatible?.includes(proposedEventType)) {
       throw new ConflictException(
-        `Cannot perform ${proposedEventType} while instrument is ${instrument.currentStatus}`,
+        `Cannot perform ${proposedEventType} while instrument is ${instrument.status}`,
       );
     }
 
@@ -41,19 +41,16 @@ export class InstrumentLifecycleGuardService {
       where: {
         status: InstrumentControllingDecisionStatus.PENDING,
         decisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
+        decisionStatus: GovernmentDecisionStatus.PENDING,
+        lifecycleDecisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
         lifecycleEvents: {
           some: { instrumentId },
         },
       },
     });
 
-    if (
-      pendingRevocation &&
-      ['RENEWED', 'AMENDED', 'REPLACED'].includes(proposedEventType)
-    ) {
-      throw new ConflictException(
-        'Cannot amend or renew instrument while revocation is pending',
-      );
+    if (pendingRevocation && ['RENEWED', 'AMENDED', 'REPLACED'].includes(proposedEventType)) {
+      throw new ConflictException('Cannot amend or renew instrument while revocation is pending');
     }
 
     const recentDuplicate = await this.prisma.instrumentLifecycleEvent.findFirst({
@@ -150,6 +147,8 @@ export class InstrumentLifecycleGuardService {
     action: InstrumentLifecycleEventType,
   ): LifecycleOfficialInstrumentStatus[] {
     const map: Partial<Record<InstrumentLifecycleEventType, LifecycleOfficialInstrumentStatus[]>> = {
+  getAllowedStatusesForAction(action: InstrumentLifecycleEventType): OfficialInstrumentStatus[] {
+    const map: Partial<Record<InstrumentLifecycleEventType, OfficialInstrumentStatus[]>> = {
       AMENDED: [
         LifecycleOfficialInstrumentStatus.EFFECTIVE,
         LifecycleOfficialInstrumentStatus.AMENDED,
