@@ -43,9 +43,7 @@ export function canonicalizeExternalReviewPackageManifest(
   return JSON.stringify(normalized);
 }
 
-export function hashExternalReviewPackageManifest(
-  manifest: ExternalReviewPackageManifest,
-): string {
+export function hashExternalReviewPackageManifest(manifest: ExternalReviewPackageManifest): string {
   return createHash('sha256')
     .update(canonicalizeExternalReviewPackageManifest(manifest))
     .digest('hex');

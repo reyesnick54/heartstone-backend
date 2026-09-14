@@ -83,10 +83,7 @@ export class ExternalReviewBoundaryService {
       throw new BadRequestException(RECOMMENDATION_NOT_BINDING_DETERMINATION_MESSAGE);
     }
 
-    if (
-      input.bindingClass === ExternalAuthorityBindingClass.BINDING &&
-      !input.isAuthenticated
-    ) {
+    if (input.bindingClass === ExternalAuthorityBindingClass.BINDING && !input.isAuthenticated) {
       throw new BadRequestException(RECOMMENDATION_NOT_BINDING_DETERMINATION_MESSAGE);
     }
   }
@@ -185,9 +182,7 @@ export class ExternalReviewBoundaryService {
     }
   }
 
-  isRetainedAppealAuthority(
-    retainedAuthorityClass?: RetainedAppealAuthorityClass | null,
-  ): boolean {
+  isRetainedAppealAuthority(retainedAuthorityClass?: RetainedAppealAuthorityClass | null): boolean {
     if (!retainedAuthorityClass) {
       return false;
     }

@@ -36,7 +36,9 @@ export class ExternalReviewPackageService {
     });
 
     if (!packetVersion) {
-      throw new NotFoundException(`EvidencePacketVersion ${input.evidencePacketVersionId} not found`);
+      throw new NotFoundException(
+        `EvidencePacketVersion ${input.evidencePacketVersionId} not found`,
+      );
     }
 
     if (packetVersion.status !== EvidencePacketVersionStatus.FROZEN) {
@@ -112,7 +114,9 @@ export class ExternalReviewPackageService {
     });
 
     if (!packageRecord) {
-      throw new BadRequestException('Referral package version is not pinned to the requested evidence packet version');
+      throw new BadRequestException(
+        'Referral package version is not pinned to the requested evidence packet version',
+      );
     }
   }
 }

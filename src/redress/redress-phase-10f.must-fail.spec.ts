@@ -139,92 +139,109 @@ describe('Phase 10F must-fail invariants', () => {
 
   it('1. external appeal is not internally adjudicated', () => {
     expect(referralService.referralIsInternalAdjudication()).toBe(false);
-    expect(() => { boundary.assertNotInternalAdjudication({
+    expect(() => {
+      boundary.assertNotInternalAdjudication({
         blocksInternalAdjudication: true,
         attemptingInternalOutcome: true,
-      }); },
-    ).toThrow(ForbiddenException);
-    expect(() => { boundary.assertNotInternalAdjudication({
+      });
+    }).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertNotInternalAdjudication({
         blocksInternalAdjudication: true,
         attemptingInternalOutcome: true,
-      }); },
-    ).toThrow(EXTERNAL_REVIEW_NOT_INTERNAL_ADJUDICATION_MESSAGE);
+      });
+    }).toThrow(EXTERNAL_REVIEW_NOT_INTERNAL_ADJUDICATION_MESSAGE);
   });
 
   it('2. national appeal authority is preserved', () => {
     expect(
       boundary.isRetainedAppealAuthority(RetainedAppealAuthorityClass.NATIONAL_STATUTORY),
     ).toBe(true);
-    expect(() => { boundary.assertRetainedNationalAuthorityBlocksAdjudication({
+    expect(() => {
+      boundary.assertRetainedNationalAuthorityBlocksAdjudication({
         retainsNationalAuthority: true,
         attemptingAdjudication: true,
-      }); },
-    ).toThrow(RETAINED_NATIONAL_APPEAL_MESSAGE);
+      });
+    }).toThrow(RETAINED_NATIONAL_APPEAL_MESSAGE);
   });
 
   it('3. judicial route does not create internal court', () => {
-    expect(() => { boundary.assertJudicialRouteIsNotCourt({ isCourtSystem: true }); }).toThrow(
-      BadRequestException,
-    );
-    expect(() => { boundary.assertJudicialRouteIsNotCourt({ isCourtSystem: true }); }).toThrow(
-      JUDICIAL_ROUTE_NOT_COURT_MESSAGE,
-    );
+    expect(() => {
+      boundary.assertJudicialRouteIsNotCourt({ isCourtSystem: true });
+    }).toThrow(BadRequestException);
+    expect(() => {
+      boundary.assertJudicialRouteIsNotCourt({ isCourtSystem: true });
+    }).toThrow(JUDICIAL_ROUTE_NOT_COURT_MESSAGE);
   });
 
   it('4. government silence is not appeal success', () => {
-    expect(() => { boundary.assertSilenceIsNotSuccess({ inferredApprovalFromSilence: true }); },
-    ).toThrow(SILENCE_NOT_APPEAL_SUCCESS_MESSAGE);
+    expect(() => {
+      boundary.assertSilenceIsNotSuccess({ inferredApprovalFromSilence: true });
+    }).toThrow(SILENCE_NOT_APPEAL_SUCCESS_MESSAGE);
   });
 
   it('5. professional challenge remains professional', () => {
-    expect(() => { boundary.assertProfessionalIndependence({ technologySubstitutesAuthority: true }); },
-    ).toThrow(PROFESSIONAL_CHALLENGE_REMAINS_PROFESSIONAL_MESSAGE);
+    expect(() => {
+      boundary.assertProfessionalIndependence({ technologySubstitutesAuthority: true });
+    }).toThrow(PROFESSIONAL_CHALLENGE_REMAINS_PROFESSIONAL_MESSAGE);
   });
 
   it('6. external recommendation is distinguished from binding determination', () => {
-    expect(() => { boundary.assertRecommendationNotBindingUnlessAuthenticated({
+    expect(() => {
+      boundary.assertRecommendationNotBindingUnlessAuthenticated({
         bindingClass: ExternalAuthorityBindingClass.BINDING,
         isAuthenticated: false,
         isRecommendatoryOnly: true,
-      }); },
-    ).toThrow(RECOMMENDATION_NOT_BINDING_DETERMINATION_MESSAGE);
+      });
+    }).toThrow(RECOMMENDATION_NOT_BINDING_DETERMINATION_MESSAGE);
   });
 
   it('7. unauthenticated external determination cannot be implemented', () => {
-    expect(() => { boundary.assertAuthenticatedBeforeImplementation({
+    expect(() => {
+      boundary.assertAuthenticatedBeforeImplementation({
         isAuthenticated: false,
         implementationAuthorized: true,
         authenticityStatus: ExternalDeterminationAuthenticityStatus.UNVERIFIED,
-      }); },
-    ).toThrow(UNAUTHENTICATED_DETERMINATION_MESSAGE);
+      });
+    }).toThrow(UNAUTHENTICATED_DETERMINATION_MESSAGE);
   });
 
   it('8. external record preserves exact source wording/reference', () => {
-    expect(() => { boundary.assertOutcomePreservesSourceWording({
+    expect(() => {
+      boundary.assertOutcomePreservesSourceWording({
         sourceOutcomeText: 'Set aside on procedural grounds',
         proposedOutcomeText: 'Approved',
         sourceReference: 'EXT-REF-1',
         proposedReference: 'EXT-REF-2',
-      }); },
-    ).toThrow(ForbiddenException);
+      });
+    }).toThrow(ForbiddenException);
   });
 
   it('9. referral package version is pinned through manifest utility contract', () => {
-    expect(boundary.canTransitionStatus(ExternalReviewStatus.PREPARATION, ExternalReviewStatus.READY_FOR_TRANSMISSION)).toBe(true);
-    expect(boundary.canTransitionStatus(ExternalReviewStatus.CLOSED, ExternalReviewStatus.PREPARATION)).toBe(false);
+    expect(
+      boundary.canTransitionStatus(
+        ExternalReviewStatus.PREPARATION,
+        ExternalReviewStatus.READY_FOR_TRANSMISSION,
+      ),
+    ).toBe(true);
+    expect(
+      boundary.canTransitionStatus(ExternalReviewStatus.CLOSED, ExternalReviewStatus.PREPARATION),
+    ).toBe(false);
   });
 
   it('10. security classification is preserved on package creation', () => {
-    expect(() => { boundary.assertSecurityClassificationPreserved({
+    expect(() => {
+      boundary.assertSecurityClassificationPreserved({
         packageClassification: 'PROTECTED',
         referralClassification: 'OFFICIAL',
-      }); },
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
   });
 
   it('11. AI cannot determine external outcome', async () => {
-    expect(() => { boundary.assertAiCannotDetermineOutcome({ actorRoleMarker: AI_ACTOR_ROLE_MARKER }); },
-    ).toThrow(AI_CANNOT_DETERMINE_EXTERNAL_OUTCOME_MESSAGE);
+    expect(() => {
+      boundary.assertAiCannotDetermineOutcome({ actorRoleMarker: AI_ACTOR_ROLE_MARKER });
+    }).toThrow(AI_CANNOT_DETERMINE_EXTERNAL_OUTCOME_MESSAGE);
 
     await expect(
       determinationService.record({
@@ -238,12 +255,13 @@ describe('Phase 10F must-fail invariants', () => {
   });
 
   it('12. technical admin cannot fabricate external determination', () => {
-    expect(() => { boundary.assertTechnicalAdminCannotFabricateDetermination({
+    expect(() => {
+      boundary.assertTechnicalAdminCannotFabricateDetermination({
         actorRoleMarker: TECHNICAL_ADMIN_ROLE_MARKER,
         hasOfficeholderAuthority: false,
         markingAuthenticated: true,
-      }); },
-    ).toThrow(TECHNICAL_ADMIN_CANNOT_FABRICATE_DETERMINATION_MESSAGE);
+      });
+    }).toThrow(TECHNICAL_ADMIN_CANNOT_FABRICATE_DETERMINATION_MESSAGE);
   });
 
   it('creates professional challenge referral without substituting authority', async () => {
@@ -334,11 +352,12 @@ describe('Phase 10F must-fail invariants', () => {
   });
 
   it('rejects APPROVED outcome language without authentication', () => {
-    expect(() => { boundary.assertApprovedOutcomeRequiresAuthentication({
+    expect(() => {
+      boundary.assertApprovedOutcomeRequiresAuthentication({
         outcomeText: 'APPROVED',
         isAuthenticated: false,
-      }); },
-    ).toThrow(ForbiddenException);
+      });
+    }).toThrow(ForbiddenException);
   });
 
   it('blocks internal adjudication on retained national redress matter', () => {
@@ -359,9 +378,8 @@ describe('Phase 10F must-fail invariants', () => {
       retainedAuthorityClass: RetainedAppealAuthorityClass.NATIONAL_STATUTORY,
     });
 
-    const statusRecordCalls = (
-      prisma.externalReviewStatusRecord.create as jest.Mock
-    ).mock.calls as [{ data: { notes: string } }][];
+    const statusRecordCalls = (prisma.externalReviewStatusRecord.create as jest.Mock).mock
+      .calls as [{ data: { notes: string } }][];
     expect(statusRecordCalls[0]?.[0].data.notes).toBe(
       EXTERNAL_REVIEW_NOT_INTERNAL_ADJUDICATION_MESSAGE,
     );
