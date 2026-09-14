@@ -210,6 +210,51 @@ model Office {
 }
 
 model Officeholder {
+  id                                      String                         @id @default(uuid()) @db.Uuid
+  code                                    String                         @unique
+  name                                    String
+  description                             String?
+  status                                  StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt                               DateTime                       @default(now())
+  updatedAt                               DateTime                       @updatedAt
+  appointments                            Appointment[]
+  delegationsAsDelegator                  Delegation[]                   @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient                  Delegation[]                   @relation("DelegationRecipientOfficeholder")
+  identityLinks                           IdentityOfficeholderLink[]
+  functionAuthorityAssignments            FunctionAuthorityAssignment[]
+  ownedGovernmentServices                 GovernmentService[]
+  managedCases                            Case[]                         @relation("CaseManager")
+  caseEvents                              CaseEvent[]                    @relation("CaseEventOfficeholder")
+  communicationsAsSender                  CaseCommunication[]            @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications                   EvidenceVerification[]         @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances              EvidencePurposeAcceptance[]    @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments              EvidenceQualityAssessment[]    @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer           DepartmentalReviewRecord[]     @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors                    InspectionInspector[]
+  custodyEventsAsCustodian                EvidenceCustodyEvent[]         @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness                  EvidenceCustodyEvent[]         @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets                EvidencePacketVersion[]        @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions              EvidencePacketItemExclusion[]  @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved               RecordCorrection[]             @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents                   RecordIntegrityEvent[]         @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents                      RecordAccessEvent[]            @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed               DecisionReadinessAssessment[]  @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants                    DecisionParticipant[]          @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade                 GovernmentDecision[]           @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments               OfficialInstrument[]           @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer                  IssuanceEvent[]                @relation("IssuanceEventIssuerOfficeholder")
+  complianceReviewsAsReviewer             ComplianceReview[]             @relation("ComplianceReviewReviewerOfficeholder")
+  inspectionAssignmentsAsInspector        InspectionAssignment[]         @relation("InspectionAssignmentInspectorOfficeholder")
+  inspectionObservationsAsObserver        InspectionObservation[]        @relation("InspectionObservationObserverOfficeholder")
+  inspectionFindingsDetermined            InspectionFinding[]            @relation("InspectionFindingDeterminerOfficeholder")
+  correctiveActionVerificationsAsVerifier CorrectiveActionVerification[] @relation("CorrectiveActionVerifierOfficeholder")
+  complianceFindingClosures               ComplianceFindingClosure[]     @relation("ComplianceFindingCloserOfficeholder")
+  complianceFindingReopenings             ComplianceFindingReopening[]   @relation("ComplianceFindingReopenerOfficeholder")
+  complianceAssessmentsAsAssessor         ComplianceAssessment[]         @relation("ComplianceAssessmentAssessorOfficeholder")
+  complianceEscalations                   ComplianceEscalation[]         @relation("ComplianceEscalationActorOfficeholder")
+  enforcementReferrals                    EnforcementReferral[]          @relation("EnforcementReferralActorOfficeholder")
+  emergencyInterimActions                 EmergencyInterimActionRecord[] @relation("EmergencyInterimActionActorOfficeholder")
+  complianceRevalidations                 ComplianceRevalidationRecord[] @relation("ComplianceRevalidationActorOfficeholder")
   id                           String                        @id @default(uuid()) @db.Uuid
   code                         String                        @unique
   name                         String
@@ -549,6 +594,70 @@ model UserAccount {
 }
 
 model Identity {
+  id                                      String                            @id @default(uuid()) @db.Uuid
+  type                                    IdentityType
+  userAccountId                           String?                           @db.Uuid
+  personId                                String?                           @db.Uuid
+  organizationId                          String?                           @db.Uuid
+  displayName                             String
+  createdAt                               DateTime                          @default(now())
+  updatedAt                               DateTime                          @updatedAt
+  userAccount                             UserAccount?                      @relation(fields: [userAccountId], references: [id])
+  person                                  Person?                           @relation(fields: [personId], references: [id])
+  organization                            Organization?                     @relation(fields: [organizationId], references: [id])
+  credentials                             Credential[]
+  authenticationMethods                   AuthenticationMethod[]
+  sessions                                Session[]
+  memberships                             OrganizationMembership[]
+  representativeAuthorities               RepresentativeAuthority[]
+  officeholderLinks                       IdentityOfficeholderLink[]
+  applications                            Application[]
+  casesAsApplicant                        Case[]                            @relation("CaseApplicant")
+  caseEventsAsActor                       CaseEvent[]                       @relation("CaseEventActor")
+  communicationsAsSender                  CaseCommunication[]               @relation("CommunicationSender")
+  documentVersionsReceived                DocumentVersion[]                 @relation("DocumentVersionReceivedFrom")
+  documentAssociations                    DocumentAssociation[]             @relation("DocumentAssociationActor")
+  documentAuditEvents                     DocumentAuditEvent[]              @relation("DocumentAuditActor")
+  evidenceVerifications                   EvidenceVerification[]            @relation("EvidenceVerificationVerifier")
+  evidencePurposeAcceptances              EvidencePurposeAcceptance[]       @relation("EvidencePurposeAcceptanceReviewer")
+  evidenceQualityAssessments              EvidenceQualityAssessment[]       @relation("EvidenceQualityAssessor")
+  departmentalReviewsAsReviewer           DepartmentalReviewRecord[]        @relation("DepartmentalReviewReviewer")
+  professionalReviews                     ProfessionalReviewRecord[]        @relation("ProfessionalReviewIdentity")
+  inspectionInspectors                    InspectionInspector[]             @relation("InspectionInspectorIdentity")
+  custodyEventsAsCustodian                EvidenceCustodyEvent[]            @relation("EvidenceCustodyCustodian")
+  custodyEventsAsWitness                  EvidenceCustodyEvent[]            @relation("EvidenceCustodyWitness")
+  recordCorrectionsRequested              RecordCorrection[]                @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved               RecordCorrection[]                @relation("RecordCorrectionApprover")
+  recordIntegrityEvents                   RecordIntegrityEvent[]            @relation("RecordIntegrityActor")
+  recordAccessEvents                      RecordAccessEvent[]               @relation("RecordAccessIdentity")
+  decisionReadinessProposed               DecisionReadinessAssessment[]     @relation("DecisionReadinessProposedMaker")
+  decisionParticipants                    DecisionParticipant[]             @relation("DecisionParticipantIdentity")
+  decisionPreparationRecords              DecisionPreparationRecord[]       @relation("DecisionPreparationEditor")
+  governmentDecisionsMade                 GovernmentDecision[]              @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder             OfficialInstrument[]              @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer                  IssuanceEvent[]                   @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions      InstrumentTemplateVersion[]       @relation("InstrumentTemplateApprover")
+  instrumentDeliveriesAsRecipient         InstrumentDelivery[]              @relation("InstrumentDeliveryRecipient")
+  instrumentReceiptsAsRecipient           InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipient")
+  instrumentDeliveryAuditsAsActor         InstrumentDeliveryAuditEvent[]    @relation("InstrumentDeliveryAuditActor")
+  instrumentVerificationEventsAsActor     InstrumentVerificationEvent[]     @relation("InstrumentVerificationEventActor")
+  instrumentDownloadsAsActor              InstrumentDownloadEvent[]         @relation("InstrumentDownloadActor")
+  complianceMattersAsHolder               ComplianceMatter[]                @relation("ComplianceMatterHolder")
+  complianceSubmissions                   ComplianceSubmission[]            @relation("ComplianceSubmissionSubmitter")
+  complianceReviewsAsReviewer             ComplianceReview[]                @relation("ComplianceReviewReviewer")
+  inspectionAssignmentsAsInspector        InspectionAssignment[]            @relation("InspectionAssignmentInspector")
+  inspectionObservationsAsObserver        InspectionObservation[]           @relation("InspectionObservationObserver")
+  inspectionFindingsDetermined            InspectionFinding[]               @relation("InspectionFindingDeterminer")
+  correctiveActionItemsAssigned           CorrectiveActionItem[]            @relation("CorrectiveActionItemAssignee")
+  correctiveActionVerificationsAsVerifier CorrectiveActionVerification[]    @relation("CorrectiveActionVerifier")
+  complianceFindingClosures               ComplianceFindingClosure[]        @relation("ComplianceFindingCloser")
+  complianceFindingReopenings             ComplianceFindingReopening[]      @relation("ComplianceFindingReopener")
+  complianceAssessmentsAsAssessor         ComplianceAssessment[]            @relation("ComplianceAssessmentAssessor")
+  complianceEscalations                   ComplianceEscalation[]            @relation("ComplianceEscalationActor")
+  enforcementReferrals                    EnforcementReferral[]             @relation("EnforcementReferralActor")
+  emergencyInterimActions                 EmergencyInterimActionRecord[]    @relation("EmergencyInterimActionActor")
+  complianceRevalidations                 ComplianceRevalidationRecord[]    @relation("ComplianceRevalidationActor")
+  complianceMonitoringEvents              ComplianceMonitoringEvent[]       @relation("ComplianceMonitoringEventActor")
   id                                 String                        @id @default(uuid()) @db.Uuid
   type                               IdentityType
   userAccountId                      String?                       @db.Uuid
@@ -772,6 +881,7 @@ model Organization {
   officialInstrumentsAsHolder     OfficialInstrument[]              @relation("OfficialInstrumentHolderOrganization")
   instrumentDeliveriesAsRecipient InstrumentDelivery[]              @relation("InstrumentDeliveryRecipientOrganization")
   instrumentReceiptsAsRecipient   InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipientOrganization")
+  complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
   complianceMattersAsHolder         ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
 
   @@index([status])
@@ -1104,6 +1214,7 @@ model FunctionAuthorityRecord {
   workflowStepDefinitions      WorkflowStepDefinition[]
   departmentalReviews          DepartmentalReviewRecord[]
   inspectionRecords            InspectionRecord[]
+  inspectionSessions           InspectionSession[]
   recordCorrections            RecordCorrection[]
   decisionTypeVersions         DecisionTypeVersion[]
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
@@ -1409,6 +1520,7 @@ model AuthorityEvaluationRecord {
   decisionReadinessAssessments DecisionReadinessAssessment[] @relation("DecisionReadinessAuthority")
   governmentDecisions          GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
   issuanceEvents               IssuanceEvent[]
+  inspectionAssignments        InspectionAssignment[]        @relation("InspectionAssignmentAuthority")
   instrumentControllingDecisions InstrumentControllingDecision[] @relation("InstrumentControllingDecisionAuthority")
   correctiveActionPlans        CorrectiveActionPlan[]          @relation("CorrectiveActionPlanAuthority")
   correctiveActionVerifications CorrectiveActionVerification[] @relation("CorrectiveActionVerificationAuthority")
@@ -2431,6 +2543,8 @@ model Case {
   emergencyInterimActionRecords     EmergencyInterimActionRecord[]
   officialInstruments               OfficialInstrument[]
   issuanceReadinessAssessments      IssuanceReadinessAssessment[]
+  complianceMatters                 ComplianceMatter[]
+  inspectionSessions                InspectionSession[]
   instrumentControllingDecisions    InstrumentControllingDecision[]
   lifecycleOfficialInstruments      LifecycleOfficialInstrument[]
   complianceMatters                 ComplianceMatter[]
@@ -3028,6 +3142,7 @@ model MasterAdministrativeFile {
   evidencePackets                      EvidencePacket[]
   decisionReadinessAssessments         DecisionReadinessAssessment[]
   officialInstruments                  OfficialInstrument[]
+  complianceMatters                    ComplianceMatter[]
   instrumentControllingDecisions       InstrumentControllingDecision[]
   lifecycleOfficialInstruments         LifecycleOfficialInstrument[]
   complianceMatters                  ComplianceMatter[]
@@ -3454,6 +3569,8 @@ model EvidenceRecord {
   custodyEvents                   EvidenceCustodyEvent[]
   packetItems                     EvidencePacketItem[]
   packetExclusions                EvidencePacketItemExclusion[]
+  complianceSubmissions           ComplianceSubmission[]
+  inspectionObservations          InspectionObservation[]
   correctiveActionSubmissionEvidence CorrectiveActionSubmissionEvidence[]
   correctiveActionVerificationEvidence CorrectiveActionVerificationEvidence[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
@@ -3615,6 +3732,7 @@ enum InspectionType {
   DESKTOP
   REMOTE
   FOLLOW_UP
+  COMPLIANCE
   OTHER
 }
 
@@ -3828,6 +3946,7 @@ model InspectionRecord {
   inspectors                InspectionInspector[]
   evidenceItems             InspectionEvidenceItem[]
   packetItems               EvidencePacketItem[]
+  inspectionSessions        InspectionSession[]
   complianceMatters         ComplianceMatter[]
   inspectionFindings        InspectionFinding[]
   scheduledReinspections    ReinspectionRequirement[]     @relation("ScheduledReinspection")
@@ -4972,6 +5091,9 @@ enum GovernmentDecisionStatus {
   EFFECTIVE
   SUPERSEDED
   SET_ASIDE
+  WITHDRAWN_BY_AUTHORIZED_PROCESS
+}
+
   WITHDRAWN
   WITHDRAWN_BY_AUTHORIZED_PROCESS
 }
@@ -5949,6 +6071,14 @@ model InstrumentNumberReservation {
 model OfficialInstrument {
   id                           String                            @id @default(uuid()) @db.Uuid
   instrumentNumber             String?                           @unique
+  instrumentTypeVersionId      String                            @db.Uuid
+  governmentDecisionId         String                            @db.Uuid
+  caseId                       String                            @db.Uuid
+  masterAdministrativeFileId   String                            @db.Uuid
+  holderIdentityId             String?                           @db.Uuid
+  holderOrganizationId         String?                           @db.Uuid
+  issuerInstitutionId          String                            @db.Uuid
+  issuerOfficeholderId         String                            @db.Uuid
   instrumentTypeVersionId      String?                           @db.Uuid
   instrumentType               OfficialInstrumentType?
   jurisdictionScope            InstrumentJurisdictionScope?      @default(NATIONAL)
@@ -5968,6 +6098,17 @@ model OfficialInstrument {
   effectiveFrom                DateTime?
   effectiveUntil               DateTime?
   currentVersionId             String?                           @unique @db.Uuid
+  verificationCode             String?
+  createdAt                    DateTime                          @default(now())
+  updatedAt                    DateTime                          @updatedAt
+  instrumentTypeVersion        InstrumentTypeVersion             @relation(fields: [instrumentTypeVersionId], references: [id])
+  governmentDecision           GovernmentDecision                @relation(fields: [governmentDecisionId], references: [id])
+  case                         Case                              @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile     MasterAdministrativeFile          @relation(fields: [masterAdministrativeFileId], references: [id])
+  holderIdentity               Identity?                         @relation("OfficialInstrumentHolderIdentity", fields: [holderIdentityId], references: [id])
+  holderOrganization           Organization?                     @relation("OfficialInstrumentHolderOrganization", fields: [holderOrganizationId], references: [id])
+  issuerInstitution            Institution                       @relation("OfficialInstrumentIssuerInstitution", fields: [issuerInstitutionId], references: [id])
+  issuerOfficeholder           Officeholder                      @relation("OfficialInstrumentIssuerOfficeholder", fields: [issuerOfficeholderId], references: [id])
   verificationCode             String?                           @unique
   publicVerificationToken      String?                           @unique
   publicVerificationStatus     String?
@@ -5996,6 +6137,13 @@ model OfficialInstrument {
   verificationRecords          InstrumentVerificationRecord[]
   deliveryAuditEvents          InstrumentDeliveryAuditEvent[]
   downloadEvents               InstrumentDownloadEvent[]
+  complianceMatters            ComplianceMatter[]
+  continuingObligations        ContinuingObligation[]
+  inspectionPlans              InspectionPlan[]
+  inspectionSessions           InspectionSession[]
+  emergencyInterimActions      EmergencyInterimActionRecord[]
+  complianceStatusProjections  ComplianceStatusProjection[]
+  complianceRevalidations      ComplianceRevalidationRecord[]
   lifecycleEvents              InstrumentLifecycleEvent[]
   amendmentRecords             InstrumentAmendmentRecord[]
   renewalRecords               InstrumentRenewalRecord[]
@@ -6020,6 +6168,28 @@ model OfficialInstrument {
 }
 
 model OfficialInstrumentVersion {
+  id                     String                            @id @default(uuid()) @db.Uuid
+  officialInstrumentId   String                            @db.Uuid
+  versionNumber          Int
+  templateVersionId      String                            @db.Uuid
+  documentRecordId       String                            @db.Uuid
+  documentVersionId      String                            @db.Uuid
+  contentHash            String
+  governmentDecisionId   String                            @db.Uuid
+  conditionsSnapshot     Json
+  signatureRecord        Json?
+  sealRecord             Json?
+  createdAt              DateTime                          @default(now())
+  officialInstrument     OfficialInstrument                @relation("OfficialInstrumentVersions", fields: [officialInstrumentId], references: [id], onDelete: Cascade)
+  currentForInstrument   OfficialInstrument?               @relation("OfficialInstrumentCurrentVersion")
+  templateVersion        InstrumentTemplateVersion         @relation(fields: [templateVersionId], references: [id])
+  documentVersion        DocumentVersion                   @relation(fields: [documentVersionId], references: [id])
+  issuanceEvents         IssuanceEvent[]
+  deliveries             InstrumentDelivery[]
+  receiptAcknowledgments InstrumentReceiptAcknowledgment[]
+  verificationRecords    InstrumentVerificationRecord[]
+  deliveryAuditEvents    InstrumentDeliveryAuditEvent[]
+  downloadEvents         InstrumentDownloadEvent[]
   id                   String                    @id @default(uuid()) @db.Uuid
   officialInstrumentId String                    @db.Uuid
   versionNumber        Int
@@ -6148,6 +6318,7 @@ model IssuanceEvent {
   @@map("issuance_readiness_assessments")
 }
 
+model InstrumentDelivery {
 model IssuanceEvent {
   id                          String                      @id @default(uuid()) @db.Uuid
   officialInstrumentId        String                      @db.Uuid
@@ -6393,6 +6564,446 @@ model InstrumentDownloadEvent {
   @@index([downloadedAt])
   @@map("instrument_download_events")
 }
+
+// ─── Phase 9: Inspection, Compliance and Corrective Action ───────────────────
+
+enum ComplianceMatterStatus {
+  OPEN
+  UNDER_REVIEW
+  MONITORING
+  ESCALATED
+  CLOSED
+}
+
+enum ContinuingObligationStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  SATISFIED
+  WAIVED
+  BREACHED
+  SUPERSEDED
+}
+
+enum ObligationScheduleFrequency {
+  ONE_TIME
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+  EVENT_DRIVEN
+}
+
+enum ComplianceSubmissionStatus {
+  RECEIVED
+  UNDER_REVIEW
+  ACCEPTED_FOR_REVIEW
+  REJECTED
+  WITHDRAWN
+}
+
+enum ComplianceReviewOutcome {
+  PENDING
+  OBLIGATION_NOT_SATISFIED
+  OBLIGATION_SATISFIED
+  ADDITIONAL_EVIDENCE_REQUIRED
+  REFERRED
+}
+
+enum InspectionPlanStatus {
+  DRAFT
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InspectionAssignmentStatus {
+  ASSIGNED
+  ACCEPTED
+  DECLINED
+  COMPLETED
+  REASSIGNED
+}
+
+enum InspectionSessionStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ComplianceObservationClassification {
+  OBSERVATION
+  CONDITION_NOTED
+  POSITIVE_INDICATOR
+  INFORMATION_REQUESTED
+}
+
+enum ComplianceFindingSeverity {
+  INFORMATIONAL
+  MINOR
+  MODERATE
+  MAJOR
+  CRITICAL
+}
+
+enum ComplianceFindingStatus {
+  OPEN
+  UNDER_CORRECTIVE_ACTION
+  PENDING_VERIFICATION
+  CLOSED
+  REOPENED
+}
+
+enum CorrectiveActionPlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  FAILED
+  SUPERSEDED
+}
+
+enum CorrectiveActionItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+  FAILED
+}
+
+enum CorrectiveActionVerificationOutcome {
+  PENDING
+  VERIFIED_SATISFACTORY
+  VERIFIED_UNSATISFACTORY
+  REQUIRES_FOLLOW_UP
+}
+
+enum ComplianceAssessmentOutcome {
+  COMPLIANT
+  PARTIALLY_COMPLIANT
+  NONCOMPLIANT
+  INCONCLUSIVE
+  PENDING
+}
+
+enum NoncomplianceFindingStatus {
+  OPEN
+  UNDER_CORRECTIVE_ACTION
+  REFERRED
+  CLOSED
+}
+
+enum ComplianceEscalationLevel {
+  SUPERVISOR
+  MANAGEMENT
+  EXECUTIVE
+  EXTERNAL
+}
+
+enum EnforcementReferralStatus {
+  PREPARED
+  SUBMITTED
+  ACKNOWLEDGED
+  CLOSED
+}
+
+enum EmergencyInterimActionType {
+  SAFETY_HOLD
+  OPERATIONAL_RESTRICTION
+  EVIDENCE_PRESERVATION
+  SITE_ACCESS_LIMIT
+  OTHER_INTERIM
+}
+
+enum ComplianceProjectionStatus {
+  COMPLIANT
+  AT_RISK
+  NONCOMPLIANT
+  UNKNOWN
+}
+
+enum ComplianceMonitoringEventType {
+  OBLIGATION_DUE
+  SUBMISSION_RECEIVED
+  REVIEW_COMPLETED
+  FINDING_RECORDED
+  CORRECTIVE_ACTION_DUE
+  ESCALATION_TRIGGERED
+  PROJECTION_UPDATED
+  ALERT_RAISED
+}
+
+enum ComplianceAlertSeverity {
+  INFO
+  WARNING
+  URGENT
+  CRITICAL
+}
+
+enum ComplianceRevalidationOutcome {
+  REINSTATED_COMPLIANT
+  REMAINS_NONCOMPLIANT
+  INCONCLUSIVE
+  PENDING
+}
+
+model ComplianceMatter {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  matterNumber                String                         @unique
+  caseId                      String?                        @db.Uuid
+  officialInstrumentId        String?                        @db.Uuid
+  masterAdministrativeFileId  String?                        @db.Uuid
+  holderIdentityId            String?                        @db.Uuid
+  holderOrganizationId        String?                        @db.Uuid
+  status                      ComplianceMatterStatus         @default(OPEN)
+  subject                     String
+  openedAt                    DateTime                       @default(now())
+  closedAt                    DateTime?
+  createdAt                   DateTime                       @default(now())
+  updatedAt                   DateTime                       @updatedAt
+  case                        Case?                          @relation(fields: [caseId], references: [id])
+  officialInstrument          OfficialInstrument?            @relation(fields: [officialInstrumentId], references: [id])
+  masterAdministrativeFile    MasterAdministrativeFile?      @relation(fields: [masterAdministrativeFileId], references: [id])
+  holderIdentity              Identity?                      @relation("ComplianceMatterHolder", fields: [holderIdentityId], references: [id])
+  holderOrganization          Organization?                  @relation("ComplianceMatterHolderOrganization", fields: [holderOrganizationId], references: [id])
+  continuingObligations       ContinuingObligation[]
+  inspectionPlans             InspectionPlan[]
+  inspectionSessions          InspectionSession[]
+  correctiveActionPlans       CorrectiveActionPlan[]
+  complianceAssessments       ComplianceAssessment[]
+  noncomplianceFindings       NoncomplianceFinding[]
+  complianceEscalations       ComplianceEscalation[]
+  emergencyInterimActions     EmergencyInterimActionRecord[]
+  complianceStatusProjections ComplianceStatusProjection[]
+  complianceMonitoringEvents  ComplianceMonitoringEvent[]
+  complianceAlerts            ComplianceAlert[]
+  complianceRevalidations     ComplianceRevalidationRecord[]
+
+  @@index([caseId])
+  @@index([officialInstrumentId])
+  @@index([masterAdministrativeFileId])
+  @@index([holderIdentityId])
+  @@index([status])
+  @@map("compliance_matters")
+}
+
+model ContinuingObligation {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  complianceMatterId   String                     @db.Uuid
+  officialInstrumentId String?                    @db.Uuid
+  description          String
+  obligationType       String
+  status               ContinuingObligationStatus @default(ACTIVE)
+  effectiveFrom        DateTime
+  effectiveUntil       DateTime?
+  sourceReference      String?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  complianceMatter     ComplianceMatter           @relation(fields: [complianceMatterId], references: [id])
+  officialInstrument   OfficialInstrument?        @relation(fields: [officialInstrumentId], references: [id])
+  schedules            ObligationSchedule[]
+  submissions          ComplianceSubmission[]
+
+  @@index([complianceMatterId])
+  @@index([officialInstrumentId])
+  @@index([status])
+  @@map("continuing_obligations")
+}
+
+model ObligationSchedule {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  continuingObligationId String                      @db.Uuid
+  frequency              ObligationScheduleFrequency
+  nextDueAt              DateTime
+  lastDueAt              DateTime?
+  reminderDaysBefore     Int?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  continuingObligation   ContinuingObligation        @relation(fields: [continuingObligationId], references: [id], onDelete: Cascade)
+
+  @@index([continuingObligationId])
+  @@index([nextDueAt])
+  @@map("obligation_schedules")
+}
+
+model ComplianceSubmission {
+  id                     String                     @id @default(uuid()) @db.Uuid
+  continuingObligationId String                     @db.Uuid
+  submittedByIdentityId  String                     @db.Uuid
+  submittedAt            DateTime                   @default(now())
+  status                 ComplianceSubmissionStatus @default(RECEIVED)
+  evidenceRecordId       String?                    @db.Uuid
+  receiptAcknowledgedAt  DateTime?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  continuingObligation   ContinuingObligation       @relation(fields: [continuingObligationId], references: [id])
+  submittedByIdentity    Identity                   @relation("ComplianceSubmissionSubmitter", fields: [submittedByIdentityId], references: [id])
+  evidenceRecord         EvidenceRecord?            @relation(fields: [evidenceRecordId], references: [id])
+  reviews                ComplianceReview[]
+
+  @@index([continuingObligationId])
+  @@index([submittedByIdentityId])
+  @@index([status])
+  @@map("compliance_submissions")
+}
+
+model ComplianceReview {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  complianceSubmissionId String                  @db.Uuid
+  reviewerIdentityId     String?                 @db.Uuid
+  reviewerOfficeholderId String?                 @db.Uuid
+  outcome                ComplianceReviewOutcome @default(PENDING)
+  reviewedAt             DateTime?
+  notes                  String?
+  obligationSatisfied    Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  complianceSubmission   ComplianceSubmission    @relation(fields: [complianceSubmissionId], references: [id], onDelete: Cascade)
+  reviewerIdentity       Identity?               @relation("ComplianceReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder   Officeholder?           @relation("ComplianceReviewReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+
+  @@index([complianceSubmissionId])
+  @@index([reviewerIdentityId])
+  @@map("compliance_reviews")
+}
+
+model InspectionTypeDefinition {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  code                    String                 @unique
+  name                    String
+  description             String?
+  inspectionType          InspectionType
+  lifecycleStatus         CatalogLifecycleStatus @default(DRAFT)
+  requiredAuthorityAction AuthorityActionType    @default(INSPECT)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  inspectionPlans         InspectionPlan[]
+  inspectionSessions      InspectionSession[]
+
+  @@map("inspection_type_definitions")
+}
+
+model InspectionPlan {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  planNumber                 String                   @unique
+  complianceMatterId         String?                  @db.Uuid
+  officialInstrumentId       String?                  @db.Uuid
+  inspectionTypeDefinitionId String                   @db.Uuid
+  scheduledFor               DateTime
+  status                     InspectionPlanStatus     @default(DRAFT)
+  scope                      String
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  complianceMatter           ComplianceMatter?        @relation(fields: [complianceMatterId], references: [id])
+  officialInstrument         OfficialInstrument?      @relation(fields: [officialInstrumentId], references: [id])
+  inspectionTypeDefinition   InspectionTypeDefinition @relation(fields: [inspectionTypeDefinitionId], references: [id])
+  assignments                InspectionAssignment[]
+  sessions                   InspectionSession[]
+
+  @@index([complianceMatterId])
+  @@index([officialInstrumentId])
+  @@index([status])
+  @@map("inspection_plans")
+}
+
+model InspectionAssignment {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  inspectionPlanId            String                     @db.Uuid
+  inspectorOfficeholderId     String                     @db.Uuid
+  inspectorIdentityId         String                     @db.Uuid
+  assignedAt                  DateTime                   @default(now())
+  status                      InspectionAssignmentStatus @default(ASSIGNED)
+  authorityEvaluationRecordId String?                    @db.Uuid
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  inspectionPlan              InspectionPlan             @relation(fields: [inspectionPlanId], references: [id], onDelete: Cascade)
+  inspectorOfficeholder       Officeholder               @relation("InspectionAssignmentInspectorOfficeholder", fields: [inspectorOfficeholderId], references: [id])
+  inspectorIdentity           Identity                   @relation("InspectionAssignmentInspector", fields: [inspectorIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("InspectionAssignmentAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@unique([inspectionPlanId, inspectorOfficeholderId])
+  @@index([inspectorIdentityId])
+  @@map("inspection_assignments")
+}
+
+model InspectionSession {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  sessionNumber              String                    @unique
+  inspectionPlanId           String?                   @db.Uuid
+  complianceMatterId         String?                   @db.Uuid
+  caseId                     String?                   @db.Uuid
+  officialInstrumentId       String?                   @db.Uuid
+  inspectionRecordId         String?                   @db.Uuid
+  inspectionTypeDefinitionId String?                   @db.Uuid
+  functionAuthorityRecordId  String?                   @db.Uuid
+  status                     InspectionSessionStatus   @default(PLANNED)
+  startedAt                  DateTime?
+  completedAt                DateTime?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  inspectionPlan             InspectionPlan?           @relation(fields: [inspectionPlanId], references: [id])
+  complianceMatter           ComplianceMatter?         @relation(fields: [complianceMatterId], references: [id])
+  case                       Case?                     @relation(fields: [caseId], references: [id])
+  officialInstrument         OfficialInstrument?       @relation(fields: [officialInstrumentId], references: [id])
+  inspectionRecord           InspectionRecord?         @relation(fields: [inspectionRecordId], references: [id])
+  inspectionTypeDefinition   InspectionTypeDefinition? @relation(fields: [inspectionTypeDefinitionId], references: [id])
+  functionAuthorityRecord    FunctionAuthorityRecord?  @relation(fields: [functionAuthorityRecordId], references: [id])
+  observations               InspectionObservation[]
+  findings                   InspectionFinding[]
+
+  @@index([inspectionPlanId])
+  @@index([complianceMatterId])
+  @@index([caseId])
+  @@index([inspectionRecordId])
+  @@index([status])
+  @@map("inspection_sessions")
+}
+
+model InspectionObservation {
+  id                     String                              @id @default(uuid()) @db.Uuid
+  inspectionSessionId    String                              @db.Uuid
+  evidenceRecordId       String?                             @db.Uuid
+  description            String
+  classification         ComplianceObservationClassification @default(OBSERVATION)
+  observedAt             DateTime                            @default(now())
+  observerIdentityId     String                              @db.Uuid
+  observerOfficeholderId String?                             @db.Uuid
+  createdAt              DateTime                            @default(now())
+  inspectionSession      InspectionSession                   @relation(fields: [inspectionSessionId], references: [id], onDelete: Cascade)
+  evidenceRecord         EvidenceRecord?                     @relation(fields: [evidenceRecordId], references: [id])
+  observerIdentity       Identity                            @relation("InspectionObservationObserver", fields: [observerIdentityId], references: [id])
+  observerOfficeholder   Officeholder?                       @relation("InspectionObservationObserverOfficeholder", fields: [observerOfficeholderId], references: [id])
+  findings               InspectionFinding[]
+
+  @@index([inspectionSessionId])
+  @@index([evidenceRecordId])
+  @@map("inspection_observations")
+}
+
+model InspectionFinding {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  inspectionSessionId        String                     @db.Uuid
+  inspectionObservationId    String?                    @db.Uuid
+  severity                   ComplianceFindingSeverity
+  status                     ComplianceFindingStatus    @default(OPEN)
+  findingCode                String
+  description                String
+  isViolation                Boolean                    @default(false)
+  determinedByOfficeholderId String                     @db.Uuid
+  determinedByIdentityId     String                     @db.Uuid
+  determinedAt               DateTime                   @default(now())
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  inspectionSession          InspectionSession          @relation(fields: [inspectionSessionId], references: [id], onDelete: Cascade)
+  inspectionObservation      InspectionObservation?     @relation(fields: [inspectionObservationId], references: [id])
+  determinedByOfficeholder   Officeholder               @relation("InspectionFindingDeterminerOfficeholder", fields: [determinedByOfficeholderId], references: [id])
+  determinedByIdentity       Identity                   @relation("InspectionFindingDeterminer", fields: [determinedByIdentityId], references: [id])
+  correctiveActionPlans      CorrectiveActionPlan[]
+  closures                   ComplianceFindingClosure[]
+  noncomplianceFindings      NoncomplianceFinding[]
+
+  @@index([inspectionSessionId])
 // ─── Phase 8G: Instrument Lifecycle (renamed to avoid 8E collision) ────────────
 
 enum InstrumentControllingDecisionType {
@@ -7549,6 +8160,17 @@ model InspectionFinding {
 }
 
 model CorrectiveActionPlan {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  planNumber          String                     @unique
+  complianceMatterId  String?                    @db.Uuid
+  inspectionFindingId String?                    @db.Uuid
+  status              CorrectiveActionPlanStatus @default(DRAFT)
+  requiredBy          DateTime?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  complianceMatter    ComplianceMatter?          @relation(fields: [complianceMatterId], references: [id])
+  inspectionFinding   InspectionFinding?         @relation(fields: [inspectionFindingId], references: [id])
+  items               CorrectiveActionItem[]
   id                         String                     @id @default(uuid()) @db.Uuid
   planNumber                 String                     @unique
   complianceMatterId         String                     @db.Uuid
@@ -7588,6 +8210,57 @@ model CorrectiveActionPlan {
 }
 
 model CorrectiveActionItem {
+  id                     String                         @id @default(uuid()) @db.Uuid
+  correctiveActionPlanId String                         @db.Uuid
+  description            String
+  status                 CorrectiveActionItemStatus     @default(PENDING)
+  dueAt                  DateTime?
+  assignedToIdentityId   String?                        @db.Uuid
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  correctiveActionPlan   CorrectiveActionPlan           @relation(fields: [correctiveActionPlanId], references: [id], onDelete: Cascade)
+  assignedToIdentity     Identity?                      @relation("CorrectiveActionItemAssignee", fields: [assignedToIdentityId], references: [id])
+  verifications          CorrectiveActionVerification[]
+
+  @@index([correctiveActionPlanId])
+  @@index([assignedToIdentityId])
+  @@map("corrective_action_items")
+}
+
+model CorrectiveActionVerification {
+  id                     String                              @id @default(uuid()) @db.Uuid
+  correctiveActionItemId String                              @db.Uuid
+  verifierIdentityId     String                              @db.Uuid
+  verifierOfficeholderId String                              @db.Uuid
+  outcome                CorrectiveActionVerificationOutcome @default(PENDING)
+  verifiedAt             DateTime?
+  notes                  String?
+  createdAt              DateTime                            @default(now())
+  updatedAt              DateTime                            @updatedAt
+  correctiveActionItem   CorrectiveActionItem                @relation(fields: [correctiveActionItemId], references: [id], onDelete: Cascade)
+  verifierIdentity       Identity                            @relation("CorrectiveActionVerifier", fields: [verifierIdentityId], references: [id])
+  verifierOfficeholder   Officeholder                        @relation("CorrectiveActionVerifierOfficeholder", fields: [verifierOfficeholderId], references: [id])
+
+  @@index([correctiveActionItemId])
+  @@index([verifierIdentityId])
+  @@map("corrective_action_verifications")
+}
+
+model ComplianceFindingClosure {
+  id                     String                       @id @default(uuid()) @db.Uuid
+  inspectionFindingId    String                       @db.Uuid
+  closedByIdentityId     String                       @db.Uuid
+  closedByOfficeholderId String                       @db.Uuid
+  closedAt               DateTime                     @default(now())
+  closureReason          String
+  remediationReference   String?
+  createdAt              DateTime                     @default(now())
+  inspectionFinding      InspectionFinding            @relation(fields: [inspectionFindingId], references: [id], onDelete: Cascade)
+  closedByIdentity       Identity                     @relation("ComplianceFindingCloser", fields: [closedByIdentityId], references: [id])
+  closedByOfficeholder   Officeholder                 @relation("ComplianceFindingCloserOfficeholder", fields: [closedByOfficeholderId], references: [id])
+  reopenings             ComplianceFindingReopening[]
+
+  @@index([inspectionFindingId])
   id                         String                     @id @default(uuid()) @db.Uuid
   correctiveActionPlanId     String                     @db.Uuid
   itemNumber                 Int
@@ -7734,6 +8407,154 @@ model ComplianceFindingClosure {
 }
 
 model ComplianceFindingReopening {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  complianceFindingClosureId String                   @db.Uuid
+  reopenedByIdentityId       String                   @db.Uuid
+  reopenedByOfficeholderId   String                   @db.Uuid
+  reopenedAt                 DateTime                 @default(now())
+  reason                     String
+  createdAt                  DateTime                 @default(now())
+  complianceFindingClosure   ComplianceFindingClosure @relation(fields: [complianceFindingClosureId], references: [id], onDelete: Cascade)
+  reopenedByIdentity         Identity                 @relation("ComplianceFindingReopener", fields: [reopenedByIdentityId], references: [id])
+  reopenedByOfficeholder     Officeholder             @relation("ComplianceFindingReopenerOfficeholder", fields: [reopenedByOfficeholderId], references: [id])
+
+  @@index([complianceFindingClosureId])
+  @@map("compliance_finding_reopenings")
+}
+
+model ComplianceAssessment {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  complianceMatterId     String                      @db.Uuid
+  assessorIdentityId     String                      @db.Uuid
+  assessorOfficeholderId String                      @db.Uuid
+  outcome                ComplianceAssessmentOutcome @default(PENDING)
+  assessedAt             DateTime                    @default(now())
+  summary                String
+  createdAt              DateTime                    @default(now())
+  complianceMatter       ComplianceMatter            @relation(fields: [complianceMatterId], references: [id])
+  assessorIdentity       Identity                    @relation("ComplianceAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder   Officeholder                @relation("ComplianceAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([complianceMatterId])
+  @@map("compliance_assessments")
+}
+
+model NoncomplianceFinding {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  inspectionFindingId  String?                    @db.Uuid
+  complianceMatterId   String                     @db.Uuid
+  status               NoncomplianceFindingStatus @default(OPEN)
+  violationCode        String
+  description          String
+  severity             ComplianceFindingSeverity
+  determinedAt         DateTime                   @default(now())
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  inspectionFinding    InspectionFinding?         @relation(fields: [inspectionFindingId], references: [id])
+  complianceMatter     ComplianceMatter           @relation(fields: [complianceMatterId], references: [id])
+  escalations          ComplianceEscalation[]
+  enforcementReferrals EnforcementReferral[]
+
+  @@index([complianceMatterId])
+  @@index([inspectionFindingId])
+  @@index([status])
+  @@map("noncompliance_findings")
+}
+
+model ComplianceEscalation {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  complianceMatterId        String?                   @db.Uuid
+  noncomplianceFindingId    String?                   @db.Uuid
+  level                     ComplianceEscalationLevel
+  escalatedAt               DateTime                  @default(now())
+  escalatedByIdentityId     String                    @db.Uuid
+  escalatedByOfficeholderId String                    @db.Uuid
+  reason                    String
+  createdAt                 DateTime                  @default(now())
+  complianceMatter          ComplianceMatter?         @relation(fields: [complianceMatterId], references: [id])
+  noncomplianceFinding      NoncomplianceFinding?     @relation(fields: [noncomplianceFindingId], references: [id])
+  escalatedByIdentity       Identity                  @relation("ComplianceEscalationActor", fields: [escalatedByIdentityId], references: [id])
+  escalatedByOfficeholder   Officeholder              @relation("ComplianceEscalationActorOfficeholder", fields: [escalatedByOfficeholderId], references: [id])
+  enforcementReferrals      EnforcementReferral[]
+
+  @@index([complianceMatterId])
+  @@index([noncomplianceFindingId])
+  @@map("compliance_escalations")
+}
+
+model EnforcementReferral {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  complianceEscalationId   String?                   @db.Uuid
+  noncomplianceFindingId   String?                   @db.Uuid
+  referredAt               DateTime                  @default(now())
+  referredByIdentityId     String                    @db.Uuid
+  referredByOfficeholderId String                    @db.Uuid
+  targetAuthorityReference String
+  status                   EnforcementReferralStatus @default(PREPARED)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  complianceEscalation     ComplianceEscalation?     @relation(fields: [complianceEscalationId], references: [id])
+  noncomplianceFinding     NoncomplianceFinding?     @relation(fields: [noncomplianceFindingId], references: [id])
+  referredByIdentity       Identity                  @relation("EnforcementReferralActor", fields: [referredByIdentityId], references: [id])
+  referredByOfficeholder   Officeholder              @relation("EnforcementReferralActorOfficeholder", fields: [referredByOfficeholderId], references: [id])
+
+  @@index([complianceEscalationId])
+  @@index([noncomplianceFindingId])
+  @@index([status])
+  @@map("enforcement_referrals")
+}
+
+model EmergencyInterimActionRecord {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  complianceMatterId       String?                    @db.Uuid
+  officialInstrumentId     String?                    @db.Uuid
+  actionType               EmergencyInterimActionType
+  recordedAt               DateTime                   @default(now())
+  recordedByIdentityId     String                     @db.Uuid
+  recordedByOfficeholderId String                     @db.Uuid
+  reason                   String
+  doesNotSuspendInstrument Boolean                    @default(true)
+  createdAt                DateTime                   @default(now())
+  complianceMatter         ComplianceMatter?          @relation(fields: [complianceMatterId], references: [id])
+  officialInstrument       OfficialInstrument?        @relation(fields: [officialInstrumentId], references: [id])
+  recordedByIdentity       Identity                   @relation("EmergencyInterimActionActor", fields: [recordedByIdentityId], references: [id])
+  recordedByOfficeholder   Officeholder               @relation("EmergencyInterimActionActorOfficeholder", fields: [recordedByOfficeholderId], references: [id])
+
+  @@index([complianceMatterId])
+  @@index([officialInstrumentId])
+  @@map("emergency_interim_action_records")
+}
+
+model ComplianceStatusProjection {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  complianceMatterId   String?                    @db.Uuid
+  officialInstrumentId String?                    @db.Uuid
+  projectedStatus      ComplianceProjectionStatus
+  projectedAt          DateTime                   @default(now())
+  basisSummary         String
+  createdAt            DateTime                   @default(now())
+  complianceMatter     ComplianceMatter?          @relation(fields: [complianceMatterId], references: [id])
+  officialInstrument   OfficialInstrument?        @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([complianceMatterId])
+  @@index([officialInstrumentId])
+  @@map("compliance_status_projections")
+}
+
+model ComplianceMonitoringEvent {
+  id                 String                        @id @default(uuid()) @db.Uuid
+  complianceMatterId String?                       @db.Uuid
+  eventType          ComplianceMonitoringEventType
+  recordedAt         DateTime                      @default(now())
+  metadata           Json                          @default("{}")
+  actorIdentityId    String?                       @db.Uuid
+  createdAt          DateTime                      @default(now())
+  complianceMatter   ComplianceMatter?             @relation(fields: [complianceMatterId], references: [id])
+  actorIdentity      Identity?                     @relation("ComplianceMonitoringEventActor", fields: [actorIdentityId], references: [id])
+
+  @@index([complianceMatterId])
+  @@index([eventType])
+  @@index([recordedAt])
   id                         String                           @id @default(uuid()) @db.Uuid
   inspectionFindingId        String                           @db.Uuid
   priorClosureId             String                           @unique @db.Uuid
@@ -8454,6 +9275,18 @@ model ComplianceMonitoringEvent {
 }
 
 model ComplianceAlert {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  complianceMatterId String?                 @db.Uuid
+  alertType          String
+  severity           ComplianceAlertSeverity
+  message            String
+  triggeredAt        DateTime                @default(now())
+  acknowledgedAt     DateTime?
+  createdAt          DateTime                @default(now())
+  complianceMatter   ComplianceMatter?       @relation(fields: [complianceMatterId], references: [id])
+
+  @@index([complianceMatterId])
+  @@index([severity])
   id                        String                     @id @default(uuid()) @db.Uuid
   projectionId              String                     @db.Uuid
   monitoringRuleId          String?                    @db.Uuid
@@ -8484,6 +9317,22 @@ model ComplianceAlert {
 }
 
 model ComplianceRevalidationRecord {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  complianceMatterId          String?                       @db.Uuid
+  officialInstrumentId        String?                       @db.Uuid
+  outcome                     ComplianceRevalidationOutcome @default(PENDING)
+  revalidatedAt               DateTime                      @default(now())
+  revalidatedByIdentityId     String                        @db.Uuid
+  revalidatedByOfficeholderId String                        @db.Uuid
+  notes                       String?
+  createdAt                   DateTime                      @default(now())
+  complianceMatter            ComplianceMatter?             @relation(fields: [complianceMatterId], references: [id])
+  officialInstrument          OfficialInstrument?           @relation(fields: [officialInstrumentId], references: [id])
+  revalidatedByIdentity       Identity                      @relation("ComplianceRevalidationActor", fields: [revalidatedByIdentityId], references: [id])
+  revalidatedByOfficeholder   Officeholder                  @relation("ComplianceRevalidationActorOfficeholder", fields: [revalidatedByOfficeholderId], references: [id])
+
+  @@index([complianceMatterId])
+  @@index([officialInstrumentId])
   id                     String                        @id @default(uuid()) @db.Uuid
   projectionId           String                        @db.Uuid
   trigger                ComplianceRevalidationTrigger

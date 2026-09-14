@@ -126,7 +126,6 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
       'InspectionCase',
     ];
 
-    for (const modelName of forbiddenModels) {
     for (const modelName of legacyPhase7Models) {
       expect(schema).not.toContain(`model ${modelName}`);
     }

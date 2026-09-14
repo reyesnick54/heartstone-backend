@@ -51,6 +51,8 @@ import { SystemModule } from './system/system.module';
     RecordsModule,
     EvidenceRecordsModule,
     EvidenceModule,
+    DecisionsModule,
+    DecisionsIssuanceModule,
     InstrumentsModule,
     InspectionComplianceModule,
     DecisionsModule,
