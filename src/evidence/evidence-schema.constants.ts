@@ -63,6 +63,15 @@ export const EVIDENCE_QUALITY_CRITERIA = [
   'FITNESS_FOR_PURPOSE',
 ] as const;
 
+export const PHASE_9D_EXECUTION_MODEL_NAMES = [
+  'InspectionSession',
+  'InspectionObservation',
+  'InspectionFinding',
+  'FindingRequirementLink',
+  'InspectionResponse',
+  'InspectionCompletionRecord',
+] as const;
+
 export const PHASE_7D_ATTRIBUTABLE_MODEL_NAMES = [
   'DepartmentalReviewRecord',
   'DepartmentalReviewEvidence',

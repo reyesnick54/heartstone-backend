@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import {
-  GovernmentDecisionStatus,
+  InstrumentControllingDecisionStatus,
   InstrumentLifecycleEventType,
-  OfficialInstrumentStatus,
+  LifecycleOfficialInstrumentStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -16,7 +16,7 @@ export class InstrumentLifecycleGuardService {
     instrumentId: string,
     proposedEventType: InstrumentLifecycleEventType,
   ): Promise<void> {
-    const instrument = await this.prisma.officialInstrument.findUnique({
+    const instrument = await this.prisma.lifecycleOfficialInstrument.findUnique({
       where: { id: instrumentId },
       include: {
         lifecycleEvents: {
@@ -30,17 +30,17 @@ export class InstrumentLifecycleGuardService {
       throw new BadRequestException(`Instrument ${instrumentId} not found`);
     }
 
-    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.status];
+    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.currentStatus];
     if (incompatible?.includes(proposedEventType)) {
       throw new ConflictException(
-        `Cannot perform ${proposedEventType} while instrument is ${instrument.status}`,
+        `Cannot perform ${proposedEventType} while instrument is ${instrument.currentStatus}`,
       );
     }
 
-    const pendingRevocation = await this.prisma.governmentDecision.findFirst({
+    const pendingRevocation = await this.prisma.instrumentControllingDecision.findFirst({
       where: {
-        decisionStatus: GovernmentDecisionStatus.PENDING,
-        lifecycleDecisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
+        status: InstrumentControllingDecisionStatus.PENDING,
+        decisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
         lifecycleEvents: {
           some: { instrumentId },
         },
@@ -136,68 +136,71 @@ export class InstrumentLifecycleGuardService {
 
     if (!systemDetectedEvents.includes(eventType) && !controllingDecisionId) {
       throw new BadRequestException(
-        `Consequential lifecycle event ${eventType} requires a controlling GovernmentDecision`,
+        `Consequential lifecycle event ${eventType} requires a controlling InstrumentControllingDecision`,
       );
     }
   }
 
-  getAllowedStatusesForAction(action: InstrumentLifecycleEventType): OfficialInstrumentStatus[] {
-    const map: Partial<Record<InstrumentLifecycleEventType, OfficialInstrumentStatus[]>> = {
-      AMENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.REINSTATED,
-      ],
-      VARIED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.VARIED,
-      ],
-      RENEWED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
-      ],
-      SUSPENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
-        OfficialInstrumentStatus.REINSTATED,
-      ],
-      PARTIALLY_SUSPENDED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
-      ],
-      REVOKED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.SUSPENDED,
-        OfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        OfficialInstrumentStatus.REVOCATION_DECIDED,
-      ],
-      REINSTATED: [
-        OfficialInstrumentStatus.SUSPENDED,
-        OfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        OfficialInstrumentStatus.REVOKED,
-        OfficialInstrumentStatus.EXPIRED,
-      ],
-      SURRENDERED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.SUSPENDED,
-      ],
-      REPLACED: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.RENEWED,
-        OfficialInstrumentStatus.AMENDED,
-      ],
-      CORRECTED_CLERICAL: [
-        OfficialInstrumentStatus.EFFECTIVE,
-        OfficialInstrumentStatus.ISSUED,
-        OfficialInstrumentStatus.AMENDED,
-      ],
-    };
+  getAllowedStatusesForAction(
+    action: InstrumentLifecycleEventType,
+  ): LifecycleOfficialInstrumentStatus[] {
+    const map: Partial<Record<InstrumentLifecycleEventType, LifecycleOfficialInstrumentStatus[]>> =
+      {
+        AMENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.REINSTATED,
+        ],
+        VARIED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.VARIED,
+        ],
+        RENEWED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        SUSPENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.REINSTATED,
+        ],
+        PARTIALLY_SUSPENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        REVOKED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+          LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
+          LifecycleOfficialInstrumentStatus.REVOCATION_DECIDED,
+        ],
+        REINSTATED: [
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+          LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
+          LifecycleOfficialInstrumentStatus.REVOKED,
+          LifecycleOfficialInstrumentStatus.EXPIRED,
+        ],
+        SURRENDERED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+        ],
+        REPLACED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        CORRECTED_CLERICAL: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.ISSUED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+      };
 
     return map[action] ?? [];
   }

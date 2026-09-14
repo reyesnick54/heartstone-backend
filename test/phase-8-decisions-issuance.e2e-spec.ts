@@ -89,8 +89,10 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
     await prisma.decisionCondition.create({
       data: {
         governmentDecisionId: decision.id,
+        conditionNumber: 1,
         conditionType: DecisionConditionType.PRECEDENT_TO_ISSUANCE,
-        description: 'Submit final site inspection report',
+        responsibleParty: 'Applicant',
+        requiredActionOrRestraint: 'Submit final site inspection report',
         status: 'PENDING',
       },
     });

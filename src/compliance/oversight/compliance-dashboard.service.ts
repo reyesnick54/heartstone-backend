@@ -62,22 +62,22 @@ export class ComplianceDashboardService {
       disclaimer: projection.projectionDisclaimer,
       status: projection.status,
       portfolio: portfolioCases,
-      overdueObligations: projection.indicators.filter((item) =>
-        item.indicatorType === 'OBLIGATIONS_OVERDUE',
+      overdueObligations: projection.indicators.filter(
+        (item) => item.indicatorType === 'OBLIGATIONS_OVERDUE',
       ),
       inspectionBacklog: projection.indicators.filter((item) =>
         ['UPCOMING_INSPECTIONS', 'REINSPECTION_REQUIRED'].includes(item.indicatorType),
       ),
       openFindings: projection.indicators.filter((item) => item.indicatorType === 'OPEN_FINDINGS'),
-      criticalFindings: projection.indicators.filter((item) =>
-        item.indicatorType === 'CRITICAL_FINDINGS',
+      criticalFindings: projection.indicators.filter(
+        (item) => item.indicatorType === 'CRITICAL_FINDINGS',
       ),
-      correctiveActions: projection.indicators.filter((item) =>
-        item.indicatorType === 'CORRECTIVE_ACTIONS_OVERDUE',
+      correctiveActions: projection.indicators.filter(
+        (item) => item.indicatorType === 'CORRECTIVE_ACTIONS_OVERDUE',
       ),
       criticalEscalations: projection.alerts.filter((alert) => alert.alertLevel === 'CRITICAL'),
-      externalReferrals: projection.indicators.filter((item) =>
-        item.indicatorType === 'UNRESOLVED_EXTERNAL_DEPENDENCIES',
+      externalReferrals: projection.indicators.filter(
+        (item) => item.indicatorType === 'UNRESOLVED_EXTERNAL_DEPENDENCIES',
       ),
       instrumentLifecycleSignals: projection.instrumentStatusSnapshot,
       revalidationRequirements: await this.prisma.complianceRevalidationRecord.findMany({

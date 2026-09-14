@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { PHASE_9G_MODEL_NAMES, PHASE_9G_STATUS_VALUES } from './oversight/compliance-status.constants';
+import {
+  PHASE_9G_MODEL_NAMES,
+  PHASE_9G_STATUS_VALUES,
+} from './oversight/compliance-status.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
