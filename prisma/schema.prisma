@@ -98,6 +98,40 @@ model Jurisdiction {
 }
 
 model Institution {
+  id                            String                          @id @default(uuid()) @db.Uuid
+  jurisdictionId                String                          @db.Uuid
+  code                          String
+  name                          String
+  description                   String?
+  type                          InstitutionType
+  status                        StructuralLifecycleStatus       @default(ACTIVE)
+  createdAt                     DateTime                        @default(now())
+  updatedAt                     DateTime                        @updatedAt
+  jurisdiction                  Jurisdiction                    @relation(fields: [jurisdictionId], references: [id])
+  governmentBodies              GovernmentBody[]
+  departments                   Department[]
+  delegations                   Delegation[]
+  externalAuthorityRelations    InstitutionExternalAuthority[]
+  functionAuthorityRecords      FunctionAuthorityRecord[]
+  functionAuthorityAssignments  FunctionAuthorityAssignment[]
+  institutionalAuthorityActs    InstitutionalAuthorityAct[]
+  responsibleGovernmentServices GovernmentService[]
+  caseReferrals                 CaseReferral[]
+  responsibleCases              Case[]
+  masterAdministrativeFiles     MasterAdministrativeFile[]
+  documentRecords               DocumentRecord[]
+  governmentCommunications      GovernmentCommunicationRecord[] @relation("GovernmentCommunicationSourceInstitution")
+  governmentDecisions           GovernmentDecision[]
+  instrumentTypeVersions        InstrumentTypeVersion[]         @relation("InstrumentIssuingInstitution")
+  instrumentNumberingRules      InstrumentNumberingRule[]
+  issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
+  complianceMattersResponsible ComplianceMatter[]
+  complianceStatusProjections  ComplianceStatusProjection[]
+  monitoringRules              MonitoringRule[]
+  dashboardDefinitions             DashboardDefinition[]
+  dashboardAccessPolicies          DashboardAccessPolicy[]
+  dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
+  dashboardIndicatorProjections    DashboardIndicatorProjection[]
   id                              String                           @id @default(uuid()) @db.Uuid
   jurisdictionId                  String                           @db.Uuid
   code                            String
@@ -179,6 +213,9 @@ model Department {
   complianceMattersResponsible  ComplianceMatter[]
   complianceStatusProjections   ComplianceStatusProjection[]
   monitoringRules               MonitoringRule[]
+  dashboardDefinitions          DashboardDefinition[]
+  dashboardAccessPolicies       DashboardAccessPolicy[]
+  dashboardIndicatorProjections DashboardIndicatorProjection[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -485,6 +522,80 @@ model UserAccount {
 }
 
 model Identity {
+  id                                  String                            @id @default(uuid()) @db.Uuid
+  type                                IdentityType
+  userAccountId                       String?                           @db.Uuid
+  personId                            String?                           @db.Uuid
+  organizationId                      String?                           @db.Uuid
+  displayName                         String
+  createdAt                           DateTime                          @default(now())
+  updatedAt                           DateTime                          @updatedAt
+  userAccount                         UserAccount?                      @relation(fields: [userAccountId], references: [id])
+  person                              Person?                           @relation(fields: [personId], references: [id])
+  organization                        Organization?                     @relation(fields: [organizationId], references: [id])
+  credentials                         Credential[]
+  authenticationMethods               AuthenticationMethod[]
+  sessions                            Session[]
+  memberships                         OrganizationMembership[]
+  representativeAuthorities           RepresentativeAuthority[]
+  officeholderLinks                   IdentityOfficeholderLink[]
+  applications                        Application[]
+  casesAsApplicant                    Case[]                            @relation("CaseApplicant")
+  caseEventsAsActor                   CaseEvent[]                       @relation("CaseEventActor")
+  communicationsAsSender              CaseCommunication[]               @relation("CommunicationSender")
+  documentVersionsReceived            DocumentVersion[]                 @relation("DocumentVersionReceivedFrom")
+  documentAssociations                DocumentAssociation[]             @relation("DocumentAssociationActor")
+  documentAuditEvents                 DocumentAuditEvent[]              @relation("DocumentAuditActor")
+  evidenceVerifications               EvidenceVerification[]            @relation("EvidenceVerificationVerifier")
+  evidencePurposeAcceptances          EvidencePurposeAcceptance[]       @relation("EvidencePurposeAcceptanceReviewer")
+  evidenceQualityAssessments          EvidenceQualityAssessment[]       @relation("EvidenceQualityAssessor")
+  departmentalReviewsAsReviewer       DepartmentalReviewRecord[]        @relation("DepartmentalReviewReviewer")
+  professionalReviews                 ProfessionalReviewRecord[]        @relation("ProfessionalReviewIdentity")
+  inspectionInspectors                InspectionInspector[]             @relation("InspectionInspectorIdentity")
+  custodyEventsAsCustodian            EvidenceCustodyEvent[]            @relation("EvidenceCustodyCustodian")
+  custodyEventsAsWitness              EvidenceCustodyEvent[]            @relation("EvidenceCustodyWitness")
+  recordCorrectionsRequested          RecordCorrection[]                @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved           RecordCorrection[]                @relation("RecordCorrectionApprover")
+  recordIntegrityEvents               RecordIntegrityEvent[]            @relation("RecordIntegrityActor")
+  recordAccessEvents                  RecordAccessEvent[]               @relation("RecordAccessIdentity")
+  decisionReadinessProposed           DecisionReadinessAssessment[]     @relation("DecisionReadinessProposedMaker")
+  decisionParticipants                DecisionParticipant[]             @relation("DecisionParticipantIdentity")
+  decisionPreparationRecords          DecisionPreparationRecord[]       @relation("DecisionPreparationEditor")
+  governmentDecisionsMade             GovernmentDecision[]              @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder         OfficialInstrument[]              @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer              IssuanceEvent[]                   @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions  InstrumentTemplateVersion[]       @relation("InstrumentTemplateApprover")
+  instrumentDeliveriesAsRecipient     InstrumentDelivery[]              @relation("InstrumentDeliveryRecipient")
+  instrumentReceiptsAsRecipient       InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipient")
+  instrumentDeliveryAuditsAsActor     InstrumentDeliveryAuditEvent[]    @relation("InstrumentDeliveryAuditActor")
+  instrumentVerificationEventsAsActor InstrumentVerificationEvent[]     @relation("InstrumentVerificationEventActor")
+  instrumentDownloadsAsActor          InstrumentDownloadEvent[]         @relation("InstrumentDownloadActor")
+  instrumentLifecycleEventsAsActor    InstrumentLifecycleEvent[]        @relation("InstrumentLifecycleActor")
+  reviewReferencesAsAppellant         DecisionReviewReference[]         @relation("ReviewAppellant")
+  externalReviewReferralsPrepared     ExternalReviewReferral[]          @relation("ExternalReviewPreparedBy")
+  externalReviewDeterminationsRecorded ExternalReviewDetermination[]    @relation("ExternalDeterminationRecordedBy")
+  suspensionRecordsExecuted           InstrumentSuspensionRecord[]      @relation("SuspensionExecutor")
+  complianceMattersAsHolder          ComplianceMatter[]            @relation("ComplianceMatterHolderIdentity")
+  obligationStatusChanges            ObligationStatusHistory[]     @relation("ObligationStatusChangedBy")
+  complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
+  complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
+  complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
+  complianceSubmissionsSubmitted     ComplianceSubmission[]        @relation("ComplianceSubmissionSubmitter")
+  obligationEvidenceLinks            ObligationEvidenceLink[]      @relation("ObligationEvidenceLinker")
+  complianceReviewsConducted         ComplianceReview[]            @relation("ComplianceReviewReviewer")
+  reviewAssignmentsAsReviewer        ReviewAssignment[]            @relation("ReviewAssignmentReviewer")
+  reviewRecommendationsAuthored      ReviewRecommendation[]        @relation("ReviewRecommendationAuthor")
+  reviewSubmissionsSubmitted         ReviewSubmission[]            @relation("ReviewSubmissionSubmitter")
+  reviewEvidenceAdmissionsRecorded   ReviewEvidenceAdmission[]     @relation("ReviewEvidenceAdmissionRecorder")
+  redressDecisionsAsReviewer         RedressDecision[]             @relation("RedressDecisionReviewer")
+  interimReliefDecisionsAsReviewer   InterimReliefDecision[]       @relation("InterimReliefDecisionReviewer")
+  reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
+  redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
+  redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  dashboardAccessPolicies            DashboardAccessPolicy[]
+  dashboardQueryAudits                 DashboardQueryAudit[]
+  dashboardSnapshotsCaptured         DashboardSnapshot[]           @relation("DashboardSnapshotCapturer")
+  dashboardIndicatorProjectionsOwned   DashboardIndicatorProjection[] @relation("DashboardIndicatorOwner")
   id                                   String                            @id @default(uuid()) @db.Uuid
   type                                 IdentityType
   userAccountId                        String?                           @db.Uuid
@@ -2245,6 +2356,7 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  dashboardIndicatorProjections     DashboardIndicatorProjection[]
   feeAssessments                    FeeAssessment[]
   invoices                          Invoice[]
   communicationMessages             CommunicationMessage[]
@@ -3747,6 +3859,7 @@ model EvidencePacket {
   case                       Case?                    @relation(fields: [caseId], references: [id])
   responsibleDepartment      Department               @relation(fields: [responsibleDepartmentId], references: [id])
   versions                   EvidencePacketVersion[]
+  dashboardDrilldownReferences DashboardDrilldownReference[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -7374,6 +7487,411 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+// ─── Phase 12B: Executive Command Console and Departmental Intelligence ─────────
+
+enum DashboardConsoleType {
+  EXECUTIVE_COMMAND
+  DEPARTMENTAL
+  SERVICE_OPERATIONS
+}
+
+enum DashboardDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum DashboardVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+  RETIRED
+}
+
+enum DashboardWidgetType {
+  INDICATOR_TILE
+  INDICATOR_LIST
+  FILTER_PANEL
+  SUMMARY_TABLE
+  TREND_CHART
+  DRILLDOWN_PANEL
+}
+
+enum DashboardIndicatorCategory {
+  SERVICE_VOLUMES
+  PENDING_DECISIONS
+  APPROACHING_DEADLINES
+  STRATEGIC_PROJECTS
+  AUTHORITY_QUESTIONS
+  GOVERNMENT_DEPENDENCIES
+  APPROVAL_BOTTLENECKS
+  EVIDENCE_DEFICIENCIES
+  COMPLIANCE_OBLIGATIONS
+  CORRECTIVE_ACTIONS
+  WORKFORCE_CONSTRAINTS
+  FINANCIAL_DEPENDENCIES
+  INTEGRATION_CONDITIONS
+  SECURITY_CONDITIONS
+  CONTINUITY_ISSUES
+  REDRESS_BACKLOG
+  INSTITUTIONAL_PERFORMANCE
+  EXECUTIVE_ESCALATION
+  ASSIGNED_CASES
+  UNASSIGNED_CASES
+  INTAKE
+  COMPLETENESS
+  REVIEWS
+  INSPECTIONS
+  GOVERNMENT_REFERRALS
+  PROFESSIONAL_REPORTS
+  DECISION_PACKETS
+  CONDITIONS
+  COMPLIANCE_MATTERS
+  APPEALS
+  RENEWALS
+  SERVICE_DEADLINES
+  STAFF_WORKLOAD
+  DEPENDENCIES
+}
+
+enum DashboardColorSemantic {
+  NEUTRAL
+  INFORMATIONAL
+  ATTENTION
+  ELEVATED
+  CRITICAL
+  POSITIVE_PRESENTATION
+  CAUTION_PRESENTATION
+}
+
+enum DashboardDataQuality {
+  VERIFIED
+  REPORTED
+  ACHIEVED
+  ESTIMATED
+  DISPUTED
+  MODELED
+  EXTERNAL_REPORTED
+  STALE_CACHED
+}
+
+enum DashboardStalenessState {
+  FRESH
+  APPROACHING_STALE
+  STALE
+  SOURCE_UNAVAILABLE
+}
+
+enum DashboardSourceAvailability {
+  AVAILABLE
+  PARTIALLY_AVAILABLE
+  UNAVAILABLE
+  DEGRADED
+}
+
+enum DashboardAccessPurpose {
+  OPERATIONAL_OVERSIGHT
+  EXECUTIVE_BRIEFING
+  DEPARTMENT_MANAGEMENT
+  CASE_WORK
+  AUDIT_REVIEW
+  TECHNICAL_OPERATIONS
+}
+
+enum DashboardSensitivityLevel {
+  PUBLIC_SUMMARY
+  OFFICIAL
+  RESTRICTED
+  HIGHLY_RESTRICTED
+}
+
+enum DashboardFilterDimension {
+  DEPARTMENT
+  SERVICE
+  PROJECT
+  SECTOR
+  GEOGRAPHY
+  OWNER
+  AUTHORITY_STATUS
+  RISK_LEVEL
+  DEADLINE
+  EVIDENCE_STATUS
+  DECISION_GATE
+  EXTERNAL_DEPENDENCY
+}
+
+enum DashboardDrilldownReferenceType {
+  METRIC_DEFINITION
+  CALCULATION_RUN
+  UNDERLYING_RECORD
+  EVIDENCE_PACKET
+  SOURCE_STATUS
+}
+
+enum DashboardQueryAuditResult {
+  GRANTED
+  DENIED_INSUFFICIENT_PURPOSE
+  DENIED_SENSITIVITY
+  DENIED_INSTITUTIONAL_BOUNDARY
+  DENIED_TECHNICAL_ONLY
+  DENIED_DEPARTMENT_SCOPE
+}
+
+enum DashboardStatusDictionaryOwnerType {
+  PLATFORM
+  INSTITUTION
+  DEPARTMENT
+}
+
+model DashboardStatusDictionaryEntry {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  code                 String
+  label                String
+  meaning              String
+  colorSemantic        DashboardColorSemantic
+  sourceRequirements   Json                             @default("[]")
+  calculationRule      String
+  limitations          String
+  permittedTransitions Json                             @default("[]")
+  stalenessRule        String
+  ownerType            DashboardStatusDictionaryOwnerType
+  ownerReference       String
+  version              Int                              @default(1)
+  institutionId        String?                          @db.Uuid
+  isActive             Boolean                          @default(true)
+  createdAt            DateTime                         @default(now())
+  updatedAt            DateTime                         @updatedAt
+  institution          Institution?                     @relation(fields: [institutionId], references: [id])
+  indicatorDefinitions DashboardIndicatorDefinition[]
+  indicatorProjections DashboardIndicatorProjection[]
+
+  @@unique([code, version, institutionId])
+  @@index([institutionId])
+  @@index([isActive])
+  @@map("dashboard_status_dictionary_entries")
+}
+
+model DashboardDefinition {
+  id             String                    @id @default(uuid()) @db.Uuid
+  code           String
+  name           String
+  description    String?
+  consoleType    DashboardConsoleType
+  status         DashboardDefinitionStatus @default(DRAFT)
+  institutionId  String?                   @db.Uuid
+  departmentId   String?                   @db.Uuid
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  institution    Institution?              @relation(fields: [institutionId], references: [id])
+  department     Department?               @relation(fields: [departmentId], references: [id])
+  versions       DashboardVersion[]
+  accessPolicies DashboardAccessPolicy[]
+  queryAudits    DashboardQueryAudit[]
+
+  @@unique([code, institutionId, departmentId])
+  @@index([consoleType])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@map("dashboard_definitions")
+}
+
+model DashboardVersion {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  dashboardDefinitionId String                   @db.Uuid
+  versionNumber         Int
+  status                DashboardVersionStatus   @default(DRAFT)
+  filterDimensions      DashboardFilterDimension[]
+  effectiveFrom         DateTime?
+  effectiveUntil        DateTime?
+  projectionDisclaimer  String
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  dashboardDefinition   DashboardDefinition      @relation(fields: [dashboardDefinitionId], references: [id], onDelete: Cascade)
+  widgets               DashboardWidgetDefinition[]
+  indicatorProjections  DashboardIndicatorProjection[]
+  snapshots             DashboardSnapshot[]
+  queryAudits           DashboardQueryAudit[]
+
+  @@unique([dashboardDefinitionId, versionNumber])
+  @@index([status])
+  @@map("dashboard_versions")
+}
+
+model DashboardWidgetDefinition {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  dashboardVersionId    String                      @db.Uuid
+  code                  String
+  title                 String
+  widgetType            DashboardWidgetType
+  indicatorDefinitionId String?                     @db.Uuid
+  displayOrder          Int                         @default(0)
+  filterConfig          Json                        @default("{}")
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  dashboardVersion      DashboardVersion            @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  indicatorDefinition   DashboardIndicatorDefinition? @relation(fields: [indicatorDefinitionId], references: [id])
+
+  @@unique([dashboardVersionId, code])
+  @@index([indicatorDefinitionId])
+  @@map("dashboard_widget_definitions")
+}
+
+model DashboardIndicatorDefinition {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  code                     String                         @unique
+  label                    String
+  category                 DashboardIndicatorCategory
+  statusDictionaryEntryId  String                         @db.Uuid
+  calculationRuleRef       String
+  sourceRequirements       Json                           @default("[]")
+  requiresEvidencePacket   Boolean                        @default(false)
+  drilldownRequired        Boolean                        @default(true)
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  statusDictionaryEntry    DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
+  widgets                  DashboardWidgetDefinition[]
+  projections              DashboardIndicatorProjection[]
+
+  @@index([category])
+  @@index([statusDictionaryEntryId])
+  @@map("dashboard_indicator_definitions")
+}
+
+model DashboardIndicatorProjection {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  indicatorDefinitionId     String                         @db.Uuid
+  dashboardVersionId        String                         @db.Uuid
+  statusDictionaryEntryId String                         @db.Uuid
+  institutionId             String?                        @db.Uuid
+  departmentId              String?                        @db.Uuid
+  caseId                    String?                        @db.Uuid
+  countValue                Int                            @default(0)
+  scoreValue                Float?
+  displayLabel              String
+  dataQuality               DashboardDataQuality
+  calculatedAt              DateTime                       @default(now())
+  sourceFreshness           DateTime?
+  staleAfter                DateTime?
+  currentStaleness          DashboardStalenessState        @default(FRESH)
+  sourceAvailability        DashboardSourceAvailability    @default(AVAILABLE)
+  limitations               String?
+  ownerIdentityId           String?                        @db.Uuid
+  effectiveDate             DateTime?
+  lastRefresh               DateTime?
+  revalidationDate          DateTime?
+  projectionVersion         Int                            @default(1)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  indicatorDefinition       DashboardIndicatorDefinition   @relation(fields: [indicatorDefinitionId], references: [id])
+  dashboardVersion          DashboardVersion               @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  statusDictionaryEntry     DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
+  institution               Institution?                   @relation(fields: [institutionId], references: [id])
+  department                Department?                    @relation(fields: [departmentId], references: [id])
+  case                      Case?                          @relation(fields: [caseId], references: [id])
+  ownerIdentity             Identity?                      @relation("DashboardIndicatorOwner", fields: [ownerIdentityId], references: [id])
+  drilldownReferences       DashboardDrilldownReference[]
+
+  @@index([indicatorDefinitionId])
+  @@index([dashboardVersionId])
+  @@index([departmentId])
+  @@index([institutionId])
+  @@index([currentStaleness])
+  @@map("dashboard_indicator_projections")
+}
+
+model DashboardDrilldownReference {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  indicatorProjectionId   String                        @db.Uuid
+  referenceType         DashboardDrilldownReferenceType
+  referenceId           String                        @db.Uuid
+  referenceLabel        String
+  evidencePacketId      String?                       @db.Uuid
+  sourceStatus          String
+  ownerReference        String
+  effectiveDate         DateTime?
+  lastRefresh           DateTime?
+  revalidationDate      DateTime?
+  limitations           String?
+  createdAt             DateTime                      @default(now())
+  indicatorProjection   DashboardIndicatorProjection  @relation(fields: [indicatorProjectionId], references: [id], onDelete: Cascade)
+  evidencePacket        EvidencePacket?               @relation(fields: [evidencePacketId], references: [id])
+
+  @@index([indicatorProjectionId])
+  @@index([referenceType])
+  @@index([referenceId])
+  @@map("dashboard_drilldown_references")
+}
+
+model DashboardSnapshot {
+  id                    String           @id @default(uuid()) @db.Uuid
+  dashboardVersionId    String           @db.Uuid
+  capturedAt            DateTime         @default(now())
+  capturedByIdentityId  String           @db.Uuid
+  snapshotPayload       Json
+  snapshotHash          String
+  replayToken           String           @unique
+  isImmutable           Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  dashboardVersion      DashboardVersion @relation(fields: [dashboardVersionId], references: [id])
+  capturedBy            Identity         @relation("DashboardSnapshotCapturer", fields: [capturedByIdentityId], references: [id])
+
+  @@index([dashboardVersionId])
+  @@index([capturedAt])
+  @@map("dashboard_snapshots")
+}
+
+model DashboardQueryAudit {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  identityId            String                  @db.Uuid
+  dashboardDefinitionId String?                 @db.Uuid
+  dashboardVersionId    String?                 @db.Uuid
+  institutionId         String?                 @db.Uuid
+  departmentId          String?                 @db.Uuid
+  purpose               DashboardAccessPurpose
+  sensitivityScope      DashboardSensitivityLevel
+  technicalPermissionOnly Boolean                 @default(false)
+  queryFilters          Json                    @default("{}")
+  accessResult          DashboardQueryAuditResult
+  resultSummary         String?
+  queriedAt             DateTime                @default(now())
+  identity              Identity                @relation(fields: [identityId], references: [id])
+  dashboardDefinition   DashboardDefinition?    @relation(fields: [dashboardDefinitionId], references: [id])
+  dashboardVersion      DashboardVersion?       @relation(fields: [dashboardVersionId], references: [id])
+
+  @@index([identityId])
+  @@index([dashboardDefinitionId])
+  @@index([queriedAt])
+  @@map("dashboard_query_audits")
+}
+
+model DashboardAccessPolicy {
+  id                            String                    @id @default(uuid()) @db.Uuid
+  dashboardDefinitionId         String                    @db.Uuid
+  identityId                    String?                   @db.Uuid
+  institutionId                 String?                   @db.Uuid
+  departmentId                  String?                   @db.Uuid
+  caseAssignmentRequired        Boolean                   @default(false)
+  purpose                       DashboardAccessPurpose
+  sensitivityLevel              DashboardSensitivityLevel
+  securityClearanceLevel        String?
+  technicalPermissionCode       String?
+  requiresInstitutionalBoundary Boolean                   @default(true)
+  substantiveAccessRequired     Boolean                   @default(true)
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @updatedAt
+  dashboardDefinition           DashboardDefinition       @relation(fields: [dashboardDefinitionId], references: [id], onDelete: Cascade)
+  identity                      Identity?                 @relation(fields: [identityId], references: [id])
+  institution                   Institution?              @relation(fields: [institutionId], references: [id])
+  department                    Department?               @relation(fields: [departmentId], references: [id])
+
+  @@index([dashboardDefinitionId])
+  @@index([identityId])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@map("dashboard_access_policies")
 // ─── Phase 11: Financial Administration, Notifications and Government Integrations ─
 
 // ─── Phase 11A: Fee Schedules and Assessment ───────────────────────────────

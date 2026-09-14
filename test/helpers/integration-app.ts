@@ -46,7 +46,21 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await prisma.organization.deleteMany();
 }
 
+export async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
+  await prisma.dashboardDrilldownReference.deleteMany();
+  await prisma.dashboardIndicatorProjection.deleteMany();
+  await prisma.dashboardSnapshot.deleteMany();
+  await prisma.dashboardQueryAudit.deleteMany();
+  await prisma.dashboardAccessPolicy.deleteMany();
+  await prisma.dashboardWidgetDefinition.deleteMany();
+  await prisma.dashboardIndicatorDefinition.deleteMany();
+  await prisma.dashboardVersion.deleteMany();
+  await prisma.dashboardDefinition.deleteMany();
+  await prisma.dashboardStatusDictionaryEntry.deleteMany();
+}
+
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetIntelligenceData(prisma);
   await resetFinancialData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
