@@ -20,6 +20,7 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.complianceRevalidationRecord.deleteMany();
   await prisma.complianceAlert.deleteMany();
   await prisma.complianceMonitoringEvent.deleteMany();
+  await prisma.monitoringRule.deleteMany();
   await prisma.complianceStatusProjection.deleteMany();
   await prisma.emergencyInterimActionRecord.deleteMany();
   await prisma.enforcementReferral.deleteMany();

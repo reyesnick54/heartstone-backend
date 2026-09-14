@@ -147,7 +147,12 @@ def remove_non_redress_index_creations(sql: str) -> str:
         if "INDEX" not in line:
             lines.append(line)
             continue
-        if "redress_" in line or "complaint_" in line or "review_" in line:
+        if (
+            "redress_" in line
+            or "complaint_" in line
+            or "review_" in line
+            or "reviewer_" in line
+        ):
             lines.append(line)
             continue
         if any(

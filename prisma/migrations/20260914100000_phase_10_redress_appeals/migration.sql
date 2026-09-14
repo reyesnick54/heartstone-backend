@@ -850,6 +850,7 @@ CREATE INDEX "automation_challenge_dispositions_challengeId_idx" ON "automation_
 CREATE INDEX "review_assignments_matterId_idx" ON "review_assignments"("matterId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "reviewer_independence_assessments_assignmentId_key" ON "reviewer_independence_assessments"("assignmentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "review_authority_assessments_assignmentId_key" ON "review_authority_assessments"("assignmentId");
