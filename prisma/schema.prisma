@@ -98,44 +98,44 @@ model Jurisdiction {
 }
 
 model Institution {
-  id                              String                           @id @default(uuid()) @db.Uuid
-  jurisdictionId                  String                           @db.Uuid
-  code                            String
-  name                            String
-  description                     String?
-  type                            InstitutionType
-  status                          StructuralLifecycleStatus        @default(ACTIVE)
-  createdAt                       DateTime                         @default(now())
-  updatedAt                       DateTime                         @updatedAt
-  jurisdiction                    Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
-  governmentBodies                GovernmentBody[]
-  departments                     Department[]
-  delegations                     Delegation[]
-  externalAuthorityRelations      InstitutionExternalAuthority[]
-  functionAuthorityRecords        FunctionAuthorityRecord[]
-  functionAuthorityAssignments    FunctionAuthorityAssignment[]
-  institutionalAuthorityActs      InstitutionalAuthorityAct[]
-  responsibleGovernmentServices   GovernmentService[]
-  caseReferrals                   CaseReferral[]
-  responsibleCases                Case[]
-  masterAdministrativeFiles       MasterAdministrativeFile[]
-  documentRecords                 DocumentRecord[]
-  governmentCommunications        GovernmentCommunicationRecord[]  @relation("GovernmentCommunicationSourceInstitution")
-  governmentDecisions             GovernmentDecision[]
-  instrumentTypeVersions          InstrumentTypeVersion[]          @relation("InstrumentIssuingInstitution")
-  instrumentNumberingRules        InstrumentNumberingRule[]
-  issuedOfficialInstruments       OfficialInstrument[]             @relation("OfficialInstrumentIssuerInstitution")
-  complianceMattersResponsible    ComplianceMatter[]
-  complianceStatusProjections     ComplianceStatusProjection[]
-  monitoringRules                 MonitoringRule[]
-  feeSchedules                    FeeSchedule[]
-  integrationDefinitions          IntegrationDefinition[]
-  paymentProviderConfigurations   PaymentProviderConfiguration[]
-  communicationTemplates          CommunicationTemplate[]
-  mandatoryCommunicationRules     MandatoryCommunicationRule[]
-  authoritativeSourceDesignations AuthoritativeSourceDesignation[]
-  reconciliationBatches           ReconciliationBatch[]
-  communicationPreferences        CommunicationPreference[]
+  id                               String                           @id @default(uuid()) @db.Uuid
+  jurisdictionId                   String                           @db.Uuid
+  code                             String
+  name                             String
+  description                      String?
+  type                             InstitutionType
+  status                           StructuralLifecycleStatus        @default(ACTIVE)
+  createdAt                        DateTime                         @default(now())
+  updatedAt                        DateTime                         @updatedAt
+  jurisdiction                     Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+  governmentBodies                 GovernmentBody[]
+  departments                      Department[]
+  delegations                      Delegation[]
+  externalAuthorityRelations       InstitutionExternalAuthority[]
+  functionAuthorityRecords         FunctionAuthorityRecord[]
+  functionAuthorityAssignments     FunctionAuthorityAssignment[]
+  institutionalAuthorityActs       InstitutionalAuthorityAct[]
+  responsibleGovernmentServices    GovernmentService[]
+  caseReferrals                    CaseReferral[]
+  responsibleCases                 Case[]
+  masterAdministrativeFiles        MasterAdministrativeFile[]
+  documentRecords                  DocumentRecord[]
+  governmentCommunications         GovernmentCommunicationRecord[]  @relation("GovernmentCommunicationSourceInstitution")
+  governmentDecisions              GovernmentDecision[]
+  instrumentTypeVersions           InstrumentTypeVersion[]          @relation("InstrumentIssuingInstitution")
+  instrumentNumberingRules         InstrumentNumberingRule[]
+  issuedOfficialInstruments        OfficialInstrument[]             @relation("OfficialInstrumentIssuerInstitution")
+  complianceMattersResponsible     ComplianceMatter[]
+  complianceStatusProjections      ComplianceStatusProjection[]
+  monitoringRules                  MonitoringRule[]
+  feeSchedules                     FeeSchedule[]
+  integrationDefinitions           IntegrationDefinition[]
+  paymentProviderConfigurations    PaymentProviderConfiguration[]
+  communicationTemplates           CommunicationTemplate[]
+  mandatoryCommunicationRules      MandatoryCommunicationRule[]
+  authoritativeSourceDesignations  AuthoritativeSourceDesignation[]
+  reconciliationBatches            ReconciliationBatch[]
+  communicationPreferences         CommunicationPreference[]
   dashboardDefinitions             DashboardDefinition[]
   dashboardAccessPolicies          DashboardAccessPolicy[]
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
@@ -143,10 +143,10 @@ model Institution {
   strategicProjectProfiles         StrategicProjectProfile[]
   performanceFrameworks            PerformanceFramework[]
   ownedMetricDefinitions           MetricDefinition[]               @relation("MetricDefinitionOwnerInstitution")
-  ownedDigitalTwinDefinitions    DigitalTwinDefinition[]
-  analysisRequests             AnalysisRequest[]
-  intelligenceMonitoringRules  IntelligenceMonitoringRule[]
-  riskDefinitions              RiskDefinition[]
+  ownedDigitalTwinDefinitions      DigitalTwinDefinition[]
+  analysisRequests                 AnalysisRequest[]
+  intelligenceMonitoringRules      IntelligenceMonitoringRule[]
+  riskDefinitions                  RiskDefinition[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -171,15 +171,15 @@ model GovernmentBody {
 }
 
 model Department {
-  id                            String                       @id @default(uuid()) @db.Uuid
-  institutionId                 String                       @db.Uuid
+  id                            String                         @id @default(uuid()) @db.Uuid
+  institutionId                 String                         @db.Uuid
   code                          String
   name                          String
   description                   String?
-  status                        StructuralLifecycleStatus    @default(ACTIVE)
-  createdAt                     DateTime                     @default(now())
-  updatedAt                     DateTime                     @updatedAt
-  institution                   Institution                  @relation(fields: [institutionId], references: [id])
+  status                        StructuralLifecycleStatus      @default(ACTIVE)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  institution                   Institution                    @relation(fields: [institutionId], references: [id])
   offices                       Office[]
   responsibleGovernmentServices GovernmentService[]
   responsibleCases              Case[]
@@ -226,52 +226,54 @@ model Office {
 }
 
 model Officeholder {
-  id                               String                        @id @default(uuid()) @db.Uuid
-  code                             String                        @unique
-  name                             String
-  description                      String?
-  status                           StructuralLifecycleStatus     @default(ACTIVE)
-  createdAt                        DateTime                      @default(now())
-  updatedAt                        DateTime                      @updatedAt
-  appointments                     Appointment[]
-  delegationsAsDelegator           Delegation[]                  @relation("DelegationDelegatorOfficeholder")
-  delegationsAsRecipient           Delegation[]                  @relation("DelegationRecipientOfficeholder")
-  identityLinks                    IdentityOfficeholderLink[]
-  functionAuthorityAssignments     FunctionAuthorityAssignment[]
-  ownedGovernmentServices          GovernmentService[]
-  managedCases                     Case[]                        @relation("CaseManager")
-  caseEvents                       CaseEvent[]                   @relation("CaseEventOfficeholder")
-  communicationsAsSender           CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
-  evidenceVerifications            EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
-  evidencePurposeAcceptances       EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
-  evidenceQualityAssessments       EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
-  departmentalReviewsAsReviewer    DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
-  inspectionInspectors             InspectionInspector[]
-  custodyEventsAsCustodian         EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
-  custodyEventsAsWitness           EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
-  assembledEvidencePackets         EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
-  authorizedPacketExclusions       EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
-  recordCorrectionsApproved        RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
-  recordIntegrityEvents            RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
-  recordAccessEvents               RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
-  decisionReadinessProposed        DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
-  decisionParticipants             DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
-  governmentDecisionsMade          GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
-  issuedOfficialInstruments        OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
-  issuanceEventsAsIssuer           IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
-  instrumentsHeld                  OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
-  instrumentLifecycleEvents        InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
-  reviewReferencesAsAppellant      DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
-  complianceProjectionSubjects     ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
-  complianceReviewsAsReviewer      ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
-  reviewAssignmentsAsReviewer      ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
-  redressDecisionsAsReviewer       RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
-  interimReliefDecisionsAsReviewer InterimReliefDecision[]       @relation("InterimReliefDecisionReviewerOfficeholder")
-  reviewStayRecordsAsDecider       ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
-  digitalTwinDefinitionsOwned   DigitalTwinDefinition[]       @relation("DigitalTwinInstitutionalOwner")
-  digitalTwinSourcesOwned       DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
-  simulationReviewsConducted    SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
-  consequentialUseReviewsConducted ConsequentialUseReview[]   @relation("ConsequentialUseOfficeholderReviewer")
+  id                                String                        @id @default(uuid()) @db.Uuid
+  code                              String                        @unique
+  name                              String
+  description                       String?
+  status                            StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                         DateTime                      @default(now())
+  updatedAt                         DateTime                      @updatedAt
+  appointments                      Appointment[]
+  delegationsAsDelegator            Delegation[]                  @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient            Delegation[]                  @relation("DelegationRecipientOfficeholder")
+  identityLinks                     IdentityOfficeholderLink[]
+  functionAuthorityAssignments      FunctionAuthorityAssignment[]
+  ownedGovernmentServices           GovernmentService[]
+  managedCases                      Case[]                        @relation("CaseManager")
+  caseEvents                        CaseEvent[]                   @relation("CaseEventOfficeholder")
+  communicationsAsSender            CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications             EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances        EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments        EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer     DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors              InspectionInspector[]
+  custodyEventsAsCustodian          EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness            EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets          EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions        EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved         RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents             RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents                RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed         DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants              DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade           GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments         OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer            IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
+  instrumentsHeld                   OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
+  instrumentLifecycleEvents         InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
+  reviewReferencesAsAppellant       DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  complianceProjectionSubjects      ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  complianceReviewsAsReviewer       ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
+  reviewAssignmentsAsReviewer       ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
+  redressDecisionsAsReviewer        RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
+  interimReliefDecisionsAsReviewer  InterimReliefDecision[]       @relation("InterimReliefDecisionReviewerOfficeholder")
+  reviewStayRecordsAsDecider        ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
+  digitalTwinDefinitionsOwned       DigitalTwinDefinition[]       @relation("DigitalTwinInstitutionalOwner")
+  digitalTwinSourcesOwned           DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
+  simulationReviewsConducted        SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
+  consequentialUseReviewsConducted  ConsequentialUseReview[]      @relation("ConsequentialUseOfficeholderReviewer")
+  operationalActivationsAccountable OperationalActivationRecord[]
+  exitAcceptancesRecorded           ExitAcceptanceRecord[]
 
   @@map("officeholders")
 }
@@ -505,121 +507,142 @@ model UserAccount {
 }
 
 model Identity {
-  id                                   String                            @id @default(uuid()) @db.Uuid
-  type                                 IdentityType
-  userAccountId                        String?                           @db.Uuid
-  personId                             String?                           @db.Uuid
-  organizationId                       String?                           @db.Uuid
-  displayName                          String
-  createdAt                            DateTime                          @default(now())
-  updatedAt                            DateTime                          @updatedAt
-  userAccount                          UserAccount?                      @relation(fields: [userAccountId], references: [id])
-  person                               Person?                           @relation(fields: [personId], references: [id])
-  organization                         Organization?                     @relation(fields: [organizationId], references: [id])
-  credentials                          Credential[]
-  authenticationMethods                AuthenticationMethod[]
-  sessions                             Session[]
-  memberships                          OrganizationMembership[]
-  representativeAuthorities            RepresentativeAuthority[]
-  officeholderLinks                    IdentityOfficeholderLink[]
-  applications                         Application[]
-  casesAsApplicant                     Case[]                            @relation("CaseApplicant")
-  caseEventsAsActor                    CaseEvent[]                       @relation("CaseEventActor")
-  communicationsAsSender               CaseCommunication[]               @relation("CommunicationSender")
-  documentVersionsReceived             DocumentVersion[]                 @relation("DocumentVersionReceivedFrom")
-  documentAssociations                 DocumentAssociation[]             @relation("DocumentAssociationActor")
-  documentAuditEvents                  DocumentAuditEvent[]              @relation("DocumentAuditActor")
-  evidenceVerifications                EvidenceVerification[]            @relation("EvidenceVerificationVerifier")
-  evidencePurposeAcceptances           EvidencePurposeAcceptance[]       @relation("EvidencePurposeAcceptanceReviewer")
-  evidenceQualityAssessments           EvidenceQualityAssessment[]       @relation("EvidenceQualityAssessor")
-  departmentalReviewsAsReviewer        DepartmentalReviewRecord[]        @relation("DepartmentalReviewReviewer")
-  professionalReviews                  ProfessionalReviewRecord[]        @relation("ProfessionalReviewIdentity")
-  inspectionInspectors                 InspectionInspector[]             @relation("InspectionInspectorIdentity")
-  custodyEventsAsCustodian             EvidenceCustodyEvent[]            @relation("EvidenceCustodyCustodian")
-  custodyEventsAsWitness               EvidenceCustodyEvent[]            @relation("EvidenceCustodyWitness")
-  recordCorrectionsRequested           RecordCorrection[]                @relation("RecordCorrectionRequester")
-  recordCorrectionsApproved            RecordCorrection[]                @relation("RecordCorrectionApprover")
-  recordIntegrityEvents                RecordIntegrityEvent[]            @relation("RecordIntegrityActor")
-  recordAccessEvents                   RecordAccessEvent[]               @relation("RecordAccessIdentity")
-  decisionReadinessProposed            DecisionReadinessAssessment[]     @relation("DecisionReadinessProposedMaker")
-  decisionParticipants                 DecisionParticipant[]             @relation("DecisionParticipantIdentity")
-  decisionPreparationRecords           DecisionPreparationRecord[]       @relation("DecisionPreparationEditor")
-  governmentDecisionsMade              GovernmentDecision[]              @relation("GovernmentDecisionMaker")
-  officialInstrumentsAsHolder          OfficialInstrument[]              @relation("OfficialInstrumentHolderIdentity")
-  issuanceEventsAsIssuer               IssuanceEvent[]                   @relation("IssuanceEventIssuerIdentity")
-  approvedInstrumentTemplateVersions   InstrumentTemplateVersion[]       @relation("InstrumentTemplateApprover")
-  instrumentDeliveriesAsRecipient      InstrumentDelivery[]              @relation("InstrumentDeliveryRecipient")
-  instrumentReceiptsAsRecipient        InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipient")
-  instrumentDeliveryAuditsAsActor      InstrumentDeliveryAuditEvent[]    @relation("InstrumentDeliveryAuditActor")
-  instrumentVerificationEventsAsActor  InstrumentVerificationEvent[]     @relation("InstrumentVerificationEventActor")
-  instrumentDownloadsAsActor           InstrumentDownloadEvent[]         @relation("InstrumentDownloadActor")
-  instrumentLifecycleEventsAsActor     InstrumentLifecycleEvent[]        @relation("InstrumentLifecycleActor")
-  reviewReferencesAsAppellant          DecisionReviewReference[]         @relation("ReviewAppellant")
-  externalReviewReferralsPrepared      ExternalReviewReferral[]          @relation("ExternalReviewPreparedBy")
-  externalReviewDeterminationsRecorded ExternalReviewDetermination[]     @relation("ExternalDeterminationRecordedBy")
-  suspensionRecordsExecuted            InstrumentSuspensionRecord[]      @relation("SuspensionExecutor")
-  complianceMattersAsHolder            ComplianceMatter[]                @relation("ComplianceMatterHolderIdentity")
-  obligationStatusChanges              ObligationStatusHistory[]         @relation("ObligationStatusChangedBy")
-  complianceProjectionSubjects         ComplianceStatusProjection[]      @relation("ComplianceProjectionSubjectIdentity")
-  complianceAlertReviews               ComplianceAlert[]                 @relation("ComplianceAlertReviewer")
-  complianceRevalidationRecords        ComplianceRevalidationRecord[]    @relation("ComplianceRevalidationRecorder")
-  complianceSubmissionsSubmitted       ComplianceSubmission[]            @relation("ComplianceSubmissionSubmitter")
-  obligationEvidenceLinks              ObligationEvidenceLink[]          @relation("ObligationEvidenceLinker")
-  complianceReviewsConducted           ComplianceReview[]                @relation("ComplianceReviewReviewer")
-  reviewAssignmentsAsReviewer          ReviewAssignment[]                @relation("ReviewAssignmentReviewer")
-  reviewRecommendationsAuthored        ReviewRecommendation[]            @relation("ReviewRecommendationAuthor")
-  reviewSubmissionsSubmitted           ReviewSubmission[]                @relation("ReviewSubmissionSubmitter")
-  reviewEvidenceAdmissionsRecorded     ReviewEvidenceAdmission[]         @relation("ReviewEvidenceAdmissionRecorder")
-  redressDecisionsAsReviewer           RedressDecision[]                 @relation("RedressDecisionReviewer")
-  interimReliefDecisionsAsReviewer     InterimReliefDecision[]           @relation("InterimReliefDecisionReviewer")
-  reviewStayRecordsAsDecider           ReviewStayRecord[]                @relation("ReviewStayDecider")
-  redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[]     @relation("RedressReviewRecordSnapshotCapturer")
-  redressImplementationActions         RedressImplementationAction[]     @relation("RedressImplementationActionResponsible")
-  feeScheduleVersionApprovals          FeeScheduleVersion[]              @relation("FeeScheduleVersionApprover")
-  feeAdjustmentRequestsRequested       FeeAdjustmentRequest[]            @relation("FeeAdjustmentRequestRequester")
-  feeAdjustmentDecisionsDecided        FeeAdjustmentDecision[]           @relation("FeeAdjustmentDecisionDecider")
-  refundRequestsRequested              RefundRequest[]                   @relation("RefundRequestRequester")
-  refundAuthorizationsAuthorized       RefundAuthorization[]             @relation("RefundAuthorizationAuthorizer")
-  financialApprovalsApproved           FinancialApprovalRecord[]         @relation("FinancialApprovalApprover")
-  integrationAcceptanceAssessments     IntegrationAcceptanceRecord[]     @relation("IntegrationAcceptanceAssessor")
-  sourceDiscrepancyResolutions         SourceDiscrepancyResolution[]     @relation("SourceDiscrepancyResolver")
-  integrationRecoveryVerifications     IntegrationRecoveryEvent[]        @relation("IntegrationRecoveryVerifier")
-  communicationRecipients              CommunicationRecipient[]          @relation("CommunicationRecipientIdentity")
-  communicationPreferences             CommunicationPreference[]         @relation("CommunicationPreferenceIdentity")
-  accessibilityAccommodations          AccessibilityAccommodation[]      @relation("AccessibilityAccommodationIdentity")
-  translationRecords                   TranslationRecord[]               @relation("TranslationRecordTranslator")
-  reconciliationExceptionsOwned        ReconciliationException[]         @relation("ReconciliationExceptionOwner")
-  dashboardAccessPolicies            DashboardAccessPolicy[]
-  dashboardQueryAudits                 DashboardQueryAudit[]
-  dashboardSnapshotsCaptured         DashboardSnapshot[]           @relation("DashboardSnapshotCapturer")
-  dashboardIndicatorProjectionsOwned   DashboardIndicatorProjection[] @relation("DashboardIndicatorOwner")
-  performanceClaimsAsserted          PerformanceClaim[]            @relation("PerformanceClaimAsserter")
-  performanceClaimsReviewed          PerformanceClaim[]            @relation("PerformanceClaimReviewer")
-  strategicProjectStagesRecorded     StrategicProjectStage[]       @relation("StrategicProjectStageRecorder")
-  strategicProjectMilestonesReported StrategicProjectMilestone[]   @relation("StrategicProjectMilestoneReporter")
-  capitalEvidenceRecorded            CapitalEvidenceRecord[]       @relation("CapitalEvidenceRecorder")
-  employmentEvidenceRecorded         EmploymentEvidenceRecord[]    @relation("EmploymentEvidenceRecorder")
-  infrastructureDeliveryRecorded     InfrastructureDeliveryRecord[] @relation("InfrastructureDeliveryRecorder")
-  sectorObservationsRecorded         SectorDevelopmentObservation[] @relation("SectorObservationRecorder")
-  projectStatusProjectionsDerived    ProjectStatusProjection[]     @relation("ProjectStatusProjectionDeriver")
-  metricBaselinesApproved                  MetricBaseline[]                   @relation("MetricBaselineApprover")
-  measuredPerformanceClaimsOwned           MeasuredPerformanceClaim[]         @relation("MeasuredPerformanceClaimOwner")
-  measuredPerformanceClaimsReviewed        MeasuredPerformanceClaim[]         @relation("MeasuredPerformanceClaimReviewer")
-  measuredPerformanceClaimReviewsConducted MeasuredPerformanceClaimReview[]   @relation("MeasuredPerformanceClaimReviewReviewer")
+  id                                       String                                 @id @default(uuid()) @db.Uuid
+  type                                     IdentityType
+  userAccountId                            String?                                @db.Uuid
+  personId                                 String?                                @db.Uuid
+  organizationId                           String?                                @db.Uuid
+  displayName                              String
+  createdAt                                DateTime                               @default(now())
+  updatedAt                                DateTime                               @updatedAt
+  userAccount                              UserAccount?                           @relation(fields: [userAccountId], references: [id])
+  person                                   Person?                                @relation(fields: [personId], references: [id])
+  organization                             Organization?                          @relation(fields: [organizationId], references: [id])
+  credentials                              Credential[]
+  authenticationMethods                    AuthenticationMethod[]
+  sessions                                 Session[]
+  memberships                              OrganizationMembership[]
+  representativeAuthorities                RepresentativeAuthority[]
+  officeholderLinks                        IdentityOfficeholderLink[]
+  applications                             Application[]
+  casesAsApplicant                         Case[]                                 @relation("CaseApplicant")
+  caseEventsAsActor                        CaseEvent[]                            @relation("CaseEventActor")
+  communicationsAsSender                   CaseCommunication[]                    @relation("CommunicationSender")
+  documentVersionsReceived                 DocumentVersion[]                      @relation("DocumentVersionReceivedFrom")
+  documentAssociations                     DocumentAssociation[]                  @relation("DocumentAssociationActor")
+  documentAuditEvents                      DocumentAuditEvent[]                   @relation("DocumentAuditActor")
+  evidenceVerifications                    EvidenceVerification[]                 @relation("EvidenceVerificationVerifier")
+  evidencePurposeAcceptances               EvidencePurposeAcceptance[]            @relation("EvidencePurposeAcceptanceReviewer")
+  evidenceQualityAssessments               EvidenceQualityAssessment[]            @relation("EvidenceQualityAssessor")
+  departmentalReviewsAsReviewer            DepartmentalReviewRecord[]             @relation("DepartmentalReviewReviewer")
+  professionalReviews                      ProfessionalReviewRecord[]             @relation("ProfessionalReviewIdentity")
+  inspectionInspectors                     InspectionInspector[]                  @relation("InspectionInspectorIdentity")
+  custodyEventsAsCustodian                 EvidenceCustodyEvent[]                 @relation("EvidenceCustodyCustodian")
+  custodyEventsAsWitness                   EvidenceCustodyEvent[]                 @relation("EvidenceCustodyWitness")
+  recordCorrectionsRequested               RecordCorrection[]                     @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved                RecordCorrection[]                     @relation("RecordCorrectionApprover")
+  recordIntegrityEvents                    RecordIntegrityEvent[]                 @relation("RecordIntegrityActor")
+  recordAccessEvents                       RecordAccessEvent[]                    @relation("RecordAccessIdentity")
+  decisionReadinessProposed                DecisionReadinessAssessment[]          @relation("DecisionReadinessProposedMaker")
+  decisionParticipants                     DecisionParticipant[]                  @relation("DecisionParticipantIdentity")
+  decisionPreparationRecords               DecisionPreparationRecord[]            @relation("DecisionPreparationEditor")
+  governmentDecisionsMade                  GovernmentDecision[]                   @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder              OfficialInstrument[]                   @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer                   IssuanceEvent[]                        @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions       InstrumentTemplateVersion[]            @relation("InstrumentTemplateApprover")
+  instrumentDeliveriesAsRecipient          InstrumentDelivery[]                   @relation("InstrumentDeliveryRecipient")
+  instrumentReceiptsAsRecipient            InstrumentReceiptAcknowledgment[]      @relation("InstrumentReceiptRecipient")
+  instrumentDeliveryAuditsAsActor          InstrumentDeliveryAuditEvent[]         @relation("InstrumentDeliveryAuditActor")
+  instrumentVerificationEventsAsActor      InstrumentVerificationEvent[]          @relation("InstrumentVerificationEventActor")
+  instrumentDownloadsAsActor               InstrumentDownloadEvent[]              @relation("InstrumentDownloadActor")
+  instrumentLifecycleEventsAsActor         InstrumentLifecycleEvent[]             @relation("InstrumentLifecycleActor")
+  reviewReferencesAsAppellant              DecisionReviewReference[]              @relation("ReviewAppellant")
+  externalReviewReferralsPrepared          ExternalReviewReferral[]               @relation("ExternalReviewPreparedBy")
+  externalReviewDeterminationsRecorded     ExternalReviewDetermination[]          @relation("ExternalDeterminationRecordedBy")
+  suspensionRecordsExecuted                InstrumentSuspensionRecord[]           @relation("SuspensionExecutor")
+  complianceMattersAsHolder                ComplianceMatter[]                     @relation("ComplianceMatterHolderIdentity")
+  obligationStatusChanges                  ObligationStatusHistory[]              @relation("ObligationStatusChangedBy")
+  complianceProjectionSubjects             ComplianceStatusProjection[]           @relation("ComplianceProjectionSubjectIdentity")
+  complianceAlertReviews                   ComplianceAlert[]                      @relation("ComplianceAlertReviewer")
+  complianceRevalidationRecords            ComplianceRevalidationRecord[]         @relation("ComplianceRevalidationRecorder")
+  complianceSubmissionsSubmitted           ComplianceSubmission[]                 @relation("ComplianceSubmissionSubmitter")
+  obligationEvidenceLinks                  ObligationEvidenceLink[]               @relation("ObligationEvidenceLinker")
+  complianceReviewsConducted               ComplianceReview[]                     @relation("ComplianceReviewReviewer")
+  reviewAssignmentsAsReviewer              ReviewAssignment[]                     @relation("ReviewAssignmentReviewer")
+  reviewRecommendationsAuthored            ReviewRecommendation[]                 @relation("ReviewRecommendationAuthor")
+  reviewSubmissionsSubmitted               ReviewSubmission[]                     @relation("ReviewSubmissionSubmitter")
+  reviewEvidenceAdmissionsRecorded         ReviewEvidenceAdmission[]              @relation("ReviewEvidenceAdmissionRecorder")
+  redressDecisionsAsReviewer               RedressDecision[]                      @relation("RedressDecisionReviewer")
+  interimReliefDecisionsAsReviewer         InterimReliefDecision[]                @relation("InterimReliefDecisionReviewer")
+  reviewStayRecordsAsDecider               ReviewStayRecord[]                     @relation("ReviewStayDecider")
+  redressReviewRecordSnapshotsCaptured     RedressReviewRecordSnapshot[]          @relation("RedressReviewRecordSnapshotCapturer")
+  redressImplementationActions             RedressImplementationAction[]          @relation("RedressImplementationActionResponsible")
+  feeScheduleVersionApprovals              FeeScheduleVersion[]                   @relation("FeeScheduleVersionApprover")
+  feeAdjustmentRequestsRequested           FeeAdjustmentRequest[]                 @relation("FeeAdjustmentRequestRequester")
+  feeAdjustmentDecisionsDecided            FeeAdjustmentDecision[]                @relation("FeeAdjustmentDecisionDecider")
+  refundRequestsRequested                  RefundRequest[]                        @relation("RefundRequestRequester")
+  refundAuthorizationsAuthorized           RefundAuthorization[]                  @relation("RefundAuthorizationAuthorizer")
+  financialApprovalsApproved               FinancialApprovalRecord[]              @relation("FinancialApprovalApprover")
+  integrationAcceptanceAssessments         IntegrationAcceptanceRecord[]          @relation("IntegrationAcceptanceAssessor")
+  sourceDiscrepancyResolutions             SourceDiscrepancyResolution[]          @relation("SourceDiscrepancyResolver")
+  integrationRecoveryVerifications         IntegrationRecoveryEvent[]             @relation("IntegrationRecoveryVerifier")
+  communicationRecipients                  CommunicationRecipient[]               @relation("CommunicationRecipientIdentity")
+  communicationPreferences                 CommunicationPreference[]              @relation("CommunicationPreferenceIdentity")
+  accessibilityAccommodations              AccessibilityAccommodation[]           @relation("AccessibilityAccommodationIdentity")
+  translationRecords                       TranslationRecord[]                    @relation("TranslationRecordTranslator")
+  reconciliationExceptionsOwned            ReconciliationException[]              @relation("ReconciliationExceptionOwner")
+  dashboardAccessPolicies                  DashboardAccessPolicy[]
+  dashboardQueryAudits                     DashboardQueryAudit[]
+  dashboardSnapshotsCaptured               DashboardSnapshot[]                    @relation("DashboardSnapshotCapturer")
+  dashboardIndicatorProjectionsOwned       DashboardIndicatorProjection[]         @relation("DashboardIndicatorOwner")
+  performanceClaimsAsserted                PerformanceClaim[]                     @relation("PerformanceClaimAsserter")
+  performanceClaimsReviewed                PerformanceClaim[]                     @relation("PerformanceClaimReviewer")
+  strategicProjectStagesRecorded           StrategicProjectStage[]                @relation("StrategicProjectStageRecorder")
+  strategicProjectMilestonesReported       StrategicProjectMilestone[]            @relation("StrategicProjectMilestoneReporter")
+  capitalEvidenceRecorded                  CapitalEvidenceRecord[]                @relation("CapitalEvidenceRecorder")
+  employmentEvidenceRecorded               EmploymentEvidenceRecord[]             @relation("EmploymentEvidenceRecorder")
+  infrastructureDeliveryRecorded           InfrastructureDeliveryRecord[]         @relation("InfrastructureDeliveryRecorder")
+  sectorObservationsRecorded               SectorDevelopmentObservation[]         @relation("SectorObservationRecorder")
+  projectStatusProjectionsDerived          ProjectStatusProjection[]              @relation("ProjectStatusProjectionDeriver")
+  metricBaselinesApproved                  MetricBaseline[]                       @relation("MetricBaselineApprover")
+  measuredPerformanceClaimsOwned           MeasuredPerformanceClaim[]             @relation("MeasuredPerformanceClaimOwner")
+  measuredPerformanceClaimsReviewed        MeasuredPerformanceClaim[]             @relation("MeasuredPerformanceClaimReviewer")
+  measuredPerformanceClaimReviewsConducted MeasuredPerformanceClaimReview[]       @relation("MeasuredPerformanceClaimReviewReviewer")
   measuredPerformanceClaimRevalidations    MeasuredPerformanceClaimRevalidation[] @relation("MeasuredPerformanceClaimRevalidationReviewer")
-  digitalTwinSourcesOwned            DigitalTwinSource[]           @relation("DigitalTwinSourceOwner")
-  digitalTwinModeRecords             DigitalTwinModeRecord[]       @relation("DigitalTwinModeRecorder")
-  simulationReviewsConducted         SimulationReview[]            @relation("SimulationReviewReviewer")
-  consequentialUseReviewsConducted   ConsequentialUseReview[]      @relation("ConsequentialUseReviewer")
-  analysisRequestsRequested          AnalysisRequest[]             @relation("AnalysisRequestRequester")
-  analysisRunsExecuted               AnalysisRun[]                 @relation("AnalysisRunExecutor")
-  analysisHumanReviews               AnalysisHumanReview[]         @relation("AnalysisHumanReviewer")
-  intelligenceMonitoringRulesOwned   IntelligenceMonitoringRule[]  @relation("IntelligenceMonitoringRuleOwner")
-  intelligenceMonitoringRulesReviewed IntelligenceMonitoringRule[] @relation("IntelligenceMonitoringRuleReviewer")
-  intelligenceMonitoringAlertsRecipient IntelligenceMonitoringAlert[] @relation("IntelligenceMonitoringAlertRecipient")
-  intelligenceAlertVerifications   IntelligenceAlertVerification[] @relation("IntelligenceAlertVerifier")
-  intelligenceAlertDispositions      IntelligenceAlertDisposition[] @relation("IntelligenceAlertDisposer")
-  riskReviews                        RiskReview[]                  @relation("RiskReviewer")
+  digitalTwinSourcesOwned                  DigitalTwinSource[]                    @relation("DigitalTwinSourceOwner")
+  digitalTwinModeRecords                   DigitalTwinModeRecord[]                @relation("DigitalTwinModeRecorder")
+  simulationReviewsConducted               SimulationReview[]                     @relation("SimulationReviewReviewer")
+  consequentialUseReviewsConducted         ConsequentialUseReview[]               @relation("ConsequentialUseReviewer")
+  analysisRequestsRequested                AnalysisRequest[]                      @relation("AnalysisRequestRequester")
+  analysisRunsExecuted                     AnalysisRun[]                          @relation("AnalysisRunExecutor")
+  analysisHumanReviews                     AnalysisHumanReview[]                  @relation("AnalysisHumanReviewer")
+  intelligenceMonitoringRulesOwned         IntelligenceMonitoringRule[]           @relation("IntelligenceMonitoringRuleOwner")
+  intelligenceMonitoringRulesReviewed      IntelligenceMonitoringRule[]           @relation("IntelligenceMonitoringRuleReviewer")
+  intelligenceMonitoringAlertsRecipient    IntelligenceMonitoringAlert[]          @relation("IntelligenceMonitoringAlertRecipient")
+  intelligenceAlertVerifications           IntelligenceAlertVerification[]        @relation("IntelligenceAlertVerifier")
+  intelligenceAlertDispositions            IntelligenceAlertDisposition[]         @relation("IntelligenceAlertDisposer")
+  riskReviews                              RiskReview[]                           @relation("RiskReviewer")
+  launchReadinessSnapshotsCreated          LaunchReadinessSnapshot[]              @relation("LaunchReadinessSnapshotCreator")
+  launchEventsRecorded                     LaunchEvent[]                          @relation("LaunchEventRecorder")
+  operationalActivationsAccountable        OperationalActivationRecord[]          @relation("OperationalActivationAccountableOwner")
+  operationalActivationsPerformed          OperationalActivationRecord[]          @relation("OperationalActivationPerformer")
+  productionMonitoringPlansOwned           ProductionMonitoringPlan[]             @relation("ProductionMonitoringPlanOwner")
+  stabilizationObservationsRecorded        StabilizationObservation[]             @relation("StabilizationObservationRecorder")
+  productionDefectsReported                ProductionDefect[]                     @relation("ProductionDefectReporter")
+  productionCorrectiveActionsAssigned      ProductionCorrectiveAction[]           @relation("ProductionCorrectiveActionAssignee")
+  productionCorrectiveActionsVerified      ProductionCorrectiveAction[]           @relation("ProductionCorrectiveActionVerifier")
+  operationalRevalidationsConducted        OperationalRevalidation[]              @relation("OperationalRevalidationConductor")
+  operationalSuspensionsIssued             OperationalSuspension[]                @relation("OperationalSuspensionIssuer")
+  operationalSuspensionsLifted             OperationalSuspension[]                @relation("OperationalSuspensionLifter")
+  capabilityRetirementsAuthorized          CapabilityRetirement[]                 @relation("CapabilityRetirementAuthorizer")
+  decommissioningPlansApproved             DecommissioningPlan[]                  @relation("DecommissioningPlanApprover")
+  decommissioningExecutionsPerformed       DecommissioningExecution[]             @relation("DecommissioningExecutionPerformer")
+  dataExportManifestsExported              DataExportManifest[]                   @relation("DataExportManifestExporter")
+  dataExportManifestsVerified              DataExportManifest[]                   @relation("DataExportManifestVerifier")
+  recordsPreservationManifestsCreated      RecordsPreservationManifest[]          @relation("RecordsPreservationManifestCreator")
+  credentialShutdownsPerformed             CredentialShutdownRecord[]             @relation("CredentialShutdownPerformer")
+  integrationShutdownsPerformed            IntegrationShutdownRecord[]            @relation("IntegrationShutdownPerformer")
+  exitAcceptancesRecorded                  ExitAcceptanceRecord[]                 @relation("ExitAcceptanceRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1277,6 +1300,10 @@ model AuthorityEvaluationRecord {
   redressDecisions                RedressDecision[]             @relation("RedressDecisionAuthority")
   interimReliefDecisions          InterimReliefDecision[]       @relation("InterimReliefDecisionAuthority")
   reviewStayRecords               ReviewStayRecord[]            @relation("ReviewStayAuthority")
+  operationalActivations          OperationalActivationRecord[]
+  operationalRevalidations        OperationalRevalidation[]
+  operationalSuspensions          OperationalSuspension[]
+  capabilityRetirements           CapabilityRetirement[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -3787,21 +3814,21 @@ enum EvidencePacketVersionStatus {
 }
 
 model EvidencePacket {
-  id                         String                   @id @default(uuid()) @db.Uuid
-  packetNumber               String                   @unique
-  masterAdministrativeFileId String                   @db.Uuid
-  caseId                     String?                  @db.Uuid
-  purpose                    EvidencePacketPurpose
-  questionOrIssue            String
-  responsibleDepartmentId    String                   @db.Uuid
-  externalProjectReference   String?
-  createdAt                  DateTime                 @default(now())
-  updatedAt                  DateTime                 @updatedAt
-  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
-  case                       Case?                    @relation(fields: [caseId], references: [id])
-  responsibleDepartment      Department               @relation(fields: [responsibleDepartmentId], references: [id])
-  versions                   EvidencePacketVersion[]
-  dashboardDrilldownReferences DashboardDrilldownReference[]
+  id                                    String                                 @id @default(uuid()) @db.Uuid
+  packetNumber                          String                                 @unique
+  masterAdministrativeFileId            String                                 @db.Uuid
+  caseId                                String?                                @db.Uuid
+  purpose                               EvidencePacketPurpose
+  questionOrIssue                       String
+  responsibleDepartmentId               String                                 @db.Uuid
+  externalProjectReference              String?
+  createdAt                             DateTime                               @default(now())
+  updatedAt                             DateTime                               @updatedAt
+  masterAdministrativeFile              MasterAdministrativeFile               @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                                  Case?                                  @relation(fields: [caseId], references: [id])
+  responsibleDepartment                 Department                             @relation(fields: [responsibleDepartmentId], references: [id])
+  versions                              EvidencePacketVersion[]
+  dashboardDrilldownReferences          DashboardDrilldownReference[]
   measuredPerformanceClaimEvidenceLinks MeasuredPerformanceClaimEvidenceLink[]
 
   @@index([masterAdministrativeFileId])
@@ -8506,6 +8533,7 @@ model IntegrationDefinition {
   deadLetterRecords        IntegrationDeadLetterRecord[]
   outages                  IntegrationOutage[]
   fallbackActivations      IntegrationFallbackActivation[]
+  integrationShutdowns     IntegrationShutdownRecord[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -9181,24 +9209,24 @@ enum DashboardStatusDictionaryOwnerType {
 }
 
 model DashboardStatusDictionaryEntry {
-  id                   String                           @id @default(uuid()) @db.Uuid
+  id                   String                             @id @default(uuid()) @db.Uuid
   code                 String
   label                String
   meaning              String
   colorSemantic        DashboardColorSemantic
-  sourceRequirements   Json                             @default("[]")
+  sourceRequirements   Json                               @default("[]")
   calculationRule      String
   limitations          String
-  permittedTransitions Json                             @default("[]")
+  permittedTransitions Json                               @default("[]")
   stalenessRule        String
   ownerType            DashboardStatusDictionaryOwnerType
   ownerReference       String
-  version              Int                              @default(1)
-  institutionId        String?                          @db.Uuid
-  isActive             Boolean                          @default(true)
-  createdAt            DateTime                         @default(now())
-  updatedAt            DateTime                         @updatedAt
-  institution          Institution?                     @relation(fields: [institutionId], references: [id])
+  version              Int                                @default(1)
+  institutionId        String?                            @db.Uuid
+  isActive             Boolean                            @default(true)
+  createdAt            DateTime                           @default(now())
+  updatedAt            DateTime                           @updatedAt
+  institution          Institution?                       @relation(fields: [institutionId], references: [id])
   indicatorDefinitions DashboardIndicatorDefinition[]
   indicatorProjections DashboardIndicatorProjection[]
 
@@ -9233,17 +9261,17 @@ model DashboardDefinition {
 }
 
 model DashboardVersion {
-  id                    String                   @id @default(uuid()) @db.Uuid
-  dashboardDefinitionId String                   @db.Uuid
+  id                    String                         @id @default(uuid()) @db.Uuid
+  dashboardDefinitionId String                         @db.Uuid
   versionNumber         Int
-  status                DashboardVersionStatus   @default(DRAFT)
+  status                DashboardVersionStatus         @default(DRAFT)
   filterDimensions      DashboardFilterDimension[]
   effectiveFrom         DateTime?
   effectiveUntil        DateTime?
   projectionDisclaimer  String
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-  dashboardDefinition   DashboardDefinition      @relation(fields: [dashboardDefinitionId], references: [id], onDelete: Cascade)
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+  dashboardDefinition   DashboardDefinition            @relation(fields: [dashboardDefinitionId], references: [id], onDelete: Cascade)
   widgets               DashboardWidgetDefinition[]
   indicatorProjections  DashboardIndicatorProjection[]
   snapshots             DashboardSnapshot[]
@@ -9255,17 +9283,17 @@ model DashboardVersion {
 }
 
 model DashboardWidgetDefinition {
-  id                    String                      @id @default(uuid()) @db.Uuid
-  dashboardVersionId    String                      @db.Uuid
+  id                    String                        @id @default(uuid()) @db.Uuid
+  dashboardVersionId    String                        @db.Uuid
   code                  String
   title                 String
   widgetType            DashboardWidgetType
-  indicatorDefinitionId String?                     @db.Uuid
-  displayOrder          Int                         @default(0)
-  filterConfig          Json                        @default("{}")
-  createdAt             DateTime                    @default(now())
-  updatedAt             DateTime                    @updatedAt
-  dashboardVersion      DashboardVersion            @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  indicatorDefinitionId String?                       @db.Uuid
+  displayOrder          Int                           @default(0)
+  filterConfig          Json                          @default("{}")
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  dashboardVersion      DashboardVersion              @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
   indicatorDefinition   DashboardIndicatorDefinition? @relation(fields: [indicatorDefinitionId], references: [id])
 
   @@unique([dashboardVersionId, code])
@@ -9274,20 +9302,20 @@ model DashboardWidgetDefinition {
 }
 
 model DashboardIndicatorDefinition {
-  id                       String                         @id @default(uuid()) @db.Uuid
-  code                     String                         @unique
-  label                    String
-  category                 DashboardIndicatorCategory
-  statusDictionaryEntryId  String                         @db.Uuid
-  calculationRuleRef       String
-  sourceRequirements       Json                           @default("[]")
-  requiresEvidencePacket   Boolean                        @default(false)
-  drilldownRequired        Boolean                        @default(true)
-  createdAt                DateTime                       @default(now())
-  updatedAt                DateTime                       @updatedAt
-  statusDictionaryEntry    DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
-  widgets                  DashboardWidgetDefinition[]
-  projections              DashboardIndicatorProjection[]
+  id                      String                         @id @default(uuid()) @db.Uuid
+  code                    String                         @unique
+  label                   String
+  category                DashboardIndicatorCategory
+  statusDictionaryEntryId String                         @db.Uuid
+  calculationRuleRef      String
+  sourceRequirements      Json                           @default("[]")
+  requiresEvidencePacket  Boolean                        @default(false)
+  drilldownRequired       Boolean                        @default(true)
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+  statusDictionaryEntry   DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
+  widgets                 DashboardWidgetDefinition[]
+  projections             DashboardIndicatorProjection[]
 
   @@index([category])
   @@index([statusDictionaryEntryId])
@@ -9296,37 +9324,37 @@ model DashboardIndicatorDefinition {
 
 model DashboardIndicatorProjection {
   id                      String                         @id @default(uuid()) @db.Uuid
-  indicatorDefinitionId     String                         @db.Uuid
-  dashboardVersionId        String                         @db.Uuid
+  indicatorDefinitionId   String                         @db.Uuid
+  dashboardVersionId      String                         @db.Uuid
   statusDictionaryEntryId String                         @db.Uuid
-  institutionId             String?                        @db.Uuid
-  departmentId              String?                        @db.Uuid
-  caseId                    String?                        @db.Uuid
-  countValue                Int                            @default(0)
-  scoreValue                Float?
-  displayLabel              String
-  dataQuality               DashboardDataQuality
-  calculatedAt              DateTime                       @default(now())
-  sourceFreshness           DateTime?
-  staleAfter                DateTime?
-  currentStaleness          DashboardStalenessState        @default(FRESH)
-  sourceAvailability        DashboardSourceAvailability    @default(AVAILABLE)
-  limitations               String?
-  ownerIdentityId           String?                        @db.Uuid
-  effectiveDate             DateTime?
-  lastRefresh               DateTime?
-  revalidationDate          DateTime?
-  projectionVersion         Int                            @default(1)
-  createdAt                 DateTime                       @default(now())
-  updatedAt                 DateTime                       @updatedAt
-  indicatorDefinition       DashboardIndicatorDefinition   @relation(fields: [indicatorDefinitionId], references: [id])
-  dashboardVersion          DashboardVersion               @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
-  statusDictionaryEntry     DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
-  institution               Institution?                   @relation(fields: [institutionId], references: [id])
-  department                Department?                    @relation(fields: [departmentId], references: [id])
-  case                      Case?                          @relation(fields: [caseId], references: [id])
-  ownerIdentity             Identity?                      @relation("DashboardIndicatorOwner", fields: [ownerIdentityId], references: [id])
-  drilldownReferences       DashboardDrilldownReference[]
+  institutionId           String?                        @db.Uuid
+  departmentId            String?                        @db.Uuid
+  caseId                  String?                        @db.Uuid
+  countValue              Int                            @default(0)
+  scoreValue              Float?
+  displayLabel            String
+  dataQuality             DashboardDataQuality
+  calculatedAt            DateTime                       @default(now())
+  sourceFreshness         DateTime?
+  staleAfter              DateTime?
+  currentStaleness        DashboardStalenessState        @default(FRESH)
+  sourceAvailability      DashboardSourceAvailability    @default(AVAILABLE)
+  limitations             String?
+  ownerIdentityId         String?                        @db.Uuid
+  effectiveDate           DateTime?
+  lastRefresh             DateTime?
+  revalidationDate        DateTime?
+  projectionVersion       Int                            @default(1)
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+  indicatorDefinition     DashboardIndicatorDefinition   @relation(fields: [indicatorDefinitionId], references: [id])
+  dashboardVersion        DashboardVersion               @relation(fields: [dashboardVersionId], references: [id], onDelete: Cascade)
+  statusDictionaryEntry   DashboardStatusDictionaryEntry @relation(fields: [statusDictionaryEntryId], references: [id])
+  institution             Institution?                   @relation(fields: [institutionId], references: [id])
+  department              Department?                    @relation(fields: [departmentId], references: [id])
+  case                    Case?                          @relation(fields: [caseId], references: [id])
+  ownerIdentity           Identity?                      @relation("DashboardIndicatorOwner", fields: [ownerIdentityId], references: [id])
+  drilldownReferences     DashboardDrilldownReference[]
 
   @@index([indicatorDefinitionId])
   @@index([dashboardVersionId])
@@ -9337,21 +9365,21 @@ model DashboardIndicatorProjection {
 }
 
 model DashboardDrilldownReference {
-  id                    String                        @id @default(uuid()) @db.Uuid
-  indicatorProjectionId   String                        @db.Uuid
+  id                    String                          @id @default(uuid()) @db.Uuid
+  indicatorProjectionId String                          @db.Uuid
   referenceType         DashboardDrilldownReferenceType
-  referenceId           String                        @db.Uuid
+  referenceId           String                          @db.Uuid
   referenceLabel        String
-  evidencePacketId      String?                       @db.Uuid
+  evidencePacketId      String?                         @db.Uuid
   sourceStatus          String
   ownerReference        String
   effectiveDate         DateTime?
   lastRefresh           DateTime?
   revalidationDate      DateTime?
   limitations           String?
-  createdAt             DateTime                      @default(now())
-  indicatorProjection   DashboardIndicatorProjection  @relation(fields: [indicatorProjectionId], references: [id], onDelete: Cascade)
-  evidencePacket        EvidencePacket?               @relation(fields: [evidencePacketId], references: [id])
+  createdAt             DateTime                        @default(now())
+  indicatorProjection   DashboardIndicatorProjection    @relation(fields: [indicatorProjectionId], references: [id], onDelete: Cascade)
+  evidencePacket        EvidencePacket?                 @relation(fields: [evidencePacketId], references: [id])
 
   @@index([indicatorProjectionId])
   @@index([referenceType])
@@ -9360,17 +9388,17 @@ model DashboardDrilldownReference {
 }
 
 model DashboardSnapshot {
-  id                    String           @id @default(uuid()) @db.Uuid
-  dashboardVersionId    String           @db.Uuid
-  capturedAt            DateTime         @default(now())
-  capturedByIdentityId  String           @db.Uuid
-  snapshotPayload       Json
-  snapshotHash          String
-  replayToken           String           @unique
-  isImmutable           Boolean          @default(true)
-  createdAt             DateTime         @default(now())
-  dashboardVersion      DashboardVersion @relation(fields: [dashboardVersionId], references: [id])
-  capturedBy            Identity         @relation("DashboardSnapshotCapturer", fields: [capturedByIdentityId], references: [id])
+  id                   String           @id @default(uuid()) @db.Uuid
+  dashboardVersionId   String           @db.Uuid
+  capturedAt           DateTime         @default(now())
+  capturedByIdentityId String           @db.Uuid
+  snapshotPayload      Json
+  snapshotHash         String
+  replayToken          String           @unique
+  isImmutable          Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  dashboardVersion     DashboardVersion @relation(fields: [dashboardVersionId], references: [id])
+  capturedBy           Identity         @relation("DashboardSnapshotCapturer", fields: [capturedByIdentityId], references: [id])
 
   @@index([dashboardVersionId])
   @@index([capturedAt])
@@ -9378,22 +9406,22 @@ model DashboardSnapshot {
 }
 
 model DashboardQueryAudit {
-  id                    String                  @id @default(uuid()) @db.Uuid
-  identityId            String                  @db.Uuid
-  dashboardDefinitionId String?                 @db.Uuid
-  dashboardVersionId    String?                 @db.Uuid
-  institutionId         String?                 @db.Uuid
-  departmentId          String?                 @db.Uuid
-  purpose               DashboardAccessPurpose
-  sensitivityScope      DashboardSensitivityLevel
-  technicalPermissionOnly Boolean                 @default(false)
-  queryFilters          Json                    @default("{}")
-  accessResult          DashboardQueryAuditResult
-  resultSummary         String?
-  queriedAt             DateTime                @default(now())
-  identity              Identity                @relation(fields: [identityId], references: [id])
-  dashboardDefinition   DashboardDefinition?    @relation(fields: [dashboardDefinitionId], references: [id])
-  dashboardVersion      DashboardVersion?       @relation(fields: [dashboardVersionId], references: [id])
+  id                      String                    @id @default(uuid()) @db.Uuid
+  identityId              String                    @db.Uuid
+  dashboardDefinitionId   String?                   @db.Uuid
+  dashboardVersionId      String?                   @db.Uuid
+  institutionId           String?                   @db.Uuid
+  departmentId            String?                   @db.Uuid
+  purpose                 DashboardAccessPurpose
+  sensitivityScope        DashboardSensitivityLevel
+  technicalPermissionOnly Boolean                   @default(false)
+  queryFilters            Json                      @default("{}")
+  accessResult            DashboardQueryAuditResult
+  resultSummary           String?
+  queriedAt               DateTime                  @default(now())
+  identity                Identity                  @relation(fields: [identityId], references: [id])
+  dashboardDefinition     DashboardDefinition?      @relation(fields: [dashboardDefinitionId], references: [id])
+  dashboardVersion        DashboardVersion?         @relation(fields: [dashboardVersionId], references: [id])
 
   @@index([identityId])
   @@index([dashboardDefinitionId])
@@ -9453,24 +9481,24 @@ enum PerformanceClaimReviewStatus {
 }
 
 model PerformanceClaim {
-  id                          String                       @id @default(uuid()) @db.Uuid
-  claimReference              String                       @unique
+  id                          String                          @id @default(uuid()) @db.Uuid
+  claimReference              String                          @unique
   category                    PerformanceClaimCategory
-  assertedValue               Json                         @default("{}")
-  assertedByIdentityId        String                       @db.Uuid
-  reviewStatus                PerformanceClaimReviewStatus @default(DRAFT)
-  requiresClaimReview         Boolean                      @default(true)
+  assertedValue               Json                            @default("{}")
+  assertedByIdentityId        String                          @db.Uuid
+  reviewStatus                PerformanceClaimReviewStatus    @default(DRAFT)
+  requiresClaimReview         Boolean                         @default(true)
   humanReviewedAt             DateTime?
-  humanReviewedByIdentityId   String?                      @db.Uuid
-  attributionMetadata         Json                         @default("{}")
+  humanReviewedByIdentityId   String?                         @db.Uuid
+  attributionMetadata         Json                            @default("{}")
   externalFactorNotes         String?
-  independentVerificationRefs Json                         @default("[]")
-  isApplicantAssertion        Boolean                      @default(true)
-  isPublic                    Boolean                      @default(false)
-  createdAt                   DateTime                     @default(now())
-  updatedAt                   DateTime                     @updatedAt
-  assertedBy                  Identity                     @relation("PerformanceClaimAsserter", fields: [assertedByIdentityId], references: [id])
-  humanReviewedBy             Identity?                    @relation("PerformanceClaimReviewer", fields: [humanReviewedByIdentityId], references: [id])
+  independentVerificationRefs Json                            @default("[]")
+  isApplicantAssertion        Boolean                         @default(true)
+  isPublic                    Boolean                         @default(false)
+  createdAt                   DateTime                        @default(now())
+  updatedAt                   DateTime                        @updatedAt
+  assertedBy                  Identity                        @relation("PerformanceClaimAsserter", fields: [assertedByIdentityId], references: [id])
+  humanReviewedBy             Identity?                       @relation("PerformanceClaimReviewer", fields: [humanReviewedByIdentityId], references: [id])
   economicClaimLinks          StrategicProjectEconomicClaim[]
 
   @@index([category])
@@ -9586,34 +9614,34 @@ enum ProjectStatusProjectionAudience {
 }
 
 model StrategicProjectProfile {
-  id                                 String                         @id @default(uuid()) @db.Uuid
-  projectCode                        String                         @unique
-  title                              String
-  description                        String?
-  sponsoringInstitutionId            String                         @db.Uuid
-  responsibleDepartmentId            String                         @db.Uuid
-  caseId                             String?                        @db.Uuid
-  sectorCode                         String?
-  currentStage                       StrategicProjectLifecycleStage @default(INQUIRY)
-  adverseStatusPreserved             Boolean                        @default(false)
-  attributionMetadata                Json                           @default("{}")
-  externalFactorNotes                String?
-  announcementDate                   DateTime?
-  doesNotInferApprovalFromActivity   Boolean                        @default(true)
-  createdAt                          DateTime                       @default(now())
-  updatedAt                          DateTime                       @updatedAt
-  sponsoringInstitution              Institution                    @relation(fields: [sponsoringInstitutionId], references: [id])
-  responsibleDepartment              Department                     @relation(fields: [responsibleDepartmentId], references: [id])
-  case                               Case?                          @relation(fields: [caseId], references: [id])
-  stageHistory                       StrategicProjectStage[]
-  milestones                         StrategicProjectMilestone[]
-  dependencies                       StrategicProjectDependency[]
-  risks                              StrategicProjectRisk[]
-  economicClaims                     StrategicProjectEconomicClaim[]
-  capitalEvidence                    CapitalEvidenceRecord[]
-  employmentEvidence                 EmploymentEvidenceRecord[]
-  infrastructureRecords              InfrastructureDeliveryRecord[]
-  statusProjections                  ProjectStatusProjection[]
+  id                               String                          @id @default(uuid()) @db.Uuid
+  projectCode                      String                          @unique
+  title                            String
+  description                      String?
+  sponsoringInstitutionId          String                          @db.Uuid
+  responsibleDepartmentId          String                          @db.Uuid
+  caseId                           String?                         @db.Uuid
+  sectorCode                       String?
+  currentStage                     StrategicProjectLifecycleStage  @default(INQUIRY)
+  adverseStatusPreserved           Boolean                         @default(false)
+  attributionMetadata              Json                            @default("{}")
+  externalFactorNotes              String?
+  announcementDate                 DateTime?
+  doesNotInferApprovalFromActivity Boolean                         @default(true)
+  createdAt                        DateTime                        @default(now())
+  updatedAt                        DateTime                        @updatedAt
+  sponsoringInstitution            Institution                     @relation(fields: [sponsoringInstitutionId], references: [id])
+  responsibleDepartment            Department                      @relation(fields: [responsibleDepartmentId], references: [id])
+  case                             Case?                           @relation(fields: [caseId], references: [id])
+  stageHistory                     StrategicProjectStage[]
+  milestones                       StrategicProjectMilestone[]
+  dependencies                     StrategicProjectDependency[]
+  risks                            StrategicProjectRisk[]
+  economicClaims                   StrategicProjectEconomicClaim[]
+  capitalEvidence                  CapitalEvidenceRecord[]
+  employmentEvidence               EmploymentEvidenceRecord[]
+  infrastructureRecords            InfrastructureDeliveryRecord[]
+  statusProjections                ProjectStatusProjection[]
 
   @@index([sponsoringInstitutionId])
   @@index([responsibleDepartmentId])
@@ -9668,19 +9696,19 @@ model StrategicProjectMilestone {
 }
 
 model StrategicProjectDependency {
-  id                    String                            @id @default(uuid()) @db.Uuid
-  profileId             String                            @db.Uuid
-  dependencyType        StrategicProjectDependencyType
-  ownerType             StrategicProjectDependencyOwnerType
-  ownerReference        String
-  ownerName             String?
-  description           String?
-  statusSummary         String?
-  isGovernmentOwned     Boolean                           @default(false)
-  sourceDataRefs        Json                              @default("[]")
-  createdAt             DateTime                          @default(now())
-  updatedAt             DateTime                          @updatedAt
-  profile               StrategicProjectProfile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id                String                              @id @default(uuid()) @db.Uuid
+  profileId         String                              @db.Uuid
+  dependencyType    StrategicProjectDependencyType
+  ownerType         StrategicProjectDependencyOwnerType
+  ownerReference    String
+  ownerName         String?
+  description       String?
+  statusSummary     String?
+  isGovernmentOwned Boolean                             @default(false)
+  sourceDataRefs    Json                                @default("[]")
+  createdAt         DateTime                            @default(now())
+  updatedAt         DateTime                            @updatedAt
+  profile           StrategicProjectProfile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@index([dependencyType])
@@ -9777,35 +9805,35 @@ model InfrastructureDeliveryRecord {
 }
 
 model SectorDevelopmentObservation {
-  id                          String    @id @default(uuid()) @db.Uuid
-  sectorCode                  String
-  observationSummary          String
-  attributionMetadata         Json      @default("{}")
-  externalFactorNotes         String?
-  sourceDataRefs              Json      @default("[]")
-  doesNotClaimNationalCausation Boolean @default(true)
-  recordedByIdentityId        String    @db.Uuid
-  recordedAt                  DateTime  @default(now())
-  recordedBy                  Identity  @relation("SectorObservationRecorder", fields: [recordedByIdentityId], references: [id])
+  id                            String   @id @default(uuid()) @db.Uuid
+  sectorCode                    String
+  observationSummary            String
+  attributionMetadata           Json     @default("{}")
+  externalFactorNotes           String?
+  sourceDataRefs                Json     @default("[]")
+  doesNotClaimNationalCausation Boolean  @default(true)
+  recordedByIdentityId          String   @db.Uuid
+  recordedAt                    DateTime @default(now())
+  recordedBy                    Identity @relation("SectorObservationRecorder", fields: [recordedByIdentityId], references: [id])
 
   @@index([sectorCode])
   @@map("sector_development_observations")
 }
 
 model ProjectStatusProjection {
-  id                          String                          @id @default(uuid()) @db.Uuid
-  profileId                   String                          @db.Uuid
-  audience                    ProjectStatusProjectionAudience
-  derivedStage                StrategicProjectLifecycleStage
-  projectionDisclaimer        String
-  sourceDataRefs              Json                            @default("[]")
-  evidenceCutoffAt            DateTime?
-  adverseStatusPreserved      Boolean                         @default(false)
-  projectionVersion           Int                             @default(1)
-  lastDerivedAt               DateTime                        @default(now())
-  derivedByIdentityId         String?                         @db.Uuid
-  profile                     StrategicProjectProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  derivedBy                   Identity?                       @relation("ProjectStatusProjectionDeriver", fields: [derivedByIdentityId], references: [id])
+  id                     String                          @id @default(uuid()) @db.Uuid
+  profileId              String                          @db.Uuid
+  audience               ProjectStatusProjectionAudience
+  derivedStage           StrategicProjectLifecycleStage
+  projectionDisclaimer   String
+  sourceDataRefs         Json                            @default("[]")
+  evidenceCutoffAt       DateTime?
+  adverseStatusPreserved Boolean                         @default(false)
+  projectionVersion      Int                             @default(1)
+  lastDerivedAt          DateTime                        @default(now())
+  derivedByIdentityId    String?                         @db.Uuid
+  profile                StrategicProjectProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  derivedBy              Identity?                       @relation("ProjectStatusProjectionDeriver", fields: [derivedByIdentityId], references: [id])
 
   @@index([profileId])
   @@index([audience])
@@ -9950,18 +9978,18 @@ enum PerformanceClaimReviewOutcome {
 }
 
 model PerformanceFramework {
-  id            String                    @id @default(uuid()) @db.Uuid
-  code          String                    @unique
-  name          String
-  description   String?
-  institutionId String                    @db.Uuid
-  status        StructuralLifecycleStatus @default(ACTIVE)
-  effectiveFrom DateTime?
+  id             String                    @id @default(uuid()) @db.Uuid
+  code           String                    @unique
+  name           String
+  description    String?
+  institutionId  String                    @db.Uuid
+  status         StructuralLifecycleStatus @default(ACTIVE)
+  effectiveFrom  DateTime?
   effectiveUntil DateTime?
-  createdAt     DateTime                  @default(now())
-  updatedAt     DateTime                  @updatedAt
-  institution   Institution               @relation(fields: [institutionId], references: [id])
-  metrics       MetricDefinition[]
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  institution    Institution               @relation(fields: [institutionId], references: [id])
+  metrics        MetricDefinition[]
 
   @@index([institutionId])
   @@index([status])
@@ -9969,31 +9997,31 @@ model PerformanceFramework {
 }
 
 model MetricDefinition {
-  id                  String                 @id @default(uuid()) @db.Uuid
-  frameworkId         String                 @db.Uuid
+  id                  String                      @id @default(uuid()) @db.Uuid
+  frameworkId         String                      @db.Uuid
   code                String
   name                String
   description         String?
   purpose             String
-  ownerInstitutionId  String                 @db.Uuid
-  ownerDepartmentId   String?                @db.Uuid
+  ownerInstitutionId  String                      @db.Uuid
+  ownerDepartmentId   String?                     @db.Uuid
   metricCategory      MetricCategory
   unit                String
   aggregationMethod   MetricAggregationMethod
   calculationMethod   MetricCalculationMethodType
-  sourceRequirements  Json                   @default("[]")
+  sourceRequirements  Json                        @default("[]")
   scope               String
   reportingFrequency  MetricReportingFrequency
-  qualityRequirements Json                   @default("{}")
-  baselineRequired    Boolean                @default(true)
+  qualityRequirements Json                        @default("{}")
+  baselineRequired    Boolean                     @default(true)
   effectiveFrom       DateTime?
   effectiveUntil      DateTime?
-  status              MetricDefinitionStatus @default(DRAFT)
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
-  framework           PerformanceFramework   @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
-  ownerInstitution    Institution            @relation("MetricDefinitionOwnerInstitution", fields: [ownerInstitutionId], references: [id])
-  ownerDepartment     Department?            @relation("MetricDefinitionOwnerDepartment", fields: [ownerDepartmentId], references: [id])
+  status              MetricDefinitionStatus      @default(DRAFT)
+  createdAt           DateTime                    @default(now())
+  updatedAt           DateTime                    @updatedAt
+  framework           PerformanceFramework        @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  ownerInstitution    Institution                 @relation("MetricDefinitionOwnerInstitution", fields: [ownerInstitutionId], references: [id])
+  ownerDepartment     Department?                 @relation("MetricDefinitionOwnerDepartment", fields: [ownerDepartmentId], references: [id])
   versions            MetricDefinitionVersion[]
 
   @@unique([frameworkId, code])
@@ -10006,29 +10034,29 @@ model MetricDefinition {
 }
 
 model MetricDefinitionVersion {
-  id                         String                        @id @default(uuid()) @db.Uuid
-  metricDefinitionId         String                        @db.Uuid
-  versionNumber              Int
-  status                     MetricDefinitionVersionStatus @default(DRAFT)
-  formulaSpecification       Json
-  sourceDefinitions          Json                          @default("[]")
-  inclusions                 Json                          @default("[]")
-  exclusions                 Json                          @default("[]")
+  id                           String                              @id @default(uuid()) @db.Uuid
+  metricDefinitionId           String                              @db.Uuid
+  versionNumber                Int
+  status                       MetricDefinitionVersionStatus       @default(DRAFT)
+  formulaSpecification         Json
+  sourceDefinitions            Json                                @default("[]")
+  inclusions                   Json                                @default("[]")
+  exclusions                   Json                                @default("[]")
   dependencyTimeClassification MetricDependencyTimeClassification?
-  roundingRule               String?
-  percentileMethod           String?
-  dataQualityThresholds      Json                          @default("{}")
-  materialityThreshold       String?
-  revalidationIntervalDays   Int?
-  activatedAt                DateTime?
-  supersededAt               DateTime?
-  createdAt                  DateTime                      @default(now())
-  updatedAt                  DateTime                      @updatedAt
-  metricDefinition           MetricDefinition              @relation(fields: [metricDefinitionId], references: [id], onDelete: Cascade)
-  baselines                  MetricBaseline[]
-  calculationRuns            MetricCalculationRun[]
-  dependencyClassifications  MetricDependencyClassification[]
-  performanceClaims          MeasuredPerformanceClaim[]
+  roundingRule                 String?
+  percentileMethod             String?
+  dataQualityThresholds        Json                                @default("{}")
+  materialityThreshold         String?
+  revalidationIntervalDays     Int?
+  activatedAt                  DateTime?
+  supersededAt                 DateTime?
+  createdAt                    DateTime                            @default(now())
+  updatedAt                    DateTime                            @updatedAt
+  metricDefinition             MetricDefinition                    @relation(fields: [metricDefinitionId], references: [id], onDelete: Cascade)
+  baselines                    MetricBaseline[]
+  calculationRuns              MetricCalculationRun[]
+  dependencyClassifications    MetricDependencyClassification[]
+  performanceClaims            MeasuredPerformanceClaim[]
 
   @@unique([metricDefinitionId, versionNumber])
   @@index([metricDefinitionId])
@@ -10060,24 +10088,24 @@ model MetricBaseline {
 }
 
 model MetricCalculationRun {
-  id                   String                    @id @default(uuid()) @db.Uuid
-  metricVersionId      String                    @db.Uuid
-  periodStart          DateTime
-  periodEnd            DateTime
-  inputRecordReferences Json                     @default("[]")
-  inputCount           Int
-  excludedRecords      Json                      @default("[]")
-  exclusionReasons     Json                      @default("[]")
-  calculationTrace     Json
-  resultValue          String?
-  qualityFindings      Json                      @default("[]")
-  generatedAt          DateTime                  @default(now())
-  softwareVersion      String
-  integrityHash        String
-  metricVersion        MetricDefinitionVersion   @relation(fields: [metricVersionId], references: [id], onDelete: Cascade)
+  id                     String                        @id @default(uuid()) @db.Uuid
+  metricVersionId        String                        @db.Uuid
+  periodStart            DateTime
+  periodEnd              DateTime
+  inputRecordReferences  Json                          @default("[]")
+  inputCount             Int
+  excludedRecords        Json                          @default("[]")
+  exclusionReasons       Json                          @default("[]")
+  calculationTrace       Json
+  resultValue            String?
+  qualityFindings        Json                          @default("[]")
+  generatedAt            DateTime                      @default(now())
+  softwareVersion        String
+  integrityHash          String
+  metricVersion          MetricDefinitionVersion       @relation(fields: [metricVersionId], references: [id], onDelete: Cascade)
   dataQualityAssessments MetricDataQualityAssessment[]
-  observations         MetricObservation[]
-  performanceClaims    MeasuredPerformanceClaim[]
+  observations           MetricObservation[]
+  performanceClaims      MeasuredPerformanceClaim[]
 
   @@index([metricVersionId])
   @@index([periodStart, periodEnd])
@@ -10086,15 +10114,15 @@ model MetricCalculationRun {
 }
 
 model MetricObservation {
-  id                String               @id @default(uuid()) @db.Uuid
-  calculationRunId  String               @db.Uuid
-  sourceReference   String
-  observedValue     String?
-  observedAt        DateTime?
-  classification    MetricDependencyTimeClassification?
-  metadata          Json                 @default("{}")
-  createdAt         DateTime             @default(now())
-  calculationRun    MetricCalculationRun @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
+  id               String                              @id @default(uuid()) @db.Uuid
+  calculationRunId String                              @db.Uuid
+  sourceReference  String
+  observedValue    String?
+  observedAt       DateTime?
+  classification   MetricDependencyTimeClassification?
+  metadata         Json                                @default("{}")
+  createdAt        DateTime                            @default(now())
+  calculationRun   MetricCalculationRun                @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
 
   @@index([calculationRunId])
   @@index([sourceReference])
@@ -10102,14 +10130,14 @@ model MetricObservation {
 }
 
 model MetricDependencyClassification {
-  id                   String                             @id @default(uuid()) @db.Uuid
-  metricVersionId      String                             @db.Uuid
-  classification       MetricDependencyTimeClassification
-  ruleReference        String
-  description          String?
-  relabelRequiresRule  Boolean                            @default(true)
-  createdAt            DateTime                           @default(now())
-  metricVersion        MetricDefinitionVersion            @relation(fields: [metricVersionId], references: [id], onDelete: Cascade)
+  id                  String                             @id @default(uuid()) @db.Uuid
+  metricVersionId     String                             @db.Uuid
+  classification      MetricDependencyTimeClassification
+  ruleReference       String
+  description         String?
+  relabelRequiresRule Boolean                            @default(true)
+  createdAt           DateTime                           @default(now())
+  metricVersion       MetricDefinitionVersion            @relation(fields: [metricVersionId], references: [id], onDelete: Cascade)
 
   @@unique([metricVersionId, classification])
   @@index([metricVersionId])
@@ -10117,13 +10145,13 @@ model MetricDependencyClassification {
 }
 
 model MetricDataQualityAssessment {
-  id               String                   @id @default(uuid()) @db.Uuid
-  calculationRunId String                   @db.Uuid
+  id               String                     @id @default(uuid()) @db.Uuid
+  calculationRunId String                     @db.Uuid
   dimension        MetricDataQualityDimension
   result           MetricDataQualityResult
   findings         String?
-  assessedAt       DateTime                 @default(now())
-  calculationRun   MetricCalculationRun     @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
+  assessedAt       DateTime                   @default(now())
+  calculationRun   MetricCalculationRun       @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
 
   @@index([calculationRunId])
   @@index([dimension])
@@ -10132,39 +10160,39 @@ model MetricDataQualityAssessment {
 }
 
 model MeasuredPerformanceClaim {
-  id                         String                             @id @default(uuid()) @db.Uuid
-  claimReference             String                             @unique
-  claimStatement             String
-  metricDefinitionVersionId  String                             @db.Uuid
-  calculationRunId           String                             @db.Uuid
-  baselineId                 String?                            @db.Uuid
-  comparisonPeriodStart      DateTime?
-  comparisonPeriodEnd        DateTime?
-  ownerIdentityId            String                             @db.Uuid
-  reviewerIdentityId         String?                            @db.Uuid
-  status                     PerformanceClaimStatus             @default(DRAFT)
-  confidence                 String?
-  assumptions                String?
-  limitations                String?
-  externalFactors            String?
-  attributionClassification  PerformanceAttributionClassification @default(NOT_ESTABLISHED)
-  evidencePacketReference    String?
-  effectivePeriodStart       DateTime?
-  effectivePeriodEnd         DateTime?
-  revalidationDate           DateTime?
-  supersededByClaimId        String?                            @unique @db.Uuid
-  createdAt                  DateTime                           @default(now())
-  updatedAt                  DateTime                           @updatedAt
-  metricDefinitionVersion    MetricDefinitionVersion            @relation(fields: [metricDefinitionVersionId], references: [id])
-  calculationRun             MetricCalculationRun               @relation(fields: [calculationRunId], references: [id])
-  baseline                   MetricBaseline?                    @relation(fields: [baselineId], references: [id])
-  owner                      Identity                           @relation("MeasuredPerformanceClaimOwner", fields: [ownerIdentityId], references: [id])
-  reviewer                   Identity?                          @relation("MeasuredPerformanceClaimReviewer", fields: [reviewerIdentityId], references: [id])
-  supersededBy               MeasuredPerformanceClaim?                  @relation("MeasuredPerformanceClaimSupersession", fields: [supersededByClaimId], references: [id])
-  supersedes                 MeasuredPerformanceClaim?                  @relation("MeasuredPerformanceClaimSupersession")
-  evidenceLinks              MeasuredPerformanceClaimEvidenceLink[]
-  reviews                    MeasuredPerformanceClaimReview[]
-  revalidations              MeasuredPerformanceClaimRevalidation[]
+  id                        String                                 @id @default(uuid()) @db.Uuid
+  claimReference            String                                 @unique
+  claimStatement            String
+  metricDefinitionVersionId String                                 @db.Uuid
+  calculationRunId          String                                 @db.Uuid
+  baselineId                String?                                @db.Uuid
+  comparisonPeriodStart     DateTime?
+  comparisonPeriodEnd       DateTime?
+  ownerIdentityId           String                                 @db.Uuid
+  reviewerIdentityId        String?                                @db.Uuid
+  status                    PerformanceClaimStatus                 @default(DRAFT)
+  confidence                String?
+  assumptions               String?
+  limitations               String?
+  externalFactors           String?
+  attributionClassification PerformanceAttributionClassification   @default(NOT_ESTABLISHED)
+  evidencePacketReference   String?
+  effectivePeriodStart      DateTime?
+  effectivePeriodEnd        DateTime?
+  revalidationDate          DateTime?
+  supersededByClaimId       String?                                @unique @db.Uuid
+  createdAt                 DateTime                               @default(now())
+  updatedAt                 DateTime                               @updatedAt
+  metricDefinitionVersion   MetricDefinitionVersion                @relation(fields: [metricDefinitionVersionId], references: [id])
+  calculationRun            MetricCalculationRun                   @relation(fields: [calculationRunId], references: [id])
+  baseline                  MetricBaseline?                        @relation(fields: [baselineId], references: [id])
+  owner                     Identity                               @relation("MeasuredPerformanceClaimOwner", fields: [ownerIdentityId], references: [id])
+  reviewer                  Identity?                              @relation("MeasuredPerformanceClaimReviewer", fields: [reviewerIdentityId], references: [id])
+  supersededBy              MeasuredPerformanceClaim?              @relation("MeasuredPerformanceClaimSupersession", fields: [supersededByClaimId], references: [id])
+  supersedes                MeasuredPerformanceClaim?              @relation("MeasuredPerformanceClaimSupersession")
+  evidenceLinks             MeasuredPerformanceClaimEvidenceLink[]
+  reviews                   MeasuredPerformanceClaimReview[]
+  revalidations             MeasuredPerformanceClaimRevalidation[]
 
   @@index([metricDefinitionVersionId])
   @@index([calculationRunId])
@@ -10177,13 +10205,13 @@ model MeasuredPerformanceClaim {
 }
 
 model MeasuredPerformanceClaimEvidenceLink {
-  id                String           @id @default(uuid()) @db.Uuid
-  performanceClaimId String          @db.Uuid
-  evidencePacketId  String           @db.Uuid
-  linkPurpose       String
-  createdAt         DateTime         @default(now())
-  performanceClaim  MeasuredPerformanceClaim @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
-  evidencePacket    EvidencePacket   @relation(fields: [evidencePacketId], references: [id])
+  id                 String                   @id @default(uuid()) @db.Uuid
+  performanceClaimId String                   @db.Uuid
+  evidencePacketId   String                   @db.Uuid
+  linkPurpose        String
+  createdAt          DateTime                 @default(now())
+  performanceClaim   MeasuredPerformanceClaim @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
+  evidencePacket     EvidencePacket           @relation(fields: [evidencePacketId], references: [id])
 
   @@unique([performanceClaimId, evidencePacketId, linkPurpose])
   @@index([performanceClaimId])
@@ -10199,7 +10227,7 @@ model MeasuredPerformanceClaimReview {
   findings           String?
   limitationsNoted   String?
   reviewedAt         DateTime                      @default(now())
-  performanceClaim   MeasuredPerformanceClaim              @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
+  performanceClaim   MeasuredPerformanceClaim      @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
   reviewer           Identity                      @relation("MeasuredPerformanceClaimReviewReviewer", fields: [reviewerIdentityId], references: [id])
 
   @@index([performanceClaimId])
@@ -10208,15 +10236,15 @@ model MeasuredPerformanceClaimReview {
 }
 
 model MeasuredPerformanceClaimRevalidation {
-  id                 String           @id @default(uuid()) @db.Uuid
-  performanceClaimId String           @db.Uuid
-  reviewerIdentityId String           @db.Uuid
+  id                 String                   @id @default(uuid()) @db.Uuid
+  performanceClaimId String                   @db.Uuid
+  reviewerIdentityId String                   @db.Uuid
   revalidationDate   DateTime
   outcome            String
   notes              String?
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime                 @default(now())
   performanceClaim   MeasuredPerformanceClaim @relation(fields: [performanceClaimId], references: [id], onDelete: Cascade)
-  reviewer           Identity         @relation("MeasuredPerformanceClaimRevalidationReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewer           Identity                 @relation("MeasuredPerformanceClaimRevalidationReviewer", fields: [reviewerIdentityId], references: [id])
 
   @@index([performanceClaimId])
   @@index([revalidationDate])
@@ -10335,35 +10363,35 @@ enum SimulationToLiveTransitionStatus {
 }
 
 model DigitalTwinDefinition {
-  id                              String                         @id @default(uuid()) @db.Uuid
-  twinCode                        String                         @unique
-  representedSubjectType          DigitalTwinType
-  representedSubjectId            String                         @db.Uuid
-  representedSubjectReference     String
-  institutionalOwnerId            String                         @db.Uuid
-  institutionalOwnerOfficeholderId String?                       @db.Uuid
-  purpose                         String
-  scope                           String
-  permittedUses                   Json                           @default("[]")
-  prohibitedUses                  Json                           @default("[]")
-  sourceRequirements              String
-  privacyClassification           DigitalTwinPrivacyClassification @default(INTERNAL)
-  status                          DigitalTwinDefinitionStatus      @default(DRAFT)
-  isAuthoritativeRecord           Boolean                        @default(false)
-  preventsPersonalProfileExpansion Boolean                       @default(true)
-  staleAsOf                       DateTime?
-  isStale                         Boolean                        @default(false)
-  isIncomplete                    Boolean                        @default(false)
-  isInconsistent                  Boolean                        @default(false)
-  isCompromised                   Boolean                        @default(false)
-  outsideApprovedUse              Boolean                        @default(false)
-  createdAt                       DateTime                       @default(now())
-  updatedAt                       DateTime                       @updatedAt
-  institutionalOwner              Institution                    @relation(fields: [institutionalOwnerId], references: [id])
-  institutionalOwnerOfficeholder  Officeholder?                  @relation("DigitalTwinInstitutionalOwner", fields: [institutionalOwnerOfficeholderId], references: [id])
-  versions                        DigitalTwinVersion[]
-  outgoingRelationships           DigitalTwinRelationship[]      @relation("DigitalTwinRelationshipFrom")
-  incomingRelationships           DigitalTwinRelationship[]      @relation("DigitalTwinRelationshipTo")
+  id                               String                           @id @default(uuid()) @db.Uuid
+  twinCode                         String                           @unique
+  representedSubjectType           DigitalTwinType
+  representedSubjectId             String                           @db.Uuid
+  representedSubjectReference      String
+  institutionalOwnerId             String                           @db.Uuid
+  institutionalOwnerOfficeholderId String?                          @db.Uuid
+  purpose                          String
+  scope                            String
+  permittedUses                    Json                             @default("[]")
+  prohibitedUses                   Json                             @default("[]")
+  sourceRequirements               String
+  privacyClassification            DigitalTwinPrivacyClassification @default(INTERNAL)
+  status                           DigitalTwinDefinitionStatus      @default(DRAFT)
+  isAuthoritativeRecord            Boolean                          @default(false)
+  preventsPersonalProfileExpansion Boolean                          @default(true)
+  staleAsOf                        DateTime?
+  isStale                          Boolean                          @default(false)
+  isIncomplete                     Boolean                          @default(false)
+  isInconsistent                   Boolean                          @default(false)
+  isCompromised                    Boolean                          @default(false)
+  outsideApprovedUse               Boolean                          @default(false)
+  createdAt                        DateTime                         @default(now())
+  updatedAt                        DateTime                         @updatedAt
+  institutionalOwner               Institution                      @relation(fields: [institutionalOwnerId], references: [id])
+  institutionalOwnerOfficeholder   Officeholder?                    @relation("DigitalTwinInstitutionalOwner", fields: [institutionalOwnerOfficeholderId], references: [id])
+  versions                         DigitalTwinVersion[]
+  outgoingRelationships            DigitalTwinRelationship[]        @relation("DigitalTwinRelationshipFrom")
+  incomingRelationships            DigitalTwinRelationship[]        @relation("DigitalTwinRelationshipTo")
 
   @@index([representedSubjectType, representedSubjectId])
   @@index([institutionalOwnerId])
@@ -10372,24 +10400,24 @@ model DigitalTwinDefinition {
 }
 
 model DigitalTwinVersion {
-  id                    String                  @id @default(uuid()) @db.Uuid
-  definitionId          String                  @db.Uuid
-  versionNumber         Int
-  versionLabel          String
-  configuration         Json                    @default("{}")
-  modelVersionReference String?
-  effectiveFrom         DateTime                @default(now())
-  effectiveTo           DateTime?
-  isCurrent             Boolean                 @default(false)
-  createdAt             DateTime                @default(now())
-  definition            DigitalTwinDefinition   @relation(fields: [definitionId], references: [id], onDelete: Cascade)
-  sources               DigitalTwinSource[]
-  modeRecords           DigitalTwinModeRecord[]
-  snapshots             DigitalTwinSnapshot[]
-  scenarios             SimulationScenario[]
-  simulationRuns        SimulationRun[]
+  id                      String                             @id @default(uuid()) @db.Uuid
+  definitionId            String                             @db.Uuid
+  versionNumber           Int
+  versionLabel            String
+  configuration           Json                               @default("{}")
+  modelVersionReference   String?
+  effectiveFrom           DateTime                           @default(now())
+  effectiveTo             DateTime?
+  isCurrent               Boolean                            @default(false)
+  createdAt               DateTime                           @default(now())
+  definition              DigitalTwinDefinition              @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  sources                 DigitalTwinSource[]
+  modeRecords             DigitalTwinModeRecord[]
+  snapshots               DigitalTwinSnapshot[]
+  scenarios               SimulationScenario[]
+  simulationRuns          SimulationRun[]
   consequentialUseReviews ConsequentialUseReview[]
-  liveTransitionRecords SimulationToLiveTransitionRecord[]
+  liveTransitionRecords   SimulationToLiveTransitionRecord[]
 
   @@unique([definitionId, versionNumber])
   @@index([definitionId])
@@ -10398,23 +10426,23 @@ model DigitalTwinVersion {
 }
 
 model DigitalTwinSource {
-  id                    String                  @id @default(uuid()) @db.Uuid
-  twinVersionId         String                  @db.Uuid
-  sourceName            String
-  sourceStatus          DigitalTwinSourceStatus
-  integrationReference  String
-  evidenceReference     String?
-  freshnessAsOf         DateTime
-  ownerIdentityId       String?                 @db.Uuid
-  ownerOfficeholderId   String?                 @db.Uuid
-  lastUpdatedAt         DateTime
-  limitations           String
-  isDisclosed           Boolean                 @default(false)
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  twinVersion           DigitalTwinVersion      @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
-  ownerIdentity         Identity?               @relation("DigitalTwinSourceOwner", fields: [ownerIdentityId], references: [id])
-  ownerOfficeholder     Officeholder?           @relation("DigitalTwinSourceOfficeholderOwner", fields: [ownerOfficeholderId], references: [id])
+  id                   String                  @id @default(uuid()) @db.Uuid
+  twinVersionId        String                  @db.Uuid
+  sourceName           String
+  sourceStatus         DigitalTwinSourceStatus
+  integrationReference String
+  evidenceReference    String?
+  freshnessAsOf        DateTime
+  ownerIdentityId      String?                 @db.Uuid
+  ownerOfficeholderId  String?                 @db.Uuid
+  lastUpdatedAt        DateTime
+  limitations          String
+  isDisclosed          Boolean                 @default(false)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  twinVersion          DigitalTwinVersion      @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  ownerIdentity        Identity?               @relation("DigitalTwinSourceOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder    Officeholder?           @relation("DigitalTwinSourceOfficeholderOwner", fields: [ownerOfficeholderId], references: [id])
 
   @@index([twinVersionId])
   @@index([sourceStatus])
@@ -10422,15 +10450,15 @@ model DigitalTwinSource {
 }
 
 model DigitalTwinRelationship {
-  id                  String                      @id @default(uuid()) @db.Uuid
-  fromDefinitionId    String                      @db.Uuid
-  toDefinitionId      String                      @db.Uuid
-  relationshipType    DigitalTwinRelationshipType
-  isModeledOnly       Boolean                     @default(true)
-  notes               String?
-  createdAt           DateTime                    @default(now())
-  fromDefinition      DigitalTwinDefinition       @relation("DigitalTwinRelationshipFrom", fields: [fromDefinitionId], references: [id], onDelete: Cascade)
-  toDefinition        DigitalTwinDefinition       @relation("DigitalTwinRelationshipTo", fields: [toDefinitionId], references: [id], onDelete: Cascade)
+  id               String                      @id @default(uuid()) @db.Uuid
+  fromDefinitionId String                      @db.Uuid
+  toDefinitionId   String                      @db.Uuid
+  relationshipType DigitalTwinRelationshipType
+  isModeledOnly    Boolean                     @default(true)
+  notes            String?
+  createdAt        DateTime                    @default(now())
+  fromDefinition   DigitalTwinDefinition       @relation("DigitalTwinRelationshipFrom", fields: [fromDefinitionId], references: [id], onDelete: Cascade)
+  toDefinition     DigitalTwinDefinition       @relation("DigitalTwinRelationshipTo", fields: [toDefinitionId], references: [id], onDelete: Cascade)
 
   @@unique([fromDefinitionId, toDefinitionId, relationshipType])
   @@index([fromDefinitionId])
@@ -10439,16 +10467,16 @@ model DigitalTwinRelationship {
 }
 
 model DigitalTwinModeRecord {
-  id                    String             @id @default(uuid()) @db.Uuid
-  twinVersionId         String             @db.Uuid
-  mode                  DigitalTwinMode
-  recordedAt            DateTime           @default(now())
-  recordedByIdentityId  String?            @db.Uuid
-  rationale             String
-  isOperationalControl  Boolean            @default(false)
-  createdAt             DateTime           @default(now())
-  twinVersion           DigitalTwinVersion @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
-  recordedByIdentity    Identity?          @relation("DigitalTwinModeRecorder", fields: [recordedByIdentityId], references: [id])
+  id                   String             @id @default(uuid()) @db.Uuid
+  twinVersionId        String             @db.Uuid
+  mode                 DigitalTwinMode
+  recordedAt           DateTime           @default(now())
+  recordedByIdentityId String?            @db.Uuid
+  rationale            String
+  isOperationalControl Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  twinVersion          DigitalTwinVersion @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  recordedByIdentity   Identity?          @relation("DigitalTwinModeRecorder", fields: [recordedByIdentityId], references: [id])
 
   @@index([twinVersionId])
   @@index([mode])
@@ -10456,16 +10484,16 @@ model DigitalTwinModeRecord {
 }
 
 model DigitalTwinSnapshot {
-  id              String             @id @default(uuid()) @db.Uuid
-  twinVersionId   String             @db.Uuid
-  snapshotAt      DateTime           @default(now())
-  snapshotPayload Json
-  snapshotHash    String
-  isImmutable     Boolean            @default(true)
-  createdAt       DateTime           @default(now())
-  twinVersion     DigitalTwinVersion @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
-  scenarios       SimulationScenario[] @relation("ScenarioInputSnapshot")
-  simulationRuns  SimulationRun[]    @relation("RunInputSnapshot")
+  id               String               @id @default(uuid()) @db.Uuid
+  twinVersionId    String               @db.Uuid
+  snapshotAt       DateTime             @default(now())
+  snapshotPayload  Json
+  snapshotHash     String
+  isImmutable      Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  twinVersion      DigitalTwinVersion   @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  scenarios        SimulationScenario[] @relation("ScenarioInputSnapshot")
+  simulationRuns   SimulationRun[]      @relation("RunInputSnapshot")
   simulationInputs SimulationInput[]
 
   @@index([twinVersionId])
@@ -10498,24 +10526,24 @@ model SimulationScenario {
 }
 
 model SimulationRun {
-  id              String              @id @default(uuid()) @db.Uuid
-  scenarioId      String              @db.Uuid
-  runNumber       Int
-  twinVersionId   String              @db.Uuid
-  inputSnapshotId String              @db.Uuid
-  mode            DigitalTwinMode     @default(SIMULATION)
-  status          SimulationRunStatus @default(PENDING)
-  startedAt       DateTime?
-  completedAt     DateTime?
-  createdAt       DateTime            @default(now())
-  scenario        SimulationScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  twinVersion     DigitalTwinVersion  @relation(fields: [twinVersionId], references: [id])
-  inputSnapshot   DigitalTwinSnapshot @relation("RunInputSnapshot", fields: [inputSnapshotId], references: [id])
-  inputs          SimulationInput[]
-  outputs         SimulationOutput[]
-  assumptions     SimulationAssumption[]
-  uncertainties   SimulationUncertainty[]
-  reviews         SimulationReview[]
+  id                      String                   @id @default(uuid()) @db.Uuid
+  scenarioId              String                   @db.Uuid
+  runNumber               Int
+  twinVersionId           String                   @db.Uuid
+  inputSnapshotId         String                   @db.Uuid
+  mode                    DigitalTwinMode          @default(SIMULATION)
+  status                  SimulationRunStatus      @default(PENDING)
+  startedAt               DateTime?
+  completedAt             DateTime?
+  createdAt               DateTime                 @default(now())
+  scenario                SimulationScenario       @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  twinVersion             DigitalTwinVersion       @relation(fields: [twinVersionId], references: [id])
+  inputSnapshot           DigitalTwinSnapshot      @relation("RunInputSnapshot", fields: [inputSnapshotId], references: [id])
+  inputs                  SimulationInput[]
+  outputs                 SimulationOutput[]
+  assumptions             SimulationAssumption[]
+  uncertainties           SimulationUncertainty[]
+  reviews                 SimulationReview[]
   consequentialUseReviews ConsequentialUseReview[]
 
   @@unique([scenarioId, runNumber])
@@ -10539,14 +10567,14 @@ model SimulationInput {
 }
 
 model SimulationOutput {
-  id                      String        @id @default(uuid()) @db.Uuid
-  simulationRunId         String        @db.Uuid
+  id                      String                   @id @default(uuid()) @db.Uuid
+  simulationRunId         String                   @db.Uuid
   outputPayload           Json
   outputType              String
-  isAdvisoryOnly          Boolean       @default(true)
-  presentedAsPrediction   Boolean       @default(false)
-  createdAt               DateTime      @default(now())
-  simulationRun           SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  isAdvisoryOnly          Boolean                  @default(true)
+  presentedAsPrediction   Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  simulationRun           SimulationRun            @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
   consequentialUseReviews ConsequentialUseReview[]
 
   @@index([simulationRunId])
@@ -10554,12 +10582,12 @@ model SimulationOutput {
 }
 
 model SimulationAssumption {
-  id                  String        @id @default(uuid()) @db.Uuid
-  simulationRunId     String        @db.Uuid
-  assumptionText      String
-  assumptionCategory  String?
-  recordedAt          DateTime      @default(now())
-  simulationRun       SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  id                 String        @id @default(uuid()) @db.Uuid
+  simulationRunId    String        @db.Uuid
+  assumptionText     String
+  assumptionCategory String?
+  recordedAt         DateTime      @default(now())
+  simulationRun      SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
 
   @@index([simulationRunId])
   @@map("simulation_assumptions")
@@ -10578,52 +10606,52 @@ model SimulationUncertainty {
 }
 
 model SimulationReview {
-  id                      String                  @id @default(uuid()) @db.Uuid
-  simulationRunId         String                  @db.Uuid
-  reviewerIdentityId      String?                 @db.Uuid
-  reviewerOfficeholderId  String?                 @db.Uuid
-  outcome                 SimulationReviewOutcome @default(DRAFT)
-  reviewNotes             String?
-  reviewedAt              DateTime?
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
-  simulationRun           SimulationRun           @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
-  reviewerIdentity        Identity?               @relation("SimulationReviewReviewer", fields: [reviewerIdentityId], references: [id])
-  reviewerOfficeholder    Officeholder?           @relation("SimulationReviewOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
+  id                     String                  @id @default(uuid()) @db.Uuid
+  simulationRunId        String                  @db.Uuid
+  reviewerIdentityId     String?                 @db.Uuid
+  reviewerOfficeholderId String?                 @db.Uuid
+  outcome                SimulationReviewOutcome @default(DRAFT)
+  reviewNotes            String?
+  reviewedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  simulationRun          SimulationRun           @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  reviewerIdentity       Identity?               @relation("SimulationReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder   Officeholder?           @relation("SimulationReviewOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
 
   @@index([simulationRunId])
   @@map("simulation_reviews")
 }
 
 model ConsequentialUseReview {
-  id                       String                         @id @default(uuid()) @db.Uuid
-  twinVersionId            String                         @db.Uuid
-  simulationRunId          String?                        @db.Uuid
-  simulationOutputId       String?                        @db.Uuid
-  representedSubjectType   DigitalTwinType
-  representedSubjectId     String                         @db.Uuid
-  impactAreas              Json                           @default("[]")
-  reviewerIdentityId       String                         @db.Uuid
-  reviewerOfficeholderId   String?                        @db.Uuid
-  authorityReference       String
-  evidenceReference        String?
-  decision                 ConsequentialUseReviewDecision
-  reasons                  String
-  limitations              String
-  conditions               String?
-  reviewedAt               DateTime                       @default(now())
-  isStaleTwinBlocked       Boolean                        @default(false)
-  missingDataDisclosed     Boolean                        @default(false)
-  proposedUse              String
-  alternativesConsidered   String?
-  conflictNotes            String?
-  createdAt                DateTime                       @default(now())
-  updatedAt                DateTime                       @updatedAt
-  twinVersion              DigitalTwinVersion             @relation(fields: [twinVersionId], references: [id])
-  simulationRun            SimulationRun?                 @relation(fields: [simulationRunId], references: [id])
-  simulationOutput         SimulationOutput?              @relation(fields: [simulationOutputId], references: [id])
-  reviewerIdentity         Identity                       @relation("ConsequentialUseReviewer", fields: [reviewerIdentityId], references: [id])
-  reviewerOfficeholder     Officeholder?                  @relation("ConsequentialUseOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
+  id                     String                         @id @default(uuid()) @db.Uuid
+  twinVersionId          String                         @db.Uuid
+  simulationRunId        String?                        @db.Uuid
+  simulationOutputId     String?                        @db.Uuid
+  representedSubjectType DigitalTwinType
+  representedSubjectId   String                         @db.Uuid
+  impactAreas            Json                           @default("[]")
+  reviewerIdentityId     String                         @db.Uuid
+  reviewerOfficeholderId String?                        @db.Uuid
+  authorityReference     String
+  evidenceReference      String?
+  decision               ConsequentialUseReviewDecision
+  reasons                String
+  limitations            String
+  conditions             String?
+  reviewedAt             DateTime                       @default(now())
+  isStaleTwinBlocked     Boolean                        @default(false)
+  missingDataDisclosed   Boolean                        @default(false)
+  proposedUse            String
+  alternativesConsidered String?
+  conflictNotes          String?
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  twinVersion            DigitalTwinVersion             @relation(fields: [twinVersionId], references: [id])
+  simulationRun          SimulationRun?                 @relation(fields: [simulationRunId], references: [id])
+  simulationOutput       SimulationOutput?              @relation(fields: [simulationOutputId], references: [id])
+  reviewerIdentity       Identity                       @relation("ConsequentialUseReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder   Officeholder?                  @relation("ConsequentialUseOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
 
   @@index([twinVersionId])
   @@index([simulationRunId])
@@ -10632,25 +10660,25 @@ model ConsequentialUseReview {
 }
 
 model SimulationToLiveTransitionRecord {
-  id                           String                           @id @default(uuid()) @db.Uuid
-  twinVersionId                String                           @db.Uuid
-  exactVersionLabel            String
-  acceptedMode                 DigitalTwinMode
-  testingCompleted             Boolean                          @default(false)
-  securityReviewCompleted      Boolean                          @default(false)
-  authorityReference           String
+  id                               String                           @id @default(uuid()) @db.Uuid
+  twinVersionId                    String                           @db.Uuid
+  exactVersionLabel                String
+  acceptedMode                     DigitalTwinMode
+  testingCompleted                 Boolean                          @default(false)
+  securityReviewCompleted          Boolean                          @default(false)
+  authorityReference               String
   institutionalAcceptanceReference String
-  rollbackPlanReference        String
-  trainingCompleted            Boolean                          @default(false)
-  effectiveDate                DateTime?
-  suspensionTriggers           Json                             @default("[]")
-  status                       SimulationToLiveTransitionStatus @default(PROPOSED)
-  technicalSuccessAcknowledged Boolean                          @default(false)
-  liveActivationAuthorized     Boolean                          @default(false)
-  recordedAt                   DateTime                         @default(now())
-  createdAt                    DateTime                         @default(now())
-  updatedAt                    DateTime                         @updatedAt
-  twinVersion                  DigitalTwinVersion               @relation(fields: [twinVersionId], references: [id])
+  rollbackPlanReference            String
+  trainingCompleted                Boolean                          @default(false)
+  effectiveDate                    DateTime?
+  suspensionTriggers               Json                             @default("[]")
+  status                           SimulationToLiveTransitionStatus @default(PROPOSED)
+  technicalSuccessAcknowledged     Boolean                          @default(false)
+  liveActivationAuthorized         Boolean                          @default(false)
+  recordedAt                       DateTime                         @default(now())
+  createdAt                        DateTime                         @default(now())
+  updatedAt                        DateTime                         @updatedAt
+  twinVersion                      DigitalTwinVersion               @relation(fields: [twinVersionId], references: [id])
 
   @@index([twinVersionId])
   @@index([status])
@@ -10793,26 +10821,26 @@ model AnalysisRequest {
 }
 
 model AnalysisRun {
-  id                    String            @id @default(uuid()) @db.Uuid
-  runNumber             String            @unique
-  requestId             String            @db.Uuid
-  status                AnalysisRunStatus @default(PENDING)
-  method                String
-  assumptions           Json              @default("[]")
-  limitations           String
-  outputReplayHash      String?
-  startedAt             DateTime?
-  completedAt           DateTime?
-  executedByIdentityId  String?           @db.Uuid
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  request               AnalysisRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  executedBy            Identity?         @relation("AnalysisRunExecutor", fields: [executedByIdentityId], references: [id])
-  sources               AnalysisSource[]
-  findings              AnalysisFinding[]
-  options               AnalysisOption[]
-  uncertainties         AnalysisUncertainty[]
-  humanReviews          AnalysisHumanReview[]
+  id                   String                @id @default(uuid()) @db.Uuid
+  runNumber            String                @unique
+  requestId            String                @db.Uuid
+  status               AnalysisRunStatus     @default(PENDING)
+  method               String
+  assumptions          Json                  @default("[]")
+  limitations          String
+  outputReplayHash     String?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  executedByIdentityId String?               @db.Uuid
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  request              AnalysisRequest       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  executedBy           Identity?             @relation("AnalysisRunExecutor", fields: [executedByIdentityId], references: [id])
+  sources              AnalysisSource[]
+  findings             AnalysisFinding[]
+  options              AnalysisOption[]
+  uncertainties        AnalysisUncertainty[]
+  humanReviews         AnalysisHumanReview[]
 
   @@index([requestId])
   @@index([status])
@@ -10820,18 +10848,18 @@ model AnalysisRun {
 }
 
 model AnalysisSource {
-  id               String               @id @default(uuid()) @db.Uuid
-  runId            String               @db.Uuid
-  sourceReference  String
-  sourceLabel      String
-  sourceStatus     AnalysisSourceStatus
-  exactValue       Json
-  retrievedAt      DateTime?
-  stalenessNotedAt DateTime?
-  conflictGroupId  String?
-  preservedConflict Boolean             @default(false)
-  createdAt        DateTime             @default(now())
-  run              AnalysisRun          @relation(fields: [runId], references: [id], onDelete: Cascade)
+  id                String               @id @default(uuid()) @db.Uuid
+  runId             String               @db.Uuid
+  sourceReference   String
+  sourceLabel       String
+  sourceStatus      AnalysisSourceStatus
+  exactValue        Json
+  retrievedAt       DateTime?
+  stalenessNotedAt  DateTime?
+  conflictGroupId   String?
+  preservedConflict Boolean              @default(false)
+  createdAt         DateTime             @default(now())
+  run               AnalysisRun          @relation(fields: [runId], references: [id], onDelete: Cascade)
 
   @@index([runId])
   @@index([conflictGroupId])
@@ -10893,33 +10921,33 @@ model AnalysisHumanReview {
 }
 
 model IntelligenceMonitoringRule {
-  id                     String                           @id @default(uuid()) @db.Uuid
-  code                   String                           @unique
-  name                   String
-  objectType             IntelligenceMonitoringObjectType
-  objectReference        String
+  id                      String                              @id @default(uuid()) @db.Uuid
+  code                    String                              @unique
+  name                    String
+  objectType              IntelligenceMonitoringObjectType
+  objectReference         String
   approvedSourceReference String
-  approvedSourceLabel    String
-  conditionDescription   String
-  detectionRule          Json                             @default("{}")
-  thresholdConfig        Json                             @default("{}")
-  ownerIdentityId        String                           @db.Uuid
-  purpose                String
-  reviewerIdentityId     String                           @db.Uuid
-  frequency              IntelligenceMonitoringFrequency
-  effectiveFrom          DateTime
-  effectiveUntil         DateTime?
-  institutionId          String?                          @db.Uuid
-  lawfulBasis            String?
-  accessApprovalRef      String?
-  status                 IntelligenceMonitoringRuleStatus @default(DRAFT)
-  createdAt              DateTime                         @default(now())
-  updatedAt              DateTime                         @updatedAt
-  owner                  Identity                         @relation("IntelligenceMonitoringRuleOwner", fields: [ownerIdentityId], references: [id])
-  reviewer               Identity                         @relation("IntelligenceMonitoringRuleReviewer", fields: [reviewerIdentityId], references: [id])
-  institution            Institution?                     @relation(fields: [institutionId], references: [id])
-  observations           IntelligenceMonitoringObservation[]
-  alerts                 IntelligenceMonitoringAlert[]
+  approvedSourceLabel     String
+  conditionDescription    String
+  detectionRule           Json                                @default("{}")
+  thresholdConfig         Json                                @default("{}")
+  ownerIdentityId         String                              @db.Uuid
+  purpose                 String
+  reviewerIdentityId      String                              @db.Uuid
+  frequency               IntelligenceMonitoringFrequency
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  institutionId           String?                             @db.Uuid
+  lawfulBasis             String?
+  accessApprovalRef       String?
+  status                  IntelligenceMonitoringRuleStatus    @default(DRAFT)
+  createdAt               DateTime                            @default(now())
+  updatedAt               DateTime                            @updatedAt
+  owner                   Identity                            @relation("IntelligenceMonitoringRuleOwner", fields: [ownerIdentityId], references: [id])
+  reviewer                Identity                            @relation("IntelligenceMonitoringRuleReviewer", fields: [reviewerIdentityId], references: [id])
+  institution             Institution?                        @relation(fields: [institutionId], references: [id])
+  observations            IntelligenceMonitoringObservation[]
+  alerts                  IntelligenceMonitoringAlert[]
 
   @@index([status])
   @@index([objectType, objectReference])
@@ -10928,17 +10956,17 @@ model IntelligenceMonitoringRule {
 }
 
 model IntelligenceMonitoringObservation {
-  id                String                     @id @default(uuid()) @db.Uuid
-  ruleId            String                     @db.Uuid
+  id                String                        @id @default(uuid()) @db.Uuid
+  ruleId            String                        @db.Uuid
   observedCondition String
   sourceReference   String
   sourceStatus      AnalysisSourceStatus
   confidenceNotes   String?
   uncertaintyNotes  String?
-  isStaleSource     Boolean                    @default(false)
-  observedAt        DateTime                   @default(now())
-  createdAt         DateTime                   @default(now())
-  rule              IntelligenceMonitoringRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  isStaleSource     Boolean                       @default(false)
+  observedAt        DateTime                      @default(now())
+  createdAt         DateTime                      @default(now())
+  rule              IntelligenceMonitoringRule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
   alerts            IntelligenceMonitoringAlert[]
 
   @@index([ruleId])
@@ -10947,32 +10975,32 @@ model IntelligenceMonitoringObservation {
 }
 
 model IntelligenceMonitoringAlert {
-  id                            String                            @id @default(uuid()) @db.Uuid
-  alertNumber                   String                            @unique
-  ruleId                        String                            @db.Uuid
-  observationId                   String?                           @db.Uuid
-  monitoredObjectType           IntelligenceMonitoringObjectType
-  monitoredObjectReference      String
-  sourceReference               String
-  observedCondition             String
-  observedAt                    DateTime
-  confidenceNotes               String?
-  uncertaintyNotes              String?
-  affectedServiceIds            Json                              @default("[]")
-  recommendedReview             String
-  responsibleRecipientIdentityId String                           @db.Uuid
-  status                        IntelligenceAlertStatus           @default(GENERATED)
-  isViolation                   Boolean                           @default(false)
-  isEmergency                   Boolean                           @default(false)
-  isEnforcement                 Boolean                           @default(false)
-  generatedAt                   DateTime                          @default(now())
-  createdAt                     DateTime                          @default(now())
-  updatedAt                     DateTime                          @updatedAt
-  rule                          IntelligenceMonitoringRule        @relation(fields: [ruleId], references: [id])
-  observation                   IntelligenceMonitoringObservation? @relation(fields: [observationId], references: [id])
-  responsibleRecipient          Identity                          @relation("IntelligenceMonitoringAlertRecipient", fields: [responsibleRecipientIdentityId], references: [id])
-  verifications                 IntelligenceAlertVerification[]
-  dispositions                  IntelligenceAlertDisposition[]
+  id                             String                             @id @default(uuid()) @db.Uuid
+  alertNumber                    String                             @unique
+  ruleId                         String                             @db.Uuid
+  observationId                  String?                            @db.Uuid
+  monitoredObjectType            IntelligenceMonitoringObjectType
+  monitoredObjectReference       String
+  sourceReference                String
+  observedCondition              String
+  observedAt                     DateTime
+  confidenceNotes                String?
+  uncertaintyNotes               String?
+  affectedServiceIds             Json                               @default("[]")
+  recommendedReview              String
+  responsibleRecipientIdentityId String                             @db.Uuid
+  status                         IntelligenceAlertStatus            @default(GENERATED)
+  isViolation                    Boolean                            @default(false)
+  isEmergency                    Boolean                            @default(false)
+  isEnforcement                  Boolean                            @default(false)
+  generatedAt                    DateTime                           @default(now())
+  createdAt                      DateTime                           @default(now())
+  updatedAt                      DateTime                           @updatedAt
+  rule                           IntelligenceMonitoringRule         @relation(fields: [ruleId], references: [id])
+  observation                    IntelligenceMonitoringObservation? @relation(fields: [observationId], references: [id])
+  responsibleRecipient           Identity                           @relation("IntelligenceMonitoringAlertRecipient", fields: [responsibleRecipientIdentityId], references: [id])
+  verifications                  IntelligenceAlertVerification[]
+  dispositions                   IntelligenceAlertDisposition[]
 
   @@index([ruleId])
   @@index([status])
@@ -11012,20 +11040,20 @@ model IntelligenceAlertDisposition {
 }
 
 model RiskDefinition {
-  id                  String               @id @default(uuid()) @db.Uuid
-  code                String               @unique
-  name                String
-  description         String?
-  methodology         String
-  methodologyVersion  String
-  institutionId       String?              @db.Uuid
-  effectiveFrom       DateTime
-  effectiveUntil      DateTime?
-  status              RiskDefinitionStatus @default(DRAFT)
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  institution         Institution?         @relation(fields: [institutionId], references: [id])
-  assessments         RiskAssessment[]
+  id                 String               @id @default(uuid()) @db.Uuid
+  code               String               @unique
+  name               String
+  description        String?
+  methodology        String
+  methodologyVersion String
+  institutionId      String?              @db.Uuid
+  effectiveFrom      DateTime
+  effectiveUntil     DateTime?
+  status             RiskDefinitionStatus @default(DRAFT)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  institution        Institution?         @relation(fields: [institutionId], references: [id])
+  assessments        RiskAssessment[]
 
   @@index([status])
   @@index([institutionId])
@@ -11033,24 +11061,24 @@ model RiskDefinition {
 }
 
 model RiskAssessment {
-  id                      String               @id @default(uuid()) @db.Uuid
-  assessmentNumber        String               @unique
-  definitionId            String               @db.Uuid
-  subjectType             String
-  subjectReference        String
-  status                  RiskAssessmentStatus @default(DRAFT)
-  overallScore            Float?
-  scoreLabel              String?
-  scoreIsMandatoryGateBypass Boolean           @default(false)
-  methodologyVersion      String
-  limitations             String
-  assessedAt              DateTime?
-  createdAt               DateTime             @default(now())
-  updatedAt               DateTime             @updatedAt
-  definition              RiskDefinition       @relation(fields: [definitionId], references: [id])
-  factors                 RiskFactor[]
-  mitigations             RiskMitigation[]
-  reviews                 RiskReview[]
+  id                         String               @id @default(uuid()) @db.Uuid
+  assessmentNumber           String               @unique
+  definitionId               String               @db.Uuid
+  subjectType                String
+  subjectReference           String
+  status                     RiskAssessmentStatus @default(DRAFT)
+  overallScore               Float?
+  scoreLabel                 String?
+  scoreIsMandatoryGateBypass Boolean              @default(false)
+  methodologyVersion         String
+  limitations                String
+  assessedAt                 DateTime?
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+  definition                 RiskDefinition       @relation(fields: [definitionId], references: [id])
+  factors                    RiskFactor[]
+  mitigations                RiskMitigation[]
+  reviews                    RiskReview[]
 
   @@index([definitionId])
   @@index([status])
@@ -11058,29 +11086,29 @@ model RiskAssessment {
 }
 
 model RiskFactor {
-  id            String            @id @default(uuid()) @db.Uuid
-  assessmentId  String            @db.Uuid
-  factorLabel   String
-  basis         RiskEvidenceBasis
-  score         Float?
-  weight        Float?
-  exactValue    Json?
-  basisLabel    String?
-  createdAt     DateTime          @default(now())
-  assessment    RiskAssessment    @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  id           String            @id @default(uuid()) @db.Uuid
+  assessmentId String            @db.Uuid
+  factorLabel  String
+  basis        RiskEvidenceBasis
+  score        Float?
+  weight       Float?
+  exactValue   Json?
+  basisLabel   String?
+  createdAt    DateTime          @default(now())
+  assessment   RiskAssessment    @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 
   @@index([assessmentId])
   @@map("risk_factors")
 }
 
 model RiskMitigation {
-  id              String               @id @default(uuid()) @db.Uuid
-  assessmentId    String               @db.Uuid
-  mitigationText  String
-  status          RiskMitigationStatus @default(PROPOSED)
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  assessment      RiskAssessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  id             String               @id @default(uuid()) @db.Uuid
+  assessmentId   String               @db.Uuid
+  mitigationText String
+  status         RiskMitigationStatus @default(PROPOSED)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  assessment     RiskAssessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 
   @@index([assessmentId])
   @@map("risk_mitigations")
@@ -11098,4 +11126,606 @@ model RiskReview {
 
   @@index([assessmentId])
   @@map("risk_reviews")
+}
+
+// ─── Phase 13: Production Readiness, National Launch and Exit ─────────────────
+
+enum ProductionDefectSeverity {
+  CRITICAL
+  MAJOR
+  MODERATE
+  MINOR
+}
+
+enum ProductionDefectStatus {
+  OPEN
+  UNDER_INVESTIGATION
+  CORRECTIVE_ACTION_IN_PROGRESS
+  PENDING_VERIFICATION
+  CLOSED
+}
+
+enum ProductionCorrectiveActionStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_VERIFICATION
+  VERIFIED
+  CLOSED
+}
+
+enum OperationalRevalidationOutcome {
+  CONFIRM
+  CONFIRM_WITH_CONDITIONS
+  REDUCE_SCOPE
+  RETURN_TO_PILOT
+  SUSPEND
+  REQUIRE_CORRECTIVE_ACTION
+  RETIRE
+  REPLACE
+}
+
+enum OperationalRevalidationTrigger {
+  SCHEDULED_REVIEW
+  LEGAL_SOURCE_CHANGE
+  AUTHORITY_CHANGE
+  OFFICEHOLDER_CHANGE
+  SECURITY_INCIDENT
+  MATERIAL_VULNERABILITY
+  MAJOR_PRODUCTION_DEFECT
+  ARCHITECTURE_CHANGE
+  VENDOR_CHANGE
+  INTEGRATION_CHANGE
+  AI_MODEL_CHANGE
+  CRYPTOGRAPHIC_CHANGE
+  DATA_CLASSIFICATION_CHANGE
+  CONTINUITY_FAILURE
+  MATERIAL_PERFORMANCE_DEGRADATION
+}
+
+enum OperationalSuspensionScope {
+  ENTIRE_PLATFORM
+  DEPARTMENT
+  SERVICE
+  WORKFLOW
+  INTEGRATION
+  AI_USE_CASE
+  AI_AGENT
+  ISSUANCE_CAPABILITY
+  PAYMENT_CAPABILITY
+  NOTIFICATION_CAPABILITY
+}
+
+enum OperationalSuspensionStatus {
+  ACTIVE
+  LIFTED
+}
+
+enum LaunchEventType {
+  SNAPSHOT_CREATED
+  GATE_EVALUATED
+  ACTIVATION_RECORDED
+  STABILIZATION_STARTED
+  STABILIZATION_COMPLETED
+  SUSPENSION_ISSUED
+  SUSPENSION_LIFTED
+  REVALIDATION_REQUIRED
+  REVALIDATION_COMPLETED
+  DEFECT_RECORDED
+  ROLLBACK_EXECUTED
+  RETIREMENT_RECORDED
+  DECOMMISSIONING_STARTED
+  EXIT_ACCEPTED
+}
+
+enum LaunchGateOutcome {
+  PASSED
+  BLOCKED
+  CONDITIONAL
+}
+
+enum OperationalActivationStatus {
+  PENDING
+  ACTIVATED
+  BLOCKED
+  SUSPENDED
+  RETIRED
+}
+
+enum OperationalActivationOutcome {
+  ACTIVATED
+  BLOCKED
+  REQUIRES_ACCEPTANCE
+  REQUIRES_GATE
+  REQUIRES_AUTHORITY
+  REQUIRES_MONITORING
+  REQUIRES_ROLLBACK_PLAN
+  REQUIRES_CONTINUITY
+  REQUIRES_QUALIFIED_STAFF
+  REQUIRES_SUSPENSION_PATH
+}
+
+enum StabilizationPeriodStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  EXTENDED
+  FAILED
+}
+
+enum StabilizationObservationCategory {
+  ERRORS
+  PERFORMANCE
+  WORKFLOW_INTEGRITY
+  AUTHORITY_FAILURES
+  RECORDS_INTEGRITY
+  SECURITY_EVENTS
+  USER_ISSUES
+  INTEGRATION_FAILURES
+  PAYMENT_FAILURES
+  NOTIFICATION_FAILURES
+  AI_ANOMALIES
+  ACCESS_ANOMALIES
+  SUPPORT_VOLUME
+}
+
+enum ProductionMonitoringPlanStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+}
+
+enum CapabilityReplacementStatus {
+  PLANNED
+  ACCEPTANCE_PENDING
+  CUTOVER_IN_PROGRESS
+  COMPLETED
+  ROLLED_BACK
+}
+
+enum DecommissioningPlanStatus {
+  DRAFT
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum ExitAcceptanceOutcome {
+  ACCEPTED
+  REJECTED
+  CONDITIONAL
+}
+
+model LaunchReadinessSnapshot {
+  id                              String                        @id @default(uuid()) @db.Uuid
+  snapshotNumber                  String                        @unique
+  releaseCommit                   String
+  artifactDigest                  String
+  migrationState                  String
+  configurationBaseline           Json                          @default("{}")
+  activeCapabilities              Json                          @default("[]")
+  institutionalAcceptanceDossiers Json                          @default("[]")
+  activationDecisions             Json                          @default("[]")
+  staffQualifications             Json                          @default("[]")
+  securityReadiness               Json                          @default("{}")
+  privacyReadiness                Json                          @default("{}")
+  recordsReadiness                Json                          @default("{}")
+  continuityReadiness             Json                          @default("{}")
+  integrations                    Json                          @default("[]")
+  aiModelVersions                 Json                          @default("[]")
+  paymentProviders                Json                          @default("[]")
+  notificationProviders           Json                          @default("[]")
+  knownDefects                    Json                          @default("[]")
+  residualRisks                   Json                          @default("[]")
+  supportReadiness                Json                          @default("{}")
+  monitoringReadiness             Json                          @default("{}")
+  rollbackPlan                    Json                          @default("{}")
+  safeHaltConditions              Json                          @default("[]")
+  integrityHash                   String
+  createdAt                       DateTime                      @default(now())
+  createdByIdentityId             String                        @db.Uuid
+  createdBy                       Identity                      @relation("LaunchReadinessSnapshotCreator", fields: [createdByIdentityId], references: [id])
+  launchEvents                    LaunchEvent[]
+  operationalActivations          OperationalActivationRecord[]
+
+  @@index([createdAt])
+  @@index([releaseCommit])
+  @@map("launch_readiness_snapshots")
+}
+
+model LaunchEvent {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  eventType                 LaunchEventType
+  launchReadinessSnapshotId String?                  @db.Uuid
+  description               String
+  eventData                 Json                     @default("{}")
+  recordedAt                DateTime                 @default(now())
+  recordedByIdentityId      String                   @db.Uuid
+  launchReadinessSnapshot   LaunchReadinessSnapshot? @relation(fields: [launchReadinessSnapshotId], references: [id])
+  recordedBy                Identity                 @relation("LaunchEventRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([eventType])
+  @@index([launchReadinessSnapshotId])
+  @@index([recordedAt])
+  @@map("launch_events")
+}
+
+model OperationalActivationRecord {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  activationNumber            String                       @unique
+  launchReadinessSnapshotId   String                       @db.Uuid
+  accountableOwnerIdentityId  String                       @db.Uuid
+  accountableOfficeholderId   String?                      @db.Uuid
+  performedByIdentityId       String                       @db.Uuid
+  scopeDescription            String
+  scopeLimitations            Json                         @default("[]")
+  acceptedReleaseCommit       String
+  acceptedArtifactDigest      String
+  activationBasis             String
+  priorStatus                 OperationalActivationStatus
+  newStatus                   OperationalActivationStatus
+  authorityEvaluationRecordId String?                      @db.Uuid
+  outcome                     OperationalActivationOutcome
+  gateOutcome                 LaunchGateOutcome?
+  residualRisksAccepted       Json                         @default("[]")
+  effectiveAt                 DateTime
+  createdAt                   DateTime                     @default(now())
+  launchReadinessSnapshot     LaunchReadinessSnapshot      @relation(fields: [launchReadinessSnapshotId], references: [id])
+  accountableOwner            Identity                     @relation("OperationalActivationAccountableOwner", fields: [accountableOwnerIdentityId], references: [id])
+  performedBy                 Identity                     @relation("OperationalActivationPerformer", fields: [performedByIdentityId], references: [id])
+  accountableOfficeholder     Officeholder?                @relation(fields: [accountableOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
+  stabilizationPeriods        StabilizationPeriod[]
+
+  @@index([launchReadinessSnapshotId])
+  @@index([newStatus])
+  @@index([effectiveAt])
+  @@map("operational_activation_records")
+}
+
+model ProductionMonitoringPlan {
+  id                   String                         @id @default(uuid()) @db.Uuid
+  planNumber           String                         @unique
+  name                 String
+  description          String
+  monitoringConfig     Json                           @default("{}")
+  slis                 Json                           @default("[]")
+  slos                 Json                           @default("[]")
+  alertRules           Json                           @default("[]")
+  incidentProcessRef   String
+  status               ProductionMonitoringPlanStatus @default(DRAFT)
+  ownerIdentityId      String                         @db.Uuid
+  effectiveFrom        DateTime
+  effectiveUntil       DateTime?
+  createdAt            DateTime                       @default(now())
+  updatedAt            DateTime                       @updatedAt
+  owner                Identity                       @relation("ProductionMonitoringPlanOwner", fields: [ownerIdentityId], references: [id])
+  stabilizationPeriods StabilizationPeriod[]
+
+  @@index([status])
+  @@index([effectiveFrom])
+  @@map("production_monitoring_plans")
+}
+
+model StabilizationPeriod {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  periodNumber                  String                      @unique
+  operationalActivationRecordId String                      @db.Uuid
+  monitoringPlanId              String                      @db.Uuid
+  startAt                       DateTime
+  plannedEndAt                  DateTime
+  actualEndAt                   DateTime?
+  successCriteria               Json                        @default("[]")
+  status                        StabilizationPeriodStatus   @default(PLANNED)
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  operationalActivationRecord   OperationalActivationRecord @relation(fields: [operationalActivationRecordId], references: [id])
+  monitoringPlan                ProductionMonitoringPlan    @relation(fields: [monitoringPlanId], references: [id])
+  observations                  StabilizationObservation[]
+
+  @@index([operationalActivationRecordId])
+  @@index([status])
+  @@map("stabilization_periods")
+}
+
+model StabilizationObservation {
+  id                    String                           @id @default(uuid()) @db.Uuid
+  stabilizationPeriodId String                           @db.Uuid
+  category              StabilizationObservationCategory
+  observationText       String
+  metricData            Json                             @default("{}")
+  severity              ProductionDefectSeverity?
+  observedAt            DateTime                         @default(now())
+  recordedByIdentityId  String                           @db.Uuid
+  createdAt             DateTime                         @default(now())
+  stabilizationPeriod   StabilizationPeriod              @relation(fields: [stabilizationPeriodId], references: [id], onDelete: Cascade)
+  recordedBy            Identity                         @relation("StabilizationObservationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([stabilizationPeriodId])
+  @@index([category])
+  @@index([observedAt])
+  @@map("stabilization_observations")
+}
+
+model ProductionDefect {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  defectNumber          String                       @unique
+  title                 String
+  description           String
+  severity              ProductionDefectSeverity
+  affectedCapabilityRef String
+  discoveryContext      String
+  reportedAt            DateTime                     @default(now())
+  reportedByIdentityId  String                       @db.Uuid
+  status                ProductionDefectStatus       @default(OPEN)
+  mayTriggerSafeHalt    Boolean                      @default(false)
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  reportedBy            Identity                     @relation("ProductionDefectReporter", fields: [reportedByIdentityId], references: [id])
+  correctiveActions     ProductionCorrectiveAction[]
+
+  @@index([severity])
+  @@index([status])
+  @@index([affectedCapabilityRef])
+  @@map("production_defects")
+}
+
+model ProductionCorrectiveAction {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  productionDefectId   String                           @db.Uuid
+  actionDescription    String
+  assignedToIdentityId String                           @db.Uuid
+  verificationRequired Boolean                          @default(true)
+  verificationNotes    String?
+  verifiedByIdentityId String?                          @db.Uuid
+  verifiedAt           DateTime?
+  status               ProductionCorrectiveActionStatus @default(OPEN)
+  createdAt            DateTime                         @default(now())
+  updatedAt            DateTime                         @updatedAt
+  productionDefect     ProductionDefect                 @relation(fields: [productionDefectId], references: [id], onDelete: Cascade)
+  assignedTo           Identity                         @relation("ProductionCorrectiveActionAssignee", fields: [assignedToIdentityId], references: [id])
+  verifiedBy           Identity?                        @relation("ProductionCorrectiveActionVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([productionDefectId])
+  @@index([status])
+  @@map("production_corrective_actions")
+}
+
+model OperationalRevalidation {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  revalidationNumber          String                          @unique
+  triggerReason               OperationalRevalidationTrigger
+  triggerDescription          String
+  targetCapabilityRef         String
+  scopeDescription            String
+  outcome                     OperationalRevalidationOutcome?
+  outcomeNotes                String?
+  requiredBy                  DateTime?
+  completedAt                 DateTime?
+  conductedByIdentityId       String?                         @db.Uuid
+  authorityEvaluationRecordId String?                         @db.Uuid
+  createdAt                   DateTime                        @default(now())
+  updatedAt                   DateTime                        @updatedAt
+  conductedBy                 Identity?                       @relation("OperationalRevalidationConductor", fields: [conductedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?      @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([targetCapabilityRef])
+  @@index([triggerReason])
+  @@index([outcome])
+  @@map("operational_revalidations")
+}
+
+model OperationalSuspension {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  suspensionNumber            String                      @unique
+  scope                       OperationalSuspensionScope
+  targetReference             String
+  reason                      String
+  suspensionEffects           Json                        @default("{}")
+  preserveRecords             Boolean                     @default(true)
+  preserveAudit               Boolean                     @default(true)
+  preserveAppealsAccess       Boolean                     @default(true)
+  revokedCredentialRefs       Json                        @default("[]")
+  disabledIntegrationRefs     Json                        @default("[]")
+  status                      OperationalSuspensionStatus @default(ACTIVE)
+  suspendedAt                 DateTime                    @default(now())
+  suspendedByIdentityId       String                      @db.Uuid
+  authorityEvaluationRecordId String?                     @db.Uuid
+  liftedAt                    DateTime?
+  liftedByIdentityId          String?                     @db.Uuid
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  suspendedBy                 Identity                    @relation("OperationalSuspensionIssuer", fields: [suspendedByIdentityId], references: [id])
+  liftedBy                    Identity?                   @relation("OperationalSuspensionLifter", fields: [liftedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?  @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([scope])
+  @@index([targetReference])
+  @@index([status])
+  @@map("operational_suspensions")
+}
+
+model CapabilityRetirement {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  retirementNumber            String                     @unique
+  capabilityRef               String
+  capabilityType              String
+  reason                      String
+  recordsPreserved            Boolean                    @default(true)
+  credentialsRevoked          Boolean                    @default(false)
+  integrationsShutdown        Boolean                    @default(false)
+  successorCapabilityRef      String?
+  effectiveAt                 DateTime
+  authorizedByIdentityId      String                     @db.Uuid
+  authorityEvaluationRecordId String?                    @db.Uuid
+  createdAt                   DateTime                   @default(now())
+  authorizedBy                Identity                   @relation("CapabilityRetirementAuthorizer", fields: [authorizedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  replacementsAsPredecessor   CapabilityReplacement[]    @relation("CapabilityReplacementPredecessor")
+
+  @@index([capabilityRef])
+  @@index([effectiveAt])
+  @@map("capability_retirements")
+}
+
+model CapabilityReplacement {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  replacementNumber         String                      @unique
+  predecessorCapabilityRef  String
+  successorCapabilityRef    String
+  predecessorRetirementId   String?                     @db.Uuid
+  dataMigrationPlan         Json                        @default("{}")
+  recordsContinuityPlan     Json                        @default("{}")
+  credentialTransitionPlan  Json                        @default("{}")
+  integrationTransitionPlan Json                        @default("{}")
+  userCommunicationPlan     Json                        @default("{}")
+  cutoverPlan               Json                        @default("{}")
+  rollbackPlan              Json                        @default("{}")
+  acceptanceRecordRef       String?
+  status                    CapabilityReplacementStatus @default(PLANNED)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  predecessorRetirement     CapabilityRetirement?       @relation("CapabilityReplacementPredecessor", fields: [predecessorRetirementId], references: [id])
+
+  @@index([predecessorCapabilityRef])
+  @@index([successorCapabilityRef])
+  @@index([status])
+  @@map("capability_replacements")
+}
+
+model DecommissioningPlan {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  planNumber              String                     @unique
+  targetSystemRef         String
+  openCasesDisposition    Json                       @default("{}")
+  recordsDisposition      Json                       @default("{}")
+  evidenceDisposition     Json                       @default("{}")
+  dataExportPlan          Json                       @default("{}")
+  legalHolds              Json                       @default("[]")
+  archivePlan             Json                       @default("{}")
+  credentialShutdownPlan  Json                       @default("{}")
+  integrationShutdownPlan Json                       @default("{}")
+  status                  DecommissioningPlanStatus  @default(DRAFT)
+  approvedAt              DateTime?
+  approvedByIdentityId    String?                    @db.Uuid
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  approvedBy              Identity?                  @relation("DecommissioningPlanApprover", fields: [approvedByIdentityId], references: [id])
+  executions              DecommissioningExecution[]
+
+  @@index([targetSystemRef])
+  @@index([status])
+  @@map("decommissioning_plans")
+}
+
+model DecommissioningExecution {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  decommissioningPlanId String                      @db.Uuid
+  executionNotes        String
+  executedSteps         Json                        @default("[]")
+  executedAt            DateTime                    @default(now())
+  executedByIdentityId  String                      @db.Uuid
+  evidenceRefs          Json                        @default("[]")
+  createdAt             DateTime                    @default(now())
+  decommissioningPlan   DecommissioningPlan         @relation(fields: [decommissioningPlanId], references: [id])
+  executedBy            Identity                    @relation("DecommissioningExecutionPerformer", fields: [executedByIdentityId], references: [id])
+  credentialShutdowns   CredentialShutdownRecord[]
+  integrationShutdowns  IntegrationShutdownRecord[]
+  exitAcceptanceRecords ExitAcceptanceRecord[]
+
+  @@index([decommissioningPlanId])
+  @@index([executedAt])
+  @@map("decommissioning_executions")
+}
+
+model DataExportManifest {
+  id                   String    @id @default(uuid()) @db.Uuid
+  manifestNumber       String    @unique
+  exportScope          Json      @default("{}")
+  dataCategories       Json      @default("[]")
+  formatDescription    String
+  verificationHash     String
+  checksumAlgorithm    String    @default("SHA-256")
+  exportedAt           DateTime?
+  exportedByIdentityId String?   @db.Uuid
+  verifiedAt           DateTime?
+  verifiedByIdentityId String?   @db.Uuid
+  isUsable             Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  exportedBy           Identity? @relation("DataExportManifestExporter", fields: [exportedByIdentityId], references: [id])
+  verifiedBy           Identity? @relation("DataExportManifestVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([isUsable])
+  @@map("data_export_manifests")
+}
+
+model RecordsPreservationManifest {
+  id                  String   @id @default(uuid()) @db.Uuid
+  manifestNumber      String   @unique
+  preservedRecords    Json     @default("[]")
+  legalHolds          Json     @default("[]")
+  archiveLocations    Json     @default("[]")
+  accessPolicy        Json     @default("{}")
+  verificationHash    String
+  createdAt           DateTime @default(now())
+  createdByIdentityId String   @db.Uuid
+  createdBy           Identity @relation("RecordsPreservationManifestCreator", fields: [createdByIdentityId], references: [id])
+
+  @@map("records_preservation_manifests")
+}
+
+model CredentialShutdownRecord {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  credentialRef              String
+  credentialType             String
+  shutdownReason             String
+  revokedAt                  DateTime                  @default(now())
+  revokedByIdentityId        String                    @db.Uuid
+  decommissioningExecutionId String?                   @db.Uuid
+  createdAt                  DateTime                  @default(now())
+  revokedBy                  Identity                  @relation("CredentialShutdownPerformer", fields: [revokedByIdentityId], references: [id])
+  decommissioningExecution   DecommissioningExecution? @relation(fields: [decommissioningExecutionId], references: [id])
+
+  @@index([credentialRef])
+  @@map("credential_shutdown_records")
+}
+
+model IntegrationShutdownRecord {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  integrationDefinitionId    String?                   @db.Uuid
+  integrationRef             String
+  shutdownReason             String
+  webhooksDisabled           Boolean                   @default(true)
+  jobsStopped                Boolean                   @default(true)
+  shutDownAt                 DateTime                  @default(now())
+  shutDownByIdentityId       String                    @db.Uuid
+  decommissioningExecutionId String?                   @db.Uuid
+  createdAt                  DateTime                  @default(now())
+  shutDownBy                 Identity                  @relation("IntegrationShutdownPerformer", fields: [shutDownByIdentityId], references: [id])
+  decommissioningExecution   DecommissioningExecution? @relation(fields: [decommissioningExecutionId], references: [id])
+  integrationDefinition      IntegrationDefinition?    @relation(fields: [integrationDefinitionId], references: [id])
+
+  @@index([integrationRef])
+  @@map("integration_shutdown_records")
+}
+
+model ExitAcceptanceRecord {
+  id                                  String                   @id @default(uuid()) @db.Uuid
+  acceptanceNumber                    String                   @unique
+  decommissioningExecutionId          String                   @db.Uuid
+  institutionalAcceptorIdentityId     String                   @db.Uuid
+  institutionalAcceptorOfficeholderId String?                  @db.Uuid
+  acceptanceOutcome                   ExitAcceptanceOutcome
+  acceptanceNotes                     String
+  residualObligations                 Json                     @default("[]")
+  acceptedAt                          DateTime                 @default(now())
+  createdAt                           DateTime                 @default(now())
+  decommissioningExecution            DecommissioningExecution @relation(fields: [decommissioningExecutionId], references: [id])
+  institutionalAcceptor               Identity                 @relation("ExitAcceptanceRecorder", fields: [institutionalAcceptorIdentityId], references: [id])
+  institutionalAcceptorOfficeholder   Officeholder?            @relation(fields: [institutionalAcceptorOfficeholderId], references: [id])
+
+  @@index([decommissioningExecutionId])
+  @@index([acceptanceOutcome])
+  @@map("exit_acceptance_records")
 }
