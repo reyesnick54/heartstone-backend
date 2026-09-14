@@ -128,6 +128,9 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  analysisRequests             AnalysisRequest[]
+  intelligenceMonitoringRules  IntelligenceMonitoringRule[]
+  riskDefinitions              RiskDefinition[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -547,6 +550,15 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  analysisRequestsRequested          AnalysisRequest[]             @relation("AnalysisRequestRequester")
+  analysisRunsExecuted               AnalysisRun[]                 @relation("AnalysisRunExecutor")
+  analysisHumanReviews               AnalysisHumanReview[]         @relation("AnalysisHumanReviewer")
+  intelligenceMonitoringRulesOwned   IntelligenceMonitoringRule[]  @relation("IntelligenceMonitoringRuleOwner")
+  intelligenceMonitoringRulesReviewed IntelligenceMonitoringRule[] @relation("IntelligenceMonitoringRuleReviewer")
+  intelligenceMonitoringAlertsRecipient IntelligenceMonitoringAlert[] @relation("IntelligenceMonitoringAlertRecipient")
+  intelligenceAlertVerifications   IntelligenceAlertVerification[] @relation("IntelligenceAlertVerifier")
+  intelligenceAlertDispositions      IntelligenceAlertDisposition[] @relation("IntelligenceAlertDisposer")
+  riskReviews                        RiskReview[]                  @relation("RiskReviewer")
 
   @@index([userAccountId])
   @@index([personId])
@@ -2220,6 +2232,7 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  analysisRequests                  AnalysisRequest[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -7335,4 +7348,447 @@ model JudicialReviewInformationRecord {
 
   @@index([redressMatterId])
   @@map("judicial_review_information_records")
+}
+
+// ─── Phase 12E: Evidence-Supported Analysis, Monitoring, Alerting and Risk ───
+
+enum AnalysisFunctionType {
+  REQUIREMENT_COMPARISON
+  SOURCE_TO_CLAIM_ANALYSIS
+  EVIDENCE_GAP_IDENTIFICATION
+  CONFLICTING_SOURCE_DETECTION
+  OPTION_DEVELOPMENT
+  RISK_CONSEQUENCE_ANALYSIS
+  QUESTION_PREPARATION
+  DECISION_SUPPORT_SUMMARY
+  PROFESSIONAL_REVIEW_IDENTIFICATION
+}
+
+enum AnalysisRequestStatus {
+  DRAFT
+  SUBMITTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AnalysisRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum AnalysisSourceStatus {
+  APPROVED
+  PENDING_REVIEW
+  STALE
+  REJECTED
+  CONFLICTING
+}
+
+enum IntelligenceMonitoringObjectType {
+  GOVERNMENT_SERVICE
+  CASE
+  COMPLIANCE_MATTER
+  INSTITUTIONAL_PROCESS
+  DOCUMENT_RECORD
+  OTHER_INSTITUTIONAL_OBJECT
+}
+
+enum ForbiddenMonitoringSubjectType {
+  PERSON
+  COMMUNICATION
+  LOCATION
+  DEVICE
+  PROTECTED_INFORMATION
+}
+
+enum IntelligenceMonitoringRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum IntelligenceMonitoringFrequency {
+  REALTIME
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum IntelligenceAlertStatus {
+  GENERATED
+  UNDER_REVIEW
+  VERIFIED_EVENT
+  FALSE_POSITIVE
+  UNRESOLVED
+  ESCALATED
+  CLOSED
+  SUPERSEDED
+}
+
+enum RiskEvidenceBasis {
+  OBSERVED_FACT
+  EXPERT_JUDGMENT
+  MODEL_ESTIMATE
+  SCENARIO_ASSUMPTION
+  HISTORICAL_PATTERN
+}
+
+enum RiskDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum RiskAssessmentStatus {
+  DRAFT
+  UNDER_REVIEW
+  ACTIVE
+  SUPERSEDED
+  CLOSED
+}
+
+enum RiskMitigationStatus {
+  PROPOSED
+  IN_PROGRESS
+  IMPLEMENTED
+  REJECTED
+  DEFERRED
+}
+
+model AnalysisRequest {
+  id                    String                @id @default(uuid()) @db.Uuid
+  requestNumber         String                @unique
+  question              String
+  functionType          AnalysisFunctionType
+  status                AnalysisRequestStatus @default(DRAFT)
+  institutionId         String?               @db.Uuid
+  caseId                String?               @db.Uuid
+  requestedByIdentityId String                @db.Uuid
+  outputClassification  String                @default("NOT_LEGAL_ADVICE;NOT_PROFESSIONAL_CERTIFICATION;NOT_GOVERNMENT_DETERMINATION;NOT_FINAL_DECISION")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  institution           Institution?          @relation(fields: [institutionId], references: [id])
+  case                  Case?                 @relation(fields: [caseId], references: [id])
+  requestedBy           Identity              @relation("AnalysisRequestRequester", fields: [requestedByIdentityId], references: [id])
+  runs                  AnalysisRun[]
+
+  @@index([status])
+  @@index([institutionId])
+  @@index([caseId])
+  @@map("analysis_requests")
+}
+
+model AnalysisRun {
+  id                    String            @id @default(uuid()) @db.Uuid
+  runNumber             String            @unique
+  requestId             String            @db.Uuid
+  status                AnalysisRunStatus @default(PENDING)
+  method                String
+  assumptions           Json              @default("[]")
+  limitations           String
+  outputReplayHash      String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  executedByIdentityId  String?           @db.Uuid
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  request               AnalysisRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  executedBy            Identity?         @relation("AnalysisRunExecutor", fields: [executedByIdentityId], references: [id])
+  sources               AnalysisSource[]
+  findings              AnalysisFinding[]
+  options               AnalysisOption[]
+  uncertainties         AnalysisUncertainty[]
+  humanReviews          AnalysisHumanReview[]
+
+  @@index([requestId])
+  @@index([status])
+  @@map("analysis_runs")
+}
+
+model AnalysisSource {
+  id               String               @id @default(uuid()) @db.Uuid
+  runId            String               @db.Uuid
+  sourceReference  String
+  sourceLabel      String
+  sourceStatus     AnalysisSourceStatus
+  exactValue       Json
+  retrievedAt      DateTime?
+  stalenessNotedAt DateTime?
+  conflictGroupId  String?
+  preservedConflict Boolean             @default(false)
+  createdAt        DateTime             @default(now())
+  run              AnalysisRun          @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([conflictGroupId])
+  @@map("analysis_sources")
+}
+
+model AnalysisFinding {
+  id              String      @id @default(uuid()) @db.Uuid
+  runId           String      @db.Uuid
+  findingText     String
+  conclusionScope String
+  isDecisionLike  Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  run             AnalysisRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("analysis_findings")
+}
+
+model AnalysisOption {
+  id          String      @id @default(uuid()) @db.Uuid
+  runId       String      @db.Uuid
+  optionLabel String
+  description String
+  tradeoffs   String?
+  createdAt   DateTime    @default(now())
+  run         AnalysisRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("analysis_options")
+}
+
+model AnalysisUncertainty {
+  id              String      @id @default(uuid()) @db.Uuid
+  runId           String      @db.Uuid
+  uncertaintyText String
+  severity        String?
+  createdAt       DateTime    @default(now())
+  run             AnalysisRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("analysis_uncertainties")
+}
+
+model AnalysisHumanReview {
+  id                         String      @id @default(uuid()) @db.Uuid
+  runId                      String      @db.Uuid
+  reviewerIdentityId         String      @db.Uuid
+  reviewNotes                String?
+  professionalReviewRequired Boolean     @default(false)
+  reviewedAt                 DateTime    @default(now())
+  createdAt                  DateTime    @default(now())
+  run                        AnalysisRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  reviewer                   Identity    @relation("AnalysisHumanReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([runId])
+  @@index([reviewerIdentityId])
+  @@map("analysis_human_reviews")
+}
+
+model IntelligenceMonitoringRule {
+  id                     String                           @id @default(uuid()) @db.Uuid
+  code                   String                           @unique
+  name                   String
+  objectType             IntelligenceMonitoringObjectType
+  objectReference        String
+  approvedSourceReference String
+  approvedSourceLabel    String
+  conditionDescription   String
+  detectionRule          Json                             @default("{}")
+  thresholdConfig        Json                             @default("{}")
+  ownerIdentityId        String                           @db.Uuid
+  purpose                String
+  reviewerIdentityId     String                           @db.Uuid
+  frequency              IntelligenceMonitoringFrequency
+  effectiveFrom          DateTime
+  effectiveUntil         DateTime?
+  institutionId          String?                          @db.Uuid
+  lawfulBasis            String?
+  accessApprovalRef      String?
+  status                 IntelligenceMonitoringRuleStatus @default(DRAFT)
+  createdAt              DateTime                         @default(now())
+  updatedAt              DateTime                         @updatedAt
+  owner                  Identity                         @relation("IntelligenceMonitoringRuleOwner", fields: [ownerIdentityId], references: [id])
+  reviewer               Identity                         @relation("IntelligenceMonitoringRuleReviewer", fields: [reviewerIdentityId], references: [id])
+  institution            Institution?                     @relation(fields: [institutionId], references: [id])
+  observations           IntelligenceMonitoringObservation[]
+  alerts                 IntelligenceMonitoringAlert[]
+
+  @@index([status])
+  @@index([objectType, objectReference])
+  @@index([institutionId])
+  @@map("intelligence_monitoring_rules")
+}
+
+model IntelligenceMonitoringObservation {
+  id                String                     @id @default(uuid()) @db.Uuid
+  ruleId            String                     @db.Uuid
+  observedCondition String
+  sourceReference   String
+  sourceStatus      AnalysisSourceStatus
+  confidenceNotes   String?
+  uncertaintyNotes  String?
+  isStaleSource     Boolean                    @default(false)
+  observedAt        DateTime                   @default(now())
+  createdAt         DateTime                   @default(now())
+  rule              IntelligenceMonitoringRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  alerts            IntelligenceMonitoringAlert[]
+
+  @@index([ruleId])
+  @@index([observedAt])
+  @@map("intelligence_monitoring_observations")
+}
+
+model IntelligenceMonitoringAlert {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  alertNumber                   String                            @unique
+  ruleId                        String                            @db.Uuid
+  observationId                   String?                           @db.Uuid
+  monitoredObjectType           IntelligenceMonitoringObjectType
+  monitoredObjectReference      String
+  sourceReference               String
+  observedCondition             String
+  observedAt                    DateTime
+  confidenceNotes               String?
+  uncertaintyNotes              String?
+  affectedServiceIds            Json                              @default("[]")
+  recommendedReview             String
+  responsibleRecipientIdentityId String                           @db.Uuid
+  status                        IntelligenceAlertStatus           @default(GENERATED)
+  isViolation                   Boolean                           @default(false)
+  isEmergency                   Boolean                           @default(false)
+  isEnforcement                 Boolean                           @default(false)
+  generatedAt                   DateTime                          @default(now())
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  rule                          IntelligenceMonitoringRule        @relation(fields: [ruleId], references: [id])
+  observation                   IntelligenceMonitoringObservation? @relation(fields: [observationId], references: [id])
+  responsibleRecipient          Identity                          @relation("IntelligenceMonitoringAlertRecipient", fields: [responsibleRecipientIdentityId], references: [id])
+  verifications                 IntelligenceAlertVerification[]
+  dispositions                  IntelligenceAlertDisposition[]
+
+  @@index([ruleId])
+  @@index([status])
+  @@index([observedAt])
+  @@map("intelligence_monitoring_alerts")
+}
+
+model IntelligenceAlertVerification {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  alertId            String                      @db.Uuid
+  verifierIdentityId String                      @db.Uuid
+  evidenceRefs       Json                        @default("[]")
+  verificationNotes  String
+  isAlgorithmic      Boolean                     @default(false)
+  verifiedAt         DateTime                    @default(now())
+  createdAt          DateTime                    @default(now())
+  alert              IntelligenceMonitoringAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  verifier           Identity                    @relation("IntelligenceAlertVerifier", fields: [verifierIdentityId], references: [id])
+
+  @@index([alertId])
+  @@map("intelligence_alert_verifications")
+}
+
+model IntelligenceAlertDisposition {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  alertId              String                      @db.Uuid
+  dispositionStatus    IntelligenceAlertStatus
+  disposedByIdentityId String                      @db.Uuid
+  dispositionNotes     String?
+  disposedAt           DateTime                    @default(now())
+  createdAt            DateTime                    @default(now())
+  alert                IntelligenceMonitoringAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  disposedBy           Identity                    @relation("IntelligenceAlertDisposer", fields: [disposedByIdentityId], references: [id])
+
+  @@index([alertId])
+  @@map("intelligence_alert_dispositions")
+}
+
+model RiskDefinition {
+  id                  String               @id @default(uuid()) @db.Uuid
+  code                String               @unique
+  name                String
+  description         String?
+  methodology         String
+  methodologyVersion  String
+  institutionId       String?              @db.Uuid
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  status              RiskDefinitionStatus @default(DRAFT)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  institution         Institution?         @relation(fields: [institutionId], references: [id])
+  assessments         RiskAssessment[]
+
+  @@index([status])
+  @@index([institutionId])
+  @@map("risk_definitions")
+}
+
+model RiskAssessment {
+  id                      String               @id @default(uuid()) @db.Uuid
+  assessmentNumber        String               @unique
+  definitionId            String               @db.Uuid
+  subjectType             String
+  subjectReference        String
+  status                  RiskAssessmentStatus @default(DRAFT)
+  overallScore            Float?
+  scoreLabel              String?
+  scoreIsMandatoryGateBypass Boolean           @default(false)
+  methodologyVersion      String
+  limitations             String
+  assessedAt              DateTime?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  definition              RiskDefinition       @relation(fields: [definitionId], references: [id])
+  factors                 RiskFactor[]
+  mitigations             RiskMitigation[]
+  reviews                 RiskReview[]
+
+  @@index([definitionId])
+  @@index([status])
+  @@map("risk_assessments")
+}
+
+model RiskFactor {
+  id            String            @id @default(uuid()) @db.Uuid
+  assessmentId  String            @db.Uuid
+  factorLabel   String
+  basis         RiskEvidenceBasis
+  score         Float?
+  weight        Float?
+  exactValue    Json?
+  basisLabel    String?
+  createdAt     DateTime          @default(now())
+  assessment    RiskAssessment    @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@map("risk_factors")
+}
+
+model RiskMitigation {
+  id              String               @id @default(uuid()) @db.Uuid
+  assessmentId    String               @db.Uuid
+  mitigationText  String
+  status          RiskMitigationStatus @default(PROPOSED)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  assessment      RiskAssessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@map("risk_mitigations")
+}
+
+model RiskReview {
+  id                 String         @id @default(uuid()) @db.Uuid
+  assessmentId       String         @db.Uuid
+  reviewerIdentityId String         @db.Uuid
+  reviewNotes        String?
+  reviewedAt         DateTime       @default(now())
+  createdAt          DateTime       @default(now())
+  assessment         RiskAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  reviewer           Identity       @relation("RiskReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([assessmentId])
+  @@map("risk_reviews")
 }
