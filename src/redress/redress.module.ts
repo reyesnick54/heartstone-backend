@@ -5,9 +5,17 @@ import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ReviewAssignmentService } from './assignment/review-assignment.service';
 import { ReviewerIndependenceService } from './assignment/reviewer-independence.service';
+import { ExternalReviewBoundaryService } from './common/external-review-boundary.service';
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
 import { ReviewEvidenceAdmissionService } from './evidence/review-evidence-admission.service';
+import { ExternalReviewDeterminationService } from './external-review/external-review-determination.service';
+import { ExternalReviewPackageService } from './external-review/external-review-package.service';
+import { ExternalReviewReferralService } from './external-review/external-review-referral.service';
+import { JudicialReviewInformationService } from './external-review/judicial-review-information.service';
+import { OmbudsOversightReferralService } from './external-review/ombuds-oversight-referral.service';
+import { ProfessionalChallengeReferralService } from './external-review/professional-challenge-referral.service';
+import { RegulatoryReviewReferralService } from './external-review/regulatory-review-referral.service';
 import { RedressImplementationService } from './implementation/redress-implementation.service';
 import { InterimReliefService } from './interim-relief/interim-relief.service';
 import { RedressMatterService } from './matters/redress-matter.service';
@@ -35,6 +43,14 @@ import { ReviewRecordSnapshotService } from './snapshot/review-record-snapshot.s
     InterimReliefService,
     RedressImplementationService,
     RedressNoticeService,
+    ExternalReviewBoundaryService,
+    ExternalReviewReferralService,
+    ExternalReviewPackageService,
+    ExternalReviewDeterminationService,
+    ProfessionalChallengeReferralService,
+    RegulatoryReviewReferralService,
+    OmbudsOversightReferralService,
+    JudicialReviewInformationService,
   ],
   exports: [
     RedressBoundaryService,
@@ -50,6 +66,14 @@ import { ReviewRecordSnapshotService } from './snapshot/review-record-snapshot.s
     InterimReliefService,
     RedressImplementationService,
     RedressNoticeService,
+    ExternalReviewBoundaryService,
+    ExternalReviewReferralService,
+    ExternalReviewPackageService,
+    ExternalReviewDeterminationService,
+    ProfessionalChallengeReferralService,
+    RegulatoryReviewReferralService,
+    OmbudsOversightReferralService,
+    JudicialReviewInformationService,
   ],
 })
 export class RedressModule {}

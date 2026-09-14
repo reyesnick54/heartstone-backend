@@ -9,8 +9,11 @@ import {
   REDRESS_REMEDY_TYPES,
 } from './redress.constants';
 import {
+  EXTERNAL_REVIEW_STATUSES,
   PHASE_10E_ENUM_NAMES,
   PHASE_10E_MODEL_NAMES,
+  PHASE_10F_ENUM_NAMES,
+  PHASE_10F_MODEL_NAMES,
   PHASE_10G_ENUM_NAMES,
   PHASE_10G_MODEL_NAMES,
 } from './redress-schema.constants';
@@ -101,5 +104,33 @@ describe('Phase 10G redress schema', () => {
     expect(schema).toContain('model RedressReviewRecordSnapshot');
     expect(schema).toContain('@@map("review_record_snapshots")');
     expect(schema).toContain('@@map("redress_review_record_snapshots")');
+  });
+});
+
+describe('Phase 10F external redress schema', () => {
+  for (const modelName of PHASE_10F_MODEL_NAMES) {
+    it(`defines model ${modelName}`, () => {
+      expect(schema).toContain(`model ${modelName}`);
+    });
+  }
+
+  for (const enumName of PHASE_10F_ENUM_NAMES) {
+    it(`defines enum ${enumName}`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
+  it('does not use APPROVED as an external review status', () => {
+    for (const status of EXTERNAL_REVIEW_STATUSES) {
+      expect(schema).toContain(status);
+    }
+    expect(EXTERNAL_REVIEW_STATUSES).not.toContain('APPROVED');
+  });
+
+  it('pins evidence packet versions without duplicating documents', () => {
+    const block = /model ExternalReviewPackage \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).toContain('evidencePacketVersionId');
+    expect(block).toContain('documentVersionPins');
+    expect(block).toContain('manifestHash');
   });
 });

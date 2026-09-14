@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import {
   RedressMatterStatus,
   RedressRouteVersionStatus,
+  RetainedAppealAuthorityClass,
   ReviewInterimEffect,
   ReviewStayStatus,
 } from '@prisma/client';
@@ -110,6 +111,29 @@ export class RedressMatterService {
     return this.findById(matter.id);
   }
 
+  async markRetainedNationalAuthority(
+    redressMatterId: string,
+    retainedAuthorityClass: RetainedAppealAuthorityClass,
+  ) {
+    return this.prisma.redressMatter.update({
+      where: { id: redressMatterId },
+      data: {
+        retainsNationalAppealAuthority: true,
+        blocksInternalAdjudication: true,
+        retainedAuthorityClass,
+      },
+    });
+  }
+
+  async assertBlocksInternalAdjudication(redressMatterId: string): Promise<void> {
+    const matter = await this.findById(redressMatterId);
+    if (matter.blocksInternalAdjudication) {
+      throw new BadRequestException(
+        'Internal adjudication is blocked for this redress matter; external coordination only',
+      );
+    }
+  }
+
   async findById(id: string) {
     const matter = await this.prisma.redressMatter.findUnique({
       where: { id },
@@ -120,6 +144,9 @@ export class RedressMatterService {
         reviewStayRecords: true,
         interimReliefRequests: true,
         redressDecisions: true,
+        externalReviewReferrals: {
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 

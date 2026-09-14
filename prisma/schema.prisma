@@ -310,6 +310,7 @@ model ExternalAuthority {
   caseReferrals                    CaseReferral[]
   documentVersionsReceived         DocumentVersion[]
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
+  externalReviewReferrals          ExternalReviewReferral[]
 
   @@map("external_authorities")
 }
@@ -526,6 +527,8 @@ model Identity {
   instrumentDownloadsAsActor          InstrumentDownloadEvent[]         @relation("InstrumentDownloadActor")
   instrumentLifecycleEventsAsActor    InstrumentLifecycleEvent[]        @relation("InstrumentLifecycleActor")
   reviewReferencesAsAppellant         DecisionReviewReference[]         @relation("ReviewAppellant")
+  externalReviewReferralsPrepared     ExternalReviewReferral[]          @relation("ExternalReviewPreparedBy")
+  externalReviewDeterminationsRecorded ExternalReviewDetermination[]    @relation("ExternalDeterminationRecordedBy")
   suspensionRecordsExecuted           InstrumentSuspensionRecord[]      @relation("SuspensionExecutor")
   complianceMattersAsHolder          ComplianceMatter[]            @relation("ComplianceMatterHolderIdentity")
   obligationStatusChanges            ObligationStatusHistory[]     @relation("ObligationStatusChangedBy")
@@ -2216,6 +2219,7 @@ model Case {
   reconsiderationProceedings        ReconsiderationProceeding[]
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
+  externalReviewReferrals           ExternalReviewReferral[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3741,6 +3745,7 @@ model EvidencePacketVersion {
   exclusionRecords             EvidencePacketItemExclusion[]
   decisionReadinessAssessments DecisionReadinessAssessment[]
   governmentDecisions          GovernmentDecision[]
+  externalReviewPackages       ExternalReviewPackage[]
 
   @@unique([packetId, version])
   @@index([packetId])
@@ -4645,6 +4650,7 @@ model GovernmentDecision {
   replacementRecords            InstrumentReplacementRecord[]
   surrenderRecords              InstrumentSurrenderRecord[]
   redressMattersChallenged      RedressMatter[]               @relation("RedressChallengedDecision")
+  externalReviewReferralsChallenged ExternalReviewReferral[]  @relation("ExternalReviewChallengedDecision")
   redressDecisionsSuperseding   RedressDecision[]             @relation("RedressSupersededDecision")
 
   @@index([caseId])
@@ -5116,6 +5122,7 @@ model OfficialInstrument {
   surrenderRecords             InstrumentSurrenderRecord[]
   challengedInReviews          DecisionReviewReference[]
   redressMattersChallenged     RedressMatter[]                  @relation("RedressChallengedInstrument")
+  externalReviewReferralsChallenged ExternalReviewReferral[]  @relation("ExternalReviewChallengedInstrument")
   complianceMatters            ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
 
@@ -6770,6 +6777,14 @@ model RedressMatter {
   interimReliefRequests              InterimReliefRequest[]
   reviewStayRecords                  ReviewStayRecord[]
   redressNotices                     RedressNotice[]
+  retainsNationalAppealAuthority     Boolean                  @default(false)
+  blocksInternalAdjudication         Boolean                  @default(false)
+  retainedAuthorityClass             RetainedAppealAuthorityClass?
+  externalReviewReferrals            ExternalReviewReferral[]
+  professionalChallengeReferrals     ProfessionalChallengeReferral[]
+  regulatoryReviewReferrals          RegulatoryReviewReferral[]
+  ombudsOversightReferrals           OmbudsOversightReferral[]
+  judicialReviewInformationRecords   JudicialReviewInformationRecord[]
 
   @@index([routeVersionId])
   @@index([challengedDecisionId])
@@ -7029,4 +7044,295 @@ model RedressNotice {
   @@index([redressMatterId])
   @@index([status])
   @@map("redress_notices")
+}
+
+// ─── Phase 10F: Statutory and External Redress Pathways ──────────────────────
+
+enum ExternalReviewStatus {
+  PREPARATION
+  READY_FOR_TRANSMISSION
+  TRANSMITTED
+  ACKNOWLEDGED
+  UNDER_EXTERNAL_REVIEW
+  FURTHER_INFORMATION_REQUESTED
+  HEARING_SCHEDULED
+  EXTERNAL_DETERMINATION_RECEIVED
+  IMPLEMENTATION_PENDING
+  CLOSED
+  UNKNOWN
+  SAFE_HALTED
+}
+
+enum ExternalReviewRouteType {
+  STATUTORY_APPEAL
+  PROFESSIONAL_CHALLENGE
+  REGULATORY_REVIEW
+  OMBUDS_OVERSIGHT
+  JUDICIAL_REVIEW
+  OTHER_EXTERNAL
+}
+
+enum ExternalAuthorityBindingClass {
+  BINDING
+  RECOMMENDATORY
+  INFORMATIONAL
+  UNKNOWN
+}
+
+enum ExternalDeterminationAuthenticityStatus {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  AUTHENTICATED
+  REJECTED
+}
+
+enum ProfessionalChallengeAuthorityType {
+  PROFESSIONAL_BODY
+  LICENSE_BOARD
+  NAMED_REVIEWING_PROFESSIONAL
+  OTHER_COMPETENT_BODY
+}
+
+enum ExternalReviewTransmissionMethod {
+  SECURE_PORTAL
+  REGISTERED_MAIL
+  EMAIL
+  IN_PERSON
+  ELECTRONIC_FILING
+  OTHER
+}
+
+enum RetainedAppealAuthorityClass {
+  NATIONAL_STATUTORY
+  PROFESSIONAL_DISCIPLINE
+  REGULATORY
+  JUDICIAL
+  OTHER_RETAINED
+}
+
+model ExternalReviewReferral {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  referralNumber             String                           @unique
+  redressMatterId            String                           @db.Uuid
+  caseId                     String?                          @db.Uuid
+  routeType                  ExternalReviewRouteType
+  competentAuthority         String
+  externalAuthorityId        String?                          @db.Uuid
+  routeVersion               String
+  authorityPurpose           String
+  standingRecordReference    String?
+  timelinessRecordReference  String?
+  challengedDecisionId       String?                          @db.Uuid
+  challengedInstrumentId     String?                          @db.Uuid
+  grounds                    String
+  requestedRemedy            String?
+  recordTransmitted          Boolean                          @default(false)
+  evidenceManifestReference  String?
+  securityClassification     String
+  transmissionMethod         ExternalReviewTransmissionMethod?
+  status                     ExternalReviewStatus             @default(PREPARATION)
+  retainsNationalAuthority   Boolean                          @default(false)
+  retainedAuthorityClass     RetainedAppealAuthorityClass?
+  blocksInternalAdjudication Boolean                          @default(false)
+  sentAt                     DateTime?
+  acknowledgedAt             DateTime?
+  externalReference          String?
+  preparedByIdentityId       String?                          @db.Uuid
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  redressMatter              RedressMatter                    @relation(fields: [redressMatterId], references: [id])
+  case                       Case?                            @relation(fields: [caseId], references: [id])
+  externalAuthority          ExternalAuthority?               @relation(fields: [externalAuthorityId], references: [id])
+  challengedDecision         GovernmentDecision?              @relation("ExternalReviewChallengedDecision", fields: [challengedDecisionId], references: [id])
+  challengedInstrument       OfficialInstrument?              @relation("ExternalReviewChallengedInstrument", fields: [challengedInstrumentId], references: [id])
+  preparedByIdentity         Identity?                        @relation("ExternalReviewPreparedBy", fields: [preparedByIdentityId], references: [id])
+  packages                   ExternalReviewPackage[]
+  acknowledgments            ExternalReviewAcknowledgment[]
+  statusRecords              ExternalReviewStatusRecord[]
+  determination              ExternalReviewDetermination?
+  professionalChallenge      ProfessionalChallengeReferral?
+  regulatoryReview           RegulatoryReviewReferral?
+  ombudsOversight            OmbudsOversightReferral?
+  judicialReviewInformation  JudicialReviewInformationRecord?
+
+  @@index([redressMatterId])
+  @@index([caseId])
+  @@index([status])
+  @@index([routeType])
+  @@index([externalAuthorityId])
+  @@map("external_review_referrals")
+}
+
+model ExternalReviewPackage {
+  id                      String                @id @default(uuid()) @db.Uuid
+  referralId              String                @db.Uuid
+  packageVersion          Int
+  evidencePacketVersionId String                @db.Uuid
+  canonicalManifest       Json
+  manifestHash            String
+  securityClassification  String
+  documentVersionPins     Json                  @default("[]")
+  createdAt               DateTime              @default(now())
+  referral                ExternalReviewReferral  @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  evidencePacketVersion   EvidencePacketVersion @relation(fields: [evidencePacketVersionId], references: [id])
+
+  @@unique([referralId, packageVersion])
+  @@index([referralId])
+  @@index([evidencePacketVersionId])
+  @@index([manifestHash])
+  @@map("external_review_packages")
+}
+
+model ExternalReviewAcknowledgment {
+  id                          String                                  @id @default(uuid()) @db.Uuid
+  referralId                  String                                  @db.Uuid
+  acknowledgedByAuthority     String
+  acknowledgedAt              DateTime
+  externalReference           String?
+  authenticityStatus          ExternalDeterminationAuthenticityStatus @default(UNVERIFIED)
+  authenticityVerificationRef String?
+  receivedFromSource          String?
+  createdAt                   DateTime                                @default(now())
+  referral                    ExternalReviewReferral                  @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([referralId])
+  @@index([acknowledgedAt])
+  @@map("external_review_acknowledgments")
+}
+
+model ExternalReviewStatusRecord {
+  id              String                 @id @default(uuid()) @db.Uuid
+  referralId      String                 @db.Uuid
+  status          ExternalReviewStatus
+  recordedAt      DateTime               @default(now())
+  sourceAuthority String?
+  sourceReference String?
+  notes           String?
+  isAuthenticated Boolean                @default(false)
+  createdAt       DateTime               @default(now())
+  referral        ExternalReviewReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([referralId])
+  @@index([status])
+  @@index([recordedAt])
+  @@map("external_review_status_records")
+}
+
+model ExternalReviewDetermination {
+  id                          String                                  @id @default(uuid()) @db.Uuid
+  referralId                  String                                  @unique @db.Uuid
+  sourceAuthority             String
+  authenticityStatus          ExternalDeterminationAuthenticityStatus @default(UNVERIFIED)
+  authenticityVerificationRef String?
+  officialReference           String?
+  decisionDate                DateTime?
+  receivedDate                DateTime
+  outcomeText                 String
+  reasonsReference            String?
+  effectiveDate               DateTime?
+  stayInterimEffect           String?
+  remedyText                  String?
+  furtherRightsText           String?
+  instrumentOrderReference    String?
+  conditionsText              String?
+  implementationRequirements  String?
+  verificationMethod          String?
+  bindingClass                ExternalAuthorityBindingClass           @default(UNKNOWN)
+  isAuthenticated             Boolean                                 @default(false)
+  implementationAuthorized  Boolean                                 @default(false)
+  recordedByIdentityId        String?                                 @db.Uuid
+  createdAt                   DateTime                                @default(now())
+  updatedAt                   DateTime                                @updatedAt
+  referral                    ExternalReviewReferral                  @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  recordedByIdentity          Identity?                               @relation("ExternalDeterminationRecordedBy", fields: [recordedByIdentityId], references: [id])
+
+  @@index([authenticityStatus])
+  @@index([bindingClass])
+  @@index([isAuthenticated])
+  @@map("external_review_determinations")
+}
+
+model ProfessionalChallengeReferral {
+  id                             String                             @id @default(uuid()) @db.Uuid
+  referralId                     String                             @unique @db.Uuid
+  redressMatterId                String                             @db.Uuid
+  competentAuthorityType         ProfessionalChallengeAuthorityType
+  professionalBodyReference      String
+  challengeTargetReference       String
+  challengedFindingReference     String
+  independencePreserved          Boolean                            @default(true)
+  technologySubstitutesAuthority Boolean                            @default(false)
+  status                         ExternalReviewStatus               @default(PREPARATION)
+  externalReference              String?
+  createdAt                      DateTime                           @default(now())
+  updatedAt                      DateTime                           @updatedAt
+  referral                       ExternalReviewReferral             @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  redressMatter                  RedressMatter                      @relation(fields: [redressMatterId], references: [id])
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@map("professional_challenge_referrals")
+}
+
+model RegulatoryReviewReferral {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  referralId                  String                 @unique @db.Uuid
+  redressMatterId             String                 @db.Uuid
+  regulatorReference          String
+  regulatoryMatterReference   String?
+  regulatorStatusText         String?
+  inferredApprovalFromSilence Boolean                @default(false)
+  status                      ExternalReviewStatus   @default(PREPARATION)
+  externalReference           String?
+  createdAt                   DateTime               @default(now())
+  updatedAt                   DateTime               @updatedAt
+  referral                    ExternalReviewReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  redressMatter               RedressMatter          @relation(fields: [redressMatterId], references: [id])
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@map("regulatory_review_referrals")
+}
+
+model OmbudsOversightReferral {
+  id                   String                        @id @default(uuid()) @db.Uuid
+  referralId           String                        @unique @db.Uuid
+  redressMatterId      String                        @db.Uuid
+  ombudsReference      String
+  oversightPurpose     String
+  bindingClass         ExternalAuthorityBindingClass @default(RECOMMENDATORY)
+  isRecommendatoryOnly Boolean                       @default(true)
+  status               ExternalReviewStatus          @default(PREPARATION)
+  externalReference    String?
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  referral             ExternalReviewReferral        @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  redressMatter        RedressMatter                 @relation(fields: [redressMatterId], references: [id])
+
+  @@index([redressMatterId])
+  @@index([status])
+  @@map("ombuds_oversight_referrals")
+}
+
+model JudicialReviewInformationRecord {
+  id                        String                 @id @default(uuid()) @db.Uuid
+  referralId                String                 @unique @db.Uuid
+  redressMatterId           String                 @db.Uuid
+  routeInformation          String
+  deadlineInformation       String?
+  competentForum            String
+  filingReference           String?
+  caseStatusText            String?
+  caseStatusAuthenticated   Boolean                @default(false)
+  exportAssistanceReference String?
+  isCourtSystem             Boolean                @default(false)
+  outcomeCharacterization   String?
+  outcomeAuthenticated      Boolean                @default(false)
+  createdAt                 DateTime               @default(now())
+  updatedAt                 DateTime               @updatedAt
+  referral                  ExternalReviewReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  redressMatter             RedressMatter          @relation(fields: [redressMatterId], references: [id])
+
+  @@index([redressMatterId])
+  @@map("judicial_review_information_records")
 }
