@@ -50,10 +50,10 @@ export class AuthorityPolicyGuard implements CanActivate {
       identityId: session.identityId,
       functionAuthorityRecordId,
       action: policy.action,
-      officeholderId: (body.officeholderId ?? body.issuerOfficeholderId) as string | undefined,
-      officeId: (body.officeId ?? body.issuerOfficeId) as string | undefined,
-      appointmentId: (body.appointmentId ?? body.issuerAppointmentId) as string | undefined,
-      delegationId: (body.delegationId ?? body.issuerDelegationId) as string | undefined,
+      officeholderId: this.readInstitutionalField(body, 'officeholderId'),
+      officeId: this.readInstitutionalField(body, 'officeId'),
+      appointmentId: this.readInstitutionalField(body, 'appointmentId'),
+      delegationId: this.readInstitutionalField(body, 'delegationId'),
       evidenceProvided: body.evidenceProvided as string[] | undefined,
       qualificationCodes: body.qualificationCodes as string[] | undefined,
       transactionAmount: body.transactionAmount as number | undefined,
@@ -81,6 +81,27 @@ export class AuthorityPolicyGuard implements CanActivate {
     return true;
   }
 
+  private readInstitutionalField(
+    body: Record<string, unknown>,
+    field: 'officeholderId' | 'officeId' | 'appointmentId' | 'delegationId',
+  ): string | undefined {
+    const direct = body[field];
+    if (typeof direct === 'string') {
+      return direct;
+    }
+
+    const prefixes = ['issuer', 'decisionMaker', 'proposedDecisionMaker'] as const;
+    for (const prefix of prefixes) {
+      const key = `${prefix}${field.charAt(0).toUpperCase()}${field.slice(1)}`;
+      const value = body[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+    }
+
+    return undefined;
+  }
+
   private async resolveFunctionId(
     policy: AuthorityPolicyMetadata,
     body: Record<string, unknown>,
@@ -94,8 +115,8 @@ export class AuthorityPolicyGuard implements CanActivate {
       return record.id;
     }
 
-    const instrumentTypeVersionId = body.instrumentTypeVersionId as string | undefined;
-    if (instrumentTypeVersionId) {
+    const instrumentTypeVersionId = body.instrumentTypeVersionId;
+    if (typeof instrumentTypeVersionId === 'string') {
       const typeVersion = await this.prisma.instrumentTypeVersion.findUnique({
         where: { id: instrumentTypeVersionId },
         select: { issuanceFunctionAuthorityRecordId: true },
