@@ -255,6 +255,33 @@ export class ContinuingObligationService {
     };
   }
 
+  async extendDeadline(input: {
+    obligationId: string;
+    extensionAuthorityReference: string;
+    effectiveExtendedDueDate: Date;
+  }) {
+    this.boundary.assertExtensionRequiresAuthority(
+      input.effectiveExtendedDueDate,
+      input.extensionAuthorityReference,
+    );
+
+    const obligation = await this.prisma.continuingObligation.findUnique({
+      where: { id: input.obligationId },
+    });
+    if (!obligation) {
+      throw new NotFoundException(`ContinuingObligation ${input.obligationId} not found`);
+    }
+
+    return this.prisma.continuingObligation.update({
+      where: { id: input.obligationId },
+      data: {
+        extensionAuthorityReference: input.extensionAuthorityReference,
+        extensionGrantedAt: new Date(),
+        effectiveExtendedDueDate: input.effectiveExtendedDueDate,
+      },
+    });
+  }
+
   async getStatusHistory(obligationId: string) {
     return this.prisma.obligationStatusHistory.findMany({
       where: { continuingObligationId: obligationId },

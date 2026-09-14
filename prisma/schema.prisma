@@ -236,6 +236,7 @@ model Officeholder {
   instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
   reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
   complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  complianceReviewsAsReviewer   ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
 
   @@map("officeholders")
 }
@@ -522,6 +523,9 @@ model Identity {
   complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
   complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
   complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
+  complianceSubmissionsSubmitted     ComplianceSubmission[]        @relation("ComplianceSubmissionSubmitter")
+  obligationEvidenceLinks            ObligationEvidenceLink[]      @relation("ObligationEvidenceLinker")
+  complianceReviewsConducted         ComplianceReview[]            @relation("ComplianceReviewReviewer")
 
   @@index([userAccountId])
   @@index([personId])
@@ -603,7 +607,8 @@ model RepresentativeAuthority {
   updatedAt        DateTime                      @updatedAt
   organization     Organization                  @relation(fields: [organizationId], references: [id])
   identity         Identity                      @relation(fields: [identityId], references: [id])
-  applications     Application[]
+  applications          Application[]
+  complianceSubmissions ComplianceSubmission[]
 
   @@index([organizationId])
   @@index([identityId])
@@ -903,6 +908,7 @@ model FunctionAuthorityRecord {
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
   continuingObligations        ContinuingObligation[]           @relation("ContinuingObligationFunctionAuthority")
   complianceStatusProjections  ComplianceStatusProjection[]
+  complianceReviews            ComplianceReview[]               @relation("ComplianceReviewAuthority")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1163,6 +1169,7 @@ model AuthorityEvaluationRecord {
   governmentDecisions          GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
   issuanceEvents               IssuanceEvent[]
   complianceProjectionEvaluations ComplianceStatusProjection[] @relation("ComplianceProjectionAuthority")
+  complianceReviews               ComplianceReview[]            @relation("ComplianceReviewAuthorityEvaluation")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -3187,6 +3194,7 @@ model EvidenceRecord {
   custodyEvents                   EvidenceCustodyEvent[]
   packetItems                     EvidencePacketItem[]
   packetExclusions                EvidencePacketItemExclusion[]
+  obligationEvidenceLinks         ObligationEvidenceLink[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -3220,6 +3228,7 @@ model EvidenceVerification {
   verifiedByOfficeholder      Officeholder?                @relation("EvidenceVerificationVerifierOfficeholder", fields: [verifiedByOfficeholderId], references: [id])
   authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
   packetItems                 EvidencePacketItem[]         @relation("PacketItemVerifications")
+  obligationEvidenceLinks     ObligationEvidenceLink[]
 
   @@index([evidenceId])
   @@index([category])
@@ -3266,6 +3275,7 @@ model EvidencePurposeAcceptance {
   reviewerIdentity       Identity                   @relation("EvidencePurposeAcceptanceReviewer", fields: [reviewerIdentityId], references: [id])
   reviewerOfficeholder   Officeholder?              @relation("EvidencePurposeAcceptanceReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
   packetItems            EvidencePacketItem[]       @relation("PacketItemAcceptances")
+  obligationEvidenceLinks ObligationEvidenceLink[]
 
   @@index([evidenceId])
   @@index([purpose])
@@ -5682,6 +5692,7 @@ model ComplianceMatter {
   responsibleInstitution     Institution            @relation(fields: [responsibleInstitutionId], references: [id])
   responsibleDepartment      Department             @relation(fields: [responsibleDepartmentId], references: [id])
   continuingObligations      ContinuingObligation[]
+  complianceSubmissions      ComplianceSubmission[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5726,6 +5737,12 @@ model ContinuingObligation {
   supersedesObligation               ContinuingObligation?        @relation("ObligationSupersession")
   schedules                          ObligationSchedule[]
   statusHistory                      ObligationStatusHistory[]
+  evidenceLinks                      ObligationEvidenceLink[]
+  complianceSubmissions              ComplianceSubmission[]
+  complianceReviews                  ComplianceReview[]
+  extensionAuthorityReference        String?
+  extensionGrantedAt                 DateTime?
+  effectiveExtendedDueDate           DateTime?
 
   @@unique([complianceMatterId, obligationCode])
   @@index([complianceMatterId])
@@ -5769,6 +5786,164 @@ model ObligationStatusHistory {
 
   @@index([continuingObligationId, changedAt])
   @@map("obligation_status_history")
+}
+
+// ─── Phase 9B: Compliance Reporting and Monitoring Evidence ───────────────────
+
+enum ComplianceSubmissionStatus {
+  RECEIVED
+  INCOMPLETE
+  COMPLETE_FOR_REVIEW
+  UNDER_REVIEW
+  CORRECTION_REQUESTED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum ObligationEvidenceLinkRole {
+  HOLDER_SUBMITTED
+  INDEPENDENTLY_VERIFIED
+  PROFESSIONAL_CERTIFICATION
+  GOVERNMENT_OBSERVATION
+  OTHER_REFERENCE
+}
+
+enum ComplianceReviewStatus {
+  PENDING
+  IN_REVIEW
+  SATISFACTORY_FOR_STATED_PURPOSE
+  DEFICIENCY_IDENTIFIED
+  MORE_INFORMATION_REQUIRED
+  DISPUTED
+  SAFE_HALTED
+}
+
+model ComplianceSubmission {
+  id                        String                       @id @default(uuid()) @db.Uuid
+  submissionNumber          String                       @unique
+  complianceMatterId        String                       @db.Uuid
+  continuingObligationId    String                       @db.Uuid
+  reportingPeriodStart      DateTime
+  reportingPeriodEnd        DateTime
+  submittedByIdentityId     String                       @db.Uuid
+  representativeAuthorityId String?                      @db.Uuid
+  submittedAt               DateTime?
+  status                    ComplianceSubmissionStatus   @default(RECEIVED)
+  declarationReference      String?
+  currentVersionId          String?                      @unique @db.Uuid
+  createdAt                 DateTime                     @default(now())
+  updatedAt                 DateTime                     @updatedAt
+  complianceMatter          ComplianceMatter             @relation(fields: [complianceMatterId], references: [id])
+  continuingObligation      ContinuingObligation         @relation(fields: [continuingObligationId], references: [id])
+  submittedByIdentity       Identity                     @relation("ComplianceSubmissionSubmitter", fields: [submittedByIdentityId], references: [id])
+  representativeAuthority   RepresentativeAuthority?     @relation(fields: [representativeAuthorityId], references: [id])
+  currentVersion            ComplianceSubmissionVersion? @relation("CurrentComplianceSubmissionVersion", fields: [currentVersionId], references: [id])
+  versions                  ComplianceSubmissionVersion[] @relation("ComplianceSubmissionVersions")
+  complianceReviews         ComplianceReview[]
+
+  @@index([complianceMatterId])
+  @@index([continuingObligationId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("compliance_submissions")
+}
+
+model ComplianceSubmissionVersion {
+  id                   String                        @id @default(uuid()) @db.Uuid
+  submissionId         String                        @db.Uuid
+  version              Int
+  answersData          Json                          @default("{}")
+  documentReferences   Json                          @default("[]")
+  evidenceReferences   Json                          @default("[]")
+  payloadHash          String
+  submittedAt          DateTime
+  supersedesVersionId  String?                       @db.Uuid
+  createdAt            DateTime                      @default(now())
+  submission           ComplianceSubmission          @relation("ComplianceSubmissionVersions", fields: [submissionId], references: [id], onDelete: Cascade)
+  currentForSubmission ComplianceSubmission?         @relation("CurrentComplianceSubmissionVersion")
+  supersedesVersion    ComplianceSubmissionVersion?  @relation("ComplianceSubmissionVersionSupersession", fields: [supersedesVersionId], references: [id])
+  supersedes           ComplianceSubmissionVersion[] @relation("ComplianceSubmissionVersionSupersession")
+  complianceReviews    ComplianceReview[]
+
+  @@unique([submissionId, version])
+  @@index([submissionId])
+  @@index([submittedAt])
+  @@map("compliance_submission_versions")
+}
+
+model ObligationEvidenceLink {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  continuingObligationId      String                     @db.Uuid
+  evidenceRecordId            String                     @db.Uuid
+  linkRole                    ObligationEvidenceLinkRole
+  isHolderSubmitted           Boolean                    @default(true)
+  linkedAt                    DateTime                   @default(now())
+  linkedByIdentityId          String                     @db.Uuid
+  evidenceVerificationId      String?                    @db.Uuid
+  evidencePurposeAcceptanceId String?                    @db.Uuid
+  notes                       String?
+  continuingObligation        ContinuingObligation       @relation(fields: [continuingObligationId], references: [id], onDelete: Cascade)
+  evidenceRecord              EvidenceRecord             @relation(fields: [evidenceRecordId], references: [id])
+  linkedByIdentity            Identity                   @relation("ObligationEvidenceLinker", fields: [linkedByIdentityId], references: [id])
+  evidenceVerification        EvidenceVerification?      @relation(fields: [evidenceVerificationId], references: [id])
+  evidencePurposeAcceptance   EvidencePurposeAcceptance? @relation(fields: [evidencePurposeAcceptanceId], references: [id])
+
+  @@index([continuingObligationId])
+  @@index([evidenceRecordId])
+  @@index([isHolderSubmitted])
+  @@map("obligation_evidence_links")
+}
+
+model ComplianceReview {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  reviewNumber                String                      @unique
+  reviewerIdentityId          String                      @db.Uuid
+  reviewerOfficeholderId      String?                     @db.Uuid
+  functionAuthorityRecordId   String?                     @db.Uuid
+  continuingObligationId        String                      @db.Uuid
+  complianceSubmissionId      String                      @db.Uuid
+  submissionVersionId         String                      @db.Uuid
+  criteria                    Json                        @default("[]")
+  findings                    Json                        @default("[]")
+  unresolvedIssues            Json                        @default("[]")
+  reviewDate                  DateTime?
+  authorityEvaluationRecordId String?                     @db.Uuid
+  status                      ComplianceReviewStatus      @default(PENDING)
+  isAiProposed                Boolean                     @default(false)
+  finalizedAt                 DateTime?
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  reviewerIdentity            Identity                    @relation("ComplianceReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder        Officeholder?               @relation("ComplianceReviewReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord?    @relation("ComplianceReviewAuthority", fields: [functionAuthorityRecordId], references: [id])
+  continuingObligation        ContinuingObligation        @relation(fields: [continuingObligationId], references: [id])
+  complianceSubmission        ComplianceSubmission        @relation(fields: [complianceSubmissionId], references: [id])
+  submissionVersion           ComplianceSubmissionVersion @relation(fields: [submissionVersionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?  @relation("ComplianceReviewAuthorityEvaluation", fields: [authorityEvaluationRecordId], references: [id])
+  items                       ComplianceReviewItem[]
+
+  @@index([continuingObligationId])
+  @@index([submissionVersionId])
+  @@index([status])
+  @@index([reviewerIdentityId])
+  @@map("compliance_reviews")
+}
+
+model ComplianceReviewItem {
+  id                 String           @id @default(uuid()) @db.Uuid
+  complianceReviewId String           @db.Uuid
+  sequence           Int
+  criterionReference String
+  assessment         String?
+  evidenceRecordIds  Json             @default("[]")
+  deficiencyNotes    String?
+  status             String?
+  createdAt          DateTime         @default(now())
+  complianceReview   ComplianceReview @relation(fields: [complianceReviewId], references: [id], onDelete: Cascade)
+
+  @@unique([complianceReviewId, sequence])
+  @@index([complianceReviewId])
+  @@map("compliance_review_items")
 }
 
 // ─── Phase 9G: Continuous Compliance Status and Oversight ─────────────────────

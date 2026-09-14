@@ -13,6 +13,8 @@ import { ComplianceProjectionService } from './oversight/compliance-projection.s
 import { ComplianceRevalidationService } from './oversight/compliance-revalidation.service';
 import { ComplianceStatusController } from './oversight/compliance-status.controller';
 import { ComplianceStatusBoundaryService } from './oversight/compliance-status-boundary.service';
+import { ComplianceReviewService } from './reviews/compliance-review.service';
+import { ComplianceSubmissionService } from './submissions/compliance-submission.service';
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
@@ -22,6 +24,8 @@ import { ComplianceStatusBoundaryService } from './oversight/compliance-status-b
     ObligationRecurrenceService,
     ComplianceMatterService,
     ContinuingObligationService,
+    ComplianceSubmissionService,
+    ComplianceReviewService,
     ComplianceStatusBoundaryService,
     ComplianceProjectionService,
     ComplianceMonitoringService,
@@ -33,6 +37,8 @@ import { ComplianceStatusBoundaryService } from './oversight/compliance-status-b
     ObligationRecurrenceService,
     ComplianceMatterService,
     ContinuingObligationService,
+    ComplianceSubmissionService,
+    ComplianceReviewService,
     ComplianceStatusBoundaryService,
     ComplianceProjectionService,
     ComplianceMonitoringService,
