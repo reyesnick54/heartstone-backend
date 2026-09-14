@@ -87,8 +87,6 @@ export const FORBIDDEN_CLIENT_TWIN_FIELDS = [
   'isPrediction',
 ] as const;
 
-export const AI_ACTOR_ROLE_MARKER = 'AI_ASSISTANCE';
-
 export const INTELLIGENCE_REASON_CODES = {
   TWIN_NOT_AUTHORITATIVE: 'TWIN_NOT_AUTHORITATIVE_RECORD',
   SIMULATION_CANNOT_MUTATE_LIVE: 'SIMULATION_CANNOT_MUTATE_LIVE_RECORD',
@@ -107,6 +105,7 @@ export const INTELLIGENCE_REASON_CODES = {
   CONSEQUENTIAL_REVIEW_REQUIRED: 'CONSEQUENTIAL_USE_REVIEW_REQUIRED',
   TECHNICAL_SUCCESS_NOT_ACTIVATION: 'TECHNICAL_SUCCESS_DOES_NOT_EQUAL_LIVE_ACTIVATION',
 } as const;
+
 export const ANALYSIS_REQUEST_NUMBER_PREFIX = 'ARQ';
 export const ANALYSIS_RUN_NUMBER_PREFIX = 'ARN';
 export const INTELLIGENCE_ALERT_NUMBER_PREFIX = 'IAL';
@@ -125,6 +124,8 @@ export const RISK_SCORE_DISCLAIMER =
   'Risk scores are prioritization aids with versioned methodology. They do not establish legal authority and cannot bypass mandatory evidence or authority requirements.';
 
 export const AI_ACTOR_IDENTITY_PREFIX = 'ai-assistant:';
+
+export const AI_ACTOR_ROLE_MARKER = 'AI_ASSISTANCE';
 
 export const ANALYSIS_NOT_DECISION_MESSAGE =
   'Analysis output cannot be presented as a government decision or final determination';
@@ -210,6 +211,7 @@ export const PHASE_12E_INVARIANTS = {
   humanReviewAttributable: true,
   analysisOutputReplayable: true,
 } as const;
+
 export const PROJECT_PROJECTION_DISCLAIMER =
   'This project status is a derived operational projection. It is not an approval decision, operational certification, or independent verification of sponsor assertions.';
 
