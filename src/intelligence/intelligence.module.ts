@@ -13,10 +13,13 @@ import { DashboardSnapshotService } from './command-console/dashboard-snapshot.s
 import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
 import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
+import { ConsequentialUseService } from './consequential-use/consequential-use.service';
+import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { IntelligenceController } from './intelligence.controller';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
 import { PerformanceClaimService } from './performance-claims/performance-claim.service';
 import { RiskAssessmentService } from './risk/risk-assessment.service';
+import { SimulationService } from './simulation/simulation.service';
 import { CapitalEvidenceService } from './strategic-projects/capital-evidence.service';
 import { EmploymentEvidenceService } from './strategic-projects/employment-evidence.service';
 import { InfrastructureDeliveryService } from './strategic-projects/infrastructure-delivery.service';
@@ -35,6 +38,9 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
   controllers: [IntelligenceController, CommandConsoleController, StrategicProjectController],
   providers: [
     IntelligenceBoundaryService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     AnalysisService,
     IntelligenceMonitoringService,
     RiskAssessmentService,
@@ -61,6 +67,9 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
   ],
   exports: [
     IntelligenceBoundaryService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     AnalysisService,
     IntelligenceMonitoringService,
     RiskAssessmentService,

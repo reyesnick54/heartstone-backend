@@ -1,7 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { INTELLIGENCE_ALERT_STATUSES, RISK_EVIDENCE_BASIS_VALUES } from './intelligence.constants';
+import {
+  CONSEQUENTIAL_USE_IMPACT_AREAS,
+  DIGITAL_TWIN_MODES,
+  DIGITAL_TWIN_SOURCE_STATUSES,
+  DIGITAL_TWIN_TYPES,
+  INTELLIGENCE_ALERT_STATUSES,
+  RISK_EVIDENCE_BASIS_VALUES,
+} from './intelligence.constants';
 import {
   DASHBOARD_FILTER_DIMENSIONS,
   DEPARTMENTAL_INDICATOR_CATEGORIES,
@@ -10,10 +17,57 @@ import {
   PHASE_12B_MODEL_NAMES,
   PHASE_12E_ENUM_NAMES,
   PHASE_12E_MODEL_NAMES,
+  PHASE_12F_ENUM_NAMES,
+  PHASE_12F_MODEL_NAMES,
 } from './intelligence-schema.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
+
+describe('Phase 12F intelligence schema', () => {
+  for (const modelName of PHASE_12F_MODEL_NAMES) {
+    it(`defines ${modelName} exactly once`, () => {
+      const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    });
+  }
+
+  for (const enumName of PHASE_12F_ENUM_NAMES) {
+    it(`defines enum ${enumName}`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
+  for (const twinType of DIGITAL_TWIN_TYPES) {
+    it(`supports digital twin type ${twinType}`, () => {
+      expect(schema).toContain(twinType);
+    });
+  }
+
+  for (const mode of DIGITAL_TWIN_MODES) {
+    it(`supports digital twin mode ${mode}`, () => {
+      expect(schema).toContain(mode);
+    });
+  }
+
+  for (const status of DIGITAL_TWIN_SOURCE_STATUSES) {
+    it(`supports digital twin source status ${status}`, () => {
+      expect(schema).toContain(status);
+    });
+  }
+
+  for (const area of CONSEQUENTIAL_USE_IMPACT_AREAS) {
+    it(`supports consequential use impact area ${area}`, () => {
+      expect(schema).toContain(area);
+    });
+  }
+
+  it('defaults twins to non-authoritative records', () => {
+    const block = /model DigitalTwinDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).toContain('isAuthoritativeRecord');
+    expect(block).toContain('@default(false)');
+  });
+});
 
 describe('Phase 12E intelligence schema', () => {
   for (const modelName of PHASE_12E_MODEL_NAMES) {

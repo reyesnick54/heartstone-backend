@@ -47,6 +47,21 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
+  await prisma.simulationToLiveTransitionRecord.deleteMany();
+  await prisma.consequentialUseReview.deleteMany();
+  await prisma.simulationReview.deleteMany();
+  await prisma.simulationUncertainty.deleteMany();
+  await prisma.simulationAssumption.deleteMany();
+  await prisma.simulationOutput.deleteMany();
+  await prisma.simulationInput.deleteMany();
+  await prisma.simulationRun.deleteMany();
+  await prisma.simulationScenario.deleteMany();
+  await prisma.digitalTwinSnapshot.deleteMany();
+  await prisma.digitalTwinModeRecord.deleteMany();
+  await prisma.digitalTwinRelationship.deleteMany();
+  await prisma.digitalTwinSource.deleteMany();
+  await prisma.digitalTwinVersion.deleteMany();
+  await prisma.digitalTwinDefinition.deleteMany();
   await prisma.aIIncident.deleteMany();
   await prisma.aIEvaluationTest.deleteMany();
   await prisma.aIEvaluation.deleteMany();
