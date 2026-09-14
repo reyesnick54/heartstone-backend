@@ -105,6 +105,8 @@ export const CORRECTIVE_ACTION_VERIFICATION_RESULTS = [
   'NOT_VERIFIED',
   'UNRESOLVED',
   'REINSPECTION_REQUIRED',
+] as const;
+
 export const PHASE_9D_MODEL_NAMES = [
   'InspectionSession',
   'InspectionObservation',

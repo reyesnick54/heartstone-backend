@@ -47,6 +47,8 @@ export const INSPECTION_PLAN_TRIGGER_TYPES = [
   'GOVERNMENT_REFERRAL',
   'PROFESSIONAL_REFERRAL',
   'OTHER_AUTHORIZED',
+] as const;
+
 export const PHASE_9B_MODEL_NAMES = [
   'ComplianceSubmission',
   'ComplianceSubmissionVersion',
