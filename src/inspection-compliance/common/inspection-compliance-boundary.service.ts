@@ -59,9 +59,7 @@ export class InspectionComplianceBoundaryService {
     }
   }
 
-  assertSubmissionIsNotVerification(input: {
-    treatingSubmissionAsVerified?: boolean;
-  }): void {
+  assertSubmissionIsNotVerification(input: { treatingSubmissionAsVerified?: boolean }): void {
     if (input.treatingSubmissionAsVerified === true) {
       throw new BadRequestException(
         'Corrective action submission remains a claim pending independent verification',
@@ -85,9 +83,7 @@ export class InspectionComplianceBoundaryService {
     }
   }
 
-  assertReinspectionBlocksClosure(input: {
-    pendingReinspectionCount: number;
-  }): void {
+  assertReinspectionBlocksClosure(input: { pendingReinspectionCount: number }): void {
     if (input.pendingReinspectionCount > 0) {
       throw new BadRequestException(
         'Finding cannot close until required reinspection is completed or waived by authorized review',

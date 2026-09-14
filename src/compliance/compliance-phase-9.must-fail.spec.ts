@@ -6,23 +6,12 @@ import appConfig from '../config/app.config';
 import identityConfig from '../config/identity.config';
 import redisConfig from '../config/redis.config';
 import securityConfig from '../config/security.config';
-import { PrismaService } from '../database/prisma.service';
 import { InspectionService } from '../evidence/inspection/inspection.service';
+import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import { PHASE_9H_INVARIANTS } from './compliance.constants';
-import { ComplianceBoundaryService } from './compliance-boundary.service';
-import { ComplianceReviewService } from './compliance-review.service';
-import { ComplianceSubmissionService } from './compliance-submission.service';
-import { CorrectiveActionService } from './corrective-action.service';
-import { EmergencyInterimActionService } from './emergency-interim-action.service';
-import { InspectionFindingService } from './inspection-finding.service';
 
 describe('Phase 9 architectural must-fail invariants', () => {
   let boundary: ComplianceBoundaryService;
-  let submissionService: ComplianceSubmissionService;
-  let reviewService: ComplianceReviewService;
-  let findingService: InspectionFindingService;
-  let correctiveActionService: CorrectiveActionService;
-  let emergencyService: EmergencyInterimActionService;
   let phase7Inspection: InspectionService;
 
   beforeAll(async () => {
@@ -35,22 +24,14 @@ describe('Phase 9 architectural must-fail invariants', () => {
       ],
       providers: [
         ComplianceBoundaryService,
-        ComplianceSubmissionService,
-        ComplianceReviewService,
-        InspectionFindingService,
-        CorrectiveActionService,
-        EmergencyInterimActionService,
-        InspectionService,
-        { provide: PrismaService, useValue: {} },
+        {
+          provide: InspectionService,
+          useValue: { observationIsViolation: jest.fn().mockReturnValue(false) },
+        },
       ],
     }).compile();
 
     boundary = moduleRef.get(ComplianceBoundaryService);
-    submissionService = moduleRef.get(ComplianceSubmissionService);
-    reviewService = moduleRef.get(ComplianceReviewService);
-    findingService = moduleRef.get(InspectionFindingService);
-    correctiveActionService = moduleRef.get(CorrectiveActionService);
-    emergencyService = moduleRef.get(EmergencyInterimActionService);
     phase7Inspection = moduleRef.get(InspectionService);
   });
 
@@ -167,10 +148,5 @@ describe('Phase 9 architectural must-fail invariants', () => {
       });
     }).toThrow();
     expect(ComplianceReviewOutcome.OBLIGATION_SATISFIED).toBe('OBLIGATION_SATISFIED');
-    expect(submissionService).toBeDefined();
-    expect(reviewService).toBeDefined();
-    expect(findingService).toBeDefined();
-    expect(correctiveActionService).toBeDefined();
-    expect(emergencyService).toBeDefined();
   });
 });

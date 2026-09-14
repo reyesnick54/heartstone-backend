@@ -47,20 +47,24 @@ export class EmergencyInterimActionService {
 
   async record(input: RecordEmergencyInterimActionInput) {
     await this.assertCaseExists(input.caseId);
-    this.assertTimeLimited(input.effectiveFrom, input.effectiveUntil, input.postActionReviewDeadline);
-
-    const authorityEvaluationRecordId = await assertComplianceAuthority(
-      this.authorityEvaluation,
-      {
-        identityId: input.actorIdentityId,
-        officeholderId: input.actorOfficeholderId,
-        functionAuthorityRecordId: input.functionAuthorityRecordId,
-        action: AuthorityActionType.ENFORCE,
-      },
+    this.assertTimeLimited(
+      input.effectiveFrom,
+      input.effectiveUntil,
+      input.postActionReviewDeadline,
     );
 
+    const authorityEvaluationRecordId = await assertComplianceAuthority(this.authorityEvaluation, {
+      identityId: input.actorIdentityId,
+      officeholderId: input.actorOfficeholderId,
+      functionAuthorityRecordId: input.functionAuthorityRecordId,
+      action: AuthorityActionType.ENFORCE,
+    });
+
     const sequence = await this.prisma.emergencyInterimActionRecord.count();
-    const recordNumber = buildComplianceNumber(EMERGENCY_INTERIM_ACTION_NUMBER_PREFIX, sequence + 1);
+    const recordNumber = buildComplianceNumber(
+      EMERGENCY_INTERIM_ACTION_NUMBER_PREFIX,
+      sequence + 1,
+    );
 
     return this.prisma.emergencyInterimActionRecord.create({
       data: {

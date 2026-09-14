@@ -30,10 +30,10 @@ export class InstrumentLifecycleGuardService {
       throw new BadRequestException(`Instrument ${instrumentId} not found`);
     }
 
-    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.status];
+    const incompatible = INCOMPATIBLE_CONCURRENT_OPERATIONS[instrument.currentStatus];
     if (incompatible?.includes(proposedEventType)) {
       throw new ConflictException(
-        `Cannot perform ${proposedEventType} while instrument is ${instrument.status}`,
+        `Cannot perform ${proposedEventType} while instrument is ${instrument.currentStatus}`,
       );
     }
 
@@ -41,8 +41,6 @@ export class InstrumentLifecycleGuardService {
       where: {
         status: InstrumentControllingDecisionStatus.PENDING,
         decisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
-        decisionStatus: GovernmentDecisionStatus.PENDING,
-        lifecycleDecisionType: { in: ['REVOKE', 'REVOCATION_DECIDED'] },
         lifecycleEvents: {
           some: { instrumentId },
         },
@@ -146,64 +144,63 @@ export class InstrumentLifecycleGuardService {
   getAllowedStatusesForAction(
     action: InstrumentLifecycleEventType,
   ): LifecycleOfficialInstrumentStatus[] {
-    const map: Partial<Record<InstrumentLifecycleEventType, LifecycleOfficialInstrumentStatus[]>> = {
-  getAllowedStatusesForAction(action: InstrumentLifecycleEventType): OfficialInstrumentStatus[] {
-    const map: Partial<Record<InstrumentLifecycleEventType, OfficialInstrumentStatus[]>> = {
-      AMENDED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.REINSTATED,
-      ],
-      VARIED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-        LifecycleOfficialInstrumentStatus.VARIED,
-      ],
-      RENEWED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-      ],
-      SUSPENDED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-        LifecycleOfficialInstrumentStatus.REINSTATED,
-      ],
-      PARTIALLY_SUSPENDED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-      ],
-      REVOKED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.SUSPENDED,
-        LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        LifecycleOfficialInstrumentStatus.REVOCATION_DECIDED,
-      ],
-      REINSTATED: [
-        LifecycleOfficialInstrumentStatus.SUSPENDED,
-        LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
-        LifecycleOfficialInstrumentStatus.REVOKED,
-        LifecycleOfficialInstrumentStatus.EXPIRED,
-      ],
-      SURRENDERED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.SUSPENDED,
-      ],
-      REPLACED: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.RENEWED,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-      ],
-      CORRECTED_CLERICAL: [
-        LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        LifecycleOfficialInstrumentStatus.ISSUED,
-        LifecycleOfficialInstrumentStatus.AMENDED,
-      ],
-    };
+    const map: Partial<Record<InstrumentLifecycleEventType, LifecycleOfficialInstrumentStatus[]>> =
+      {
+        AMENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.REINSTATED,
+        ],
+        VARIED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.VARIED,
+        ],
+        RENEWED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        SUSPENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+          LifecycleOfficialInstrumentStatus.REINSTATED,
+        ],
+        PARTIALLY_SUSPENDED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        REVOKED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+          LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
+          LifecycleOfficialInstrumentStatus.REVOCATION_DECIDED,
+        ],
+        REINSTATED: [
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+          LifecycleOfficialInstrumentStatus.PARTIALLY_SUSPENDED,
+          LifecycleOfficialInstrumentStatus.REVOKED,
+          LifecycleOfficialInstrumentStatus.EXPIRED,
+        ],
+        SURRENDERED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.SUSPENDED,
+        ],
+        REPLACED: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.RENEWED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+        CORRECTED_CLERICAL: [
+          LifecycleOfficialInstrumentStatus.EFFECTIVE,
+          LifecycleOfficialInstrumentStatus.ISSUED,
+          LifecycleOfficialInstrumentStatus.AMENDED,
+        ],
+      };
 
     return map[action] ?? [];
   }

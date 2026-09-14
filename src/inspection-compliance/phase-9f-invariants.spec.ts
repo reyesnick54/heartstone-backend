@@ -44,7 +44,11 @@ describe('Phase 9F invariants', () => {
     governmentDecision: { findMany: jest.fn() },
     identity: { findUnique: jest.fn() },
     officialInstrument: { findUnique: jest.fn() },
-    enforcementReferral: { count: jest.fn().mockResolvedValue(0), create: jest.fn(), findUnique: jest.fn() },
+    enforcementReferral: {
+      count: jest.fn().mockResolvedValue(0),
+      create: jest.fn(),
+      findUnique: jest.fn(),
+    },
     protectiveActionRecommendation: { count: jest.fn().mockResolvedValue(0), create: jest.fn() },
     emergencyInterimActionRecord: {
       count: jest.fn().mockResolvedValue(0),
@@ -80,7 +84,9 @@ describe('Phase 9F invariants', () => {
   it('1. overdue obligation does not equal violation', async () => {
     (prisma.governmentDecision.findMany as jest.Mock).mockResolvedValue([
       {
-        conditions: [{ id: 'cond-1', status: DecisionConditionStatus.OVERDUE, dueAt: new Date('2020-01-01') }],
+        conditions: [
+          { id: 'cond-1', status: DecisionConditionStatus.OVERDUE, dueAt: new Date('2020-01-01') },
+        ],
       },
     ]);
 
@@ -93,12 +99,16 @@ describe('Phase 9F invariants', () => {
 
   it('2. risk score does not equal violation', () => {
     expect(assessmentService.signalIsViolation('risk_score')).toBe(false);
-    expect(assessmentService.complianceSignalMessage('risk_score')).toBe(RISK_SCORE_NOT_VIOLATION_MESSAGE);
+    expect(assessmentService.complianceSignalMessage('risk_score')).toBe(
+      RISK_SCORE_NOT_VIOLATION_MESSAGE,
+    );
   });
 
   it('3. AI alert does not equal violation', () => {
     expect(assessmentService.signalIsViolation('ai_alert')).toBe(false);
-    expect(assessmentService.complianceSignalMessage('ai_alert')).toBe(AI_ALERT_NOT_VIOLATION_MESSAGE);
+    expect(assessmentService.complianceSignalMessage('ai_alert')).toBe(
+      AI_ALERT_NOT_VIOLATION_MESSAGE,
+    );
   });
 
   it('4. finding requires authorized human action', async () => {
@@ -130,9 +140,9 @@ describe('Phase 9F invariants', () => {
   });
 
   it('7. criminal referral preserves national authority', () => {
-    expect(
-      referralService.isRetainedAuthority(RetainedEnforcementAuthorityClass.CRIMINAL),
-    ).toBe(true);
+    expect(referralService.isRetainedAuthority(RetainedEnforcementAuthorityClass.CRIMINAL)).toBe(
+      true,
+    );
     expect(referralService.retainedAuthorityMessage()).toMatch(/national authority/i);
   });
 
@@ -148,7 +158,9 @@ describe('Phase 9F invariants', () => {
         'instrument-1',
         OfficialInstrumentStatus.SUSPENDED,
       ),
-    ).rejects.toThrow(/Protective action recommendations do not change official instrument status/i);
+    ).rejects.toThrow(
+      /Protective action recommendations do not change official instrument status/i,
+    );
   });
 
   it('9. actual suspension invokes Phase 8', () => {
@@ -174,12 +186,13 @@ describe('Phase 9F invariants', () => {
     expect(emergencyService.interimActionBoundaryMessage()).toMatch(/time-limited/i);
     expect(emergencyService.interimActionBoundaryMessage()).toMatch(/review/i);
 
-    expect(() => { emergencyService.assertTimeLimited(
+    expect(() => {
+      emergencyService.assertTimeLimited(
         new Date('2026-01-01'),
         new Date('2026-01-01'),
         new Date('2026-02-01'),
-      ); },
-    ).toThrow(/positive duration/i);
+      );
+    }).toThrow(/positive duration/i);
   });
 
   it('12. technical admin cannot impose sanction', async () => {

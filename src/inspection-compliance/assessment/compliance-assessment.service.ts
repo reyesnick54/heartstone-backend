@@ -146,7 +146,9 @@ export class ComplianceAssessmentService {
       for (const condition of decision.conditions) {
         if (
           condition.status === DecisionConditionStatus.OVERDUE ||
-          (condition.dueAt && condition.dueAt < now && condition.status !== DecisionConditionStatus.SATISFIED)
+          (condition.dueAt &&
+            condition.dueAt < now &&
+            condition.status !== DecisionConditionStatus.SATISFIED)
         ) {
           overdueIds.push(condition.id);
         }

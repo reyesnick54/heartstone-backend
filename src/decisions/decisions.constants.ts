@@ -26,6 +26,8 @@ export const NOTICE_DOES_NOT_ISSUE_INSTRUMENT_MESSAGE =
   'DecisionNotice preparation does not issue an instrument; issuance belongs to a later phase';
 export const NON_PRODUCTION_DECISIONS_FIXTURE_MARKER = 'NON_PRODUCTION_PHASE_8B_TEST_ONLY';
 
+export const DECISION_NUMBER_PREFIX = 'DEC';
+
 export const READINESS_ASSESSMENT_NUMBER_PREFIX = 'DRA';
 
 export const PHASE_8B_BOUNDARY_DISCLAIMER =

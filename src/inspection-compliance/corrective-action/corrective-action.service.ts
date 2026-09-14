@@ -1,12 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   ComplianceFindingClosureStatus,
+  ComplianceFindingReopeningReason,
   ComplianceImmediateActionRoute,
   ComplianceMatterStatus,
   ComplianceRiskLevel,
   CorrectiveActionPlanStatus,
   CorrectiveActionSubmissionStatus,
   CorrectiveActionVerificationResult,
+  InspectionFindingSeverity,
   InspectionFindingStatus,
   Prisma,
   ReinspectionRequirementStatus,
@@ -14,6 +16,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { InspectionComplianceBoundaryService } from '../common/inspection-compliance-boundary.service';
 import {
   COMPLIANCE_FINDING_CLOSURE_NUMBER_PREFIX,
   COMPLIANCE_FINDING_REOPENING_NUMBER_PREFIX,
@@ -21,7 +24,6 @@ import {
   CORRECTIVE_ACTION_PLAN_NUMBER_PREFIX,
   INSPECTION_FINDING_NUMBER_PREFIX,
 } from '../inspection-compliance.constants';
-import { InspectionComplianceBoundaryService } from '../common/inspection-compliance-boundary.service';
 
 export interface ActorContext {
   identityId: string;
@@ -30,13 +32,17 @@ export interface ActorContext {
 }
 
 export interface CreateComplianceMatterInput {
-  caseId: string;
-  holderIdentityId: string;
+  masterAdministrativeFileId: string;
+  officialInstrumentId: string;
+  responsibleInstitutionId: string;
+  responsibleDepartmentId: string;
+  caseId?: string;
+  holderIdentityId?: string;
+  holderOrganizationId?: string;
   summary: string;
   riskLevel?: ComplianceRiskLevel;
   immediateActionRoute?: ComplianceImmediateActionRoute;
   authoritySource?: string;
-  inspectionRecordId?: string;
 }
 
 export interface RecordInspectionFindingInput {
@@ -62,12 +68,12 @@ export interface ProposeCorrectiveActionPlanInput {
   evidenceRequired: string;
   verificationMethod: string;
   escalationRule?: string;
-  items?: Array<{
+  items?: {
     actionDescription: string;
     responsibleParty: string;
     dueDate?: Date;
     evidenceRequired?: string;
-  }>;
+  }[];
   actor: ActorContext;
 }
 
@@ -114,7 +120,7 @@ export interface CloseInspectionFindingInput {
 export interface ReopenInspectionFindingInput {
   findingId: string;
   priorClosureId: string;
-  reason: import('@prisma/client').ComplianceFindingReopeningReason;
+  reason: ComplianceFindingReopeningReason;
   reasonDetail: string;
   reviewer: ActorContext & { officeholderId: string };
   authorityReference?: string;
@@ -134,14 +140,21 @@ export class CorrectiveActionService {
   ) {}
 
   async createComplianceMatter(input: CreateComplianceMatterInput) {
-    const matterNumber = await this.nextNumber(COMPLIANCE_MATTER_NUMBER_PREFIX, 'complianceMatter');
+    const complianceMatterNumber = await this.nextNumber(
+      COMPLIANCE_MATTER_NUMBER_PREFIX,
+      'complianceMatter',
+    );
 
     return this.prisma.complianceMatter.create({
       data: {
-        matterNumber,
+        complianceMatterNumber,
+        masterAdministrativeFileId: input.masterAdministrativeFileId,
+        officialInstrumentId: input.officialInstrumentId,
+        responsibleInstitutionId: input.responsibleInstitutionId,
+        responsibleDepartmentId: input.responsibleDepartmentId,
         caseId: input.caseId,
         holderIdentityId: input.holderIdentityId,
-        inspectionRecordId: input.inspectionRecordId,
+        holderOrganizationId: input.holderOrganizationId,
         summary: input.summary,
         riskLevel: input.riskLevel ?? ComplianceRiskLevel.MODERATE,
         immediateActionRoute: input.immediateActionRoute ?? ComplianceImmediateActionRoute.NONE,
@@ -150,21 +163,37 @@ export class CorrectiveActionService {
     });
   }
 
-  async recordInspectionFinding(input: RecordInspectionFindingInput) {
+  async recordInspectionFinding(
+    input: RecordInspectionFindingInput & {
+      inspectionSessionId: string;
+      inspectorIdentityId: string;
+      inspectorOfficeholderId: string;
+    },
+  ) {
     const findingNumber = await this.nextNumber(
       INSPECTION_FINDING_NUMBER_PREFIX,
       'inspectionFinding',
     );
 
+    const severity: InspectionFindingSeverity =
+      input.severity === ComplianceRiskLevel.CRITICAL
+        ? InspectionFindingSeverity.CRITICAL
+        : input.severity === ComplianceRiskLevel.HIGH
+          ? InspectionFindingSeverity.MAJOR
+          : input.severity === ComplianceRiskLevel.LOW
+            ? InspectionFindingSeverity.MINOR
+            : InspectionFindingSeverity.MODERATE;
+
     return this.prisma.inspectionFinding.create({
       data: {
         findingNumber,
+        inspectionSessionId: input.inspectionSessionId,
         complianceMatterId: input.complianceMatterId,
-        description: input.description,
-        deficiencyReference: input.deficiencyReference,
-        severity: input.severity ?? ComplianceRiskLevel.MODERATE,
-        inspectionRecordId: input.inspectionRecordId,
-        inspectionEvidenceItemId: input.inspectionEvidenceItemId,
+        factsReliedUpon: input.description,
+        severity,
+        inspectorIdentityId: input.inspectorIdentityId,
+        inspectorOfficeholderId: input.inspectorOfficeholderId,
+        status: InspectionFindingStatus.DRAFT,
       },
     });
   }
@@ -306,7 +335,7 @@ export class CorrectiveActionService {
       if (findingId) {
         await tx.inspectionFinding.update({
           where: { id: findingId },
-          data: { status: InspectionFindingStatus.EVIDENCE_SUBMITTED },
+          data: { status: InspectionFindingStatus.CORRECTIVE_ACTION_REQUIRED },
         });
       }
 
@@ -370,7 +399,8 @@ export class CorrectiveActionService {
         });
       }
 
-      let nextPlanStatus: CorrectiveActionPlanStatus = CorrectiveActionPlanStatus.VERIFICATION_PENDING;
+      let nextPlanStatus: CorrectiveActionPlanStatus =
+        CorrectiveActionPlanStatus.VERIFICATION_PENDING;
       if (input.result === CorrectiveActionVerificationResult.VERIFIED) {
         nextPlanStatus = CorrectiveActionPlanStatus.VERIFIED_COMPLETE;
       } else if (input.result === CorrectiveActionVerificationResult.PARTIALLY_VERIFIED) {
@@ -380,13 +410,11 @@ export class CorrectiveActionService {
         await tx.reinspectionRequirement.create({
           data: {
             inspectionFindingId: plan.inspectionFindingId,
-            requirementDescription: input.followUpRequired ?? 'Reinspection required before closure',
+            requirementDescription:
+              input.followUpRequired ?? 'Reinspection required before closure',
           },
         });
-      } else if (
-        input.result === CorrectiveActionVerificationResult.NOT_VERIFIED ||
-        input.result === CorrectiveActionVerificationResult.UNRESOLVED
-      ) {
+      } else {
         nextPlanStatus = CorrectiveActionPlanStatus.FAILED;
       }
 
@@ -453,7 +481,9 @@ export class CorrectiveActionService {
     const pendingReinspection = finding.reinspectionRequirements.filter(
       (req) => req.status === ReinspectionRequirementStatus.REQUIRED,
     ).length;
-    this.boundary.assertReinspectionBlocksClosure({ pendingReinspectionCount: pendingReinspection });
+    this.boundary.assertReinspectionBlocksClosure({
+      pendingReinspectionCount: pendingReinspection,
+    });
 
     const activePlan = finding.correctiveActionPlans.find(
       (plan) => plan.status !== CorrectiveActionPlanStatus.SUPERSEDED,
@@ -502,10 +532,16 @@ export class CorrectiveActionService {
         data: { status: InspectionFindingStatus.CLOSED, closedAt: new Date() },
       });
 
-      await tx.complianceMatter.update({
-        where: { id: finding.complianceMatterId },
-        data: { status: ComplianceMatterStatus.CLOSED, closedAt: new Date() },
+      const plan = await tx.correctiveActionPlan.findFirst({
+        where: { inspectionFindingId: input.findingId },
+        select: { complianceMatterId: true },
       });
+      if (plan?.complianceMatterId) {
+        await tx.complianceMatter.update({
+          where: { id: plan.complianceMatterId },
+          data: { status: ComplianceMatterStatus.CLOSED, closedAt: new Date() },
+        });
+      }
 
       return closure;
     });
@@ -517,7 +553,7 @@ export class CorrectiveActionService {
     const priorClosure = await this.prisma.complianceFindingClosure.findUnique({
       where: { id: input.priorClosureId },
     });
-    if (!priorClosure || priorClosure.status !== ComplianceFindingClosureStatus.ACTIVE) {
+    if (priorClosure?.status !== ComplianceFindingClosureStatus.ACTIVE) {
       throw new BadRequestException('Prior active closure record required for reopening');
     }
 
@@ -551,10 +587,24 @@ export class CorrectiveActionService {
         data: { status: InspectionFindingStatus.REOPENED, closedAt: null },
       });
 
-      await tx.complianceMatter.update({
-        where: { id: (await tx.inspectionFinding.findUnique({ where: { id: input.findingId } }))!.complianceMatterId },
-        data: { status: ComplianceMatterStatus.REOPENED, closedAt: null },
+      const finding = await tx.inspectionFinding.findUnique({
+        where: { id: input.findingId },
+        select: { complianceMatterId: true },
       });
+      const matterId =
+        finding?.complianceMatterId ??
+        (
+          await tx.correctiveActionPlan.findFirst({
+            where: { inspectionFindingId: input.findingId },
+            select: { complianceMatterId: true },
+          })
+        )?.complianceMatterId;
+      if (matterId) {
+        await tx.complianceMatter.update({
+          where: { id: matterId },
+          data: { status: ComplianceMatterStatus.REOPENED, closedAt: null },
+        });
+      }
 
       return reopening;
     });
@@ -586,7 +636,12 @@ export class CorrectiveActionService {
 
   private async nextNumber(
     prefix: string,
-    model: 'complianceMatter' | 'inspectionFinding' | 'correctiveActionPlan' | 'complianceFindingClosure' | 'complianceFindingReopening',
+    model:
+      | 'complianceMatter'
+      | 'inspectionFinding'
+      | 'correctiveActionPlan'
+      | 'complianceFindingClosure'
+      | 'complianceFindingReopening',
   ): Promise<string> {
     const count = await (this.prisma[model] as { count: () => Promise<number> }).count();
     return `${prefix}-${String(count + 1).padStart(8, '0')}`;

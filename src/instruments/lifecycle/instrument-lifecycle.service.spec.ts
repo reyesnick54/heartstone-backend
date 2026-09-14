@@ -85,14 +85,8 @@ describe('InstrumentLifecycleService', () => {
 
   describe('boundary guards', () => {
     it('rejects ordinary PATCH of instrument status', () => {
-      expect(() => { boundary.assertClientCannotPatchInstrumentStatus({
-          currentStatus: LifecycleOfficialInstrumentStatus.REVOKED,
-        }); },
-      ).toThrow(ForbiddenException);
       expect(() => {
-        boundary.assertClientCannotPatchInstrumentStatus({
-          status: OfficialInstrumentStatus.REVOKED,
-        });
+        boundary.assertClientCannotPatchInstrumentStatus({ status: 'REVOKED' });
       }).toThrow(ForbiddenException);
     });
 
@@ -212,14 +206,11 @@ describe('InstrumentLifecycleService', () => {
         id: 'decision-amend',
         status: InstrumentControllingDecisionStatus.FINALIZED,
         decisionType: InstrumentControllingDecisionType.AMEND,
-        decisionStatus: GovernmentDecisionStatus.FINALIZED,
-        lifecycleDecisionType: GovernmentDecisionType.AMEND,
       });
 
       const activeInstrument = {
         id: 'inst-1',
         currentStatus: LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        status: OfficialInstrumentStatus.EFFECTIVE,
         currentVersion: {
           id: 'v1',
           versionNumber: 1,
@@ -232,7 +223,6 @@ describe('InstrumentLifecycleService', () => {
       const amendedInstrument = {
         id: 'inst-1',
         currentStatus: LifecycleOfficialInstrumentStatus.AMENDED,
-        status: OfficialInstrumentStatus.AMENDED,
         versions: [{ id: 'v1' }, { id: 'v2' }],
         lifecycleEvents: [],
         currentVersion: { id: 'v2' },
@@ -245,7 +235,10 @@ describe('InstrumentLifecycleService', () => {
 
       prisma.instrumentControllingDecision.findFirst.mockResolvedValue(null);
       prisma.instrumentLifecycleEvent.findFirst.mockResolvedValue(null);
-      prisma.lifecycleOfficialInstrumentVersion.create.mockResolvedValue({ id: 'v2', versionNumber: 2 });
+      prisma.lifecycleOfficialInstrumentVersion.create.mockResolvedValue({
+        id: 'v2',
+        versionNumber: 2,
+      });
       prisma.instrumentAmendmentRecord.create.mockResolvedValue({ id: 'amend-1' });
       prisma.instrumentLifecycleEvent.create.mockResolvedValue({ id: 'event-1' });
       prisma.instrumentLifecycleDecisionLink.create.mockResolvedValue({ id: 'link-1' });
@@ -271,7 +264,6 @@ describe('InstrumentLifecycleService', () => {
         }),
       );
       expect(result.currentStatus).toBe(LifecycleOfficialInstrumentStatus.AMENDED);
-      expect(result.status).toBe(OfficialInstrumentStatus.AMENDED);
     });
   });
 
@@ -285,7 +277,6 @@ describe('InstrumentLifecycleService', () => {
       prisma.lifecycleOfficialInstrument.findUnique.mockResolvedValue({
         id: 'inst-1',
         currentStatus: LifecycleOfficialInstrumentStatus.EFFECTIVE,
-        status: OfficialInstrumentStatus.EFFECTIVE,
       });
 
       prisma.instrumentSurrenderRecord.create.mockResolvedValue({ id: 'surrender-1' });
@@ -326,14 +317,12 @@ describe('InstrumentLifecycleService', () => {
         'inst-1',
         LifecycleOfficialInstrumentStatus.SUSPENDED,
       );
-      await verification.updateVerificationCache('inst-1', OfficialInstrumentStatus.SUSPENDED);
 
       expect(prisma.lifecycleOfficialInstrument.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             publicVerificationStatus: 'SUSPENDED',
             currentStatus: LifecycleOfficialInstrumentStatus.SUSPENDED,
-            status: OfficialInstrumentStatus.SUSPENDED,
           }) as Record<string, unknown>,
         }),
       );

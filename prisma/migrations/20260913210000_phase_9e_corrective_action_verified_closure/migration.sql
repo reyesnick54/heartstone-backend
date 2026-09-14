@@ -1,3 +1,15 @@
+-- Phase 9E reconciliation: supersede interim Phase 8G lifecycle tables on official_instruments.
+DROP TABLE IF EXISTS "decision_review_references" CASCADE;
+DROP TABLE IF EXISTS "instrument_surrender_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_replacement_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_reinstatement_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_revocation_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_suspension_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_renewal_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_amendment_records" CASCADE;
+DROP TABLE IF EXISTS "instrument_lifecycle_decision_links" CASCADE;
+DROP TABLE IF EXISTS "instrument_lifecycle_events" CASCADE;
+
 -- CreateEnum
 CREATE TYPE "InstrumentControllingDecisionType" AS ENUM ('APPROVE', 'APPROVE_WITH_CONDITIONS', 'REFUSE', 'DEFER', 'SUSPEND', 'PARTIALLY_SUSPEND', 'REVOKE', 'REVOCATION_DECIDED', 'REINSTATE', 'AMEND', 'VARY', 'RENEW', 'REPLACE', 'CORRECT_CLERICAL', 'SURRENDER_ACCEPT', 'CLOSE', 'OTHER');
 
@@ -8,28 +20,28 @@ CREATE TYPE "InstrumentControllingDecisionStatus" AS ENUM ('DRAFT', 'PENDING', '
 CREATE TYPE "LifecycleOfficialInstrumentType" AS ENUM ('LICENSE', 'PERMIT', 'CERTIFICATE', 'AUTHORIZATION', 'REGISTRATION', 'APPROVAL', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "InstrumentJurisdictionScope" AS ENUM ('NATIONAL', 'ABSEZ', 'INSTITUTIONAL', 'OTHER');
+DO $$ BEGIN CREATE TYPE "InstrumentJurisdictionScope" AS ENUM ('NATIONAL', 'ABSEZ', 'INSTITUTIONAL', 'OTHER'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
 CREATE TYPE "LifecycleOfficialInstrumentStatus" AS ENUM ('DRAFT', 'ISSUED', 'EFFECTIVE', 'AMENDED', 'VARIED', 'RENEWED', 'SUSPENDED', 'PARTIALLY_SUSPENDED', 'REVOCATION_DECIDED', 'REVOKED', 'REINSTATED', 'EXPIRED', 'SURRENDERED', 'SUPERSEDED', 'REPLACED', 'CLOSED');
 
 -- CreateEnum
-CREATE TYPE "InstrumentLifecycleEventType" AS ENUM ('ISSUED', 'BECAME_EFFECTIVE', 'AMENDED', 'VARIED', 'RENEWED', 'CORRECTED_CLERICAL', 'REPLACED', 'SUSPENDED', 'PARTIALLY_SUSPENDED', 'REVOCATION_DECIDED', 'REVOKED', 'REINSTATED', 'EXPIRED', 'SURRENDERED', 'SUPERSEDED', 'CLOSED');
+DO $$ BEGIN CREATE TYPE "InstrumentLifecycleEventType" AS ENUM ('ISSUED', 'BECAME_EFFECTIVE', 'AMENDED', 'VARIED', 'RENEWED', 'CORRECTED_CLERICAL', 'REPLACED', 'SUSPENDED', 'PARTIALLY_SUSPENDED', 'REVOCATION_DECIDED', 'REVOKED', 'REINSTATED', 'EXPIRED', 'SURRENDERED', 'SUPERSEDED', 'CLOSED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ReviewStayStatus" AS ENUM ('NONE', 'INTERIM_STAY_AUTHORIZED', 'STAY_DENIED', 'STAY_EXPIRED', 'STAY_LIFTED');
+DO $$ BEGIN CREATE TYPE "ReviewStayStatus" AS ENUM ('NONE', 'INTERIM_STAY_AUTHORIZED', 'STAY_DENIED', 'STAY_EXPIRED', 'STAY_LIFTED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ReviewInterimEffect" AS ENUM ('NONE', 'PARTIAL_STAY', 'FULL_STAY', 'OPERATIONAL_CONTINUATION');
+DO $$ BEGIN CREATE TYPE "ReviewInterimEffect" AS ENUM ('NONE', 'PARTIAL_STAY', 'FULL_STAY', 'OPERATIONAL_CONTINUATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "SurrenderType" AS ENUM ('APPLICANT_REQUEST', 'INSTITUTIONAL_ACCEPTANCE', 'VOLUNTARY_CESSATION');
+DO $$ BEGIN CREATE TYPE "SurrenderType" AS ENUM ('APPLICANT_REQUEST', 'INSTITUTIONAL_ACCEPTANCE', 'VOLUNTARY_CESSATION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "PriorVersionTreatment" AS ENUM ('SUPERSEDED', 'PARTIALLY_SUPERSEDED', 'RETAINED_HISTORICAL', 'REPLACED');
+DO $$ BEGIN CREATE TYPE "PriorVersionTreatment" AS ENUM ('SUPERSEDED', 'PARTIALLY_SUPERSEDED', 'RETAINED_HISTORICAL', 'REPLACED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
-CREATE TYPE "ComplianceMatterStatus" AS ENUM ('OPEN', 'UNDER_REVIEW', 'CORRECTIVE_ACTION', 'VERIFICATION', 'CLOSED', 'REOPENED', 'ESCALATED', 'ROUTED_IMMEDIATE_ACTION');
+DO $$ BEGIN CREATE TYPE "ComplianceMatterStatus" AS ENUM ('OPEN', 'UNDER_REVIEW', 'CORRECTIVE_ACTION', 'VERIFICATION', 'CLOSED', 'REOPENED', 'ESCALATED', 'ROUTED_IMMEDIATE_ACTION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
 CREATE TYPE "ComplianceRiskLevel" AS ENUM ('LOW', 'MODERATE', 'HIGH', 'CRITICAL');
@@ -38,7 +50,7 @@ CREATE TYPE "ComplianceRiskLevel" AS ENUM ('LOW', 'MODERATE', 'HIGH', 'CRITICAL'
 CREATE TYPE "ComplianceImmediateActionRoute" AS ENUM ('NONE', 'IMMEDIATE_RESTRICTION', 'PHASE_8_SUSPENSION', 'PHASE_8_REVOCATION', 'RETAINED_NATIONAL_REFERRAL', 'EMERGENCY_ACTION');
 
 -- CreateEnum
-CREATE TYPE "InspectionFindingStatus" AS ENUM ('OPEN', 'CORRECTIVE_ACTION_REQUIRED', 'EVIDENCE_SUBMITTED', 'VERIFICATION_PENDING', 'PARTIALLY_VERIFIED', 'CLOSED', 'REOPENED');
+DO $$ BEGIN CREATE TYPE "InspectionFindingStatus" AS ENUM ('OPEN', 'CORRECTIVE_ACTION_REQUIRED', 'EVIDENCE_SUBMITTED', 'VERIFICATION_PENDING', 'PARTIALLY_VERIFIED', 'CLOSED', 'REOPENED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- CreateEnum
 CREATE TYPE "CorrectiveActionPlanStatus" AS ENUM ('PROPOSED', 'REVIEW_REQUIRED', 'APPROVED', 'IN_PROGRESS', 'EVIDENCE_SUBMITTED', 'VERIFICATION_PENDING', 'PARTIALLY_VERIFIED', 'VERIFIED_COMPLETE', 'OVERDUE', 'FAILED', 'ESCALATED', 'SUPERSEDED', 'CLOSED');
@@ -332,45 +344,6 @@ CREATE TABLE "decision_review_references" (
 );
 
 -- CreateTable
-CREATE TABLE "compliance_matters" (
-    "id" UUID NOT NULL,
-    "matterNumber" TEXT NOT NULL,
-    "caseId" UUID NOT NULL,
-    "holderIdentityId" UUID NOT NULL,
-    "inspectionRecordId" UUID,
-    "status" "ComplianceMatterStatus" NOT NULL DEFAULT 'OPEN',
-    "riskLevel" "ComplianceRiskLevel" NOT NULL DEFAULT 'MODERATE',
-    "immediateActionRoute" "ComplianceImmediateActionRoute" NOT NULL DEFAULT 'NONE',
-    "summary" TEXT NOT NULL,
-    "authoritySource" TEXT,
-    "openedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "closedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "compliance_matters_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "inspection_findings" (
-    "id" UUID NOT NULL,
-    "findingNumber" TEXT NOT NULL,
-    "complianceMatterId" UUID NOT NULL,
-    "inspectionRecordId" UUID,
-    "inspectionEvidenceItemId" UUID,
-    "description" TEXT NOT NULL,
-    "deficiencyReference" TEXT,
-    "status" "InspectionFindingStatus" NOT NULL DEFAULT 'OPEN',
-    "severity" "ComplianceRiskLevel" NOT NULL DEFAULT 'MODERATE',
-    "openedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "closedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "inspection_findings_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "corrective_action_plans" (
     "id" UUID NOT NULL,
     "planNumber" TEXT NOT NULL,
@@ -642,28 +615,20 @@ CREATE INDEX "decision_review_references_challengedInstrumentId_idx" ON "decisio
 CREATE INDEX "decision_review_references_stayStatus_idx" ON "decision_review_references"("stayStatus");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "compliance_matters_matterNumber_key" ON "compliance_matters"("matterNumber");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_caseId_idx" ON "compliance_matters"("caseId");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_holderIdentityId_idx" ON "compliance_matters"("holderIdentityId");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_status_idx" ON "compliance_matters"("status");
 
 -- CreateIndex
-CREATE INDEX "compliance_matters_riskLevel_idx" ON "compliance_matters"("riskLevel");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "inspection_findings_findingNumber_key" ON "inspection_findings"("findingNumber");
 
 -- CreateIndex
-CREATE INDEX "inspection_findings_complianceMatterId_idx" ON "inspection_findings"("complianceMatterId");
 
 -- CreateIndex
-CREATE INDEX "inspection_findings_status_idx" ON "inspection_findings"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "corrective_action_plans_planNumber_key" ON "corrective_action_plans"("planNumber");
@@ -894,28 +859,20 @@ ALTER TABLE "decision_review_references" ADD CONSTRAINT "decision_review_referen
 ALTER TABLE "decision_review_references" ADD CONSTRAINT "decision_review_references_appellantOfficeholderId_fkey" FOREIGN KEY ("appellantOfficeholderId") REFERENCES "officeholders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_holderIdentityId_fkey" FOREIGN KEY ("holderIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_matters" ADD CONSTRAINT "compliance_matters_inspectionRecordId_fkey" FOREIGN KEY ("inspectionRecordId") REFERENCES "inspection_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inspection_findings" ADD CONSTRAINT "inspection_findings_complianceMatterId_fkey" FOREIGN KEY ("complianceMatterId") REFERENCES "compliance_matters"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inspection_findings" ADD CONSTRAINT "inspection_findings_inspectionRecordId_fkey" FOREIGN KEY ("inspectionRecordId") REFERENCES "inspection_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inspection_findings" ADD CONSTRAINT "inspection_findings_inspectionEvidenceItemId_fkey" FOREIGN KEY ("inspectionEvidenceItemId") REFERENCES "inspection_evidence_items"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "corrective_action_plans" ADD CONSTRAINT "corrective_action_plans_complianceMatterId_fkey" FOREIGN KEY ("complianceMatterId") REFERENCES "compliance_matters"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "corrective_action_plans" ADD CONSTRAINT "corrective_action_plans_inspectionFindingId_fkey" FOREIGN KEY ("inspectionFindingId") REFERENCES "inspection_findings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "corrective_action_plans" ADD CONSTRAINT "corrective_action_plans_approvedByOfficeholderId_fkey" FOREIGN KEY ("approvedByOfficeholderId") REFERENCES "officeholders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -966,7 +923,6 @@ ALTER TABLE "corrective_action_verification_evidence" ADD CONSTRAINT "corrective
 ALTER TABLE "corrective_action_verification_evidence" ADD CONSTRAINT "corrective_action_verification_evidence_evidenceRecordId_fkey" FOREIGN KEY ("evidenceRecordId") REFERENCES "evidence_records"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reinspection_requirements" ADD CONSTRAINT "reinspection_requirements_inspectionFindingId_fkey" FOREIGN KEY ("inspectionFindingId") REFERENCES "inspection_findings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "reinspection_requirements" ADD CONSTRAINT "reinspection_requirements_scheduledInspectionRecordId_fkey" FOREIGN KEY ("scheduledInspectionRecordId") REFERENCES "inspection_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -978,7 +934,6 @@ ALTER TABLE "reinspection_requirements" ADD CONSTRAINT "reinspection_requirement
 ALTER TABLE "reinspection_requirements" ADD CONSTRAINT "reinspection_requirements_waivedByOfficeholderId_fkey" FOREIGN KEY ("waivedByOfficeholderId") REFERENCES "officeholders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_finding_closures" ADD CONSTRAINT "compliance_finding_closures_inspectionFindingId_fkey" FOREIGN KEY ("inspectionFindingId") REFERENCES "inspection_findings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "compliance_finding_closures" ADD CONSTRAINT "compliance_finding_closures_reviewerOfficeholderId_fkey" FOREIGN KEY ("reviewerOfficeholderId") REFERENCES "officeholders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -990,7 +945,6 @@ ALTER TABLE "compliance_finding_closures" ADD CONSTRAINT "compliance_finding_clo
 ALTER TABLE "compliance_finding_closures" ADD CONSTRAINT "compliance_finding_closures_authorityEvaluationRecordId_fkey" FOREIGN KEY ("authorityEvaluationRecordId") REFERENCES "authority_evaluation_records"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "compliance_finding_reopenings" ADD CONSTRAINT "compliance_finding_reopenings_inspectionFindingId_fkey" FOREIGN KEY ("inspectionFindingId") REFERENCES "inspection_findings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "compliance_finding_reopenings" ADD CONSTRAINT "compliance_finding_reopenings_priorClosureId_fkey" FOREIGN KEY ("priorClosureId") REFERENCES "compliance_finding_closures"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1000,4 +954,3 @@ ALTER TABLE "compliance_finding_reopenings" ADD CONSTRAINT "compliance_finding_r
 
 -- AddForeignKey
 ALTER TABLE "compliance_finding_reopenings" ADD CONSTRAINT "compliance_finding_reopenings_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-

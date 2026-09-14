@@ -23,5 +23,5 @@
     "esModuleInterop": true
   },
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "src/instruments"]
+  "exclude": ["node_modules", "dist", "tests"]
 }

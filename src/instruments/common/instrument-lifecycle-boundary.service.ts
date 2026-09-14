@@ -102,12 +102,10 @@ export class InstrumentLifecycleBoundaryService {
   assertInstrumentStatusAllowsAction(
     currentStatus: LifecycleOfficialInstrumentStatus,
     allowedStatuses: LifecycleOfficialInstrumentStatus[],
-    status: OfficialInstrumentStatus,
-    allowedStatuses: OfficialInstrumentStatus[],
     action: string,
   ): void {
-    if (!allowedStatuses.includes(status)) {
-      throw new BadRequestException(`Instrument status ${status} does not permit ${action}`);
+    if (!allowedStatuses.includes(currentStatus)) {
+      throw new BadRequestException(`Instrument status ${currentStatus} does not permit ${action}`);
     }
   }
 }

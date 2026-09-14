@@ -85,10 +85,7 @@ export const IMMEDIATE_ACTION_ROUTES = [
   'EMERGENCY_ACTION',
 ] as const;
 
-export const CORRECTIVE_ACTION_TERMINAL_STATUSES = [
-  'VERIFIED_COMPLETE',
-  'CLOSED',
-] as const;
+export const CORRECTIVE_ACTION_TERMINAL_STATUSES = ['VERIFIED_COMPLETE', 'CLOSED'] as const;
 
 export const PHASE_9E_BOUNDARY_DISCLAIMER =
   'Corrective action supports remediable compliance deficiencies. It is not punishment and does not substitute for immediate protective action when risk requires suspension, revocation, or emergency measures.';

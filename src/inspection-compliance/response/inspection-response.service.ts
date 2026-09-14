@@ -62,7 +62,10 @@ export class InspectionResponseService {
       include: { supportingEvidence: true },
     });
 
-    if (input.inspectionObservationId && input.responseType === InspectionResponseType.DISPUTED_FACTS) {
+    if (
+      input.inspectionObservationId &&
+      input.responseType === InspectionResponseType.DISPUTED_FACTS
+    ) {
       await this.prisma.inspectionObservation.update({
         where: { id: input.inspectionObservationId },
         data: { disputedBySubject: true },

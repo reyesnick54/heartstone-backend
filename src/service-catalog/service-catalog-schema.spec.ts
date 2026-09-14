@@ -114,8 +114,6 @@ describe('Service catalog schema coherence (Phase 5A)', () => {
     }
   });
 
-  it('does not define Phase 7 evidence vault or Phase 8 issuance models', () => {
-    const forbiddenModels = [
   it('does not define legacy Phase 7+ issuance models outside Phase 8 canonical instrument model', () => {
     const legacyPhase7Models = [
       'IssuedLicense',

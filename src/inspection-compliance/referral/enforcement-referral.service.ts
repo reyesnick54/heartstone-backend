@@ -82,15 +82,12 @@ export class EnforcementReferralService {
       throw new NotFoundException('Enforcement referral not found');
     }
 
-    const authorityEvaluationRecordId = await assertComplianceAuthority(
-      this.authorityEvaluation,
-      {
-        identityId: input.sentByIdentityId,
-        officeholderId: input.sentByOfficeholderId,
-        functionAuthorityRecordId: input.functionAuthorityRecordId,
-        action: AuthorityActionType.LIAISE,
-      },
-    );
+    const authorityEvaluationRecordId = await assertComplianceAuthority(this.authorityEvaluation, {
+      identityId: input.sentByIdentityId,
+      officeholderId: input.sentByOfficeholderId,
+      functionAuthorityRecordId: input.functionAuthorityRecordId,
+      action: AuthorityActionType.LIAISE,
+    });
 
     return this.prisma.enforcementReferral.update({
       where: { id: input.referralId },
@@ -102,9 +99,7 @@ export class EnforcementReferralService {
     });
   }
 
-  isRetainedAuthority(
-    retainedAuthorityClass?: RetainedEnforcementAuthorityClass | null,
-  ): boolean {
+  isRetainedAuthority(retainedAuthorityClass?: RetainedEnforcementAuthorityClass | null): boolean {
     if (!retainedAuthorityClass) {
       return false;
     }
