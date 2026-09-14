@@ -15,14 +15,13 @@ import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { EvidenceModule } from './evidence/evidence.module';
-import { InspectionComplianceModule } from './inspection-compliance/inspection-compliance.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
-import { InspectionComplianceModule } from './inspection-compliance/inspection-compliance.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { RecordsModule } from './records/records.module';
+import { RedressModule } from './redress/redress.module';
 import { RedisModule } from './redis/redis.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { SystemModule } from './system/system.module';
@@ -51,14 +50,11 @@ import { SystemModule } from './system/system.module';
     RecordsModule,
     EvidenceRecordsModule,
     EvidenceModule,
-    DecisionsModule,
-    DecisionsIssuanceModule,
     InstrumentsModule,
-    InspectionComplianceModule,
     DecisionsModule,
     DecisionsIssuanceModule,
-    InspectionComplianceModule,
     ComplianceModule,
+    RedressModule,
   ],
 })
 export class AppModule {}

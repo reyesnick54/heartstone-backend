@@ -1,9 +1,9 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import {
-  InstrumentControllingDecisionType,
+  GovernmentDecisionType,
   InstrumentJurisdictionScope,
-  LifecycleOfficialInstrumentStatus,
+  OfficialInstrumentStatus,
 } from '@prisma/client';
 
 import {
@@ -89,8 +89,8 @@ export class InstrumentLifecycleBoundaryService {
   }
 
   assertDecisionTypeMatchesLifecycleAction(
-    decisionType: InstrumentControllingDecisionType,
-    expectedTypes: InstrumentControllingDecisionType[],
+    decisionType: GovernmentDecisionType,
+    expectedTypes: GovernmentDecisionType[],
   ): void {
     if (!expectedTypes.includes(decisionType)) {
       throw new BadRequestException(
@@ -100,8 +100,6 @@ export class InstrumentLifecycleBoundaryService {
   }
 
   assertInstrumentStatusAllowsAction(
-    currentStatus: LifecycleOfficialInstrumentStatus,
-    allowedStatuses: LifecycleOfficialInstrumentStatus[],
     status: OfficialInstrumentStatus,
     allowedStatuses: OfficialInstrumentStatus[],
     action: string,

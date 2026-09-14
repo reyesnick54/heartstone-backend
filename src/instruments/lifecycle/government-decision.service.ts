@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  InstrumentControllingDecision,
-  InstrumentControllingDecisionStatus,
-  InstrumentControllingDecisionType,
+  GovernmentDecision,
+  GovernmentDecisionStatus,
+  GovernmentDecisionType,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
-export interface CreateInstrumentControllingDecisionInput {
+export interface CreateGovernmentDecisionInput {
   decisionNumber: string;
-  decisionType: InstrumentControllingDecisionType;
+  decisionType: GovernmentDecisionType;
   decidingOfficeholderId: string;
   decidingIdentityId: string;
   outcomeSummary: string;
@@ -23,17 +23,13 @@ export interface CreateInstrumentControllingDecisionInput {
 }
 
 @Injectable()
-export class InstrumentControllingDecisionService {
+export class GovernmentDecisionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createDecision(input: CreateInstrumentControllingDecisionInput): Promise<InstrumentControllingDecision> {
-    return this.prisma.instrumentControllingDecision.create({
+  async createDecision(input: CreateGovernmentDecisionInput): Promise<GovernmentDecision> {
+    return this.prisma.governmentDecision.create({
       data: {
         decisionNumber: input.decisionNumber,
-        decisionType: input.decisionType,
-        status: InstrumentControllingDecisionStatus.DRAFT,
-        decidingOfficeholderId: input.decidingOfficeholderId,
-        decidingIdentityId: input.decidingIdentityId,
         lifecycleDecisionType: input.decisionType,
         decisionStatus: GovernmentDecisionStatus.DRAFT,
         decisionMakerOfficeholderId: input.decidingOfficeholderId,
@@ -50,17 +46,15 @@ export class InstrumentControllingDecisionService {
     });
   }
 
-  async finalizeDecision(decisionId: string): Promise<InstrumentControllingDecision> {
-    const decision = await this.prisma.instrumentControllingDecision.findUnique({
+  async finalizeDecision(decisionId: string): Promise<GovernmentDecision> {
+    const decision = await this.prisma.governmentDecision.findUnique({
       where: { id: decisionId },
     });
 
     if (!decision) {
-      throw new NotFoundException(`InstrumentControllingDecision ${decisionId} not found`);
+      throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== InstrumentControllingDecisionStatus.DRAFT &&
-        decision.status !== InstrumentControllingDecisionStatus.PENDING) {
     if (
       decision.decisionStatus !== GovernmentDecisionStatus.DRAFT &&
       decision.decisionStatus !== GovernmentDecisionStatus.PENDING
@@ -68,29 +62,24 @@ export class InstrumentControllingDecisionService {
       throw new BadRequestException('Decision is not in a finalizable state');
     }
 
-    return this.prisma.instrumentControllingDecision.update({
+    return this.prisma.governmentDecision.update({
       where: { id: decisionId },
       data: {
-        status: InstrumentControllingDecisionStatus.FINALIZED,
         decisionStatus: GovernmentDecisionStatus.FINALIZED,
         finalizedAt: new Date(),
       },
     });
   }
 
-  async assertDecisionFinalized(decisionId: string): Promise<InstrumentControllingDecision> {
-    const decision = await this.prisma.instrumentControllingDecision.findUnique({
+  async assertDecisionFinalized(decisionId: string): Promise<GovernmentDecision> {
+    const decision = await this.prisma.governmentDecision.findUnique({
       where: { id: decisionId },
     });
 
     if (!decision) {
-      throw new NotFoundException(`InstrumentControllingDecision ${decisionId} not found`);
+      throw new NotFoundException(`GovernmentDecision ${decisionId} not found`);
     }
 
-    if (decision.status !== InstrumentControllingDecisionStatus.FINALIZED) {
-      throw new BadRequestException(
-        'Lifecycle action requires a finalized InstrumentControllingDecision',
-      );
     if (decision.decisionStatus !== GovernmentDecisionStatus.FINALIZED) {
       throw new BadRequestException('Lifecycle action requires a finalized GovernmentDecision');
     }

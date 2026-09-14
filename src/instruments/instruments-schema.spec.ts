@@ -38,17 +38,17 @@ describe('Phase 8G instrument lifecycle schema', () => {
   it('links lifecycle events to controlling decisions', () => {
     const eventBlock = extractModelBlock(schema, 'InstrumentLifecycleEvent');
     expect(eventBlock).toContain('controllingDecisionId');
-    expect(eventBlock).toContain('InstrumentControllingDecision');
+    expect(eventBlock).toContain('GovernmentDecision');
   });
 
   it('preserves instrument versions without overwrite', () => {
-    const versionBlock = extractModelBlock(schema, 'LifecycleOfficialInstrumentVersion');
+    const versionBlock = extractModelBlock(schema, 'OfficialInstrumentVersion');
     expect(versionBlock).toContain('supersededByVersionId');
     expect(versionBlock).toContain('isCurrent');
   });
 
   it('tracks public verification status on instruments', () => {
-    const instrumentBlock = extractModelBlock(schema, 'LifecycleOfficialInstrument');
+    const instrumentBlock = extractModelBlock(schema, 'OfficialInstrument');
     expect(instrumentBlock).toContain('publicVerificationStatus');
     expect(instrumentBlock).toContain('publicVerificationToken');
     expect(instrumentBlock).toContain('publicVerificationUpdatedAt');

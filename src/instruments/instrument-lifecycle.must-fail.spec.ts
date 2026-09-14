@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import {
   InstrumentJurisdictionScope,
-  LifecycleOfficialInstrumentStatus,
+  OfficialInstrumentStatus,
   ReviewInterimEffect,
   ReviewStayStatus,
 } from '@prisma/client';
@@ -131,13 +131,13 @@ describe('Phase 8G architectural must-fail invariants', () => {
 
   it('9. suspension may be scoped where authorized', () => {
     const allowed = guard.getAllowedStatusesForAction('SUSPENDED');
-    expect(allowed).toContain(LifecycleOfficialInstrumentStatus.EFFECTIVE);
+    expect(allowed).toContain(OfficialInstrumentStatus.EFFECTIVE);
   });
 
   it('10. revocation requires decision and authority', () => {
     expect(() => {
       guard.assertConsequentialEventHasDecision('REVOKED');
-    }).toThrow(/controlling InstrumentControllingDecision/i);
+    }).toThrow(/controlling GovernmentDecision/i);
   });
 
   it('11. ABSEZ revocation cannot masquerade as national revocation', () => {
@@ -207,7 +207,7 @@ describe('Phase 8G architectural must-fail invariants', () => {
   it('20. consequential lifecycle event requires controlling decision', () => {
     expect(() => {
       guard.assertConsequentialEventHasDecision('SUSPENDED');
-    }).toThrow(/controlling InstrumentControllingDecision/i);
+    }).toThrow(/controlling GovernmentDecision/i);
 
     expect(() => {
       guard.assertConsequentialEventHasDecision('EXPIRED');
