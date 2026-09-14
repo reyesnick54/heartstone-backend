@@ -125,6 +125,11 @@ model Institution {
   instrumentTypeVersions        InstrumentTypeVersion[]         @relation("InstrumentIssuingInstitution")
   instrumentNumberingRules      InstrumentNumberingRule[]
   issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
+  complianceMattersResponsible ComplianceMatter[]
+  complianceStatusProjections  ComplianceStatusProjection[]
+  monitoringRules              MonitoringRule[]
+  invoices                     Invoice[]
+  paymentReceipts              PaymentReceipt[]
   complianceMattersResponsible  ComplianceMatter[]
   complianceStatusProjections   ComplianceStatusProjection[]
   monitoringRules               MonitoringRule[]
@@ -206,6 +211,49 @@ model Office {
 }
 
 model Officeholder {
+  id                            String                        @id @default(uuid()) @db.Uuid
+  code                          String                        @unique
+  name                          String
+  description                   String?
+  status                        StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                     DateTime                      @default(now())
+  updatedAt                     DateTime                      @updatedAt
+  appointments                  Appointment[]
+  delegationsAsDelegator        Delegation[]                  @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient        Delegation[]                  @relation("DelegationRecipientOfficeholder")
+  identityLinks                 IdentityOfficeholderLink[]
+  functionAuthorityAssignments  FunctionAuthorityAssignment[]
+  ownedGovernmentServices       GovernmentService[]
+  managedCases                  Case[]                        @relation("CaseManager")
+  caseEvents                    CaseEvent[]                   @relation("CaseEventOfficeholder")
+  communicationsAsSender        CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications         EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances    EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments    EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors          InspectionInspector[]
+  custodyEventsAsCustodian      EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness        EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets      EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved     RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents         RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents            RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed     DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants          DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade       GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments     OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer        IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
+  instrumentsHeld               OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
+  instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
+  reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  complianceReviewsAsReviewer   ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
+  reviewAssignmentsAsReviewer   ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
+  redressDecisionsAsReviewer    RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
+  interimReliefDecisionsAsReviewer InterimReliefDecision[]    @relation("InterimReliefDecisionReviewerOfficeholder")
+  reviewStayRecordsAsDecider    ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
+  manualPaymentConfirmations    PaymentTransaction[]          @relation("ManualPaymentReviewer")
   id                               String                        @id @default(uuid()) @db.Uuid
   code                             String                        @unique
   name                             String
@@ -482,6 +530,79 @@ model UserAccount {
 }
 
 model Identity {
+  id                                  String                            @id @default(uuid()) @db.Uuid
+  type                                IdentityType
+  userAccountId                       String?                           @db.Uuid
+  personId                            String?                           @db.Uuid
+  organizationId                      String?                           @db.Uuid
+  displayName                         String
+  createdAt                           DateTime                          @default(now())
+  updatedAt                           DateTime                          @updatedAt
+  userAccount                         UserAccount?                      @relation(fields: [userAccountId], references: [id])
+  person                              Person?                           @relation(fields: [personId], references: [id])
+  organization                        Organization?                     @relation(fields: [organizationId], references: [id])
+  credentials                         Credential[]
+  authenticationMethods               AuthenticationMethod[]
+  sessions                            Session[]
+  memberships                         OrganizationMembership[]
+  representativeAuthorities           RepresentativeAuthority[]
+  officeholderLinks                   IdentityOfficeholderLink[]
+  applications                        Application[]
+  casesAsApplicant                    Case[]                            @relation("CaseApplicant")
+  caseEventsAsActor                   CaseEvent[]                       @relation("CaseEventActor")
+  communicationsAsSender              CaseCommunication[]               @relation("CommunicationSender")
+  documentVersionsReceived            DocumentVersion[]                 @relation("DocumentVersionReceivedFrom")
+  documentAssociations                DocumentAssociation[]             @relation("DocumentAssociationActor")
+  documentAuditEvents                 DocumentAuditEvent[]              @relation("DocumentAuditActor")
+  evidenceVerifications               EvidenceVerification[]            @relation("EvidenceVerificationVerifier")
+  evidencePurposeAcceptances          EvidencePurposeAcceptance[]       @relation("EvidencePurposeAcceptanceReviewer")
+  evidenceQualityAssessments          EvidenceQualityAssessment[]       @relation("EvidenceQualityAssessor")
+  departmentalReviewsAsReviewer       DepartmentalReviewRecord[]        @relation("DepartmentalReviewReviewer")
+  professionalReviews                 ProfessionalReviewRecord[]        @relation("ProfessionalReviewIdentity")
+  inspectionInspectors                InspectionInspector[]             @relation("InspectionInspectorIdentity")
+  custodyEventsAsCustodian            EvidenceCustodyEvent[]            @relation("EvidenceCustodyCustodian")
+  custodyEventsAsWitness              EvidenceCustodyEvent[]            @relation("EvidenceCustodyWitness")
+  recordCorrectionsRequested          RecordCorrection[]                @relation("RecordCorrectionRequester")
+  recordCorrectionsApproved           RecordCorrection[]                @relation("RecordCorrectionApprover")
+  recordIntegrityEvents               RecordIntegrityEvent[]            @relation("RecordIntegrityActor")
+  recordAccessEvents                  RecordAccessEvent[]               @relation("RecordAccessIdentity")
+  decisionReadinessProposed           DecisionReadinessAssessment[]     @relation("DecisionReadinessProposedMaker")
+  decisionParticipants                DecisionParticipant[]             @relation("DecisionParticipantIdentity")
+  decisionPreparationRecords          DecisionPreparationRecord[]       @relation("DecisionPreparationEditor")
+  governmentDecisionsMade             GovernmentDecision[]              @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder         OfficialInstrument[]              @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer              IssuanceEvent[]                   @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions  InstrumentTemplateVersion[]       @relation("InstrumentTemplateApprover")
+  instrumentDeliveriesAsRecipient     InstrumentDelivery[]              @relation("InstrumentDeliveryRecipient")
+  instrumentReceiptsAsRecipient       InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipient")
+  instrumentDeliveryAuditsAsActor     InstrumentDeliveryAuditEvent[]    @relation("InstrumentDeliveryAuditActor")
+  instrumentVerificationEventsAsActor InstrumentVerificationEvent[]     @relation("InstrumentVerificationEventActor")
+  instrumentDownloadsAsActor          InstrumentDownloadEvent[]         @relation("InstrumentDownloadActor")
+  instrumentLifecycleEventsAsActor    InstrumentLifecycleEvent[]        @relation("InstrumentLifecycleActor")
+  reviewReferencesAsAppellant         DecisionReviewReference[]         @relation("ReviewAppellant")
+  externalReviewReferralsPrepared     ExternalReviewReferral[]          @relation("ExternalReviewPreparedBy")
+  externalReviewDeterminationsRecorded ExternalReviewDetermination[]    @relation("ExternalDeterminationRecordedBy")
+  suspensionRecordsExecuted           InstrumentSuspensionRecord[]      @relation("SuspensionExecutor")
+  complianceMattersAsHolder          ComplianceMatter[]            @relation("ComplianceMatterHolderIdentity")
+  obligationStatusChanges            ObligationStatusHistory[]     @relation("ObligationStatusChangedBy")
+  complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
+  complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
+  complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
+  complianceSubmissionsSubmitted     ComplianceSubmission[]        @relation("ComplianceSubmissionSubmitter")
+  obligationEvidenceLinks            ObligationEvidenceLink[]      @relation("ObligationEvidenceLinker")
+  complianceReviewsConducted         ComplianceReview[]            @relation("ComplianceReviewReviewer")
+  reviewAssignmentsAsReviewer        ReviewAssignment[]            @relation("ReviewAssignmentReviewer")
+  reviewRecommendationsAuthored      ReviewRecommendation[]        @relation("ReviewRecommendationAuthor")
+  reviewSubmissionsSubmitted         ReviewSubmission[]            @relation("ReviewSubmissionSubmitter")
+  reviewEvidenceAdmissionsRecorded   ReviewEvidenceAdmission[]     @relation("ReviewEvidenceAdmissionRecorder")
+  redressDecisionsAsReviewer         RedressDecision[]             @relation("RedressDecisionReviewer")
+  interimReliefDecisionsAsReviewer   InterimReliefDecision[]       @relation("InterimReliefDecisionReviewer")
+  reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
+  redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
+  redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  invoicesAsPayer                    Invoice[]                     @relation("InvoicePayerIdentity")
+  paymentIntentsAsPayer              PaymentIntent[]               @relation("PaymentIntentPayerIdentity")
+  paymentReceiptsAsPayer             PaymentReceipt[]              @relation("PaymentReceiptPayerIdentity")
   id                                   String                            @id @default(uuid()) @db.Uuid
   type                                 IdentityType
   userAccountId                        String?                           @db.Uuid
@@ -599,6 +720,10 @@ model Organization {
   officialInstrumentsAsHolder     OfficialInstrument[]              @relation("OfficialInstrumentHolderOrganization")
   instrumentDeliveriesAsRecipient InstrumentDelivery[]              @relation("InstrumentDeliveryRecipientOrganization")
   instrumentReceiptsAsRecipient   InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipientOrganization")
+  complianceMattersAsHolder         ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
+  invoicesAsPayer                   Invoice[]
+  paymentIntentsAsPayer             PaymentIntent[]
+  paymentReceiptsAsPayer            PaymentReceipt[]
   complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
   invoices                        Invoice[]
 
@@ -782,6 +907,8 @@ enum AuthorityActionType {
   CONSULT
   SUPERVISE
   LIAISE
+  COLLECT_PAYMENT
+  CONFIRM_MANUAL_PAYMENT
 }
 
 enum GoverningSourceStatus {
@@ -1647,6 +1774,7 @@ model GovernmentServiceFeeDefinition {
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
   governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  invoiceLines               InvoiceLine[]
   feeScheduleItems           FeeScheduleItem[]        @relation("FeeScheduleItemFeeDefinition")
 
   @@unique([governmentServiceVersionId, code])
@@ -2134,6 +2262,7 @@ model Application {
   submissions                ApplicationSubmission[]
   case                       Case?
   masterAdministrativeFile   MasterAdministrativeFile?
+  invoices                   Invoice[]
   feeAssessments             FeeAssessment[]
 
   @@unique([applicantIdentityId, idempotencyKey])
@@ -2987,6 +3116,7 @@ model DocumentRecord {
   auditEvents                      DocumentAuditEvent[]
   governmentCommunicationDocuments GovernmentCommunicationDocument[]
   custodyEvents                    EvidenceCustodyEvent[]
+  paymentReceipts                  PaymentReceipt[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -7362,6 +7492,352 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+// ---------------------------------------------------------------------------
+// Phase 11A — Invoicing foundation
+// ---------------------------------------------------------------------------
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  WRITTEN_OFF
+}
+
+model Invoice {
+  id                   String        @id @default(uuid()) @db.Uuid
+  invoiceNumber        String        @unique
+  institutionId        String        @db.Uuid
+  caseId               String?       @db.Uuid
+  applicationId        String?       @db.Uuid
+  payerIdentityId      String        @db.Uuid
+  payerOrganizationId  String?       @db.Uuid
+  totalAmountCents     Int
+  paidAmountCents      Int           @default(0)
+  currency             String        @default("XCD")
+  status               InvoiceStatus @default(DRAFT)
+  dueDate              DateTime?
+  issuedAt             DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  institution          Institution   @relation(fields: [institutionId], references: [id])
+  case                 Case?         @relation(fields: [caseId], references: [id])
+  application          Application?  @relation(fields: [applicationId], references: [id])
+  payerIdentity        Identity      @relation("InvoicePayerIdentity", fields: [payerIdentityId], references: [id])
+  payerOrganization    Organization? @relation(fields: [payerOrganizationId], references: [id])
+  lines                InvoiceLine[]
+  paymentIntents       PaymentIntent[]
+  paymentTransactions  PaymentTransaction[]
+  paymentAllocations   PaymentAllocation[]
+  paymentReceipts      PaymentReceipt[]
+
+  @@index([institutionId])
+  @@index([caseId])
+  @@index([applicationId])
+  @@index([payerIdentityId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  invoiceId             String                          @db.Uuid
+  lineNumber            Int
+  description           String
+  feeDefinitionId       String?                         @db.Uuid
+  amountCents           Int
+  currency              String                          @default("XCD")
+  allocatedAmountCents  Int                             @default(0)
+  createdAt             DateTime                        @default(now())
+  invoice               Invoice                         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeDefinition         GovernmentServiceFeeDefinition? @relation(fields: [feeDefinitionId], references: [id])
+  paymentAllocations    PaymentAllocation[]
+
+  @@unique([invoiceId, lineNumber])
+  @@index([invoiceId])
+  @@index([feeDefinitionId])
+  @@map("invoice_lines")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 11B — Payment collection, provider abstraction and receipts
+// ---------------------------------------------------------------------------
+
+enum PaymentChannelCode {
+  ONLINE_CARD
+  BANK_TRANSFER
+  GOVERNMENT_PAYMENT_GATEWAY
+  MOBILE_PAYMENT
+  COUNTER_PAYMENT
+  INTERNAL_TRANSFER
+  OTHER_APPROVED_CHANNEL
+}
+
+enum PaymentChannelDefinitionStatus {
+  DRAFT
+  APPROVED
+  INACTIVE
+}
+
+enum PaymentProviderConfigurationStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum PaymentIntentStatus {
+  CREATED
+  PENDING
+  REQUIRES_ACTION
+  AUTHORIZED
+  PROCESSING
+  SETTLED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentTransactionType {
+  AUTHORIZATION
+  CAPTURE
+  PAYMENT
+  SETTLEMENT
+  REVERSAL
+  REFUND_REFERENCE
+  CHARGEBACK_REFERENCE
+  MANUAL_CONFIRMED_PAYMENT
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum PaymentReceiptStatus {
+  ISSUED
+  VOIDED
+}
+
+enum PaymentWebhookProcessingStatus {
+  RECEIVED
+  VALIDATED
+  PROCESSED
+  REJECTED
+  DUPLICATE
+  FAILED
+}
+
+enum ManualPaymentSource {
+  BANK_TRANSFER
+  COUNTER
+  INTERNAL_TRANSFER
+  OTHER
+}
+
+model PaymentChannelDefinition {
+  id            String                         @id @default(uuid()) @db.Uuid
+  code          PaymentChannelCode             @unique
+  name          String
+  description   String?
+  status        PaymentChannelDefinitionStatus @default(DRAFT)
+  acceptedAt    DateTime?
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime                       @updatedAt
+
+  @@index([status])
+  @@map("payment_channel_definitions")
+}
+
+model PaymentProviderConfiguration {
+  id                      String                             @id @default(uuid()) @db.Uuid
+  providerCode            String
+  name                    String
+  environment             String
+  merchantAccountReference String?
+  supportedCurrencies     String[]
+  supportedChannels       PaymentChannelCode[]
+  webhookConfigured       Boolean                            @default(false)
+  credentialReference     String?
+  status                  PaymentProviderConfigurationStatus @default(DRAFT)
+  acceptedAt              DateTime?
+  effectiveFrom           DateTime?
+  effectiveTo             DateTime?
+  createdAt               DateTime                           @default(now())
+  updatedAt               DateTime                           @updatedAt
+  paymentIntents          PaymentIntent[]
+  paymentTransactions     PaymentTransaction[]
+
+  @@unique([providerCode, environment])
+  @@index([status])
+  @@map("payment_provider_configurations")
+}
+
+model PaymentIntent {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  paymentIntentNumber      String                          @unique
+  invoiceId                String                          @db.Uuid
+  payerIdentityId          String                          @db.Uuid
+  payerOrganizationId      String?                         @db.Uuid
+  requestedAmountCents     Int
+  currency                 String                          @default("XCD")
+  providerCode             String
+  providerConfigurationId  String?                         @db.Uuid
+  channel                  PaymentChannelCode
+  providerIntentReference  String?
+  providerStatusRaw        String?
+  status                   PaymentIntentStatus             @default(CREATED)
+  idempotencyKey           String?                         @unique
+  expiresAt                DateTime?
+  createdAt                DateTime                        @default(now())
+  updatedAt                DateTime                        @updatedAt
+  invoice                  Invoice                         @relation(fields: [invoiceId], references: [id])
+  payerIdentity            Identity                        @relation("PaymentIntentPayerIdentity", fields: [payerIdentityId], references: [id])
+  payerOrganization        Organization?                   @relation(fields: [payerOrganizationId], references: [id])
+  providerConfiguration    PaymentProviderConfiguration?   @relation(fields: [providerConfigurationId], references: [id])
+  paymentTransactions      PaymentTransaction[]
+
+  @@index([invoiceId])
+  @@index([payerIdentityId])
+  @@index([status])
+  @@index([providerCode])
+  @@map("payment_intents")
+}
+
+model PaymentTransaction {
+  id                           String                          @id @default(uuid()) @db.Uuid
+  transactionNumber            String                          @unique
+  paymentIntentId              String?                         @db.Uuid
+  invoiceId                    String                          @db.Uuid
+  providerCode                 String
+  providerConfigurationId      String?                         @db.Uuid
+  providerTransactionReference String?
+  type                         PaymentTransactionType
+  amountCents                  Int
+  currency                     String                          @default("XCD")
+  status                       PaymentTransactionStatus        @default(PENDING)
+  occurredAt                   DateTime
+  receivedAt                   DateTime                        @default(now())
+  providerPayloadHash          String
+  settlementReference          String?
+  isManualConfirmation         Boolean                         @default(false)
+  manualSource                 ManualPaymentSource?
+  manualBankReference          String?
+  manualEvidenceReference      String?
+  manualReviewerOfficeholderId String?                         @db.Uuid
+  manualConfirmationDate       DateTime?
+  manualConfirmationReason     String?
+  createdAt                    DateTime                        @default(now())
+  paymentIntent                PaymentIntent?                  @relation(fields: [paymentIntentId], references: [id])
+  invoice                      Invoice                         @relation(fields: [invoiceId], references: [id])
+  providerConfiguration        PaymentProviderConfiguration?   @relation(fields: [providerConfigurationId], references: [id])
+  manualReviewerOfficeholder   Officeholder?                   @relation("ManualPaymentReviewer", fields: [manualReviewerOfficeholderId], references: [id])
+  events                       PaymentTransactionEvent[]
+  allocations                  PaymentAllocation[]
+  webhookEvents                PaymentProviderWebhookEvent[]
+  receipt                      PaymentReceipt?
+
+  @@index([paymentIntentId])
+  @@index([invoiceId])
+  @@index([providerCode])
+  @@index([status])
+  @@index([type])
+  @@map("payment_transactions")
+}
+
+model PaymentTransactionEvent {
+  id                   String               @id @default(uuid()) @db.Uuid
+  paymentTransactionId String               @db.Uuid
+  eventType            String
+  providerStatusRaw    String?
+  canonicalStatus      PaymentTransactionStatus?
+  payloadHash          String
+  occurredAt           DateTime
+  createdAt            DateTime             @default(now())
+  paymentTransaction   PaymentTransaction   @relation(fields: [paymentTransactionId], references: [id], onDelete: Cascade)
+
+  @@index([paymentTransactionId])
+  @@index([occurredAt])
+  @@map("payment_transaction_events")
+}
+
+model PaymentAllocation {
+  id             String       @id @default(uuid()) @db.Uuid
+  transactionId  String       @db.Uuid
+  invoiceId      String       @db.Uuid
+  invoiceLineId  String?      @db.Uuid
+  amountCents    Int
+  currency       String       @default("XCD")
+  createdAt      DateTime     @default(now())
+  transaction    PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  invoice        Invoice      @relation(fields: [invoiceId], references: [id])
+  invoiceLine    InvoiceLine? @relation(fields: [invoiceLineId], references: [id])
+
+  @@index([transactionId])
+  @@index([invoiceId])
+  @@index([invoiceLineId])
+  @@map("payment_allocations")
+}
+
+model PaymentReceipt {
+  id                    String               @id @default(uuid()) @db.Uuid
+  receiptNumber         String               @unique
+  invoiceId             String               @db.Uuid
+  paymentTransactionId  String               @unique @db.Uuid
+  payerIdentityId       String               @db.Uuid
+  payerOrganizationId   String?              @db.Uuid
+  amountCents           Int
+  currency              String               @default("XCD")
+  paymentDate           DateTime
+  channel               PaymentChannelCode
+  providerReference     String?
+  institutionId         String               @db.Uuid
+  documentRecordId      String?              @db.Uuid
+  status                PaymentReceiptStatus @default(ISSUED)
+  issuedAt              DateTime             @default(now())
+  createdAt             DateTime             @default(now())
+  invoice               Invoice              @relation(fields: [invoiceId], references: [id])
+  paymentTransaction    PaymentTransaction   @relation(fields: [paymentTransactionId], references: [id])
+  payerIdentity         Identity             @relation("PaymentReceiptPayerIdentity", fields: [payerIdentityId], references: [id])
+  payerOrganization     Organization?        @relation(fields: [payerOrganizationId], references: [id])
+  institution           Institution          @relation(fields: [institutionId], references: [id])
+  documentRecord        DocumentRecord?      @relation(fields: [documentRecordId], references: [id])
+
+  @@index([invoiceId])
+  @@index([payerIdentityId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("payment_receipts")
+}
+
+model PaymentProviderWebhookEvent {
+  id                         String                         @id @default(uuid()) @db.Uuid
+  provider                   String
+  externalEventId            String
+  receivedAt                 DateTime                       @default(now())
+  signatureValidationResult  String
+  timestampValidation        String
+  payloadHash                String
+  eventType                  String
+  processingStatus           PaymentWebhookProcessingStatus @default(RECEIVED)
+  processedAt                DateTime?
+  relatedTransactionId       String?                        @db.Uuid
+  failureReason              String?
+  createdAt                  DateTime                       @default(now())
+  relatedTransaction         PaymentTransaction?            @relation(fields: [relatedTransactionId], references: [id])
+
+  @@unique([provider, externalEventId])
+  @@index([provider])
+  @@index([processingStatus])
+  @@index([relatedTransactionId])
+  @@map("payment_provider_webhook_events")
 // ─── Phase 11A: Financial Administration Foundation ──────────────────────────
 
 enum FeeScheduleLifecycleStatus {

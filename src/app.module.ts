@@ -21,6 +21,7 @@ import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { InstrumentsModule } from './instruments/instruments.module';
+import { PaymentsModule } from './payments/payments.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -55,6 +56,7 @@ import { SystemModule } from './system/system.module';
     DecisionsModule,
     DecisionsIssuanceModule,
     ComplianceModule,
+    PaymentsModule,
     RedressModule,
     FinancialAdministrationModule,
   ],
