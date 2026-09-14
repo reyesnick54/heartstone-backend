@@ -138,6 +138,8 @@ model Institution {
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections    DashboardIndicatorProjection[]
   metricDefinitions                MetricDefinition[]              @relation("MetricDefinitionInstitution")
+  institutionalAcceptanceDossiers  InstitutionalAcceptanceDossier[] @relation("InstitutionalAcceptanceDossierInstitution")
+  featureActivations               FeatureActivation[]             @relation("FeatureActivationInstitution")
   reportingDashboardIndicators     ReportingDashboardIndicator[]   @relation("ReportingDashboardIndicatorInstitution")
   reportingDashboardSnapshots      ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotInstitution")
   reportDefinitions                ReportDefinition[]              @relation("ReportDefinitionInstitution")
@@ -283,6 +285,14 @@ model Officeholder {
   reportApprovalsAsApprover       ReportApproval[]           @relation("ReportApproverOfficeholder")
   reportPublicationsAsPublisher   ReportPublication[]        @relation("ReportPublisherOfficeholder")
   reportCorrectionsAsCorrector    ReportCorrection[]         @relation("ReportCorrectionOfficeholder")
+  acceptanceDossiersOwned         InstitutionalAcceptanceDossier[] @relation("AcceptanceDossierAccountableOwner")
+  acceptanceVersionsOwned         AcceptanceDossierVersion[] @relation("AcceptanceVersionAccountableOwner")
+  acceptanceDecisionsMade         AcceptanceDecision[]       @relation("AcceptanceDecisionDecider")
+  acceptanceSignatures            AcceptanceSignature[]      @relation("AcceptanceSignatureSigner")
+  acceptanceConditionsOwned       AcceptanceCondition[]      @relation("AcceptanceConditionOwner")
+  residualRisksOwned              ResidualRisk[]             @relation("ResidualRiskOwner")
+  residualRiskAcceptancesMade     ResidualRiskAcceptance[]   @relation("ResidualRiskAcceptanceOfficeholder")
+  productionActivationDecisionsMade ProductionActivationDecision[] @relation("ProductionActivationDecisionOfficeholder")
 
   @@map("officeholders")
 }
@@ -636,6 +646,13 @@ model Identity {
   reportPublicationsAsPublisher        ReportPublication[]               @relation("ReportPublisher")
   reportCorrectionsRecorded            ReportCorrection[]                @relation("ReportCorrectionRecorder")
   reportClaimRevalidationsRecorded     ReportClaimRevalidationRecord[]   @relation("ReportClaimRevalidationRecorder")
+  acceptanceReviewsConducted           AcceptanceReview[]                @relation("AcceptanceReviewReviewer")
+  acceptanceLevelAchievementsRecorded  AcceptanceLevelAchievement[]      @relation("AcceptanceLevelAchiever")
+  residualRiskAcceptancesDecided       ResidualRiskAcceptance[]          @relation("ResidualRiskAcceptanceDecider")
+  productionActivationRequestsSubmitted ProductionActivationRequest[]  @relation("ProductionActivationRequestSubmitter")
+  productionActivationDecisionsDecided ProductionActivationDecision[]  @relation("ProductionActivationDecisionDecider")
+  activationCommunicationsSent         ActivationCommunication[]         @relation("ActivationCommunicationSender")
+  activationAuditRecordsRecorded     ActivationAuditRecord[]           @relation("ActivationAuditRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1027,6 +1044,9 @@ model FunctionAuthorityRecord {
   interimReliefDecisions        InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
   reviewStayRecords             ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
   reportPublicationAuthorities  ReportDefinitionVersion[]        @relation("ReportPublicationAuthority")
+  acceptanceDossierAuthorities  InstitutionalAcceptanceDossier[] @relation("AcceptanceDossierAuthorityFunction")
+  acceptanceVersionAuthorities  AcceptanceDossierVersion[]       @relation("AcceptanceVersionAuthorityFunction")
+  residualRiskAuthorities       ResidualRisk[]                   @relation("ResidualRiskAuthorityFunction")
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1297,6 +1317,11 @@ model AuthorityEvaluationRecord {
   reportApprovals                 ReportApproval[]              @relation("ReportApprovalAuthority")
   reportPublications              ReportPublication[]           @relation("ReportPublicationAuthority")
   reportCorrections               ReportCorrection[]            @relation("ReportCorrectionAuthority")
+  acceptanceLevelAchievements   AcceptanceLevelAchievement[]  @relation("AcceptanceLevelAuthority")
+  acceptanceDecisions             AcceptanceDecision[]          @relation("AcceptanceDecisionAuthority")
+  residualRiskAcceptances         ResidualRiskAcceptance[]      @relation("ResidualRiskAcceptanceAuthority")
+  productionActivationDecisions   ProductionActivationDecision[] @relation("ProductionActivationAuthority")
+  productionActivationFreshEvaluations ProductionActivationDecision[] @relation("ProductionActivationFreshAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -3344,6 +3369,7 @@ model EvidenceRecord {
   packetExclusions                EvidencePacketItemExclusion[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
   evidenceDashboardDecisionTraces EvidenceDashboardDecisionTrace[] @relation("TraceEvidenceRecord")
+  acceptanceEvidenceLinks         AcceptanceEvidenceLink[]         @relation("AcceptanceEvidenceLink")
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -11423,4 +11449,666 @@ model ReportClaimRevalidationRecord {
   @@index([reportClaimId])
   @@index([recordedByIdentityId])
   @@map("report_claim_revalidation_records")
+}
+
+// ─── Phase 13E/13G: Production Readiness, Institutional Acceptance, Activation ─
+
+enum FeatureActivationStatus {
+  DEPLOYED
+  OPERATIONALLY_AVAILABLE
+  SUSPENDED
+  ROLLED_BACK
+}
+
+enum AcceptanceDossierStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AcceptanceDossierVersionStatus {
+  DRAFT
+  SUBMITTED_FOR_FINAL_ACCEPTANCE
+  FROZEN_ACCEPTED
+  SUPERSEDED
+}
+
+enum AcceptanceLevel {
+  RECEIPT
+  ADMINISTRATIVE_COMPLETENESS
+  DISCOVERY
+  DESIGN
+  PROTOTYPE
+  TEST
+  PILOT
+  TECHNICAL_PRODUCTION
+  OPERATIONAL
+  DEPARTMENTAL
+  WORKFLOW
+  INTEGRATION
+  AI_AGENT
+  ISSUANCE
+  INSTITUTIONAL
+  OPERATIONAL_ACTIVATION
+  REVALIDATION
+}
+
+enum AcceptanceReviewClass {
+  INSTITUTIONAL
+  OPERATIONAL
+  TECHNICAL
+  SECURITY
+  PRIVACY
+  RECORDS
+  CONTINUITY
+  LEGAL
+  PROFESSIONAL
+  INTEGRATION
+  AI_GOVERNANCE
+  ACCESSIBILITY
+  FINANCIAL
+  OTHER_CONFIGURED
+}
+
+enum AcceptanceReviewStatus {
+  PENDING
+  IN_REVIEW
+  SATISFACTORY
+  DEFICIENCY_IDENTIFIED
+  REJECTED
+}
+
+enum AcceptanceDecisionOutcome {
+  ACCEPTED
+  ACCEPTED_WITH_CONDITIONS
+  REJECTED
+  RETURNED_FOR_CORRECTION
+  DEFERRED
+  SUSPENDED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum AcceptanceConditionStatus {
+  OPEN
+  VERIFIED
+  MISSED
+  WAIVED
+}
+
+enum AcceptanceDefectSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AcceptanceDefectStatus {
+  OPEN
+  RESOLVED
+  WAIVED
+  DEFERRED
+}
+
+enum ResidualRiskCategory {
+  TECHNICAL
+  OPERATIONAL
+  SECURITY
+  PRIVACY
+  LEGAL
+  CONTINUITY
+  INTEGRATION
+  WORKFORCE
+  FINANCIAL
+  REPUTATIONAL
+  OTHER
+}
+
+enum ResidualRiskLikelihood {
+  RARE
+  UNLIKELY
+  POSSIBLE
+  LIKELY
+  ALMOST_CERTAIN
+}
+
+enum ResidualRiskImpact {
+  NEGLIGIBLE
+  MINOR
+  MODERATE
+  MAJOR
+  SEVERE
+}
+
+enum ResidualRiskStatus {
+  OPEN
+  ACCEPTED
+  MITIGATED
+  REJECTED
+  DEFERRED
+  EXPIRED
+}
+
+enum ResidualRiskDecision {
+  ACCEPT
+  ACCEPT_WITH_CONDITIONS
+  MITIGATE_BEFORE_ACTIVATION
+  TRANSFER_OR_SHARE_IF_AUTHORIZED
+  AVOID
+  DEFER
+  REJECT
+}
+
+enum ProductionActivationRequestStatus {
+  DRAFT
+  SUBMITTED
+  DECIDED
+  WITHDRAWN
+}
+
+enum ProductionActivationDecisionOutcome {
+  APPROVED
+  APPROVED_WITH_RESTRICTIONS
+  DEFERRED
+  REJECTED
+  SUSPENDED
+}
+
+enum ActivationScopeType {
+  DEPARTMENT
+  SERVICE
+  USER
+  USER_POPULATION
+  APPLICANT_POPULATION
+  INTEGRATION
+  ENVIRONMENT
+  LOCATION
+  DATE_RANGE
+  FUNCTION
+}
+
+enum ActivationCommunicationAudience {
+  USERS
+  STAFF
+  SUPPORT
+  PARTNERS
+  GOVERNMENT_INTERFACE
+}
+
+enum ActivationAuditEventType {
+  REQUEST_SUBMITTED
+  DECISION_RECORDED
+  SCOPE_VALIDATED
+  FEATURE_TRANSITIONED
+  COMMUNICATION_SENT
+  SUSPENSION_TRIGGERED
+  ROLLBACK_INITIATED
+}
+
+model FeatureActivation {
+  id                             String                  @id @default(uuid()) @db.Uuid
+  featureCode                    String
+  releaseReference               String
+  institutionId                  String                  @db.Uuid
+  environment                    String
+  status                         FeatureActivationStatus @default(DEPLOYED)
+  deployedAt                     DateTime                @default(now())
+  operationallyAvailableAt       DateTime?
+  productionActivationDecisionId String?                 @db.Uuid
+  activationScopeId              String?                 @db.Uuid
+  createdAt                      DateTime                @default(now())
+  updatedAt                      DateTime                @updatedAt
+  institution                    Institution             @relation("FeatureActivationInstitution", fields: [institutionId], references: [id])
+  productionActivationDecision   ProductionActivationDecision? @relation(fields: [productionActivationDecisionId], references: [id])
+  activationScope                ActivationScope?        @relation(fields: [activationScopeId], references: [id])
+
+  @@unique([featureCode, releaseReference, environment, institutionId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("feature_activations")
+}
+
+model InstitutionalAcceptanceDossier {
+  id                                String                  @id @default(uuid()) @db.Uuid
+  dossierNumber                     String                  @unique
+  institutionId                     String                  @db.Uuid
+  accountableOwnerOfficeholderId    String                  @db.Uuid
+  acceptanceAuthorityFunctionRecordId String                @db.Uuid
+  currentVersionId                  String?                 @unique @db.Uuid
+  status                            AcceptanceDossierStatus @default(ACTIVE)
+  createdAt                         DateTime                @default(now())
+  updatedAt                         DateTime                @updatedAt
+  institution                       Institution             @relation("InstitutionalAcceptanceDossierInstitution", fields: [institutionId], references: [id])
+  accountableOwner                  Officeholder            @relation("AcceptanceDossierAccountableOwner", fields: [accountableOwnerOfficeholderId], references: [id])
+  acceptanceAuthorityFunction       FunctionAuthorityRecord @relation("AcceptanceDossierAuthorityFunction", fields: [acceptanceAuthorityFunctionRecordId], references: [id])
+  versions                          AcceptanceDossierVersion[] @relation("DossierVersions")
+  currentVersion                    AcceptanceDossierVersion? @relation("DossierCurrentVersion", fields: [currentVersionId], references: [id])
+  productionActivationRequests      ProductionActivationRequest[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@map("institutional_acceptance_dossiers")
+}
+
+model AcceptanceDossierVersion {
+  id                                String                         @id @default(uuid()) @db.Uuid
+  dossierId                         String                         @db.Uuid
+  versionNumber                     Int
+  status                            AcceptanceDossierVersionStatus @default(DRAFT)
+  subjectSummary                    String
+  scopeDescription                  String
+  exclusions                        Json                           @default("[]")
+  versionConfiguration              Json                           @default("{}")
+  environment                       String
+  releaseReference                  String
+  effectiveFrom                     DateTime?
+  effectiveUntil                    DateTime?
+  authorityBasis                    String
+  accountableOwnerOfficeholderId    String                         @db.Uuid
+  acceptanceAuthorityFunctionRecordId String                       @db.Uuid
+  requirementsBaseline              Json                           @default("[]")
+  evidenceIndex                     Json                           @default("[]")
+  sourceCrosswalk                   Json                           @default("{}")
+  assumptions                       Json                           @default("[]")
+  technicalReadiness                Json                           @default("{}")
+  operationalReadiness              Json                           @default("{}")
+  workforceReadiness                Json                           @default("{}")
+  institutionalReadiness            Json                           @default("{}")
+  continuityReadiness               Json                           @default("{}")
+  integrationReadiness              Json                           @default("{}")
+  supportReadiness                  Json                           @default("{}")
+  trainingQualification             Json                           @default("{}")
+  limitations                       Json                           @default("[]")
+  suspensionTriggers                Json                           @default("[]")
+  rollbackPlan                      Json                           @default("{}")
+  revalidationDate                  DateTime?
+  contentHash                       String
+  submittedForFinalAcceptanceAt     DateTime?
+  frozenAt                          DateTime?
+  createdAt                         DateTime                       @default(now())
+  updatedAt                         DateTime                       @updatedAt
+  dossier                           InstitutionalAcceptanceDossier   @relation("DossierVersions", fields: [dossierId], references: [id])
+  accountableOwner                  Officeholder                   @relation("AcceptanceVersionAccountableOwner", fields: [accountableOwnerOfficeholderId], references: [id])
+  acceptanceAuthorityFunction       FunctionAuthorityRecord        @relation("AcceptanceVersionAuthorityFunction", fields: [acceptanceAuthorityFunctionRecordId], references: [id])
+  currentForDossier                 InstitutionalAcceptanceDossier?  @relation("DossierCurrentVersion")
+  subjects                          AcceptanceSubject[]
+  requirements                      AcceptanceRequirement[]
+  evidenceLinks                     AcceptanceEvidenceLink[]
+  testResults                       AcceptanceTestResult[]
+  defects                           AcceptanceDefect[]
+  exceptions                        AcceptanceException[]
+  conditions                        AcceptanceCondition[]
+  dependencies                      AcceptanceDependency[]
+  levelAchievements                 AcceptanceLevelAchievement[]
+  reviews                           AcceptanceReview[]
+  decisions                         AcceptanceDecision[]
+  residualRisks                     ResidualRisk[]
+  productionActivationRequests      ProductionActivationRequest[]
+
+  @@unique([dossierId, versionNumber])
+  @@index([dossierId])
+  @@index([status])
+  @@map("acceptance_dossier_versions")
+}
+
+model AcceptanceSubject {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  subjectType      String
+  subjectReference String
+  subjectLabel     String
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_subjects")
+}
+
+model AcceptanceRequirement {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  requirementCode  String
+  description      String
+  mandatory        Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_requirements")
+}
+
+model AcceptanceEvidenceLink {
+  id                String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId  String                 @db.Uuid
+  evidenceRecordId  String?                @db.Uuid
+  externalReference String?
+  description       String
+  createdAt         DateTime               @default(now())
+  dossierVersion    AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  evidenceRecord    EvidenceRecord?        @relation("AcceptanceEvidenceLink", fields: [evidenceRecordId], references: [id])
+
+  @@index([dossierVersionId])
+  @@index([evidenceRecordId])
+  @@map("acceptance_evidence_links")
+}
+
+model AcceptanceTestResult {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  testReference    String
+  outcome          String
+  executedAt       DateTime
+  notes            String?
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_test_results")
+}
+
+model AcceptanceDefect {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  description      String
+  severity         AcceptanceDefectSeverity
+  status           AcceptanceDefectStatus @default(OPEN)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_defects")
+}
+
+model AcceptanceException {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  description      String
+  justification    String?
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_exceptions")
+}
+
+model AcceptanceCondition {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  dossierVersionId      String?                   @db.Uuid
+  acceptanceDecisionId  String?                   @db.Uuid
+  residualRiskAcceptanceId String?                @db.Uuid
+  conditionText         String
+  ownerOfficeholderId   String                    @db.Uuid
+  deadline              DateTime?
+  verificationMethod    String?
+  effectIfMissed        String?
+  status                AcceptanceConditionStatus @default(OPEN)
+  verifiedAt            DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  dossierVersion        AcceptanceDossierVersion? @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  acceptanceDecision    AcceptanceDecision?       @relation(fields: [acceptanceDecisionId], references: [id], onDelete: Cascade)
+  residualRiskAcceptance ResidualRiskAcceptance?  @relation(fields: [residualRiskAcceptanceId], references: [id], onDelete: Cascade)
+  ownerOfficeholder     Officeholder              @relation("AcceptanceConditionOwner", fields: [ownerOfficeholderId], references: [id])
+
+  @@index([dossierVersionId])
+  @@index([acceptanceDecisionId])
+  @@index([ownerOfficeholderId])
+  @@index([status])
+  @@map("acceptance_conditions")
+}
+
+model AcceptanceDependency {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId    String                 @db.Uuid
+  dependencyType      String
+  dependencyReference String
+  dependencyLabel     String
+  satisfied           Boolean                @default(false)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  dossierVersion      AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_dependencies")
+}
+
+model AcceptanceLevelAchievement {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId            String                 @db.Uuid
+  acceptanceLevel             AcceptanceLevel
+  achievedAt                  DateTime               @default(now())
+  achievedByIdentityId        String                 @db.Uuid
+  authorityEvaluationRecordId String?
+  basisReference              String?
+  notes                       String?
+  dossierVersion              AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  achievedBy                  Identity               @relation("AcceptanceLevelAchiever", fields: [achievedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("AcceptanceLevelAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@unique([dossierVersionId, acceptanceLevel])
+  @@index([dossierVersionId])
+  @@index([acceptanceLevel])
+  @@map("acceptance_level_achievements")
+}
+
+model AcceptanceReview {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId   String                 @db.Uuid
+  reviewClass        AcceptanceReviewClass
+  status             AcceptanceReviewStatus @default(PENDING)
+  reviewerIdentityId String?
+  findings           String?
+  reviewedAt         DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  dossierVersion     AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  reviewer           Identity?              @relation("AcceptanceReviewReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@unique([dossierVersionId, reviewClass])
+  @@index([dossierVersionId])
+  @@index([reviewClass])
+  @@map("acceptance_reviews")
+}
+
+model AcceptanceDecision {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  dossierVersionId            String                    @db.Uuid
+  outcome                     AcceptanceDecisionOutcome
+  acceptanceLevel             AcceptanceLevel
+  decidedByOfficeholderId     String                    @db.Uuid
+  authorityEvaluationRecordId String?
+  reason                      String?
+  decidedAt                   DateTime                  @default(now())
+  createdAt                   DateTime                  @default(now())
+  dossierVersion              AcceptanceDossierVersion  @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  decidedByOfficeholder       Officeholder              @relation("AcceptanceDecisionDecider", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("AcceptanceDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  signatures                  AcceptanceSignature[]
+  conditions                  AcceptanceCondition[]
+
+  @@index([dossierVersionId])
+  @@index([outcome])
+  @@map("acceptance_decisions")
+}
+
+model AcceptanceSignature {
+  id                   String             @id @default(uuid()) @db.Uuid
+  acceptanceDecisionId String             @db.Uuid
+  signerOfficeholderId String             @db.Uuid
+  signatureReference   String
+  signedAt             DateTime           @default(now())
+  acceptanceDecision   AcceptanceDecision @relation(fields: [acceptanceDecisionId], references: [id], onDelete: Cascade)
+  signerOfficeholder   Officeholder       @relation("AcceptanceSignatureSigner", fields: [signerOfficeholderId], references: [id])
+
+  @@index([acceptanceDecisionId])
+  @@map("acceptance_signatures")
+}
+
+model ResidualRisk {
+  id                                    String               @id @default(uuid()) @db.Uuid
+  dossierVersionId                        String               @db.Uuid
+  description                           String
+  category                              ResidualRiskCategory
+  affectedCapability                    String
+  likelihood                            ResidualRiskLikelihood
+  impact                                ResidualRiskImpact
+  controls                              Json                 @default("[]")
+  remainingExposure                     String
+  limitations                           Json                 @default("[]")
+  ownerOfficeholderId                   String               @db.Uuid
+  riskAcceptanceAuthorityFunctionRecordId String             @db.Uuid
+  expirationDate                        DateTime?
+  reviewDate                            DateTime?
+  isCritical                            Boolean              @default(false)
+  status                                ResidualRiskStatus   @default(OPEN)
+  createdAt                             DateTime             @default(now())
+  updatedAt                             DateTime             @updatedAt
+  dossierVersion                        AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  ownerOfficeholder                     Officeholder         @relation("ResidualRiskOwner", fields: [ownerOfficeholderId], references: [id])
+  riskAcceptanceAuthorityFunction       FunctionAuthorityRecord @relation("ResidualRiskAuthorityFunction", fields: [riskAcceptanceAuthorityFunctionRecordId], references: [id])
+  acceptances                           ResidualRiskAcceptance[]
+
+  @@index([dossierVersionId])
+  @@index([status])
+  @@index([isCritical])
+  @@map("residual_risks")
+}
+
+model ResidualRiskAcceptance {
+  id                          String               @id @default(uuid()) @db.Uuid
+  residualRiskId              String               @db.Uuid
+  decision                    ResidualRiskDecision
+  decidedByOfficeholderId     String               @db.Uuid
+  decidedByIdentityId         String               @db.Uuid
+  authorityEvaluationRecordId String?
+  reason                      String?
+  decidedAt                   DateTime             @default(now())
+  createdAt                   DateTime             @default(now())
+  residualRisk                ResidualRisk         @relation(fields: [residualRiskId], references: [id], onDelete: Cascade)
+  decidedByOfficeholder       Officeholder         @relation("ResidualRiskAcceptanceOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  decidedBy                   Identity             @relation("ResidualRiskAcceptanceDecider", fields: [decidedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ResidualRiskAcceptanceAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  conditions                  AcceptanceCondition[]
+
+  @@index([residualRiskId])
+  @@index([decision])
+  @@map("residual_risk_acceptances")
+}
+
+model ProductionActivationRequest {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  requestNumber         String                            @unique
+  dossierId             String                            @db.Uuid
+  dossierVersionId      String                            @db.Uuid
+  acceptedReleaseReference String
+  environment           String
+  effectiveDate         DateTime
+  monitoringPlan        Json                              @default("{}")
+  supportPlan           Json                              @default("{}")
+  rollbackPlan          Json                              @default("{}")
+  safeHaltPlan          Json                              @default("{}")
+  revalidationDate      DateTime?
+  status                ProductionActivationRequestStatus @default(DRAFT)
+  submittedByIdentityId String?
+  submittedAt           DateTime?
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  dossier               InstitutionalAcceptanceDossier      @relation(fields: [dossierId], references: [id])
+  dossierVersion        AcceptanceDossierVersion          @relation(fields: [dossierVersionId], references: [id])
+  submittedBy           Identity?                         @relation("ProductionActivationRequestSubmitter", fields: [submittedByIdentityId], references: [id])
+  scopes                ActivationScope[]
+  decision              ProductionActivationDecision?
+  auditRecords          ActivationAuditRecord[]
+
+  @@index([dossierId])
+  @@index([dossierVersionId])
+  @@index([status])
+  @@map("production_activation_requests")
+}
+
+model ProductionActivationDecision {
+  id                              String                              @id @default(uuid()) @db.Uuid
+  activationRequestId             String                              @unique @db.Uuid
+  outcome                         ProductionActivationDecisionOutcome
+  decidedByOfficeholderId         String                              @db.Uuid
+  decidedByIdentityId             String                              @db.Uuid
+  authorityEvaluationRecordId     String?
+  freshAuthorityEvaluationRecordId String?
+  securityPrivacyStatus           String
+  recordsControlsStatus           String
+  continuityReadinessVerified     Boolean                             @default(false)
+  workforceQualified              Boolean                             @default(false)
+  integrationsAccepted            Boolean                             @default(false)
+  residualRisksAccepted           Boolean                             @default(false)
+  monitoringConfigured            Boolean                             @default(false)
+  rollbackCapable                 Boolean                             @default(false)
+  restrictions                    Json                                @default("[]")
+  replaySnapshot                  Json                                @default("{}")
+  reason                          String?
+  decidedAt                       DateTime                            @default(now())
+  createdAt                       DateTime                            @default(now())
+  activationRequest               ProductionActivationRequest         @relation(fields: [activationRequestId], references: [id])
+  decidedByOfficeholder           Officeholder                        @relation("ProductionActivationDecisionOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  decidedBy                       Identity                            @relation("ProductionActivationDecisionDecider", fields: [decidedByIdentityId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord?          @relation("ProductionActivationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  freshAuthorityEvaluationRecord  AuthorityEvaluationRecord?          @relation("ProductionActivationFreshAuthority", fields: [freshAuthorityEvaluationRecordId], references: [id])
+  scopes                          ActivationScope[]
+  communications                  ActivationCommunication[]
+  auditRecords                    ActivationAuditRecord[]
+  featureActivations              FeatureActivation[]
+
+  @@index([outcome])
+  @@map("production_activation_decisions")
+}
+
+model ActivationScope {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  activationRequestId   String?                        @db.Uuid
+  activationDecisionId  String?                        @db.Uuid
+  scopeType             ActivationScopeType
+  scopeReference        String
+  scopeLabel            String
+  constraints           Json                           @default("{}")
+  createdAt             DateTime                       @default(now())
+  activationRequest     ProductionActivationRequest?   @relation(fields: [activationRequestId], references: [id], onDelete: Cascade)
+  activationDecision    ProductionActivationDecision?  @relation(fields: [activationDecisionId], references: [id], onDelete: Cascade)
+  featureActivations    FeatureActivation[]
+
+  @@index([activationRequestId])
+  @@index([activationDecisionId])
+  @@index([scopeType])
+  @@map("activation_scopes")
+}
+
+model ActivationCommunication {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  activationDecisionId     String                          @db.Uuid
+  audienceType             ActivationCommunicationAudience
+  communicationReference   String
+  sentAt                   DateTime                        @default(now())
+  sentByIdentityId         String                          @db.Uuid
+  notes                    String?
+  activationDecision       ProductionActivationDecision    @relation(fields: [activationDecisionId], references: [id], onDelete: Cascade)
+  sentBy                   Identity                        @relation("ActivationCommunicationSender", fields: [sentByIdentityId], references: [id])
+
+  @@index([activationDecisionId])
+  @@map("activation_communications")
+}
+
+model ActivationAuditRecord {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  eventType            ActivationAuditEventType
+  activationRequestId  String?                   @db.Uuid
+  activationDecisionId String?                   @db.Uuid
+  actorIdentityId      String                    @db.Uuid
+  eventSnapshot        Json                      @default("{}")
+  recordedAt           DateTime                  @default(now())
+  activationRequest    ProductionActivationRequest? @relation(fields: [activationRequestId], references: [id])
+  activationDecision   ProductionActivationDecision? @relation(fields: [activationDecisionId], references: [id])
+  actor                Identity                  @relation("ActivationAuditRecorder", fields: [actorIdentityId], references: [id])
+
+  @@index([activationRequestId])
+  @@index([activationDecisionId])
+  @@index([eventType])
+  @@map("activation_audit_records")
 }
