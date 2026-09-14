@@ -128,6 +128,14 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  feeSchedules                 FeeSchedule[]
+  integrationDefinitions       IntegrationDefinition[]
+  paymentProviderConfigurations PaymentProviderConfiguration[]
+  communicationTemplates       CommunicationTemplate[]
+  mandatoryCommunicationRules  MandatoryCommunicationRule[]
+  authoritativeSourceDesignations AuthoritativeSourceDesignation[]
+  reconciliationBatches        ReconciliationBatch[]
+  communicationPreferences     CommunicationPreference[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -547,6 +555,19 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  feeScheduleVersionApprovals        FeeScheduleVersion[]             @relation("FeeScheduleVersionApprover")
+  feeAdjustmentRequestsRequested     FeeAdjustmentRequest[]           @relation("FeeAdjustmentRequestRequester")
+  feeAdjustmentDecisionsDecided      FeeAdjustmentDecision[]          @relation("FeeAdjustmentDecisionDecider")
+  refundRequestsRequested            RefundRequest[]                  @relation("RefundRequestRequester")
+  refundAuthorizationsAuthorized     RefundAuthorization[]            @relation("RefundAuthorizationAuthorizer")
+  financialApprovalsApproved         FinancialApprovalRecord[]        @relation("FinancialApprovalApprover")
+  integrationAcceptanceAssessments   IntegrationAcceptanceRecord[]    @relation("IntegrationAcceptanceAssessor")
+  sourceDiscrepancyResolutions       SourceDiscrepancyResolution[]    @relation("SourceDiscrepancyResolver")
+  integrationRecoveryVerifications   IntegrationRecoveryEvent[]       @relation("IntegrationRecoveryVerifier")
+  communicationRecipients            CommunicationRecipient[]         @relation("CommunicationRecipientIdentity")
+  communicationPreferences           CommunicationPreference[]        @relation("CommunicationPreferenceIdentity")
+  accessibilityAccommodations        AccessibilityAccommodation[]     @relation("AccessibilityAccommodationIdentity")
+  translationRecords                 TranslationRecord[]              @relation("TranslationRecordTranslator")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1410,6 +1431,8 @@ model GovernmentService {
   cases                     Case[]
   masterAdministrativeFiles MasterAdministrativeFile[]
   decisionTypes             DecisionType[]
+  feeSchedules              FeeSchedule[]
+  mandatoryCommunicationRules MandatoryCommunicationRule[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2119,6 +2142,7 @@ model Application {
   submissions                ApplicationSubmission[]
   case                       Case?
   masterAdministrativeFile   MasterAdministrativeFile?
+  feeAssessments             FeeAssessment[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2220,6 +2244,10 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  feeAssessments                    FeeAssessment[]
+  invoices                          Invoice[]
+  communicationMessages             CommunicationMessage[]
+  integrationRequests               IntegrationRequest[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2815,6 +2843,10 @@ model MasterAdministrativeFile {
   complianceMatters                  ComplianceMatter[]
   complianceStatusProjections        ComplianceStatusProjection[]
   redressMatters                     RedressMatter[]
+  feeAssessments                     FeeAssessment[]
+  invoices                           Invoice[]
+  communicationMessages              CommunicationMessage[]
+  integrationRequests                IntegrationRequest[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -7000,6 +7032,7 @@ model RedressImplementationAction {
   implementationPlan          RedressImplementationPlan         @relation(fields: [implementationPlanId], references: [id], onDelete: Cascade)
   responsibleIdentity         Identity?                         @relation("RedressImplementationActionResponsible", fields: [responsibleIdentityId], references: [id])
   verification                RedressImplementationVerification?
+  refundRequests              RefundRequest[]
 
   @@index([implementationPlanId])
   @@index([status])
@@ -7335,4 +7368,1505 @@ model JudicialReviewInformationRecord {
 
   @@index([redressMatterId])
   @@map("judicial_review_information_records")
+}
+
+// ─── Phase 11: Financial Administration, Notifications and Government Integrations ─
+
+// ─── Phase 11A: Fee Schedules and Assessment ───────────────────────────────
+
+enum FeeScheduleStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum FeeAssessmentStatus {
+  CALCULATED
+  INVOICED
+  WAIVED
+  ADJUSTED
+  SUPERSEDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  WRITTEN_OFF
+}
+
+enum FinancialApprovalType {
+  FEE_SCHEDULE_ACTIVATION
+  FEE_WAIVER
+  FEE_ADJUSTMENT
+  REFUND_AUTHORIZATION
+  RECONCILIATION_CLOSURE
+  ARREARS_ACTION
+}
+
+enum FinancialApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUPERSEDED
+}
+
+enum FeeAdjustmentDecisionOutcome {
+  APPROVED
+  PARTIALLY_APPROVED
+  REJECTED
+}
+
+// ─── Phase 11B: Payments ─────────────────────────────────────────────────────
+
+enum PaymentChannelType {
+  CARD
+  BANK_TRANSFER
+  CASH_COUNTER
+  GOVERNMENT_TREASURY
+  MOBILE_WALLET
+  OTHER
+}
+
+enum PaymentIntentStatus {
+  CREATED
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  AUTHORIZED
+  SETTLED
+  FAILED
+  REVERSED
+  CHARGEBACK
+}
+
+enum PaymentWebhookProcessingStatus {
+  RECEIVED
+  AUTHENTICATED
+  PROCESSED
+  DUPLICATE
+  REJECTED
+  FAILED
+}
+
+// ─── Phase 11C: Refunds, Adjustments, Reconciliation ─────────────────────────
+
+enum FeeAdjustmentRequestStatus {
+  PENDING
+  DECIDED
+  WITHDRAWN
+}
+
+enum RefundRequestStatus {
+  PENDING
+  AUTHORIZED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
+}
+
+enum RefundTransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ReconciliationBatchStatus {
+  OPEN
+  IN_PROGRESS
+  EXCEPTION
+  CLOSED
+}
+
+enum ReconciliationItemStatus {
+  MATCHED
+  MISMATCH
+  EXCEPTION
+  RESOLVED
+}
+
+enum FinancialDisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  ESCALATED
+}
+
+enum ArrearsRecordStatus {
+  OUTSTANDING
+  PARTIALLY_PAID
+  PAID
+  WRITTEN_OFF
+  DISPUTED
+}
+
+// ─── Phase 11D: Communications ───────────────────────────────────────────────
+
+enum CommunicationTemplateStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum CommunicationChannelType {
+  EMAIL
+  SMS
+  PORTAL
+  POSTAL
+  IN_PERSON
+  GOVERNMENT_SECURE_MESSAGING
+  OTHER
+}
+
+enum CommunicationMessageStatus {
+  DRAFT
+  APPROVED
+  QUEUED
+  DELIVERING
+  DELIVERED
+  PARTIALLY_DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum CommunicationDeliveryStatus {
+  PENDING
+  IN_PROGRESS
+  DELIVERED
+  FAILED
+  BOUNCED
+  SUPERSEDED
+}
+
+enum CommunicationReceiptType {
+  DELIVERY_CONFIRMATION
+  READ_RECEIPT
+  LEGAL_ACKNOWLEDGMENT
+  SIGNATURE_CAPTURE
+}
+
+enum MandatoryCommunicationRuleStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ─── Phase 11E: Integrations ─────────────────────────────────────────────────
+
+enum IntegrationAcceptanceStatus {
+  TECHNICALLY_CONNECTED
+  TESTED
+  TECHNICALLY_READY
+  INSTITUTIONALLY_ACCEPTED
+  OPERATIONALLY_ACTIVE
+  SUSPENDED
+  REVALIDATION_REQUIRED
+}
+
+enum IntegrationDefinitionStatus {
+  DRAFT
+  PENDING_ACCEPTANCE
+  ACCEPTED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum IntegrationEndpointDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum DataExchangeFieldDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum AuthoritativeSourceStatus {
+  AUTHORITATIVE
+  SUPPORTING
+  MODELED
+  UNVERIFIED
+  STALE
+}
+
+enum IntegrationRequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum IntegrationExchangeStatus {
+  INITIATED
+  SENT
+  ACKNOWLEDGED
+  COMPLETED
+  FAILED
+  SAFE_HALTED
+}
+
+enum IntegrationMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum IntegrationWebhookProcessingStatus {
+  RECEIVED
+  AUTHENTICATED
+  PROCESSED
+  DUPLICATE
+  REJECTED
+  FAILED
+}
+
+enum SourceDiscrepancyStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  SAFE_HALTED
+}
+
+enum IntegrationOutageStatus {
+  DETECTED
+  CONFIRMED
+  RECOVERING
+  RESOLVED
+}
+
+enum IntegrationFallbackStatus {
+  ACTIVATED
+  IN_USE
+  RECONCILING
+  DEACTIVATED
+}
+
+enum IntegrationReconciliationStatus {
+  OPEN
+  IN_PROGRESS
+  EXCEPTION
+  CLOSED
+}
+
+enum RegistryQueryStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  TIMEOUT
+  SAFE_HALTED
+}
+
+enum RegistrySynchronizationResult {
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model FeeSchedule {
+  id                  String            @id @default(uuid()) @db.Uuid
+  institutionId       String            @db.Uuid
+  governmentServiceId String?           @db.Uuid
+  code                String
+  name                String
+  description         String?
+  status              FeeScheduleStatus @default(DRAFT)
+  currency            String            @default("XCD")
+  effectiveFrom       DateTime?
+  effectiveUntil      DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  institution         Institution       @relation(fields: [institutionId], references: [id])
+  governmentService   GovernmentService? @relation(fields: [governmentServiceId], references: [id])
+  versions            FeeScheduleVersion[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([governmentServiceId])
+  @@index([status])
+  @@map("fee_schedules")
+}
+
+model FeeScheduleVersion {
+  id                   String            @id @default(uuid()) @db.Uuid
+  feeScheduleId        String            @db.Uuid
+  versionNumber        String
+  status               FeeScheduleStatus @default(DRAFT)
+  changeSummary        String?
+  approvedAt           DateTime?
+  approvedByIdentityId String?           @db.Uuid
+  effectiveFrom        DateTime?
+  effectiveUntil       DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  feeSchedule          FeeSchedule       @relation(fields: [feeScheduleId], references: [id], onDelete: Cascade)
+  approvedBy           Identity?         @relation("FeeScheduleVersionApprover", fields: [approvedByIdentityId], references: [id])
+  items                FeeScheduleItem[]
+  feeAssessments       FeeAssessment[]
+  financialApprovals   FinancialApprovalRecord[]
+
+  @@unique([feeScheduleId, versionNumber])
+  @@index([feeScheduleId])
+  @@index([status])
+  @@index([approvedByIdentityId])
+  @@map("fee_schedule_versions")
+}
+
+model FeeScheduleItem {
+  id                   String             @id @default(uuid()) @db.Uuid
+  feeScheduleVersionId String             @db.Uuid
+  itemCode             String
+  label                String
+  description          String?
+  amountCents          Int?
+  currency             String             @default("XCD")
+  isVariable           Boolean            @default(false)
+  calculationFormula   String?
+  sortOrder            Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  feeScheduleVersion   FeeScheduleVersion @relation(fields: [feeScheduleVersionId], references: [id], onDelete: Cascade)
+  invoiceLines         InvoiceLine[]
+
+  @@unique([feeScheduleVersionId, itemCode])
+  @@index([feeScheduleVersionId])
+  @@map("fee_schedule_items")
+}
+
+model FeeAssessment {
+  id                         String              @id @default(uuid()) @db.Uuid
+  caseId                     String?             @db.Uuid
+  applicationId              String?             @db.Uuid
+  feeScheduleVersionId       String              @db.Uuid
+  masterAdministrativeFileId String?             @db.Uuid
+  assessmentReference        String              @unique
+  status                     FeeAssessmentStatus @default(CALCULATED)
+  totalAmountCents           Int
+  currency                   String              @default("XCD")
+  calculatedAt               DateTime            @default(now())
+  waivedAt                   DateTime?
+  notes                      String?
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+  case                       Case?               @relation(fields: [caseId], references: [id])
+  application                Application?        @relation(fields: [applicationId], references: [id])
+  feeScheduleVersion         FeeScheduleVersion  @relation(fields: [feeScheduleVersionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  invoices                   Invoice[]
+  feeAdjustmentRequests      FeeAdjustmentRequest[]
+
+  @@index([caseId])
+  @@index([applicationId])
+  @@index([feeScheduleVersionId])
+  @@index([masterAdministrativeFileId])
+  @@index([status])
+  @@map("fee_assessments")
+}
+
+model Invoice {
+  id                         String        @id @default(uuid()) @db.Uuid
+  feeAssessmentId            String        @db.Uuid
+  caseId                     String?       @db.Uuid
+  masterAdministrativeFileId String        @db.Uuid
+  invoiceNumber              String        @unique
+  status                     InvoiceStatus @default(DRAFT)
+  totalAmountCents           Int
+  amountPaidCents            Int           @default(0)
+  currency                   String        @default("XCD")
+  issuedAt                   DateTime?
+  dueAt                      DateTime?
+  cancelledAt                DateTime?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+  feeAssessment              FeeAssessment @relation(fields: [feeAssessmentId], references: [id])
+  case                       Case?         @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  lines                      InvoiceLine[]
+  paymentIntents             PaymentIntent[]
+  arrearsRecords             ArrearsRecord[]
+  financialDisputes          FinancialDispute[]
+
+  @@index([feeAssessmentId])
+  @@index([caseId])
+  @@index([masterAdministrativeFileId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id                String           @id @default(uuid()) @db.Uuid
+  invoiceId         String           @db.Uuid
+  feeScheduleItemId String?          @db.Uuid
+  lineCode          String
+  description       String
+  quantity          Int              @default(1)
+  unitAmountCents   Int
+  lineAmountCents   Int
+  sortOrder         Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  invoice           Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeScheduleItem   FeeScheduleItem? @relation(fields: [feeScheduleItemId], references: [id])
+  paymentAllocations PaymentAllocation[]
+
+  @@index([invoiceId])
+  @@index([feeScheduleItemId])
+  @@map("invoice_lines")
+}
+
+model PaymentChannelDefinition {
+  id                  String               @id @default(uuid()) @db.Uuid
+  code                String               @unique
+  name                String
+  channelType         PaymentChannelType
+  description         String?
+  isActive            Boolean              @default(true)
+  configurationSchema Json                 @default("{}")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  providerConfigurations PaymentProviderConfiguration[]
+
+  @@index([channelType])
+  @@index([isActive])
+  @@map("payment_channel_definitions")
+}
+
+model PaymentProviderConfiguration {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  paymentChannelDefinitionId String                   @db.Uuid
+  institutionId              String?                  @db.Uuid
+  providerCode               String
+  providerName               String
+  configuration              Json                     @default("{}")
+  isActive                   Boolean                  @default(true)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  paymentChannelDefinition   PaymentChannelDefinition @relation(fields: [paymentChannelDefinitionId], references: [id])
+  institution                Institution?             @relation(fields: [institutionId], references: [id])
+  transactions               PaymentTransaction[]
+  webhookEvents              PaymentProviderWebhookEvent[]
+
+  @@unique([paymentChannelDefinitionId, providerCode, institutionId])
+  @@index([paymentChannelDefinitionId])
+  @@index([institutionId])
+  @@index([isActive])
+  @@map("payment_provider_configurations")
+}
+
+model PaymentIntent {
+  id              String              @id @default(uuid()) @db.Uuid
+  invoiceId       String              @db.Uuid
+  intentReference String              @unique
+  status          PaymentIntentStatus @default(CREATED)
+  amountCents     Int
+  currency        String              @default("XCD")
+  expiresAt       DateTime?
+  completedAt     DateTime?
+  failureReason   String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  invoice         Invoice             @relation(fields: [invoiceId], references: [id])
+  transactions    PaymentTransaction[]
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("payment_intents")
+}
+
+model PaymentTransaction {
+  id                             String                   @id @default(uuid()) @db.Uuid
+  paymentIntentId                String                   @db.Uuid
+  paymentProviderConfigurationId String                   @db.Uuid
+  providerTransactionReference   String
+  status                         PaymentTransactionStatus @default(PENDING)
+  amountCents                    Int
+  currency                       String                   @default("XCD")
+  authorizedAt                   DateTime?
+  settledAt                      DateTime?
+  failureReason                  String?
+  rawResponse                    Json?
+  createdAt                      DateTime                 @default(now())
+  updatedAt                      DateTime                 @updatedAt
+  paymentIntent                  PaymentIntent            @relation(fields: [paymentIntentId], references: [id])
+  paymentProviderConfiguration   PaymentProviderConfiguration @relation(fields: [paymentProviderConfigurationId], references: [id])
+  allocations                    PaymentAllocation[]
+  receipts                       PaymentReceipt[]
+  refundRequests                 RefundRequest[]
+  reconciliationItems            ReconciliationItem[]
+  financialDisputes              FinancialDispute[]
+
+  @@unique([paymentProviderConfigurationId, providerTransactionReference])
+  @@index([paymentIntentId])
+  @@index([paymentProviderConfigurationId])
+  @@index([status])
+  @@map("payment_transactions")
+}
+
+model PaymentAllocation {
+  id                   String             @id @default(uuid()) @db.Uuid
+  paymentTransactionId String             @db.Uuid
+  invoiceLineId        String?            @db.Uuid
+  allocatedAmountCents Int
+  allocationType       String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  paymentTransaction   PaymentTransaction @relation(fields: [paymentTransactionId], references: [id], onDelete: Cascade)
+  invoiceLine          InvoiceLine?       @relation(fields: [invoiceLineId], references: [id])
+
+  @@index([paymentTransactionId])
+  @@index([invoiceLineId])
+  @@map("payment_allocations")
+}
+
+model PaymentReceipt {
+  id                   String             @id @default(uuid()) @db.Uuid
+  paymentTransactionId String             @db.Uuid
+  receiptNumber        String             @unique
+  issuedAt             DateTime           @default(now())
+  contentHash          String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  paymentTransaction   PaymentTransaction @relation(fields: [paymentTransactionId], references: [id], onDelete: Cascade)
+
+  @@index([paymentTransactionId])
+  @@map("payment_receipts")
+}
+
+model PaymentProviderWebhookEvent {
+  id                             String                         @id @default(uuid()) @db.Uuid
+  paymentProviderConfigurationId String                         @db.Uuid
+  eventType                      String
+  externalEventId                String
+  payload                        Json
+  processingStatus               PaymentWebhookProcessingStatus @default(RECEIVED)
+  processedAt                    DateTime?
+  failureReason                  String?
+  createdAt                      DateTime                       @default(now())
+  updatedAt                      DateTime                       @updatedAt
+  paymentProviderConfiguration   PaymentProviderConfiguration   @relation(fields: [paymentProviderConfigurationId], references: [id])
+
+  @@unique([paymentProviderConfigurationId, externalEventId])
+  @@index([paymentProviderConfigurationId])
+  @@index([processingStatus])
+  @@map("payment_provider_webhook_events")
+}
+
+model FeeAdjustmentRequest {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  feeAssessmentId      String                     @db.Uuid
+  requestedAmountCents Int
+  requestedByIdentityId String?                   @db.Uuid
+  reason               String
+  status               FeeAdjustmentRequestStatus @default(PENDING)
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  feeAssessment        FeeAssessment              @relation(fields: [feeAssessmentId], references: [id])
+  requestedBy          Identity?                  @relation("FeeAdjustmentRequestRequester", fields: [requestedByIdentityId], references: [id])
+  decisions            FeeAdjustmentDecision[]
+
+  @@index([feeAssessmentId])
+  @@index([status])
+  @@index([requestedByIdentityId])
+  @@map("fee_adjustment_requests")
+}
+
+model FeeAdjustmentDecision {
+  id                     String                       @id @default(uuid()) @db.Uuid
+  feeAdjustmentRequestId String                       @db.Uuid
+  decidedByIdentityId    String?                      @db.Uuid
+  outcome                FeeAdjustmentDecisionOutcome
+  adjustedAmountCents    Int?
+  reason                 String?
+  decidedAt              DateTime                     @default(now())
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  feeAdjustmentRequest   FeeAdjustmentRequest         @relation(fields: [feeAdjustmentRequestId], references: [id], onDelete: Cascade)
+  decidedBy              Identity?                    @relation("FeeAdjustmentDecisionDecider", fields: [decidedByIdentityId], references: [id])
+
+  @@index([feeAdjustmentRequestId])
+  @@index([decidedByIdentityId])
+  @@map("fee_adjustment_decisions")
+}
+
+model RefundRequest {
+  id                            String              @id @default(uuid()) @db.Uuid
+  paymentTransactionId          String              @db.Uuid
+  redressImplementationActionId String?             @db.Uuid
+  requestedAmountCents          Int
+  reason                        String
+  status                        RefundRequestStatus @default(PENDING)
+  requestedByIdentityId         String?             @db.Uuid
+  createdAt                     DateTime            @default(now())
+  updatedAt                     DateTime            @updatedAt
+  paymentTransaction            PaymentTransaction  @relation(fields: [paymentTransactionId], references: [id])
+  redressImplementationAction   RedressImplementationAction? @relation(fields: [redressImplementationActionId], references: [id])
+  requestedBy                   Identity?           @relation("RefundRequestRequester", fields: [requestedByIdentityId], references: [id])
+  authorizations                RefundAuthorization[]
+  transactions                  RefundTransaction[]
+
+  @@index([paymentTransactionId])
+  @@index([redressImplementationActionId])
+  @@index([status])
+  @@index([requestedByIdentityId])
+  @@map("refund_requests")
+}
+
+model RefundAuthorization {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  refundRequestId       String                  @db.Uuid
+  authorizedByIdentityId String?                @db.Uuid
+  authorizedAmountCents Int
+  authorizationReference String                 @unique
+  authorizedAt          DateTime                @default(now())
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  refundRequest         RefundRequest           @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+  authorizedBy          Identity?               @relation("RefundAuthorizationAuthorizer", fields: [authorizedByIdentityId], references: [id])
+  transactions          RefundTransaction[]
+  financialApprovals    FinancialApprovalRecord[]
+
+  @@index([refundRequestId])
+  @@index([authorizedByIdentityId])
+  @@map("refund_authorizations")
+}
+
+model RefundTransaction {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  refundRequestId       String                  @db.Uuid
+  refundAuthorizationId String?                 @db.Uuid
+  providerRefundReference String?
+  amountCents           Int
+  status                RefundTransactionStatus @default(PENDING)
+  processedAt           DateTime?
+  failureReason         String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  refundRequest         RefundRequest           @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+  refundAuthorization   RefundAuthorization?    @relation(fields: [refundAuthorizationId], references: [id])
+
+  @@index([refundRequestId])
+  @@index([refundAuthorizationId])
+  @@index([status])
+  @@map("refund_transactions")
+}
+
+model ReconciliationBatch {
+  id             String                    @id @default(uuid()) @db.Uuid
+  institutionId  String?                   @db.Uuid
+  batchReference String                    @unique
+  status         ReconciliationBatchStatus @default(OPEN)
+  periodStart    DateTime
+  periodEnd      DateTime
+  openedAt       DateTime                  @default(now())
+  closedAt       DateTime?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  institution    Institution?              @relation(fields: [institutionId], references: [id])
+  items          ReconciliationItem[]
+  financialApprovals FinancialApprovalRecord[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@map("reconciliation_batches")
+}
+
+model ReconciliationItem {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  reconciliationBatchId String                  @db.Uuid
+  paymentTransactionId String?                  @db.Uuid
+  externalReference    String?
+  expectedAmountCents  Int
+  actualAmountCents    Int?
+  status               ReconciliationItemStatus @default(MISMATCH)
+  resolvedAt           DateTime?
+  resolutionNotes      String?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  reconciliationBatch  ReconciliationBatch      @relation(fields: [reconciliationBatchId], references: [id], onDelete: Cascade)
+  paymentTransaction   PaymentTransaction?      @relation(fields: [paymentTransactionId], references: [id])
+
+  @@index([reconciliationBatchId])
+  @@index([paymentTransactionId])
+  @@index([status])
+  @@map("reconciliation_items")
+}
+
+model FinancialDispute {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  invoiceId            String?                @db.Uuid
+  paymentTransactionId String?                @db.Uuid
+  disputeReference     String                 @unique
+  status               FinancialDisputeStatus @default(OPEN)
+  amountCents          Int
+  reason               String
+  openedAt             DateTime               @default(now())
+  resolvedAt           DateTime?
+  resolutionSummary    String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  invoice              Invoice?               @relation(fields: [invoiceId], references: [id])
+  paymentTransaction   PaymentTransaction?    @relation(fields: [paymentTransactionId], references: [id])
+
+  @@index([invoiceId])
+  @@index([paymentTransactionId])
+  @@index([status])
+  @@map("financial_disputes")
+}
+
+model ArrearsRecord {
+  id                    String              @id @default(uuid()) @db.Uuid
+  invoiceId             String              @db.Uuid
+  outstandingAmountCents Int
+  status                ArrearsRecordStatus @default(OUTSTANDING)
+  asOfDate              DateTime            @default(now())
+  writtenOffAt          DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  invoice               Invoice             @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("arrears_records")
+}
+
+model FinancialApprovalRecord {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  approvalType           FinancialApprovalType
+  status                 FinancialApprovalStatus @default(PENDING)
+  subjectReference       String
+  subjectType            String
+  approvedByIdentityId   String?                 @db.Uuid
+  approvedAt             DateTime?
+  rejectionReason        String?
+  feeScheduleVersionId   String?                 @db.Uuid
+  refundAuthorizationId  String?                 @db.Uuid
+  reconciliationBatchId  String?                 @db.Uuid
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  approvedBy             Identity?               @relation("FinancialApprovalApprover", fields: [approvedByIdentityId], references: [id])
+  feeScheduleVersion     FeeScheduleVersion?     @relation(fields: [feeScheduleVersionId], references: [id])
+  refundAuthorization    RefundAuthorization?    @relation(fields: [refundAuthorizationId], references: [id])
+  reconciliationBatch    ReconciliationBatch?    @relation(fields: [reconciliationBatchId], references: [id])
+
+  @@index([approvalType])
+  @@index([status])
+  @@index([approvedByIdentityId])
+  @@index([feeScheduleVersionId])
+  @@index([refundAuthorizationId])
+  @@index([reconciliationBatchId])
+  @@map("financial_approval_records")
+}
+
+model CommunicationTemplate {
+  id            String                      @id @default(uuid()) @db.Uuid
+  code          String                      @unique
+  name          String
+  channelType   CommunicationChannelType
+  institutionId String?                     @db.Uuid
+  status        CommunicationTemplateStatus @default(DRAFT)
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  institution   Institution?                @relation(fields: [institutionId], references: [id])
+  versions      CommunicationTemplateVersion[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@index([channelType])
+  @@map("communication_templates")
+}
+
+model CommunicationTemplateVersion {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  communicationTemplateId String                      @db.Uuid
+  versionNumber           String
+  subjectTemplate         String
+  bodyTemplate            String
+  locale                  String                      @default("en")
+  status                  CommunicationTemplateStatus @default(DRAFT)
+  approvedAt              DateTime?
+  effectiveFrom           DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  communicationTemplate   CommunicationTemplate       @relation(fields: [communicationTemplateId], references: [id], onDelete: Cascade)
+  messages                CommunicationMessage[]
+
+  @@unique([communicationTemplateId, versionNumber])
+  @@index([communicationTemplateId])
+  @@index([status])
+  @@map("communication_template_versions")
+}
+
+model CommunicationMessage {
+  id                            String                     @id @default(uuid()) @db.Uuid
+  caseId                        String?                    @db.Uuid
+  masterAdministrativeFileId    String?                    @db.Uuid
+  communicationTemplateVersionId String?                   @db.Uuid
+  decisionNoticeReference       String?
+  messageReference              String                     @unique
+  channelType                   CommunicationChannelType
+  status                        CommunicationMessageStatus @default(DRAFT)
+  subject                       String
+  body                          String
+  scheduledAt                   DateTime?
+  approvedAt                    DateTime?
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  case                          Case?                      @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?  @relation(fields: [masterAdministrativeFileId], references: [id])
+  communicationTemplateVersion  CommunicationTemplateVersion? @relation(fields: [communicationTemplateVersionId], references: [id])
+  recipients                    CommunicationRecipient[]
+  deliveries                    CommunicationDelivery[]
+
+  @@index([caseId])
+  @@index([masterAdministrativeFileId])
+  @@index([communicationTemplateVersionId])
+  @@index([status])
+  @@index([decisionNoticeReference])
+  @@map("communication_messages")
+}
+
+model CommunicationRecipient {
+  id                    String               @id @default(uuid()) @db.Uuid
+  communicationMessageId String              @db.Uuid
+  recipientType         String
+  recipientReference    String
+  recipientIdentityId   String?              @db.Uuid
+  displayName           String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  communicationMessage  CommunicationMessage @relation(fields: [communicationMessageId], references: [id], onDelete: Cascade)
+  recipientIdentity     Identity?            @relation("CommunicationRecipientIdentity", fields: [recipientIdentityId], references: [id])
+  deliveries            CommunicationDelivery[]
+
+  @@index([communicationMessageId])
+  @@index([recipientIdentityId])
+  @@map("communication_recipients")
+}
+
+model CommunicationDelivery {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  communicationMessageId   String                      @db.Uuid
+  communicationRecipientId String?                     @db.Uuid
+  channelType              CommunicationChannelType
+  status                   CommunicationDeliveryStatus @default(PENDING)
+  startedAt                DateTime?
+  completedAt              DateTime?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  communicationMessage     CommunicationMessage        @relation(fields: [communicationMessageId], references: [id], onDelete: Cascade)
+  communicationRecipient   CommunicationRecipient?     @relation(fields: [communicationRecipientId], references: [id])
+  attempts                 CommunicationDeliveryAttempt[]
+  receipts                 CommunicationReceipt[]
+
+  @@index([communicationMessageId])
+  @@index([communicationRecipientId])
+  @@index([status])
+  @@map("communication_deliveries")
+}
+
+model CommunicationDeliveryAttempt {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  communicationDeliveryId String                      @db.Uuid
+  attemptNumber           Int
+  status                  CommunicationDeliveryStatus
+  attemptedAt             DateTime                    @default(now())
+  providerReference       String?
+  failureReason           String?
+  responsePayload         Json?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  communicationDelivery   CommunicationDelivery       @relation(fields: [communicationDeliveryId], references: [id], onDelete: Cascade)
+
+  @@unique([communicationDeliveryId, attemptNumber])
+  @@index([communicationDeliveryId])
+  @@index([status])
+  @@map("communication_delivery_attempts")
+}
+
+model CommunicationReceipt {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  communicationDeliveryId String                   @db.Uuid
+  receiptType             CommunicationReceiptType
+  receivedAt              DateTime                 @default(now())
+  evidenceReference       String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  communicationDelivery   CommunicationDelivery    @relation(fields: [communicationDeliveryId], references: [id], onDelete: Cascade)
+
+  @@index([communicationDeliveryId])
+  @@index([receiptType])
+  @@map("communication_receipts")
+}
+
+model CommunicationPreference {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  identityId                 String?                  @db.Uuid
+  institutionId              String?                  @db.Uuid
+  channelType                CommunicationChannelType
+  isEnabled                  Boolean                  @default(true)
+  locale                     String?
+  accessibilityRequirements  Json                     @default("[]")
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  identity                   Identity?                @relation("CommunicationPreferenceIdentity", fields: [identityId], references: [id])
+  institution                Institution?             @relation(fields: [institutionId], references: [id])
+
+  @@index([identityId])
+  @@index([institutionId])
+  @@index([channelType])
+  @@map("communication_preferences")
+}
+
+model MandatoryCommunicationRule {
+  id                  String                           @id @default(uuid()) @db.Uuid
+  ruleCode            String                           @unique
+  institutionId       String?                          @db.Uuid
+  governmentServiceId String?                          @db.Uuid
+  triggerEvent        String
+  channelType         CommunicationChannelType
+  templateReference   String
+  status              MandatoryCommunicationRuleStatus @default(ACTIVE)
+  createdAt           DateTime                         @default(now())
+  updatedAt           DateTime                         @updatedAt
+  institution         Institution?                     @relation(fields: [institutionId], references: [id])
+  governmentService   GovernmentService?               @relation(fields: [governmentServiceId], references: [id])
+
+  @@index([institutionId])
+  @@index([governmentServiceId])
+  @@index([status])
+  @@map("mandatory_communication_rules")
+}
+
+model TranslationRecord {
+  id                   String    @id @default(uuid()) @db.Uuid
+  sourceReference      String
+  sourceLocale         String
+  targetLocale         String
+  translatedContent    String
+  translatorIdentityId String?   @db.Uuid
+  verifiedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  translator           Identity? @relation("TranslationRecordTranslator", fields: [translatorIdentityId], references: [id])
+
+  @@index([sourceReference])
+  @@index([translatorIdentityId])
+  @@map("translation_records")
+}
+
+model AccessibilityAccommodation {
+  id                String    @id @default(uuid()) @db.Uuid
+  identityId        String?   @db.Uuid
+  accommodationType String
+  configuration     Json      @default("{}")
+  effectiveFrom     DateTime  @default(now())
+  effectiveUntil    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  identity          Identity? @relation("AccessibilityAccommodationIdentity", fields: [identityId], references: [id])
+
+  @@index([identityId])
+  @@index([accommodationType])
+  @@map("accessibility_accommodations")
+}
+
+model TechnologyDependency {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  code                  String                  @unique
+  name                  String
+  description           String?
+  vendorReference       String?
+  criticalityLevel      String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  integrationDefinitions IntegrationDefinition[]
+
+  @@map("technology_dependencies")
+}
+
+model IntegrationDefinition {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  institutionId          String                      @db.Uuid
+  technologyDependencyId String?                     @db.Uuid
+  code                   String
+  name                   String
+  description            String?
+  status                 IntegrationDefinitionStatus @default(DRAFT)
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  institution            Institution                 @relation(fields: [institutionId], references: [id])
+  technologyDependency   TechnologyDependency?       @relation(fields: [technologyDependencyId], references: [id])
+  versions               IntegrationVersion[]
+  credentialReferences   IntegrationCredentialReference[]
+  acceptanceRecords      IntegrationAcceptanceRecord[]
+  webhookEvents          IntegrationWebhookEvent[]
+  externalRecordReferences ExternalRecordReference[]
+  registryQueries        RegistryQuery[]
+  sourceDiscrepancies    SourceDiscrepancy[]
+  reconciliationRecords  IntegrationReconciliationRecord[]
+  deadLetterRecords      IntegrationDeadLetterRecord[]
+  outages                IntegrationOutage[]
+  fallbackActivations    IntegrationFallbackActivation[]
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@index([technologyDependencyId])
+  @@index([status])
+  @@map("integration_definitions")
+}
+
+model IntegrationVersion {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                   @db.Uuid
+  versionNumber           String
+  specificationReference  String?
+  effectiveFrom           DateTime?
+  effectiveUntil          DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  integrationDefinition   IntegrationDefinition    @relation(fields: [integrationDefinitionId], references: [id], onDelete: Cascade)
+  endpoints               IntegrationEndpoint[]
+  dataExchangeContracts   DataExchangeContract[]
+  requests                IntegrationRequest[]
+
+  @@unique([integrationDefinitionId, versionNumber])
+  @@index([integrationDefinitionId])
+  @@map("integration_versions")
+}
+
+model IntegrationEndpoint {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  integrationVersionId String                     @db.Uuid
+  endpointCode         String
+  direction            IntegrationEndpointDirection
+  urlTemplate          String
+  protocol             String
+  authenticationMethod String?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  integrationVersion   IntegrationVersion         @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  messages             IntegrationMessage[]
+
+  @@unique([integrationVersionId, endpointCode])
+  @@index([integrationVersionId])
+  @@map("integration_endpoints")
+}
+
+model DataExchangeContract {
+  id                   String               @id @default(uuid()) @db.Uuid
+  integrationVersionId String               @db.Uuid
+  contractCode         String
+  name                 String
+  schemaReference      String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  integrationVersion   IntegrationVersion   @relation(fields: [integrationVersionId], references: [id], onDelete: Cascade)
+  fields               DataExchangeField[]
+
+  @@unique([integrationVersionId, contractCode])
+  @@index([integrationVersionId])
+  @@map("data_exchange_contracts")
+}
+
+model DataExchangeField {
+  id                     String                     @id @default(uuid()) @db.Uuid
+  dataExchangeContractId String                     @db.Uuid
+  fieldCode              String
+  fieldPath              String
+  dataType               String
+  direction              DataExchangeFieldDirection
+  isRequired             Boolean                    @default(false)
+  transformationRule     String?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  dataExchangeContract   DataExchangeContract       @relation(fields: [dataExchangeContractId], references: [id], onDelete: Cascade)
+  authorityMappings      FieldAuthorityMapping[]
+
+  @@unique([dataExchangeContractId, fieldCode])
+  @@index([dataExchangeContractId])
+  @@map("data_exchange_fields")
+}
+
+model AuthoritativeSourceDesignation {
+  id            String                    @id @default(uuid()) @db.Uuid
+  sourceCode    String                    @unique
+  sourceName    String
+  institutionId String?                   @db.Uuid
+  status        AuthoritativeSourceStatus @default(UNVERIFIED)
+  designatedAt  DateTime                  @default(now())
+  reviewDueAt   DateTime?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  institution   Institution?              @relation(fields: [institutionId], references: [id])
+  fieldMappings FieldAuthorityMapping[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@map("authoritative_source_designations")
+}
+
+model FieldAuthorityMapping {
+  id                               String                         @id @default(uuid()) @db.Uuid
+  dataExchangeFieldId              String                         @db.Uuid
+  authoritativeSourceDesignationId String                         @db.Uuid
+  mappingRule                      String?
+  priority                         Int                            @default(0)
+  createdAt                        DateTime                       @default(now())
+  updatedAt                        DateTime                       @updatedAt
+  dataExchangeField                DataExchangeField              @relation(fields: [dataExchangeFieldId], references: [id], onDelete: Cascade)
+  authoritativeSourceDesignation   AuthoritativeSourceDesignation @relation(fields: [authoritativeSourceDesignationId], references: [id])
+
+  @@unique([dataExchangeFieldId, authoritativeSourceDesignationId])
+  @@index([dataExchangeFieldId])
+  @@index([authoritativeSourceDesignationId])
+  @@map("field_authority_mappings")
+}
+
+model IntegrationCredentialReference {
+  id                      String                @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  credentialAlias         String
+  vaultReference          String
+  rotatedAt               DateTime?
+  expiresAt               DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  integrationDefinition   IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationDefinitionId, credentialAlias])
+  @@index([integrationDefinitionId])
+  @@map("integration_credential_references")
+}
+
+model IntegrationAcceptanceRecord {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                      @db.Uuid
+  acceptanceStatus        IntegrationAcceptanceStatus
+  assessedAt              DateTime                    @default(now())
+  assessedByIdentityId    String?                     @db.Uuid
+  notes                   String?
+  validUntil              DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  integrationDefinition   IntegrationDefinition       @relation(fields: [integrationDefinitionId], references: [id], onDelete: Cascade)
+  assessedBy              Identity?                   @relation("IntegrationAcceptanceAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@index([integrationDefinitionId])
+  @@index([acceptanceStatus])
+  @@index([assessedByIdentityId])
+  @@map("integration_acceptance_records")
+}
+
+model IntegrationRequest {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  integrationVersionId       String                   @db.Uuid
+  masterAdministrativeFileId String?                  @db.Uuid
+  caseId                     String?                  @db.Uuid
+  requestReference           String                   @unique
+  status                     IntegrationRequestStatus @default(PENDING)
+  initiatedAt                DateTime                 @default(now())
+  completedAt                DateTime?
+  correlationId              String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  integrationVersion         IntegrationVersion       @relation(fields: [integrationVersionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                       Case?                    @relation(fields: [caseId], references: [id])
+  exchanges                  IntegrationExchange[]
+
+  @@index([integrationVersionId])
+  @@index([masterAdministrativeFileId])
+  @@index([caseId])
+  @@index([status])
+  @@map("integration_requests")
+}
+
+model IntegrationExchange {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  integrationRequestId String                    @db.Uuid
+  status               IntegrationExchangeStatus @default(INITIATED)
+  initiatedAt          DateTime                  @default(now())
+  completedAt          DateTime?
+  externalReference    String?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  integrationRequest   IntegrationRequest        @relation(fields: [integrationRequestId], references: [id], onDelete: Cascade)
+  messages             IntegrationMessage[]
+  validationResults    IntegrationValidationResult[]
+
+  @@index([integrationRequestId])
+  @@index([status])
+  @@map("integration_exchanges")
+}
+
+model IntegrationMessage {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  integrationExchangeId String                      @db.Uuid
+  integrationEndpointId String?                     @db.Uuid
+  direction             IntegrationMessageDirection
+  messageType           String
+  payload               Json
+  payloadHash           String?
+  sentAt                DateTime?
+  receivedAt            DateTime?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  integrationExchange   IntegrationExchange         @relation(fields: [integrationExchangeId], references: [id], onDelete: Cascade)
+  integrationEndpoint   IntegrationEndpoint?        @relation(fields: [integrationEndpointId], references: [id])
+  transformations       IntegrationDataTransformation[]
+  deadLetterRecords     IntegrationDeadLetterRecord[]
+
+  @@index([integrationExchangeId])
+  @@index([integrationEndpointId])
+  @@index([direction])
+  @@map("integration_messages")
+}
+
+model IntegrationWebhookEvent {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                           @db.Uuid
+  eventType               String
+  externalEventId         String
+  payload                 Json
+  processingStatus        IntegrationWebhookProcessingStatus @default(RECEIVED)
+  receivedAt              DateTime                         @default(now())
+  processedAt             DateTime?
+  createdAt               DateTime                         @default(now())
+  updatedAt               DateTime                         @updatedAt
+  integrationDefinition   IntegrationDefinition            @relation(fields: [integrationDefinitionId], references: [id])
+
+  @@unique([integrationDefinitionId, externalEventId])
+  @@index([integrationDefinitionId])
+  @@index([processingStatus])
+  @@map("integration_webhook_events")
+}
+
+model IntegrationDataTransformation {
+  id                    String             @id @default(uuid()) @db.Uuid
+  integrationMessageId  String             @db.Uuid
+  transformationType    String
+  inputReference        String
+  outputReference       String
+  transformedAt         DateTime           @default(now())
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  integrationMessage    IntegrationMessage @relation(fields: [integrationMessageId], references: [id], onDelete: Cascade)
+
+  @@index([integrationMessageId])
+  @@map("integration_data_transformations")
+}
+
+model IntegrationValidationResult {
+  id                    String              @id @default(uuid()) @db.Uuid
+  integrationExchangeId String              @db.Uuid
+  validationType        String
+  isValid               Boolean
+  errors                Json?
+  validatedAt           DateTime            @default(now())
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  integrationExchange   IntegrationExchange @relation(fields: [integrationExchangeId], references: [id], onDelete: Cascade)
+
+  @@index([integrationExchangeId])
+  @@index([isValid])
+  @@map("integration_validation_results")
+}
+
+model ExternalRecordReference {
+  id                      String                @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  externalSystemCode      String
+  externalRecordId        String
+  localReferenceType      String
+  localReferenceId        String                @db.Uuid
+  lastVerifiedAt          DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  integrationDefinition   IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id])
+  registryQueries         RegistryQuery[]
+
+  @@unique([integrationDefinitionId, externalSystemCode, externalRecordId])
+  @@index([integrationDefinitionId])
+  @@index([localReferenceType, localReferenceId])
+  @@map("external_record_references")
+}
+
+model RegistryQuery {
+  id                        String                @id @default(uuid()) @db.Uuid
+  externalRecordReferenceId String?               @db.Uuid
+  integrationDefinitionId   String                @db.Uuid
+  queryReference            String                @unique
+  status                    RegistryQueryStatus   @default(PENDING)
+  queriedAt                 DateTime              @default(now())
+  completedAt               DateTime?
+  responsePayload           Json?
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  externalRecordReference   ExternalRecordReference? @relation(fields: [externalRecordReferenceId], references: [id])
+  integrationDefinition     IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id])
+  synchronizations          RegistrySynchronization[]
+
+  @@index([externalRecordReferenceId])
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@map("registry_queries")
+}
+
+model RegistrySynchronization {
+  id              String                        @id @default(uuid()) @db.Uuid
+  registryQueryId String                        @db.Uuid
+  syncDirection   String
+  syncedAt        DateTime                      @default(now())
+  syncResult      RegistrySynchronizationResult
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+  registryQuery   RegistryQuery                 @relation(fields: [registryQueryId], references: [id], onDelete: Cascade)
+
+  @@index([registryQueryId])
+  @@index([syncResult])
+  @@map("registry_synchronizations")
+}
+
+model SourceDiscrepancy {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                  @db.Uuid
+  fieldReference          String
+  localValue              String?
+  externalValue           String?
+  status                  SourceDiscrepancyStatus @default(OPEN)
+  detectedAt              DateTime                @default(now())
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  integrationDefinition   IntegrationDefinition   @relation(fields: [integrationDefinitionId], references: [id])
+  resolutions             SourceDiscrepancyResolution[]
+
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@map("source_discrepancies")
+}
+
+model SourceDiscrepancyResolution {
+  id                  String            @id @default(uuid()) @db.Uuid
+  sourceDiscrepancyId String            @db.Uuid
+  resolutionAction    String
+  resolvedByIdentityId String?          @db.Uuid
+  resolvedAt          DateTime          @default(now())
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  sourceDiscrepancy   SourceDiscrepancy @relation(fields: [sourceDiscrepancyId], references: [id], onDelete: Cascade)
+  resolvedBy          Identity?         @relation("SourceDiscrepancyResolver", fields: [resolvedByIdentityId], references: [id])
+
+  @@index([sourceDiscrepancyId])
+  @@index([resolvedByIdentityId])
+  @@map("source_discrepancy_resolutions")
+}
+
+model IntegrationReconciliationRecord {
+  id                      String                        @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                        @db.Uuid
+  reconciliationReference String                        @unique
+  periodStart             DateTime
+  periodEnd               DateTime
+  status                  IntegrationReconciliationStatus @default(OPEN)
+  reconciledAt            DateTime?
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @updatedAt
+  integrationDefinition   IntegrationDefinition         @relation(fields: [integrationDefinitionId], references: [id])
+
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@map("integration_reconciliation_records")
+}
+
+model IntegrationDeadLetterRecord {
+  id                      String                @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  integrationMessageId    String?               @db.Uuid
+  originalPayload         Json
+  failureReason           String
+  failedAt                DateTime              @default(now())
+  retriedAt               DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  integrationDefinition   IntegrationDefinition @relation(fields: [integrationDefinitionId], references: [id])
+  integrationMessage      IntegrationMessage?   @relation(fields: [integrationMessageId], references: [id])
+
+  @@index([integrationDefinitionId])
+  @@index([integrationMessageId])
+  @@map("integration_dead_letter_records")
+}
+
+model IntegrationOutage {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  integrationDefinitionId String                @db.Uuid
+  status                IntegrationOutageStatus @default(DETECTED)
+  detectedAt            DateTime                @default(now())
+  confirmedAt           DateTime?
+  resolvedAt            DateTime?
+  impactSummary         String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  integrationDefinition IntegrationDefinition   @relation(fields: [integrationDefinitionId], references: [id])
+  fallbackActivations   IntegrationFallbackActivation[]
+  recoveryEvents        IntegrationRecoveryEvent[]
+
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@map("integration_outages")
+}
+
+model IntegrationFallbackActivation {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  integrationOutageId     String                    @db.Uuid
+  integrationDefinitionId String                    @db.Uuid
+  status                  IntegrationFallbackStatus @default(ACTIVATED)
+  activatedAt             DateTime                  @default(now())
+  deactivatedAt           DateTime?
+  fallbackMode            String
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  integrationOutage       IntegrationOutage         @relation(fields: [integrationOutageId], references: [id], onDelete: Cascade)
+  integrationDefinition   IntegrationDefinition   @relation(fields: [integrationDefinitionId], references: [id])
+
+  @@index([integrationOutageId])
+  @@index([integrationDefinitionId])
+  @@index([status])
+  @@map("integration_fallback_activations")
+}
+
+model IntegrationRecoveryEvent {
+  id                  String            @id @default(uuid()) @db.Uuid
+  integrationOutageId String            @db.Uuid
+  recoveryAction      String
+  recoveredAt         DateTime          @default(now())
+  verifiedByIdentityId String?          @db.Uuid
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  integrationOutage   IntegrationOutage @relation(fields: [integrationOutageId], references: [id], onDelete: Cascade)
+  verifiedBy          Identity?         @relation("IntegrationRecoveryVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([integrationOutageId])
+  @@index([verifiedByIdentityId])
+  @@map("integration_recovery_events")
 }
