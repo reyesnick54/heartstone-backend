@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
+import { CommunicationsModule } from './communications/communications.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -54,6 +55,7 @@ import { SystemModule } from './system/system.module';
     DecisionsModule,
     DecisionsIssuanceModule,
     ComplianceModule,
+    CommunicationsModule,
     RedressModule,
   ],
 })

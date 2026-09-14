@@ -128,6 +128,7 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  communicationMessagesSent    CommunicationMessage[] @relation("CommunicationMessageSenderInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -547,6 +548,11 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  communicationMessagesPrepared      CommunicationMessage[]        @relation("CommunicationMessagePreparedBy")
+  communicationMessagesApproved      CommunicationMessage[]        @relation("CommunicationMessageApprovedBy")
+  communicationRecipients            CommunicationRecipient[]      @relation("CommunicationRecipientIdentity")
+  communicationTemplateVersionsActivated CommunicationTemplateVersion[] @relation("CommunicationTemplateVersionActivatedBy")
+  communicationPreferences           CommunicationPreference[]
 
   @@index([userAccountId])
   @@index([personId])
@@ -592,6 +598,7 @@ model Organization {
   instrumentDeliveriesAsRecipient InstrumentDelivery[]              @relation("InstrumentDeliveryRecipientOrganization")
   instrumentReceiptsAsRecipient   InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipientOrganization")
   complianceMattersAsHolder         ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
+  communicationRecipients           CommunicationRecipient[]          @relation("CommunicationRecipientOrganization")
 
   @@index([status])
   @@map("organizations")
@@ -630,6 +637,7 @@ model RepresentativeAuthority {
   identity         Identity                      @relation(fields: [identityId], references: [id])
   applications          Application[]
   complianceSubmissions ComplianceSubmission[]
+  communicationRecipients CommunicationRecipient[]
 
   @@index([organizationId])
   @@index([identityId])
@@ -2220,6 +2228,7 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  communicationMessages             CommunicationMessage[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2815,6 +2824,8 @@ model MasterAdministrativeFile {
   complianceMatters                  ComplianceMatter[]
   complianceStatusProjections        ComplianceStatusProjection[]
   redressMatters                     RedressMatter[]
+  communicationMessages              CommunicationMessage[]
+  communicationMafIndexEntries       CommunicationMafIndexEntry[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -7335,4 +7346,463 @@ model JudicialReviewInformationRecord {
 
   @@index([redressMatterId])
   @@map("judicial_review_information_records")
+}
+
+enum CommunicationChannel {
+  PORTAL
+  EMAIL
+  SMS
+  PUSH
+  SECURE_MESSAGE
+  GOVERNMENT_INTERFACE
+  PARTNER_INTERFACE
+  POSTAL_REFERENCE
+  IN_PERSON_REFERENCE
+  OTHER_APPROVED_CHANNEL
+}
+
+enum CommunicationDeliveryStatus {
+  PREPARED
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum CommunicationDeliveryEffect {
+  INFORMATIONAL_ONLY
+  EFFECTIVE_ON_ISSUE
+  EFFECTIVE_ON_SEND
+  EFFECTIVE_ON_DELIVERY
+  EFFECTIVE_ON_RECEIPT
+  EFFECTIVE_BY_SEPARATE_RULE
+}
+
+enum CommunicationTemplateVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum CommunicationTemplateFieldSource {
+  VERIFIED_DATA
+  COMPUTED_DATA
+  HUMAN_ENTERED_TEXT
+}
+
+enum CommunicationMessageStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  QUEUED_FOR_DELIVERY
+  PARTIALLY_DELIVERED
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum CommunicationClassification {
+  PUBLIC
+  OFFICIAL
+  RESTRICTED
+  SECRET
+}
+
+enum CommunicationMandatoryCategory {
+  REQUIRED_DECISION_NOTICE
+  APPEAL_NOTICE
+  INSPECTION_NOTICE
+  SECURITY_NOTIFICATION
+  PRIVACY_NOTIFICATION
+  OTHER_MANDATORY
+}
+
+enum CommunicationPreferenceScope {
+  MARKETING
+  INFORMATIONAL
+  CHANNEL
+}
+
+enum TranslationReviewStatus {
+  DRAFT
+  PENDING_REVIEW
+  REVIEWED
+  CERTIFIED
+  REJECTED
+}
+
+enum TranslationMethod {
+  HUMAN_PROFESSIONAL
+  HUMAN_OFFICIAL
+  AI_ASSISTED
+  MACHINE
+}
+
+enum AccessibilityAccommodationType {
+  ALTERNATE_FORMAT
+  SCREEN_READER_COMPATIBLE
+  LARGE_PRINT
+  LANGUAGE_SUPPORT
+  ASSISTED_SERVICE
+  OTHER_CONFIGURED
+}
+
+enum CommunicationFailureRetryState {
+  NOT_RETRYABLE
+  PENDING_RETRY
+  RETRYING
+  RETRY_EXHAUSTED
+  RESOLVED
+}
+
+enum CommunicationReceiptMethod {
+  EXPLICIT_ACKNOWLEDGMENT
+  PORTAL_CONFIRMATION
+  SECURE_MESSAGE_READ
+  IN_PERSON_SIGNATURE
+  POSTAL_CONFIRMATION
+  OTHER
+}
+
+enum CommunicationRecipientRole {
+  PRIMARY
+  COPY
+  REPRESENTATIVE
+  INSTITUTIONAL
+  OTHER
+}
+
+enum CommunicationServiceCapacity {
+  PERSONAL
+  ORGANIZATIONAL
+  REPRESENTATIVE
+  INSTITUTIONAL
+}
+
+enum CommunicationProviderType {
+  EMAIL
+  SMS
+  PUSH
+  PORTAL
+  SECURE_MESSAGE
+  OTHER
+}
+
+enum CommunicationAiDraftStatus {
+  DRAFT
+  PENDING_HUMAN_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+model CommunicationTemplate {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  code                  String                         @unique
+  name                  String
+  description           String?
+  communicationType     String
+  defaultClassification CommunicationClassification    @default(OFFICIAL)
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+  versions              CommunicationTemplateVersion[]
+  mandatoryRules        MandatoryCommunicationRule[]
+
+  @@map("communication_templates")
+}
+
+model CommunicationTemplateVersion {
+  id                           String                             @id @default(uuid()) @db.Uuid
+  templateId                   String                             @db.Uuid
+  versionNumber                Int
+  status                       CommunicationTemplateVersionStatus @default(DRAFT)
+  subjectTemplate              String
+  bodyTemplate                 String
+  fieldDefinitions             Json
+  allowedChannels              CommunicationChannel[]
+  deliveryEffect               CommunicationDeliveryEffect        @default(INFORMATIONAL_ONLY)
+  requiresApproval             Boolean                            @default(true)
+  certifiedTranslationRequired Boolean                            @default(false)
+  activatedAt                  DateTime?
+  activatedByIdentityId        String?                            @db.Uuid
+  createdAt                    DateTime                           @default(now())
+  updatedAt                    DateTime                           @updatedAt
+  template                     CommunicationTemplate              @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  activatedBy                  Identity?                          @relation("CommunicationTemplateVersionActivatedBy", fields: [activatedByIdentityId], references: [id])
+  messages                     CommunicationMessage[]
+  mafIndexEntries              CommunicationMafIndexEntry[]
+
+  @@unique([templateId, versionNumber])
+  @@index([templateId])
+  @@index([status])
+  @@map("communication_template_versions")
+}
+
+model CommunicationMessage {
+  id                         String                          @id @default(uuid()) @db.Uuid
+  messageNumber              String                          @unique
+  communicationType          String
+  sourceRecordType           String
+  sourceRecordId             String                          @db.Uuid
+  caseId                     String?                         @db.Uuid
+  masterAdministrativeFileId String                          @db.Uuid
+  templateVersionId          String?                         @db.Uuid
+  subject                    String
+  classification             CommunicationClassification
+  senderInstitutionId        String                          @db.Uuid
+  preparedByIdentityId       String                          @db.Uuid
+  approvedByIdentityId       String?                         @db.Uuid
+  status                     CommunicationMessageStatus      @default(DRAFT)
+  aiDraftStatus              CommunicationAiDraftStatus?
+  isOfficial                 Boolean                         @default(false)
+  canonicalNoticeReference   String?
+  verifiedDataSnapshot       Json?
+  computedDataSnapshot       Json?
+  humanEnteredText           Json?
+  mandatoryCategory          CommunicationMandatoryCategory?
+  deliveryEffect             CommunicationDeliveryEffect       @default(INFORMATIONAL_ONLY)
+  createdAt                  DateTime                        @default(now())
+  updatedAt                  DateTime                        @updatedAt
+  templateVersion            CommunicationTemplateVersion?   @relation(fields: [templateVersionId], references: [id])
+  senderInstitution          Institution                     @relation("CommunicationMessageSenderInstitution", fields: [senderInstitutionId], references: [id])
+  preparedBy                 Identity                        @relation("CommunicationMessagePreparedBy", fields: [preparedByIdentityId], references: [id])
+  approvedBy                 Identity?                       @relation("CommunicationMessageApprovedBy", fields: [approvedByIdentityId], references: [id])
+  case                       Case?                           @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile          @relation(fields: [masterAdministrativeFileId], references: [id])
+  recipients                 CommunicationRecipient[]
+  deliveries                 CommunicationDelivery[]
+  translationRecords         TranslationRecord[]
+  accessibilityAccommodations AccessibilityAccommodation[]
+  mafIndexEntries            CommunicationMafIndexEntry[]
+
+  @@index([sourceRecordType, sourceRecordId])
+  @@index([caseId])
+  @@index([masterAdministrativeFileId])
+  @@index([templateVersionId])
+  @@index([senderInstitutionId])
+  @@index([status])
+  @@map("communication_messages")
+}
+
+model CommunicationRecipient {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  messageId                   String                       @db.Uuid
+  recipientIdentityId         String?                      @db.Uuid
+  recipientOrganizationId     String?                      @db.Uuid
+  recipientRole               CommunicationRecipientRole   @default(PRIMARY)
+  channelReference            String?
+  preferredLanguage           String                       @default("en")
+  accessibilityRequirements   Json?
+  legalServiceCapacity        CommunicationServiceCapacity
+  representativeAuthorityId   String?                      @db.Uuid
+  representativeRelationship  String?
+  blocked                     Boolean                      @default(false)
+  blockReason                 String?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  message                     CommunicationMessage         @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipientIdentity           Identity?                    @relation("CommunicationRecipientIdentity", fields: [recipientIdentityId], references: [id])
+  recipientOrganization       Organization?                @relation("CommunicationRecipientOrganization", fields: [recipientOrganizationId], references: [id])
+  representativeAuthority     RepresentativeAuthority?     @relation(fields: [representativeAuthorityId], references: [id])
+  deliveries                  CommunicationDelivery[]
+  receipts                    CommunicationReceipt[]
+  accessibilityAccommodations AccessibilityAccommodation[]
+
+  @@index([messageId])
+  @@index([recipientIdentityId])
+  @@index([recipientOrganizationId])
+  @@index([representativeAuthorityId])
+  @@map("communication_recipients")
+}
+
+model CommunicationDelivery {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  messageId            String                       @db.Uuid
+  recipientId          String                       @db.Uuid
+  channel              CommunicationChannel
+  provider             CommunicationProviderType
+  destinationReference String?
+  requiredOrOptional   Boolean                      @default(true)
+  preparedAt           DateTime?
+  sentAt               DateTime?
+  deliveredAt          DateTime?
+  failedAt             DateTime?
+  status               CommunicationDeliveryStatus  @default(PREPARED)
+  providerReference    String?
+  idempotencyKey       String?                      @unique
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+  message              CommunicationMessage         @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipient            CommunicationRecipient         @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  attempts             CommunicationDeliveryAttempt[]
+  receipts             CommunicationReceipt[]
+  failureRecords       CommunicationFailureRecord[]
+
+  @@index([messageId])
+  @@index([recipientId])
+  @@index([status])
+  @@map("communication_deliveries")
+}
+
+model CommunicationDeliveryAttempt {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  deliveryId             String                      @db.Uuid
+  attemptNumber          Int
+  channel                CommunicationChannel
+  provider               CommunicationProviderType
+  destinationReference   String?
+  status                 CommunicationDeliveryStatus @default(QUEUED)
+  providerReference      String?
+  callbackIdempotencyKey String?                     @unique
+  queuedAt               DateTime                    @default(now())
+  sentAt                 DateTime?
+  deliveredAt            DateTime?
+  failedAt               DateTime?
+  failureReason          String?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  delivery               CommunicationDelivery       @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  receipts               CommunicationReceipt[]
+
+  @@unique([deliveryId, attemptNumber])
+  @@index([deliveryId])
+  @@index([status])
+  @@map("communication_delivery_attempts")
+}
+
+model CommunicationReceipt {
+  id                     String                       @id @default(uuid()) @db.Uuid
+  deliveryId             String                       @db.Uuid
+  attemptId              String?                      @db.Uuid
+  recipientId            String                       @db.Uuid
+  receivedAt             DateTime
+  method                 CommunicationReceiptMethod
+  identityAssuranceLevel String?
+  isLegalReceipt         Boolean                      @default(false)
+  emailOpenPixel         Boolean                      @default(false)
+  sourceDeliveryId       String                       @db.Uuid
+  callbackIdempotencyKey String?                      @unique
+  createdAt              DateTime                     @default(now())
+  delivery               CommunicationDelivery        @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  attempt                CommunicationDeliveryAttempt? @relation(fields: [attemptId], references: [id])
+  recipient              CommunicationRecipient       @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId])
+  @@index([recipientId])
+  @@index([attemptId])
+  @@map("communication_receipts")
+}
+
+model CommunicationPreference {
+  id                String                        @id @default(uuid()) @db.Uuid
+  identityId        String                        @db.Uuid
+  scope             CommunicationPreferenceScope
+  channel           CommunicationChannel?
+  mandatoryCategory CommunicationMandatoryCategory?
+  enabled           Boolean                       @default(true)
+  language          String?
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+  identity          Identity                      @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, scope, channel])
+  @@index([identityId])
+  @@map("communication_preferences")
+}
+
+model MandatoryCommunicationRule {
+  id                String                         @id @default(uuid()) @db.Uuid
+  templateId        String?                        @db.Uuid
+  mandatoryCategory CommunicationMandatoryCategory
+  communicationType String?
+  suppressible      Boolean                        @default(false)
+  description       String
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+  template          CommunicationTemplate?         @relation(fields: [templateId], references: [id])
+
+  @@index([mandatoryCategory])
+  @@index([templateId])
+  @@map("mandatory_communication_rules")
+}
+
+model TranslationRecord {
+  id                             String                  @id @default(uuid()) @db.Uuid
+  messageId                      String                  @db.Uuid
+  sourceTemplateVersionId        String?                 @db.Uuid
+  targetLanguage                 String
+  translationMethod              TranslationMethod
+  translatorReference            String?
+  translatedSubject              String
+  translatedContent              String
+  reviewStatus                   TranslationReviewStatus @default(DRAFT)
+  limitations                    String?
+  aiAssisted                     Boolean                 @default(false)
+  certifiedRequired              Boolean                 @default(false)
+  cannotSubstituteAiForCertified Boolean                 @default(true)
+  reviewedAt                     DateTime?
+  createdAt                      DateTime                @default(now())
+  updatedAt                      DateTime                @updatedAt
+  message                        CommunicationMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([targetLanguage])
+  @@map("translation_records")
+}
+
+model AccessibilityAccommodation {
+  id                String                         @id @default(uuid()) @db.Uuid
+  messageId         String                         @db.Uuid
+  recipientId       String?                        @db.Uuid
+  accommodationType AccessibilityAccommodationType
+  description       String?
+  configuredSupport String?
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+  message           CommunicationMessage           @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipient         CommunicationRecipient?        @relation(fields: [recipientId], references: [id])
+
+  @@index([messageId])
+  @@index([recipientId])
+  @@map("accessibility_accommodations")
+}
+
+model CommunicationFailureRecord {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  deliveryId            String                         @db.Uuid
+  failureReason         String
+  retryState            CommunicationFailureRetryState @default(PENDING_RETRY)
+  alternateChannel      CommunicationChannel?
+  escalationReference   String?
+  resolutionNotes       String?
+  resolvedAt            DateTime?
+  affectsLegalStatus    Boolean?
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+  delivery              CommunicationDelivery          @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId])
+  @@index([retryState])
+  @@map("communication_failure_records")
+}
+
+model CommunicationMafIndexEntry {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  masterAdministrativeFileId String                        @db.Uuid
+  messageId                  String                        @db.Uuid
+  templateVersionId          String?                       @db.Uuid
+  deliveredVersionReference  String
+  indexedAt                  DateTime                      @default(now())
+  masterAdministrativeFile   MasterAdministrativeFile      @relation(fields: [masterAdministrativeFileId], references: [id], onDelete: Cascade)
+  message                    CommunicationMessage          @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  templateVersion            CommunicationTemplateVersion? @relation(fields: [templateVersionId], references: [id])
+
+  @@unique([masterAdministrativeFileId, messageId, deliveredVersionReference])
+  @@index([messageId])
+  @@index([templateVersionId])
+  @@map("communication_maf_index_entries")
 }

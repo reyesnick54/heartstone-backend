@@ -17,6 +17,21 @@ export interface MasterFileIndexReference {
   metadata?: Record<string, unknown>;
 }
 
+interface CommunicationMafIndexEntryWithRelations {
+  id: string;
+  masterAdministrativeFileId: string;
+  messageId: string;
+  templateVersionId: string | null;
+  deliveredVersionReference: string;
+  indexedAt: Date;
+  message: {
+    messageNumber: string;
+    sourceRecordType: string;
+    canonicalNoticeReference: string | null;
+  };
+  templateVersion: { id: string } | null;
+}
+
 export interface MasterFileSectionIndex {
   sectionType: MasterAdministrativeFileSectionType;
   sectionNumber: number;
@@ -57,6 +72,7 @@ export class MasterAdministrativeFileIndexService {
       submissions,
       events,
       communications,
+      communicationIndexEntries,
       workflowInstance,
       officialInstruments,
       governmentDecisions,
@@ -75,6 +91,11 @@ export class MasterAdministrativeFileIndexService {
         where: { caseId: file.caseId },
         orderBy: { createdAt: 'asc' },
       }),
+      this.prisma.communicationMafIndexEntry.findMany({
+        where: { masterAdministrativeFileId: file.id },
+        include: { message: true, templateVersion: true },
+        orderBy: { indexedAt: 'asc' },
+      }) as Promise<CommunicationMafIndexEntryWithRelations[]>,
       this.prisma.caseWorkflowInstance.findUnique({ where: { caseId: file.caseId } }),
       this.prisma.officialInstrument.findMany({
         where: { caseId: file.caseId },
@@ -105,6 +126,7 @@ export class MasterAdministrativeFileIndexService {
           submissions,
           events,
           communications: filteredCommunications,
+          communicationIndexEntries,
           workflowInstance,
           officialInstruments,
           governmentDecisions,
@@ -132,6 +154,7 @@ export class MasterAdministrativeFileIndexService {
       submissions: Awaited<ReturnType<PrismaService['applicationSubmission']['findMany']>>;
       events: Awaited<ReturnType<PrismaService['caseEvent']['findMany']>>;
       communications: Awaited<ReturnType<PrismaService['caseCommunication']['findMany']>>;
+      communicationIndexEntries: CommunicationMafIndexEntryWithRelations[];
       workflowInstance: Awaited<ReturnType<PrismaService['caseWorkflowInstance']['findUnique']>>;
       officialInstruments: Awaited<ReturnType<PrismaService['officialInstrument']['findMany']>>;
       governmentDecisions: Awaited<ReturnType<PrismaService['governmentDecision']['findMany']>>;
@@ -266,16 +289,30 @@ export class MasterAdministrativeFileIndexService {
             occurredAt: event.occurredAt.toISOString(),
           }));
       case MasterAdministrativeFileSectionType.COMMUNICATIONS_AND_NOTICES:
-        return context.communications.map((communication) => ({
-          referenceType: 'CaseCommunication',
-          referenceId: communication.id,
-          label: communication.communicationType ?? communication.subject ?? 'COMMUNICATION',
-          occurredAt: communication.createdAt.toISOString(),
-          metadata: {
-            classification: communication.classification,
-            visibility: communication.visibility,
-          },
-        }));
+        return [
+          ...context.communications.map((communication) => ({
+            referenceType: 'CaseCommunication',
+            referenceId: communication.id,
+            label: communication.communicationType ?? communication.subject ?? 'COMMUNICATION',
+            occurredAt: communication.createdAt.toISOString(),
+            metadata: {
+              classification: communication.classification,
+              visibility: communication.visibility,
+            },
+          })),
+          ...context.communicationIndexEntries.map((entry) => ({
+            referenceType: 'CommunicationMessage',
+            referenceId: entry.messageId,
+            label: entry.message.messageNumber,
+            occurredAt: entry.indexedAt.toISOString(),
+            metadata: {
+              deliveredVersionReference: entry.deliveredVersionReference,
+              templateVersionId: entry.templateVersionId,
+              sourceRecordType: entry.message.sourceRecordType,
+              canonicalNoticeReference: entry.message.canonicalNoticeReference,
+            },
+          })),
+        ];
       case MasterAdministrativeFileSectionType.AUDIT_AND_TECHNICAL_HISTORY:
         return context.events.map((event) => ({
           referenceType: 'CaseEvent',
