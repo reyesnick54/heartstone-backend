@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
+import { AnalysisService } from './analysis/analysis.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { PHASE_12F_BOUNDARY_DISCLAIMER } from './intelligence.constants';
-import { SimulationService } from './simulation/simulation.service';
-import { AnalysisService } from './analysis/analysis.service';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
 import { RiskAssessmentService } from './risk/risk-assessment.service';
+import { SimulationService } from './simulation/simulation.service';
 
 @Controller('intelligence')
 export class IntelligenceController {
@@ -16,6 +16,9 @@ export class IntelligenceController {
     private readonly digitalTwin: DigitalTwinService,
     private readonly simulation: SimulationService,
     private readonly consequentialUse: ConsequentialUseService,
+    private readonly analysisService: AnalysisService,
+    private readonly monitoringService: IntelligenceMonitoringService,
+    private readonly riskService: RiskAssessmentService,
   ) {}
 
   @Get('boundary')
@@ -105,10 +108,8 @@ export class IntelligenceController {
   ) {
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
     return this.consequentialUse.proposeLiveTransition(body);
-    private readonly analysisService: AnalysisService,
-    private readonly monitoringService: IntelligenceMonitoringService,
-    private readonly riskService: RiskAssessmentService,
-  ) {}
+  }
+
 
   @Post('analysis/requests')
   createAnalysisRequest(@Body() body: Parameters<AnalysisService['createRequest']>[0]) {

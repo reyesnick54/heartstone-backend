@@ -1,49 +1,31 @@
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
+import { SessionsModule } from '../identity/sessions/sessions.module';
+import { AnalysisService } from './analysis/analysis.service';
+import { CommandConsoleController } from './command-console/command-console.controller';
+import { DashboardAccessPolicyService } from './command-console/dashboard-access-policy.service';
+import { DashboardBoundaryService } from './command-console/dashboard-boundary.service';
+import { DashboardDefinitionService } from './command-console/dashboard-definition.service';
+import { DashboardIndicatorProjectionService } from './command-console/dashboard-indicator-projection.service';
+import { DashboardQueryService } from './command-console/dashboard-query.service';
+import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
+import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
+import { ReportingBoundaryService } from './common/reporting-boundary.service';
+import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { IntelligenceController } from './intelligence.controller';
-import { SimulationService } from './simulation/simulation.service';
-
-@Module({
-  imports: [DatabaseModule],
-  controllers: [IntelligenceController],
-  providers: [
-    IntelligenceBoundaryService,
-    DigitalTwinService,
-    SimulationService,
-    ConsequentialUseService,
-  ],
-  exports: [
-    IntelligenceBoundaryService,
-    DigitalTwinService,
-    SimulationService,
-    ConsequentialUseService,
-import { SessionsModule } from '../identity/sessions/sessions.module';
-import { AnalysisService } from './analysis/analysis.service';
-import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
-import { IntelligenceController } from './intelligence.controller';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
-import { RiskAssessmentService } from './risk/risk-assessment.service';
-
-@Module({
-  imports: [DatabaseModule, SessionsModule],
-  controllers: [IntelligenceController],
-  providers: [
-    IntelligenceBoundaryService,
-    AnalysisService,
-    IntelligenceMonitoringService,
-    RiskAssessmentService,
-  ],
-  exports: [
-    IntelligenceBoundaryService,
-    AnalysisService,
-    IntelligenceMonitoringService,
-    RiskAssessmentService,
-import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { PerformanceClaimService } from './performance-claims/performance-claim.service';
+import { EvidenceDashboardTraceService } from './reporting/evidence-dashboard-trace.service';
+import { ReportCorrectionService } from './reporting/report-correction.service';
+import { ReportGenerationService } from './reporting/report-generation.service';
+import { ReportPublicationService } from './reporting/report-publication.service';
+import { ReportingController } from './reporting/reporting.controller';
+import { RiskAssessmentService } from './risk/risk-assessment.service';
+import { SimulationService } from './simulation/simulation.service';
 import { CapitalEvidenceService } from './strategic-projects/capital-evidence.service';
 import { EmploymentEvidenceService } from './strategic-projects/employment-evidence.service';
 import { InfrastructureDeliveryService } from './strategic-projects/infrastructure-delivery.service';
@@ -59,9 +41,17 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
-  controllers: [StrategicProjectController],
+  controllers: [IntelligenceController, StrategicProjectController, CommandConsoleController, ReportingController],
   providers: [
+    IntelligenceBoundaryService,
     StrategicProjectBoundaryService,
+    ReportingBoundaryService,
+    AnalysisService,
+    IntelligenceMonitoringService,
+    RiskAssessmentService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     PerformanceClaimService,
     StrategicProjectProfileService,
     StrategicProjectStageService,
@@ -74,9 +64,28 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     InfrastructureDeliveryService,
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
+    DashboardBoundaryService,
+    DashboardStatusDictionaryService,
+    DashboardDefinitionService,
+    DashboardAccessPolicyService,
+    DashboardIndicatorProjectionService,
+    DashboardSnapshotService,
+    DashboardQueryService,
+    ReportGenerationService,
+    ReportPublicationService,
+    ReportCorrectionService,
+    EvidenceDashboardTraceService,
   ],
   exports: [
+    IntelligenceBoundaryService,
     StrategicProjectBoundaryService,
+    ReportingBoundaryService,
+    AnalysisService,
+    IntelligenceMonitoringService,
+    RiskAssessmentService,
+    DigitalTwinService,
+    SimulationService,
+    ConsequentialUseService,
     PerformanceClaimService,
     StrategicProjectProfileService,
     StrategicProjectStageService,
@@ -89,19 +98,6 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     InfrastructureDeliveryService,
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
-import { CommandConsoleController } from './command-console/command-console.controller';
-import { DashboardAccessPolicyService } from './command-console/dashboard-access-policy.service';
-import { DashboardBoundaryService } from './command-console/dashboard-boundary.service';
-import { DashboardDefinitionService } from './command-console/dashboard-definition.service';
-import { DashboardIndicatorProjectionService } from './command-console/dashboard-indicator-projection.service';
-import { DashboardQueryService } from './command-console/dashboard-query.service';
-import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
-import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
-
-@Module({
-  imports: [DatabaseModule, SessionsModule],
-  controllers: [CommandConsoleController],
-  providers: [
     DashboardBoundaryService,
     DashboardStatusDictionaryService,
     DashboardDefinitionService,
@@ -109,15 +105,10 @@ import { DashboardStatusDictionaryService } from './command-console/dashboard-st
     DashboardIndicatorProjectionService,
     DashboardSnapshotService,
     DashboardQueryService,
-  ],
-  exports: [
-    DashboardBoundaryService,
-    DashboardStatusDictionaryService,
-    DashboardDefinitionService,
-    DashboardAccessPolicyService,
-    DashboardIndicatorProjectionService,
-    DashboardSnapshotService,
-    DashboardQueryService,
+    ReportGenerationService,
+    ReportPublicationService,
+    ReportCorrectionService,
+    EvidenceDashboardTraceService,
   ],
 })
 export class IntelligenceModule {}

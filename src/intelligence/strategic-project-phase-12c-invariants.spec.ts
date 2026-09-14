@@ -2,8 +2,8 @@ import {
   FORBIDDEN_AI_STRATEGIC_PROJECT_ACTIONS,
   PHASE_12C_INVARIANTS,
   PROJECT_PROJECTION_DISCLAIMER,
-  RISK_SCORE_DISCLAIMER,
   SECTOR_OBSERVATION_DISCLAIMER,
+  STRATEGIC_PROJECT_RISK_SCORE_DISCLAIMER,
 } from './intelligence.constants';
 
 describe('Phase 12C strategic project invariants', () => {
@@ -44,6 +44,6 @@ describe('Phase 12C strategic project invariants', () => {
   it('includes projection and sector disclaimers', () => {
     expect(PROJECT_PROJECTION_DISCLAIMER).toContain('not an approval decision');
     expect(SECTOR_OBSERVATION_DISCLAIMER).toContain('national economic causation');
-    expect(RISK_SCORE_DISCLAIMER).toContain('prioritization aids only');
+    expect(STRATEGIC_PROJECT_RISK_SCORE_DISCLAIMER).toContain('prioritization aids only');
   });
 });
