@@ -123,6 +123,7 @@ model Institution {
   instrumentNumberingRules      InstrumentNumberingRule[]
   issuedOfficialInstruments     OfficialInstrument[]            @relation("OfficialInstrumentIssuerInstitution")
   complianceMattersResponsible ComplianceMatter[]
+  complaintsResponsible        Complaint[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
 
@@ -166,6 +167,7 @@ model Department {
   evidencePackets               EvidencePacket[]
   governmentDecisions           GovernmentDecision[]
   complianceMattersResponsible  ComplianceMatter[]
+  complaintsResponsible         Complaint[]
   complianceStatusProjections   ComplianceStatusProjection[]
   monitoringRules               MonitoringRule[]
 
@@ -522,6 +524,15 @@ model Identity {
   complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
   complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
   complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
+  complaintsAsComplainant            Complaint[]                    @relation("ComplaintComplainant")
+  complaintAssignmentsAsHandler      ComplaintAssignment[]          @relation("ComplaintHandler")
+  complaintInvestigationsAsLead      ComplaintInvestigation[]       @relation("ComplaintLeadInvestigator")
+  complaintFindingsAsReviewer        ComplaintFinding[]             @relation("ComplaintFindingReviewer")
+  complaintResponsesAsAuthor         ComplaintResponse[]            @relation("ComplaintResponseAuthor")
+  complaintCorrectiveActionsAsAuthor ComplaintCorrectiveAction[]    @relation("ComplaintCorrectiveActionAuthor")
+  complaintEscalationsAsAuthor       ComplaintEscalation[]          @relation("ComplaintEscalationAuthor")
+  complaintClosuresAsAuthor          ComplaintClosure[]             @relation("ComplaintClosureAuthor")
+  substantiveAppealsAsAppellant      SubstantiveAppeal[]            @relation("SubstantiveAppealAppellant")
 
   @@index([userAccountId])
   @@index([personId])
@@ -2173,6 +2184,8 @@ model Case {
   officialInstruments               OfficialInstrument[]
   issuanceReadinessAssessments      IssuanceReadinessAssessment[]
   complianceMatters                 ComplianceMatter[]
+  complaints                        Complaint[]
+  substantiveAppeals                SubstantiveAppeal[]
   complianceStatusProjections       ComplianceStatusProjection[]
 
   @@index([status])
@@ -2767,6 +2780,8 @@ model MasterAdministrativeFile {
   governmentDecisions                  GovernmentDecision[]
   officialInstruments                  OfficialInstrument[]
   complianceMatters                  ComplianceMatter[]
+  complaints                         Complaint[]
+  substantiveAppeals                 SubstantiveAppeal[]
   complianceStatusProjections        ComplianceStatusProjection[]
 
   @@index([governmentServiceId])
@@ -4595,6 +4610,8 @@ model GovernmentDecision {
   reinstatementRecords          InstrumentReinstatementRecord[]
   replacementRecords            InstrumentReplacementRecord[]
   surrenderRecords              InstrumentSurrenderRecord[]
+  complaints                    Complaint[]
+  substantiveAppeals            SubstantiveAppeal[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -6025,4 +6042,476 @@ model ComplianceRevalidationRecord {
   @@index([projectionId])
   @@index([trigger])
   @@map("compliance_revalidation_records")
+}
+
+// ─── Phase 10: Redress, Appeals and Complaints ───────────────────────────────
+
+enum SubstantiveAppealStatus {
+  LODGED
+  ACKNOWLEDGED
+  UNDER_ADJUDICATION
+  DECIDED
+  WITHDRAWN
+  CLOSED
+}
+
+enum ComplaintCategory {
+  SERVICE_QUALITY
+  DELAY
+  STAFF_CONDUCT
+  ACCESSIBILITY
+  DISCRIMINATION_ALLEGATION
+  PRIVACY
+  SECURITY
+  UNAUTHORIZED_DISCLOSURE
+  CONFLICT_OF_INTEREST
+  PROCEDURAL_UNFAIRNESS
+  PROFESSIONAL_CONDUCT
+  SYSTEM_MALFUNCTION
+  REVIEW_ROUTE_ACCESS
+  RETALIATION_ALLEGATION
+  OTHER_AUTHORIZED_CATEGORY
+}
+
+enum ComplaintStatus {
+  RECEIVED
+  ACKNOWLEDGED
+  ASSIGNED
+  UNDER_INVESTIGATION
+  AWAITING_RESPONSE
+  REMEDY_PENDING
+  ESCALATED
+  CLOSED
+}
+
+enum ComplaintSafeguardType {
+  CONFIDENTIAL_HANDLING
+  RESTRICTED_ACCESS
+  RETALIATION_PROTECTION
+  URGENT_SAFETY_SECURITY_REFERRAL
+  PRIVACY_INCIDENT_REFERRAL
+  PRESERVATION_LEGAL_HOLD
+  INDEPENDENT_HANDLER_REQUIRED
+}
+
+enum ComplaintAssignmentStatus {
+  PROPOSED
+  ACTIVE
+  WITHDRAWN
+  BLOCKED_CONFLICT
+}
+
+enum ComplaintInvestigationStatus {
+  PLANNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+}
+
+enum ComplaintInvestigationIssueStatus {
+  OPEN
+  UNDER_REVIEW
+  ADDRESSED
+  OUT_OF_SCOPE
+}
+
+enum ComplaintEvidenceType {
+  DOCUMENT
+  INTERVIEW_NOTE
+  COMMUNICATION
+  SYSTEM_LOG
+  STAFF_RECORD
+  AI_AUTOMATION_RECORD
+  OTHER
+}
+
+enum ComplaintEvidenceAccessLevel {
+  RESTRICTED
+  INTERNAL
+  MINIMUM_NECESSARY
+}
+
+enum ComplaintFindingStatus {
+  DRAFT
+  PROPOSED
+  FINALIZED
+}
+
+enum ComplaintInvestigationFindingOutcome {
+  SUBSTANTIATED
+  PARTIALLY_SUBSTANTIATED
+  NOT_SUBSTANTIATED
+  UNRESOLVED
+  REFERRED
+  OUTSIDE_SCOPE
+}
+
+enum ComplaintRemedyType {
+  EXPLANATION
+  APOLOGY
+  SERVICE_CORRECTION
+  ACCESS_RESTORATION
+  PROCESS_CORRECTION
+  STAFF_SUPERVISORY_REFERRAL
+  PRIVACY_SECURITY_REMEDIATION
+  RETRAINING
+  SYSTEM_DEFECT_REMEDIATION
+  ESCALATION
+  REFERRAL
+  RECOMMENDATION_FOR_RECONSIDERATION
+}
+
+enum ComplaintEscalationTarget {
+  SUPERVISOR
+  INDEPENDENT_REVIEWER
+  PROFESSIONAL_BODY
+  PRIVACY_COMMISSIONER
+  SECURITY_INCIDENT_TEAM
+  EXTERNAL_AUTHORITY
+}
+
+enum ComplaintClosureReason {
+  RESOLVED
+  PARTIALLY_RESOLVED
+  UNSUBSTANTIATED
+  OUT_OF_SCOPE
+  WITHDRAWN
+  DUPLICATED
+  REFERRED
+}
+
+enum ComplaintPathwayActor {
+  COMPLAINANT
+  HANDLER
+  INVESTIGATOR
+  REVIEWER
+  AI_ASSISTANCE
+  SYSTEM
+}
+
+enum RedressRelatedMatterType {
+  SUBSTANTIVE_APPEAL
+  COMPLAINT
+  RECONSIDERATION
+  OTHER
+}
+
+enum ComplaintPathwayScope {
+  COMPLAINT
+  APPEAL
+  SHARED
+}
+
+model SubstantiveAppeal {
+  id                         String                  @id @default(uuid()) @db.Uuid
+  appealNumber               String                  @unique
+  masterAdministrativeFileId String                  @db.Uuid
+  caseId                     String?                 @db.Uuid
+  governmentDecisionId       String?                 @db.Uuid
+  appellantIdentityId        String                  @db.Uuid
+  status                     SubstantiveAppealStatus @default(LODGED)
+  subjectSummary             String
+  lodgedAt                   DateTime                @default(now())
+  closedAt                   DateTime?
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                       Case?                   @relation(fields: [caseId], references: [id])
+  governmentDecision         GovernmentDecision?     @relation(fields: [governmentDecisionId], references: [id])
+  appellantIdentity          Identity                @relation("SubstantiveAppealAppellant", fields: [appellantIdentityId], references: [id])
+  relatedMatters             ComplaintRelatedMatter[] @relation("AppealRelatedMatters")
+
+  @@index([masterAdministrativeFileId])
+  @@index([caseId])
+  @@index([governmentDecisionId])
+  @@index([status])
+  @@map("substantive_appeals")
+}
+
+model Complaint {
+  id                         String          @id @default(uuid()) @db.Uuid
+  complaintNumber            String          @unique
+  masterAdministrativeFileId String          @db.Uuid
+  caseId                     String?         @db.Uuid
+  governmentDecisionId       String?         @db.Uuid
+  complainantIdentityId      String          @db.Uuid
+  responsibleInstitutionId   String          @db.Uuid
+  responsibleDepartmentId    String          @db.Uuid
+  status                     ComplaintStatus @default(RECEIVED)
+  subjectSummary             String
+  pathwayScopeNotes          String?
+  acknowledgedAt             DateTime?
+  closedAt                   DateTime?
+  createdAt                  DateTime        @default(now())
+  updatedAt                  DateTime        @updatedAt
+  masterAdministrativeFile   MasterAdministrativeFile @relation(fields: [masterAdministrativeFileId], references: [id])
+  case                       Case?           @relation(fields: [caseId], references: [id])
+  governmentDecision         GovernmentDecision? @relation(fields: [governmentDecisionId], references: [id])
+  complainantIdentity        Identity        @relation("ComplaintComplainant", fields: [complainantIdentityId], references: [id])
+  responsibleInstitution     Institution     @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment      Department      @relation(fields: [responsibleDepartmentId], references: [id])
+  classifications            ComplaintClassification[]
+  safeguards                 ComplaintSafeguard[]
+  assignments                ComplaintAssignment[]
+  investigations             ComplaintInvestigation[]
+  findings                   ComplaintFinding[]
+  responses                  ComplaintResponse[]
+  correctiveActions          ComplaintCorrectiveAction[]
+  escalations                ComplaintEscalation[]
+  closure                    ComplaintClosure?
+  retaliationAllegations     ComplaintRetaliationAllegation[]
+  relatedMatters             ComplaintRelatedMatter[] @relation("ComplaintRelatedMatters")
+
+  @@index([masterAdministrativeFileId])
+  @@index([caseId])
+  @@index([governmentDecisionId])
+  @@index([status])
+  @@map("complaints")
+}
+
+model ComplaintClassification {
+  id                      String            @id @default(uuid()) @db.Uuid
+  complaintId             String            @db.Uuid
+  category                ComplaintCategory
+  classificationNotes     String?
+  isFactualFinding        Boolean           @default(false)
+  classifiedAt            DateTime          @default(now())
+  classifiedByActor       ComplaintPathwayActor
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  complaint               Complaint         @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@index([category])
+  @@map("complaint_classifications")
+}
+
+model ComplaintSafeguard {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  complaintId        String                 @db.Uuid
+  safeguardType      ComplaintSafeguardType
+  isActive           Boolean                @default(true)
+  configurationNotes String?
+  appliedAt          DateTime               @default(now())
+  appliedByActor     ComplaintPathwayActor
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  complaint          Complaint              @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@index([safeguardType])
+  @@map("complaint_safeguards")
+}
+
+model ComplaintAssignment {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  complaintId                 String                    @db.Uuid
+  handlerIdentityId           String                    @db.Uuid
+  handlerInstitutionId        String                    @db.Uuid
+  handlerDepartmentId         String                    @db.Uuid
+  status                      ComplaintAssignmentStatus @default(PROPOSED)
+  competenceNotes             String?
+  conflictCheckPassed         Boolean                   @default(false)
+  conflictReason              String?
+  priorInvolvementDeclared    Boolean                   @default(false)
+  independenceRequired        Boolean                   @default(false)
+  independenceSatisfied       Boolean                   @default(false)
+  accessVerified              Boolean                   @default(false)
+  doesNotAlterDecisionAuthority Boolean                 @default(true)
+  assignedAt                  DateTime?
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  complaint                   Complaint                 @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  handlerIdentity             Identity                  @relation("ComplaintHandler", fields: [handlerIdentityId], references: [id])
+
+  @@index([complaintId])
+  @@index([handlerIdentityId])
+  @@index([status])
+  @@map("complaint_assignments")
+}
+
+model ComplaintInvestigation {
+  id                         String                       @id @default(uuid()) @db.Uuid
+  complaintId                String                       @db.Uuid
+  leadInvestigatorIdentityId String                       @db.Uuid
+  status                     ComplaintInvestigationStatus @default(PLANNED)
+  scopeSummary               String
+  partiesSummary             String?
+  limitationsSummary         String?
+  conflictNotes              String?
+  openedAt                   DateTime                     @default(now())
+  completedAt                DateTime?
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  complaint                  Complaint                    @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  leadInvestigatorIdentity   Identity                     @relation("ComplaintLeadInvestigator", fields: [leadInvestigatorIdentityId], references: [id])
+  issues                     ComplaintInvestigationIssue[]
+  evidence                   ComplaintInvestigationEvidence[]
+
+  @@index([complaintId])
+  @@index([status])
+  @@map("complaint_investigations")
+}
+
+model ComplaintInvestigationIssue {
+  id              String                            @id @default(uuid()) @db.Uuid
+  investigationId String                            @db.Uuid
+  issueSummary    String
+  status          ComplaintInvestigationIssueStatus @default(OPEN)
+  pathwayScope    ComplaintPathwayScope             @default(COMPLAINT)
+  createdAt       DateTime                          @default(now())
+  updatedAt       DateTime                          @updatedAt
+  investigation   ComplaintInvestigation            @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_investigation_issues")
+}
+
+model ComplaintInvestigationEvidence {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  investigationId    String                       @db.Uuid
+  evidenceType       ComplaintEvidenceType
+  accessLevel        ComplaintEvidenceAccessLevel @default(MINIMUM_NECESSARY)
+  description        String
+  sourceReference    String?
+  collectedAt        DateTime                     @default(now())
+  minimumNecessary   Boolean                      @default(true)
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  investigation      ComplaintInvestigation       @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@index([accessLevel])
+  @@map("complaint_investigation_evidence")
+}
+
+model ComplaintFinding {
+  id                         String                             @id @default(uuid()) @db.Uuid
+  complaintId                String                             @db.Uuid
+  investigationId            String?                            @db.Uuid
+  outcome                    ComplaintInvestigationFindingOutcome
+  status                     ComplaintFindingStatus             @default(DRAFT)
+  findingSummary             String
+  isSubstantiveAppealOutcome Boolean                            @default(false)
+  consequential              Boolean                            @default(false)
+  finalizedAt                DateTime?
+  finalizedByIdentityId      String?                            @db.Uuid
+  recordedByActor            ComplaintPathwayActor
+  createdAt                  DateTime                           @default(now())
+  updatedAt                  DateTime                           @updatedAt
+  complaint                  Complaint                          @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  finalizedByIdentity        Identity?                          @relation("ComplaintFindingReviewer", fields: [finalizedByIdentityId], references: [id])
+
+  @@index([complaintId])
+  @@index([status])
+  @@map("complaint_findings")
+}
+
+model ComplaintResponse {
+  id                   String                @id @default(uuid()) @db.Uuid
+  complaintId          String                @db.Uuid
+  responseSummary      String
+  isPublic             Boolean               @default(true)
+  authorIdentityId     String                @db.Uuid
+  recordedByActor      ComplaintPathwayActor
+  issuedAt             DateTime              @default(now())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  complaint            Complaint             @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  authorIdentity       Identity              @relation("ComplaintResponseAuthor", fields: [authorIdentityId], references: [id])
+
+  @@index([complaintId])
+  @@map("complaint_responses")
+}
+
+model ComplaintCorrectiveAction {
+  id                              String              @id @default(uuid()) @db.Uuid
+  complaintId                     String              @db.Uuid
+  remedyType                      ComplaintRemedyType
+  description                     String
+  mayReverseFinalDecision         Boolean             @default(false)
+  authorizedSubstantiveReviewOnly Boolean             @default(true)
+  authorIdentityId                String              @db.Uuid
+  recordedByActor                 ComplaintPathwayActor
+  recordedAt                      DateTime            @default(now())
+  createdAt                       DateTime            @default(now())
+  updatedAt                       DateTime            @updatedAt
+  complaint                       Complaint           @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  authorIdentity                  Identity            @relation("ComplaintCorrectiveActionAuthor", fields: [authorIdentityId], references: [id])
+
+  @@index([complaintId])
+  @@index([remedyType])
+  @@map("complaint_corrective_actions")
+}
+
+model ComplaintEscalation {
+  id                 String                    @id @default(uuid()) @db.Uuid
+  complaintId        String                    @db.Uuid
+  escalationTarget   ComplaintEscalationTarget
+  reasonSummary      String
+  authorIdentityId   String                    @db.Uuid
+  recordedByActor    ComplaintPathwayActor
+  escalatedAt        DateTime                  @default(now())
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  complaint          Complaint                 @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  authorIdentity     Identity                  @relation("ComplaintEscalationAuthor", fields: [authorIdentityId], references: [id])
+
+  @@index([complaintId])
+  @@map("complaint_escalations")
+}
+
+model ComplaintClosure {
+  id                         String                 @id @default(uuid()) @db.Uuid
+  complaintId                String                 @unique @db.Uuid
+  closureReason              ComplaintClosureReason
+  closureSummary             String
+  evidencePreserved          Boolean                @default(true)
+  decisionHistoryPreserved   Boolean                @default(true)
+  furtherRedressSummary      String?
+  authorIdentityId           String                 @db.Uuid
+  recordedByActor            ComplaintPathwayActor
+  closedAt                   DateTime               @default(now())
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+  complaint                  Complaint              @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  authorIdentity             Identity               @relation("ComplaintClosureAuthor", fields: [authorIdentityId], references: [id])
+
+  @@index([closureReason])
+  @@map("complaint_closures")
+}
+
+model ComplaintRetaliationAllegation {
+  id                   String                @id @default(uuid()) @db.Uuid
+  complaintId          String                @db.Uuid
+  allegationSummary    String
+  preservedSeparately  Boolean               @default(true)
+  affectsRiskScore     Boolean               @default(false)
+  recordedAt           DateTime              @default(now())
+  recordedByActor      ComplaintPathwayActor
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  complaint            Complaint             @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@map("complaint_retaliation_allegations")
+}
+
+model ComplaintRelatedMatter {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  complaintId         String                   @db.Uuid
+  relatedMatterType   RedressRelatedMatterType
+  substantiveAppealId String?                  @db.Uuid
+  relatedComplaintId  String?                  @db.Uuid
+  pathwayScope        ComplaintPathwayScope
+  linkageNotes        String
+  doesNotAutoClose    Boolean                  @default(true)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  complaint           Complaint                @relation("ComplaintRelatedMatters", fields: [complaintId], references: [id], onDelete: Cascade)
+  substantiveAppeal   SubstantiveAppeal?       @relation("AppealRelatedMatters", fields: [substantiveAppealId], references: [id])
+
+  @@index([complaintId])
+  @@index([substantiveAppealId])
+  @@map("complaint_related_matters")
 }
