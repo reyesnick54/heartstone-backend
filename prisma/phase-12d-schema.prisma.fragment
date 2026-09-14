@@ -1,0 +1,190 @@
+// Phase 12D: Controlled AI, Model and Agent Governance
+// Append to schema.prisma
+
+enum AIRiskClass {
+  LOW
+  MODERATE
+  HIGH
+  CONSEQUENTIAL_ASSISTANCE
+  PROHIBITED
+}
+
+enum AIModelDefinitionStatus {
+  DRAFT
+  REGISTERED
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AIModelVersionStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  SUSPENDED
+  RETIRED
+}
+
+enum AIDeploymentType {
+  CLOUD_MANAGED
+  SELF_HOSTED
+  ON_PREMISE
+  EDGE
+  SAAS_API
+}
+
+enum AICapabilityDefinitionStatus {
+  DRAFT
+  REGISTERED
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AIUseCaseStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  RETIRED
+}
+
+enum AIAgentDefinitionStatus {
+  DRAFT
+  REGISTERED
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  RETIRED
+}
+
+enum AIAgentVersionStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  SUSPENDED
+}
+
+enum AIEntitlementStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum AIOutputContractStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum AIPromptPolicyType {
+  SYSTEM
+  INSTITUTION
+  USE_CASE
+}
+
+enum AIPromptPolicyStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum AIExecutionStatus {
+  PREPARED
+  EXECUTED
+  BLOCKED
+  FAILED
+}
+
+enum AIHumanDispositionType {
+  ACCEPTED_FOR_ASSISTIVE_USE
+  REVISED
+  REJECTED
+  ESCALATED
+  UNSAFE
+  OUTSIDE_SCOPE
+}
+
+enum AISuspensionScope {
+  MODEL_DEFINITION
+  MODEL_VERSION
+  USE_CASE
+  USE_CASE_VERSION
+  AGENT_DEFINITION
+  AGENT_VERSION
+  CAPABILITY_DEFINITION
+}
+
+enum AISuspensionStatus {
+  ACTIVE
+  LIFTED
+  SUPERSEDED
+}
+
+enum AIEvaluationStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum AIEvaluationTestCategory {
+  HALLUCINATION
+  UNSUPPORTED_AUTHORITY_CLAIM
+  SOURCE_MISATTRIBUTION
+  PROMPT_INJECTION
+  DATA_POISONING
+  RETRIEVAL_AUTHORIZATION_BYPASS
+  PII_LEAKAGE
+  CROSS_CASE_LEAKAGE
+  TOOL_MISUSE
+  BIAS_DISPARATE_IMPACT
+  MODEL_DRIFT
+  UNSAFE_RECOMMENDATION
+  REFUSAL_BEHAVIOR
+  SUSPENSION
+  REPLAYABILITY
+}
+
+enum AIEvaluationTestOutcome {
+  PASS
+  FAIL
+  INCONCLUSIVE
+  NOT_RUN
+}
+
+enum AIIncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AIIncidentStatus {
+  OPEN
+  INVESTIGATING
+  CONTAINED
+  RESOLVED
+  CLOSED
+}
+
+enum AIRevalidationStatus {
+  SCHEDULED
+  IN_PROGRESS
+  PASSED
+  FAILED
+  OVERDUE
+}

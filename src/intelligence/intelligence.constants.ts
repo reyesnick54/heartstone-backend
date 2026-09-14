@@ -102,13 +102,14 @@ export const PHASE_12E_INVARIANTS = {
   humanReviewAttributable: true,
   analysisOutputReplayable: true,
 } as const;
+
 export const PROJECT_PROJECTION_DISCLAIMER =
   'This project status is a derived operational projection. It is not an approval decision, operational certification, or independent verification of sponsor assertions.';
 
 export const SECTOR_OBSERVATION_DISCLAIMER =
   'Sector observations do not establish national economic causation attributable to platform deployment.';
 
-export const RISK_SCORE_DISCLAIMER =
+export const STRATEGIC_PROJECT_RISK_SCORE_DISCLAIMER =
   'Risk scores are prioritization aids only. They do not affect project approval status.';
 
 export const FORBIDDEN_AI_STRATEGIC_PROJECT_ACTIONS = [
@@ -247,6 +248,8 @@ export const STRATEGIC_PROJECT_DEPENDENCY_TYPES = [
   'TECHNOLOGY',
   'SUPPLIER',
   'INFRASTRUCTURE',
+] as const;
+
 export const DASHBOARD_PROJECTION_DISCLAIMER =
   'Dashboard indicators are derived operational projections. Visibility does not create permission or institutional authority to act.';
 

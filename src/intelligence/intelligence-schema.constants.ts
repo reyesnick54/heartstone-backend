@@ -44,6 +44,8 @@ export const PHASE_12E_ENUM_NAMES = [
   'RiskDefinitionStatus',
   'RiskAssessmentStatus',
   'RiskMitigationStatus',
+] as const;
+
 export const PHASE_12B_MODEL_NAMES = [
   'DashboardStatusDictionaryEntry',
   'DashboardDefinition',

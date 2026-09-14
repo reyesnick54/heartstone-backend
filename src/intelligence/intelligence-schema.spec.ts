@@ -2,13 +2,14 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { INTELLIGENCE_ALERT_STATUSES, RISK_EVIDENCE_BASIS_VALUES } from './intelligence.constants';
-import { PHASE_12E_ENUM_NAMES, PHASE_12E_MODEL_NAMES } from './intelligence-schema.constants';
 import {
   DASHBOARD_FILTER_DIMENSIONS,
   DEPARTMENTAL_INDICATOR_CATEGORIES,
   EXECUTIVE_INDICATOR_CATEGORIES,
   PHASE_12B_ENUM_NAMES,
   PHASE_12B_MODEL_NAMES,
+  PHASE_12E_ENUM_NAMES,
+  PHASE_12E_MODEL_NAMES,
 } from './intelligence-schema.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
@@ -16,8 +17,6 @@ const schema = readFileSync(schemaPath, 'utf8');
 
 describe('Phase 12E intelligence schema', () => {
   for (const modelName of PHASE_12E_MODEL_NAMES) {
-describe('Phase 12B intelligence schema', () => {
-  for (const modelName of PHASE_12B_MODEL_NAMES) {
     it(`defines ${modelName} exactly once`, () => {
       const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
       expect(matches).toHaveLength(1);
@@ -26,8 +25,6 @@ describe('Phase 12B intelligence schema', () => {
 
   for (const enumName of PHASE_12E_ENUM_NAMES) {
     it(`defines ${enumName}`, () => {
-  for (const enumName of PHASE_12B_ENUM_NAMES) {
-    it(`defines enum ${enumName}`, () => {
       expect(schema).toContain(`enum ${enumName}`);
     });
   }
@@ -89,6 +86,23 @@ describe('Phase 12B intelligence schema', () => {
   it('prevents risk score mandatory gate bypass by default', () => {
     const assessmentBlock = /model RiskAssessment \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(assessmentBlock).toContain('scoreIsMandatoryGateBypass');
+  });
+});
+
+describe('Phase 12B intelligence schema', () => {
+  for (const modelName of PHASE_12B_MODEL_NAMES) {
+    it(`defines ${modelName} exactly once`, () => {
+      const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    });
+  }
+
+  for (const enumName of PHASE_12B_ENUM_NAMES) {
+    it(`defines enum ${enumName}`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
   for (const category of EXECUTIVE_INDICATOR_CATEGORIES) {
     it(`supports executive indicator category ${category}`, () => {
       expect(schema).toContain(category);

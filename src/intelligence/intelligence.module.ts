@@ -3,27 +3,20 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AnalysisService } from './analysis/analysis.service';
+import { CommandConsoleController } from './command-console/command-console.controller';
+import { DashboardAccessPolicyService } from './command-console/dashboard-access-policy.service';
+import { DashboardBoundaryService } from './command-console/dashboard-boundary.service';
+import { DashboardDefinitionService } from './command-console/dashboard-definition.service';
+import { DashboardIndicatorProjectionService } from './command-console/dashboard-indicator-projection.service';
+import { DashboardQueryService } from './command-console/dashboard-query.service';
+import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
+import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
+import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { IntelligenceController } from './intelligence.controller';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
-import { RiskAssessmentService } from './risk/risk-assessment.service';
-
-@Module({
-  imports: [DatabaseModule, SessionsModule],
-  controllers: [IntelligenceController],
-  providers: [
-    IntelligenceBoundaryService,
-    AnalysisService,
-    IntelligenceMonitoringService,
-    RiskAssessmentService,
-  ],
-  exports: [
-    IntelligenceBoundaryService,
-    AnalysisService,
-    IntelligenceMonitoringService,
-    RiskAssessmentService,
-import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { PerformanceClaimService } from './performance-claims/performance-claim.service';
+import { RiskAssessmentService } from './risk/risk-assessment.service';
 import { CapitalEvidenceService } from './strategic-projects/capital-evidence.service';
 import { EmploymentEvidenceService } from './strategic-projects/employment-evidence.service';
 import { InfrastructureDeliveryService } from './strategic-projects/infrastructure-delivery.service';
@@ -39,8 +32,23 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
-  controllers: [StrategicProjectController],
+  controllers: [
+    IntelligenceController,
+    CommandConsoleController,
+    StrategicProjectController,
+  ],
   providers: [
+    IntelligenceBoundaryService,
+    AnalysisService,
+    IntelligenceMonitoringService,
+    RiskAssessmentService,
+    DashboardBoundaryService,
+    DashboardStatusDictionaryService,
+    DashboardDefinitionService,
+    DashboardAccessPolicyService,
+    DashboardIndicatorProjectionService,
+    DashboardSnapshotService,
+    DashboardQueryService,
     StrategicProjectBoundaryService,
     PerformanceClaimService,
     StrategicProjectProfileService,
@@ -56,6 +64,17 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     ProjectStatusProjectionService,
   ],
   exports: [
+    IntelligenceBoundaryService,
+    AnalysisService,
+    IntelligenceMonitoringService,
+    RiskAssessmentService,
+    DashboardBoundaryService,
+    DashboardStatusDictionaryService,
+    DashboardDefinitionService,
+    DashboardAccessPolicyService,
+    DashboardIndicatorProjectionService,
+    DashboardSnapshotService,
+    DashboardQueryService,
     StrategicProjectBoundaryService,
     PerformanceClaimService,
     StrategicProjectProfileService,
@@ -69,35 +88,6 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     InfrastructureDeliveryService,
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
-import { CommandConsoleController } from './command-console/command-console.controller';
-import { DashboardAccessPolicyService } from './command-console/dashboard-access-policy.service';
-import { DashboardBoundaryService } from './command-console/dashboard-boundary.service';
-import { DashboardDefinitionService } from './command-console/dashboard-definition.service';
-import { DashboardIndicatorProjectionService } from './command-console/dashboard-indicator-projection.service';
-import { DashboardQueryService } from './command-console/dashboard-query.service';
-import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
-import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
-
-@Module({
-  imports: [DatabaseModule, SessionsModule],
-  controllers: [CommandConsoleController],
-  providers: [
-    DashboardBoundaryService,
-    DashboardStatusDictionaryService,
-    DashboardDefinitionService,
-    DashboardAccessPolicyService,
-    DashboardIndicatorProjectionService,
-    DashboardSnapshotService,
-    DashboardQueryService,
-  ],
-  exports: [
-    DashboardBoundaryService,
-    DashboardStatusDictionaryService,
-    DashboardDefinitionService,
-    DashboardAccessPolicyService,
-    DashboardIndicatorProjectionService,
-    DashboardSnapshotService,
-    DashboardQueryService,
   ],
 })
 export class IntelligenceModule {}
