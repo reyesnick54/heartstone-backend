@@ -27,6 +27,45 @@ export const COMPLIANCE_MATTER_STATUSES = [
   'CLOSED',
 ] as const;
 
+export const PHASE_9B_MODEL_NAMES = [
+  'ComplianceSubmission',
+  'ComplianceSubmissionVersion',
+  'ObligationEvidenceLink',
+  'ComplianceReview',
+  'ComplianceReviewItem',
+] as const;
+
+export const PHASE_9B_ENUM_NAMES = [
+  'ComplianceSubmissionStatus',
+  'ObligationEvidenceLinkRole',
+  'ComplianceReviewStatus',
+] as const;
+
+export const COMPLIANCE_SUBMISSION_STATUSES = [
+  'RECEIVED',
+  'INCOMPLETE',
+  'COMPLETE_FOR_REVIEW',
+  'UNDER_REVIEW',
+  'CORRECTION_REQUESTED',
+  'WITHDRAWN',
+  'SUPERSEDED',
+] as const;
+
+export const COMPLIANCE_REVIEW_STATUSES = [
+  'PENDING',
+  'IN_REVIEW',
+  'SATISFACTORY_FOR_STATED_PURPOSE',
+  'DEFICIENCY_IDENTIFIED',
+  'MORE_INFORMATION_REQUIRED',
+  'DISPUTED',
+  'SAFE_HALTED',
+] as const;
+
+export const FORBIDDEN_COMPLIANCE_REVIEW_STATUSES = [
+  'VERIFIED_COMPLIANT',
+  'LEGALLY_COMPLIANT',
+] as const;
+
 export const CONTINUING_OBLIGATION_STATUSES = [
   'NOT_YET_DUE',
   'DUE',

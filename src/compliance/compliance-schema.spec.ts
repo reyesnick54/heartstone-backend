@@ -3,9 +3,14 @@ import { join } from 'node:path';
 
 import {
   COMPLIANCE_MATTER_STATUSES,
+  COMPLIANCE_REVIEW_STATUSES,
+  COMPLIANCE_SUBMISSION_STATUSES,
   CONTINUING_OBLIGATION_STATUSES,
+  FORBIDDEN_COMPLIANCE_REVIEW_STATUSES,
   PHASE_9A_ENUM_NAMES,
   PHASE_9A_MODEL_NAMES,
+  PHASE_9B_ENUM_NAMES,
+  PHASE_9B_MODEL_NAMES,
 } from './compliance-schema.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
@@ -54,5 +59,45 @@ describe('Phase 9A compliance schema', () => {
     expect(schema).toContain('model ObligationSchedule');
     expect(schema).toContain('model ObligationStatusHistory');
     expect(schema).toContain('lawfulDueDate');
+  });
+});
+
+describe('Phase 9B compliance schema', () => {
+  for (const modelName of PHASE_9B_MODEL_NAMES) {
+    it(`defines ${modelName} exactly once`, () => {
+      const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    });
+  }
+
+  for (const enumName of PHASE_9B_ENUM_NAMES) {
+    it(`defines ${enumName}`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
+  for (const status of COMPLIANCE_SUBMISSION_STATUSES) {
+    it(`supports compliance submission status ${status}`, () => {
+      expect(schema).toContain(status);
+    });
+  }
+
+  for (const status of COMPLIANCE_REVIEW_STATUSES) {
+    it(`supports compliance review status ${status}`, () => {
+      expect(schema).toContain(status);
+    });
+  }
+
+  it('does not expose forbidden compliance review statuses', () => {
+    const block = /enum ComplianceReviewStatus\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
+    for (const status of FORBIDDEN_COMPLIANCE_REVIEW_STATUSES) {
+      expect(block).not.toContain(status);
+    }
+  });
+
+  it('links submissions to immutable versions', () => {
+    const submissionBlock = /model ComplianceSubmission \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(submissionBlock).toContain('currentVersionId');
+    expect(submissionBlock).toContain('versions');
   });
 });

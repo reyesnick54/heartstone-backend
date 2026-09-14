@@ -19,9 +19,7 @@ export class ComplianceStatusBoundaryService {
 
   sanitizeHolderDashboardResponse<T extends Record<string, unknown>>(payload: T): T {
     const restricted = new Set<string>(HOLDER_DASHBOARD_RESTRICTED_FIELDS);
-    return Object.fromEntries(
-      Object.entries(payload).filter(([key]) => !restricted.has(key)),
-    ) as T;
+    return Object.fromEntries(Object.entries(payload).filter(([key]) => !restricted.has(key))) as T;
   }
 
   assertAlertIsNotViolation(alert: { isViolation: boolean; isEnforcementDecision: boolean }) {
