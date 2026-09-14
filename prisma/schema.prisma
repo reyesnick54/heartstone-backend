@@ -226,55 +226,58 @@ model Office {
 }
 
 model Officeholder {
-  id                                String                        @id @default(uuid()) @db.Uuid
-  code                              String                        @unique
-  name                              String
-  description                       String?
-  status                            StructuralLifecycleStatus     @default(ACTIVE)
-  createdAt                         DateTime                      @default(now())
-  updatedAt                         DateTime                      @updatedAt
-  appointments                      Appointment[]
-  delegationsAsDelegator            Delegation[]                  @relation("DelegationDelegatorOfficeholder")
-  delegationsAsRecipient            Delegation[]                  @relation("DelegationRecipientOfficeholder")
-  identityLinks                     IdentityOfficeholderLink[]
-  functionAuthorityAssignments      FunctionAuthorityAssignment[]
-  ownedGovernmentServices           GovernmentService[]
-  managedCases                      Case[]                        @relation("CaseManager")
-  caseEvents                        CaseEvent[]                   @relation("CaseEventOfficeholder")
-  communicationsAsSender            CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
-  evidenceVerifications             EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
-  evidencePurposeAcceptances        EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
-  evidenceQualityAssessments        EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
-  departmentalReviewsAsReviewer     DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
-  inspectionInspectors              InspectionInspector[]
-  custodyEventsAsCustodian          EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
-  custodyEventsAsWitness            EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
-  assembledEvidencePackets          EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
-  authorizedPacketExclusions        EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
-  recordCorrectionsApproved         RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
-  recordIntegrityEvents             RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
-  recordAccessEvents                RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
-  decisionReadinessProposed         DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
-  decisionParticipants              DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
-  governmentDecisionsMade           GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
-  issuedOfficialInstruments         OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
-  issuanceEventsAsIssuer            IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
-  instrumentsHeld                   OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
-  instrumentLifecycleEvents         InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
-  reviewReferencesAsAppellant       DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
-  complianceProjectionSubjects      ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
-  complianceReviewsAsReviewer       ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
-  reviewAssignmentsAsReviewer       ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
-  redressDecisionsAsReviewer        RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
-  interimReliefDecisionsAsReviewer  InterimReliefDecision[]       @relation("InterimReliefDecisionReviewerOfficeholder")
-  reviewStayRecordsAsDecider        ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
-  digitalTwinDefinitionsOwned       DigitalTwinDefinition[]       @relation("DigitalTwinInstitutionalOwner")
-  digitalTwinSourcesOwned           DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
-  simulationReviewsConducted        SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
-  consequentialUseReviewsConducted  ConsequentialUseReview[]      @relation("ConsequentialUseOfficeholderReviewer")
+  id                               String                        @id @default(uuid()) @db.Uuid
+  code                             String                        @unique
+  name                             String
+  description                      String?
+  status                           StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                        DateTime                      @default(now())
+  updatedAt                        DateTime                      @updatedAt
+  appointments                     Appointment[]
+  delegationsAsDelegator           Delegation[]                  @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient           Delegation[]                  @relation("DelegationRecipientOfficeholder")
+  identityLinks                    IdentityOfficeholderLink[]
+  functionAuthorityAssignments     FunctionAuthorityAssignment[]
+  ownedGovernmentServices          GovernmentService[]
+  managedCases                     Case[]                        @relation("CaseManager")
+  caseEvents                       CaseEvent[]                   @relation("CaseEventOfficeholder")
+  communicationsAsSender           CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications            EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances       EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments       EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer    DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors             InspectionInspector[]
+  custodyEventsAsCustodian         EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness           EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets         EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions       EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved        RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents            RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents               RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed        DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants             DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade          GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments        OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer           IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
+  instrumentsHeld                  OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
+  instrumentLifecycleEvents        InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
+  reviewReferencesAsAppellant      DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  complianceProjectionSubjects     ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  complianceReviewsAsReviewer      ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
+  reviewAssignmentsAsReviewer      ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
+  redressDecisionsAsReviewer       RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
+  interimReliefDecisionsAsReviewer InterimReliefDecision[]       @relation("InterimReliefDecisionReviewerOfficeholder")
+  reviewStayRecordsAsDecider       ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
+  digitalTwinDefinitionsOwned   DigitalTwinDefinition[]       @relation("DigitalTwinInstitutionalOwner")
+  digitalTwinSourcesOwned       DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
+  simulationReviewsConducted    SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
+  consequentialUseReviewsConducted ConsequentialUseReview[]   @relation("ConsequentialUseOfficeholderReviewer")
+  capabilityMaturityAssessmentsAsInstitutionalOwner CapabilityMaturityAssessment[] @relation("CapabilityMaturityInstitutionalOwner")
+  activationConditionsAsOwner     ActivationCondition[]      @relation("ActivationConditionOfficeholderOwner")
+  capabilityDependenciesAsOwner   CapabilityDependency[]     @relation("CapabilityDependencyOfficeholderOwner")
+  capabilityOwnerAssignmentsAsInstitutionalOwner CapabilityOwnerAssignment[] @relation("CapabilityInstitutionalOwner")
   operationalActivationsAccountable OperationalActivationRecord[]
-  exitAcceptancesRecorded           ExitAcceptanceRecord[]
-
+  exitAcceptancesRecorded          ExitAcceptanceRecord[]
   @@map("officeholders")
 }
 
@@ -609,19 +612,29 @@ model Identity {
   measuredPerformanceClaimsReviewed        MeasuredPerformanceClaim[]             @relation("MeasuredPerformanceClaimReviewer")
   measuredPerformanceClaimReviewsConducted MeasuredPerformanceClaimReview[]       @relation("MeasuredPerformanceClaimReviewReviewer")
   measuredPerformanceClaimRevalidations    MeasuredPerformanceClaimRevalidation[] @relation("MeasuredPerformanceClaimRevalidationReviewer")
-  digitalTwinSourcesOwned                  DigitalTwinSource[]                    @relation("DigitalTwinSourceOwner")
-  digitalTwinModeRecords                   DigitalTwinModeRecord[]                @relation("DigitalTwinModeRecorder")
-  simulationReviewsConducted               SimulationReview[]                     @relation("SimulationReviewReviewer")
-  consequentialUseReviewsConducted         ConsequentialUseReview[]               @relation("ConsequentialUseReviewer")
-  analysisRequestsRequested                AnalysisRequest[]                      @relation("AnalysisRequestRequester")
-  analysisRunsExecuted                     AnalysisRun[]                          @relation("AnalysisRunExecutor")
-  analysisHumanReviews                     AnalysisHumanReview[]                  @relation("AnalysisHumanReviewer")
-  intelligenceMonitoringRulesOwned         IntelligenceMonitoringRule[]           @relation("IntelligenceMonitoringRuleOwner")
-  intelligenceMonitoringRulesReviewed      IntelligenceMonitoringRule[]           @relation("IntelligenceMonitoringRuleReviewer")
-  intelligenceMonitoringAlertsRecipient    IntelligenceMonitoringAlert[]          @relation("IntelligenceMonitoringAlertRecipient")
-  intelligenceAlertVerifications           IntelligenceAlertVerification[]        @relation("IntelligenceAlertVerifier")
-  intelligenceAlertDispositions            IntelligenceAlertDisposition[]         @relation("IntelligenceAlertDisposer")
-  riskReviews                              RiskReview[]                           @relation("RiskReviewer")
+  digitalTwinSourcesOwned            DigitalTwinSource[]           @relation("DigitalTwinSourceOwner")
+  digitalTwinModeRecords             DigitalTwinModeRecord[]       @relation("DigitalTwinModeRecorder")
+  simulationReviewsConducted         SimulationReview[]            @relation("SimulationReviewReviewer")
+  consequentialUseReviewsConducted   ConsequentialUseReview[]      @relation("ConsequentialUseReviewer")
+  analysisRequestsRequested          AnalysisRequest[]             @relation("AnalysisRequestRequester")
+  analysisRunsExecuted               AnalysisRun[]                 @relation("AnalysisRunExecutor")
+  analysisHumanReviews               AnalysisHumanReview[]         @relation("AnalysisHumanReviewer")
+  intelligenceMonitoringRulesOwned   IntelligenceMonitoringRule[]  @relation("IntelligenceMonitoringRuleOwner")
+  intelligenceMonitoringRulesReviewed IntelligenceMonitoringRule[] @relation("IntelligenceMonitoringRuleReviewer")
+  intelligenceMonitoringAlertsRecipient IntelligenceMonitoringAlert[] @relation("IntelligenceMonitoringAlertRecipient")
+  intelligenceAlertVerifications   IntelligenceAlertVerification[] @relation("IntelligenceAlertVerifier")
+  intelligenceAlertDispositions      IntelligenceAlertDisposition[] @relation("IntelligenceAlertDisposer")
+  riskReviews                        RiskReview[]                  @relation("RiskReviewer")
+  capabilityMaturityAssessmentsAsTechnicalOwner CapabilityMaturityAssessment[] @relation("CapabilityMaturityTechnicalOwner")
+  capabilityMaturityAssessmentsAsReviewer CapabilityMaturityAssessment[] @relation("CapabilityMaturityReviewer")
+  capabilityMaturityHistoryChanges     CapabilityMaturityHistory[]       @relation("CapabilityMaturityHistoryChanger")
+  productionReadinessAssessments         ProductionReadinessAssessment[] @relation("ProductionReadinessAssessor")
+  productionReadinessEvidenceSubmissions ProductionReadinessEvidence[]     @relation("ProductionReadinessEvidenceSubmitter")
+  activationConditionsAsOwner          ActivationCondition[]             @relation("ActivationConditionOwner")
+  capabilityDependenciesAsOwner        CapabilityDependency[]            @relation("CapabilityDependencyOwner")
+  capabilityOwnerAssignmentsAsTechnicalOwner CapabilityOwnerAssignment[] @relation("CapabilityTechnicalOwner")
+  capabilityOwnerAssignmentsAsAssigner CapabilityOwnerAssignment[]     @relation("CapabilityOwnerAssigner")
+  capabilityRevalidationTriggers       CapabilityRevalidationRequirement[] @relation("CapabilityRevalidationTriggerer")
   launchReadinessSnapshotsCreated          LaunchReadinessSnapshot[]              @relation("LaunchReadinessSnapshotCreator")
   launchEventsRecorded                     LaunchEvent[]                          @relation("LaunchEventRecorder")
   operationalActivationsAccountable        OperationalActivationRecord[]          @relation("OperationalActivationAccountableOwner")
@@ -643,6 +656,7 @@ model Identity {
   credentialShutdownsPerformed             CredentialShutdownRecord[]             @relation("CredentialShutdownPerformer")
   integrationShutdownsPerformed            IntegrationShutdownRecord[]            @relation("IntegrationShutdownPerformer")
   exitAcceptancesRecorded                  ExitAcceptanceRecord[]                 @relation("ExitAcceptanceRecorder")
+
 
   @@index([userAccountId])
   @@index([personId])
@@ -11126,6 +11140,453 @@ model RiskReview {
 
   @@index([assessmentId])
   @@map("risk_reviews")
+}
+
+// ─── Phase 13A: Operational Readiness and Activation Foundation ───────────────
+
+enum CapabilitySubjectType {
+  DEPARTMENT
+  SERVICE
+  FUNCTION
+  WORKFLOW
+  INTEGRATION
+  ENVIRONMENT
+  APPLICATION
+  ISSUANCE_FUNCTION
+  AI_USE_CASE
+  AI_AGENT
+  DIGITAL_TWIN
+  PAYMENT_CAPABILITY
+  COMMUNICATION_CAPABILITY
+  REPORTING_CAPABILITY
+  SECURITY_CAPABILITY
+  OTHER_CONTROLLED_CAPABILITY
+}
+
+enum CapabilityMaturityState {
+  CONCEPTUAL
+  DESIGNED
+  PROTOTYPED
+  PILOT_READY
+  PILOT_OPERATIONAL
+  PRODUCTION_READY
+  INSTITUTIONALLY_ACCEPTED
+  OPERATIONALLY_ACTIVATED
+  REVALIDATION_REQUIRED
+  REVALIDATED
+  SUSPENDED
+  RETIRED
+  REPLACED
+}
+
+enum ProductionReadinessDomain {
+  AUTHORITY
+  GOVERNANCE
+  FUNCTIONAL
+  WORKFLOW
+  DATA
+  RECORDS
+  IDENTITY
+  SECURITY
+  PRIVACY
+  CRYPTOGRAPHY
+  INTEGRATION
+  AI_GOVERNANCE
+  PERFORMANCE
+  CAPACITY
+  CONTINUITY
+  BACKUP_RECOVERY
+  SUPPORT
+  WORKFORCE
+  TRAINING
+  ACCESSIBILITY
+  MONITORING
+  INCIDENT_RESPONSE
+  CHANGE_MANAGEMENT
+  VENDOR
+  EXIT_PORTABILITY
+}
+
+enum ProductionReadinessStatus {
+  NOT_ASSESSED
+  NOT_READY
+  PARTIALLY_READY
+  READY_WITH_CONDITIONS
+  READY
+  SAFE_HALTED
+}
+
+enum CapabilityMaturityAssessmentDecision {
+  APPROVED
+  REJECTED
+  DEFERRED
+  CONDITIONALLY_APPROVED
+}
+
+enum CapabilityDependencyControlScope {
+  HEARTSTONE_CONTROLLED
+  EXTERNAL
+  PARTIALLY_CONTROLLED
+}
+
+enum CapabilityDependencyVerificationStatus {
+  NOT_VERIFIED
+  VERIFIED
+  VERIFICATION_FAILED
+  STALE
+}
+
+enum ActivationConditionStatus {
+  PENDING
+  SATISFIED
+  UNSATISFIED
+  WAIVED
+  EXPIRED
+}
+
+enum SafeHaltTriggerType {
+  AUTHORITY_UNAVAILABLE
+  REQUIRED_OFFICEHOLDER_UNAVAILABLE
+  SECURITY_CONTROL_FAILURE
+  IDENTITY_TRUST_FAILURE
+  RECORD_INTEGRITY_FAILURE
+  REQUIRED_INTEGRATION_UNAVAILABLE
+  MANDATORY_PROFESSIONAL_REVIEW_UNAVAILABLE
+  UNRESOLVED_CRITICAL_DEFECT
+  CONTINUITY_FAILURE
+  AI_GOVERNANCE_FAILURE
+  QUALIFICATION_EXPIRY
+}
+
+enum CapabilityRevalidationTrigger {
+  AUTHORITY_SOURCE_CHANGE
+  POLICY_CHANGE
+  CONFIGURATION_CHANGE
+  RELEASE_CHANGE
+  SCHEMA_CHANGE
+  MODEL_CHANGE
+  AI_MODEL_CHANGE
+  INTEGRATION_CHANGE
+  VENDOR_CHANGE
+  HOSTING_CHANGE
+  SECURITY_ARCHITECTURE_CHANGE
+  CRYPTOGRAPHIC_ALGORITHM_CHANGE
+  STAFFING_CHANGE
+  OFFICEHOLDER_CHANGE
+  PROFESSIONAL_QUALIFICATION_CHANGE
+  SERVICE_POPULATION_CHANGE
+  DATA_CLASSIFICATION_CHANGE
+  OPERATING_ENVIRONMENT_CHANGE
+  INCIDENT
+  MAJOR_DEFECT
+}
+
+model CapabilityDefinition {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  code                   String                  @unique
+  name                   String
+  description            String?
+  subjectType            CapabilitySubjectType
+  subjectReferenceId     String?                 @db.Uuid
+  currentMaturityState   CapabilityMaturityState @default(CONCEPTUAL)
+  isOperational          Boolean                 @default(false)
+  isSuspended            Boolean                 @default(false)
+  isRetired              Boolean                 @default(false)
+  replacedByCapabilityId String?                 @db.Uuid
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  versions               CapabilityVersion[]
+  ownerAssignments       CapabilityOwnerAssignment[]
+  dependencies           CapabilityDependency[]
+  safeHaltConditions     CapabilitySafeHaltCondition[]
+  revalidationRequirements CapabilityRevalidationRequirement[]
+  maturityAssessments    CapabilityMaturityAssessment[]
+  maturityHistory        CapabilityMaturityHistory[]
+  productionReadinessAssessments ProductionReadinessAssessment[]
+  activationConditions   ActivationCondition[]
+  activationRestrictions ActivationRestriction[]
+  replacedBy             CapabilityDefinition?   @relation("CapabilityReplacement", fields: [replacedByCapabilityId], references: [id])
+  replaces               CapabilityDefinition[]    @relation("CapabilityReplacement")
+
+  @@index([subjectType])
+  @@index([currentMaturityState])
+  @@index([isSuspended])
+  @@index([isRetired])
+  @@map("capability_definitions")
+}
+
+model CapabilityVersion {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                  @db.Uuid
+  versionNumber          String
+  description            String?
+  releaseReference       String?
+  isCurrent              Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  capabilityDefinition   CapabilityDefinition    @relation(fields: [capabilityDefinitionId], references: [id])
+  maturityAssessments    CapabilityMaturityAssessment[]
+  maturityHistory        CapabilityMaturityHistory[]
+  productionReadinessAssessments ProductionReadinessAssessment[]
+
+  @@unique([capabilityDefinitionId, versionNumber])
+  @@index([capabilityDefinitionId])
+  @@index([isCurrent])
+  @@map("capability_versions")
+}
+
+model CapabilityMaturityAssessment {
+  id                       String                               @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId     String                               @db.Uuid
+  capabilityVersionId        String                               @db.Uuid
+  currentMaturity            CapabilityMaturityState
+  requestedMaturity          CapabilityMaturityState
+  scope                      String?
+  environment                String?
+  usersPopulation            String?
+  authorityBasis             String?
+  institutionalOwnerId       String?                              @db.Uuid
+  technicalOwnerIdentityId   String?                              @db.Uuid
+  requirements               Json                                 @default("[]")
+  evidence                   Json                                 @default("[]")
+  openDefects                Json                                 @default("[]")
+  residualRisks              Json                                 @default("[]")
+  dependencies               Json                                 @default("[]")
+  staffingReadiness          Json                                 @default("{}")
+  trainingReadiness          Json                                 @default("{}")
+  securityReadiness          Json                                 @default("{}")
+  privacyReadiness           Json                                 @default("{}")
+  recordsReadiness           Json                                 @default("{}")
+  continuityReadiness        Json                                 @default("{}")
+  integrationReadiness       Json                                 @default("{}")
+  supportReadiness           Json                                 @default("{}")
+  decision                   CapabilityMaturityAssessmentDecision?
+  reviewerIdentityId         String?                              @db.Uuid
+  decidedAt                  DateTime?
+  createdAt                  DateTime                             @default(now())
+  updatedAt                  DateTime                             @updatedAt
+  capabilityDefinition       CapabilityDefinition                 @relation(fields: [capabilityDefinitionId], references: [id])
+  capabilityVersion          CapabilityVersion                    @relation(fields: [capabilityVersionId], references: [id])
+  institutionalOwner         Officeholder?                        @relation("CapabilityMaturityInstitutionalOwner", fields: [institutionalOwnerId], references: [id])
+  technicalOwner             Identity?                            @relation("CapabilityMaturityTechnicalOwner", fields: [technicalOwnerIdentityId], references: [id])
+  reviewer                   Identity?                            @relation("CapabilityMaturityReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([capabilityVersionId])
+  @@index([requestedMaturity])
+  @@index([decision])
+  @@map("capability_maturity_assessments")
+}
+
+model CapabilityMaturityHistory {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                  @db.Uuid
+  capabilityVersionId    String                  @db.Uuid
+  priorMaturity          CapabilityMaturityState
+  newMaturity            CapabilityMaturityState
+  assessmentId           String?                 @db.Uuid
+  changeReason           String
+  changedByIdentityId    String?                 @db.Uuid
+  recordedAt             DateTime                @default(now())
+  capabilityDefinition   CapabilityDefinition    @relation(fields: [capabilityDefinitionId], references: [id])
+  capabilityVersion      CapabilityVersion       @relation(fields: [capabilityVersionId], references: [id])
+  changedBy              Identity?               @relation("CapabilityMaturityHistoryChanger", fields: [changedByIdentityId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([capabilityVersionId])
+  @@index([recordedAt])
+  @@map("capability_maturity_history")
+}
+
+model ProductionReadinessAssessment {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                    @db.Uuid
+  capabilityVersionId    String                    @db.Uuid
+  overallStatus          ProductionReadinessStatus @default(NOT_ASSESSED)
+  assessedByIdentityId   String?                   @db.Uuid
+  assessedAt             DateTime?
+  summary                String?
+  conditions             String[]                  @default([])
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  capabilityDefinition   CapabilityDefinition      @relation(fields: [capabilityDefinitionId], references: [id])
+  capabilityVersion      CapabilityVersion         @relation(fields: [capabilityVersionId], references: [id])
+  assessedBy             Identity?                 @relation("ProductionReadinessAssessor", fields: [assessedByIdentityId], references: [id])
+  requirements           ProductionReadinessRequirement[]
+  evidence               ProductionReadinessEvidence[]
+
+  @@index([capabilityDefinitionId])
+  @@index([capabilityVersionId])
+  @@index([overallStatus])
+  @@map("production_readiness_assessments")
+}
+
+model ProductionReadinessRequirement {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  assessmentId         String                    @db.Uuid
+  domain               ProductionReadinessDomain
+  status               ProductionReadinessStatus @default(NOT_ASSESSED)
+  requirementText      String
+  measurableConditions String[]                  @default([])
+  blockers             String[]                  @default([])
+  notes                String?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  assessment           ProductionReadinessAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  evidence             ProductionReadinessEvidence[]
+
+  @@unique([assessmentId, domain])
+  @@index([assessmentId])
+  @@index([domain])
+  @@index([status])
+  @@map("production_readiness_requirements")
+}
+
+model ProductionReadinessEvidence {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  assessmentId          String                         @db.Uuid
+  requirementId         String?                        @db.Uuid
+  evidenceReference     String
+  evidenceType          String
+  evidenceHash          String?
+  description           String?
+  submittedByIdentityId String?                        @db.Uuid
+  submittedAt           DateTime                       @default(now())
+  isReplayable          Boolean                        @default(true)
+  replaySnapshot        Json                           @default("{}")
+  assessment            ProductionReadinessAssessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  requirement           ProductionReadinessRequirement? @relation(fields: [requirementId], references: [id])
+  submittedBy           Identity?                      @relation("ProductionReadinessEvidenceSubmitter", fields: [submittedByIdentityId], references: [id])
+
+  @@index([assessmentId])
+  @@index([requirementId])
+  @@index([evidenceReference])
+  @@map("production_readiness_evidence")
+}
+
+model ActivationCondition {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                    @db.Uuid
+  conditionText          String
+  ownerIdentityId        String?                   @db.Uuid
+  ownerOfficeholderId    String?                   @db.Uuid
+  evidenceReference      String?
+  deadline               DateTime?
+  status                 ActivationConditionStatus @default(PENDING)
+  verificationNotes      String?
+  isMandatory            Boolean                   @default(true)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  capabilityDefinition   CapabilityDefinition      @relation(fields: [capabilityDefinitionId], references: [id])
+  ownerIdentity          Identity?                 @relation("ActivationConditionOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder      Officeholder?             @relation("ActivationConditionOfficeholderOwner", fields: [ownerOfficeholderId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([status])
+  @@index([isMandatory])
+  @@map("activation_conditions")
+}
+
+model ActivationRestriction {
+  id                     String               @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String               @db.Uuid
+  restrictionText        String
+  restrictionBasis       String?
+  effectiveFrom          DateTime?
+  effectiveUntil         DateTime?
+  isActive               Boolean              @default(true)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  capabilityDefinition   CapabilityDefinition @relation(fields: [capabilityDefinitionId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([isActive])
+  @@map("activation_restrictions")
+}
+
+model CapabilityDependency {
+  id                     String                               @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                               @db.Uuid
+  dependencyName         String
+  ownerIdentityId        String?                              @db.Uuid
+  ownerOfficeholderId    String?                              @db.Uuid
+  requiredState          String
+  actualState            String?
+  verificationStatus     CapabilityDependencyVerificationStatus @default(NOT_VERIFIED)
+  verificationNotes      String?
+  fallbackPlan           String?
+  effectIfUnavailable    String
+  controlScope           CapabilityDependencyControlScope
+  isReady                Boolean                              @default(false)
+  createdAt              DateTime                             @default(now())
+  updatedAt              DateTime                             @updatedAt
+  capabilityDefinition   CapabilityDefinition                 @relation(fields: [capabilityDefinitionId], references: [id])
+  ownerIdentity          Identity?                            @relation("CapabilityDependencyOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder      Officeholder?                        @relation("CapabilityDependencyOfficeholderOwner", fields: [ownerOfficeholderId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([controlScope])
+  @@index([verificationStatus])
+  @@map("capability_dependencies")
+}
+
+model CapabilityOwnerAssignment {
+  id                       String               @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId   String               @db.Uuid
+  institutionalOwnerId     String?              @db.Uuid
+  technicalOwnerIdentityId String?              @db.Uuid
+  assignedByIdentityId     String?              @db.Uuid
+  effectiveFrom            DateTime             @default(now())
+  effectiveUntil           DateTime?
+  isCurrent                Boolean              @default(true)
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  capabilityDefinition     CapabilityDefinition @relation(fields: [capabilityDefinitionId], references: [id])
+  institutionalOwner       Officeholder?        @relation("CapabilityInstitutionalOwner", fields: [institutionalOwnerId], references: [id])
+  technicalOwner           Identity?            @relation("CapabilityTechnicalOwner", fields: [technicalOwnerIdentityId], references: [id])
+  assignedBy               Identity?            @relation("CapabilityOwnerAssigner", fields: [assignedByIdentityId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([isCurrent])
+  @@map("capability_owner_assignments")
+}
+
+model CapabilitySafeHaltCondition {
+  id                     String               @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String               @db.Uuid
+  triggerType            SafeHaltTriggerType
+  triggerDescription     String
+  isActive               Boolean              @default(true)
+  haltAction             String?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  capabilityDefinition   CapabilityDefinition @relation(fields: [capabilityDefinitionId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([triggerType])
+  @@index([isActive])
+  @@map("capability_safe_halt_conditions")
+}
+
+model CapabilityRevalidationRequirement {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  capabilityDefinitionId String                        @db.Uuid
+  trigger                CapabilityRevalidationTrigger
+  description            String
+  requiredEvidence       Json                          @default("[]")
+  isTriggered            Boolean                       @default(false)
+  triggeredAt            DateTime?
+  triggeredByIdentityId  String?                       @db.Uuid
+  priorMaturityState     CapabilityMaturityState?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  capabilityDefinition   CapabilityDefinition          @relation(fields: [capabilityDefinitionId], references: [id])
+  triggeredBy            Identity?                     @relation("CapabilityRevalidationTriggerer", fields: [triggeredByIdentityId], references: [id])
+
+  @@index([capabilityDefinitionId])
+  @@index([trigger])
+  @@index([isTriggered])
+  @@map("capability_revalidation_requirements")
 }
 
 // ─── Phase 13: Production Readiness, National Launch and Exit ─────────────────
