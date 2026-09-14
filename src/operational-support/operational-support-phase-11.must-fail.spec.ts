@@ -1,25 +1,24 @@
 import { createHmac } from 'node:crypto';
 
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import {
   FeeScheduleStatus,
   FinancialApprovalStatus,
-  FinancialApprovalType,
   IntegrationAcceptanceStatus,
   InvoiceStatus,
   PaymentWebhookProcessingStatus,
 } from '@prisma/client';
 
 import { type PrismaService } from '../database/prisma.service';
-import { CommunicationTemplateService } from './communications/communication-template.service';
 import { OperationalSupportBoundaryService } from './common/operational-support-boundary.service';
+import { CommunicationTemplateService } from './communications/communication-template.service';
+import { TestPaymentProviderAdapter } from './financial/adapters/test-payment-provider.adapter';
 import { FeeScheduleService } from './financial/fee-schedule.service';
-import { FinancialApprovalService } from './financial/financial-approval.service';
+import { type FinancialApprovalService } from './financial/financial-approval.service';
 import { InvoiceService } from './financial/invoice.service';
 import { PaymentWebhookService } from './financial/payment-webhook.service';
 import { ReconciliationService } from './financial/reconciliation.service';
 import { RefundService } from './financial/refund.service';
-import { TestPaymentProviderAdapter } from './financial/adapters/test-payment-provider.adapter';
 import { IntegrationAcceptanceService } from './integrations/integration-acceptance.service';
 import {
   FORBIDDEN_CLIENT_FEE_ASSESSMENT_FIELDS,
@@ -45,7 +44,9 @@ describe('Phase 11 must-fail invariants', () => {
   describe('OperationalSupportBoundaryService', () => {
     it('exposes operational support boundary disclaimer', () => {
       expect(OPERATIONAL_SUPPORT_BOUNDARY_DISCLAIMER).toContain('payment processing');
-      expect(PHASE_11A_BOUNDARY_DISCLAIMER).toContain('Payment obligation does not constitute approval');
+      expect(PHASE_11A_BOUNDARY_DISCLAIMER).toContain(
+        'Payment obligation does not constitute approval',
+      );
       expect(PHASE_11B_BOUNDARY_DISCLAIMER).toContain('Payment success does not alter case status');
     });
 
@@ -223,7 +224,9 @@ describe('Phase 11 must-fail invariants', () => {
       $transaction: jest.fn((callback: (tx: unknown) => Promise<unknown>) =>
         callback({
           feeScheduleVersion: {
-            update: jest.fn().mockResolvedValue({ id: 'version-1', status: FeeScheduleStatus.ACTIVE }),
+            update: jest
+              .fn()
+              .mockResolvedValue({ id: 'version-1', status: FeeScheduleStatus.ACTIVE }),
           },
           feeSchedule: {
             update: jest.fn().mockResolvedValue({ id: 'schedule-1' }),
@@ -338,7 +341,9 @@ describe('Phase 11 must-fail invariants', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (prisma.paymentProviderConfiguration.findUnique as jest.Mock).mockResolvedValue(providerConfig);
+      (prisma.paymentProviderConfiguration.findUnique as jest.Mock).mockResolvedValue(
+        providerConfig,
+      );
     });
 
     it('rejects webhook payload containing PAN', async () => {
@@ -496,7 +501,9 @@ describe('Phase 11 must-fail invariants', () => {
         update: jest.fn(),
       },
       integrationAcceptanceRecord: {
-        create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'acc-1', ...data })),
+        create: jest
+          .fn()
+          .mockImplementation(({ data }) => Promise.resolve({ id: 'acc-1', ...data })),
       },
     } as unknown as PrismaService;
 

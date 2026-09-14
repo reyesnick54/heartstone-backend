@@ -2,8 +2,8 @@ import { createHash, createHmac } from 'node:crypto';
 
 import { type INestApplication } from '@nestjs/common';
 import {
-  AuthorityActionType,
   AuthoritativeSourceStatus,
+  AuthorityActionType,
   CommunicationChannelType,
   CommunicationTemplateStatus,
   IntegrationAcceptanceStatus,

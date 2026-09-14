@@ -107,7 +107,9 @@ export class FeeScheduleService {
     const version = await this.loadVersion(feeScheduleVersionId);
 
     if (version.status !== FeeScheduleStatus.DRAFT) {
-      throw new BadRequestException('Only DRAFT fee schedule versions may be submitted for approval');
+      throw new BadRequestException(
+        'Only DRAFT fee schedule versions may be submitted for approval',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -162,9 +164,7 @@ export class FeeScheduleService {
     });
 
     if (!approval) {
-      throw new ForbiddenException(
-        OPERATIONAL_SUPPORT_REASON_CODES.FEE_SCHEDULE_APPROVAL_REQUIRED,
-      );
+      throw new ForbiddenException(OPERATIONAL_SUPPORT_REASON_CODES.FEE_SCHEDULE_APPROVAL_REQUIRED);
     }
 
     if (version.status !== FeeScheduleStatus.APPROVED) {

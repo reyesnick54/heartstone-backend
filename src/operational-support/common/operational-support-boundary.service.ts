@@ -114,9 +114,7 @@ export class OperationalSupportBoundaryService {
 
   assertPaymentDoesNotAlterCaseStatus(caseStatusMutationRequested: boolean): void {
     if (caseStatusMutationRequested) {
-      throw new ForbiddenException(
-        OPERATIONAL_SUPPORT_REASON_CODES.PAYMENT_DOES_NOT_ALTER_CASE,
-      );
+      throw new ForbiddenException(OPERATIONAL_SUPPORT_REASON_CODES.PAYMENT_DOES_NOT_ALTER_CASE);
     }
   }
 

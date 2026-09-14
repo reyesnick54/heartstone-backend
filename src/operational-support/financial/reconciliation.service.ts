@@ -148,7 +148,10 @@ export class ReconciliationService {
       throw new NotFoundException(`ReconciliationItem ${reconciliationItemId} not found`);
     }
 
-    if (item.status !== ReconciliationItemStatus.MISMATCH && item.status !== ReconciliationItemStatus.EXCEPTION) {
+    if (
+      item.status !== ReconciliationItemStatus.MISMATCH &&
+      item.status !== ReconciliationItemStatus.EXCEPTION
+    ) {
       throw new BadRequestException('Only mismatch or exception items may be resolved');
     }
 

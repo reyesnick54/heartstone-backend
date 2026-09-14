@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceStatus, PaymentIntent, PaymentIntentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -65,7 +61,9 @@ export class PaymentIntentService {
     const amountCents = input.amountCents ?? outstandingCents;
 
     if (amountCents <= 0 || amountCents > outstandingCents) {
-      throw new BadRequestException('Payment intent amount must be positive and not exceed outstanding balance');
+      throw new BadRequestException(
+        'Payment intent amount must be positive and not exceed outstanding balance',
+      );
     }
 
     const currency = input.currency ?? invoice.currency;

@@ -126,10 +126,9 @@ export class CommunicationMessageService {
     });
   }
 
-  async getMessage(messageId: string): Promise<
-    | (CommunicationMessage & { recipients: CommunicationRecipient[] })
-    | null
-  > {
+  async getMessage(
+    messageId: string,
+  ): Promise<(CommunicationMessage & { recipients: CommunicationRecipient[] }) | null> {
     return this.prisma.communicationMessage.findUnique({
       where: { id: messageId },
       include: { recipients: true, deliveries: true },

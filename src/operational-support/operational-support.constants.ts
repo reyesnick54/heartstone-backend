@@ -26,10 +26,7 @@ export const ALTERNATE_CHANNEL_MAP: Partial<
   [CommunicationChannelType.PORTAL]: CommunicationChannelType.EMAIL,
 };
 
-export const INTEGRATION_ACCEPTANCE_STATUS_ORDER: Record<
-  IntegrationAcceptanceStatus,
-  number
-> = {
+export const INTEGRATION_ACCEPTANCE_STATUS_ORDER: Record<IntegrationAcceptanceStatus, number> = {
   [IntegrationAcceptanceStatus.TECHNICALLY_CONNECTED]: 1,
   [IntegrationAcceptanceStatus.TESTED]: 2,
   [IntegrationAcceptanceStatus.TECHNICALLY_READY]: 3,
@@ -138,11 +135,7 @@ export const FORBIDDEN_PAYMENT_SIDE_EFFECT_FIELDS = [
   'approvalStatus',
 ] as const;
 
-export const IMMUTABLE_ISSUED_INVOICE_FIELDS = [
-  'totalAmountCents',
-  'currency',
-  'lines',
-] as const;
+export const IMMUTABLE_ISSUED_INVOICE_FIELDS = ['totalAmountCents', 'currency', 'lines'] as const;
 
 export const OPERATIONAL_SUPPORT_REASON_CODES = {
   PAYMENT_NOT_APPROVAL: 'PAYMENT_NOT_APPROVAL',

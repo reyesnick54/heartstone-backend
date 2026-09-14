@@ -19,10 +19,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { OperationalSupportBoundaryService } from '../common/operational-support-boundary.service';
 import { REFUND_AUTHORIZATION_REFERENCE_PREFIX } from '../operational-support.constants';
 import { FinancialApprovalService } from './financial-approval.service';
-import {
-  PAYMENT_PROVIDER_PORT,
-  PaymentProviderPort,
-} from './ports/payment-provider.port';
+import { PAYMENT_PROVIDER_PORT, PaymentProviderPort } from './ports/payment-provider.port';
 
 export interface RequestRefundInput {
   paymentTransactionId: string;

@@ -1,13 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import {
-  FeeAssessment,
-  FeeAssessmentStatus,
-  FeeScheduleStatus,
-} from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { FeeAssessment, FeeAssessmentStatus, FeeScheduleStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { OperationalSupportBoundaryService } from '../common/operational-support-boundary.service';

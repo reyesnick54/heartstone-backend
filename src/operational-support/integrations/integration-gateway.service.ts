@@ -154,10 +154,7 @@ export class IntegrationGatewayService {
     return endpoint;
   }
 
-  private resolveEndpointUrl(
-    urlTemplate: string,
-    payload: Record<string, unknown>,
-  ): string {
+  private resolveEndpointUrl(urlTemplate: string, payload: Record<string, unknown>): string {
     return urlTemplate.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, key: string) => {
       const value = payload[key];
       if (typeof value !== 'string' && typeof value !== 'number') {
@@ -187,7 +184,9 @@ export class IntegrationGatewayService {
     payload: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => { controller.abort(); }, DEFAULT_INTEGRATION_REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, DEFAULT_INTEGRATION_REQUEST_TIMEOUT_MS);
 
     try {
       const response = await fetch(url, {
@@ -198,7 +197,9 @@ export class IntegrationGatewayService {
       });
 
       if (!response.ok) {
-        throw new BadRequestException(`Integration endpoint returned HTTP ${String(response.status)}`);
+        throw new BadRequestException(
+          `Integration endpoint returned HTTP ${String(response.status)}`,
+        );
       }
 
       const body = (await response.json()) as Record<string, unknown>;

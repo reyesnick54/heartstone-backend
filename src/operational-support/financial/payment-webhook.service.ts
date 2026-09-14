@@ -7,20 +7,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  PaymentIntentStatus,
-  PaymentWebhookProcessingStatus,
-  Prisma,
-} from '@prisma/client';
+import { PaymentIntentStatus, PaymentWebhookProcessingStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { OperationalSupportBoundaryService } from '../common/operational-support-boundary.service';
 import { OPERATIONAL_SUPPORT_REASON_CODES } from '../operational-support.constants';
 import { PaymentTransactionService } from './payment-transaction.service';
-import {
-  PAYMENT_PROVIDER_PORT,
-  PaymentProviderPort,
-} from './ports/payment-provider.port';
+import { PAYMENT_PROVIDER_PORT, PaymentProviderPort } from './ports/payment-provider.port';
 
 export interface ProcessPaymentWebhookInput {
   paymentProviderConfigurationId: string;
@@ -195,7 +188,9 @@ export class PaymentWebhookService {
   ) {
     const parsed = JSON.parse(rawBody) as { externalEventId?: string; eventType?: string };
     const eventId =
-      externalEventId ?? parsed.externalEventId ?? createHash('sha256').update(rawBody).digest('hex');
+      externalEventId ??
+      parsed.externalEventId ??
+      createHash('sha256').update(rawBody).digest('hex');
     const type = eventType ?? parsed.eventType ?? 'UNKNOWN';
 
     await this.prisma.paymentProviderWebhookEvent.create({

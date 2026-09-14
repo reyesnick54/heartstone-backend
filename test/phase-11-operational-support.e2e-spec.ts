@@ -16,11 +16,11 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
+import { CommunicationDeliveryService } from '../src/operational-support/communications/communication-delivery.service';
+import { CommunicationMessageService } from '../src/operational-support/communications/communication-message.service';
 import { PaymentWebhookService } from '../src/operational-support/financial/payment-webhook.service';
 import { ReconciliationService } from '../src/operational-support/financial/reconciliation.service';
 import { RefundService } from '../src/operational-support/financial/refund.service';
-import { CommunicationDeliveryService } from '../src/operational-support/communications/communication-delivery.service';
-import { CommunicationMessageService } from '../src/operational-support/communications/communication-message.service';
 import { IntegrationOutageService } from '../src/operational-support/integrations/integration-outage.service';
 import { IntegrationWebhookService } from '../src/operational-support/integrations/integration-webhook.service';
 import { RegistryQueryService } from '../src/operational-support/integrations/registry-query.service';
@@ -482,7 +482,8 @@ describe('Phase 11 operational support (e2e)', () => {
       })
       .expect(201);
 
-    expect(httpResponse.body.processingStatus).toBe(IntegrationWebhookProcessingStatus.PROCESSED);
+    const body = httpResponse.body as { processingStatus: IntegrationWebhookProcessingStatus };
+    expect(body.processingStatus).toBe(IntegrationWebhookProcessingStatus.PROCESSED);
   });
 
   it('E2E12. prohibited government update is blocked via material source discrepancy safe halt', async () => {
@@ -530,8 +531,8 @@ describe('Phase 11 operational support (e2e)', () => {
     const events = await prisma.integrationWebhookEvent.findMany({
       where: { integrationDefinitionId: fixture.integrationDefinitionId },
     });
-    expect(events.some((event) => event.externalEventId === unauthorizedPayload.externalEventId)).toBe(
-      false,
-    );
+    expect(
+      events.some((event) => event.externalEventId === unauthorizedPayload.externalEventId),
+    ).toBe(false);
   });
 });

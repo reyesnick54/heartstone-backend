@@ -20,9 +20,9 @@ import { InvoiceService } from '../src/operational-support/financial/invoice.ser
 import { PaymentWebhookService } from '../src/operational-support/financial/payment-webhook.service';
 import { IntegrationAcceptanceService } from '../src/operational-support/integrations/integration-acceptance.service';
 import { IntegrationOutageService } from '../src/operational-support/integrations/integration-outage.service';
-import { MafIndexingService } from '../src/operational-support/maf/maf-indexing.service';
 import { RegistryQueryService } from '../src/operational-support/integrations/registry-query.service';
 import { SourceDiscrepancyService } from '../src/operational-support/integrations/source-discrepancy.service';
+import { MafIndexingService } from '../src/operational-support/maf/maf-indexing.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   buildPaymentWebhookPayload,
@@ -198,7 +198,9 @@ describe('Phase 11 operational support (integration)', () => {
     expect(refreshed.status).toBe(CommunicationMessageStatus.DELIVERED);
     expect(refreshed.decisionNoticeReference).toBe(`${fixture.marker}-DN-000001`);
 
-    const index = await mafIndexing.buildOperationalSupportIndex(fixture.masterAdministrativeFileId);
+    const index = await mafIndexing.buildOperationalSupportIndex(
+      fixture.masterAdministrativeFileId,
+    );
     expect(index.section15.some((entry) => entry.referenceType === 'CommunicationMessage')).toBe(
       true,
     );

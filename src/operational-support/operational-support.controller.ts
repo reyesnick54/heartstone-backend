@@ -116,7 +116,10 @@ export class OperationalSupportController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { mandatoryRuleCode?: string },
   ) {
-    return this.deliveries.deliverMessage({ messageId: id, mandatoryRuleCode: body.mandatoryRuleCode });
+    return this.deliveries.deliverMessage({
+      messageId: id,
+      mandatoryRuleCode: body.mandatoryRuleCode,
+    });
   }
 
   @Post('integrations/definitions')
@@ -150,12 +153,16 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/exchanges')
-  executeExchange(@Body() body: Parameters<IntegrationGatewayService['executeAuthorizedExchange']>[0]) {
+  executeExchange(
+    @Body() body: Parameters<IntegrationGatewayService['executeAuthorizedExchange']>[0],
+  ) {
     return this.integrationGateway.executeAuthorizedExchange(body);
   }
 
   @Post('integrations/webhooks')
-  receiveIntegrationWebhook(@Body() body: Parameters<IntegrationWebhookService['receiveWebhook']>[0]) {
+  receiveIntegrationWebhook(
+    @Body() body: Parameters<IntegrationWebhookService['receiveWebhook']>[0],
+  ) {
     return this.integrationWebhooks.receiveWebhook(body);
   }
 

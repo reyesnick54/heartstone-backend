@@ -8,7 +8,9 @@ import type { MasterFileIndexReference } from '../../records/master-administrati
 export class MafIndexingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async indexFinancialRecords(masterAdministrativeFileId: string): Promise<MasterFileIndexReference[]> {
+  async indexFinancialRecords(
+    masterAdministrativeFileId: string,
+  ): Promise<MasterFileIndexReference[]> {
     const [assessments, invoices, refundRequests] = await Promise.all([
       this.prisma.feeAssessment.findMany({
         where: { masterAdministrativeFileId },

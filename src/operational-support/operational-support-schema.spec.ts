@@ -72,8 +72,7 @@ describe('Phase 11 operational support schema', () => {
   });
 
   it('links communication messages to decisionNoticeReference without duplicating decision models', () => {
-    const block =
-      /model CommunicationMessage \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    const block = /model CommunicationMessage \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(block).toContain('decisionNoticeReference');
     expect(block).not.toContain('model GovernmentDecision');
   });

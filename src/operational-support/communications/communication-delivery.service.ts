@@ -108,12 +108,15 @@ export class CommunicationDeliveryService {
     }
 
     let delivery = await this.createDelivery(message.id, recipient.id, channel);
-    let result = await this.attemptDelivery(message, recipient, delivery, channel, mandatoryDelivery);
+    let result = await this.attemptDelivery(
+      message,
+      recipient,
+      delivery,
+      channel,
+      mandatoryDelivery,
+    );
 
-    if (
-      result.status === CommunicationDeliveryStatus.FAILED &&
-      !mandatoryDelivery
-    ) {
+    if (result.status === CommunicationDeliveryStatus.FAILED && !mandatoryDelivery) {
       const alternate = ALTERNATE_CHANNEL_MAP[channel];
       if (alternate && this.channelPorts.has(alternate)) {
         delivery = await this.createDelivery(message.id, recipient.id, alternate);
@@ -127,10 +130,7 @@ export class CommunicationDeliveryService {
       }
     }
 
-    if (
-      result.status === CommunicationDeliveryStatus.FAILED &&
-      mandatoryDelivery
-    ) {
+    if (result.status === CommunicationDeliveryStatus.FAILED && mandatoryDelivery) {
       const alternate = ALTERNATE_CHANNEL_MAP[channel];
       if (alternate && this.channelPorts.has(alternate)) {
         delivery = await this.markDeliverySuperseded(delivery.id);

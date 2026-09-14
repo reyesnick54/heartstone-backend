@@ -44,7 +44,9 @@ export class RedressRefundBridgeService {
     }
 
     if (action.status !== RedressImplementationActionStatus.PENDING) {
-      throw new BadRequestException('Refund bridge may execute only for pending implementation actions');
+      throw new BadRequestException(
+        'Refund bridge may execute only for pending implementation actions',
+      );
     }
 
     const transaction = await this.prisma.paymentTransaction.findUnique({
