@@ -60,6 +60,8 @@ export class MasterAdministrativeFileIndexService {
       workflowInstance,
       officialInstruments,
       governmentDecisions,
+      feeAssessments,
+      invoices,
     ] = await Promise.all([
       this.prisma.application.findUnique({ where: { id: file.applicationId } }),
       this.prisma.case.findUnique({ where: { id: file.caseId } }),
@@ -82,6 +84,14 @@ export class MasterAdministrativeFileIndexService {
       }),
       this.prisma.governmentDecision.findMany({
         where: { caseId: file.caseId },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.feeAssessment.findMany({
+        where: { masterAdministrativeFileId: file.id },
+        orderBy: { calculatedAt: 'asc' },
+      }),
+      this.prisma.invoice.findMany({
+        where: { masterAdministrativeFileId: file.id },
         orderBy: { createdAt: 'asc' },
       }),
     ]);
@@ -108,6 +118,8 @@ export class MasterAdministrativeFileIndexService {
           workflowInstance,
           officialInstruments,
           governmentDecisions,
+          feeAssessments,
+          invoices,
         }),
       }));
 
@@ -135,6 +147,8 @@ export class MasterAdministrativeFileIndexService {
       workflowInstance: Awaited<ReturnType<PrismaService['caseWorkflowInstance']['findUnique']>>;
       officialInstruments: Awaited<ReturnType<PrismaService['officialInstrument']['findMany']>>;
       governmentDecisions: Awaited<ReturnType<PrismaService['governmentDecision']['findMany']>>;
+      feeAssessments: Awaited<ReturnType<PrismaService['feeAssessment']['findMany']>>;
+      invoices: Awaited<ReturnType<PrismaService['invoice']['findMany']>>;
     },
   ): MasterFileIndexReference[] {
     switch (sectionType) {
@@ -305,6 +319,33 @@ export class MasterAdministrativeFileIndexService {
             status: decision.decisionStatus,
           },
         }));
+      case MasterAdministrativeFileSectionType.FEES_AND_FINANCIAL_RECORDS:
+        return [
+          ...context.feeAssessments.map((assessment) => ({
+            referenceType: 'FeeAssessment',
+            referenceId: assessment.id,
+            label: assessment.assessmentNumber,
+            occurredAt: assessment.calculatedAt.toISOString(),
+            metadata: {
+              status: assessment.status,
+              totalCents: assessment.totalCents,
+              currency: assessment.currency,
+              feeScheduleVersionId: assessment.feeScheduleVersionId,
+            },
+          })),
+          ...context.invoices.map((invoice) => ({
+            referenceType: 'Invoice',
+            referenceId: invoice.id,
+            label: invoice.invoiceNumber,
+            occurredAt: (invoice.issuedAt ?? invoice.createdAt).toISOString(),
+            metadata: {
+              status: invoice.status,
+              totalCents: invoice.totalCents,
+              amountOutstandingCents: invoice.amountOutstandingCents,
+              currency: invoice.currency,
+            },
+          })),
+        ];
       default:
         return [];
     }
