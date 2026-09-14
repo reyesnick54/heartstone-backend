@@ -1,3 +1,4 @@
+export const PHASE_10D_MODEL_NAMES = [
 export const PHASE_10C_MODEL_NAMES = [
   'ComplaintClassification',
   'ComplaintSafeguard',
@@ -114,6 +115,16 @@ export const PHASE_10H_MODEL_NAMES = [
   'AutomationChallenge',
   'AutomationExplanationRecord',
   'AutomationChallengeDisposition',
+] as const;
+
+export const PHASE_10D_ENUM_NAMES = [
+  'AdministrativeCorrectionCategory',
+  'AdministrativeCorrectionMatterStatus',
+  'RedressRouteType',
+  'ClarificationRequestStatus',
+  'AutomationChallengeGround',
+  'AutomationChallengeStatus',
+  'AutomationChallengeDispositionType',
   'ReviewAssignment',
   'ReviewerIndependenceAssessment',
   'ReviewAuthorityAssessment',
