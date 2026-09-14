@@ -241,6 +241,15 @@ model Officeholder {
   decisionReasonsAuthored      DecisionReason[]              @relation("DecisionReasonMaker")
   decisionReadinessProposed    DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
   decisionParticipants         DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade      GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments     OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer        IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
+  complianceAssessmentsAsReviewer ComplianceAssessment[]      @relation("ComplianceAssessmentReviewerOfficeholder")
+  noncomplianceFindingsConfirmed NoncomplianceFinding[]       @relation("NoncomplianceFindingConfirmedByOfficeholder")
+  complianceEscalationsCreated  ComplianceEscalation[]        @relation("ComplianceEscalationEscalatedByOfficeholder")
+  enforcementReferralsCreated   EnforcementReferral[]         @relation("EnforcementReferralReferredByOfficeholder")
+  protectiveActionRecommendations ProtectiveActionRecommendation[] @relation("ProtectiveActionRecommendedByOfficeholder")
+  emergencyInterimActions       EmergencyInterimActionRecord[] @relation("EmergencyInterimActionActorOfficeholder")
   governmentDecisionsMade      GovernmentDecision[]          @relation("DecisionMaker")
   issuedOfficialInstruments     OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
   issuanceEventsAsIssuer        IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
@@ -303,6 +312,16 @@ model Officeholder {
 }
 
 model Appointment {
+  id             String            @id @default(uuid()) @db.Uuid
+  officeId       String            @db.Uuid
+  officeholderId String            @db.Uuid
+  status         AppointmentStatus @default(PENDING)
+  effectiveFrom  DateTime
+  effectiveUntil DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  office         Office            @relation(fields: [officeId], references: [id])
+  officeholder   Officeholder      @relation(fields: [officeholderId], references: [id])
   id                   String                @id @default(uuid()) @db.Uuid
   officeId             String                @db.Uuid
   officeholderId       String                @db.Uuid
@@ -363,6 +382,7 @@ model ExternalAuthority {
   caseReferrals                    CaseReferral[]
   documentVersionsReceived         DocumentVersion[]
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
+  enforcementReferrals             EnforcementReferral[]
 
   @@map("external_authorities")
 }
@@ -607,6 +627,16 @@ model Identity {
   decisionReadinessProposed  DecisionReadinessAssessment[] @relation("DecisionReadinessProposedMaker")
   decisionParticipants       DecisionParticipant[]      @relation("DecisionParticipantIdentity")
   decisionPreparationRecords DecisionPreparationRecord[] @relation("DecisionPreparationEditor")
+  governmentDecisionsMade    GovernmentDecision[]       @relation("GovernmentDecisionMaker")
+  officialInstrumentsAsHolder        OfficialInstrument[]          @relation("OfficialInstrumentHolderIdentity")
+  issuanceEventsAsIssuer             IssuanceEvent[]               @relation("IssuanceEventIssuerIdentity")
+  approvedInstrumentTemplateVersions InstrumentTemplateVersion[]   @relation("InstrumentTemplateApprover")
+  complianceAssessmentsAsReviewer    ComplianceAssessment[]        @relation("ComplianceAssessmentReviewerIdentity")
+  noncomplianceFindingsConfirmed     NoncomplianceFinding[]        @relation("NoncomplianceFindingConfirmedByIdentity")
+  complianceEscalationsCreated       ComplianceEscalation[]        @relation("ComplianceEscalationEscalatedByIdentity")
+  enforcementReferralsCreated        EnforcementReferral[]         @relation("EnforcementReferralReferredByIdentity")
+  protectiveActionRecommendations    ProtectiveActionRecommendation[] @relation("ProtectiveActionRecommendedByIdentity")
+  emergencyInterimActions            EmergencyInterimActionRecord[] @relation("EmergencyInterimActionActorIdentity")
   governmentDecisionsMade            GovernmentDecision[]          @relation("GovernmentDecisionMaker")
   officialInstrumentsAsHolder        OfficialInstrument[]          @relation("OfficialInstrumentHolderIdentity")
   issuanceEventsAsIssuer             IssuanceEvent[]               @relation("IssuanceEventIssuerIdentity")
@@ -1077,6 +1107,9 @@ model FunctionAuthorityRecord {
   recordCorrections            RecordCorrection[]
   decisionTypeVersions         DecisionTypeVersion[]
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
+  complianceAssessments        ComplianceAssessment[]
+  noncomplianceFindings        NoncomplianceFinding[]
+  emergencyInterimActions      EmergencyInterimActionRecord[]
   instrumentControllingDecisions InstrumentControllingDecision[] @relation("InstrumentControllingDecisionFunctionAuthority")
   continuingObligations        ContinuingObligation[]           @relation("ContinuingObligationFunctionAuthority")
   inspectionTypeDefinitions  InspectionTypeDefinition[]
@@ -1342,6 +1375,14 @@ model AuthorityEvaluationRecord {
   evidencePacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthority")
   recordCorrections           RecordCorrection[]
   decisionReadinessAssessments DecisionReadinessAssessment[] @relation("DecisionReadinessAuthority")
+  governmentDecisions         GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
+  issuanceEvents               IssuanceEvent[]
+  complianceAssessments        ComplianceAssessment[]
+  noncomplianceFindings        NoncomplianceFinding[]
+  complianceEscalations        ComplianceEscalation[]
+  enforcementReferrals         EnforcementReferral[]
+  protectiveActionRecommendations ProtectiveActionRecommendation[]
+  emergencyInterimActions      EmergencyInterimActionRecord[]
   issuanceEvents               IssuanceEvent[]
   inspectionSessionStarts      InspectionSession[]           @relation("InspectionSessionStartAuthority")
   inspectionFindingConfirmations InspectionFinding[]         @relation("InspectionFindingConfirmationAuthority")
@@ -2382,6 +2423,12 @@ model Case {
   evidencePackets                   EvidencePacket[]
   decisionReadinessAssessments      DecisionReadinessAssessment[]
   decisionPreparationRecords        DecisionPreparationRecord[]
+  complianceAssessments             ComplianceAssessment[]
+  noncomplianceFindings             NoncomplianceFinding[]
+  complianceEscalations             ComplianceEscalation[]
+  enforcementReferrals              EnforcementReferral[]
+  protectiveActionRecommendations   ProtectiveActionRecommendation[]
+  emergencyInterimActionRecords     EmergencyInterimActionRecord[]
   officialInstruments               OfficialInstrument[]
   issuanceReadinessAssessments      IssuanceReadinessAssessment[]
   instrumentControllingDecisions    InstrumentControllingDecision[]
@@ -4138,6 +4185,9 @@ model EvidencePacket {
   case                       Case?                    @relation(fields: [caseId], references: [id])
   responsibleDepartment      Department               @relation(fields: [responsibleDepartmentId], references: [id])
   versions                   EvidencePacketVersion[]
+  complianceAssessments      ComplianceAssessment[]
+  noncomplianceFindings      NoncomplianceFinding[]
+  enforcementReferrals       EnforcementReferral[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -4169,6 +4219,7 @@ model EvidencePacketVersion {
   manifest                    EvidencePacketManifest?
   exclusionRecords            EvidencePacketItemExclusion[]
   decisionReadinessAssessments DecisionReadinessAssessment[]
+  governmentDecisions         GovernmentDecision[]
   id                           String                        @id @default(uuid()) @db.Uuid
   packetId                     String                        @db.Uuid
   version                      Int
@@ -4925,6 +4976,13 @@ enum GovernmentDecisionStatus {
   WITHDRAWN_BY_AUTHORIZED_PROCESS
 }
 
+enum GovernmentDecisionOutcome {
+  APPROVED
+  REFUSED
+  CONDITIONAL_APPROVAL
+  RETURN_FOR_INFORMATION
+  WITHDRAWN
+  OTHER_AUTHORIZED_OUTCOME
 enum GovernmentDecisionType {
   APPROVE
   APPROVE_WITH_CONDITIONS
@@ -4960,6 +5018,7 @@ model DecisionType {
   governmentServiceId String               @db.Uuid
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  governmentService   GovernmentService    @relation(fields: [governmentServiceId], references: [id])
   id                  String                @id @default(uuid()) @db.Uuid
   code                String                @unique
   name                String
@@ -5049,6 +5108,7 @@ model DecisionReadinessAssessment {
   masterAdministrativeFile      MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
   authorityEvaluationRecord     AuthorityEvaluationRecord? @relation("DecisionReadinessAuthority", fields: [authorityEvaluationRecordId], references: [id])
   participants                  DecisionParticipant[]
+  governmentDecisions           GovernmentDecision[]
   id                                  String                     @id @default(uuid()) @db.Uuid
   assessmentNumber                    String                     @unique
   caseId                              String                     @db.Uuid
@@ -5097,21 +5157,6 @@ model DecisionParticipant {
   identity                      Identity                  @relation("DecisionParticipantIdentity", fields: [identityId], references: [id])
   officeholder                  Officeholder?             @relation("DecisionParticipantOfficeholder", fields: [officeholderId], references: [id])
   appointment                   Appointment?              @relation(fields: [appointmentId], references: [id])
-  id                    String                      @id @default(uuid()) @db.Uuid
-  readinessAssessmentId String                      @db.Uuid
-  identityId            String                      @db.Uuid
-  officeholderId        String?                     @db.Uuid
-  appointmentId         String?                     @db.Uuid
-  role                  DecisionParticipantRole
-  isConflicted          Boolean                     @default(false)
-  isRecused             Boolean                     @default(false)
-  hasApproved           Boolean                     @default(false)
-  approvedAt            DateTime?
-  createdAt             DateTime                    @default(now())
-  readinessAssessment   DecisionReadinessAssessment @relation(fields: [readinessAssessmentId], references: [id], onDelete: Cascade)
-  identity              Identity                    @relation("DecisionParticipantIdentity", fields: [identityId], references: [id])
-  officeholder          Officeholder?               @relation("DecisionParticipantOfficeholder", fields: [officeholderId], references: [id])
-  appointment           Appointment?                @relation(fields: [appointmentId], references: [id])
 
   @@index([readinessAssessmentId])
   @@index([identityId])
@@ -5141,6 +5186,43 @@ model DecisionPreparationRecord {
 }
 
 model GovernmentDecision {
+  id                            String                   @id @default(uuid()) @db.Uuid
+  decisionNumber                String                   @unique
+  caseId                        String                   @db.Uuid
+  masterAdministrativeFileId    String                   @db.Uuid
+  decisionTypeVersionId         String                   @db.Uuid
+  functionAuthorityRecordId     String                   @db.Uuid
+  authorityEvaluationRecordId   String                   @db.Uuid
+  decisionReadinessAssessmentId String                   @db.Uuid
+  evidencePacketVersionId       String                   @db.Uuid
+  decisionMakerIdentityId       String                   @db.Uuid
+  decisionMakerOfficeholderId   String                   @db.Uuid
+  appointmentId                 String                   @db.Uuid
+  delegationId                  String?                  @db.Uuid
+  institutionId                 String                   @db.Uuid
+  departmentId                  String                   @db.Uuid
+  matterDecided                 String
+  outcome                       String
+  decisionStatus                GovernmentDecisionStatus @default(RECORDED)
+  decidedAt                     DateTime
+  effectiveAt                   DateTime?
+  effectiveUntil                DateTime?
+  integrityHash                 String
+  explicitIntentConfirmed       Boolean                  @default(true)
+  createdAt                     DateTime                 @default(now())
+  case                          Case                     @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile   @relation(fields: [masterAdministrativeFileId], references: [id])
+  decisionTypeVersion           DecisionTypeVersion      @relation(fields: [decisionTypeVersionId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord  @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord @relation("GovernmentDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  decisionReadinessAssessment   DecisionReadinessAssessment @relation(fields: [decisionReadinessAssessmentId], references: [id])
+  evidencePacketVersion         EvidencePacketVersion    @relation(fields: [evidencePacketVersionId], references: [id])
+  decisionMakerIdentity         Identity                 @relation("GovernmentDecisionMaker", fields: [decisionMakerIdentityId], references: [id])
+  decisionMakerOfficeholder     Officeholder             @relation("GovernmentDecisionOfficeholder", fields: [decisionMakerOfficeholderId], references: [id])
+  appointment                   Appointment              @relation(fields: [appointmentId], references: [id])
+  delegation                    Delegation?              @relation(fields: [delegationId], references: [id])
+  institution                   Institution              @relation(fields: [institutionId], references: [id])
+  department                    Department               @relation(fields: [departmentId], references: [id])
   id                            String                            @id @default(uuid()) @db.Uuid
   decisionNumber                String                            @unique
   caseId                        String?                           @db.Uuid
@@ -5186,6 +5268,11 @@ model GovernmentDecision {
   department                    Department?                       @relation(fields: [departmentId], references: [id])
   governmentServiceVersion      GovernmentServiceVersion?         @relation(fields: [governmentServiceVersionId], references: [id])
   conditions                    DecisionCondition[]
+  findings                      DecisionFinding[]
+  reasons                       DecisionReason[]
+  notices                       DecisionNotice[]
+  assistanceRecords             DecisionAssistanceRecord[]
+  waivedConditions              DecisionCondition[]      @relation("ConditionWaiverDecision")
   officialInstruments           OfficialInstrument[]
   issuanceReadinessAssessments  IssuanceReadinessAssessment[]
   issuanceEvents                IssuanceEvent[]
@@ -5496,17 +5583,6 @@ model DecisionNoticeRight {
   @@unique([decisionNoticeId, routeCode])
   @@index([decisionNoticeId])
   @@map("decision_notice_rights")
-  ONGOING
-  SUSPENSION
-  REVOCATION
-}
-
-enum DecisionConditionStatus {
-  PENDING
-  SATISFIED
-  WAIVED
-  FAILED
-  SUPERSEDED
 }
 
 enum InstrumentIssuerSource {
@@ -5913,6 +5989,8 @@ model OfficialInstrument {
   numberReservation            InstrumentNumberReservation?
   issuanceEvents               IssuanceEvent[]
   issuanceReadinessAssessments IssuanceReadinessAssessment[]
+  complianceEscalations        ComplianceEscalation[]
+  protectiveActionRecommendations ProtectiveActionRecommendation[]
   deliveries                   InstrumentDelivery[]
   receiptAcknowledgments       InstrumentReceiptAcknowledgment[]
   verificationRecords          InstrumentVerificationRecord[]
@@ -6101,6 +6179,36 @@ model IssuanceEvent {
   @@map("issuance_events")
 }
 
+// ─── Phase 9F: Noncompliance Assessment, Escalation & Enforcement Referral ──
+
+enum ComplianceAssessmentStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SUPERSEDED
+}
+
+enum ComplianceRecommendedNextStep {
+  MONITOR
+  ESCALATE
+  FINDING_REVIEW
+  REFERRAL_REVIEW
+  PROTECTIVE_ACTION_REVIEW
+  NO_ACTION
+}
+
+enum NoncomplianceFindingStatus {
+  DRAFT
+  PROPOSED
+  CONFIRMED
+  DISPUTED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum NoncomplianceSeverity {
+  LOW
+  MEDIUM
 // ─── Phase 8F: Official delivery, receipt, and instrument verification ───────────
 
 model InstrumentDelivery {
@@ -6943,6 +7051,297 @@ enum ComplianceRiskLevel {
   CRITICAL
 }
 
+enum NoncomplianceRepetition {
+  FIRST_OCCURRENCE
+  REPEAT
+  PATTERN
+}
+
+enum NoncomplianceMateriality {
+  IMMATERIAL
+  MATERIAL
+  SIGNIFICANT
+}
+
+enum ComplianceEscalationType {
+  INTERNAL_SUPERVISORY
+  DEPARTMENT_HEAD
+  ONE_STOP_ADMINISTRATION
+  MANAGEMENT_COMMITTEE
+  PROFESSIONAL_REFERRAL
+  GOVERNMENT_REFERRAL
+  EMERGENCY_REVIEW
+  PHASE_8_SUSPENSION_REVIEW
+  PHASE_8_REVOCATION_REVIEW
+}
+
+enum ComplianceEscalationStatus {
+  PENDING
+  ACKNOWLEDGED
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum EnforcementReferralStatus {
+  DRAFT
+  PENDING_SEND
+  SENT
+  ACKNOWLEDGED
+  RESPONDED
+  CLOSED
+  WITHDRAWN
+}
+
+enum RetainedEnforcementAuthorityClass {
+  CRIMINAL
+  NATIONAL_REGULATORY
+  BORDER_CUSTOMS
+  JUDICIAL
+  OTHER_RETAINED
+}
+
+enum ProtectiveActionRecommendationType {
+  ENHANCED_MONITORING
+  REINSPECTION
+  CONDITION_REVIEW
+  TEMPORARY_OPERATIONAL_RESTRICTION_REVIEW
+  SUSPENSION_REVIEW
+  REVOCATION_REVIEW
+  GOVERNMENT_REFERRAL
+  EMERGENCY_REVIEW
+}
+
+enum ProtectiveActionRecommendationStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  ACCEPTED
+  REJECTED
+  SUPERSEDED
+}
+
+enum EmergencyInterimActionStatus {
+  ACTIVE
+  EXPIRED
+  REVIEWED
+  SUPERSEDED
+}
+
+model ComplianceAssessment {
+  id                              String                          @id @default(uuid()) @db.Uuid
+  assessmentNumber                String                          @unique
+  caseId                          String                          @db.Uuid
+  assessmentStandard              String
+  reviewerIdentityId              String                          @db.Uuid
+  reviewerOfficeholderId          String?                         @db.Uuid
+  functionAuthorityRecordId       String?                         @db.Uuid
+  evidencePacketId                String?                         @db.Uuid
+  obligationsReviewed             Json                            @default("[]")
+  submissionsReviewed             Json                            @default("[]")
+  verifiedEvidenceReviewed        Json                            @default("[]")
+  inspectionFindingsReviewed      Json                            @default("[]")
+  correctiveActionHistoryReviewed Json                            @default("[]")
+  incidentsReviewed               Json                            @default("[]")
+  professionalFindingsReviewed    Json                            @default("[]")
+  governmentInputsReviewed        Json                            @default("[]")
+  instrumentStatusReviewed        Json                            @default("[]")
+  priorComplianceHistoryReviewed  Json                            @default("[]")
+  findings                        String?
+  uncertainties                   String?
+  status                          ComplianceAssessmentStatus      @default(DRAFT)
+  recommendedNextStep             ComplianceRecommendedNextStep?
+  authorityEvaluationRecordId     String?                         @db.Uuid
+  aiRiskFlags                     Json                            @default("[]")
+  completedAt                     DateTime?
+  createdAt                       DateTime                        @default(now())
+  updatedAt                       DateTime                        @updatedAt
+  case                            Case                            @relation(fields: [caseId], references: [id])
+  reviewerIdentity                Identity                        @relation("ComplianceAssessmentReviewerIdentity", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder            Officeholder?                   @relation("ComplianceAssessmentReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  functionAuthorityRecord         FunctionAuthorityRecord?        @relation(fields: [functionAuthorityRecordId], references: [id])
+  evidencePacket                  EvidencePacket?                 @relation(fields: [evidencePacketId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord?      @relation(fields: [authorityEvaluationRecordId], references: [id])
+  noncomplianceFindings           NoncomplianceFinding[]
+  escalations                     ComplianceEscalation[]
+  protectiveActionRecommendations ProtectiveActionRecommendation[]
+
+  @@index([caseId])
+  @@index([status])
+  @@index([reviewerIdentityId])
+  @@map("compliance_assessments")
+}
+
+model NoncomplianceFinding {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  findingNumber               String                     @unique
+  caseId                      String                     @db.Uuid
+  complianceAssessmentId      String?                    @db.Uuid
+  requirementSource           String
+  facts                       String
+  evidencePacketId            String?                    @db.Uuid
+  responsibleSubjectType      String
+  responsibleSubjectReference String
+  scope                       String
+  severity                    NoncomplianceSeverity
+  repetition                  NoncomplianceRepetition    @default(FIRST_OCCURRENCE)
+  materiality                 NoncomplianceMateriality
+  status                      NoncomplianceFindingStatus @default(DRAFT)
+  reasons                     String?
+  reviewRights                String?
+  isAiProposed                Boolean                    @default(false)
+  confirmedByIdentityId       String?                    @db.Uuid
+  confirmedByOfficeholderId   String?                    @db.Uuid
+  confirmedAt                 DateTime?
+  functionAuthorityRecordId   String?                    @db.Uuid
+  authorityEvaluationRecordId String?                    @db.Uuid
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  case                        Case                       @relation(fields: [caseId], references: [id])
+  complianceAssessment        ComplianceAssessment?      @relation(fields: [complianceAssessmentId], references: [id])
+  evidencePacket              EvidencePacket?            @relation(fields: [evidencePacketId], references: [id])
+  confirmedByIdentity         Identity?                  @relation("NoncomplianceFindingConfirmedByIdentity", fields: [confirmedByIdentityId], references: [id])
+  confirmedByOfficeholder     Officeholder?              @relation("NoncomplianceFindingConfirmedByOfficeholder", fields: [confirmedByOfficeholderId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord?   @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  escalations                 ComplianceEscalation[]
+  protectiveActionRecommendations ProtectiveActionRecommendation[]
+
+  @@index([caseId])
+  @@index([complianceAssessmentId])
+  @@index([status])
+  @@map("noncompliance_findings")
+}
+
+model ComplianceEscalation {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  caseId                      String                     @db.Uuid
+  complianceAssessmentId      String?                    @db.Uuid
+  noncomplianceFindingId      String?                    @db.Uuid
+  escalationType              ComplianceEscalationType
+  status                      ComplianceEscalationStatus @default(PENDING)
+  reason                      String
+  escalatedByIdentityId       String                     @db.Uuid
+  escalatedByOfficeholderId   String?                    @db.Uuid
+  escalatedToReference        String?
+  authorityEvaluationRecordId String?                    @db.Uuid
+  phase8InstrumentId          String?                    @db.Uuid
+  acknowledgedAt              DateTime?
+  resolvedAt                  DateTime?
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  case                        Case                       @relation(fields: [caseId], references: [id])
+  complianceAssessment        ComplianceAssessment?      @relation(fields: [complianceAssessmentId], references: [id])
+  noncomplianceFinding        NoncomplianceFinding?      @relation(fields: [noncomplianceFindingId], references: [id])
+  escalatedByIdentity         Identity                   @relation("ComplianceEscalationEscalatedByIdentity", fields: [escalatedByIdentityId], references: [id])
+  escalatedByOfficeholder     Officeholder?              @relation("ComplianceEscalationEscalatedByOfficeholder", fields: [escalatedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  phase8Instrument            OfficialInstrument?        @relation(fields: [phase8InstrumentId], references: [id])
+
+  @@index([caseId])
+  @@index([complianceAssessmentId])
+  @@index([noncomplianceFindingId])
+  @@index([escalationType, status])
+  @@map("compliance_escalations")
+}
+
+model EnforcementReferral {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  referralNumber              String                            @unique
+  caseId                      String                            @db.Uuid
+  matter                      String
+  competentAuthority          String
+  externalAuthorityId         String?                           @db.Uuid
+  authorityPurpose            String
+  facts                       String
+  evidencePacketId            String?                           @db.Uuid
+  questionsRequest            String?
+  securityClassification      String?
+  retainedAuthorityClass      RetainedEnforcementAuthorityClass?
+  retainsNationalAuthority    Boolean                           @default(false)
+  status                      EnforcementReferralStatus           @default(DRAFT)
+  sentAt                      DateTime?
+  acknowledgment              Json?
+  response                    String?
+  outcomeReference            String?
+  referredByIdentityId        String                            @db.Uuid
+  referredByOfficeholderId    String?                           @db.Uuid
+  authorityEvaluationRecordId String?                           @db.Uuid
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  case                        Case                              @relation(fields: [caseId], references: [id])
+  externalAuthority           ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
+  evidencePacket              EvidencePacket?                   @relation(fields: [evidencePacketId], references: [id])
+  referredByIdentity          Identity                          @relation("EnforcementReferralReferredByIdentity", fields: [referredByIdentityId], references: [id])
+  referredByOfficeholder      Officeholder?                     @relation("EnforcementReferralReferredByOfficeholder", fields: [referredByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?        @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([caseId])
+  @@index([status])
+  @@index([externalAuthorityId])
+  @@map("enforcement_referrals")
+}
+
+model ProtectiveActionRecommendation {
+  id                          String                               @id @default(uuid()) @db.Uuid
+  recommendationNumber        String                               @unique
+  caseId                      String                               @db.Uuid
+  complianceAssessmentId      String?                              @db.Uuid
+  noncomplianceFindingId      String?                              @db.Uuid
+  recommendationType          ProtectiveActionRecommendationType
+  status                      ProtectiveActionRecommendationStatus @default(DRAFT)
+  rationale                   String
+  recommendedByIdentityId     String                               @db.Uuid
+  recommendedByOfficeholderId String?                              @db.Uuid
+  authorityEvaluationRecordId String?                              @db.Uuid
+  phase8InstrumentId          String?                              @db.Uuid
+  createdAt                   DateTime                             @default(now())
+  updatedAt                   DateTime                             @updatedAt
+  case                        Case                                 @relation(fields: [caseId], references: [id])
+  complianceAssessment        ComplianceAssessment?                @relation(fields: [complianceAssessmentId], references: [id])
+  noncomplianceFinding        NoncomplianceFinding?                @relation(fields: [noncomplianceFindingId], references: [id])
+  recommendedByIdentity       Identity                             @relation("ProtectiveActionRecommendedByIdentity", fields: [recommendedByIdentityId], references: [id])
+  recommendedByOfficeholder   Officeholder?                        @relation("ProtectiveActionRecommendedByOfficeholder", fields: [recommendedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?           @relation(fields: [authorityEvaluationRecordId], references: [id])
+  phase8Instrument            OfficialInstrument?                  @relation(fields: [phase8InstrumentId], references: [id])
+
+  @@index([caseId])
+  @@index([complianceAssessmentId])
+  @@index([noncomplianceFindingId])
+  @@index([recommendationType, status])
+  @@map("protective_action_recommendations")
+}
+
+model EmergencyInterimActionRecord {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  recordNumber                String                       @unique
+  caseId                      String                       @db.Uuid
+  functionAuthorityRecordId   String                       @db.Uuid
+  immediateRisk               String
+  scope                       String
+  evidenceAvailable           String
+  actorIdentityId             String                       @db.Uuid
+  actorOfficeholderId         String?                      @db.Uuid
+  effectiveFrom               DateTime
+  effectiveUntil              DateTime
+  noticeRequirement           String?
+  postActionReviewDeadline    DateTime
+  relationshipToFinalDecision String?
+  status                      EmergencyInterimActionStatus @default(ACTIVE)
+  postActionReviewCompletedAt DateTime?
+  authorityEvaluationRecordId String?                      @db.Uuid
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  case                        Case                         @relation(fields: [caseId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord      @relation(fields: [functionAuthorityRecordId], references: [id])
+  actorIdentity               Identity                     @relation("EmergencyInterimActionActorIdentity", fields: [actorIdentityId], references: [id])
+  actorOfficeholder           Officeholder?                @relation("EmergencyInterimActionActorOfficeholder", fields: [actorOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?   @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([caseId])
+  @@index([status])
+  @@index([effectiveUntil])
+  @@map("emergency_interim_action_records")
 enum ComplianceImmediateActionRoute {
   NONE
   IMMEDIATE_RESTRICTION
