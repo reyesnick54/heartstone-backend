@@ -25,9 +25,9 @@ interface CommunicationMafIndexEntryWithRelations {
   deliveredVersionReference: string;
   indexedAt: Date;
   message: {
-    messageNumber: string;
-    sourceRecordType: string;
-    canonicalNoticeReference: string | null;
+    messageReference: string;
+    decisionNoticeReference: string | null;
+    subject: string;
   };
   templateVersion: { id: string } | null;
 }
@@ -97,7 +97,7 @@ export class MasterAdministrativeFileIndexService {
         where: { masterAdministrativeFileId: file.id },
         include: { message: true, templateVersion: true },
         orderBy: { indexedAt: 'asc' },
-      }) as Promise<CommunicationMafIndexEntryWithRelations[]>,
+      }),
       this.prisma.caseWorkflowInstance.findUnique({ where: { caseId: file.caseId } }),
       this.prisma.officialInstrument.findMany({
         where: { caseId: file.caseId },
@@ -317,13 +317,13 @@ export class MasterAdministrativeFileIndexService {
           ...context.communicationIndexEntries.map((entry) => ({
             referenceType: 'CommunicationMessage',
             referenceId: entry.messageId,
-            label: entry.message.messageNumber,
+            label: entry.message.messageReference,
             occurredAt: entry.indexedAt.toISOString(),
             metadata: {
               deliveredVersionReference: entry.deliveredVersionReference,
               templateVersionId: entry.templateVersionId,
-              sourceRecordType: entry.message.sourceRecordType,
-              canonicalNoticeReference: entry.message.canonicalNoticeReference,
+              subject: entry.message.subject,
+              decisionNoticeReference: entry.message.decisionNoticeReference,
             },
           })),
         ];
@@ -361,11 +361,11 @@ export class MasterAdministrativeFileIndexService {
           ...context.feeAssessments.map((assessment) => ({
             referenceType: 'FeeAssessment',
             referenceId: assessment.id,
-            label: assessment.assessmentNumber,
+            label: assessment.assessmentReference,
             occurredAt: assessment.calculatedAt.toISOString(),
             metadata: {
               status: assessment.status,
-              totalCents: assessment.totalCents,
+              totalCents: assessment.totalAmountCents,
               currency: assessment.currency,
               feeScheduleVersionId: assessment.feeScheduleVersionId,
             },
@@ -377,8 +377,8 @@ export class MasterAdministrativeFileIndexService {
             occurredAt: (invoice.issuedAt ?? invoice.createdAt).toISOString(),
             metadata: {
               status: invoice.status,
-              totalCents: invoice.totalCents,
-              amountOutstandingCents: invoice.amountOutstandingCents,
+              totalCents: invoice.totalAmountCents,
+              amountOutstandingCents: invoice.totalAmountCents - invoice.amountPaidCents,
               currency: invoice.currency,
             },
           })),
