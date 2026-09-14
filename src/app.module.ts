@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
 import { createPinoConfig } from './common/logging/pino-config';
+import { CommunicationsModule } from './communications/communications.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
@@ -16,11 +17,13 @@ import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
+import { FinancialAdministrationModule } from './financial-administration/financial-administration.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { PaymentsModule } from './payments/payments.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -55,8 +58,12 @@ import { SystemModule } from './system/system.module';
     DecisionsModule,
     DecisionsIssuanceModule,
     ComplianceModule,
+    CommunicationsModule,
+    PaymentsModule,
     RedressModule,
     IntegrationsModule,
+    PaymentsModule,
+    FinancialAdministrationModule,
   ],
 })
 export class AppModule {}
