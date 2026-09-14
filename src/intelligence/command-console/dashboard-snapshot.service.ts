@@ -42,9 +42,7 @@ export class DashboardSnapshotService {
       indicators: formattedProjections,
     };
 
-    const snapshotHash = createHash('sha256')
-      .update(JSON.stringify(snapshotPayload))
-      .digest('hex');
+    const snapshotHash = createHash('sha256').update(JSON.stringify(snapshotPayload)).digest('hex');
 
     return this.prisma.dashboardSnapshot.create({
       data: {
