@@ -27,6 +27,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "security:scan-secrets": "node scripts/check-secrets.js",
+    "security:audit-dependencies": "node scripts/check-dependency-vulnerabilities.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
