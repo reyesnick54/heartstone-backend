@@ -289,7 +289,7 @@ CREATE TABLE "measured_performance_claims" (
   "supersededByClaimId" UUID,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
-  CONSTRAINT "performance_claims_pkey" PRIMARY KEY ("id")
+  CONSTRAINT "measured_performance_claims_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "measured_performance_claim_evidence_links" (
@@ -298,7 +298,7 @@ CREATE TABLE "measured_performance_claim_evidence_links" (
   "evidencePacketId" UUID NOT NULL,
   "linkPurpose" TEXT NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT "performance_claim_evidence_links_pkey" PRIMARY KEY ("id")
+  CONSTRAINT "measured_performance_claim_evidence_links_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "measured_performance_claim_reviews" (
@@ -309,7 +309,7 @@ CREATE TABLE "measured_performance_claim_reviews" (
   "findings" TEXT,
   "limitationsNoted" TEXT,
   "reviewedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT "performance_claim_reviews_pkey" PRIMARY KEY ("id")
+  CONSTRAINT "measured_performance_claim_reviews_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "measured_performance_claim_revalidations" (
@@ -320,7 +320,7 @@ CREATE TABLE "measured_performance_claim_revalidations" (
   "outcome" TEXT NOT NULL,
   "notes" TEXT,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT "performance_claim_revalidations_pkey" PRIMARY KEY ("id")
+  CONSTRAINT "measured_performance_claim_revalidations_pkey" PRIMARY KEY ("id")
 );
 
 CREATE UNIQUE INDEX "performance_frameworks_code_key" ON "performance_frameworks"("code");
@@ -355,25 +355,25 @@ CREATE INDEX "metric_data_quality_assessments_calculationRunId_idx" ON "metric_d
 CREATE INDEX "metric_data_quality_assessments_dimension_idx" ON "metric_data_quality_assessments"("dimension");
 CREATE INDEX "metric_data_quality_assessments_result_idx" ON "metric_data_quality_assessments"("result");
 
-CREATE UNIQUE INDEX "performance_claims_claimReference_key" ON "measured_performance_claims"("claimReference");
-CREATE UNIQUE INDEX "performance_claims_supersededByClaimId_key" ON "measured_performance_claims"("supersededByClaimId");
-CREATE INDEX "performance_claims_metricDefinitionVersionId_idx" ON "measured_performance_claims"("metricDefinitionVersionId");
-CREATE INDEX "performance_claims_calculationRunId_idx" ON "measured_performance_claims"("calculationRunId");
-CREATE INDEX "performance_claims_baselineId_idx" ON "measured_performance_claims"("baselineId");
-CREATE INDEX "performance_claims_ownerIdentityId_idx" ON "measured_performance_claims"("ownerIdentityId");
-CREATE INDEX "performance_claims_reviewerIdentityId_idx" ON "measured_performance_claims"("reviewerIdentityId");
-CREATE INDEX "performance_claims_status_idx" ON "measured_performance_claims"("status");
-CREATE INDEX "performance_claims_revalidationDate_idx" ON "measured_performance_claims"("revalidationDate");
+CREATE UNIQUE INDEX "measured_performance_claims_claimReference_key" ON "measured_performance_claims"("claimReference");
+CREATE UNIQUE INDEX "measured_performance_claims_supersededByClaimId_key" ON "measured_performance_claims"("supersededByClaimId");
+CREATE INDEX "measured_performance_claims_metricDefinitionVersionId_idx" ON "measured_performance_claims"("metricDefinitionVersionId");
+CREATE INDEX "measured_performance_claims_calculationRunId_idx" ON "measured_performance_claims"("calculationRunId");
+CREATE INDEX "measured_performance_claims_baselineId_idx" ON "measured_performance_claims"("baselineId");
+CREATE INDEX "measured_performance_claims_ownerIdentityId_idx" ON "measured_performance_claims"("ownerIdentityId");
+CREATE INDEX "measured_performance_claims_reviewerIdentityId_idx" ON "measured_performance_claims"("reviewerIdentityId");
+CREATE INDEX "measured_performance_claims_status_idx" ON "measured_performance_claims"("status");
+CREATE INDEX "measured_performance_claims_revalidationDate_idx" ON "measured_performance_claims"("revalidationDate");
 
-CREATE UNIQUE INDEX "performance_claim_evidence_links_performanceClaimId_evidencePacketId_linkPurpose_key" ON "measured_performance_claim_evidence_links"("performanceClaimId", "evidencePacketId", "linkPurpose");
-CREATE INDEX "performance_claim_evidence_links_performanceClaimId_idx" ON "measured_performance_claim_evidence_links"("performanceClaimId");
-CREATE INDEX "performance_claim_evidence_links_evidencePacketId_idx" ON "measured_performance_claim_evidence_links"("evidencePacketId");
+CREATE UNIQUE INDEX "measured_performance_claim_evidence_links_performanceClaimId_evidencePacketId_linkPurpose_key" ON "measured_performance_claim_evidence_links"("performanceClaimId", "evidencePacketId", "linkPurpose");
+CREATE INDEX "measured_performance_claim_evidence_links_performanceClaimId_idx" ON "measured_performance_claim_evidence_links"("performanceClaimId");
+CREATE INDEX "measured_performance_claim_evidence_links_evidencePacketId_idx" ON "measured_performance_claim_evidence_links"("evidencePacketId");
 
-CREATE INDEX "performance_claim_reviews_performanceClaimId_idx" ON "measured_performance_claim_reviews"("performanceClaimId");
-CREATE INDEX "performance_claim_reviews_reviewerIdentityId_idx" ON "measured_performance_claim_reviews"("reviewerIdentityId");
+CREATE INDEX "measured_performance_claim_reviews_performanceClaimId_idx" ON "measured_performance_claim_reviews"("performanceClaimId");
+CREATE INDEX "measured_performance_claim_reviews_reviewerIdentityId_idx" ON "measured_performance_claim_reviews"("reviewerIdentityId");
 
-CREATE INDEX "performance_claim_revalidations_performanceClaimId_idx" ON "measured_performance_claim_revalidations"("performanceClaimId");
-CREATE INDEX "performance_claim_revalidations_revalidationDate_idx" ON "measured_performance_claim_revalidations"("revalidationDate");
+CREATE INDEX "measured_performance_claim_revalidations_performanceClaimId_idx" ON "measured_performance_claim_revalidations"("performanceClaimId");
+CREATE INDEX "measured_performance_claim_revalidations_revalidationDate_idx" ON "measured_performance_claim_revalidations"("revalidationDate");
 
 ALTER TABLE "performance_frameworks" ADD CONSTRAINT "performance_frameworks_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "metric_definitions" ADD CONSTRAINT "metric_definitions_frameworkId_fkey" FOREIGN KEY ("frameworkId") REFERENCES "performance_frameworks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -386,15 +386,15 @@ ALTER TABLE "metric_calculation_runs" ADD CONSTRAINT "metric_calculation_runs_me
 ALTER TABLE "metric_observations" ADD CONSTRAINT "metric_observations_calculationRunId_fkey" FOREIGN KEY ("calculationRunId") REFERENCES "metric_calculation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "metric_dependency_classifications" ADD CONSTRAINT "metric_dependency_classifications_metricVersionId_fkey" FOREIGN KEY ("metricVersionId") REFERENCES "metric_definition_versions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "metric_data_quality_assessments" ADD CONSTRAINT "metric_data_quality_assessments_calculationRunId_fkey" FOREIGN KEY ("calculationRunId") REFERENCES "metric_calculation_runs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_metricDefinitionVersionId_fkey" FOREIGN KEY ("metricDefinitionVersionId") REFERENCES "metric_definition_versions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_calculationRunId_fkey" FOREIGN KEY ("calculationRunId") REFERENCES "metric_calculation_runs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_baselineId_fkey" FOREIGN KEY ("baselineId") REFERENCES "metric_baselines"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_ownerIdentityId_fkey" FOREIGN KEY ("ownerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "performance_claims_supersededByClaimId_fkey" FOREIGN KEY ("supersededByClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_evidence_links" ADD CONSTRAINT "performance_claim_evidence_links_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_evidence_links" ADD CONSTRAINT "performance_claim_evidence_links_evidencePacketId_fkey" FOREIGN KEY ("evidencePacketId") REFERENCES "evidence_packets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_reviews" ADD CONSTRAINT "performance_claim_reviews_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_reviews" ADD CONSTRAINT "performance_claim_reviews_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_revalidations" ADD CONSTRAINT "performance_claim_revalidations_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "measured_performance_claim_revalidations" ADD CONSTRAINT "performance_claim_revalidations_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_metricDefinitionVersionId_fkey" FOREIGN KEY ("metricDefinitionVersionId") REFERENCES "metric_definition_versions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_calculationRunId_fkey" FOREIGN KEY ("calculationRunId") REFERENCES "metric_calculation_runs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_baselineId_fkey" FOREIGN KEY ("baselineId") REFERENCES "metric_baselines"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_ownerIdentityId_fkey" FOREIGN KEY ("ownerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claims" ADD CONSTRAINT "measured_performance_claims_supersededByClaimId_fkey" FOREIGN KEY ("supersededByClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_evidence_links" ADD CONSTRAINT "measured_performance_claim_evidence_links_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_evidence_links" ADD CONSTRAINT "measured_performance_claim_evidence_links_evidencePacketId_fkey" FOREIGN KEY ("evidencePacketId") REFERENCES "evidence_packets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_reviews" ADD CONSTRAINT "measured_performance_claim_reviews_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_reviews" ADD CONSTRAINT "measured_performance_claim_reviews_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_revalidations" ADD CONSTRAINT "measured_performance_claim_revalidations_performanceClaimId_fkey" FOREIGN KEY ("performanceClaimId") REFERENCES "measured_performance_claims"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "measured_performance_claim_revalidations" ADD CONSTRAINT "measured_performance_claim_revalidations_reviewerIdentityId_fkey" FOREIGN KEY ("reviewerIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
