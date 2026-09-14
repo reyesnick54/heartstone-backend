@@ -128,6 +128,7 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  integrations                 Integration[]
   ownedIntegrationDefinitions  IntegrationDefinition[]         @relation("IntegrationInstitutionalOwner")
   integrationInstitutionOwners IntegrationInstitutionOwner[]
   authoritativeSourceDesignations AuthoritativeSourceDesignation[]
@@ -368,6 +369,7 @@ model ExternalAuthority {
   documentVersionsReceived         DocumentVersion[]
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
   externalReviewReferrals          ExternalReviewReferral[]
+  integrations                     Integration[]
 
   @@map("external_authorities")
 }
@@ -604,6 +606,10 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  integrationVersionsAccepted        IntegrationVersion[]          @relation("IntegrationVersionAcceptedBy")
+  integrationVersionsAsService       IntegrationVersion[]          @relation("IntegrationVersionServiceIdentity")
+  integrationCredentials             IntegrationCredential[]
+  integrationRequestsInitiated       IntegrationRequest[]          @relation("IntegrationRequestInitiator")
   authoritativeDesignationsDesignated AuthoritativeSourceDesignation[] @relation("AuthoritativeDesignationDesignator")
   integrationApprovalsApproved       IntegrationApproval[]         @relation("IntegrationApprovalApprover")
   integrationAcceptanceRecordsAchieved IntegrationAcceptanceRecord[] @relation("IntegrationAcceptanceAchiever")
@@ -2292,6 +2298,7 @@ model Application {
   submissions                ApplicationSubmission[]
   case                       Case?
   masterAdministrativeFile   MasterAdministrativeFile?
+  integrationRequests        IntegrationRequest[]
   invoices                   Invoice[]
   feeAssessments             FeeAssessment[]
 
@@ -2395,6 +2402,7 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  integrationRequests               IntegrationRequest[]
   communicationMessages             CommunicationMessage[]
   feeAssessments                    FeeAssessment[]
   invoices                          Invoice[]
@@ -3152,6 +3160,7 @@ model DocumentRecord {
   auditEvents                      DocumentAuditEvent[]
   governmentCommunicationDocuments GovernmentCommunicationDocument[]
   custodyEvents                    EvidenceCustodyEvent[]
+  integrationExchanges             IntegrationExchange[]
   paymentReceipts                  PaymentReceipt[]
 
   @@index([owningInstitutionId])
@@ -7528,6 +7537,365 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+// ─── Phase 11: Payments, Notifications & Integrations ────────────────────────
+// Phase 11F: Governed Integration Gateway and Data Exchange
+
+enum IntegrationLifecycleStatus {
+  DRAFT
+  PENDING_ACCEPTANCE
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum IntegrationOperation {
+  QUERY
+  SUBMIT
+  UPDATE
+  SEND_EVENT
+  RECEIVE_EVENT
+  HEALTH_CHECK
+}
+
+enum IntegrationExchangeDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum IntegrationExchangeStatus {
+  PREPARED
+  SENT
+  ACKNOWLEDGED
+  RESPONSE_RECEIVED
+  VALIDATED
+  RECONCILIATION_REQUIRED
+  FAILED
+  TIMED_OUT
+  RETRY_PENDING
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum IntegrationMessageDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum IntegrationDeliveryAttemptOutcome {
+  SUCCESS
+  FAILURE
+  TIMEOUT
+  RETRY_SCHEDULED
+}
+
+enum IntegrationSignatureValidationResult {
+  VALID
+  INVALID
+  MISSING
+  NOT_APPLICABLE
+}
+
+enum IntegrationWebhookProcessingStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  REJECTED_INVALID_SIGNATURE
+  REJECTED_REPLAY
+  REJECTED_DUPLICATE
+  REJECTED_UNEXPECTED_TYPE
+  REJECTED_INVALID_SCHEMA
+  REJECTED_EXPIRED_TIMESTAMP
+  SAFE_HALTED
+}
+
+enum IntegrationValidationOverallStatus {
+  PENDING
+  PASSED
+  FAILED
+  PARTIAL
+}
+
+enum IntegrationDataClassification {
+  UNCLASSIFIED
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED
+  SECRET
+}
+
+model Integration {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  code                String                     @unique
+  name                String
+  description         String?
+  institutionId       String?                    @db.Uuid
+  externalAuthorityId String?                    @db.Uuid
+  status              IntegrationLifecycleStatus @default(DRAFT)
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  institution         Institution?               @relation(fields: [institutionId], references: [id])
+  externalAuthority   ExternalAuthority?         @relation(fields: [externalAuthorityId], references: [id])
+  versions            IntegrationVersion[]
+
+  @@index([institutionId])
+  @@index([externalAuthorityId])
+  @@index([status])
+  @@map("integrations")
+}
+
+model IntegrationVersion {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  integrationId             String                      @db.Uuid
+  version                   String
+  status                    IntegrationLifecycleStatus  @default(DRAFT)
+  adapterType               String
+  acceptedAt                DateTime?
+  acceptedByIdentityId      String?                     @db.Uuid
+  serviceIdentityId         String                      @db.Uuid
+  requestSchemaVersion      String
+  permittedOperations       Json
+  permittedPurposes         Json
+  permittedFields           Json
+  dataClassificationCeiling IntegrationDataClassification @default(OFFICIAL)
+  capabilityDeclarations    Json
+  schemaDefinition          Json?
+  failurePolicy             Json?
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  integration               Integration                 @relation(fields: [integrationId], references: [id])
+  acceptedByIdentity        Identity?                   @relation("IntegrationVersionAcceptedBy", fields: [acceptedByIdentityId], references: [id])
+  serviceIdentity           Identity                    @relation("IntegrationVersionServiceIdentity", fields: [serviceIdentityId], references: [id])
+  credential                IntegrationCredential?
+  requests                  IntegrationRequest[]
+  exchanges                 IntegrationExchange[]
+  webhookEvents             IntegrationWebhookEvent[]
+
+  @@unique([integrationId, version])
+  @@index([integrationId])
+  @@index([status])
+  @@index([serviceIdentityId])
+  @@map("integration_versions")
+}
+
+model IntegrationCredential {
+  id                   String           @id @default(uuid()) @db.Uuid
+  integrationVersionId String           @unique @db.Uuid
+  identityId           String           @db.Uuid
+  credentialReference  String
+  status               CredentialStatus @default(PENDING)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  integrationVersion   IntegrationVersion @relation(fields: [integrationVersionId], references: [id])
+  identity             Identity           @relation(fields: [identityId], references: [id])
+
+  @@index([identityId])
+  @@index([status])
+  @@map("integration_credentials")
+}
+
+model IntegrationRequest {
+  id                   String               @id @default(uuid()) @db.Uuid
+  integrationVersionId String               @db.Uuid
+  operation            IntegrationOperation
+  initiatingIdentityId String               @db.Uuid
+  serviceIdentityId    String?              @db.Uuid
+  institutionalPurpose String
+  caseId               String?              @db.Uuid
+  applicationId        String?              @db.Uuid
+  recordReference      String?
+  permittedFields      Json
+  requestSchemaVersion String
+  correlationId        String
+  idempotencyKey       String
+  payloadHash          String
+  payloadMinimized     Json
+  dataClassification   IntegrationDataClassification
+  createdAt            DateTime             @default(now())
+  integrationVersion   IntegrationVersion   @relation(fields: [integrationVersionId], references: [id])
+  initiatingIdentity   Identity             @relation("IntegrationRequestInitiator", fields: [initiatingIdentityId], references: [id])
+  case                 Case?                @relation(fields: [caseId], references: [id])
+  application          Application?         @relation(fields: [applicationId], references: [id])
+  exchanges            IntegrationExchange[]
+  correlationRecords   IntegrationCorrelationRecord[]
+
+  @@unique([integrationVersionId, idempotencyKey])
+  @@index([integrationVersionId])
+  @@index([initiatingIdentityId])
+  @@index([correlationId])
+  @@index([caseId])
+  @@index([applicationId])
+  @@map("integration_requests")
+}
+
+model IntegrationExchange {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  direction            IntegrationExchangeDirection
+  integrationVersionId String                       @db.Uuid
+  requestId            String?                      @db.Uuid
+  externalSystem       String
+  startedAt            DateTime                     @default(now())
+  completedAt          DateTime?
+  status               IntegrationExchangeStatus    @default(PREPARED)
+  correlationId        String
+  requestHash          String
+  responseHash         String?
+  dataClassification   IntegrationDataClassification
+  recordsReference     String?
+  documentRecordId     String?                      @db.Uuid
+  integrationVersion   IntegrationVersion           @relation(fields: [integrationVersionId], references: [id])
+  request              IntegrationRequest?          @relation(fields: [requestId], references: [id])
+  documentRecord       DocumentRecord?              @relation(fields: [documentRecordId], references: [id])
+  messages             IntegrationMessage[]
+  deliveryAttempts     IntegrationDeliveryAttempt[]
+  responseRecords      IntegrationResponseRecord[]
+  transformations      IntegrationDataTransformation[]
+  validationResults    IntegrationValidationResult[]
+  correlationRecords   IntegrationCorrelationRecord[]
+
+  @@index([integrationVersionId])
+  @@index([requestId])
+  @@index([correlationId])
+  @@index([status])
+  @@index([documentRecordId])
+  @@map("integration_exchanges")
+}
+
+model IntegrationMessage {
+  id                String                      @id @default(uuid()) @db.Uuid
+  exchangeId        String                      @db.Uuid
+  direction         IntegrationMessageDirection
+  messageType       String
+  contentHash       String
+  structuredSummary Json
+  createdAt         DateTime                    @default(now())
+  exchange          IntegrationExchange         @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
+
+  @@index([exchangeId])
+  @@index([contentHash])
+  @@map("integration_messages")
+}
+
+model IntegrationDeliveryAttempt {
+  id             String                          @id @default(uuid()) @db.Uuid
+  exchangeId     String                          @db.Uuid
+  attemptNumber  Int
+  outcome        IntegrationDeliveryAttemptOutcome
+  startedAt      DateTime                        @default(now())
+  completedAt    DateTime?
+  outcomeCode    String?
+  errorMessage   String?
+  createdAt      DateTime                        @default(now())
+  exchange       IntegrationExchange             @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
+
+  @@unique([exchangeId, attemptNumber])
+  @@index([exchangeId])
+  @@map("integration_delivery_attempts")
+}
+
+model IntegrationResponseRecord {
+  id               String                              @id @default(uuid()) @db.Uuid
+  exchangeId       String                              @db.Uuid
+  sourceVerified   Boolean                             @default(false)
+  endpointVerified Boolean                             @default(false)
+  signatureResult  IntegrationSignatureValidationResult @default(NOT_APPLICABLE)
+  schemaValid      Boolean                             @default(false)
+  versionValid     Boolean                             @default(false)
+  httpStatusCode   Int?
+  responseHash     String
+  structuredSummary Json
+  validatedAt      DateTime?
+  isValidated      Boolean                             @default(false)
+  createdAt        DateTime                            @default(now())
+  exchange         IntegrationExchange                 @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
+  validationResult IntegrationValidationResult?
+
+  @@index([exchangeId])
+  @@index([responseHash])
+  @@map("integration_response_records")
+}
+
+model IntegrationWebhookEvent {
+  id                   String                             @id @default(uuid()) @db.Uuid
+  integrationVersionId String                             @db.Uuid
+  externalEventId      String
+  eventType            String
+  receivedAt           DateTime                           @default(now())
+  signatureResult      IntegrationSignatureValidationResult @default(NOT_APPLICABLE)
+  timestampValid       Boolean                            @default(false)
+  replayValid          Boolean                            @default(false)
+  payloadHash          String
+  correlationId        String?
+  processingStatus     IntegrationWebhookProcessingStatus @default(PENDING)
+  rejectionReason      String?
+  createdAt            DateTime                           @default(now())
+  integrationVersion   IntegrationVersion                 @relation(fields: [integrationVersionId], references: [id])
+  validationResults    IntegrationValidationResult[]
+  correlationRecords   IntegrationCorrelationRecord[]
+
+  @@unique([integrationVersionId, externalEventId])
+  @@index([integrationVersionId])
+  @@index([eventType])
+  @@index([correlationId])
+  @@index([processingStatus])
+  @@map("integration_webhook_events")
+}
+
+model IntegrationCorrelationRecord {
+  id             String                 @id @default(uuid()) @db.Uuid
+  correlationId  String
+  exchangeId     String?                @db.Uuid
+  webhookEventId String?                @db.Uuid
+  requestId      String?                @db.Uuid
+  createdAt      DateTime               @default(now())
+  exchange       IntegrationExchange?   @relation(fields: [exchangeId], references: [id])
+  webhookEvent   IntegrationWebhookEvent? @relation(fields: [webhookEventId], references: [id])
+  request        IntegrationRequest?    @relation(fields: [requestId], references: [id])
+
+  @@index([correlationId])
+  @@index([exchangeId])
+  @@index([webhookEventId])
+  @@index([requestId])
+  @@map("integration_correlation_records")
+}
+
+model IntegrationDataTransformation {
+  id                    String              @id @default(uuid()) @db.Uuid
+  exchangeId            String              @db.Uuid
+  sourceSchema          String
+  destinationSchema     String
+  mappingVersion        String
+  transformationVersion String
+  inputHash             String
+  outputHash            String
+  lossyFields           Json
+  warnings              Json
+  createdAt             DateTime            @default(now())
+  exchange              IntegrationExchange @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
+
+  @@index([exchangeId])
+  @@index([inputHash])
+  @@index([outputHash])
+  @@map("integration_data_transformations")
+}
+
+model IntegrationValidationResult {
+  id               String                             @id @default(uuid()) @db.Uuid
+  exchangeId       String?                            @db.Uuid
+  responseRecordId String?                            @unique @db.Uuid
+  webhookEventId   String?                            @db.Uuid
+  overallStatus    IntegrationValidationOverallStatus @default(PENDING)
+  checks           Json
+  failureReasons   Json
+  createdAt        DateTime                           @default(now())
+  exchange         IntegrationExchange?               @relation(fields: [exchangeId], references: [id])
+  responseRecord   IntegrationResponseRecord?         @relation(fields: [responseRecordId], references: [id])
+  webhookEvent     IntegrationWebhookEvent?           @relation(fields: [webhookEventId], references: [id])
+
+  @@index([exchangeId])
+  @@index([webhookEventId])
+  @@index([overallStatus])
+  @@map("integration_validation_results")
 // ─── Phase 11E: Integration Registry, Dependencies & Authoritative Source Catalog ─
 
 enum TechnologyDependencyCategory {
