@@ -71,7 +71,6 @@ export class MetricCalculationService {
   }
 
   async recordObservation(input: RecordMetricObservationInput) {
-    this.boundary.rejectClientMetricFields(input as unknown as Record<string, unknown>);
     this.boundary.assertMetricObservationNotPerformanceVerdict();
     return this.prisma.metricObservation.create({
       data: {

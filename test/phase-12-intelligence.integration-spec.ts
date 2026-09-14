@@ -63,7 +63,7 @@ describe('Phase 12 intelligence (integration)', () => {
     const storedRun = await prisma.metricCalculationRun.findUniqueOrThrow({
       where: { id: completedRun.id },
     });
-    const inputs = storedRun.inputsSnapshot as {
+    const inputs = storedRun.inputsSnapshot as unknown as {
       processingTimeBreakdown: ReturnType<typeof buildProcessingTimeBreakdown>;
     };
     expect(inputs.processingTimeBreakdown.ABSEZ).toBe(48);

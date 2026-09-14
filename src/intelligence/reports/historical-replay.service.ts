@@ -30,7 +30,12 @@ export class HistoricalReplayService {
 
   async createDecisionTrace(input: CreateDecisionTraceInput) {
     this.boundary.assertDecisionTraceNotSubstitutesDecision();
-    this.boundary.rejectAnalyticsPatchTargets(input as unknown as Record<string, unknown>);
+    if (input.decisionTrace) {
+      this.boundary.rejectAnalyticsPatchTargets(input.decisionTrace);
+    }
+    if (input.processingTimeBreakdown) {
+      this.boundary.rejectAnalyticsPatchTargets(input.processingTimeBreakdown);
+    }
     return this.prisma.evidenceDashboardDecisionTrace.create({
       data: {
         institutionId: input.institutionId,

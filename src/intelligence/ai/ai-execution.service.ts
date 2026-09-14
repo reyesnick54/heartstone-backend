@@ -36,7 +36,6 @@ export class AiExecutionService {
 
   async execute(input: ExecuteAiInput) {
     this.boundary.rejectClientAiExecutionFields(input as unknown as Record<string, unknown>);
-    this.boundary.assertAiAssistanceNotOfficialActor('AI_ASSISTANCE');
 
     if (input.aiModelVersionId) {
       await this.modelRegistry.assertModelExecutable(input.aiModelVersionId);

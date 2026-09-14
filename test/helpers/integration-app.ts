@@ -8,9 +8,9 @@ import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
+import { resetFinancialData } from './financial-test-reset';
 import { resetIntelligenceData } from './intelligence-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
-import { resetFinancialData } from './financial-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{

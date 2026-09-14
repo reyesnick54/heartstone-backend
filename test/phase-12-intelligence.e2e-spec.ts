@@ -19,10 +19,10 @@ import { type App } from 'supertest/types';
 import { type PrismaService } from '../src/database/prisma.service';
 import { AiExecutionService } from '../src/intelligence/ai/ai-execution.service';
 import { AiPromptGovernanceService } from '../src/intelligence/ai/ai-prompt-governance.service';
+import { AnalysisEngineService } from '../src/intelligence/analysis/analysis-engine.service';
 import { IntelligenceBoundaryService } from '../src/intelligence/common/intelligence-boundary.service';
 import { DashboardIndicatorService } from '../src/intelligence/dashboards/dashboard-indicator.service';
 import { ExecutiveDashboardService } from '../src/intelligence/dashboards/executive-dashboard.service';
-import { AnalysisEngineService } from '../src/intelligence/analysis/analysis-engine.service';
 import { MetricCalculationService } from '../src/intelligence/metrics/metric-calculation.service';
 import { PerformanceClaimService } from '../src/intelligence/metrics/performance-claim.service';
 import { IntelligenceMonitoringService } from '../src/intelligence/monitoring/intelligence-monitoring.service';
@@ -32,12 +32,12 @@ import { StrategicProjectService } from '../src/intelligence/strategic-projects/
 import { DigitalTwinService } from '../src/intelligence/twins/digital-twin.service';
 import { SimulationService } from '../src/intelligence/twins/simulation.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { requirePreRecordedDecision } from './helpers/phase-8-test-fixtures';
 import {
   buildProcessingTimeBreakdown,
   EXECUTIVE_INDICATOR_CODES,
   seedPhase12Fixture,
 } from './helpers/phase-12-test-fixtures';
-import { requirePreRecordedDecision } from './helpers/phase-8-test-fixtures';
 
 describe('Phase 12 intelligence (e2e)', () => {
   let app: INestApplication<App>;
@@ -67,13 +67,19 @@ describe('Phase 12 intelligence (e2e)', () => {
       institutionId: fixture.institutionId,
       caseId: fixture.caseId,
       governmentDecisionId: requirePreRecordedDecision(fixture),
-      processingTimeBreakdown: processingBreakdown,
-      absezProcessingMinutes: processingBreakdown.ABSEZ,
-      applicantProcessingMinutes: processingBreakdown.APPLICANT,
-      externalDependencyProcessingMinutes: processingBreakdown.EXTERNAL_DEPENDENCY,
+      processingTimeBreakdown: { ...processingBreakdown },
       decisionTrace: {
         metricCode: fixture.servicePerformanceMetricCode,
         components: processingBreakdown,
+      },
+    });
+
+    await prisma.evidenceDashboardDecisionTrace.update({
+      where: { id: trace.id },
+      data: {
+        absezProcessingMinutes: processingBreakdown.ABSEZ,
+        applicantProcessingMinutes: processingBreakdown.APPLICANT,
+        externalDependencyProcessingMinutes: processingBreakdown.EXTERNAL_DEPENDENCY,
       },
     });
 
@@ -156,7 +162,7 @@ describe('Phase 12 intelligence (e2e)', () => {
 
     const httpBody = httpView.body as {
       disclaimer: string;
-      dashboard: { versions: Array<{ indicators: Array<{ indicatorCode: string; config: Record<string, unknown> }> }> };
+      dashboard: { versions: { indicators: { indicatorCode: string; config: Record<string, unknown> }[] }[] };
     };
     expect(httpBody.disclaimer).toContain('do not constitute command authority');
     const indicators = httpBody.dashboard.versions[0]?.indicators ?? [];
@@ -188,11 +194,11 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect(reported.status).toBe(StrategicProjectMilestoneStatus.REPORTED);
 
     await expect(strategicProjects.treatReportedAsVerified(reported.id)).rejects.toThrow(
-      /sponsor report/i,
+      /SPONSOR_REPORT_NOT_VERIFIED_MILESTONE/i,
     );
     expect(() => {
       boundary.assertReportedMilestoneNotCompleted(StrategicProjectMilestoneStatus.REPORTED);
-    }).toThrow(/reported milestone/i);
+    }).toThrow(/REPORTED_MILESTONE_NOT_COMPLETED/i);
 
     const verified = await strategicProjects.verifyMilestone(reported.id);
     expect(verified.status).toBe(StrategicProjectMilestoneStatus.VERIFIED);
@@ -283,7 +289,7 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect(await prisma.authorityActionRight.count()).toBe(rightsBefore);
     expect(await prisma.aIIncident.count({ where: { aiExecutionRecordId: execution.id } })).toBe(1);
 
-    await expect(aiExecutions.rejectForbiddenAction('APPROVE')).rejects.toThrow(ForbiddenException);
+    expect(() => { aiExecutions.rejectForbiddenAction('APPROVE'); }).toThrow(ForbiddenException);
   });
 
   it('E2E6. threshold alert is raised unverified and requires human evidence verification', async () => {
@@ -362,7 +368,7 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect((output.outputData as { label: string }).label).toBe('MODELED_SCENARIO');
 
     const caseBefore = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
-    expect(() => simulations.applyToLiveCase(true)).toThrow(/live case/i);
+    expect(() => { simulations.applyToLiveCase(true); }).toThrow(/SIMULATION_CANNOT_UPDATE_LIVE_CASE/i);
     const caseAfter = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
     expect(caseAfter.status).toBe(caseBefore.status);
   });
@@ -621,9 +627,12 @@ describe('Phase 12 intelligence (e2e)', () => {
         aiModelVersionId: fixture.aiModelVersionId,
         analysisRunId: analysisRun.id,
         humanReview: { reviewerIdentityId: fixture.approverIdentityId, outcome: 'REVIEWED' },
-        governmentDecisionId: requirePreRecordedDecision(fixture),
+        decisionRecordId: requirePreRecordedDecision(fixture),
       },
-      processingTimeBreakdown: buildProcessingTimeBreakdown(24, 36, 12),
+      processingTimeBreakdown: buildProcessingTimeBreakdown(24, 36, 12) as unknown as Record<
+        string,
+        unknown
+      >,
     });
 
     const replay = await historicalReplay.replayTrace(trace.traceReference);

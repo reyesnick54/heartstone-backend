@@ -68,7 +68,6 @@ export class ReportService {
   }
 
   async createClaim(input: CreateReportClaimInput) {
-    this.boundary.assertUnverifiedReportClaimNotPublishedFact(ReportClaimStatus.DRAFT);
     return this.prisma.reportClaim.create({
       data: {
         reportGenerationRunId: input.reportGenerationRunId,
