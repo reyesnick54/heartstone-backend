@@ -6,6 +6,10 @@ import {
   COMPLIANCE_REVIEW_STATUSES,
   COMPLIANCE_SUBMISSION_STATUSES,
   CONTINUING_OBLIGATION_STATUSES,
+  INSPECTION_PLAN_TRIGGER_TYPES,
+  PHASE_9A_ENUM_NAMES,
+  PHASE_9A_MODEL_NAMES,
+  PHASE_9C_MODEL_NAMES,
   FORBIDDEN_COMPLIANCE_REVIEW_STATUSES,
   PHASE_9A_ENUM_NAMES,
   PHASE_9A_MODEL_NAMES,
@@ -62,6 +66,8 @@ describe('Phase 9A compliance schema', () => {
   });
 });
 
+describe('Phase 9C inspection planning schema', () => {
+  for (const modelName of PHASE_9C_MODEL_NAMES) {
 describe('Phase 9B compliance schema', () => {
   for (const modelName of PHASE_9B_MODEL_NAMES) {
     it(`defines ${modelName} exactly once`, () => {
@@ -70,6 +76,31 @@ describe('Phase 9B compliance schema', () => {
     });
   }
 
+  for (const triggerType of INSPECTION_PLAN_TRIGGER_TYPES) {
+    it(`supports inspection plan trigger ${triggerType}`, () => {
+      expect(schema).toContain(triggerType);
+    });
+  }
+
+  it('does not attach authority evaluation to inspection assignment', () => {
+    const block =
+      /model InspectionAssignment \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).not.toContain('authorityEvaluationRecordId');
+  });
+
+  it('preserves risk factors and optional risk score on inspection plans', () => {
+    const block = /model InspectionPlan \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).toContain('riskFactors');
+    expect(block).toContain('riskScore');
+    expect(block).toContain('triggerReference');
+    expect(block).toContain('authorizedConditionId');
+  });
+
+  it('requires explicit unannounced configuration on inspection type definitions', () => {
+    const block =
+      /model InspectionTypeDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).toContain('unannouncedAllowed');
+    expect(block).toContain('noticeRequirement');
   for (const enumName of PHASE_9B_ENUM_NAMES) {
     it(`defines ${enumName}`, () => {
       expect(schema).toContain(`enum ${enumName}`);
