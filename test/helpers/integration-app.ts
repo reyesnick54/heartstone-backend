@@ -9,6 +9,7 @@ import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
+import { resetFinancialData } from './financial-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
@@ -46,6 +47,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetFinancialData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);

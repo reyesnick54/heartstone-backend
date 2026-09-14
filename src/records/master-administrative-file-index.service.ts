@@ -17,6 +17,21 @@ export interface MasterFileIndexReference {
   metadata?: Record<string, unknown>;
 }
 
+interface CommunicationMafIndexEntryWithRelations {
+  id: string;
+  masterAdministrativeFileId: string;
+  messageId: string;
+  templateVersionId: string | null;
+  deliveredVersionReference: string;
+  indexedAt: Date;
+  message: {
+    messageNumber: string;
+    sourceRecordType: string;
+    canonicalNoticeReference: string | null;
+  };
+  templateVersion: { id: string } | null;
+}
+
 export interface MasterFileSectionIndex {
   sectionType: MasterAdministrativeFileSectionType;
   sectionNumber: number;
@@ -57,9 +72,12 @@ export class MasterAdministrativeFileIndexService {
       submissions,
       events,
       communications,
+      communicationIndexEntries,
       workflowInstance,
       officialInstruments,
       governmentDecisions,
+      feeAssessments,
+      invoices,
     ] = await Promise.all([
       this.prisma.application.findUnique({ where: { id: file.applicationId } }),
       this.prisma.case.findUnique({ where: { id: file.caseId } }),
@@ -75,6 +93,11 @@ export class MasterAdministrativeFileIndexService {
         where: { caseId: file.caseId },
         orderBy: { createdAt: 'asc' },
       }),
+      this.prisma.communicationMafIndexEntry.findMany({
+        where: { masterAdministrativeFileId: file.id },
+        include: { message: true, templateVersion: true },
+        orderBy: { indexedAt: 'asc' },
+      }) as Promise<CommunicationMafIndexEntryWithRelations[]>,
       this.prisma.caseWorkflowInstance.findUnique({ where: { caseId: file.caseId } }),
       this.prisma.officialInstrument.findMany({
         where: { caseId: file.caseId },
@@ -82,6 +105,14 @@ export class MasterAdministrativeFileIndexService {
       }),
       this.prisma.governmentDecision.findMany({
         where: { caseId: file.caseId },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.feeAssessment.findMany({
+        where: { masterAdministrativeFileId: file.id },
+        orderBy: { calculatedAt: 'asc' },
+      }),
+      this.prisma.invoice.findMany({
+        where: { masterAdministrativeFileId: file.id },
         orderBy: { createdAt: 'asc' },
       }),
     ]);
@@ -105,9 +136,12 @@ export class MasterAdministrativeFileIndexService {
           submissions,
           events,
           communications: filteredCommunications,
+          communicationIndexEntries,
           workflowInstance,
           officialInstruments,
           governmentDecisions,
+          feeAssessments,
+          invoices,
         }),
       }));
 
@@ -132,9 +166,12 @@ export class MasterAdministrativeFileIndexService {
       submissions: Awaited<ReturnType<PrismaService['applicationSubmission']['findMany']>>;
       events: Awaited<ReturnType<PrismaService['caseEvent']['findMany']>>;
       communications: Awaited<ReturnType<PrismaService['caseCommunication']['findMany']>>;
+      communicationIndexEntries: CommunicationMafIndexEntryWithRelations[];
       workflowInstance: Awaited<ReturnType<PrismaService['caseWorkflowInstance']['findUnique']>>;
       officialInstruments: Awaited<ReturnType<PrismaService['officialInstrument']['findMany']>>;
       governmentDecisions: Awaited<ReturnType<PrismaService['governmentDecision']['findMany']>>;
+      feeAssessments: Awaited<ReturnType<PrismaService['feeAssessment']['findMany']>>;
+      invoices: Awaited<ReturnType<PrismaService['invoice']['findMany']>>;
     },
   ): MasterFileIndexReference[] {
     switch (sectionType) {
@@ -266,16 +303,30 @@ export class MasterAdministrativeFileIndexService {
             occurredAt: event.occurredAt.toISOString(),
           }));
       case MasterAdministrativeFileSectionType.COMMUNICATIONS_AND_NOTICES:
-        return context.communications.map((communication) => ({
-          referenceType: 'CaseCommunication',
-          referenceId: communication.id,
-          label: communication.communicationType ?? communication.subject ?? 'COMMUNICATION',
-          occurredAt: communication.createdAt.toISOString(),
-          metadata: {
-            classification: communication.classification,
-            visibility: communication.visibility,
-          },
-        }));
+        return [
+          ...context.communications.map((communication) => ({
+            referenceType: 'CaseCommunication',
+            referenceId: communication.id,
+            label: communication.communicationType ?? communication.subject ?? 'COMMUNICATION',
+            occurredAt: communication.createdAt.toISOString(),
+            metadata: {
+              classification: communication.classification,
+              visibility: communication.visibility,
+            },
+          })),
+          ...context.communicationIndexEntries.map((entry) => ({
+            referenceType: 'CommunicationMessage',
+            referenceId: entry.messageId,
+            label: entry.message.messageNumber,
+            occurredAt: entry.indexedAt.toISOString(),
+            metadata: {
+              deliveredVersionReference: entry.deliveredVersionReference,
+              templateVersionId: entry.templateVersionId,
+              sourceRecordType: entry.message.sourceRecordType,
+              canonicalNoticeReference: entry.message.canonicalNoticeReference,
+            },
+          })),
+        ];
       case MasterAdministrativeFileSectionType.AUDIT_AND_TECHNICAL_HISTORY:
         return context.events.map((event) => ({
           referenceType: 'CaseEvent',
@@ -305,6 +356,33 @@ export class MasterAdministrativeFileIndexService {
             status: decision.decisionStatus,
           },
         }));
+      case MasterAdministrativeFileSectionType.FEES_AND_FINANCIAL_RECORDS:
+        return [
+          ...context.feeAssessments.map((assessment) => ({
+            referenceType: 'FeeAssessment',
+            referenceId: assessment.id,
+            label: assessment.assessmentNumber,
+            occurredAt: assessment.calculatedAt.toISOString(),
+            metadata: {
+              status: assessment.status,
+              totalCents: assessment.totalCents,
+              currency: assessment.currency,
+              feeScheduleVersionId: assessment.feeScheduleVersionId,
+            },
+          })),
+          ...context.invoices.map((invoice) => ({
+            referenceType: 'Invoice',
+            referenceId: invoice.id,
+            label: invoice.invoiceNumber,
+            occurredAt: (invoice.issuedAt ?? invoice.createdAt).toISOString(),
+            metadata: {
+              status: invoice.status,
+              totalCents: invoice.totalCents,
+              amountOutstandingCents: invoice.amountOutstandingCents,
+              currency: invoice.currency,
+            },
+          })),
+        ];
       default:
         return [];
     }
