@@ -1,0 +1,32 @@
+export const PHASE_12F_MODEL_NAMES = [
+  'DigitalTwinDefinition',
+  'DigitalTwinVersion',
+  'DigitalTwinSource',
+  'DigitalTwinRelationship',
+  'DigitalTwinModeRecord',
+  'DigitalTwinSnapshot',
+  'SimulationScenario',
+  'SimulationRun',
+  'SimulationInput',
+  'SimulationOutput',
+  'SimulationAssumption',
+  'SimulationUncertainty',
+  'SimulationReview',
+  'ConsequentialUseReview',
+  'SimulationToLiveTransitionRecord',
+] as const;
+
+export const PHASE_12F_ENUM_NAMES = [
+  'DigitalTwinType',
+  'DigitalTwinDefinitionStatus',
+  'DigitalTwinPrivacyClassification',
+  'DigitalTwinMode',
+  'DigitalTwinSourceStatus',
+  'DigitalTwinRelationshipType',
+  'SimulationScenarioStatus',
+  'SimulationRunStatus',
+  'SimulationReviewOutcome',
+  'ConsequentialUseReviewDecision',
+  'ConsequentialUseImpactArea',
+  'SimulationToLiveTransitionStatus',
+] as const;
