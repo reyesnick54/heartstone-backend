@@ -101,4 +101,3 @@ describe('Phase 9B compliance schema', () => {
     expect(submissionBlock).toContain('versions');
   });
 });
-

@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ComplianceReviewStatus, ComplianceSubmissionStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -69,7 +74,9 @@ export class ComplianceReviewService {
       dto.status === ('VERIFIED_COMPLIANT' as ComplianceReviewStatus) ||
       dto.status === ('LEGALLY_COMPLIANT' as ComplianceReviewStatus)
     ) {
-      throw new BadRequestException('Compliance review may not use unauthorized compliance determination statuses');
+      throw new BadRequestException(
+        'Compliance review may not use unauthorized compliance determination statuses',
+      );
     }
 
     const review = await this.prisma.complianceReview.findUnique({
@@ -80,7 +87,9 @@ export class ComplianceReviewService {
     }
 
     if (review.reviewerIdentityId !== reviewerIdentityId && !options?.isAiActor) {
-      throw new ForbiddenException('Only the assigned reviewer may finalize this compliance review');
+      throw new ForbiddenException(
+        'Only the assigned reviewer may finalize this compliance review',
+      );
     }
 
     if (options?.isAiActor) {
@@ -96,10 +105,14 @@ export class ComplianceReviewService {
           where: { id: dto.reviewId },
           data: {
             status: ComplianceReviewStatus.MORE_INFORMATION_REQUIRED,
-            findings: [{ note: 'Additional information required; no findings invented' }] as Prisma.InputJsonValue,
+            findings: [
+              { note: 'Additional information required; no findings invented' },
+            ] as Prisma.InputJsonValue,
             unresolvedIssues: (unresolvedIssues.length
               ? unresolvedIssues
-              : [{ issue: 'Insufficient information to assess stated criteria' }]) as Prisma.InputJsonValue,
+              : [
+                  { issue: 'Insufficient information to assess stated criteria' },
+                ]) as Prisma.InputJsonValue,
             reviewDate: new Date(),
             reviewerOfficeholderId: dto.reviewerOfficeholderId,
             finalizedAt: new Date(),
@@ -109,7 +122,9 @@ export class ComplianceReviewService {
       }
     }
 
-    const expiredEvidence = await this.findExpiredEvidenceForObligation(review.continuingObligationId);
+    const expiredEvidence = await this.findExpiredEvidenceForObligation(
+      review.continuingObligationId,
+    );
     const mergedUnresolved = [
       ...unresolvedIssues,
       ...expiredEvidence.map((e) => ({

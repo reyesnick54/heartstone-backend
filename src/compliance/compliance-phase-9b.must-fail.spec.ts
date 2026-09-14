@@ -19,23 +19,27 @@ describe('Phase 9B must-fail gates', () => {
     });
 
     it('rejects holder self-setting submission status', () => {
-      expect(() => { boundary.rejectForbiddenSubmissionFields({ status: 'VERIFIED_COMPLIANT' }); }).toThrow(
-        BadRequestException,
-      );
+      expect(() => {
+        boundary.rejectForbiddenSubmissionFields({ status: 'VERIFIED_COMPLIANT' });
+      }).toThrow(BadRequestException);
     });
 
     it('rejects deadline extension without authority reference', () => {
-      expect(() => { boundary.assertExtensionRequiresAuthority(new Date(), undefined); },
-      ).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertExtensionRequiresAuthority(new Date(), undefined);
+      }).toThrow(BadRequestException);
     });
 
     it('rejects AI finalizing review', () => {
-      expect(() => { boundary.assertAiCannotFinalize('FINALIZE_REVIEW', true); }).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertAiCannotFinalize('FINALIZE_REVIEW', true);
+      }).toThrow(ForbiddenException);
     });
 
     it('requires officeholder for consequential review outcomes', () => {
-      expect(() => { boundary.assertAuthorizedReviewerPresent(undefined, 'SATISFACTORY_FOR_STATED_PURPOSE'); },
-      ).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertAuthorizedReviewerPresent(undefined, 'SATISFACTORY_FOR_STATED_PURPOSE');
+      }).toThrow(BadRequestException);
     });
   });
 
@@ -132,11 +136,15 @@ describe('Phase 9B must-fail gates', () => {
       });
 
       await expect(
-        service.finalizeReview('identity-1', {
-          reviewId: 'rev-1',
-          status: ComplianceReviewStatus.SATISFACTORY_FOR_STATED_PURPOSE,
-          reviewerOfficeholderId: 'officeholder-1',
-        }, { isAiActor: true }),
+        service.finalizeReview(
+          'identity-1',
+          {
+            reviewId: 'rev-1',
+            status: ComplianceReviewStatus.SATISFACTORY_FOR_STATED_PURPOSE,
+            reviewerOfficeholderId: 'officeholder-1',
+          },
+          { isAiActor: true },
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
   });

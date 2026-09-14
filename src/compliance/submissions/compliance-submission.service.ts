@@ -34,8 +34,7 @@ export class ComplianceSubmissionService {
     }
 
     const submittedAt = new Date();
-    const effectiveDeadline =
-      obligation.effectiveExtendedDueDate ?? obligation.dueDate;
+    const effectiveDeadline = obligation.effectiveExtendedDueDate ?? obligation.dueDate;
     const isLate = effectiveDeadline != null && submittedAt > effectiveDeadline;
 
     const count = await this.prisma.complianceSubmission.count();
@@ -89,9 +88,7 @@ export class ComplianceSubmissionService {
     await this.prisma.continuingObligation.update({
       where: { id: obligation.id },
       data: {
-        status: isLate
-          ? ContinuingObligationStatus.OVERDUE
-          : ContinuingObligationStatus.SUBMITTED,
+        status: isLate ? ContinuingObligationStatus.OVERDUE : ContinuingObligationStatus.SUBMITTED,
       },
     });
 
@@ -106,10 +103,7 @@ export class ComplianceSubmissionService {
     };
   }
 
-  async requestCorrection(
-    reviewerIdentityId: string,
-    dto: RequestSubmissionCorrectionDto,
-  ) {
+  async requestCorrection(reviewerIdentityId: string, dto: RequestSubmissionCorrectionDto) {
     const submission = await this.prisma.complianceSubmission.findUnique({
       where: { id: dto.submissionId },
       include: { versions: { orderBy: { version: 'desc' }, take: 1 } },

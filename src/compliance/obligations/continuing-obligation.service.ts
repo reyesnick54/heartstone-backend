@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ContinuingObligationSourceType,
   ContinuingObligationStatus,
@@ -176,7 +181,9 @@ export class ContinuingObligationService {
       obligation.approvedConditionText &&
       obligation.description !== obligation.approvedConditionText
     ) {
-      throw new ForbiddenException('Stored obligation description diverges from approved condition text');
+      throw new ForbiddenException(
+        'Stored obligation description diverges from approved condition text',
+      );
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {

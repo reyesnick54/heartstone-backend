@@ -1,9 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import {
-  ContinuingObligationStatus,
-  ObligationStatusChangeActor,
-} from '@prisma/client';
+import { ContinuingObligationStatus, ObligationStatusChangeActor } from '@prisma/client';
 
 import {
   ALLOWED_RECURRENCE_RULE_TYPES,
@@ -58,9 +55,7 @@ export class ComplianceBoundaryService {
 
     if (actor === ObligationStatusChangeActor.HOLDER) {
       if (!HOLDER_ALLOWED_OBLIGATION_STATUSES.includes(targetStatus as never)) {
-        throw new ForbiddenException(
-          `Holder may not set obligation status to ${targetStatus}`,
-        );
+        throw new ForbiddenException(`Holder may not set obligation status to ${targetStatus}`);
       }
       return;
     }
@@ -92,7 +87,10 @@ export class ComplianceBoundaryService {
     }
   }
 
-  assertAiCannotChangeDeadline(payload: Record<string, unknown>, actor: ObligationStatusChangeActor): void {
+  assertAiCannotChangeDeadline(
+    payload: Record<string, unknown>,
+    actor: ObligationStatusChangeActor,
+  ): void {
     if (actor === ObligationStatusChangeActor.AI_ASSISTANCE && 'dueDate' in payload) {
       throw new ForbiddenException('AI cannot change lawful obligation deadlines');
     }
@@ -185,7 +183,9 @@ export class ComplianceBoundaryService {
     status: string,
   ): void {
     if (
-      CONSEQUENTIAL_REVIEW_STATUSES.includes(status as (typeof CONSEQUENTIAL_REVIEW_STATUSES)[number]) &&
+      CONSEQUENTIAL_REVIEW_STATUSES.includes(
+        status as (typeof CONSEQUENTIAL_REVIEW_STATUSES)[number],
+      ) &&
       !reviewerOfficeholderId
     ) {
       throw new BadRequestException(
