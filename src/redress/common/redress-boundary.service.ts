@@ -1,11 +1,20 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { IdentityType } from '@prisma/client';
+import {
+  IdentityType,
+  InterimReliefRequestType,
+  RedressDecisionOutcome,
+  RedressRemedyType,
+} from '@prisma/client';
 
 import {
   AUTHORIZED_RECONSIDERATION_STANDARDS,
+  FORBIDDEN_AI_REDRESS_ACTORS,
   FORBIDDEN_AI_REVIEW_ACTIONS,
+  FORBIDDEN_CLIENT_REDRESS_FIELDS,
   FORBIDDEN_CLIENT_REVIEW_FIELDS,
+  INSTRUMENT_REMEDY_TYPES,
   REDRESS_REASON_CODES,
+  TECHNICAL_ADMIN_ROLE_MARKER,
 } from '../redress.constants';
 
 @Injectable()
@@ -76,8 +85,142 @@ export class RedressBoundaryService {
     }
   }
 
+  rejectClientProtectedFields(payload: Record<string, unknown>): void {
+    for (const field of FORBIDDEN_CLIENT_REDRESS_FIELDS) {
+      if (field in payload && payload[field] !== undefined) {
+        throw new ForbiddenException(`Client may not set "${field}" on a redress record`);
+      }
+    }
+  }
+
   assertOpeningReviewDoesNotAlterDecision(): void {
     // Proceeding creation must not mutate GovernmentDecision status or outcome.
+  }
+
+  assertHumanReviewer(actorType: string): void {
+    if (
+      FORBIDDEN_AI_REDRESS_ACTORS.includes(
+        actorType as (typeof FORBIDDEN_AI_REDRESS_ACTORS)[number],
+      )
+    ) {
+      throw new ForbiddenException(
+        'Only authorized human officeholders may make final redress determinations',
+      );
+    }
+  }
+
+  assertTechnicalAdminCannotCreateDecision(actorRoleMarker?: string): void {
+    if (actorRoleMarker === TECHNICAL_ADMIN_ROLE_MARKER) {
+      throw new ForbiddenException(
+        'Technical administrators cannot create RedressDecision records',
+      );
+    }
+  }
+
+  assertOutcomePermittedForRoute(
+    outcome: RedressDecisionOutcome,
+    permissibleOutcomes: string[],
+  ): void {
+    if (!permissibleOutcomes.includes(outcome)) {
+      throw new BadRequestException(
+        `Outcome ${outcome} is not permitted for this redress route version`,
+      );
+    }
+  }
+
+  assertRemedyPermittedForRoute(
+    remedyType: RedressRemedyType,
+    permissibleRemedies: string[],
+  ): void {
+    if (!permissibleRemedies.includes(remedyType)) {
+      throw new BadRequestException(
+        `Remedy ${remedyType} is not permitted for this redress route version`,
+      );
+    }
+  }
+
+  assertInterimReliefPermittedForRoute(
+    requestType: InterimReliefRequestType,
+    permissibleTypes: string[],
+  ): void {
+    if (!permissibleTypes.includes(requestType)) {
+      throw new BadRequestException(
+        `Interim relief type ${requestType} is not permitted for this redress route version`,
+      );
+    }
+  }
+
+  assertFilingDoesNotAutoStay(automaticStayOnFiling: boolean, stayCreated: boolean): void {
+    if (!automaticStayOnFiling && stayCreated) {
+      throw new BadRequestException(
+        'Filing an appeal does not create an automatic stay unless route configuration explicitly permits it',
+      );
+    }
+  }
+
+  assertStayIsNotReversal(isReversal: boolean): void {
+    if (isReversal) {
+      throw new BadRequestException(
+        'A stay is not a reversal; use authorized disposition outcomes instead',
+      );
+    }
+  }
+
+  assertIndependenceRequired(
+    requiresIndependence: boolean,
+    originalReviewerOfficeholderId: string | null | undefined,
+    reviewerOfficeholderId: string,
+  ): void {
+    if (
+      requiresIndependence &&
+      originalReviewerOfficeholderId &&
+      originalReviewerOfficeholderId === reviewerOfficeholderId
+    ) {
+      throw new ForbiddenException(
+        'Original decision-maker cannot self-review where route independence is required',
+      );
+    }
+  }
+
+  assertReasonedDeterminationRequired(
+    requiresReasonedDetermination: boolean,
+    reasonSections: { humanConfirmed: boolean }[],
+  ): void {
+    if (!requiresReasonedDetermination) {
+      return;
+    }
+
+    if (reasonSections.length === 0) {
+      throw new BadRequestException('Route configuration requires a reasoned determination');
+    }
+
+    const unconfirmed = reasonSections.some((section) => !section.humanConfirmed);
+    if (unconfirmed) {
+      throw new BadRequestException(
+        'AI may draft reasons but final reasons must be attributable to the reviewer',
+      );
+    }
+  }
+
+  assertInstrumentRemedyUsesLifecycleService(
+    remedyType: RedressRemedyType,
+    lifecycleServiceReference?: string | null,
+  ): void {
+    if (
+      INSTRUMENT_REMEDY_TYPES.includes(remedyType as (typeof INSTRUMENT_REMEDY_TYPES)[number]) &&
+      !lifecycleServiceReference
+    ) {
+      throw new BadRequestException(
+        'Instrument remedy changes must invoke Phase 8 lifecycle services; direct status PATCH is not permitted',
+      );
+    }
+  }
+
+  assertFurtherReviewRightsFromConfiguration(
+    configuredRights: string[],
+    requestedRights: string[],
+  ): string[] {
+    return requestedRights.filter((right) => configuredRights.includes(right));
   }
 
   private parseReviewerLevel(level: string): number {
