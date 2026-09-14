@@ -47,6 +47,50 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
 }
 
 export async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
+  await prisma.intelligenceAlertDisposition.deleteMany();
+  await prisma.intelligenceAlertVerification.deleteMany();
+  await prisma.intelligenceMonitoringAlert.deleteMany();
+  await prisma.intelligenceMonitoringObservation.deleteMany();
+  await prisma.intelligenceMonitoringRule.deleteMany();
+  await prisma.analysisHumanReview.deleteMany();
+  await prisma.analysisUncertainty.deleteMany();
+  await prisma.analysisOption.deleteMany();
+  await prisma.analysisFinding.deleteMany();
+  await prisma.analysisSource.deleteMany();
+  await prisma.analysisRun.deleteMany();
+  await prisma.analysisRequest.deleteMany();
+  await prisma.riskReview.deleteMany();
+  await prisma.riskMitigation.deleteMany();
+  await prisma.riskFactor.deleteMany();
+  await prisma.riskAssessment.deleteMany();
+  await prisma.riskDefinition.deleteMany();
+  await prisma.simulationToLiveTransitionRecord.deleteMany();
+  await prisma.consequentialUseReview.deleteMany();
+  await prisma.simulationReview.deleteMany();
+  await prisma.simulationUncertainty.deleteMany();
+  await prisma.simulationAssumption.deleteMany();
+  await prisma.simulationOutput.deleteMany();
+  await prisma.simulationInput.deleteMany();
+  await prisma.simulationRun.deleteMany();
+  await prisma.simulationScenario.deleteMany();
+  await prisma.digitalTwinSnapshot.deleteMany();
+  await prisma.digitalTwinModeRecord.deleteMany();
+  await prisma.digitalTwinRelationship.deleteMany();
+  await prisma.digitalTwinSource.deleteMany();
+  await prisma.digitalTwinVersion.deleteMany();
+  await prisma.digitalTwinDefinition.deleteMany();
+  await prisma.measuredPerformanceClaimRevalidation.deleteMany();
+  await prisma.measuredPerformanceClaimReview.deleteMany();
+  await prisma.measuredPerformanceClaimEvidenceLink.deleteMany();
+  await prisma.measuredPerformanceClaim.deleteMany();
+  await prisma.metricDataQualityAssessment.deleteMany();
+  await prisma.metricObservation.deleteMany();
+  await prisma.metricCalculationRun.deleteMany();
+  await prisma.metricDependencyClassification.deleteMany();
+  await prisma.metricBaseline.deleteMany();
+  await prisma.metricDefinitionVersion.deleteMany();
+  await prisma.metricDefinition.deleteMany();
+  await prisma.performanceFramework.deleteMany();
   await prisma.dashboardDrilldownReference.deleteMany();
   await prisma.dashboardIndicatorProjection.deleteMany();
   await prisma.dashboardSnapshot.deleteMany();
@@ -57,6 +101,18 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.dashboardVersion.deleteMany();
   await prisma.dashboardDefinition.deleteMany();
   await prisma.dashboardStatusDictionaryEntry.deleteMany();
+  await prisma.projectStatusProjection.deleteMany();
+  await prisma.sectorDevelopmentObservation.deleteMany();
+  await prisma.infrastructureDeliveryRecord.deleteMany();
+  await prisma.employmentEvidenceRecord.deleteMany();
+  await prisma.capitalEvidenceRecord.deleteMany();
+  await prisma.strategicProjectEconomicClaim.deleteMany();
+  await prisma.strategicProjectRisk.deleteMany();
+  await prisma.strategicProjectDependency.deleteMany();
+  await prisma.strategicProjectMilestone.deleteMany();
+  await prisma.strategicProjectStage.deleteMany();
+  await prisma.strategicProjectProfile.deleteMany();
+  await prisma.performanceClaim.deleteMany();
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
@@ -77,21 +133,6 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.externalAuthority.deleteMany();
   await prisma.institution.deleteMany();
   await prisma.jurisdiction.deleteMany();
-}
-
-async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
-  await prisma.projectStatusProjection.deleteMany();
-  await prisma.sectorDevelopmentObservation.deleteMany();
-  await prisma.infrastructureDeliveryRecord.deleteMany();
-  await prisma.employmentEvidenceRecord.deleteMany();
-  await prisma.capitalEvidenceRecord.deleteMany();
-  await prisma.strategicProjectEconomicClaim.deleteMany();
-  await prisma.strategicProjectRisk.deleteMany();
-  await prisma.strategicProjectDependency.deleteMany();
-  await prisma.strategicProjectMilestone.deleteMany();
-  await prisma.strategicProjectStage.deleteMany();
-  await prisma.strategicProjectProfile.deleteMany();
-  await prisma.performanceClaim.deleteMany();
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
