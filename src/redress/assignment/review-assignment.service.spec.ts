@@ -4,8 +4,8 @@ import {
   AuthorityEvaluationOutcome,
   DelegationStatus,
   IdentityType,
-  ReviewProceedingKind,
   ReviewerIndependenceOutcome,
+  ReviewProceedingKind,
 } from '@prisma/client';
 
 import { RedressBoundaryService } from '../common/redress-boundary.service';
@@ -27,7 +27,11 @@ describe('ReviewAssignmentService', () => {
   const authorityEvaluation = { evaluate: jest.fn() };
   const independenceService = {
     assessIndependence: jest.fn(),
-    assertAssignmentPermitted: ReviewerIndependenceService.prototype.assertAssignmentPermitted,
+    assertAssignmentPermitted: (
+      outcome: Parameters<ReviewerIndependenceService['assertAssignmentPermitted']>[0],
+    ) => {
+      new ReviewerIndependenceService(prisma as never, boundary).assertAssignmentPermitted(outcome);
+    },
   };
 
   let service: ReviewAssignmentService;

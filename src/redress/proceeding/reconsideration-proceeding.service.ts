@@ -2,11 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ReconsiderationReviewStandard, ReviewProceedingKind } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { RedressBoundaryService } from '../common/redress-boundary.service';
 import {
   RECONSIDERATION_PROCEEDING_NUMBER_PREFIX,
   REDRESS_REASON_CODES,
 } from '../redress.constants';
-import { RedressBoundaryService } from '../common/redress-boundary.service';
 import { ReviewRecordSnapshotService } from '../snapshot/review-record-snapshot.service';
 
 export interface OpenReconsiderationInput {

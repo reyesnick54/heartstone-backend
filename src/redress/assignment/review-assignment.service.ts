@@ -10,15 +10,15 @@ import {
   DelegationStatus,
   IdentityType,
   ReviewAssignmentStatus,
-  ReviewProceedingKind,
   ReviewerIndependenceOutcome,
+  ReviewProceedingKind,
 } from '@prisma/client';
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../database/prisma.service';
 import { isAppointmentCurrent } from '../../government/common/appointment-current.util';
-import { REDRESS_REASON_CODES, REVIEW_ASSIGNMENT_NUMBER_PREFIX } from '../redress.constants';
 import { RedressBoundaryService } from '../common/redress-boundary.service';
+import { REDRESS_REASON_CODES, REVIEW_ASSIGNMENT_NUMBER_PREFIX } from '../redress.constants';
 import { ReviewerIndependenceService } from './reviewer-independence.service';
 
 export interface AssignReviewerInput {

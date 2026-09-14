@@ -10,31 +10,37 @@ CREATE TYPE "OfficialInstrumentType" AS ENUM (
   'OTHER'
 );
 
-CREATE TYPE "InstrumentJurisdictionScope" AS ENUM (
-  'NATIONAL',
-  'ABSEZ',
-  'INSTITUTIONAL',
-  'OTHER'
-);
+DO $$ BEGIN
+  CREATE TYPE "InstrumentJurisdictionScope" AS ENUM (
+    'NATIONAL',
+    'ABSEZ',
+    'INSTITUTIONAL',
+    'OTHER'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE "InstrumentLifecycleEventType" AS ENUM (
-  'ISSUED',
-  'BECAME_EFFECTIVE',
-  'AMENDED',
-  'VARIED',
-  'RENEWED',
-  'CORRECTED_CLERICAL',
-  'REPLACED',
-  'SUSPENDED',
-  'PARTIALLY_SUSPENDED',
-  'REVOCATION_DECIDED',
-  'REVOKED',
-  'REINSTATED',
-  'EXPIRED',
-  'SURRENDERED',
-  'SUPERSEDED',
-  'CLOSED'
-);
+DO $$ BEGIN
+  CREATE TYPE "InstrumentLifecycleEventType" AS ENUM (
+    'ISSUED',
+    'BECAME_EFFECTIVE',
+    'AMENDED',
+    'VARIED',
+    'RENEWED',
+    'CORRECTED_CLERICAL',
+    'REPLACED',
+    'SUSPENDED',
+    'PARTIALLY_SUSPENDED',
+    'REVOCATION_DECIDED',
+    'REVOKED',
+    'REINSTATED',
+    'EXPIRED',
+    'SURRENDERED',
+    'SUPERSEDED',
+    'CLOSED'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TYPE "ReviewStayStatus" AS ENUM (
   'NONE',

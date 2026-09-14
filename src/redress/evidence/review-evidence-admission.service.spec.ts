@@ -14,7 +14,9 @@ describe('ReviewEvidenceAdmissionService', () => {
     jest.clearAllMocks();
     service = new ReviewEvidenceAdmissionService(prisma as never);
     prisma.reviewEvidenceAdmission.count.mockResolvedValue(0);
-    prisma.reviewEvidenceAdmission.create.mockImplementation(({ data }) => data);
+    prisma.reviewEvidenceAdmission.create.mockImplementation(
+      ({ data }: { data: Record<string, unknown> }) => data,
+    );
   });
 
   it('clearly separates later evidence with POST_DECISION_EVIDENCE label', async () => {

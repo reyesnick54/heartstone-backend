@@ -1,7 +1,7 @@
 import { GovernmentDecisionStatus, ReconsiderationReviewStandard } from '@prisma/client';
 
 import { RedressBoundaryService } from '../common/redress-boundary.service';
-import { ReviewRecordSnapshotService } from '../snapshot/review-record-snapshot.service';
+import { type ReviewRecordSnapshotService } from '../snapshot/review-record-snapshot.service';
 import { InternalAdministrativeReviewService } from './internal-administrative-review.service';
 import { ReconsiderationProceedingService } from './reconsideration-proceeding.service';
 

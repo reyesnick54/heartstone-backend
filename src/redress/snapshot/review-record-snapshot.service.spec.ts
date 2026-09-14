@@ -35,7 +35,9 @@ describe('ReviewRecordSnapshotService', () => {
       officialInstruments: [{ versions: [{ id: 'version-1' }] }],
     });
     prisma.reviewRecordSnapshot.count.mockResolvedValue(0);
-    prisma.reviewRecordSnapshot.create.mockImplementation(({ data }) => data);
+    prisma.reviewRecordSnapshot.create.mockImplementation(
+      ({ data }: { data: Record<string, unknown> }) => data,
+    );
 
     const snapshot = await service.createSnapshot('decision-1');
     const manifest = snapshot.referenceManifest as {

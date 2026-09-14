@@ -1,13 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import {
   IdentityType,
-  ReviewerIndependenceOutcome,
   type ReviewerIndependenceAssessment,
+  ReviewerIndependenceOutcome,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { REDRESS_REASON_CODES } from '../redress.constants';
 import { RedressBoundaryService } from '../common/redress-boundary.service';
+import { REDRESS_REASON_CODES } from '../redress.constants';
 
 export interface AssessReviewerIndependenceInput {
   reviewAssignmentId: string;

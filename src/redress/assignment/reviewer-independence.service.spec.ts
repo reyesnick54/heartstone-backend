@@ -29,7 +29,7 @@ describe('ReviewerIndependenceService', () => {
     });
 
     expect(assessment.outcome).toBe(ReviewerIndependenceOutcome.REQUIRES_RECUSAL);
-    expect(() => service.assertAssignmentPermitted(assessment.outcome)).toThrow(ForbiddenException);
+    expect(() => { service.assertAssignmentPermitted(assessment.outcome); }).toThrow(ForbiddenException);
   });
 
   it('blocks materially involved reviewer', async () => {
@@ -46,7 +46,7 @@ describe('ReviewerIndependenceService', () => {
     });
 
     expect(assessment.outcome).toBe(ReviewerIndependenceOutcome.PRIOR_INVOLVEMENT_IDENTIFIED);
-    expect(() => service.assertAssignmentPermitted(assessment.outcome)).toThrow(ForbiddenException);
+    expect(() => { service.assertAssignmentPermitted(assessment.outcome); }).toThrow(ForbiddenException);
   });
 
   it('blocks system role from satisfying independence', async () => {

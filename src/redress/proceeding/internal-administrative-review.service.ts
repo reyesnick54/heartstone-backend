@@ -6,11 +6,11 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { RedressBoundaryService } from '../common/redress-boundary.service';
 import {
   INTERNAL_ADMINISTRATIVE_REVIEW_NUMBER_PREFIX,
   REDRESS_REASON_CODES,
 } from '../redress.constants';
-import { RedressBoundaryService } from '../common/redress-boundary.service';
 import { ReviewRecordSnapshotService } from '../snapshot/review-record-snapshot.service';
 
 export interface OpenInternalReviewInput {
@@ -19,10 +19,10 @@ export interface OpenInternalReviewInput {
   jurisdictionId: string;
   requiredReviewerLevel: string;
   configurationReference?: string;
-  issues: Array<{
+  issues: {
     ground: InternalAdministrativeReviewGround;
     description: string;
-  }>;
+  }[];
 }
 
 @Injectable()

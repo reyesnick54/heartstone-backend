@@ -15,7 +15,9 @@ describe('ReviewRecommendationService', () => {
     jest.clearAllMocks();
     service = new ReviewRecommendationService(prisma as never, boundary);
     prisma.reviewRecommendation.count.mockResolvedValue(0);
-    prisma.reviewRecommendation.create.mockImplementation(({ data }) => data);
+    prisma.reviewRecommendation.create.mockImplementation(
+      ({ data }: { data: Record<string, unknown> }) => data,
+    );
   });
 
   it('keeps AI recommendation non-final', async () => {

@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { IdentityType, ReviewProceedingKind, ReviewRecommendationType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { REDRESS_REASON_CODES, REVIEW_RECOMMENDATION_NUMBER_PREFIX } from '../redress.constants';
 import { RedressBoundaryService } from '../common/redress-boundary.service';
+import { REDRESS_REASON_CODES, REVIEW_RECOMMENDATION_NUMBER_PREFIX } from '../redress.constants';
 
 export interface RecordReviewRecommendationInput {
   proceedingKind: ReviewProceedingKind;
