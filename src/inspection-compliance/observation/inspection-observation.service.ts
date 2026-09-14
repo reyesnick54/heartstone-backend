@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EvidenceCustodyEventType, InspectionSessionStatus } from '@prisma/client';
 
-import { EvidenceCustodyService } from '../../evidence/custody/evidence-custody.service';
 import { PrismaService } from '../../database/prisma.service';
+import { EvidenceCustodyService } from '../../evidence/custody/evidence-custody.service';
 import { InspectionComplianceBoundaryService } from '../boundary/inspection-compliance-boundary.service';
 
 export interface RecordInspectionObservationInput {
@@ -36,7 +36,9 @@ export class InspectionObservationService {
     }
 
     if (session.status !== InspectionSessionStatus.IN_PROGRESS) {
-      throw new ForbiddenException('Observations may only be recorded during an in-progress session');
+      throw new ForbiddenException(
+        'Observations may only be recorded during an in-progress session',
+      );
     }
 
     const isAssignedInspector = session.inspectionRecord.inspectors.some(

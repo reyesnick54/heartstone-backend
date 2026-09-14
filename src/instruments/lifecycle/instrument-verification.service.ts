@@ -32,7 +32,7 @@ export class InstrumentVerificationService {
       data: {
         publicVerificationStatus: verificationStatus,
         publicVerificationUpdatedAt: new Date(),
-        status,
+        currentStatus: status,
       },
     });
   }
@@ -47,11 +47,11 @@ export class InstrumentVerificationService {
     }
 
     return {
-      instrumentNumber: instrument.instrumentNumber ?? '',
-      status: instrument.status,
-      verificationStatus: instrument.publicVerificationStatus ?? 'UNKNOWN',
-      verifiedAt: instrument.publicVerificationUpdatedAt ?? instrument.updatedAt,
-      isCurrent: this.isCurrentStatus(instrument.status),
+      instrumentNumber: instrument.instrumentNumber,
+      status: instrument.currentStatus,
+      verificationStatus: instrument.publicVerificationStatus,
+      verifiedAt: instrument.publicVerificationUpdatedAt,
+      isCurrent: this.isCurrentStatus(instrument.currentStatus),
     };
   }
 
@@ -74,7 +74,10 @@ export class InstrumentVerificationService {
     }));
   }
 
-  async getStatusAt(instrumentId: string, at: Date): Promise<LifecycleOfficialInstrumentStatus | null> {
+  async getStatusAt(
+    instrumentId: string,
+    at: Date,
+  ): Promise<LifecycleOfficialInstrumentStatus | null> {
     const snapshot = await this.replayHistoricalStatus(instrumentId, at);
     if (snapshot.length === 0) {
       return null;

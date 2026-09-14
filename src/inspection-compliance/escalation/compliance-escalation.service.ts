@@ -44,15 +44,12 @@ export class ComplianceEscalationService {
       }
     }
 
-    const authorityEvaluationRecordId = await assertComplianceAuthority(
-      this.authorityEvaluation,
-      {
-        identityId: input.escalatedByIdentityId,
-        officeholderId: input.escalatedByOfficeholderId,
-        functionAuthorityRecordId: input.functionAuthorityRecordId,
-        action: AuthorityActionType.SUPERVISE,
-      },
-    );
+    const authorityEvaluationRecordId = await assertComplianceAuthority(this.authorityEvaluation, {
+      identityId: input.escalatedByIdentityId,
+      officeholderId: input.escalatedByOfficeholderId,
+      functionAuthorityRecordId: input.functionAuthorityRecordId,
+      action: AuthorityActionType.SUPERVISE,
+    });
 
     return this.prisma.complianceEscalation.create({
       data: {

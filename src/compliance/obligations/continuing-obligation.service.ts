@@ -75,7 +75,7 @@ export class ContinuingObligationService {
       throw new NotFoundException(`DecisionCondition ${input.sourceDecisionConditionId} not found`);
     }
 
-    if (condition.conditionType !== DecisionConditionType.ONGOING) {
+    if (condition.conditionType !== DecisionConditionType.CONTINUING) {
       throw new BadRequestException(
         'Only approved continuing decision conditions may generate continuing obligations',
       );
@@ -90,7 +90,7 @@ export class ContinuingObligationService {
       );
     }
 
-    const approvedText = condition.description;
+    const approvedText = condition.requiredActionOrRestraint;
     const approvedHash = hashConditionText(approvedText);
 
     if (input.recurrenceConfiguration) {

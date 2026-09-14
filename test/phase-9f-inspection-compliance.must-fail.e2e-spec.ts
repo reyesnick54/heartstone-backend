@@ -149,7 +149,9 @@ describe('Phase 9F must-fail invariants (e2e)', () => {
   it('protective recommendations route suspension/revocation to Phase 8 review', () => {
     expect(ProtectiveActionRecommendationType.SUSPENSION_REVIEW).toBe('SUSPENSION_REVIEW');
     expect(ProtectiveActionRecommendationType.REVOCATION_REVIEW).toBe('REVOCATION_REVIEW');
-    protective.assertPhase8ReviewRecommendation(ProtectiveActionRecommendationType.SUSPENSION_REVIEW);
+    protective.assertPhase8ReviewRecommendation(
+      ProtectiveActionRecommendationType.SUSPENSION_REVIEW,
+    );
   });
 
   it('AI-proposed finding proposal does not auto-confirm', async () => {

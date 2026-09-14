@@ -45,18 +45,18 @@ export class ProtectiveActionRecommendationService {
       this.assertPhase8ReviewRecommendation(input.recommendationType);
     }
 
-    const authorityEvaluationRecordId = await assertComplianceAuthority(
-      this.authorityEvaluation,
-      {
-        identityId: input.recommendedByIdentityId,
-        officeholderId: input.recommendedByOfficeholderId,
-        functionAuthorityRecordId: input.functionAuthorityRecordId,
-        action: AuthorityActionType.RECOMMEND,
-      },
-    );
+    const authorityEvaluationRecordId = await assertComplianceAuthority(this.authorityEvaluation, {
+      identityId: input.recommendedByIdentityId,
+      officeholderId: input.recommendedByOfficeholderId,
+      functionAuthorityRecordId: input.functionAuthorityRecordId,
+      action: AuthorityActionType.RECOMMEND,
+    });
 
     const sequence = await this.prisma.protectiveActionRecommendation.count();
-    const recommendationNumber = buildComplianceNumber(PROTECTIVE_ACTION_NUMBER_PREFIX, sequence + 1);
+    const recommendationNumber = buildComplianceNumber(
+      PROTECTIVE_ACTION_NUMBER_PREFIX,
+      sequence + 1,
+    );
 
     return this.prisma.protectiveActionRecommendation.create({
       data: {

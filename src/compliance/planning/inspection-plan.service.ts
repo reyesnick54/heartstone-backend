@@ -84,7 +84,10 @@ export class InspectionPlanService {
     const matterJurisdictionId = matter.responsibleInstitution.jurisdictionId;
     this.boundary.assertJurisdictionMatches(matterJurisdictionId, typeDefinition.jurisdictionId);
 
-    if (input.triggerType === InspectionPlanTriggerType.CONDITION_REQUIRED && !input.authorizedConditionId) {
+    if (
+      input.triggerType === InspectionPlanTriggerType.CONDITION_REQUIRED &&
+      !input.authorizedConditionId
+    ) {
       throw new BadRequestException(
         'Condition-required inspections must reference an authorized condition',
       );
@@ -130,7 +133,10 @@ export class InspectionPlanService {
       throw new NotFoundException('Inspection plan not found');
     }
 
-    if (plan.status !== InspectionPlanStatus.DRAFT && plan.status !== InspectionPlanStatus.PENDING_APPROVAL) {
+    if (
+      plan.status !== InspectionPlanStatus.DRAFT &&
+      plan.status !== InspectionPlanStatus.PENDING_APPROVAL
+    ) {
       throw new ForbiddenException('Scope may only be amended during draft planning');
     }
 

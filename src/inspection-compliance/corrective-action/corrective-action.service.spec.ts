@@ -23,10 +23,21 @@ describe('CorrectiveActionService', () => {
   let service: CorrectiveActionService;
 
   const prismaMock = {
-    complianceMatter: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), count: jest.fn() },
-    inspectionFinding: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), count: jest.fn() },
+    complianceMatter: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      count: jest.fn(),
+    },
+    inspectionFinding: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      count: jest.fn(),
+    },
     correctiveActionPlan: {
       create: jest.fn(),
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
@@ -37,19 +48,24 @@ describe('CorrectiveActionService', () => {
     correctiveActionVerification: { create: jest.fn() },
     correctiveActionVerificationEvidence: { createMany: jest.fn() },
     reinspectionRequirement: { create: jest.fn() },
-    complianceFindingClosure: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), count: jest.fn() },
+    complianceFindingClosure: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      count: jest.fn(),
+    },
     complianceFindingReopening: { create: jest.fn(), count: jest.fn() },
     $transaction: jest.fn(),
   };
   const prisma = prismaMock as unknown as PrismaService;
 
-  (prismaMock.$transaction as jest.Mock).mockImplementation(
+  prismaMock.$transaction.mockImplementation(
     async (fn: (tx: typeof prismaMock) => Promise<unknown>) => fn(prismaMock),
   );
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    (prismaMock.$transaction as jest.Mock).mockImplementation(
+    prismaMock.$transaction.mockImplementation(
       async (fn: (tx: typeof prismaMock) => Promise<unknown>) => fn(prismaMock),
     );
     prismaMock.complianceMatter.count.mockResolvedValue(0);
@@ -196,6 +212,9 @@ describe('CorrectiveActionService', () => {
       id: 'closure-1',
       closureNumber: 'CFC-00000001',
     });
+    prismaMock.correctiveActionPlan.findFirst.mockResolvedValue({
+      complianceMatterId: 'matter-1',
+    });
 
     const closure = await service.closeInspectionFinding({
       findingId: 'finding-1',
@@ -212,11 +231,10 @@ describe('CorrectiveActionService', () => {
     });
 
     expect(closure.closureNumber).toBe('CFC-00000001');
-    expect(prismaMock.inspectionFinding.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: InspectionFindingStatus.CLOSED }),
-      }),
-    );
+    expect(prismaMock.inspectionFinding.update).toHaveBeenCalledWith({
+      where: { id: 'finding-1' },
+      data: { status: InspectionFindingStatus.CLOSED, closedAt: expect.any(Date) as Date },
+    });
   });
 
   it('reopens finding while superseding prior closure record', async () => {

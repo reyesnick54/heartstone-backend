@@ -119,8 +119,7 @@ describe('Phase 9C inspection planning schema', () => {
   }
 
   it('does not attach authority evaluation to inspection assignment', () => {
-    const block =
-      /model InspectionAssignment \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    const block = /model InspectionAssignment \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(block).not.toContain('authorityEvaluationRecordId');
   });
 
@@ -133,8 +132,7 @@ describe('Phase 9C inspection planning schema', () => {
   });
 
   it('requires explicit unannounced configuration on inspection type definitions', () => {
-    const block =
-      /model InspectionTypeDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    const block = /model InspectionTypeDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(block).toContain('unannouncedAllowed');
     expect(block).toContain('noticeRequirement');
   });

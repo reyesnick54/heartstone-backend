@@ -26,7 +26,9 @@ export interface CreateInstrumentControllingDecisionInput {
 export class InstrumentControllingDecisionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createDecision(input: CreateInstrumentControllingDecisionInput): Promise<InstrumentControllingDecision> {
+  async createDecision(
+    input: CreateInstrumentControllingDecisionInput,
+  ): Promise<InstrumentControllingDecision> {
     return this.prisma.instrumentControllingDecision.create({
       data: {
         decisionNumber: input.decisionNumber,

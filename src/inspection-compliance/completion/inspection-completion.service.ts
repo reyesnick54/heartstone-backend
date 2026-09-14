@@ -4,10 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  InspectionSessionStatus,
-  InspectionStatus,
-} from '@prisma/client';
+import { InspectionSessionStatus, InspectionStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { InspectionComplianceBoundaryService } from '../boundary/inspection-compliance-boundary.service';

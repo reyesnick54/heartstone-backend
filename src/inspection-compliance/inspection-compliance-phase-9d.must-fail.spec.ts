@@ -1,8 +1,5 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import {
-  InspectionFindingSeverity,
-  ProfessionalSignatureSource,
-} from '@prisma/client';
+import { ForbiddenException } from '@nestjs/common';
+import { InspectionFindingSeverity, ProfessionalSignatureSource } from '@prisma/client';
 
 import { InspectionComplianceBoundaryService } from './boundary/inspection-compliance-boundary.service';
 import { InspectionCompletionService } from './completion/inspection-completion.service';
@@ -11,7 +8,6 @@ import {
   AI_CANNOT_CONFIRM_VIOLATION_MESSAGE,
   COMPLETION_DOES_NOT_SUSPEND_INSTRUMENT_MESSAGE,
   COMPLETION_IS_NOT_COMPLIANCE_CERTIFICATION_MESSAGE,
-  FINDING_IS_NOT_SANCTION_MESSAGE,
   FINDING_REQUIRES_REQUIREMENT_SOURCE_MESSAGE,
   OBSERVATION_IS_NOT_VIOLATION_MESSAGE,
   SCOPE_AMENDMENT_REQUIRES_APPROVAL_MESSAGE,
@@ -19,7 +15,6 @@ import {
 
 describe('Phase 9D inspection compliance invariants (must-fail)', () => {
   const boundary = new InspectionComplianceBoundaryService();
-  const findingService = new InspectionFindingService({} as never, {} as never, boundary);
   const completionService = new InspectionCompletionService({} as never, boundary);
 
   it('observation is not automatically a violation', () => {
@@ -27,19 +22,24 @@ describe('Phase 9D inspection compliance invariants (must-fail)', () => {
       boundary.assertObservationIsNotViolation('The site is in violation of section 4.2');
     }).toThrow(OBSERVATION_IS_NOT_VIOLATION_MESSAGE);
     expect(() => {
-      boundary.assertObservationIsNotViolation('Visible sediment control measures were not installed');
+      boundary.assertObservationIsNotViolation(
+        'Visible sediment control measures were not installed',
+      );
     }).not.toThrow();
   });
 
   it('finding severity does not constitute sanction', () => {
     expect(boundary.assertFindingIsNotSanction(InspectionFindingSeverity.CRITICAL)).toEqual({
       constitutesSanction: false,
+      severity: InspectionFindingSeverity.CRITICAL,
     });
     expect(boundary.assertSeverityDoesNotImplySanction(InspectionFindingSeverity.MAJOR)).toEqual({
       constitutesSanction: false,
       severity: InspectionFindingSeverity.MAJOR,
     });
-    expect(() => boundary.assertSeverityDoesNotImplySanction(InspectionFindingSeverity.CRITICAL)).not.toThrow();
+    expect(() =>
+      boundary.assertSeverityDoesNotImplySanction(InspectionFindingSeverity.CRITICAL),
+    ).not.toThrow();
   });
 
   it('AI cannot confirm violation', () => {
@@ -47,7 +47,9 @@ describe('Phase 9D inspection compliance invariants (must-fail)', () => {
       boundary.assertAiCannotConfirmViolation(ProfessionalSignatureSource.AI_ASSISTANCE);
     }).toThrow(AI_CANNOT_CONFIRM_VIOLATION_MESSAGE);
     expect(() => {
-      boundary.assertAiCannotConfirmViolation(ProfessionalSignatureSource.CONTROLLED_PROFESSIONAL_ACTION);
+      boundary.assertAiCannotConfirmViolation(
+        ProfessionalSignatureSource.CONTROLLED_PROFESSIONAL_ACTION,
+      );
     }).not.toThrow();
   });
 

@@ -196,9 +196,9 @@ describe('Phase 9A compliance foundation', () => {
     it('materializes obligations without changing approved condition text', async () => {
       prisma.decisionCondition.findUnique.mockResolvedValue({
         id: 'cond-1',
-        conditionType: DecisionConditionType.ONGOING,
+        conditionType: DecisionConditionType.CONTINUING,
         status: DecisionConditionStatus.PENDING,
-        description: 'Submit quarterly environmental reports.',
+        requiredActionOrRestraint: 'Submit quarterly environmental reports.',
       });
       prisma.continuingObligation.create.mockResolvedValue({
         id: 'obl-1',
@@ -212,7 +212,7 @@ describe('Phase 9A compliance foundation', () => {
         schedules: [],
         statusHistory: [],
         sourceDecisionCondition: {
-          description: 'Submit quarterly environmental reports.',
+          requiredActionOrRestraint: 'Submit quarterly environmental reports.',
         },
         supersededByObligation: null,
         supersedesObligation: null,

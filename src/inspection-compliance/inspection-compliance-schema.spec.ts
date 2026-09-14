@@ -70,7 +70,8 @@ describe('Inspection compliance schema coherence (Phase 9E)', () => {
   });
 
   it('preserves historical closure on reopening', () => {
-    const reopeningBlock = /model ComplianceFindingReopening\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
+    const reopeningBlock =
+      /model ComplianceFindingReopening\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(reopeningBlock).toContain('priorClosureId');
     expect(reopeningBlock).toContain('ComplianceFindingClosure');
   });

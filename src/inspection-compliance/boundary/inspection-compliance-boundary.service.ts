@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
-  InspectionFindingSeverity,
+  type InspectionFindingSeverity,
   InspectionFindingStatus,
   ProfessionalSignatureSource,
 } from '@prisma/client';
@@ -9,7 +9,6 @@ import {
   AI_CANNOT_CONFIRM_VIOLATION_MESSAGE,
   COMPLETION_DOES_NOT_SUSPEND_INSTRUMENT_MESSAGE,
   COMPLETION_IS_NOT_COMPLIANCE_CERTIFICATION_MESSAGE,
-  FINDING_IS_NOT_SANCTION_MESSAGE,
   FINDING_REQUIRES_REQUIREMENT_SOURCE_MESSAGE,
   OBSERVATION_IS_NOT_VIOLATION_MESSAGE,
   SCOPE_AMENDMENT_REQUIRES_APPROVAL_MESSAGE,
@@ -34,8 +33,9 @@ export class InspectionComplianceBoundaryService {
 
   assertFindingIsNotSanction(severity: InspectionFindingSeverity): {
     constitutesSanction: boolean;
+    severity: InspectionFindingSeverity;
   } {
-    return { constitutesSanction: false };
+    return { constitutesSanction: false, severity };
   }
 
   assertSeverityDoesNotImplySanction(severity: InspectionFindingSeverity): {

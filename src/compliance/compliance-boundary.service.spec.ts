@@ -10,12 +10,12 @@ import appConfig from '../config/app.config';
 import identityConfig from '../config/identity.config';
 import redisConfig from '../config/redis.config';
 import securityConfig from '../config/security.config';
+import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import {
   FORBIDDEN_CLIENT_COMPLIANCE_FIELDS,
   PHASE_9_BOUNDARY_DISCLAIMER,
   PHASE_9H_INVARIANTS,
 } from './compliance.constants';
-import { ComplianceBoundaryService } from './compliance-boundary.service';
 
 describe('ComplianceBoundaryService', () => {
   let boundary: ComplianceBoundaryService;

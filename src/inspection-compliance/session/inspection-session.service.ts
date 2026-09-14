@@ -71,7 +71,10 @@ export class InspectionSessionService {
       throw new NotFoundException('Inspection record not found');
     }
 
-    if (inspection.status === InspectionStatus.COMPLETED || inspection.status === InspectionStatus.CANCELLED) {
+    if (
+      inspection.status === InspectionStatus.COMPLETED ||
+      inspection.status === InspectionStatus.CANCELLED
+    ) {
       throw new BadRequestException('Cannot start session for a completed or cancelled inspection');
     }
 
@@ -88,7 +91,7 @@ export class InspectionSessionService {
       const assignment = await this.prisma.caseAssignment.findUnique({
         where: { id: input.caseAssignmentId },
       });
-      if (!assignment || assignment.caseId !== inspection.caseId) {
+      if (assignment?.caseId !== inspection.caseId) {
         throw new BadRequestException('Case assignment does not match inspection case');
       }
       if (assignment.status !== CaseAssignmentStatus.ACTIVE) {
@@ -99,7 +102,12 @@ export class InspectionSessionService {
       }
     }
 
-    if (!input.scopeVerified || !input.locationVerified || !input.qualificationVerified || !input.independenceVerified) {
+    if (
+      !input.scopeVerified ||
+      !input.locationVerified ||
+      !input.qualificationVerified ||
+      !input.independenceVerified
+    ) {
       throw new BadRequestException(
         'Scope, location, qualification, and independence must be verified before session start',
       );
@@ -166,7 +174,9 @@ export class InspectionSessionService {
   async requestScopeAmendment(sessionId: string, amendmentNotes: string, requestedScope: string) {
     const session = await this.getSessionWithInspection(sessionId);
     if (requestedScope.trim() === session.inspectionRecord.scope.trim()) {
-      throw new BadRequestException('Requested scope must differ from the current authorized scope');
+      throw new BadRequestException(
+        'Requested scope must differ from the current authorized scope',
+      );
     }
 
     return this.prisma.inspectionSession.update({

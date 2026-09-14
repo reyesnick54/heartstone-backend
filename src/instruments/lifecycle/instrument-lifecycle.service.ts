@@ -25,8 +25,8 @@ export interface IssueInstrumentInput {
   instrumentNumber: string;
   instrumentType: LifecycleOfficialInstrumentType;
   jurisdictionScope?: InstrumentJurisdictionScope;
-  issuerInstitutionId: string;
-  governmentDecisionId: string;
+  issuingInstitutionId: string;
+  originalDecisionId: string;
   holderIdentityId?: string;
   caseId?: string;
   masterAdministrativeFileId?: string;
@@ -196,8 +196,6 @@ export class InstrumentLifecycleService {
 
   async issueInstrument(input: IssueInstrumentInput): Promise<LifecycleOfficialInstrument> {
     await this.decisionService.assertDecisionFinalized(input.originalDecisionId);
-  async issueInstrument(input: IssueInstrumentInput): Promise<OfficialInstrument> {
-    await this.decisionService.assertDecisionFinalized(input.governmentDecisionId);
 
     const token = randomUUID();
     const contentHash = input.contentHash ?? this.hashContent(input.contentReference);
@@ -208,14 +206,12 @@ export class InstrumentLifecycleService {
         instrumentType: input.instrumentType,
         jurisdictionScope: input.jurisdictionScope ?? InstrumentJurisdictionScope.NATIONAL,
         currentStatus: LifecycleOfficialInstrumentStatus.ISSUED,
-        status: OfficialInstrumentStatus.ISSUED,
         holderIdentityId: input.holderIdentityId,
         caseId: input.caseId,
         masterAdministrativeFileId: input.masterAdministrativeFileId,
         governmentServiceVersionId: input.governmentServiceVersionId,
-        issuerInstitutionId: input.issuerInstitutionId,
-        governmentDecisionId: input.governmentDecisionId,
-        scope: {},
+        issuingInstitutionId: input.issuingInstitutionId,
+        originalDecisionId: input.originalDecisionId,
         effectiveFrom: input.effectiveFrom,
         effectiveUntil: input.effectiveUntil,
         publicVerificationToken: token,
@@ -229,7 +225,7 @@ export class InstrumentLifecycleService {
             scopeDescription: input.scopeDescription,
             effectiveFrom: input.effectiveFrom,
             effectiveUntil: input.effectiveUntil,
-            createdByDecisionId: input.governmentDecisionId,
+            createdByDecisionId: input.originalDecisionId,
           },
         },
       },
@@ -251,8 +247,6 @@ export class InstrumentLifecycleService {
       eventType: InstrumentLifecycleEventType.ISSUED,
       controllingDecisionId: input.originalDecisionId,
       newStatus: LifecycleOfficialInstrumentStatus.ISSUED,
-      controllingDecisionId: input.governmentDecisionId,
-      newStatus: OfficialInstrumentStatus.ISSUED,
       effectiveAt: input.effectiveFrom ?? new Date(),
       actorIdentityId: input.actorIdentityId,
       actorOfficeholderId: input.actorOfficeholderId,
@@ -276,17 +270,11 @@ export class InstrumentLifecycleService {
     this.boundary.assertDecisionTypeMatchesLifecycleAction(decision.decisionType, [
       InstrumentControllingDecisionType.AMEND,
       InstrumentControllingDecisionType.APPROVE_WITH_CONDITIONS,
-    if (!decision.lifecycleDecisionType) {
-      throw new BadRequestException('Lifecycle action requires lifecycleDecisionType');
-    }
-    this.boundary.assertDecisionTypeMatchesLifecycleAction(decision.lifecycleDecisionType, [
-      GovernmentDecisionType.AMEND,
-      GovernmentDecisionType.APPROVE_WITH_CONDITIONS,
     ]);
 
     const instrument = await this.getInstrumentWithCurrentVersion(input.instrumentId);
     this.boundary.assertInstrumentStatusAllowsAction(
-      instrument.status,
+      instrument.currentStatus,
       this.guard.getAllowedStatusesForAction(InstrumentLifecycleEventType.AMENDED),
       'amendment',
     );
@@ -301,7 +289,7 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.lifecycleOfficialInstrumentVersion.create({
       data: {
-        officialInstrumentId: instrument.id,
+        instrumentId: instrument.id,
         versionNumber: nextVersionNumber,
         isCurrent: true,
         contentReference: input.newContentReference,
@@ -354,8 +342,6 @@ export class InstrumentLifecycleService {
       controllingDecisionId: input.controllingDecisionId,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.AMENDED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.AMENDED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
       actorOfficeholderId: input.actorOfficeholderId,
@@ -379,7 +365,7 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.lifecycleOfficialInstrumentVersion.create({
       data: {
-        officialInstrumentId: instrument.id,
+        instrumentId: instrument.id,
         versionNumber: priorVersion.versionNumber + 1,
         isCurrent: true,
         contentReference: input.correctedContentReference,
@@ -408,8 +394,8 @@ export class InstrumentLifecycleService {
       instrumentId: instrument.id,
       eventType: InstrumentLifecycleEventType.CORRECTED_CLERICAL,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.status,
-      newStatus: instrument.status,
+      priorStatus: instrument.currentStatus,
+      newStatus: instrument.currentStatus,
       effectiveAt: new Date(),
       actorIdentityId: input.actorIdentityId,
     });
@@ -434,7 +420,7 @@ export class InstrumentLifecycleService {
       conditionsPerformanceVerified: input.conditionsPerformanceVerified,
       priorApprovalReliedUpon: input.priorApprovalReliedUpon ?? false,
       paymentReceived: input.paymentReceived ?? false,
-      decisionFinalized: decision.decisionStatus === 'FINALIZED',
+      decisionFinalized: decision.status === 'FINALIZED',
     });
 
     const instrument = await this.getInstrumentWithCurrentVersion(input.instrumentId);
@@ -447,7 +433,7 @@ export class InstrumentLifecycleService {
 
     const newVersion = await this.prisma.lifecycleOfficialInstrumentVersion.create({
       data: {
-        officialInstrumentId: instrument.id,
+        instrumentId: instrument.id,
         versionNumber: priorVersion.versionNumber + 1,
         isCurrent: true,
         contentReference: input.newContentReference,
@@ -500,8 +486,6 @@ export class InstrumentLifecycleService {
       controllingDecisionId: input.controllingDecisionId,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.RENEWED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.RENEWED,
       effectiveAt: input.newEffectiveFrom,
       actorIdentityId: input.actorIdentityId,
     });
@@ -554,7 +538,7 @@ export class InstrumentLifecycleService {
       instrumentId: instrument.id,
       eventType,
       controllingDecisionId: input.controllingDecisionId,
-      priorStatus: instrument.status,
+      priorStatus: instrument.currentStatus,
       newStatus,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.executedByIdentityId,
@@ -574,7 +558,7 @@ export class InstrumentLifecycleService {
     const instrument = await this.getInstrument(input.instrumentId);
 
     this.boundary.assertAbsezRevocationNotNational({
-      jurisdictionScope: instrument.jurisdictionScope ?? InstrumentJurisdictionScope.NATIONAL,
+      jurisdictionScope: instrument.jurisdictionScope,
       representsNationalRevocation: input.representsNationalRevocation ?? true,
     });
 
@@ -603,8 +587,6 @@ export class InstrumentLifecycleService {
       controllingDecisionId: input.controllingDecisionId,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.REVOKED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.REVOKED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
     });
@@ -627,7 +609,7 @@ export class InstrumentLifecycleService {
       correctiveEvidenceProvided: input.correctiveEvidenceIds.length > 0,
       inspectionVerified: input.inspectionVerified,
       professionalVerified: input.professionalVerified,
-      newDecisionFinalized: decision.decisionStatus === 'FINALIZED',
+      newDecisionFinalized: decision.status === 'FINALIZED',
     });
 
     const instrument = await this.getInstrument(input.instrumentId);
@@ -653,8 +635,6 @@ export class InstrumentLifecycleService {
       controllingDecisionId: input.controllingDecisionId,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.REINSTATED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.REINSTATED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
     });
@@ -678,8 +658,6 @@ export class InstrumentLifecycleService {
       eventType: InstrumentLifecycleEventType.EXPIRED,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.EXPIRED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.EXPIRED,
       effectiveAt: instrument.effectiveUntil,
     });
 
@@ -713,8 +691,6 @@ export class InstrumentLifecycleService {
       controllingDecisionId: input.controllingDecisionId,
       priorStatus: instrument.currentStatus,
       newStatus: LifecycleOfficialInstrumentStatus.SURRENDERED,
-      priorStatus: instrument.status,
-      newStatus: OfficialInstrumentStatus.SURRENDERED,
       effectiveAt: input.effectiveAt,
       actorIdentityId: input.actorIdentityId,
       metadata: { continuingObligations: input.continuingObligations ?? [] },

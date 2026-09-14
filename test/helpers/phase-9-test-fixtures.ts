@@ -1,12 +1,15 @@
 import { type INestApplication } from '@nestjs/common';
 import {
   AuthorityActionType,
+  ContinuingObligationSourceType,
+  ContinuingObligationStatus,
+  ContinuingObligationType,
   FunctionAssignmentStatus,
-  InspectionType,
   OfficialInstrumentStatus,
 } from '@prisma/client';
 import { type App } from 'supertest/types';
 
+import { COMPLIANCE_MATTER_NUMBER_PREFIX } from '../../src/compliance/compliance.constants';
 import { NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER } from '../../src/compliance/compliance.constants';
 import { type PrismaService } from '../../src/database/prisma.service';
 import {
@@ -19,11 +22,9 @@ import {
 export interface Phase9FixtureContext extends Phase8FixtureContext {
   inspectFunctionAuthorityRecordId: string;
   officialInstrumentId: string;
+  officialInstrumentVersionId: string;
   complianceMatterId?: string;
   continuingObligationId?: string;
-  inspectionTypeDefinitionId?: string;
-  inspectionPlanId?: string;
-  inspectionSessionId?: string;
 }
 
 export async function seedPhase9Fixture(
@@ -36,6 +37,15 @@ export async function seedPhase9Fixture(
   const issued = await issueInstrumentForDecision(app, phase8, requirePreRecordedDecision(phase8), {
     sealDocumentVersionId: phase8.sealDocumentVersionId,
   });
+
+  const instrument = await prisma.officialInstrument.findUniqueOrThrow({
+    where: { id: issued.instrument.id },
+    include: { currentVersion: true },
+  });
+  if (!instrument.currentVersionId || !instrument.currentVersion) {
+    throw new Error('Issued instrument is missing current version for Phase 9 fixture');
+  }
+  const officialInstrumentVersionId = instrument.currentVersionId;
 
   const inspectAuthority = await prisma.functionAuthorityRecord.create({
     data: {
@@ -66,7 +76,8 @@ export async function seedPhase9Fixture(
   const base: Phase9FixtureContext = {
     ...phase8,
     inspectFunctionAuthorityRecordId: inspectAuthority.id,
-    officialInstrumentId: issued.instrument.id,
+    officialInstrumentId: instrument.id,
+    officialInstrumentVersionId,
   };
 
   if (!options?.includeComplianceGraph) {
@@ -75,69 +86,40 @@ export async function seedPhase9Fixture(
 
   const matter = await prisma.complianceMatter.create({
     data: {
-      matterNumber: `${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-CM-001`,
-      subject: 'Continuing compliance monitoring',
-      caseId: phase8.caseId,
-      officialInstrumentId: issued.instrument.id,
+      complianceMatterNumber: `${COMPLIANCE_MATTER_NUMBER_PREFIX}-${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-001`,
       masterAdministrativeFileId: phase8.masterAdministrativeFileId,
+      caseId: phase8.caseId,
+      officialInstrumentId: instrument.id,
       holderIdentityId: phase8.applicantIdentityId,
-      status: 'OPEN',
+      responsibleInstitutionId: phase8.institutionId,
+      responsibleDepartmentId: phase8.departmentId,
+      status: 'MONITORING',
     },
   });
 
   const obligation = await prisma.continuingObligation.create({
     data: {
       complianceMatterId: matter.id,
-      officialInstrumentId: issued.instrument.id,
+      sourceType: ContinuingObligationSourceType.INSTRUMENT_VERSION,
+      sourceInstrumentVersionId: officialInstrumentVersionId,
+      obligationCode: `${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-OBL-001`,
       description: 'Submit quarterly compliance report',
-      obligationType: 'REPORTING',
-      effectiveFrom: new Date('2026-01-01'),
-      status: 'ACTIVE',
+      responsibleParty: 'Holder',
+      obligationType: ContinuingObligationType.REPORTING,
+      startDate: new Date('2026-01-01'),
+      status: ContinuingObligationStatus.NOT_YET_DUE,
       schedules: {
         create: {
-          frequency: 'QUARTERLY',
-          nextDueAt: new Date('2026-04-01'),
+          occurrenceNumber: 1,
+          scheduledDueDate: new Date('2026-04-01'),
+          lawfulDueDate: new Date('2026-04-01'),
         },
       },
     },
   });
 
-  const typeDef = await prisma.inspectionTypeDefinition.create({
-    data: {
-      code: `${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-ROUTINE`,
-      name: 'Routine compliance inspection',
-      inspectionType: InspectionType.COMPLIANCE,
-      lifecycleStatus: 'ACTIVE',
-    },
-  });
-
-  const plan = await prisma.inspectionPlan.create({
-    data: {
-      planNumber: `${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-IP-001`,
-      complianceMatterId: matter.id,
-      officialInstrumentId: issued.instrument.id,
-      inspectionTypeDefinitionId: typeDef.id,
-      scheduledFor: new Date('2026-05-01'),
-      scope: 'Verify quarterly reporting compliance',
-      status: 'SCHEDULED',
-    },
-  });
-
-  const session = await prisma.inspectionSession.create({
-    data: {
-      sessionNumber: `${NON_PRODUCTION_COMPLIANCE_FIXTURE_MARKER}-IS-001`,
-      inspectionPlanId: plan.id,
-      complianceMatterId: matter.id,
-      caseId: phase8.caseId,
-      officialInstrumentId: issued.instrument.id,
-      inspectionTypeDefinitionId: typeDef.id,
-      functionAuthorityRecordId: inspectAuthority.id,
-      status: 'PLANNED',
-    },
-  });
-
   await prisma.officialInstrument.update({
-    where: { id: issued.instrument.id },
+    where: { id: instrument.id },
     data: { status: OfficialInstrumentStatus.ISSUED },
   });
 
@@ -145,8 +127,5 @@ export async function seedPhase9Fixture(
     ...base,
     complianceMatterId: matter.id,
     continuingObligationId: obligation.id,
-    inspectionTypeDefinitionId: typeDef.id,
-    inspectionPlanId: plan.id,
-    inspectionSessionId: session.id,
   };
 }

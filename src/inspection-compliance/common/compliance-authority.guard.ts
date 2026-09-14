@@ -1,9 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import {
-  type AuthorityActionType,
-  AuthorityEvaluationOutcome,
-  IdentityType,
-} from '@prisma/client';
+import { type AuthorityActionType, AuthorityEvaluationOutcome, IdentityType } from '@prisma/client';
 
 import { type AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import {

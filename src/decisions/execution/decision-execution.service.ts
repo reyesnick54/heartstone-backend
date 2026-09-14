@@ -223,10 +223,6 @@ export class DecisionExecutionService {
     return Object.assign(decision, { boundaryDisclaimer: PHASE_8B_BOUNDARY_DISCLAIMER });
   }
 
-  assertDecisionImmutable(
-    existing: GovernmentDecision,
-    update: Record<string, unknown>,
-  ): void {
   assertDecisionImmutable(existing: GovernmentDecision, update: Record<string, unknown>): void {
     for (const field of IMMUTABLE_DECISION_UPDATE_FIELDS) {
       if (update[field] !== undefined) {

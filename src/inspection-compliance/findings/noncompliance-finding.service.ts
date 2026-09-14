@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   AuthorityActionType,
   NoncomplianceFindingStatus,
@@ -105,6 +110,17 @@ export class NoncomplianceFindingService {
   }
 
   async confirm(input: ConfirmNoncomplianceFindingInput) {
+    if (input.isTechnicalAdminOnly || input.hasCaseAssignmentOnly) {
+      await assertComplianceAuthority(this.authorityEvaluation, {
+        identityId: input.confirmedByIdentityId,
+        officeholderId: input.confirmedByOfficeholderId,
+        functionAuthorityRecordId: input.functionAuthorityRecordId,
+        action: AuthorityActionType.ENFORCE,
+        isTechnicalAdminOnly: input.isTechnicalAdminOnly,
+        hasCaseAssignmentOnly: input.hasCaseAssignmentOnly,
+      });
+    }
+
     const finding = await this.prisma.noncomplianceFinding.findUnique({
       where: { id: input.findingId },
     });
@@ -132,18 +148,15 @@ export class NoncomplianceFindingService {
       }
     }
 
-    const authorityEvaluationRecordId = await assertComplianceAuthority(
-      this.authorityEvaluation,
-      {
-        identityId: input.confirmedByIdentityId,
-        officeholderId: input.confirmedByOfficeholderId,
-        functionAuthorityRecordId: input.functionAuthorityRecordId,
-        action: AuthorityActionType.ENFORCE,
-        isAiActor: input.isAiActor,
-        isTechnicalAdminOnly: input.isTechnicalAdminOnly,
-        hasCaseAssignmentOnly: input.hasCaseAssignmentOnly,
-      },
-    );
+    const authorityEvaluationRecordId = await assertComplianceAuthority(this.authorityEvaluation, {
+      identityId: input.confirmedByIdentityId,
+      officeholderId: input.confirmedByOfficeholderId,
+      functionAuthorityRecordId: input.functionAuthorityRecordId,
+      action: AuthorityActionType.ENFORCE,
+      isAiActor: input.isAiActor,
+      isTechnicalAdminOnly: input.isTechnicalAdminOnly,
+      hasCaseAssignmentOnly: input.hasCaseAssignmentOnly,
+    });
 
     return this.prisma.noncomplianceFinding.update({
       where: { id: input.findingId },
