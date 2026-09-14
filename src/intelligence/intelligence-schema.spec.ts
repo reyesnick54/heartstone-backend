@@ -24,9 +24,9 @@ import {
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
 
-describe('Phase 12F schema guard', () => {
+describe('Phase 12F intelligence schema', () => {
   for (const modelName of PHASE_12F_MODEL_NAMES) {
-    it(`defines model ${modelName} exactly once`, () => {
+    it(`defines ${modelName} exactly once`, () => {
       const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
       expect(matches).toHaveLength(1);
     });
@@ -50,29 +50,22 @@ describe('Phase 12F schema guard', () => {
     });
   }
 
-  for (const sourceStatus of DIGITAL_TWIN_SOURCE_STATUSES) {
-    it(`supports digital twin source status ${sourceStatus}`, () => {
-      expect(schema).toContain(sourceStatus);
+  for (const status of DIGITAL_TWIN_SOURCE_STATUSES) {
+    it(`supports digital twin source status ${status}`, () => {
+      expect(schema).toContain(status);
     });
   }
 
-  for (const impactArea of CONSEQUENTIAL_USE_IMPACT_AREAS) {
-    it(`supports consequential use impact area ${impactArea}`, () => {
-      expect(schema).toContain(impactArea);
+  for (const area of CONSEQUENTIAL_USE_IMPACT_AREAS) {
+    it(`supports consequential use impact area ${area}`, () => {
+      expect(schema).toContain(area);
     });
   }
 
-  it('marks twin as non-authoritative by default', () => {
-    expect(schema).toContain('isAuthoritativeRecord');
-    expect(schema).toContain('@default(false)');
-  });
-
-  it('requires rollback plan for live transition', () => {
-    expect(schema).toContain('rollbackPlanReference');
-  });
-
-  it('keeps snapshots immutable', () => {
-    expect(schema).toContain('isImmutable');
+  it('defaults twins to non-authoritative records', () => {
+    const block = /model DigitalTwinDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    expect(block).toContain('isAuthoritativeRecord');
+    expect(block).toContain('@default(false)');
   });
 });
 

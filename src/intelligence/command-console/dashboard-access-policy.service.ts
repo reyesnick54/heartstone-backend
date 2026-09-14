@@ -68,22 +68,31 @@ export class DashboardAccessPolicyService {
     });
 
     if (!definition) {
-      throw new NotFoundException(`Dashboard definition "${input.dashboardDefinitionId}" was not found`);
+      throw new NotFoundException(
+        `Dashboard definition "${input.dashboardDefinitionId}" was not found`,
+      );
     }
 
-    let accessResult: DashboardQueryAuditResult = DashboardQueryAuditResult.DENIED_INSUFFICIENT_PURPOSE;
+    let accessResult: DashboardQueryAuditResult =
+      DashboardQueryAuditResult.DENIED_INSUFFICIENT_PURPOSE;
     let granted = false;
 
     if (input.technicalPermissionOnly) {
       accessResult = DashboardQueryAuditResult.DENIED_TECHNICAL_ONLY;
-      this.boundaryService.assertTechnicalAdminNotSubstantiveUser(input.technicalPermissionOnly, false);
+      this.boundaryService.assertTechnicalAdminNotSubstantiveUser(
+        input.technicalPermissionOnly,
+        false,
+      );
     } else {
       const matchingPolicy = definition.accessPolicies.find((policy) => {
         if (policy.identityId && policy.identityId !== input.identityId) return false;
         if (policy.institutionId && policy.institutionId !== input.institutionId) return false;
         if (policy.departmentId && policy.departmentId !== input.departmentId) return false;
         if (policy.purpose !== input.purpose) return false;
-        if (this.sensitivityRank(policy.sensitivityLevel) < this.sensitivityRank(input.sensitivityScope)) {
+        if (
+          this.sensitivityRank(policy.sensitivityLevel) <
+          this.sensitivityRank(input.sensitivityScope)
+        ) {
           return false;
         }
         if (
@@ -130,7 +139,9 @@ export class DashboardAccessPolicyService {
         technicalPermissionOnly: input.technicalPermissionOnly ?? false,
         queryFilters: (input.queryFilters ?? {}) as Prisma.InputJsonValue,
         accessResult,
-        resultSummary: granted ? 'Access granted under matching policy' : `Access denied: ${accessResult}`,
+        resultSummary: granted
+          ? 'Access granted under matching policy'
+          : `Access denied: ${accessResult}`,
       },
     });
 
