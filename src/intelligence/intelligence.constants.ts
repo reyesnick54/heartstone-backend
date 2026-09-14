@@ -124,7 +124,6 @@ export const INTELLIGENCE_ALERT_DISCLAIMER =
 export const RISK_SCORE_DISCLAIMER =
   'Risk scores are prioritization aids with versioned methodology. They do not establish legal authority and cannot bypass mandatory evidence or authority requirements.';
 
-export const AI_ACTOR_ROLE_MARKER = 'AI_ASSISTANCE';
 export const AI_ACTOR_IDENTITY_PREFIX = 'ai-assistant:';
 
 export const ANALYSIS_NOT_DECISION_MESSAGE =
@@ -217,7 +216,7 @@ export const PROJECT_PROJECTION_DISCLAIMER =
 export const SECTOR_OBSERVATION_DISCLAIMER =
   'Sector observations do not establish national economic causation attributable to platform deployment.';
 
-export const RISK_SCORE_DISCLAIMER =
+export const STRATEGIC_PROJECT_RISK_SCORE_DISCLAIMER =
   'Risk scores are prioritization aids only. They do not affect project approval status.';
 
 export const FORBIDDEN_AI_STRATEGIC_PROJECT_ACTIONS = [
@@ -356,6 +355,8 @@ export const STRATEGIC_PROJECT_DEPENDENCY_TYPES = [
   'TECHNOLOGY',
   'SUPPLIER',
   'INFRASTRUCTURE',
+] as const;
+
 export const DASHBOARD_PROJECTION_DISCLAIMER =
   'Dashboard indicators are derived operational projections. Visibility does not create permission or institutional authority to act.';
 

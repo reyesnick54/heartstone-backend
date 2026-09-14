@@ -4,15 +4,30 @@ import {
   DigitalTwinMode,
   DigitalTwinType,
   IdentityType,
+  RiskEvidenceBasis,
 } from '@prisma/client';
 
 import {
+  AI_ACTOR_IDENTITY_PREFIX,
   AI_ACTOR_ROLE_MARKER,
+  AI_CANNOT_IMPOSE_ENFORCEMENT_MESSAGE,
+  AI_CANNOT_SELF_VERIFY_ALERT_MESSAGE,
+  ALERT_GENERATED_NOT_VERIFIED_MESSAGE,
+  ALERT_NOT_EMERGENCY_MESSAGE,
+  ALERT_NOT_VIOLATION_MESSAGE,
+  ANALYSIS_NOT_DECISION_MESSAGE,
   FORBIDDEN_AI_TWIN_FINAL_ACTIONS,
   FORBIDDEN_CLIENT_TWIN_FIELDS,
+  FORBIDDEN_MONITORING_SUBJECT_TYPES,
   FORBIDDEN_SIMULATION_LIVE_ACTIONS,
   FORBIDDEN_SIMULATION_LIVE_MUTATIONS,
   INTELLIGENCE_REASON_CODES,
+  MODEL_ESTIMATE_LABEL_REQUIRED_MESSAGE,
+  MONITORING_SOURCE_NOT_APPROVED_MESSAGE,
+  RISK_SCORE_CANNOT_BYPASS_GATE_MESSAGE,
+  RISK_SCORE_NOT_AUTHORITY_MESSAGE,
+  SOURCE_CONFLICT_PRESERVATION_MESSAGE,
+  UNAUTHORIZED_PERSONAL_MONITORING_MESSAGE,
 } from '../intelligence.constants';
 
 export interface TwinIntegrityState {
@@ -26,25 +41,7 @@ export interface TwinIntegrityState {
 
 export interface TwinSourceDisclosureState {
   sources: { isDisclosed: boolean; sourceStatus: string }[];
-import { RiskEvidenceBasis } from '@prisma/client';
-
-import {
-  AI_ACTOR_IDENTITY_PREFIX,
-  AI_ACTOR_ROLE_MARKER,
-  AI_CANNOT_IMPOSE_ENFORCEMENT_MESSAGE,
-  AI_CANNOT_SELF_VERIFY_ALERT_MESSAGE,
-  ALERT_GENERATED_NOT_VERIFIED_MESSAGE,
-  ALERT_NOT_EMERGENCY_MESSAGE,
-  ALERT_NOT_VIOLATION_MESSAGE,
-  ANALYSIS_NOT_DECISION_MESSAGE,
-  FORBIDDEN_MONITORING_SUBJECT_TYPES,
-  MODEL_ESTIMATE_LABEL_REQUIRED_MESSAGE,
-  MONITORING_SOURCE_NOT_APPROVED_MESSAGE,
-  RISK_SCORE_CANNOT_BYPASS_GATE_MESSAGE,
-  RISK_SCORE_NOT_AUTHORITY_MESSAGE,
-  SOURCE_CONFLICT_PRESERVATION_MESSAGE,
-  UNAUTHORIZED_PERSONAL_MONITORING_MESSAGE,
-} from '../intelligence.constants';
+}
 
 export interface MonitoringPrivacyInput {
   subjectType?: string;
@@ -240,6 +237,9 @@ export class IntelligenceBoundaryService {
       if (field in payload && payload[field] !== undefined) {
         throw new ForbiddenException(`Client may not set protected field "${field}"`);
       }
+    }
+  }
+
   assertAnalysisNotDecision(input: { isDecisionLike?: boolean; presentationText?: string }): void {
     if (input.isDecisionLike) {
       throw new BadRequestException(ANALYSIS_NOT_DECISION_MESSAGE);

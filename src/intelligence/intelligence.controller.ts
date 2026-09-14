@@ -16,6 +16,9 @@ export class IntelligenceController {
     private readonly digitalTwin: DigitalTwinService,
     private readonly simulation: SimulationService,
     private readonly consequentialUse: ConsequentialUseService,
+    private readonly analysisService: AnalysisService,
+    private readonly monitoringService: IntelligenceMonitoringService,
+    private readonly riskService: RiskAssessmentService,
   ) {}
 
   @Get('boundary')
@@ -105,10 +108,8 @@ export class IntelligenceController {
   ) {
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
     return this.consequentialUse.proposeLiveTransition(body);
-    private readonly analysisService: AnalysisService,
-    private readonly monitoringService: IntelligenceMonitoringService,
-    private readonly riskService: RiskAssessmentService,
-  ) {}
+  }
+
 
   @Post('analysis/requests')
   createAnalysisRequest(@Body() body: Parameters<AnalysisService['createRequest']>[0]) {
