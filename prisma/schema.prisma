@@ -236,6 +236,10 @@ model Officeholder {
   instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
   reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
   complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  administrativeCorrectionsAsRequester AdministrativeCorrectionMatter[] @relation("AdministrativeCorrectionRequesterOfficeholder")
+  administrativeCorrectionsAsReviewer  AdministrativeCorrectionMatter[] @relation("AdministrativeCorrectionReviewerOfficeholder")
+  clarificationResponsesAuthored       ClarificationResponse[] @relation("ClarificationResponderOfficeholder")
+  automationChallengeDispositions      AutomationChallengeDisposition[] @relation("AutomationChallengeDisposerOfficeholder")
 
   @@map("officeholders")
 }
@@ -522,6 +526,14 @@ model Identity {
   complianceProjectionSubjects       ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectIdentity")
   complianceAlertReviews             ComplianceAlert[]             @relation("ComplianceAlertReviewer")
   complianceRevalidationRecords      ComplianceRevalidationRecord[] @relation("ComplianceRevalidationRecorder")
+  administrativeCorrectionsRequested AdministrativeCorrectionMatter[] @relation("AdministrativeCorrectionRequester")
+  administrativeCorrectionsReviewed  AdministrativeCorrectionMatter[] @relation("AdministrativeCorrectionReviewer")
+  clarificationRequestsFiled         ClarificationRequest[]        @relation("ClarificationRequester")
+  clarificationResponsesAuthored     ClarificationResponse[]       @relation("ClarificationResponder")
+  automationChallengesFiled          AutomationChallenge[]         @relation("AutomationChallenger")
+  automationChallengesDisposed       AutomationChallengeDisposition[] @relation("AutomationChallengeDisposer")
+  automationExplanationHumanReviewers AutomationExplanationRecord[] @relation("AutomationExplanationHumanReviewer")
+  automationExplanationDecisionMakers AutomationExplanationRecord[] @relation("AutomationExplanationDecisionMaker")
 
   @@index([userAccountId])
   @@index([personId])
@@ -903,6 +915,7 @@ model FunctionAuthorityRecord {
   instrumentTypeVersions       InstrumentTypeVersion[]          @relation("InstrumentIssuanceFunctionAuthority")
   continuingObligations        ContinuingObligation[]           @relation("ContinuingObligationFunctionAuthority")
   complianceStatusProjections  ComplianceStatusProjection[]
+  administrativeCorrectionMatters AdministrativeCorrectionMatter[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1163,6 +1176,9 @@ model AuthorityEvaluationRecord {
   governmentDecisions          GovernmentDecision[]          @relation("GovernmentDecisionAuthority")
   issuanceEvents               IssuanceEvent[]
   complianceProjectionEvaluations ComplianceStatusProjection[] @relation("ComplianceProjectionAuthority")
+  administrativeCorrectionApprovals AdministrativeCorrectionMatter[] @relation("AdministrativeCorrectionAuthority")
+  clarificationResponseApprovals    ClarificationResponse[] @relation("ClarificationResponseAuthority")
+  automationChallengeDispositionApprovals AutomationChallengeDisposition[] @relation("AutomationChallengeDispositionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -2174,6 +2190,9 @@ model Case {
   issuanceReadinessAssessments      IssuanceReadinessAssessment[]
   complianceMatters                 ComplianceMatter[]
   complianceStatusProjections       ComplianceStatusProjection[]
+  administrativeCorrectionMatters AdministrativeCorrectionMatter[]
+  clarificationRequests           ClarificationRequest[]
+  automationChallenges            AutomationChallenge[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -2768,6 +2787,8 @@ model MasterAdministrativeFile {
   officialInstruments                  OfficialInstrument[]
   complianceMatters                  ComplianceMatter[]
   complianceStatusProjections        ComplianceStatusProjection[]
+  administrativeCorrectionMatters  AdministrativeCorrectionMatter[]
+  clarificationRequests            ClarificationRequest[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -3835,6 +3856,8 @@ model RecordCorrection {
   approverOfficeholder          Officeholder?              @relation("RecordCorrectionApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
   authorityEvaluationRecord     AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
   correctionAuthorityFunction   FunctionAuthorityRecord?   @relation(fields: [correctionAuthorityFunctionId], references: [id])
+  administrativeCorrectionMatters AdministrativeCorrectionMatter[]
+  automationChallengeDispositions AutomationChallengeDisposition[]
 
   @@index([targetRecordType, targetRecordId])
   @@index([status])
@@ -4595,6 +4618,9 @@ model GovernmentDecision {
   reinstatementRecords          InstrumentReinstatementRecord[]
   replacementRecords            InstrumentReplacementRecord[]
   surrenderRecords              InstrumentSurrenderRecord[]
+  administrativeCorrectionMatters AdministrativeCorrectionMatter[]
+  clarificationRequests         ClarificationRequest[]
+  automationChallenges          AutomationChallenge[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5066,6 +5092,7 @@ model OfficialInstrument {
   challengedInReviews          DecisionReviewReference[]
   complianceMatters            ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
+  clarificationRequests        ClarificationRequest[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -6025,4 +6052,262 @@ model ComplianceRevalidationRecord {
   @@index([projectionId])
   @@index([trigger])
   @@map("compliance_revalidation_records")
+}
+
+// ─── Phase 10D: Administrative Correction, Clarification, Automation Challenge ─
+
+enum AdministrativeCorrectionCategory {
+  TYPOGRAPHICAL_ERROR
+  CONTACT_INFORMATION
+  CLERICAL_MISSTATEMENT
+  DUPLICATE_RECORD
+  DOCUMENT_ASSOCIATION
+  CALCULATION_ERROR
+  STATUS_DISPLAY_ERROR
+  DELIVERY_ERROR
+  OTHER_AUTHORIZED_NONSUBSTANTIVE_ERROR
+}
+
+enum AdministrativeCorrectionMatterStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  IMPLEMENTED
+  REJECTED
+  ROUTED_TO_ALTERNATE_REDRESS
+}
+
+enum RedressRouteType {
+  ADMINISTRATIVE_CORRECTION
+  CLARIFICATION
+  RECONSIDERATION
+  INTERNAL_REVIEW
+  STATUTORY_APPEAL
+  AUTOMATION_CHALLENGE
+}
+
+enum ClarificationRequestStatus {
+  REQUESTED
+  RESPONDED
+  CLOSED
+  REJECTED
+}
+
+enum AutomationChallengeGround {
+  INCORRECT_INPUT_DATA
+  MISTAKEN_IDENTITY
+  FALSE_MATCH
+  INAPPROPRIATE_CLASSIFICATION
+  UNEXPLAINED_SCORE
+  INCONSISTENT_RECOMMENDATION
+  IRRELEVANT_DATA
+  BIASED_OR_DISCRIMINATORY_EFFECT
+  OUTDATED_SOURCE
+  UNSUPPORTED_INFERENCE
+  MISSING_HUMAN_REVIEW
+  OUTSIDE_APPROVED_AUTOMATION_BOUNDARY
+  OTHER_AUTHORIZED_GROUND
+}
+
+enum AutomationChallengeStatus {
+  FILED
+  EXPLANATION_REQUESTED
+  EXPLANATION_PROVIDED
+  UNDER_REVIEW
+  DISPOSED
+  ROUTED_TO_CORRECTION
+  ROUTED_TO_RECONSIDERATION
+}
+
+enum AutomationChallengeDispositionType {
+  CORRECT_INPUT
+  RERUN_AUTHORIZED_PROCESS
+  EXCLUDE_FAULTY_OUTPUT
+  REQUIRE_HUMAN_REVIEW
+  REOPEN_REVIEW
+  REFER_FOR_RECONSIDERATION
+  NO_DEFECT_FOUND
+  OTHER_AUTHORIZED_REMEDY
+}
+
+model AdministrativeCorrectionMatter {
+  id                            String                             @id @default(uuid()) @db.Uuid
+  matterNumber                  String                             @unique
+  category                      AdministrativeCorrectionCategory
+  status                        AdministrativeCorrectionMatterStatus @default(REQUESTED)
+  targetRecordType              String
+  targetRecordId                String                             @db.Uuid
+  targetVersionId               String?                            @db.Uuid
+  requestedByIdentityId         String                             @db.Uuid
+  requesterOfficeholderId       String?                            @db.Uuid
+  correctionAuthorityFunctionId String?                            @db.Uuid
+  reason                        String
+  requestedChangeDescription    String
+  requestedChanges              Json                               @default("{}")
+  originalRecordSnapshot        Json?
+  supportingEvidenceIds         Json                               @default("[]")
+  recordCorrectionId            String?                            @db.Uuid
+  reviewerIdentityId            String?                            @db.Uuid
+  reviewerOfficeholderId        String?                            @db.Uuid
+  approvedAt                    DateTime?
+  authorityEvaluationRecordId   String?                            @db.Uuid
+  correctedRecordReference      String?
+  downstreamRecordsRequiringUpdate Json                            @default("[]")
+  notificationReferences        Json                               @default("[]")
+  routedToRoute                 RedressRouteType?
+  routedRouteGuidance             String?
+  caseId                        String?                            @db.Uuid
+  masterAdministrativeFileId    String?                            @db.Uuid
+  governmentDecisionId          String?                            @db.Uuid
+  createdAt                     DateTime                           @default(now())
+  updatedAt                     DateTime                           @updatedAt
+  requesterIdentity             Identity                           @relation("AdministrativeCorrectionRequester", fields: [requestedByIdentityId], references: [id])
+  requesterOfficeholder         Officeholder?                      @relation("AdministrativeCorrectionRequesterOfficeholder", fields: [requesterOfficeholderId], references: [id])
+  reviewerIdentity              Identity?                          @relation("AdministrativeCorrectionReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder            Officeholder?                      @relation("AdministrativeCorrectionReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  correctionAuthorityFunction   FunctionAuthorityRecord?           @relation(fields: [correctionAuthorityFunctionId], references: [id])
+  authorityEvaluationRecord     AuthorityEvaluationRecord?         @relation("AdministrativeCorrectionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  recordCorrection              RecordCorrection?                  @relation(fields: [recordCorrectionId], references: [id])
+  case                          Case?                              @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?          @relation(fields: [masterAdministrativeFileId], references: [id])
+  governmentDecision            GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([status])
+  @@index([category])
+  @@index([targetRecordType, targetRecordId])
+  @@index([caseId])
+  @@index([requestedByIdentityId])
+  @@map("administrative_correction_matters")
+}
+
+model ClarificationRequest {
+  id                     String                     @id @default(uuid()) @db.Uuid
+  requestNumber          String                     @unique
+  status                 ClarificationRequestStatus @default(REQUESTED)
+  requesterIdentityId    String                     @db.Uuid
+  requestedSubject       String
+  clarificationQuestion  String
+  relatedDecisionId      String?                    @db.Uuid
+  relatedInstrumentId    String?                    @db.Uuid
+  relatedNoticeReference String?
+  caseId                 String?                    @db.Uuid
+  masterAdministrativeFileId String?                @db.Uuid
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  requesterIdentity      Identity                   @relation("ClarificationRequester", fields: [requesterIdentityId], references: [id])
+  relatedDecision        GovernmentDecision?        @relation(fields: [relatedDecisionId], references: [id])
+  relatedInstrument      OfficialInstrument?        @relation(fields: [relatedInstrumentId], references: [id])
+  case                   Case?                      @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  responses              ClarificationResponse[]
+
+  @@index([status])
+  @@index([requesterIdentityId])
+  @@index([relatedDecisionId])
+  @@map("clarification_requests")
+}
+
+model ClarificationResponse {
+  id                          String               @id @default(uuid()) @db.Uuid
+  clarificationRequestId      String               @db.Uuid
+  responderIdentityId         String               @db.Uuid
+  responderOfficeholderId     String?              @db.Uuid
+  responseContent             String
+  proceduralExplanation       String?
+  referencedRequirement       String?
+  applicableDeadline          DateTime?
+  availableRoutes             Json                 @default("[]")
+  displayedDataExplanation    String?
+  recordAccessGuidance        String?
+  authorityEvaluationRecordId String?              @db.Uuid
+  respondedAt                 DateTime             @default(now())
+  clarificationRequest        ClarificationRequest @relation(fields: [clarificationRequestId], references: [id], onDelete: Cascade)
+  responderIdentity           Identity             @relation("ClarificationResponder", fields: [responderIdentityId], references: [id])
+  responderOfficeholder       Officeholder?        @relation("ClarificationResponderOfficeholder", fields: [responderOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ClarificationResponseAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([clarificationRequestId])
+  @@map("clarification_responses")
+}
+
+model AutomationChallenge {
+  id                              String                    @id @default(uuid()) @db.Uuid
+  challengeNumber                 String                    @unique
+  status                          AutomationChallengeStatus @default(FILED)
+  grounds                         AutomationChallengeGround
+  challengedAutomationReference   String
+  decisionAssistanceRecordRef     String?
+  challengerIdentityId            String                    @db.Uuid
+  description                     String
+  relatedDecisionId               String?                   @db.Uuid
+  relatedCaseId                   String?                   @db.Uuid
+  explanationRecordId             String?                   @unique @db.Uuid
+  createdAt                       DateTime                  @default(now())
+  updatedAt                       DateTime                  @updatedAt
+  challengerIdentity              Identity                  @relation("AutomationChallenger", fields: [challengerIdentityId], references: [id])
+  relatedDecision                 GovernmentDecision?       @relation(fields: [relatedDecisionId], references: [id])
+  relatedCase                     Case?                     @relation(fields: [relatedCaseId], references: [id])
+  explanationRecord               AutomationExplanationRecord? @relation(fields: [explanationRecordId], references: [id])
+  disposition                     AutomationChallengeDisposition?
+
+  @@index([status])
+  @@index([grounds])
+  @@index([challengerIdentityId])
+  @@index([relatedDecisionId])
+  @@map("automation_challenges")
+}
+
+model AutomationExplanationRecord {
+  id                            String              @id @default(uuid()) @db.Uuid
+  automationUsed                Boolean             @default(true)
+  approvedPurpose               String
+  systemIdentifier              String
+  modelIdentifier               String?
+  version                       String
+  materialInputs                Json                @default("{}")
+  output                        Json                @default("{}")
+  workflowRole                  String
+  limitations                   String?
+  humanReviewerIdentityId       String?             @db.Uuid
+  finalDecisionMakerIdentityId  String?             @db.Uuid
+  dataSourceReferences          Json                @default("[]")
+  rerunAvailable                Boolean             @default(false)
+  exclusionAvailable            Boolean             @default(false)
+  correctionRouteReference      String?
+  reconsiderationRouteReference String?
+  protectedRedactedElements     Json                @default("[]")
+  explanationSummary            String
+  securityAuditEventId          String?             @db.Uuid
+  createdAt                     DateTime            @default(now())
+  humanReviewerIdentity         Identity?           @relation("AutomationExplanationHumanReviewer", fields: [humanReviewerIdentityId], references: [id])
+  finalDecisionMakerIdentity    Identity?           @relation("AutomationExplanationDecisionMaker", fields: [finalDecisionMakerIdentityId], references: [id])
+  automationChallenge           AutomationChallenge?
+
+  @@index([systemIdentifier])
+  @@index([modelIdentifier])
+  @@map("automation_explanation_records")
+}
+
+model AutomationChallengeDisposition {
+  id                            String                             @id @default(uuid()) @db.Uuid
+  automationChallengeId           String                             @unique @db.Uuid
+  dispositionType                 AutomationChallengeDispositionType
+  disposedByIdentityId            String                             @db.Uuid
+  disposedByOfficeholderId        String?                            @db.Uuid
+  authorityEvaluationRecordId     String?                            @db.Uuid
+  rationale                       String
+  excludedOutputReference         String?
+  historicalOutputPreserved       Boolean                            @default(true)
+  recordCorrectionId              String?                            @db.Uuid
+  reconsiderationRouteReference   String?
+  disposedAt                      DateTime                           @default(now())
+  disposedByIdentity              Identity                           @relation("AutomationChallengeDisposer", fields: [disposedByIdentityId], references: [id])
+  disposedByOfficeholder          Officeholder?                      @relation("AutomationChallengeDisposerOfficeholder", fields: [disposedByOfficeholderId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord?         @relation("AutomationChallengeDispositionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  recordCorrection                RecordCorrection?                  @relation(fields: [recordCorrectionId], references: [id])
+  automationChallenge             AutomationChallenge                @relation(fields: [automationChallengeId], references: [id])
+
+  @@index([dispositionType])
+  @@index([disposedByIdentityId])
+  @@map("automation_challenge_dispositions")
 }
