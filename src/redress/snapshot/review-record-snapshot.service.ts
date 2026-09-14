@@ -45,7 +45,7 @@ export class ReviewRecordSnapshotService {
         },
         decisionReadinessAssessment: true,
         evidencePacketVersion: true,
-      officialInstruments: { include: { versions: true } },
+        officialInstruments: { include: { versions: true } },
         conditions: true,
       },
     });
@@ -67,9 +67,10 @@ export class ReviewRecordSnapshotService {
       inspectionRecordIds: decision.case?.inspectionRecords.map((record) => record.id) ?? [],
       recommendationReferences:
         decision.case?.decisionPreparationRecords.map((record) => record.id) ?? [],
-      aiAssistanceReferences: decision.case?.decisionPreparationRecords
-        .filter((record) => Object.keys(record.aiAssistanceMetadata as object).length > 0)
-        .map((record) => record.id) ?? [],
+      aiAssistanceReferences:
+        decision.case?.decisionPreparationRecords
+          .filter((record) => Object.keys(record.aiAssistanceMetadata as object).length > 0)
+          .map((record) => record.id) ?? [],
       decisionReadinessAssessmentId: decision.decisionReadinessAssessmentId,
       evidencePacketVersionId:
         decision.evidencePacketVersion?.status === EvidencePacketVersionStatus.FROZEN

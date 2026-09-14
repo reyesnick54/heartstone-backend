@@ -27,7 +27,9 @@ describe('ReviewRecordSnapshotService', () => {
         departmentalReviews: [{ id: 'dept-review-1' }],
         professionalReviews: [{ id: 'prof-review-1' }],
         inspectionRecords: [{ id: 'inspection-1' }],
-        decisionPreparationRecords: [{ id: 'prep-1', aiAssistanceMetadata: { model: 'assistant' } }],
+        decisionPreparationRecords: [
+          { id: 'prep-1', aiAssistanceMetadata: { model: 'assistant' } },
+        ],
       },
       decisionReadinessAssessment: { id: 'readiness-1' },
       evidencePacketVersion: { id: 'packet-1', status: 'FROZEN' },

@@ -81,7 +81,10 @@ export class ReviewerIndependenceService {
       return ReviewerIndependenceOutcome.REQUIRES_RECUSAL;
     }
 
-    if (input.originalRecommenderIdentityId && input.reviewerIdentityId === input.originalRecommenderIdentityId) {
+    if (
+      input.originalRecommenderIdentityId &&
+      input.reviewerIdentityId === input.originalRecommenderIdentityId
+    ) {
       return ReviewerIndependenceOutcome.PRIOR_INVOLVEMENT_IDENTIFIED;
     }
 
