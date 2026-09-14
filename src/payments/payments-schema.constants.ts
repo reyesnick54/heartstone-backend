@@ -1,3 +1,44 @@
+export const PHASE_11_PREREQUISITE_MODEL_NAMES = [
+  'FeeSchedule',
+  'FeeScheduleVersion',
+  'Invoice',
+  'PaymentTransaction',
+  'Receipt',
+  'ChargebackEvent',
+] as const;
+
+export const PHASE_11C_MODEL_NAMES = [
+  'FeeAdjustmentRequest',
+  'FeeAdjustmentDecision',
+  'RefundRequest',
+  'RefundAuthorization',
+  'RefundTransaction',
+  'ReconciliationBatch',
+  'ReconciliationItem',
+  'ReconciliationException',
+  'FinancialDispute',
+  'ArrearsRecord',
+  'FinancialApprovalRecord',
+  'FinancialReversalRecord',
+] as const;
+
+export const PHASE_11C_ENUM_NAMES = [
+  'FeeAdjustmentType',
+  'FeeAdjustmentRequestStatus',
+  'FeeScheduleVersionStatus',
+  'InvoiceStatus',
+  'PaymentTransactionStatus',
+  'RefundRequestStatus',
+  'RefundAuthorizationStatus',
+  'ReconciliationBatchSource',
+  'ReconciliationBatchStatus',
+  'ReconciliationMatchStatus',
+  'ReconciliationExceptionStatus',
+  'ArrearsRecordStatus',
+  'FinancialDisputeSubject',
+  'FinancialDisputeStatus',
+  'FinancialApprovalDecision',
+  'FinancialReversalReason',
 export const PHASE_11A_MODEL_NAMES = ['Invoice', 'InvoiceLine'] as const;
 
 export const PHASE_11A_ENUM_NAMES = ['InvoiceStatus'] as const;

@@ -58,6 +58,7 @@ import { SystemModule } from './system/system.module';
     ComplianceModule,
     PaymentsModule,
     RedressModule,
+    PaymentsModule,
     FinancialAdministrationModule,
   ],
 })

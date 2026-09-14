@@ -600,6 +600,18 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  feeAdjustmentRequestsRequested     FeeAdjustmentRequest[]        @relation("FeeAdjustmentRequester")
+  feeAdjustmentDecisionsDecided      FeeAdjustmentDecision[]       @relation("FeeAdjustmentDecider")
+  refundRequestsRequested            RefundRequest[]               @relation("RefundRequester")
+  refundAuthorizationsRequested      RefundAuthorization[]         @relation("RefundAuthorizationRequester")
+  refundAuthorizationsApproved       RefundAuthorization[]         @relation("RefundAuthorizationApprover")
+  financialApprovalsRequested        FinancialApprovalRecord[]     @relation("FinancialApprovalRequester")
+  financialApprovalsReviewed         FinancialApprovalRecord[]     @relation("FinancialApprovalReviewer")
+  financialApprovalsApproved         FinancialApprovalRecord[]     @relation("FinancialApprovalApprover")
+  reconciliationExceptionsOwned      ReconciliationException[]     @relation("ReconciliationExceptionOwner")
+  financialDisputesFiled               FinancialDispute[]            @relation("FinancialDisputeFiler")
+  chargebackEventsRecorded           ChargebackEvent[]             @relation("ChargebackRecorder")
+  financialReversalsRecorded           FinancialReversalRecord[]     @relation("FinancialReversalRecorder")
   invoicesAsPayer                    Invoice[]                     @relation("InvoicePayerIdentity")
   paymentIntentsAsPayer              PaymentIntent[]               @relation("PaymentIntentPayerIdentity")
   paymentReceiptsAsPayer             PaymentReceipt[]              @relation("PaymentReceiptPayerIdentity")
@@ -1342,6 +1354,10 @@ model AuthorityEvaluationRecord {
   redressDecisions                RedressDecision[]             @relation("RedressDecisionAuthority")
   interimReliefDecisions          InterimReliefDecision[]       @relation("InterimReliefDecisionAuthority")
   reviewStayRecords               ReviewStayRecord[]            @relation("ReviewStayAuthority")
+  feeAdjustmentDecisions          FeeAdjustmentDecision[]
+  refundAuthorizations            RefundAuthorization[]
+  financialApprovalRecords        FinancialApprovalRecord[]
+  financialReversalRecords        FinancialReversalRecord[]
   feeScheduleVersions             FeeScheduleVersion[]          @relation("FeeScheduleVersionAuthorityEvaluation")
 
   @@index([functionAuthorityRecordId])
@@ -7492,6 +7508,30 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+enum FeeAdjustmentType {
+  WAIVER
+  REDUCTION
+  EXEMPTION
+  CREDIT
+  CORRECTION
+  AUTHORIZED_SURCHARGE
+  OTHER_APPROVED_ADJUSTMENT
+}
+
+enum FeeAdjustmentRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum FeeScheduleVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
 // ---------------------------------------------------------------------------
 // Phase 11A — Invoicing foundation
 // ---------------------------------------------------------------------------
@@ -7505,6 +7545,123 @@ enum InvoiceStatus {
   CANCELLED
   WRITTEN_OFF
 }
+
+enum PaymentTransactionStatus {
+  PENDING
+  AUTHORIZED
+  SETTLED
+  FAILED
+  CANCELLED
+  CHARGEBACK
+}
+
+enum RefundRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PENDING_PROVIDER
+  PROCESSING
+  SETTLED
+  FAILED
+  CANCELLED
+  PARTIALLY_SETTLED
+}
+
+enum RefundAuthorizationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ReconciliationBatchSource {
+  PROVIDER_TRANSACTION_EXPORT
+  BANK_SETTLEMENT_FILE
+  GOVERNMENT_TREASURY_FEED
+  INTERNAL_PAYMENT_JOURNAL
+  MANUAL_APPROVED_STATEMENT
+}
+
+enum ReconciliationBatchStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  REQUIRES_INVESTIGATION
+}
+
+enum ReconciliationMatchStatus {
+  MATCHED
+  AMOUNT_MISMATCH
+  CURRENCY_MISMATCH
+  MISSING_INTERNAL
+  MISSING_EXTERNAL
+  DUPLICATE
+  TIMING_DIFFERENCE
+  UNKNOWN_REFERENCE
+  UNDER_REVIEW
+  RESOLVED
+}
+
+enum ReconciliationExceptionStatus {
+  OPEN
+  UNDER_INVESTIGATION
+  RESOLVED
+  CLOSED
+}
+
+enum ArrearsRecordStatus {
+  OPEN
+  REMINDER_SENT
+  IN_COLLECTION_ROUTE
+  DISPUTED
+  PARTIALLY_PAID
+  CLOSED
+  WRITTEN_OFF
+}
+
+enum FinancialDisputeSubject {
+  AMOUNT
+  DUPLICATE_CHARGE
+  PAYMENT_NOT_RECOGNIZED
+  REFUND
+  WAIVER
+  CALCULATION
+  ALLOCATION
+}
+
+enum FinancialDisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  REFERRED_TO_SUBSTANTIVE_ROUTE
+  RESOLVED
+  CLOSED
+}
+
+enum FinancialApprovalDecision {
+  APPROVED
+  REJECTED
+  DEFERRED
+}
+
+enum FinancialReversalReason {
+  ACCOUNTING_CORRECTION
+  DUPLICATE_ENTRY
+  PROVIDER_REVERSAL
+  OTHER_AUTHORIZED_CORRECTION
+}
+
+model FeeSchedule {
+  id             String                    @id @default(uuid()) @db.Uuid
+  code           String                    @unique
+  name           String
+  description    String?
+  jurisdictionId String?                   @db.Uuid
+  status         StructuralLifecycleStatus @default(ACTIVE)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  versions       FeeScheduleVersion[]
 
 model Invoice {
   id                   String        @id @default(uuid()) @db.Uuid
@@ -7918,6 +8075,373 @@ model FeeSchedule {
 }
 
 model FeeScheduleVersion {
+  id                        String                    @id @default(uuid()) @db.Uuid
+  feeScheduleId             String                    @db.Uuid
+  versionNumber             Int
+  effectiveFrom             DateTime
+  effectiveTo               DateTime?
+  permittedAdjustmentRoutes FeeAdjustmentType[]       @default([])
+  status                    FeeScheduleVersionStatus  @default(DRAFT)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  feeSchedule               FeeSchedule               @relation(fields: [feeScheduleId], references: [id], onDelete: Cascade)
+  invoices                  Invoice[]
+
+  @@unique([feeScheduleId, versionNumber])
+  @@index([feeScheduleId])
+  @@map("fee_schedule_versions")
+}
+
+model Invoice {
+  id                   String              @id @default(uuid()) @db.Uuid
+  invoiceNumber        String              @unique
+  feeScheduleVersionId String?             @db.Uuid
+  assessmentReference  String?
+  governmentDecisionId String?             @db.Uuid
+  amountDueCents       Int
+  amountPaidCents      Int                 @default(0)
+  currency             String              @default("XCD")
+  status               InvoiceStatus       @default(DRAFT)
+  dueDate              DateTime?
+  issuedAt             DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  feeScheduleVersion   FeeScheduleVersion? @relation(fields: [feeScheduleVersionId], references: [id])
+  paymentTransactions  PaymentTransaction[]
+  feeAdjustmentRequests FeeAdjustmentRequest[]
+  refundRequests       RefundRequest[]
+  arrearsRecords       ArrearsRecord[]
+  financialDisputes    FinancialDispute[]
+
+  @@index([feeScheduleVersionId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model PaymentTransaction {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  invoiceId            String                   @db.Uuid
+  providerReference    String?
+  amountCents          Int
+  settledAmountCents   Int                      @default(0)
+  currency             String                   @default("XCD")
+  status               PaymentTransactionStatus @default(PENDING)
+  settledAt            DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  invoice              Invoice                  @relation(fields: [invoiceId], references: [id])
+  receipts             Receipt[]
+  chargebackEvents     ChargebackEvent[]
+  refundRequests       RefundRequest[]
+  reconciliationItems  ReconciliationItem[]
+  financialDisputes    FinancialDispute[]
+  financialReversals   FinancialReversalRecord[] @relation("OriginalPaymentTransaction")
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("payment_transactions")
+}
+
+model Receipt {
+  id                   String               @id @default(uuid()) @db.Uuid
+  paymentTransactionId String               @db.Uuid
+  receiptNumber        String               @unique
+  amountCents          Int
+  currency             String               @default("XCD")
+  issuedAt             DateTime             @default(now())
+  createdAt            DateTime             @default(now())
+  paymentTransaction   PaymentTransaction   @relation(fields: [paymentTransactionId], references: [id])
+  reconciliationItems  ReconciliationItem[]
+
+  @@index([paymentTransactionId])
+  @@map("receipts")
+}
+
+model ChargebackEvent {
+  id                   String             @id @default(uuid()) @db.Uuid
+  paymentTransactionId String             @db.Uuid
+  providerReference    String
+  amountCents          Int
+  currency             String             @default("XCD")
+  receivedAt           DateTime           @default(now())
+  recordedByIdentityId String?            @db.Uuid
+  notes                String?
+  createdAt            DateTime           @default(now())
+  paymentTransaction   PaymentTransaction @relation(fields: [paymentTransactionId], references: [id])
+  recordedByIdentity   Identity?          @relation("ChargebackRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([paymentTransactionId])
+  @@map("chargeback_events")
+}
+
+model FeeAdjustmentRequest {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  requestNumber               String                     @unique
+  adjustmentType              FeeAdjustmentType
+  basis                       String
+  requestedAmountCents      Int
+  currency                    String                     @default("XCD")
+  source                      String
+  supportingEvidenceReference String?
+  requesterIdentityId         String                     @db.Uuid
+  requesterOfficeholderId     String?                    @db.Uuid
+  invoiceId                   String                     @db.Uuid
+  assessmentReference         String?
+  requestedAt                 DateTime                   @default(now())
+  status                      FeeAdjustmentRequestStatus   @default(REQUESTED)
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  requesterIdentity           Identity                   @relation("FeeAdjustmentRequester", fields: [requesterIdentityId], references: [id])
+  invoice                     Invoice                    @relation(fields: [invoiceId], references: [id])
+  decision                    FeeAdjustmentDecision?
+  financialDisputes           FinancialDispute[]
+  financialApprovals          FinancialApprovalRecord[]
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("fee_adjustment_requests")
+}
+
+model FeeAdjustmentDecision {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  requestId                   String                    @unique @db.Uuid
+  deciderIdentityId           String                    @db.Uuid
+  deciderOfficeholderId       String?                   @db.Uuid
+  authorityEvaluationRecordId String?                   @db.Uuid
+  approvedAmountCents         Int
+  currency                    String                    @default("XCD")
+  reason                      String
+  effectiveDate               DateTime
+  createdAt                   DateTime                  @default(now())
+  request                     FeeAdjustmentRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  deciderIdentity             Identity                  @relation("FeeAdjustmentDecider", fields: [deciderIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@map("fee_adjustment_decisions")
+}
+
+model RefundRequest {
+  id                           String               @id @default(uuid()) @db.Uuid
+  requestNumber                String               @unique
+  invoiceId                    String               @db.Uuid
+  originalPaymentTransactionId String               @db.Uuid
+  amountCents                  Int
+  currency                     String               @default("XCD")
+  reason                       String
+  requestedByIdentityId        String               @db.Uuid
+  redressDecisionId            String?              @db.Uuid
+  financialAuthorityReference  String?
+  status                       RefundRequestStatus  @default(REQUESTED)
+  createdAt                    DateTime             @default(now())
+  updatedAt                    DateTime             @updatedAt
+  invoice                      Invoice              @relation(fields: [invoiceId], references: [id])
+  originalPaymentTransaction   PaymentTransaction   @relation(fields: [originalPaymentTransactionId], references: [id])
+  requestedByIdentity          Identity             @relation("RefundRequester", fields: [requestedByIdentityId], references: [id])
+  authorization                RefundAuthorization?
+  refundTransactions           RefundTransaction[]
+  financialDisputes            FinancialDispute[]
+  financialApprovals           FinancialApprovalRecord[]
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("refund_requests")
+}
+
+model RefundAuthorization {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  refundRequestId             String                    @unique @db.Uuid
+  requesterIdentityId         String                    @db.Uuid
+  approverIdentityId          String?                   @db.Uuid
+  approverOfficeholderId      String?                   @db.Uuid
+  authorityEvaluationRecordId String?                   @db.Uuid
+  authorizedAmountCents       Int
+  currency                    String                    @default("XCD")
+  status                      RefundAuthorizationStatus @default(PENDING)
+  reason                      String?
+  authorizedAt                DateTime?
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  refundRequest               RefundRequest             @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+  requesterIdentity           Identity                  @relation("RefundAuthorizationRequester", fields: [requesterIdentityId], references: [id])
+  approverIdentity            Identity?                 @relation("RefundAuthorizationApprover", fields: [approverIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  refundTransactions          RefundTransaction[]
+
+  @@map("refund_authorizations")
+}
+
+model RefundTransaction {
+  id                   String              @id @default(uuid()) @db.Uuid
+  refundRequestId      String              @db.Uuid
+  authorizationId      String              @db.Uuid
+  amountCents          Int
+  settledAmountCents   Int                 @default(0)
+  currency             String              @default("XCD")
+  status               RefundRequestStatus @default(APPROVED)
+  providerReference    String?
+  providerErrorMessage String?
+  settledAt            DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  refundRequest        RefundRequest       @relation(fields: [refundRequestId], references: [id])
+  authorization        RefundAuthorization @relation(fields: [authorizationId], references: [id])
+  reconciliationItems  ReconciliationItem[]
+  financialReversals   FinancialReversalRecord[] @relation("OriginalRefundTransaction")
+
+  @@index([refundRequestId])
+  @@map("refund_transactions")
+}
+
+model ReconciliationBatch {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  batchNumber          String                    @unique
+  periodStart          DateTime
+  periodEnd            DateTime
+  source               ReconciliationBatchSource
+  currency             String                    @default("XCD")
+  expectedTotalCents   Int                       @default(0)
+  externalTotalCents   Int                       @default(0)
+  matchedTotalCents    Int                       @default(0)
+  unmatchedTotalCents  Int                       @default(0)
+  status               ReconciliationBatchStatus @default(PENDING)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  items                ReconciliationItem[]
+
+  @@map("reconciliation_batches")
+}
+
+model ReconciliationItem {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  batchId              String                    @db.Uuid
+  paymentTransactionId String?                   @db.Uuid
+  refundTransactionId  String?                   @db.Uuid
+  receiptId            String?                   @db.Uuid
+  externalReference    String?
+  externalAmountCents  Int?
+  externalCurrency     String?
+  matchStatus          ReconciliationMatchStatus @default(UNDER_REVIEW)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  batch                ReconciliationBatch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  paymentTransaction   PaymentTransaction?       @relation(fields: [paymentTransactionId], references: [id])
+  refundTransaction    RefundTransaction?        @relation(fields: [refundTransactionId], references: [id])
+  receipt              Receipt?                  @relation(fields: [receiptId], references: [id])
+  exception            ReconciliationException?
+
+  @@index([batchId])
+  @@index([matchStatus])
+  @@map("reconciliation_items")
+}
+
+model ReconciliationException {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  itemId              String                        @unique @db.Uuid
+  differenceCents     Int
+  evidenceReference   String?
+  ownerIdentityId     String?                       @db.Uuid
+  investigationNotes  String?
+  resolutionNotes     String?
+  approvalReference   String?
+  adjustmentReference String?
+  status              ReconciliationExceptionStatus @default(OPEN)
+  closedAt            DateTime?
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+  item                ReconciliationItem            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  ownerIdentity       Identity?                     @relation("ReconciliationExceptionOwner", fields: [ownerIdentityId], references: [id])
+
+  @@map("reconciliation_exceptions")
+}
+
+model ArrearsRecord {
+  id                     String              @id @default(uuid()) @db.Uuid
+  invoiceId              String              @db.Uuid
+  amountOutstandingCents Int
+  dueDate                DateTime
+  daysPastDue            Int                 @default(0)
+  status                 ArrearsRecordStatus @default(OPEN)
+  reminderStatus         String?
+  collectionRoute        String?
+  disputeStatus          String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  invoice                Invoice             @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("arrears_records")
+}
+
+model FinancialDispute {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  disputeNumber             String                  @unique
+  subject                   FinancialDisputeSubject
+  description               String
+  filerIdentityId           String                  @db.Uuid
+  invoiceId                 String?                 @db.Uuid
+  paymentTransactionId      String?                 @db.Uuid
+  refundRequestId           String?                 @db.Uuid
+  feeAdjustmentRequestId    String?                 @db.Uuid
+  substantiveRouteReference String?
+  status                    FinancialDisputeStatus  @default(OPEN)
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  filerIdentity             Identity                @relation("FinancialDisputeFiler", fields: [filerIdentityId], references: [id])
+  invoice                   Invoice?                @relation(fields: [invoiceId], references: [id])
+  paymentTransaction        PaymentTransaction?   @relation(fields: [paymentTransactionId], references: [id])
+  refundRequest             RefundRequest?          @relation(fields: [refundRequestId], references: [id])
+  feeAdjustmentRequest      FeeAdjustmentRequest?   @relation(fields: [feeAdjustmentRequestId], references: [id])
+
+  @@index([status])
+  @@map("financial_disputes")
+}
+
+model FinancialApprovalRecord {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  approvalNumber              String                    @unique
+  requesterIdentityId         String                    @db.Uuid
+  reviewerIdentityId          String?                   @db.Uuid
+  approverIdentityId          String?                   @db.Uuid
+  approverOfficeholderId      String?                   @db.Uuid
+  authorityEvaluationRecordId String?                   @db.Uuid
+  amountCents                 Int
+  currency                    String                    @default("XCD")
+  purpose                     String
+  decision                    FinancialApprovalDecision
+  decidedAt                   DateTime                  @default(now())
+  relatedRefundRequestId      String?                   @db.Uuid
+  relatedFeeAdjustmentRequestId String?                 @db.Uuid
+  createdAt                   DateTime                  @default(now())
+  requesterIdentity           Identity                  @relation("FinancialApprovalRequester", fields: [requesterIdentityId], references: [id])
+  reviewerIdentity            Identity?                 @relation("FinancialApprovalReviewer", fields: [reviewerIdentityId], references: [id])
+  approverIdentity            Identity?                 @relation("FinancialApprovalApprover", fields: [approverIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  relatedRefundRequest        RefundRequest?            @relation(fields: [relatedRefundRequestId], references: [id])
+  relatedFeeAdjustmentRequest FeeAdjustmentRequest?     @relation(fields: [relatedFeeAdjustmentRequestId], references: [id])
+
+  @@map("financial_approval_records")
+}
+
+model FinancialReversalRecord {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  reversalNumber              String                   @unique
+  originalPaymentTransactionId String?                 @db.Uuid
+  originalRefundTransactionId  String?                 @db.Uuid
+  reason                      FinancialReversalReason
+  amountCents                 Int
+  currency                    String                   @default("XCD")
+  preservesOriginal           Boolean                  @default(true)
+  recordedByIdentityId        String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  notes                       String?
+  createdAt                   DateTime                 @default(now())
+  originalPaymentTransaction  PaymentTransaction?      @relation("OriginalPaymentTransaction", fields: [originalPaymentTransactionId], references: [id])
+  originalRefundTransaction   RefundTransaction?       @relation("OriginalRefundTransaction", fields: [originalRefundTransactionId], references: [id])
+  recordedByIdentity          Identity?                @relation("FinancialReversalRecorder", fields: [recordedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+
+  @@map("financial_reversal_records")
   id                          String                     @id @default(uuid()) @db.Uuid
   feeScheduleId               String                     @db.Uuid
   version                     String
