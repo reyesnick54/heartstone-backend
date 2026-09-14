@@ -119,11 +119,6 @@ export class InterimReliefService {
     });
 
     if (input.outcome === InterimReliefOutcome.GRANTED) {
-      this.boundary.assertNoAutoStay(
-        request.matter.routeVersion?.automaticStayOnFiling ?? false,
-        true,
-      );
-
       const stayRecord = await this.prisma.reviewStayRecord.create({
         data: {
           matterId: request.matterId,

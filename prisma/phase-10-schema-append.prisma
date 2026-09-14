@@ -1,0 +1,996 @@
+// ─── Phase 10: Complaints, Reconsideration, Appeals and Redress ──────────────
+
+enum RedressRouteCategory {
+  ADMINISTRATIVE_CORRECTION
+  CLARIFICATION
+  SERVICE_COMPLAINT
+  CONDUCT_COMPLAINT
+  PRIVACY_SECURITY_COMPLAINT
+  AI_AUTOMATION_CHALLENGE
+  RECONSIDERATION
+  INTERNAL_ADMINISTRATIVE_REVIEW
+  STATUTORY_APPEAL
+  PROFESSIONAL_CHALLENGE
+  REGULATORY_REVIEW
+  OMBUDS_OVERSIGHT
+  JUDICIAL_REVIEW_COORDINATION
+}
+
+enum RedressRouteVersionStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum RedressMatterStatus {
+  OPEN
+  INTAKE
+  STANDING_ASSESSMENT
+  TIMELINESS_ASSESSMENT
+  CLASSIFICATION
+  INVESTIGATION
+  REVIEW
+  EXTERNAL_REFERRAL
+  DECISION_PENDING
+  IMPLEMENTATION
+  CLOSED
+  SAFE_HALTED
+}
+
+enum RedressFilingStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  CLASSIFIED
+  REJECTED
+  WITHDRAWN
+}
+
+enum RedressStandingOutcome {
+  NOT_ASSESSED
+  STANDING_ESTABLISHED
+  STANDING_DENIED
+  STANDING_CONDITIONAL
+  REQUIRES_HUMAN_DETERMINATION
+}
+
+enum RedressTimelinessOutcome {
+  NOT_ASSESSED
+  TIMELY
+  LATE
+  EXTENSION_REQUESTED
+  EXTENSION_GRANTED
+  EXTENSION_DENIED
+  REQUIRES_HUMAN_DETERMINATION
+}
+
+enum DeadlineExtensionOutcome {
+  PENDING
+  GRANTED
+  DENIED
+  WITHDRAWN
+}
+
+enum ComplaintClassificationType {
+  SERVICE
+  CONDUCT
+  PRIVACY_SECURITY
+  NOT_A_COMPLAINT
+}
+
+enum ComplaintInvestigationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SUSPENDED
+}
+
+enum ComplaintClosureReason {
+  RESOLVED
+  WITHDRAWN
+  DISMISSED
+  REFERRED
+  DUPLICATE
+}
+
+enum RedressReviewType {
+  RECONSIDERATION
+  INTERNAL_ADMINISTRATIVE_REVIEW
+  STATUTORY_APPEAL
+  PROFESSIONAL_CHALLENGE
+  REGULATORY_REVIEW
+  OMBUDS_OVERSIGHT
+  JUDICIAL_REVIEW_COORDINATION
+}
+
+enum ReviewIndependenceOutcome {
+  NOT_ASSESSED
+  INDEPENDENCE_ESTABLISHED
+  INDEPENDENCE_BLOCKED
+  REQUIRES_HUMAN_DETERMINATION
+}
+
+enum ReviewAuthorityOutcome {
+  NOT_ASSESSED
+  AUTHORITY_ESTABLISHED
+  AUTHORITY_DENIED
+  REQUIRES_HUMAN_DETERMINATION
+}
+
+enum ExternalReviewReferralStatus {
+  PREPARING
+  TRANSMITTED
+  ACKNOWLEDGED
+  DETERMINATION_RECEIVED
+  IMPLEMENTED
+  CLOSED
+}
+
+enum ExternalDeterminationAuthenticity {
+  UNVERIFIED
+  AUTHENTICATED
+  REJECTED
+}
+
+enum AutomationChallengeDispositionOutcome {
+  PENDING
+  UPHELD
+  VARIED
+  DISMISSED
+  REPROCESSING_ORDERED
+}
+
+enum RedressDecisionOutcome {
+  RECOMMENDATION
+  UPHELD
+  VARIED
+  REVERSED
+  REMANDED
+  DISMISSED
+  CORRECTED_NONSUBSTANTIVE
+  CLARIFIED
+  SERVICE_REMEDY
+  EXTERNAL_REFERRAL
+}
+
+enum RedressDecisionStatus {
+  DRAFT
+  RECORDED
+  IMPLEMENTED
+  SUPERSEDED
+}
+
+enum InterimReliefOutcome {
+  PENDING
+  GRANTED
+  DENIED
+  WITHDRAWN
+}
+
+enum RedressImplementationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  VERIFIED
+}
+
+enum RedressSafeHaltReason {
+  AUTHORITY_UNRESOLVED
+  REVIEWER_APPOINTMENT_INVALID
+  INDEPENDENCE_NOT_ESTABLISHED
+  SNAPSHOT_NOT_RECONSTRUCTABLE
+  EVIDENCE_INTEGRITY_COMPROMISED
+  ROUTE_SUPERSEDED
+  EXTERNAL_AUTHENTICITY_UNRESOLVED
+  NOTICE_CANNOT_BE_PROVIDED
+  IMPLEMENTATION_AUTHORITY_BYPASS
+  LEGAL_HOLD_PREVENTS_HANDLING
+}
+
+enum RedressNoticeType {
+  ACKNOWLEDGMENT
+  CLASSIFICATION
+  INVESTIGATION_UPDATE
+  DECISION
+  IMPLEMENTATION
+  STAY
+  EXTERNAL_REFERRAL
+  CORRECTION
+  CLARIFICATION
+}
+
+model RedressRouteDefinition {
+  id              String               @id @default(uuid()) @db.Uuid
+  code            String               @unique
+  name            String
+  category        RedressRouteCategory
+  institutionId   String?              @db.Uuid
+  jurisdictionId  String?              @db.Uuid
+  description     String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  institution     Institution?         @relation(fields: [institutionId], references: [id])
+  jurisdiction    Jurisdiction?        @relation(fields: [jurisdictionId], references: [id])
+  versions        RedressRouteVersion[]
+
+  @@index([category])
+  @@index([institutionId])
+  @@map("redress_route_definitions")
+}
+
+model RedressRouteVersion {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  routeDefinitionId           String                    @db.Uuid
+  versionNumber               Int
+  status                      RedressRouteVersionStatus @default(DRAFT)
+  filingDeadlineDays          Int?
+  permitsDeadlineExtension    Boolean                   @default(false)
+  requiresIndependence        Boolean                   @default(false)
+  automaticStayOnFiling       Boolean                   @default(false)
+  permitsSubstantiveChange    Boolean                   @default(true)
+  permitsNonSubstantiveCorrection Boolean               @default(false)
+  reviewFunctionAuthorityRecordId String?               @db.Uuid
+  effectiveFrom               DateTime?
+  effectiveUntil              DateTime?
+  configuration               Json                      @default("{}")
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  routeDefinition             RedressRouteDefinition    @relation(fields: [routeDefinitionId], references: [id], onDelete: Cascade)
+  reviewFunctionAuthorityRecord FunctionAuthorityRecord? @relation("RedressRouteReviewAuthority", fields: [reviewFunctionAuthorityRecordId], references: [id])
+  eligibleMatters             RedressRouteEligibleMatter[]
+  grounds                     RedressRouteGround[]
+  remedyDefinitions           RedressRouteRemedyDefinition[]
+  filings                     RedressFiling[]
+  matters                     RedressMatter[]
+
+  @@unique([routeDefinitionId, versionNumber])
+  @@index([routeDefinitionId, status])
+  @@map("redress_route_versions")
+}
+
+model RedressRouteEligibleMatter {
+  id                String              @id @default(uuid()) @db.Uuid
+  routeVersionId    String              @db.Uuid
+  matterTypeCode    String
+  description       String?
+  createdAt         DateTime            @default(now())
+  routeVersion      RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([routeVersionId, matterTypeCode])
+  @@map("redress_route_eligible_matters")
+}
+
+model RedressRouteGround {
+  id             String              @id @default(uuid()) @db.Uuid
+  routeVersionId String              @db.Uuid
+  groundCode     String
+  label          String
+  description    String?
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  routeVersion   RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([routeVersionId, groundCode])
+  @@map("redress_route_grounds")
+}
+
+model RedressRouteRemedyDefinition {
+  id             String              @id @default(uuid()) @db.Uuid
+  routeVersionId String              @db.Uuid
+  remedyCode     String
+  label          String
+  description    String?
+  isSubstantive  Boolean             @default(false)
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  routeVersion   RedressRouteVersion @relation(fields: [routeVersionId], references: [id], onDelete: Cascade)
+  remedies       RedressRemedy[]
+
+  @@unique([routeVersionId, remedyCode])
+  @@map("redress_route_remedy_definitions")
+}
+
+model RedressMatter {
+  id                          String              @id @default(uuid()) @db.Uuid
+  matterNumber                String              @unique
+  status                      RedressMatterStatus @default(OPEN)
+  routeVersionId              String?             @db.Uuid
+  caseId                      String?             @db.Uuid
+  masterAdministrativeFileId  String?             @db.Uuid
+  challengedDecisionId        String?             @db.Uuid
+  challengedInstrumentId      String?             @db.Uuid
+  filerIdentityId             String              @db.Uuid
+  representativeAuthorityId   String?             @db.Uuid
+  safeHaltReason              RedressSafeHaltReason?
+  safeHaltAt                  DateTime?
+  openedAt                    DateTime            @default(now())
+  closedAt                    DateTime?
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
+  routeVersion                RedressRouteVersion? @relation(fields: [routeVersionId], references: [id])
+  case                        Case?               @relation(fields: [caseId], references: [id])
+  masterAdministrativeFile    MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  challengedDecision          GovernmentDecision? @relation("RedressChallengedDecision", fields: [challengedDecisionId], references: [id])
+  challengedInstrument        OfficialInstrument? @relation("RedressChallengedInstrument", fields: [challengedInstrumentId], references: [id])
+  filerIdentity               Identity            @relation("RedressMatterFiler", fields: [filerIdentityId], references: [id])
+  representativeAuthority     RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
+  filings                     RedressFiling[]
+  standingAssessments         RedressStandingAssessment[]
+  timelinessAssessments       RedressTimelinessAssessment[]
+  deadlineExtensionRequests   DeadlineExtensionRequest[]
+  acknowledgments             RedressAcknowledgment[]
+  complaintClassifications    ComplaintClassification[]
+  complaintInvestigations     ComplaintInvestigation[]
+  administrativeCorrections   AdministrativeCorrectionMatter[]
+  clarificationRequests       ClarificationRequest[]
+  automationChallenges        AutomationChallenge[]
+  reviewAssignments           ReviewAssignment[]
+  reviewSnapshots             ReviewRecordSnapshot[]
+  reconsiderationProceedings  ReconsiderationProceeding[]
+  internalAdministrativeReviews InternalAdministrativeReview[]
+  externalReviewReferrals     ExternalReviewReferral[]
+  redressDecisions            RedressDecision[]
+  interimReliefRequests       InterimReliefRequest[]
+  reviewStayRecords           ReviewStayRecord[]
+  implementationPlans         RedressImplementationPlan[]
+  notices                     RedressNotice[]
+
+  @@index([status])
+  @@index([caseId])
+  @@index([filerIdentityId])
+  @@index([challengedDecisionId])
+  @@map("redress_matters")
+}
+
+model RedressFiling {
+  id                          String              @id @default(uuid()) @db.Uuid
+  filingNumber                String              @unique
+  matterId                    String              @db.Uuid
+  routeVersionId              String              @db.Uuid
+  status                      RedressFilingStatus @default(DRAFT)
+  filerIdentityId             String              @db.Uuid
+  representativeAuthorityId   String?             @db.Uuid
+  groundsReference            String?
+  summary                     String?
+  requestedRouteCategory      RedressRouteCategory?
+  classifiedRouteCategory     RedressRouteCategory?
+  submittedAt                 DateTime?
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
+  matter                      RedressMatter       @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  routeVersion                RedressRouteVersion @relation(fields: [routeVersionId], references: [id])
+  filerIdentity               Identity            @relation("RedressFilingFiler", fields: [filerIdentityId], references: [id])
+  representativeAuthority     RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
+  versions                    RedressFilingVersion[]
+
+  @@index([matterId])
+  @@index([status])
+  @@map("redress_filings")
+}
+
+model RedressFilingVersion {
+  id              String        @id @default(uuid()) @db.Uuid
+  filingId        String        @db.Uuid
+  versionNumber   Int
+  contentReference String?
+  contentHash     String?
+  submittedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  filing          RedressFiling @relation(fields: [filingId], references: [id], onDelete: Cascade)
+
+  @@unique([filingId, versionNumber])
+  @@map("redress_filing_versions")
+}
+
+model RedressStandingAssessment {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  matterId                    String                 @db.Uuid
+  outcome                     RedressStandingOutcome @default(NOT_ASSESSED)
+  assessedByIdentityId        String?                @db.Uuid
+  assessedByOfficeholderId    String?                @db.Uuid
+  authorityEvaluationRecordId String?                @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime               @default(now())
+  matter                      RedressMatter          @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assessedByIdentity          Identity?              @relation("RedressStandingAssessor", fields: [assessedByIdentityId], references: [id])
+  assessedByOfficeholder      Officeholder?          @relation("RedressStandingAssessorOfficeholder", fields: [assessedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressStandingAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_standing_assessments")
+}
+
+model RedressTimelinessAssessment {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  matterId                    String                   @db.Uuid
+  outcome                     RedressTimelinessOutcome @default(NOT_ASSESSED)
+  filingDeadline              DateTime?
+  actualFilingDate            DateTime?
+  assessedByIdentityId        String?                  @db.Uuid
+  assessedByOfficeholderId    String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime                 @default(now())
+  matter                      RedressMatter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  assessedByIdentity          Identity?                @relation("RedressTimelinessAssessor", fields: [assessedByIdentityId], references: [id])
+  assessedByOfficeholder      Officeholder?            @relation("RedressTimelinessAssessorOfficeholder", fields: [assessedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressTimelinessAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_timeliness_assessments")
+}
+
+model DeadlineExtensionRequest {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  matterId                    String                   @db.Uuid
+  requestedByIdentityId       String                   @db.Uuid
+  reason                      String
+  outcome                     DeadlineExtensionOutcome @default(PENDING)
+  decidedByIdentityId         String?                  @db.Uuid
+  decidedByOfficeholderId     String?                  @db.Uuid
+  authorityEvaluationRecordId String?                  @db.Uuid
+  requestedAt                 DateTime                 @default(now())
+  decidedAt                   DateTime?
+  createdAt                   DateTime                 @default(now())
+  matter                      RedressMatter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  requestedBy                 Identity                 @relation("DeadlineExtensionRequester", fields: [requestedByIdentityId], references: [id])
+  decidedBy                   Identity?                @relation("DeadlineExtensionDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?            @relation("DeadlineExtensionDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("DeadlineExtensionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("deadline_extension_requests")
+}
+
+model RedressAcknowledgment {
+  id              String        @id @default(uuid()) @db.Uuid
+  matterId        String        @db.Uuid
+  acknowledgmentReference String @unique
+  acknowledgedAt  DateTime      @default(now())
+  noticeReference String?
+  createdAt       DateTime      @default(now())
+  matter          RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("redress_acknowledgments")
+}
+
+model ComplaintClassification {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  matterId                    String                      @db.Uuid
+  classificationType          ComplaintClassificationType
+  classifiedByIdentityId      String?                     @db.Uuid
+  classifiedByOfficeholderId  String?                     @db.Uuid
+  isAppealMislabel            Boolean                     @default(false)
+  explanation                 String?
+  classifiedAt                DateTime?
+  createdAt                   DateTime                    @default(now())
+  matter                      RedressMatter               @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  classifiedByIdentity        Identity?                   @relation("ComplaintClassifier", fields: [classifiedByIdentityId], references: [id])
+  classifiedByOfficeholder    Officeholder?               @relation("ComplaintClassifierOfficeholder", fields: [classifiedByOfficeholderId], references: [id])
+  investigations              ComplaintInvestigation[]
+
+  @@index([matterId])
+  @@map("complaint_classifications")
+}
+
+model ComplaintInvestigation {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  matterId              String                       @db.Uuid
+  classificationId      String                       @db.Uuid
+  status                ComplaintInvestigationStatus @default(NOT_STARTED)
+  investigatorIdentityId String?                     @db.Uuid
+  investigatorOfficeholderId String?                 @db.Uuid
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  matter                RedressMatter                @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  classification        ComplaintClassification      @relation(fields: [classificationId], references: [id])
+  investigatorIdentity  Identity?                    @relation("ComplaintInvestigator", fields: [investigatorIdentityId], references: [id])
+  investigatorOfficeholder Officeholder?             @relation("ComplaintInvestigatorOfficeholder", fields: [investigatorOfficeholderId], references: [id])
+  findings              ComplaintFinding[]
+  responses             ComplaintResponse[]
+  correctiveActions     ComplaintCorrectiveAction[]
+  closure               ComplaintClosure?
+
+  @@index([matterId])
+  @@map("complaint_investigations")
+}
+
+model ComplaintFinding {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  findingSummary   String
+  isSubstantive    Boolean                @default(false)
+  recordedAt       DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_findings")
+}
+
+model ComplaintResponse {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  responseSummary  String
+  issuedAt         DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_responses")
+}
+
+model ComplaintCorrectiveAction {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @db.Uuid
+  actionSummary    String
+  isServiceRemedy  Boolean                @default(true)
+  recordedAt       DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@index([investigationId])
+  @@map("complaint_corrective_actions")
+}
+
+model ComplaintClosure {
+  id               String                 @id @default(uuid()) @db.Uuid
+  investigationId  String                 @unique @db.Uuid
+  reason           ComplaintClosureReason
+  closedAt         DateTime               @default(now())
+  investigation    ComplaintInvestigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@map("complaint_closures")
+}
+
+model AdministrativeCorrectionMatter {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  originalNoticeReference     String
+  correctedNoticeReference    String?
+  errorDescription            String
+  isNonSubstantive            Boolean       @default(true)
+  altersSubstantiveOutcome    Boolean       @default(false)
+  altersMaterialReasons       Boolean       @default(false)
+  removesReviewRights         Boolean       @default(false)
+  originalPreserved           Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("administrative_correction_matters")
+}
+
+model ClarificationRequest {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  matterId              String                  @db.Uuid
+  questionSummary       String
+  altersSubstantiveDecision Boolean             @default(false)
+  createdAt             DateTime                @default(now())
+  matter                RedressMatter           @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  responses             ClarificationResponse[]
+
+  @@index([matterId])
+  @@map("clarification_requests")
+}
+
+model ClarificationResponse {
+  id              String               @id @default(uuid()) @db.Uuid
+  requestId       String               @db.Uuid
+  responseSummary String
+  issuedAt        DateTime             @default(now())
+  request         ClarificationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("clarification_responses")
+}
+
+model AutomationChallenge {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  matterId                    String                            @db.Uuid
+  challengedOutputReference   String
+  challengedInputReference    String?
+  explanationDisclosed        Boolean                           @default(false)
+  faultyOutputExcluded        Boolean                           @default(false)
+  reprocessingOrdered         Boolean                           @default(false)
+  aiAdjudicated               Boolean                           @default(false)
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  matter                      RedressMatter                     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  explanationRecords          AutomationExplanationRecord[]
+  dispositions                AutomationChallengeDisposition[]
+
+  @@index([matterId])
+  @@map("automation_challenges")
+}
+
+model AutomationExplanationRecord {
+  id                    String              @id @default(uuid()) @db.Uuid
+  challengeId           String              @db.Uuid
+  approvedUseSummary    String
+  inputSummary          String?
+  outputSummary         String?
+  confidentialityLevel  String              @default("STANDARD")
+  disclosedAt           DateTime            @default(now())
+  challenge             AutomationChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId])
+  @@map("automation_explanation_records")
+}
+
+model AutomationChallengeDisposition {
+  id                          String                              @id @default(uuid()) @db.Uuid
+  challengeId                 String                              @db.Uuid
+  outcome                     AutomationChallengeDispositionOutcome @default(PENDING)
+  decidedByIdentityId         String?                             @db.Uuid
+  decidedByOfficeholderId     String?                             @db.Uuid
+  authorityEvaluationRecordId String?                             @db.Uuid
+  explanation                 String?
+  decidedAt                   DateTime?
+  createdAt                   DateTime                            @default(now())
+  challenge                   AutomationChallenge                 @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  decidedByIdentity           Identity?                           @relation("AutomationChallengeDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?                       @relation("AutomationChallengeDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?          @relation("AutomationChallengeAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([challengeId])
+  @@map("automation_challenge_dispositions")
+}
+
+model ReviewAssignment {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  reviewerIdentityId          String        @db.Uuid
+  reviewerOfficeholderId      String        @db.Uuid
+  appointmentId               String?       @db.Uuid
+  assignedAt                  DateTime      @default(now())
+  blockedReason               String?
+  isBlocked                   Boolean       @default(false)
+  createdAt                   DateTime      @default(now())
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  reviewerIdentity            Identity      @relation("ReviewAssignee", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder        Officeholder  @relation("ReviewAssigneeOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  appointment                 Appointment?  @relation(fields: [appointmentId], references: [id])
+  independenceAssessment      ReviewerIndependenceAssessment?
+  authorityAssessment         ReviewAuthorityAssessment?
+
+  @@index([matterId])
+  @@map("review_assignments")
+}
+
+model ReviewerIndependenceAssessment {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  assignmentId                String                    @unique @db.Uuid
+  outcome                     ReviewIndependenceOutcome @default(NOT_ASSESSED)
+  originalDecisionMakerBlocked Boolean                  @default(false)
+  priorInvolvementBlocked     Boolean                   @default(false)
+  conflictBlocked             Boolean                   @default(false)
+  assessedByIdentityId        String?                   @db.Uuid
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime                  @default(now())
+  assignment                  ReviewAssignment          @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assessedBy                  Identity?                 @relation("IndependenceAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@map("reviewer_independence_assessments")
+}
+
+model ReviewAuthorityAssessment {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  assignmentId                String                 @unique @db.Uuid
+  outcome                     ReviewAuthorityOutcome @default(NOT_ASSESSED)
+  functionAuthorityRecordId   String?                @db.Uuid
+  authorityEvaluationRecordId String?                @db.Uuid
+  jurisdictionBlocked         Boolean                @default(false)
+  appointmentExpired          Boolean                @default(false)
+  delegationRevoked           Boolean                @default(false)
+  explanation                 String?
+  assessedAt                  DateTime?
+  createdAt                   DateTime               @default(now())
+  assignment                  ReviewAssignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  functionAuthorityRecord     FunctionAuthorityRecord? @relation("ReviewAuthorityFunction", fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReviewAuthorityEvaluation", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@map("review_authority_assessments")
+}
+
+model ReviewRecordSnapshot {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  snapshotReference           String
+  snapshotHash                String
+  originalDecisionReference   String?
+  pinnedAt                    DateTime      @default(now())
+  isImmutable                 Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  reviewIssues                ReviewIssue[]
+  reviewSubmissions           ReviewSubmission[]
+
+  @@index([matterId])
+  @@map("review_record_snapshots")
+}
+
+model ReconsiderationProceeding {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  snapshotId                  String?       @db.Uuid
+  newEvidenceSeparated        Boolean       @default(true)
+  originalPreserved           Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("reconsideration_proceedings")
+}
+
+model InternalAdministrativeReview {
+  id                          String        @id @default(uuid()) @db.Uuid
+  matterId                    String        @db.Uuid
+  reviewType                  RedressReviewType @default(INTERNAL_ADMINISTRATIVE_REVIEW)
+  independenceRequired        Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  matter                      RedressMatter @relation(fields: [matterId], references: [id], onDelete: Cascade)
+
+  @@index([matterId])
+  @@map("internal_administrative_reviews")
+}
+
+model ReviewIssue {
+  id              String               @id @default(uuid()) @db.Uuid
+  snapshotId      String               @db.Uuid
+  issueSummary    String
+  sortOrder       Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  snapshot        ReviewRecordSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@index([snapshotId])
+  @@map("review_issues")
+}
+
+model ReviewSubmission {
+  id                    String               @id @default(uuid()) @db.Uuid
+  snapshotId            String               @db.Uuid
+  submissionReference   String
+  isLaterEvidence       Boolean              @default(false)
+  attributableToIdentityId String?           @db.Uuid
+  submittedAt           DateTime             @default(now())
+  snapshot              ReviewRecordSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  attributableTo        Identity?            @relation("ReviewSubmissionAttributable", fields: [attributableToIdentityId], references: [id])
+
+  @@index([snapshotId])
+  @@map("review_submissions")
+}
+
+model ExternalReviewReferral {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  matterId                    String                       @db.Uuid
+  externalAuthorityLabel      String
+  status                      ExternalReviewReferralStatus @default(PREPARING)
+  transmittedAt               DateTime?
+  acknowledgedAt              DateTime?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  matter                      RedressMatter                @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  packages                    ExternalReviewPackage[]
+  determinations              ExternalReviewDetermination[]
+
+  @@index([matterId])
+  @@map("external_review_referrals")
+}
+
+model ExternalReviewPackage {
+  id              String                 @id @default(uuid()) @db.Uuid
+  referralId      String                 @db.Uuid
+  versionNumber   Int
+  packageReference String
+  packageHash     String
+  transmittedAt   DateTime?
+  createdAt       DateTime               @default(now())
+  referral        ExternalReviewReferral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@unique([referralId, versionNumber])
+  @@map("external_review_packages")
+}
+
+model ExternalReviewDetermination {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  referralId                  String                          @db.Uuid
+  determinationReference      String
+  authenticity                ExternalDeterminationAuthenticity @default(UNVERIFIED)
+  receivedAt                  DateTime?
+  implementedAt               DateTime?
+  authorityEvaluationRecordId String?                         @db.Uuid
+  createdAt                   DateTime                        @default(now())
+  referral                    ExternalReviewReferral          @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  authorityEvaluationRecord   AuthorityEvaluationRecord?      @relation("ExternalDeterminationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([referralId])
+  @@map("external_review_determinations")
+}
+
+model RedressDecision {
+  id                          String                @id @default(uuid()) @db.Uuid
+  matterId                    String                @db.Uuid
+  decisionNumber              String                @unique
+  outcome                     RedressDecisionOutcome
+  status                      RedressDecisionStatus @default(DRAFT)
+  isRecommendation            Boolean               @default(false)
+  isFinalDisposition          Boolean               @default(false)
+  isImplemented               Boolean               @default(false)
+  deciderIdentityId           String                @db.Uuid
+  deciderOfficeholderId       String                @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  originalDecisionPreserved   Boolean               @default(true)
+  decidedAt                   DateTime?
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  matter                      RedressMatter         @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  deciderIdentity             Identity              @relation("RedressDecisionDecider", fields: [deciderIdentityId], references: [id])
+  deciderOfficeholder         Officeholder          @relation("RedressDecisionDeciderOfficeholder", fields: [deciderOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("RedressDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  findings                    RedressFinding[]
+  reasons                     RedressReason[]
+  remedies                    RedressRemedy[]
+  implementationPlans         RedressImplementationPlan[]
+
+  @@index([matterId])
+  @@index([status])
+  @@map("redress_decisions")
+}
+
+model RedressFinding {
+  id              String          @id @default(uuid()) @db.Uuid
+  decisionId      String          @db.Uuid
+  findingSummary  String
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  decision        RedressDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId])
+  @@map("redress_findings")
+}
+
+model RedressReason {
+  id              String          @id @default(uuid()) @db.Uuid
+  decisionId      String          @db.Uuid
+  reasonSummary   String
+  isMaterial      Boolean         @default(true)
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  decision        RedressDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId])
+  @@map("redress_reasons")
+}
+
+model RedressRemedy {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  decisionId            String                       @db.Uuid
+  remedyDefinitionId    String?                      @db.Uuid
+  remedySummary         String
+  isAuthorized          Boolean                      @default(false)
+  isSubstantive         Boolean                      @default(false)
+  createdAt             DateTime                     @default(now())
+  decision              RedressDecision              @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  remedyDefinition      RedressRouteRemedyDefinition? @relation(fields: [remedyDefinitionId], references: [id])
+
+  @@index([decisionId])
+  @@map("redress_remedies")
+}
+
+model InterimReliefRequest {
+  id                          String               @id @default(uuid()) @db.Uuid
+  matterId                    String               @db.Uuid
+  requestedByIdentityId       String               @db.Uuid
+  outcome                     InterimReliefOutcome @default(PENDING)
+  scopeDescription            String?
+  decidedByIdentityId         String?              @db.Uuid
+  decidedByOfficeholderId     String?              @db.Uuid
+  authorityEvaluationRecordId String?              @db.Uuid
+  requestedAt                 DateTime             @default(now())
+  decidedAt                   DateTime?
+  createdAt                   DateTime             @default(now())
+  matter                      RedressMatter        @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  requestedBy                 Identity             @relation("InterimReliefRequester", fields: [requestedByIdentityId], references: [id])
+  decidedBy                   Identity?            @relation("InterimReliefDecider", fields: [decidedByIdentityId], references: [id])
+  decidedByOfficeholder       Officeholder?        @relation("InterimReliefDeciderOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("InterimReliefAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  stayRecords                 ReviewStayRecord[]
+
+  @@index([matterId])
+  @@map("interim_relief_requests")
+}
+
+model ReviewStayRecord {
+  id                          String               @id @default(uuid()) @db.Uuid
+  matterId                    String               @db.Uuid
+  interimReliefRequestId      String?              @db.Uuid
+  challengedInstrumentId      String?              @db.Uuid
+  stayGranted                 Boolean              @default(false)
+  isReversal                  Boolean              @default(false)
+  scopeDescription            String?
+  effectiveAt                 DateTime?
+  authorityEvaluationRecordId String?              @db.Uuid
+  createdAt                   DateTime             @default(now())
+  matter                      RedressMatter        @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  interimReliefRequest        InterimReliefRequest? @relation(fields: [interimReliefRequestId], references: [id])
+  challengedInstrument        OfficialInstrument?  @relation("RedressStayInstrument", fields: [challengedInstrumentId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ReviewStayAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([matterId])
+  @@map("review_stay_records")
+}
+
+model RedressImplementationPlan {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  matterId                    String                      @db.Uuid
+  decisionId                  String                      @db.Uuid
+  status                      RedressImplementationStatus @default(PENDING)
+  markedImplementedAt         DateTime?
+  failureVisible              Boolean                     @default(false)
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  matter                      RedressMatter               @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  decision                    RedressDecision             @relation(fields: [decisionId], references: [id])
+  actions                     RedressImplementationAction[]
+  verifications               RedressImplementationVerification[]
+
+  @@index([matterId])
+  @@index([decisionId])
+  @@map("redress_implementation_plans")
+}
+
+model RedressImplementationAction {
+  id              String                      @id @default(uuid()) @db.Uuid
+  planId          String                      @db.Uuid
+  actionType      String
+  actionSummary   String
+  status          RedressImplementationStatus @default(PENDING)
+  phase8Controlled Boolean                    @default(true)
+  phase9Controlled Boolean                    @default(false)
+  completedAt     DateTime?
+  failureReason   String?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  plan            RedressImplementationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@map("redress_implementation_actions")
+}
+
+model RedressImplementationVerification {
+  id              String                    @id @default(uuid()) @db.Uuid
+  planId          String                    @db.Uuid
+  verifiedByIdentityId String?              @db.Uuid
+  verificationSummary String
+  verifiedAt      DateTime                  @default(now())
+  plan            RedressImplementationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  verifiedBy      Identity?                 @relation("RedressImplementationVerifier", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([planId])
+  @@map("redress_implementation_verifications")
+}
+
+model RedressNotice {
+  id              String            @id @default(uuid()) @db.Uuid
+  matterId        String            @db.Uuid
+  noticeType      RedressNoticeType
+  noticeReference String            @unique
+  recipientIdentityId String?       @db.Uuid
+  isPrivileged    Boolean           @default(false)
+  issuedAt        DateTime          @default(now())
+  createdAt       DateTime          @default(now())
+  matter          RedressMatter     @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  recipient       Identity?         @relation("RedressNoticeRecipient", fields: [recipientIdentityId], references: [id])
+
+  @@index([matterId])
+  @@map("redress_notices")
+}
