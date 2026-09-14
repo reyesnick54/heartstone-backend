@@ -64,7 +64,9 @@ export class IntelligenceController {
   }
 
   @Post('metrics/frameworks')
-  createPerformanceFramework(@Body() body: Parameters<PerformanceFrameworkService['createFramework']>[0]) {
+  createPerformanceFramework(
+    @Body() body: Parameters<PerformanceFrameworkService['createFramework']>[0],
+  ) {
     return this.performanceFrameworks.createFramework(body);
   }
 
@@ -74,7 +76,9 @@ export class IntelligenceController {
   }
 
   @Post('metrics/calculations')
-  startMetricCalculation(@Body() body: Parameters<MetricCalculationService['startCalculationRun']>[0]) {
+  startMetricCalculation(
+    @Body() body: Parameters<MetricCalculationService['startCalculationRun']>[0],
+  ) {
     return this.metricCalculations.startCalculationRun(body);
   }
 
@@ -147,7 +151,8 @@ export class IntelligenceController {
   @Post('analysis/requests')
   createAnalysisRequest(
     @CurrentSession() session: SessionContextDto,
-    @Body() body: Omit<Parameters<AnalysisEngineService['createRequest']>[0], 'requestedByIdentityId'>,
+    @Body()
+    body: Omit<Parameters<AnalysisEngineService['createRequest']>[0], 'requestedByIdentityId'>,
   ) {
     return this.analysisEngine.createRequest({
       ...body,
@@ -156,7 +161,9 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/observations')
-  recordObservation(@Body() body: Parameters<IntelligenceMonitoringService['recordObservation']>[0]) {
+  recordObservation(
+    @Body() body: Parameters<IntelligenceMonitoringService['recordObservation']>[0],
+  ) {
     return this.monitoring.recordObservation(body);
   }
 

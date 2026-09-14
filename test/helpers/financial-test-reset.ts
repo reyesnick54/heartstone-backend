@@ -7,6 +7,4 @@ export async function resetFinancialData(prisma: PrismaService): Promise<void> {
   await prisma.feeScheduleItem.deleteMany();
   await prisma.feeScheduleVersion.deleteMany();
   await prisma.feeSchedule.deleteMany();
-  await prisma.financialAccountReference.deleteMany();
-  await prisma.financialAuditEvent.deleteMany();
 }

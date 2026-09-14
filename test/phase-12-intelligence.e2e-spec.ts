@@ -86,7 +86,10 @@ describe('Phase 12 intelligence (e2e)', () => {
     const run = await metricCalculations.startCalculationRun({
       metricDefinitionVersionId: fixture.metricDefinitionVersionId,
       institutionId: fixture.institutionId,
-      inputsSnapshot: { traceReference: trace.traceReference, processingTimeBreakdown: processingBreakdown },
+      inputsSnapshot: {
+        traceReference: trace.traceReference,
+        processingTimeBreakdown: processingBreakdown,
+      },
     });
     await metricCalculations.completeCalculationRun(run.id);
 
@@ -131,7 +134,9 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect(replayBody.trace.applicantProcessingMinutes).toBe(48);
     expect(replayBody.disclaimer).toContain('does not substitute live government decisions');
 
-    const storedClaim = await prisma.performanceClaim.findUniqueOrThrow({ where: { id: claim.id } });
+    const storedClaim = await prisma.performanceClaim.findUniqueOrThrow({
+      where: { id: claim.id },
+    });
     expect(storedClaim.status).toBe(PerformanceClaimStatus.SUBMITTED);
   });
 
@@ -162,7 +167,9 @@ describe('Phase 12 intelligence (e2e)', () => {
 
     const httpBody = httpView.body as {
       disclaimer: string;
-      dashboard: { versions: { indicators: { indicatorCode: string; config: Record<string, unknown> }[] }[] };
+      dashboard: {
+        versions: { indicators: { indicatorCode: string; config: Record<string, unknown> }[] }[];
+      };
     };
     expect(httpBody.disclaimer).toContain('do not constitute command authority');
     const indicators = httpBody.dashboard.versions[0]?.indicators ?? [];
@@ -289,7 +296,9 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect(await prisma.authorityActionRight.count()).toBe(rightsBefore);
     expect(await prisma.aIIncident.count({ where: { aiExecutionRecordId: execution.id } })).toBe(1);
 
-    expect(() => { aiExecutions.rejectForbiddenAction('APPROVE'); }).toThrow(ForbiddenException);
+    expect(() => {
+      aiExecutions.rejectForbiddenAction('APPROVE');
+    }).toThrow(ForbiddenException);
   });
 
   it('E2E6. threshold alert is raised unverified and requires human evidence verification', async () => {
@@ -368,7 +377,9 @@ describe('Phase 12 intelligence (e2e)', () => {
     expect((output.outputData as { label: string }).label).toBe('MODELED_SCENARIO');
 
     const caseBefore = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
-    expect(() => { simulations.applyToLiveCase(true); }).toThrow(/SIMULATION_CANNOT_UPDATE_LIVE_CASE/i);
+    expect(() => {
+      simulations.applyToLiveCase(true);
+    }).toThrow(/SIMULATION_CANNOT_UPDATE_LIVE_CASE/i);
     const caseAfter = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
     expect(caseAfter.status).toBe(caseBefore.status);
   });
@@ -398,9 +409,9 @@ describe('Phase 12 intelligence (e2e)', () => {
     });
     expect(refreshed.isStale).toBe(true);
 
-    await expect(
-      digitalTwins.assertConsequentialUseAllowed(twinVersion.id, true),
-    ).rejects.toThrow(/stale|review/i);
+    await expect(digitalTwins.assertConsequentialUseAllowed(twinVersion.id, true)).rejects.toThrow(
+      /stale|review/i,
+    );
   });
 
   it('E2E9. performance claim associates improvement without asserting automatic causation', async () => {

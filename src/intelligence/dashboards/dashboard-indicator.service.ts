@@ -57,9 +57,7 @@ export class DashboardIndicatorService {
     });
 
     const status =
-      input.isStale === true
-        ? DashboardIndicatorStatus.STALE
-        : DashboardIndicatorStatus.CURRENT;
+      input.isStale === true ? DashboardIndicatorStatus.STALE : DashboardIndicatorStatus.CURRENT;
 
     return this.prisma.dashboardIndicatorProjection.create({
       data: {

@@ -76,7 +76,9 @@ export class IntelligenceBoundaryService {
 
   assertDashboardSnapshotNotOfficialRecord(context?: string): void {
     if (context?.toLowerCase().includes('snapshot is official record')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.DASHBOARD_SNAPSHOT_NOT_OFFICIAL_RECORD);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.DASHBOARD_SNAPSHOT_NOT_OFFICIAL_RECORD,
+      );
     }
   }
 
@@ -88,13 +90,17 @@ export class IntelligenceBoundaryService {
 
   assertDashboardProjectionNotVerifiedOutcome(context?: string): void {
     if (context?.toLowerCase().includes('projection verified outcome')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.DASHBOARD_PROJECTION_NOT_VERIFIED_OUTCOME);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.DASHBOARD_PROJECTION_NOT_VERIFIED_OUTCOME,
+      );
     }
   }
 
   assertStaleIndicatorBlocksConsequentialUse(isStale: boolean, consequential: boolean): void {
     if (isStale && consequential) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.STALE_INDICATOR_BLOCK_CONSEQUENTIAL_USE);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.STALE_INDICATOR_BLOCK_CONSEQUENTIAL_USE,
+      );
     }
   }
 
@@ -191,10 +197,7 @@ export class IntelligenceBoundaryService {
     }
   }
 
-  assertAiOutputRequiresHumanDisposition(
-    consequential: boolean,
-    hasDisposition: boolean,
-  ): void {
+  assertAiOutputRequiresHumanDisposition(consequential: boolean, hasDisposition: boolean): void {
     if (consequential && !hasDisposition) {
       throw new ForbiddenException(INTELLIGENCE_REASON_CODES.AI_OUTPUT_REQUIRES_HUMAN_DISPOSITION);
     }
@@ -212,10 +215,7 @@ export class IntelligenceBoundaryService {
     }
   }
 
-  assertOpenAlertNotConfirmedBreach(
-    status: MonitoringAlertStatus,
-    claimingBreach: boolean,
-  ): void {
+  assertOpenAlertNotConfirmedBreach(status: MonitoringAlertStatus, claimingBreach: boolean): void {
     if (status === MonitoringAlertStatus.OPEN && claimingBreach) {
       throw new ForbiddenException(INTELLIGENCE_REASON_CODES.OPEN_ALERT_NOT_CONFIRMED_BREACH);
     }
@@ -233,7 +233,9 @@ export class IntelligenceBoundaryService {
     outcome?: AlertVerificationOutcome,
   ): void {
     if (claimingViolation && !hasVerification) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION,
+      );
     }
     if (
       claimingViolation &&
@@ -241,7 +243,9 @@ export class IntelligenceBoundaryService {
       outcome !== AlertVerificationOutcome.CONFIRMED &&
       outcome !== AlertVerificationOutcome.PARTIALLY_CONFIRMED
     ) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION,
+      );
     }
   }
 
@@ -277,7 +281,9 @@ export class IntelligenceBoundaryService {
 
   assertAnalysisFindingNotFinalDetermination(context?: string): void {
     if (context?.toLowerCase().includes('finding is final determination')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.ANALYSIS_FINDING_NOT_FINAL_DETERMINATION);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.ANALYSIS_FINDING_NOT_FINAL_DETERMINATION,
+      );
     }
   }
 
@@ -289,7 +295,9 @@ export class IntelligenceBoundaryService {
 
   assertSponsorReportNotVerifiedMilestone(status: StrategicProjectMilestoneStatus): void {
     if (status === StrategicProjectMilestoneStatus.REPORTED) {
-      throw new BadRequestException(INTELLIGENCE_REASON_CODES.SPONSOR_REPORT_NOT_VERIFIED_MILESTONE);
+      throw new BadRequestException(
+        INTELLIGENCE_REASON_CODES.SPONSOR_REPORT_NOT_VERIFIED_MILESTONE,
+      );
     }
   }
 
@@ -313,7 +321,9 @@ export class IntelligenceBoundaryService {
 
   assertEmploymentEvidenceNotVerifiedCount(context?: string): void {
     if (context?.toLowerCase().includes('employment count verified')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.EMPLOYMENT_EVIDENCE_NOT_VERIFIED_COUNT);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.EMPLOYMENT_EVIDENCE_NOT_VERIFIED_COUNT,
+      );
     }
   }
 
@@ -327,7 +337,9 @@ export class IntelligenceBoundaryService {
 
   assertStrategicProjectNotAuthorityProgram(context?: string): void {
     if (context?.toLowerCase().includes('project profile grants authority')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.STRATEGIC_PROJECT_NOT_AUTHORITY_PROGRAM);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.STRATEGIC_PROJECT_NOT_AUTHORITY_PROGRAM,
+      );
     }
   }
 
@@ -355,12 +367,11 @@ export class IntelligenceBoundaryService {
     }
   }
 
-  assertConsequentialTwinUseRequiresReview(
-    consequential: boolean,
-    hasReview: boolean,
-  ): void {
+  assertConsequentialTwinUseRequiresReview(consequential: boolean, hasReview: boolean): void {
     if (consequential && !hasReview) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.CONSEQUENTIAL_TWIN_USE_REQUIRES_REVIEW);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.CONSEQUENTIAL_TWIN_USE_REQUIRES_REVIEW,
+      );
     }
   }
 
@@ -423,7 +434,8 @@ export class IntelligenceBoundaryService {
       }
       const normalized = field.toLowerCase();
       const forbidden = FORBIDDEN_ANALYTICS_PATCH_TARGETS.some(
-        (target) => normalized === target.toLowerCase() || normalized.includes(target.toLowerCase()),
+        (target) =>
+          normalized === target.toLowerCase() || normalized.includes(target.toLowerCase()),
       );
       if (!forbidden) {
         continue;
@@ -441,7 +453,9 @@ export class IntelligenceBoundaryService {
 
   assertMetricObservationNotPerformanceVerdict(context?: string): void {
     if (context?.toLowerCase().includes('observation is performance verdict')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.METRIC_OBSERVATION_NOT_PERFORMANCE_VERDICT);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.METRIC_OBSERVATION_NOT_PERFORMANCE_VERDICT,
+      );
     }
   }
 
@@ -504,19 +518,25 @@ export class IntelligenceBoundaryService {
 
   assertDataQualityNotAssessmentOfLegality(context?: string): void {
     if (context?.toLowerCase().includes('data quality proves legality')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.DATA_QUALITY_NOT_ASSESSMENT_OF_LEGALITY);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.DATA_QUALITY_NOT_ASSESSMENT_OF_LEGALITY,
+      );
     }
   }
 
   assertReportClaimNotVerifiedWithoutReview(status: ReportClaimStatus): void {
     if (status !== ReportClaimStatus.VERIFIED) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.REPORT_CLAIM_NOT_VERIFIED_WITHOUT_REVIEW);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.REPORT_CLAIM_NOT_VERIFIED_WITHOUT_REVIEW,
+      );
     }
   }
 
   assertReportPublicationNotDecisionNotice(context?: string): void {
     if (context?.toLowerCase().includes('publication is decision notice')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.REPORT_PUBLICATION_NOT_DECISION_NOTICE);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.REPORT_PUBLICATION_NOT_DECISION_NOTICE,
+      );
     }
   }
 
@@ -534,7 +554,9 @@ export class IntelligenceBoundaryService {
 
   assertDecisionTraceNotSubstitutesDecision(context?: string): void {
     if (context?.toLowerCase().includes('trace substitutes decision')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.DECISION_TRACE_NOT_SUBSTITUTES_DECISION);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.DECISION_TRACE_NOT_SUBSTITUTES_DECISION,
+      );
     }
   }
 
@@ -576,7 +598,9 @@ export class IntelligenceBoundaryService {
 
   assertAiDataEntitlementNotDisclosureRight(context?: string): void {
     if (context?.toLowerCase().includes('data entitlement is disclosure right')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.AI_DATA_ENTITLEMENT_NOT_DISCLOSURE_RIGHT);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.AI_DATA_ENTITLEMENT_NOT_DISCLOSURE_RIGHT,
+      );
     }
   }
 
@@ -591,9 +615,14 @@ export class IntelligenceBoundaryService {
     }
   }
 
-  assertAiIncidentTriggersSuspensionReview(hasIncident: boolean, hasSuspensionReview: boolean): void {
+  assertAiIncidentTriggersSuspensionReview(
+    hasIncident: boolean,
+    hasSuspensionReview: boolean,
+  ): void {
     if (hasIncident && !hasSuspensionReview) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.AI_INCIDENT_TRIGGERS_SUSPENSION_REVIEW);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.AI_INCIDENT_TRIGGERS_SUSPENSION_REVIEW,
+      );
     }
   }
 
@@ -605,7 +634,9 @@ export class IntelligenceBoundaryService {
 
   assertMonitoringRuleNotEnforcementAuthority(context?: string): void {
     if (context?.toLowerCase().includes('monitoring rule enforces')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.MONITORING_RULE_NOT_ENFORCEMENT_AUTHORITY);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.MONITORING_RULE_NOT_ENFORCEMENT_AUTHORITY,
+      );
     }
   }
 
@@ -635,7 +666,9 @@ export class IntelligenceBoundaryService {
 
   assertUnresolvedEntitlementBlocksExecution(hasEntitlement: boolean): void {
     if (!hasEntitlement) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.UNRESOLVED_ENTITLEMENT_BLOCKS_EXECUTION);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.UNRESOLVED_ENTITLEMENT_BLOCKS_EXECUTION,
+      );
     }
   }
 
@@ -659,19 +692,25 @@ export class IntelligenceBoundaryService {
 
   assertDeterministicAdapterNotDecisionEngine(context?: string): void {
     if (context?.toLowerCase().includes('adapter issues decision')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.DETERMINISTIC_ADAPTER_NOT_DECISION_ENGINE);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.DETERMINISTIC_ADAPTER_NOT_DECISION_ENGINE,
+      );
     }
   }
 
   assertPromptGovernanceNotPolicyAuthority(context?: string): void {
     if (context?.toLowerCase().includes('prompt governance sets policy')) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.PROMPT_GOVERNANCE_NOT_POLICY_AUTHORITY);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.PROMPT_GOVERNANCE_NOT_POLICY_AUTHORITY,
+      );
     }
   }
 
   assertForecastStalenessRequiresDisclaimer(isStale: boolean, hasDisclaimer: boolean): void {
     if (isStale && !hasDisclaimer) {
-      throw new BadRequestException(INTELLIGENCE_REASON_CODES.FORECAST_STALENESS_REQUIRES_DISCLAIMER);
+      throw new BadRequestException(
+        INTELLIGENCE_REASON_CODES.FORECAST_STALENESS_REQUIRES_DISCLAIMER,
+      );
     }
   }
 
@@ -731,7 +770,9 @@ export class IntelligenceBoundaryService {
 
   assertIntelligenceLayerBoundaryNonWaivable(waiverRequested: boolean): void {
     if (waiverRequested) {
-      throw new ForbiddenException(INTELLIGENCE_REASON_CODES.INTELLIGENCE_LAYER_BOUNDARY_NON_WAIVABLE);
+      throw new ForbiddenException(
+        INTELLIGENCE_REASON_CODES.INTELLIGENCE_LAYER_BOUNDARY_NON_WAIVABLE,
+      );
     }
   }
 
@@ -741,108 +782,311 @@ export class IntelligenceBoundaryService {
     }
 
     const handlers: Record<IntelligenceInvariantCode, () => void> = {
-      DASHBOARD_CANNOT_CREATE_AUTHORITY: () => { this.assertDashboardCannotCreateAuthority(true); },
-      DASHBOARD_CANNOT_GRANT_DELEGATION: () => { this.assertDashboardCannotGrantDelegation(true); },
-      DASHBOARD_VIEW_NOT_AUTHORITY: () => { this.assertDashboardViewNotAuthority('authority granted via dashboard'); },
-      INDICATOR_NOT_DECISION: () => { this.assertIndicatorNotDecision('indicator constitutes decision'); },
-      EXECUTIVE_DASHBOARD_NOT_COMMAND: () => { this.assertExecutiveDashboardNotCommand('executive command issued'); },
-      DEPARTMENTAL_CONSOLE_NOT_DISPOSITION: () => { this.assertDepartmentalConsoleNotDisposition('case disposition recorded'); },
-      DASHBOARD_SNAPSHOT_NOT_OFFICIAL_RECORD: () => { this.assertDashboardSnapshotNotOfficialRecord('snapshot is official record'); },
-      DASHBOARD_WIDGET_NOT_INSTRUMENT: () => { this.assertDashboardWidgetNotInstrument('widget is official instrument'); },
-      DASHBOARD_PROJECTION_NOT_VERIFIED_OUTCOME: () => { this.assertDashboardProjectionNotVerifiedOutcome('projection verified outcome'); },
-      STALE_INDICATOR_BLOCK_CONSEQUENTIAL_USE: () => { this.assertStaleIndicatorBlocksConsequentialUse(true, true); },
-      AI_CANNOT_APPROVE: () => { this.assertAiCannotApprove('APPROVE'); },
-      AI_CANNOT_REFUSE: () => { this.assertAiCannotRefuse('REFUSE'); },
-      AI_CANNOT_WAIVE: () => { this.assertAiCannotWaive('WAIVE'); },
-      AI_CANNOT_SIGN: () => { this.assertAiCannotSign('SIGN'); },
-      AI_CANNOT_ISSUE: () => { this.assertAiCannotIssue('ISSUE'); },
-      AI_CANNOT_DECIDE: () => { this.assertAiCannotDecide('DECIDE'); },
-      AI_RECOMMENDATION_NOT_DECISION: () => { this.assertAiRecommendationNotDecision('recommendation recorded as decision'); },
-      AI_EXECUTION_NOT_BINDING: () => { this.assertAiExecutionNotBinding(false); },
-      AI_CANNOT_FINALIZE_GOVERNMENT_ACTION: () => { this.assertAiCannotFinalizeGovernmentAction(true); },
-      AI_CANNOT_EXECUTE_ENFORCEMENT: () => { this.assertAiCannotExecuteEnforcement('EXECUTE_ENFORCEMENT'); },
-      AI_CANNOT_APPOINT_OFFICEHOLDER: () => { this.assertAiCannotAppointOfficeholder('APPOINT_OFFICEHOLDER'); },
-      AI_CANNOT_SUSPEND_AUTHORITY: () => { this.assertAiCannotSuspendAuthority('SUSPEND_AUTHORITY'); },
-      AI_CANNOT_REVOKE_INSTRUMENT: () => { this.assertAiCannotRevokeInstrument('REVOKE_INSTRUMENT'); },
-      AI_ASSISTANCE_NOT_OFFICIAL_ACTOR: () => { this.assertAiAssistanceNotOfficialActor('AI_ASSISTANCE'); },
-      AI_OUTPUT_REQUIRES_HUMAN_DISPOSITION: () => { this.assertAiOutputRequiresHumanDisposition(true, false); },
-      ALERT_NOT_VIOLATION: () => { this.assertAlertNotViolation(true); },
-      ALERT_CANNOT_SELF_VERIFY: () => { this.assertAlertCannotSelfVerify(true); },
-      OPEN_ALERT_NOT_CONFIRMED_BREACH: () => { this.assertOpenAlertNotConfirmedBreach(MonitoringAlertStatus.OPEN, true); },
-      MONITORING_OBSERVATION_NOT_VIOLATION: () => { this.assertMonitoringObservationNotViolation(true); },
-      ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION: () => { this.assertAlertVerificationRequiredForViolation(false, true); },
-      CORRELATION_NOT_CAUSATION: () => { this.assertCorrelationNotCausation('correlation proves causation'); },
-      FORECAST_NOT_ACHIEVEMENT: () => { this.assertForecastNotAchievement('forecast achieved'); },
-      PROJECTION_NOT_GUARANTEE: () => { this.assertProjectionNotGuarantee('projection guaranteed'); },
-      TREND_NOT_POLICY_DIRECTIVE: () => { this.assertTrendNotPolicyDirective('trend is policy directive'); },
-      ANALYSIS_OPTION_NOT_DECISION: () => { this.assertAnalysisOptionNotDecision('option selected as decision'); },
-      ANALYSIS_FINDING_NOT_FINAL_DETERMINATION: () => { this.assertAnalysisFindingNotFinalDetermination('finding is final determination'); },
-      RISK_ASSESSMENT_NOT_SANCTION: () => { this.assertRiskAssessmentNotSanction('risk assessment is sanction'); },
-      SPONSOR_REPORT_NOT_VERIFIED_MILESTONE: () => { this.assertSponsorReportNotVerifiedMilestone(StrategicProjectMilestoneStatus.REPORTED); },
-      REPORTED_MILESTONE_NOT_COMPLETED: () => { this.assertReportedMilestoneNotCompleted(StrategicProjectMilestoneStatus.REPORTED); },
-      PROJECT_STATUS_PROJECTION_NOT_VERDICT: () => { this.assertProjectStatusProjectionNotVerdict('projection is institutional verdict'); },
-      CAPITAL_EVIDENCE_NOT_AUDITED_FACT: () => { this.assertCapitalEvidenceNotAuditedFact('capital evidence audited fact'); },
-      EMPLOYMENT_EVIDENCE_NOT_VERIFIED_COUNT: () => { this.assertEmploymentEvidenceNotVerifiedCount('employment count verified'); },
-      INFRASTRUCTURE_REPORT_NOT_DELIVERY_CERTIFICATE: () => { this.assertInfrastructureReportNotDeliveryCertificate(
+      DASHBOARD_CANNOT_CREATE_AUTHORITY: () => {
+        this.assertDashboardCannotCreateAuthority(true);
+      },
+      DASHBOARD_CANNOT_GRANT_DELEGATION: () => {
+        this.assertDashboardCannotGrantDelegation(true);
+      },
+      DASHBOARD_VIEW_NOT_AUTHORITY: () => {
+        this.assertDashboardViewNotAuthority('authority granted via dashboard');
+      },
+      INDICATOR_NOT_DECISION: () => {
+        this.assertIndicatorNotDecision('indicator constitutes decision');
+      },
+      EXECUTIVE_DASHBOARD_NOT_COMMAND: () => {
+        this.assertExecutiveDashboardNotCommand('executive command issued');
+      },
+      DEPARTMENTAL_CONSOLE_NOT_DISPOSITION: () => {
+        this.assertDepartmentalConsoleNotDisposition('case disposition recorded');
+      },
+      DASHBOARD_SNAPSHOT_NOT_OFFICIAL_RECORD: () => {
+        this.assertDashboardSnapshotNotOfficialRecord('snapshot is official record');
+      },
+      DASHBOARD_WIDGET_NOT_INSTRUMENT: () => {
+        this.assertDashboardWidgetNotInstrument('widget is official instrument');
+      },
+      DASHBOARD_PROJECTION_NOT_VERIFIED_OUTCOME: () => {
+        this.assertDashboardProjectionNotVerifiedOutcome('projection verified outcome');
+      },
+      STALE_INDICATOR_BLOCK_CONSEQUENTIAL_USE: () => {
+        this.assertStaleIndicatorBlocksConsequentialUse(true, true);
+      },
+      AI_CANNOT_APPROVE: () => {
+        this.assertAiCannotApprove('APPROVE');
+      },
+      AI_CANNOT_REFUSE: () => {
+        this.assertAiCannotRefuse('REFUSE');
+      },
+      AI_CANNOT_WAIVE: () => {
+        this.assertAiCannotWaive('WAIVE');
+      },
+      AI_CANNOT_SIGN: () => {
+        this.assertAiCannotSign('SIGN');
+      },
+      AI_CANNOT_ISSUE: () => {
+        this.assertAiCannotIssue('ISSUE');
+      },
+      AI_CANNOT_DECIDE: () => {
+        this.assertAiCannotDecide('DECIDE');
+      },
+      AI_RECOMMENDATION_NOT_DECISION: () => {
+        this.assertAiRecommendationNotDecision('recommendation recorded as decision');
+      },
+      AI_EXECUTION_NOT_BINDING: () => {
+        this.assertAiExecutionNotBinding(false);
+      },
+      AI_CANNOT_FINALIZE_GOVERNMENT_ACTION: () => {
+        this.assertAiCannotFinalizeGovernmentAction(true);
+      },
+      AI_CANNOT_EXECUTE_ENFORCEMENT: () => {
+        this.assertAiCannotExecuteEnforcement('EXECUTE_ENFORCEMENT');
+      },
+      AI_CANNOT_APPOINT_OFFICEHOLDER: () => {
+        this.assertAiCannotAppointOfficeholder('APPOINT_OFFICEHOLDER');
+      },
+      AI_CANNOT_SUSPEND_AUTHORITY: () => {
+        this.assertAiCannotSuspendAuthority('SUSPEND_AUTHORITY');
+      },
+      AI_CANNOT_REVOKE_INSTRUMENT: () => {
+        this.assertAiCannotRevokeInstrument('REVOKE_INSTRUMENT');
+      },
+      AI_ASSISTANCE_NOT_OFFICIAL_ACTOR: () => {
+        this.assertAiAssistanceNotOfficialActor('AI_ASSISTANCE');
+      },
+      AI_OUTPUT_REQUIRES_HUMAN_DISPOSITION: () => {
+        this.assertAiOutputRequiresHumanDisposition(true, false);
+      },
+      ALERT_NOT_VIOLATION: () => {
+        this.assertAlertNotViolation(true);
+      },
+      ALERT_CANNOT_SELF_VERIFY: () => {
+        this.assertAlertCannotSelfVerify(true);
+      },
+      OPEN_ALERT_NOT_CONFIRMED_BREACH: () => {
+        this.assertOpenAlertNotConfirmedBreach(MonitoringAlertStatus.OPEN, true);
+      },
+      MONITORING_OBSERVATION_NOT_VIOLATION: () => {
+        this.assertMonitoringObservationNotViolation(true);
+      },
+      ALERT_VERIFICATION_REQUIRED_FOR_VIOLATION: () => {
+        this.assertAlertVerificationRequiredForViolation(false, true);
+      },
+      CORRELATION_NOT_CAUSATION: () => {
+        this.assertCorrelationNotCausation('correlation proves causation');
+      },
+      FORECAST_NOT_ACHIEVEMENT: () => {
+        this.assertForecastNotAchievement('forecast achieved');
+      },
+      PROJECTION_NOT_GUARANTEE: () => {
+        this.assertProjectionNotGuarantee('projection guaranteed');
+      },
+      TREND_NOT_POLICY_DIRECTIVE: () => {
+        this.assertTrendNotPolicyDirective('trend is policy directive');
+      },
+      ANALYSIS_OPTION_NOT_DECISION: () => {
+        this.assertAnalysisOptionNotDecision('option selected as decision');
+      },
+      ANALYSIS_FINDING_NOT_FINAL_DETERMINATION: () => {
+        this.assertAnalysisFindingNotFinalDetermination('finding is final determination');
+      },
+      RISK_ASSESSMENT_NOT_SANCTION: () => {
+        this.assertRiskAssessmentNotSanction('risk assessment is sanction');
+      },
+      SPONSOR_REPORT_NOT_VERIFIED_MILESTONE: () => {
+        this.assertSponsorReportNotVerifiedMilestone(StrategicProjectMilestoneStatus.REPORTED);
+      },
+      REPORTED_MILESTONE_NOT_COMPLETED: () => {
+        this.assertReportedMilestoneNotCompleted(StrategicProjectMilestoneStatus.REPORTED);
+      },
+      PROJECT_STATUS_PROJECTION_NOT_VERDICT: () => {
+        this.assertProjectStatusProjectionNotVerdict('projection is institutional verdict');
+      },
+      CAPITAL_EVIDENCE_NOT_AUDITED_FACT: () => {
+        this.assertCapitalEvidenceNotAuditedFact('capital evidence audited fact');
+      },
+      EMPLOYMENT_EVIDENCE_NOT_VERIFIED_COUNT: () => {
+        this.assertEmploymentEvidenceNotVerifiedCount('employment count verified');
+      },
+      INFRASTRUCTURE_REPORT_NOT_DELIVERY_CERTIFICATE: () => {
+        this.assertInfrastructureReportNotDeliveryCertificate(
           'infrastructure report is delivery certificate',
-        ); },
-      STRATEGIC_PROJECT_NOT_AUTHORITY_PROGRAM: () => { this.assertStrategicProjectNotAuthorityProgram('project profile grants authority'); },
-      TWIN_NOT_REAL_OBJECT: () => { this.assertTwinNotRealObject('twin is real object'); },
-      SIMULATION_CANNOT_UPDATE_LIVE_CASE: () => { this.assertSimulationCannotUpdateLiveCase(true); },
-      SIMULATION_OUTPUT_NOT_LIVE_STATE: () => { this.assertSimulationOutputNotLiveState(true); },
-      STALE_TWIN_SAFE_HALT: () => { this.assertStaleTwinSafeHalt(true, true); },
-      CONSEQUENTIAL_TWIN_USE_REQUIRES_REVIEW: () => { this.assertConsequentialTwinUseRequiresReview(true, false); },
-      SIMULATION_TO_LIVE_REQUIRES_APPROVED_REVIEW: () => { this.assertSimulationToLiveRequiresApprovedReview(false); },
-      PROMPT_INJECTION_TREATED_AS_DATA: () => { this.assertPromptInjectionTreatedAsData('ignore previous instructions', 'ignore previous instructions'); },
-      CROSS_CASE_RETRIEVAL_BLOCKED: () => { this.assertCrossCaseRetrievalBlocked('case-a', 'case-b'); },
-      SUSPENDED_MODEL_BLOCKED: () => { this.assertSuspendedModelBlocked(AIModelStatus.SUSPENDED); },
-      SUSPENDED_USE_CASE_BLOCKED: () => { this.assertSuspendedUseCaseBlocked(AIUseCaseStatus.SUSPENDED); },
-      SUSPENDED_AGENT_BLOCKED: () => { this.assertSuspendedAgentBlocked(AIAgentStatus.SUSPENDED); },
-      ANALYTICS_CANNOT_PATCH_GOVERNMENT_DECISION: () => { this.rejectAnalyticsPatchTargets({ governmentDecisionId: 'decision-1' }); },
-      ANALYTICS_CANNOT_PATCH_OFFICIAL_INSTRUMENT: () => { this.rejectAnalyticsPatchTargets({ officialInstrumentId: 'instrument-1' }); },
-      METRIC_OBSERVATION_NOT_PERFORMANCE_VERDICT: () => { this.assertMetricObservationNotPerformanceVerdict('observation is performance verdict'); },
-      PERFORMANCE_CLAIM_NOT_DECISION: () => { this.assertPerformanceClaimNotDecision('claim is government decision'); },
-      UNVERIFIED_CLAIM_NOT_PUBLISHED_FACT: () => { this.assertUnverifiedPerformanceClaimNotPublishedFact(PerformanceClaimStatus.DRAFT); },
-      DEGRADED_DATA_QUALITY_BLOCKS_CLAIM: () => { this.assertDegradedDataQualityBlocksClaim(MetricDataQualityStatus.DEGRADED); },
-      STALE_METRIC_BLOCKS_CONSEQUENTIAL_USE: () => { this.assertStaleMetricBlocksConsequentialUse(true, true); },
-      BASELINE_NOT_CURRENT_TARGET: () => { this.assertBaselineNotCurrentTarget('baseline is current target'); },
-      CALCULATION_RUN_FAILURE_SAFE_HALT: () => { this.assertCalculationRunFailureSafeHalt(MetricCalculationRunStatus.SAFE_HALTED); },
-      DATA_QUALITY_NOT_ASSESSMENT_OF_LEGALITY: () => { this.assertDataQualityNotAssessmentOfLegality('data quality proves legality'); },
-      REPORT_CLAIM_NOT_VERIFIED_WITHOUT_REVIEW: () => { this.assertReportClaimNotVerifiedWithoutReview(ReportClaimStatus.DRAFT); },
-      REPORT_PUBLICATION_NOT_DECISION_NOTICE: () => { this.assertReportPublicationNotDecisionNotice('publication is decision notice'); },
-      REPORT_APPROVAL_NOT_AUTHORITY_ACT: () => { this.assertReportApprovalNotAuthorityAct('report approval is authority act'); },
-      HISTORICAL_REPLAY_NOT_LIVE_DECISION: () => { this.assertHistoricalReplayNotLiveDecision('replay substitutes live decision'); },
-      DECISION_TRACE_NOT_SUBSTITUTES_DECISION: () => { this.assertDecisionTraceNotSubstitutesDecision('trace substitutes decision'); },
-      ACCESS_NOT_AUTHORITY: () => { this.assertAccessNotAuthority('access grants authority'); },
-      VIEWING_ANALYTICS_NOT_DELEGATION: () => { this.assertViewingAnalyticsNotDelegation('viewing analytics grants delegation'); },
-      RECOMMENDATION_NOT_WAIVER: () => { this.assertRecommendationNotWaiver('recommendation waives obligation'); },
-      SCENARIO_COMPARISON_NOT_MANDATE: () => { this.assertScenarioComparisonNotMandate('scenario comparison is mandate'); },
-      SENSITIVITY_ANALYSIS_NOT_APPROVAL: () => { this.assertSensitivityAnalysisNotApproval('sensitivity analysis is approval'); },
-      AI_TOOL_ENTITLEMENT_NOT_AUTHORITY: () => { this.assertAiToolEntitlementNotAuthority('tool entitlement grants authority'); },
-      AI_DATA_ENTITLEMENT_NOT_DISCLOSURE_RIGHT: () => { this.assertAiDataEntitlementNotDisclosureRight('data entitlement is disclosure right'); },
-      HUMAN_DISPOSITION_REQUIRED_FOR_CONSEQUENTIAL_AI: () => { this.assertHumanDispositionRequiredForConsequentialAi(true, false); },
-      AI_INCIDENT_TRIGGERS_SUSPENSION_REVIEW: () => { this.assertAiIncidentTriggersSuspensionReview(true, false); },
-      EVALUATION_SCORE_NOT_APPROVAL: () => { this.assertEvaluationScoreNotApproval('evaluation score is approval'); },
-      MONITORING_RULE_NOT_ENFORCEMENT_AUTHORITY: () => { this.assertMonitoringRuleNotEnforcementAuthority('monitoring rule enforces'); },
-      RISK_LEVEL_NOT_SANCTION_LEVEL: () => { this.assertRiskLevelNotSanctionLevel('risk level is sanction'); },
-      ANALYSIS_REQUEST_NOT_DECISION_REQUEST: () => { this.assertAnalysisRequestNotDecisionRequest('analysis request is decision request'); },
-      COMPLETED_ANALYSIS_NOT_FINAL_ORDER: () => { this.assertCompletedAnalysisNotFinalOrder('completed analysis is final order'); },
-      SAFE_HALT_BLOCKS_CONSEQUENTIAL_PATH: () => { this.assertSafeHaltBlocksConsequentialPath(true, true); },
-      UNRESOLVED_ENTITLEMENT_BLOCKS_EXECUTION: () => { this.assertUnresolvedEntitlementBlocksExecution(false); },
-      CASE_SCOPED_EXECUTION_ONLY: () => { this.assertCaseScopedExecutionOnly('case-a', 'case-b'); },
-      INSTITUTION_BOUNDARY_ON_RETRIEVAL: () => { this.assertInstitutionBoundaryOnRetrieval('inst-a', 'inst-b'); },
-      DETERMINISTIC_ADAPTER_NOT_DECISION_ENGINE: () => { this.assertDeterministicAdapterNotDecisionEngine('adapter issues decision'); },
-      PROMPT_GOVERNANCE_NOT_POLICY_AUTHORITY: () => { this.assertPromptGovernanceNotPolicyAuthority('prompt governance sets policy'); },
-      FORECAST_STALENESS_REQUIRES_DISCLAIMER: () => { this.assertForecastStalenessRequiresDisclaimer(true, false); },
-      INDICATOR_STALENESS_SAFE_HALT: () => { this.assertIndicatorStalenessSafeHalt(true, true); },
-      REPORT_GENERATION_SAFE_HALT: () => { this.assertReportGenerationSafeHalt(true); },
-      SIMULATION_RUN_SAFE_HALT: () => { this.assertSimulationRunSafeHalt(true); },
-      ANALYSIS_RUN_SAFE_HALT: () => { this.assertAnalysisRunSafeHalt(true); },
-      PERFORMANCE_CLAIM_CLIENT_STATUS_FORBIDDEN: () => { this.rejectClientPerformanceClaimFields({ status: PerformanceClaimStatus.VERIFIED }); },
-      DASHBOARD_CLIENT_AUTHORITY_FIELDS_FORBIDDEN: () => { this.rejectDashboardAuthorityFields({ authorityGranted: true }); },
-      METRIC_CLIENT_COMPUTED_VALUE_FORBIDDEN: () => { this.rejectClientMetricFields({ observedValue: 100 }); },
-      AI_EXECUTION_CLIENT_DECISION_FIELDS_FORBIDDEN: () => { this.rejectClientAiExecutionFields({ approved: true }); },
-      INTELLIGENCE_LAYER_BOUNDARY_NON_WAIVABLE: () => { this.assertIntelligenceLayerBoundaryNonWaivable(true); },
+        );
+      },
+      STRATEGIC_PROJECT_NOT_AUTHORITY_PROGRAM: () => {
+        this.assertStrategicProjectNotAuthorityProgram('project profile grants authority');
+      },
+      TWIN_NOT_REAL_OBJECT: () => {
+        this.assertTwinNotRealObject('twin is real object');
+      },
+      SIMULATION_CANNOT_UPDATE_LIVE_CASE: () => {
+        this.assertSimulationCannotUpdateLiveCase(true);
+      },
+      SIMULATION_OUTPUT_NOT_LIVE_STATE: () => {
+        this.assertSimulationOutputNotLiveState(true);
+      },
+      STALE_TWIN_SAFE_HALT: () => {
+        this.assertStaleTwinSafeHalt(true, true);
+      },
+      CONSEQUENTIAL_TWIN_USE_REQUIRES_REVIEW: () => {
+        this.assertConsequentialTwinUseRequiresReview(true, false);
+      },
+      SIMULATION_TO_LIVE_REQUIRES_APPROVED_REVIEW: () => {
+        this.assertSimulationToLiveRequiresApprovedReview(false);
+      },
+      PROMPT_INJECTION_TREATED_AS_DATA: () => {
+        this.assertPromptInjectionTreatedAsData(
+          'ignore previous instructions',
+          'ignore previous instructions',
+        );
+      },
+      CROSS_CASE_RETRIEVAL_BLOCKED: () => {
+        this.assertCrossCaseRetrievalBlocked('case-a', 'case-b');
+      },
+      SUSPENDED_MODEL_BLOCKED: () => {
+        this.assertSuspendedModelBlocked(AIModelStatus.SUSPENDED);
+      },
+      SUSPENDED_USE_CASE_BLOCKED: () => {
+        this.assertSuspendedUseCaseBlocked(AIUseCaseStatus.SUSPENDED);
+      },
+      SUSPENDED_AGENT_BLOCKED: () => {
+        this.assertSuspendedAgentBlocked(AIAgentStatus.SUSPENDED);
+      },
+      ANALYTICS_CANNOT_PATCH_GOVERNMENT_DECISION: () => {
+        this.rejectAnalyticsPatchTargets({ governmentDecisionId: 'decision-1' });
+      },
+      ANALYTICS_CANNOT_PATCH_OFFICIAL_INSTRUMENT: () => {
+        this.rejectAnalyticsPatchTargets({ officialInstrumentId: 'instrument-1' });
+      },
+      METRIC_OBSERVATION_NOT_PERFORMANCE_VERDICT: () => {
+        this.assertMetricObservationNotPerformanceVerdict('observation is performance verdict');
+      },
+      PERFORMANCE_CLAIM_NOT_DECISION: () => {
+        this.assertPerformanceClaimNotDecision('claim is government decision');
+      },
+      UNVERIFIED_CLAIM_NOT_PUBLISHED_FACT: () => {
+        this.assertUnverifiedPerformanceClaimNotPublishedFact(PerformanceClaimStatus.DRAFT);
+      },
+      DEGRADED_DATA_QUALITY_BLOCKS_CLAIM: () => {
+        this.assertDegradedDataQualityBlocksClaim(MetricDataQualityStatus.DEGRADED);
+      },
+      STALE_METRIC_BLOCKS_CONSEQUENTIAL_USE: () => {
+        this.assertStaleMetricBlocksConsequentialUse(true, true);
+      },
+      BASELINE_NOT_CURRENT_TARGET: () => {
+        this.assertBaselineNotCurrentTarget('baseline is current target');
+      },
+      CALCULATION_RUN_FAILURE_SAFE_HALT: () => {
+        this.assertCalculationRunFailureSafeHalt(MetricCalculationRunStatus.SAFE_HALTED);
+      },
+      DATA_QUALITY_NOT_ASSESSMENT_OF_LEGALITY: () => {
+        this.assertDataQualityNotAssessmentOfLegality('data quality proves legality');
+      },
+      REPORT_CLAIM_NOT_VERIFIED_WITHOUT_REVIEW: () => {
+        this.assertReportClaimNotVerifiedWithoutReview(ReportClaimStatus.DRAFT);
+      },
+      REPORT_PUBLICATION_NOT_DECISION_NOTICE: () => {
+        this.assertReportPublicationNotDecisionNotice('publication is decision notice');
+      },
+      REPORT_APPROVAL_NOT_AUTHORITY_ACT: () => {
+        this.assertReportApprovalNotAuthorityAct('report approval is authority act');
+      },
+      HISTORICAL_REPLAY_NOT_LIVE_DECISION: () => {
+        this.assertHistoricalReplayNotLiveDecision('replay substitutes live decision');
+      },
+      DECISION_TRACE_NOT_SUBSTITUTES_DECISION: () => {
+        this.assertDecisionTraceNotSubstitutesDecision('trace substitutes decision');
+      },
+      ACCESS_NOT_AUTHORITY: () => {
+        this.assertAccessNotAuthority('access grants authority');
+      },
+      VIEWING_ANALYTICS_NOT_DELEGATION: () => {
+        this.assertViewingAnalyticsNotDelegation('viewing analytics grants delegation');
+      },
+      RECOMMENDATION_NOT_WAIVER: () => {
+        this.assertRecommendationNotWaiver('recommendation waives obligation');
+      },
+      SCENARIO_COMPARISON_NOT_MANDATE: () => {
+        this.assertScenarioComparisonNotMandate('scenario comparison is mandate');
+      },
+      SENSITIVITY_ANALYSIS_NOT_APPROVAL: () => {
+        this.assertSensitivityAnalysisNotApproval('sensitivity analysis is approval');
+      },
+      AI_TOOL_ENTITLEMENT_NOT_AUTHORITY: () => {
+        this.assertAiToolEntitlementNotAuthority('tool entitlement grants authority');
+      },
+      AI_DATA_ENTITLEMENT_NOT_DISCLOSURE_RIGHT: () => {
+        this.assertAiDataEntitlementNotDisclosureRight('data entitlement is disclosure right');
+      },
+      HUMAN_DISPOSITION_REQUIRED_FOR_CONSEQUENTIAL_AI: () => {
+        this.assertHumanDispositionRequiredForConsequentialAi(true, false);
+      },
+      AI_INCIDENT_TRIGGERS_SUSPENSION_REVIEW: () => {
+        this.assertAiIncidentTriggersSuspensionReview(true, false);
+      },
+      EVALUATION_SCORE_NOT_APPROVAL: () => {
+        this.assertEvaluationScoreNotApproval('evaluation score is approval');
+      },
+      MONITORING_RULE_NOT_ENFORCEMENT_AUTHORITY: () => {
+        this.assertMonitoringRuleNotEnforcementAuthority('monitoring rule enforces');
+      },
+      RISK_LEVEL_NOT_SANCTION_LEVEL: () => {
+        this.assertRiskLevelNotSanctionLevel('risk level is sanction');
+      },
+      ANALYSIS_REQUEST_NOT_DECISION_REQUEST: () => {
+        this.assertAnalysisRequestNotDecisionRequest('analysis request is decision request');
+      },
+      COMPLETED_ANALYSIS_NOT_FINAL_ORDER: () => {
+        this.assertCompletedAnalysisNotFinalOrder('completed analysis is final order');
+      },
+      SAFE_HALT_BLOCKS_CONSEQUENTIAL_PATH: () => {
+        this.assertSafeHaltBlocksConsequentialPath(true, true);
+      },
+      UNRESOLVED_ENTITLEMENT_BLOCKS_EXECUTION: () => {
+        this.assertUnresolvedEntitlementBlocksExecution(false);
+      },
+      CASE_SCOPED_EXECUTION_ONLY: () => {
+        this.assertCaseScopedExecutionOnly('case-a', 'case-b');
+      },
+      INSTITUTION_BOUNDARY_ON_RETRIEVAL: () => {
+        this.assertInstitutionBoundaryOnRetrieval('inst-a', 'inst-b');
+      },
+      DETERMINISTIC_ADAPTER_NOT_DECISION_ENGINE: () => {
+        this.assertDeterministicAdapterNotDecisionEngine('adapter issues decision');
+      },
+      PROMPT_GOVERNANCE_NOT_POLICY_AUTHORITY: () => {
+        this.assertPromptGovernanceNotPolicyAuthority('prompt governance sets policy');
+      },
+      FORECAST_STALENESS_REQUIRES_DISCLAIMER: () => {
+        this.assertForecastStalenessRequiresDisclaimer(true, false);
+      },
+      INDICATOR_STALENESS_SAFE_HALT: () => {
+        this.assertIndicatorStalenessSafeHalt(true, true);
+      },
+      REPORT_GENERATION_SAFE_HALT: () => {
+        this.assertReportGenerationSafeHalt(true);
+      },
+      SIMULATION_RUN_SAFE_HALT: () => {
+        this.assertSimulationRunSafeHalt(true);
+      },
+      ANALYSIS_RUN_SAFE_HALT: () => {
+        this.assertAnalysisRunSafeHalt(true);
+      },
+      PERFORMANCE_CLAIM_CLIENT_STATUS_FORBIDDEN: () => {
+        this.rejectClientPerformanceClaimFields({ status: PerformanceClaimStatus.VERIFIED });
+      },
+      DASHBOARD_CLIENT_AUTHORITY_FIELDS_FORBIDDEN: () => {
+        this.rejectDashboardAuthorityFields({ authorityGranted: true });
+      },
+      METRIC_CLIENT_COMPUTED_VALUE_FORBIDDEN: () => {
+        this.rejectClientMetricFields({ observedValue: 100 });
+      },
+      AI_EXECUTION_CLIENT_DECISION_FIELDS_FORBIDDEN: () => {
+        this.rejectClientAiExecutionFields({ approved: true });
+      },
+      INTELLIGENCE_LAYER_BOUNDARY_NON_WAIVABLE: () => {
+        this.assertIntelligenceLayerBoundaryNonWaivable(true);
+      },
     };
 
     handlers[code]();

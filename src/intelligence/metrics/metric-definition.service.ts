@@ -56,7 +56,9 @@ export class MetricDefinitionService {
 
   async createVersion(input: CreateMetricDefinitionVersionInput) {
     const metric = await this.findById(input.metricDefinitionId);
-    const nextVersion = (metric.versions.length > 0 ? Math.max(...metric.versions.map((v) => v.versionNumber)) : 0) + 1;
+    const nextVersion =
+      (metric.versions.length > 0 ? Math.max(...metric.versions.map((v) => v.versionNumber)) : 0) +
+      1;
     return this.prisma.metricDefinitionVersion.create({
       data: {
         metricDefinitionId: input.metricDefinitionId,

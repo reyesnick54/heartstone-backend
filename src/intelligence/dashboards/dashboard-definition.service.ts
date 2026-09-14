@@ -51,7 +51,9 @@ export class DashboardDefinitionService {
   async createVersion(input: CreateDashboardVersionInput) {
     const dashboard = await this.findById(input.dashboardDefinitionId);
     const nextVersion =
-      (dashboard.versions.length > 0 ? Math.max(...dashboard.versions.map((v) => v.versionNumber)) : 0) + 1;
+      (dashboard.versions.length > 0
+        ? Math.max(...dashboard.versions.map((v) => v.versionNumber))
+        : 0) + 1;
     return this.prisma.dashboardVersion.create({
       data: {
         dashboardDefinitionId: input.dashboardDefinitionId,

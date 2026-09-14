@@ -57,7 +57,7 @@ export class AiAgentService {
         aiAgentDefinitionId: input.aiAgentDefinitionId,
         versionNumber: nextVersion,
         agentConfig: (input.agentConfig ?? {}) as Prisma.InputJsonValue,
-        toolsAllowed: (input.toolsAllowed ?? []),
+        toolsAllowed: input.toolsAllowed ?? [],
         limitations: input.limitations,
         status: AIAgentStatus.DRAFT,
       },

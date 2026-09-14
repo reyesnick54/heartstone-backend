@@ -50,7 +50,8 @@ export class PerformanceClaimService {
         claimReference: this.generateReference(),
         status: PerformanceClaimStatus.DRAFT,
         claimStatement: input.claimStatement,
-        claimedValue: input.claimedValue !== undefined ? new Decimal(input.claimedValue) : undefined,
+        claimedValue:
+          input.claimedValue !== undefined ? new Decimal(input.claimedValue) : undefined,
         createdByIdentityId: input.createdByIdentityId,
         limitations: input.limitations,
         uncertaintyNotes: input.uncertaintyNotes,

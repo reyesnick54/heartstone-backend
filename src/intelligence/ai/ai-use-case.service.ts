@@ -54,7 +54,9 @@ export class AiUseCaseService {
   async createVersion(input: CreateAiUseCaseVersionInput) {
     const useCase = await this.findById(input.aiUseCaseId);
     const nextVersion =
-      (useCase.versions.length > 0 ? Math.max(...useCase.versions.map((v) => v.versionNumber)) : 0) + 1;
+      (useCase.versions.length > 0
+        ? Math.max(...useCase.versions.map((v) => v.versionNumber))
+        : 0) + 1;
     return this.prisma.aIUseCaseVersion.create({
       data: {
         aiUseCaseId: input.aiUseCaseId,

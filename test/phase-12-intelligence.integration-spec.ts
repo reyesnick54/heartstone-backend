@@ -11,10 +11,7 @@ import { DashboardIndicatorService } from '../src/intelligence/dashboards/dashbo
 import { MetricCalculationService } from '../src/intelligence/metrics/metric-calculation.service';
 import { PerformanceClaimService } from '../src/intelligence/metrics/performance-claim.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
-import {
-  buildProcessingTimeBreakdown,
-  seedPhase12Fixture,
-} from './helpers/phase-12-test-fixtures';
+import { buildProcessingTimeBreakdown, seedPhase12Fixture } from './helpers/phase-12-test-fixtures';
 
 describe('Phase 12 intelligence (integration)', () => {
   let app: INestApplication<App>;
@@ -54,7 +51,10 @@ describe('Phase 12 intelligence (integration)', () => {
       metricDefinitionVersionId: fixture.metricDefinitionVersionId,
       institutionId: fixture.institutionId,
       metricCalculationRunId: completedRun.id,
-      observedValue: processingBreakdown.ABSEZ + processingBreakdown.APPLICANT + processingBreakdown.EXTERNAL_DEPENDENCY,
+      observedValue:
+        processingBreakdown.ABSEZ +
+        processingBreakdown.APPLICANT +
+        processingBreakdown.EXTERNAL_DEPENDENCY,
       uncertaintyNotes: 'Components recorded separately in decision trace',
     });
 
@@ -122,7 +122,9 @@ describe('Phase 12 intelligence (integration)', () => {
     expect(currentProjection.status).toBe(DashboardIndicatorStatus.CURRENT);
     expect(currentProjection.isStale).toBe(false);
 
-    const latest = await dashboardIndicators.getLatestProjection(fixture.servicePerformanceIndicatorId);
+    const latest = await dashboardIndicators.getLatestProjection(
+      fixture.servicePerformanceIndicatorId,
+    );
     expect(latest.computedValue?.toNumber()).toBe(144);
 
     await expect(

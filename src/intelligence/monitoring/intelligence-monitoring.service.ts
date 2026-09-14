@@ -111,9 +111,6 @@ export class IntelligenceMonitoringService {
     if (!alert) {
       throw new NotFoundException(`Monitoring alert ${alertId} not found`);
     }
-    this.boundary.assertAlertVerificationRequiredForViolation(
-      alert.verifications.length > 0,
-      true,
-    );
+    this.boundary.assertAlertVerificationRequiredForViolation(alert.verifications.length > 0, true);
   }
 }

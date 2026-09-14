@@ -91,7 +91,11 @@ export class StrategicProjectService {
     return milestone;
   }
 
-  async projectStatus(strategicProjectProfileId: string, institutionId: string, projectedStatus: string) {
+  async projectStatus(
+    strategicProjectProfileId: string,
+    institutionId: string,
+    projectedStatus: string,
+  ) {
     this.boundary.assertProjectStatusProjectionNotVerdict();
     return this.prisma.projectStatusProjection.create({
       data: {

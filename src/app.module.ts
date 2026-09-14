@@ -19,8 +19,8 @@ import { EvidenceRecordsModule } from './evidence-records/evidence-records.modul
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
-import { IntelligenceModule } from './intelligence/intelligence.module';
 import { InstrumentsModule } from './instruments/instruments.module';
+import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
