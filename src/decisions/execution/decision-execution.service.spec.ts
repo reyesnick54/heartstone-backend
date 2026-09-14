@@ -112,7 +112,6 @@ describe('DecisionExecutionService', () => {
       masterAdministrativeFile: { id: 'maf-1' },
     });
 
-    prisma.identity.findUnique.mockResolvedValue({ id: 'identity-1', type: IdentityType.INDIVIDUAL });
     prisma.identity.findUnique.mockResolvedValue({
       id: 'identity-1',
       type: IdentityType.INDIVIDUAL,

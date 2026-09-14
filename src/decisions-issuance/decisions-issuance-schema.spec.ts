@@ -2,9 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
+  DECISIONS_ISSUANCE_MODEL_NAMES,
   EVIDENCE_PACKET_VERSION_STATUSES,
+  INSTRUMENT_DELIVERY_AUDIT_EVENT_TYPES,
+  INSTRUMENT_DELIVERY_CHANNELS,
+  INSTRUMENT_VERIFICATION_STATUSES,
   OFFICIAL_INSTRUMENT_KINDS,
-  PHASE_8E_MODEL_NAMES,
+  PHASE_8F_MODEL_NAMES,
 } from './decisions-issuance-schema.constants';
 
 const SCHEMA_PATH = join(__dirname, '../../prisma/schema.prisma');
@@ -13,11 +17,28 @@ function readSchema(): string {
   return readFileSync(SCHEMA_PATH, 'utf-8');
 }
 
-describe('Decisions issuance schema coherence (Phase 8E)', () => {
+function extractEnumBlock(schema: string, enumName: string): string {
+  const match = new RegExp(`enum ${enumName}\\s*\\{([^}]*)\\}`, 's').exec(schema);
+  return match?.[1] ?? '';
+}
+
+function extractModelBlock(source: string, modelName: string): string {
+  const match = new RegExp(`model ${modelName} \\{[\\s\\S]*?\\n\\}`, 'm').exec(source);
+  return match?.[0] ?? '';
+}
+
+describe('Decisions issuance schema coherence (Phase 8E+8F)', () => {
   const schema = readSchema();
 
-  it('defines all canonical Phase 8E models exactly once', () => {
-    for (const modelName of PHASE_8E_MODEL_NAMES) {
+  it('defines all canonical Phase 8E and 8F models exactly once', () => {
+    for (const modelName of DECISIONS_ISSUANCE_MODEL_NAMES) {
+      const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    }
+  });
+
+  it('defines all Phase 8F delivery, receipt, and verification models exactly once', () => {
+    for (const modelName of PHASE_8F_MODEL_NAMES) {
       const matches = schema.match(new RegExp(`model ${modelName}\\s*\\{`, 'g'));
       expect(matches).toHaveLength(1);
     }
@@ -41,6 +62,20 @@ describe('Decisions issuance schema coherence (Phase 8E)', () => {
     }
   });
 
+  it('defines all supported delivery channels', () => {
+    const block = extractEnumBlock(schema, 'InstrumentDeliveryChannel');
+    for (const channel of INSTRUMENT_DELIVERY_CHANNELS) {
+      expect(block).toContain(channel);
+    }
+  });
+
+  it('defines all verification statuses including restricted public responses', () => {
+    const block = extractEnumBlock(schema, 'InstrumentVerificationStatus');
+    for (const status of INSTRUMENT_VERIFICATION_STATUSES) {
+      expect(block).toContain(status);
+    }
+  });
+
   it('links GovernmentDecision to frozen EvidencePacketVersion', () => {
     const block = /model GovernmentDecision\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
     expect(block).toContain('evidencePacketVersionId');
@@ -59,8 +94,26 @@ describe('Decisions issuance schema coherence (Phase 8E)', () => {
   });
 
   it('does not permit client-chosen instrument numbers on OfficialInstrument create fields', () => {
-    const block = /model OfficialInstrument\s*\{([^}]*)\}/s.exec(schema)?.[1] ?? '';
+    const block = extractModelBlock(schema, 'OfficialInstrument');
     expect(block).toContain('instrumentNumber');
     expect(block).toContain('PENDING_ISSUANCE');
+  });
+
+  it('defines delivery audit event types for delivery, download, verification, and receipt', () => {
+    const block = extractEnumBlock(schema, 'InstrumentDeliveryAuditEventType');
+    for (const eventType of INSTRUMENT_DELIVERY_AUDIT_EVENT_TYPES) {
+      expect(block).toContain(eventType);
+    }
+  });
+
+  it('stores high-entropy verification codes separately from sequential instrument numbers', () => {
+    const block = extractModelBlock(schema, 'OfficialInstrument');
+    expect(block).toMatch(/verificationCode\s+String\?\s+@unique/);
+    expect(block).toMatch(/instrumentNumber\s+String\?\s+@unique/);
+  });
+
+  it('models delivery attempts separately from parent delivery for retry support', () => {
+    expect(schema).toContain('model InstrumentDeliveryAttempt');
+    expect(schema).toContain('attemptNumber             Int');
   });
 });

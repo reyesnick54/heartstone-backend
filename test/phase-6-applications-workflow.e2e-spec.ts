@@ -184,6 +184,8 @@ describe('Phase 6 Applications, Workflow & Case Management (e2e)', () => {
       const caseRecord = await prisma.case.findUnique({ where: { id: caseId } });
       expect(caseRecord?.status).toBe(CaseStatus.DECISION_PENDING);
 
+      const decisionRecords = await prisma.governmentDecision.count();
+      expect(decisionRecords).toBe(0);
       const decisionRowCount = await prisma.governmentDecision.count({
         where: { caseId },
       });

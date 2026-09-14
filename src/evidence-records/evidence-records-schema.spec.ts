@@ -95,13 +95,15 @@ describe('Evidence records schema coherence (Phase 7G)', () => {
 
   it('requires explicit disposition authorization records', () => {
     expect(schema).toContain('model RecordDispositionRecord');
-    expect(schema).toContain('authorityReference         String');
-    expect(schema).toContain('manifestCertificateHash    String');
+    const block = extractModelBlock(schema, 'RecordDispositionRecord');
+    expect(block).toContain('authorityReference');
+    expect(block).toContain('manifestCertificateHash');
   });
 
   it('audits legal hold release separately from hold creation', () => {
     expect(schema).toContain('model LegalHoldReleaseRecord');
-    expect(schema).toContain('auditManifestHash          String');
+    const block = extractModelBlock(schema, 'LegalHoldReleaseRecord');
+    expect(block).toContain('auditManifestHash');
   });
 
   it('does not define automatic destruction fields on retention schedules', () => {

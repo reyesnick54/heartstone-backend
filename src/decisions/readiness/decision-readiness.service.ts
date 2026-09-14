@@ -70,9 +70,6 @@ export class DecisionReadinessService {
     });
 
     if (!caseRecord) {
-      return this.persistAssessment(input, DecisionReadinessOutcome.NOT_READY, [
-        DECISION_READINESS_REASON_CODES.CASE_NOT_FOUND,
-      ], at);
       return this.persistAssessment(
         input,
         DecisionReadinessOutcome.NOT_READY,
@@ -373,6 +370,10 @@ export class DecisionReadinessService {
 
     if (packetVersion.packet.purpose !== requiredPurpose) {
       reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_WRONG_PURPOSE);
+    }
+
+    if (packetVersion.packet.caseId !== caseId) {
+      reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_MISSING);
     }
 
     if (masterFileId && packetVersion.packet.masterAdministrativeFileId !== masterFileId) {

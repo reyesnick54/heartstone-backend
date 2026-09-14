@@ -163,9 +163,21 @@ export class GovernmentDecisionsController {
     return this.decisionsService.assertIssuanceAllowed(decisionId);
   }
 }
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
+import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
+import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
+import { ExecuteGovernmentDecisionDto } from './dto/execute-government-decision.dto';
+import { DecisionExecutionService } from './execution/decision-execution.service';
+import { DecisionPreparationService } from './preparation/decision-preparation.service';
+import { DecisionReadinessService } from './readiness/decision-readiness.service';
 
 @ApiTags('decisions')
-@Controller('api/v1/decisions')
+@Controller('decisions')
 @UseGuards(SessionAuthGuard)
 export class DecisionsController {
   constructor(

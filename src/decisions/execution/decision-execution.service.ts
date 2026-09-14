@@ -227,6 +227,7 @@ export class DecisionExecutionService {
     existing: GovernmentDecision,
     update: Record<string, unknown>,
   ): void {
+  assertDecisionImmutable(existing: GovernmentDecision, update: Record<string, unknown>): void {
     for (const field of IMMUTABLE_DECISION_UPDATE_FIELDS) {
       if (update[field] !== undefined) {
         throw new ConflictException(
