@@ -244,7 +244,7 @@ export class ComplianceProjectionService {
         where: {
           governmentDecision: { caseId: input.caseId },
           status: 'PENDING',
-          conditionType: 'ONGOING',
+          conditionType: 'CONTINUING',
         },
       });
 

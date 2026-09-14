@@ -292,12 +292,6 @@ END $$;
 
 DO $$ BEGIN
     ALTER TABLE "compliance_status_projections"
-        ON DELETE SET NULL ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "compliance_status_projections"
         ADD CONSTRAINT "compliance_status_projections_officialInstrumentId_fkey"
         FOREIGN KEY ("officialInstrumentId") REFERENCES "official_instruments"("id")
         ON DELETE SET NULL ON UPDATE CASCADE;

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
 import { InstrumentLifecycleBoundaryService } from './common/instrument-lifecycle-boundary.service';
-import { GovernmentDecisionService } from './lifecycle/government-decision.service';
+import { InstrumentControllingDecisionService } from './lifecycle/government-decision.service';
 import { InstrumentLifecycleService } from './lifecycle/instrument-lifecycle.service';
 import { InstrumentLifecycleGuardService } from './lifecycle/instrument-lifecycle-guard.service';
 import { InstrumentVerificationService } from './lifecycle/instrument-verification.service';
@@ -13,14 +13,14 @@ import { InstrumentVerificationService } from './lifecycle/instrument-verificati
     InstrumentLifecycleBoundaryService,
     InstrumentLifecycleGuardService,
     InstrumentVerificationService,
-    GovernmentDecisionService,
+    InstrumentControllingDecisionService,
     InstrumentLifecycleService,
   ],
   exports: [
     InstrumentLifecycleBoundaryService,
     InstrumentLifecycleGuardService,
     InstrumentVerificationService,
-    GovernmentDecisionService,
+    InstrumentControllingDecisionService,
     InstrumentLifecycleService,
   ],
 })

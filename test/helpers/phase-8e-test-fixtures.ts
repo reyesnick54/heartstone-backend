@@ -214,10 +214,12 @@ export async function seedPhase8eIssuanceFixture(
       conditions: {
         create: [
           {
+            conditionNumber: 1,
             conditionType: DecisionConditionType.PRECEDENT_TO_ISSUANCE,
             status: DecisionConditionStatus.SATISFIED,
-            description: 'Fee payment confirmed',
-            satisfiedAt: new Date(),
+            responsibleParty: 'Applicant',
+            requiredActionOrRestraint: 'Fee payment confirmed',
+            approvedAt: new Date(),
           },
         ],
       },
