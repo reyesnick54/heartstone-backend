@@ -8,6 +8,8 @@ import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
+import { resetFinancialData } from './financial-test-reset';
+import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
@@ -44,7 +46,22 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await prisma.organization.deleteMany();
 }
 
+export async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
+  await prisma.dashboardDrilldownReference.deleteMany();
+  await prisma.dashboardIndicatorProjection.deleteMany();
+  await prisma.dashboardSnapshot.deleteMany();
+  await prisma.dashboardQueryAudit.deleteMany();
+  await prisma.dashboardAccessPolicy.deleteMany();
+  await prisma.dashboardWidgetDefinition.deleteMany();
+  await prisma.dashboardIndicatorDefinition.deleteMany();
+  await prisma.dashboardVersion.deleteMany();
+  await prisma.dashboardDefinition.deleteMany();
+  await prisma.dashboardStatusDictionaryEntry.deleteMany();
+}
+
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetIntelligenceData(prisma);
+  await resetFinancialData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
@@ -79,6 +96,7 @@ async function resetIntelligenceData(prisma: PrismaService): Promise<void> {
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetIntelligenceData(prisma);
+  await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);
   await resetIdentityData(prisma);
 }
