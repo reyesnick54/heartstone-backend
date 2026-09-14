@@ -24,6 +24,12 @@ function extractEnumBlock(schema: string, enumName: string): string {
   return match?.[1] ?? '';
 }
 
+function extractModelBlock(schema: string, modelName: string): string {
+  const pattern = new RegExp(`model ${modelName}\\s*\\{([^}]*)\\}`, 's');
+  const match = pattern.exec(schema);
+  return match?.[1] ?? '';
+}
+
 describe('Evidence schema coherence (Phase 7C)', () => {
   const schema = readSchema();
 
@@ -127,7 +133,7 @@ describe('Evidence schema coherence (Phase 7D)', () => {
   });
 
   it('defines append-only custody events without scientific validity claims', () => {
-    const custodyBlock = schema.slice(schema.indexOf('model EvidenceCustodyEvent'));
+    const custodyBlock = extractModelBlock(schema, 'EvidenceCustodyEvent');
     expect(custodyBlock).toContain('eventType');
     expect(custodyBlock).not.toContain('scientificValidity');
     expect(custodyBlock).not.toContain('validated');

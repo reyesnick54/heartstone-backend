@@ -22,6 +22,7 @@ import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { InstrumentsModule } from './instruments/instruments.module';
+import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RecordsModule } from './records/records.module';
@@ -61,6 +62,7 @@ import { SystemModule } from './system/system.module';
     CommunicationsModule,
     PaymentsModule,
     RedressModule,
+    OperationalSupportModule,
     IntegrationsModule,
     PaymentsModule,
     FinancialAdministrationModule,
