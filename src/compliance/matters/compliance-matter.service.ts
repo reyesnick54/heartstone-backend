@@ -1,10 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  ComplianceMatterStatus,
-  OfficialInstrumentStatus,
-} from '@prisma/client';
+import { ComplianceMatterStatus, OfficialInstrumentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { COMPLIANCE_MATTER_NUMBER_PREFIX } from '../compliance.constants';

@@ -1,12 +1,15 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import {
+  GovernmentDecisionType,
   InstrumentJurisdictionScope,
-  InstrumentLifecycleDecisionType,
-  InstrumentLifecycleStatus,
+  OfficialInstrumentStatus,
 } from '@prisma/client';
 
-import { PROTECTED_INSTRUMENT_STATUS_FIELDS, TECHNICAL_ADMIN_ROLE_MARKER } from '../instruments.constants';
+import {
+  PROTECTED_INSTRUMENT_STATUS_FIELDS,
+  TECHNICAL_ADMIN_ROLE_MARKER,
+} from '../instruments.constants';
 
 @Injectable()
 export class InstrumentLifecycleBoundaryService {
@@ -64,10 +67,7 @@ export class InstrumentLifecycleBoundaryService {
     actorRoleMarker?: string;
     isCreatingDecision: boolean;
   }): void {
-    if (
-      input.isCreatingDecision &&
-      input.actorRoleMarker === TECHNICAL_ADMIN_ROLE_MARKER
-    ) {
+    if (input.isCreatingDecision && input.actorRoleMarker === TECHNICAL_ADMIN_ROLE_MARKER) {
       throw new ForbiddenException(
         'Technical administrators may execute approved suspension status changes but cannot create suspension decisions',
       );
@@ -89,8 +89,8 @@ export class InstrumentLifecycleBoundaryService {
   }
 
   assertDecisionTypeMatchesLifecycleAction(
-    decisionType: InstrumentLifecycleDecisionType,
-    expectedTypes: InstrumentLifecycleDecisionType[],
+    decisionType: GovernmentDecisionType,
+    expectedTypes: GovernmentDecisionType[],
   ): void {
     if (!expectedTypes.includes(decisionType)) {
       throw new BadRequestException(
@@ -100,14 +100,12 @@ export class InstrumentLifecycleBoundaryService {
   }
 
   assertInstrumentStatusAllowsAction(
-    lifecycleStatus: InstrumentLifecycleStatus,
-    allowedStatuses: InstrumentLifecycleStatus[],
+    status: OfficialInstrumentStatus,
+    allowedStatuses: OfficialInstrumentStatus[],
     action: string,
   ): void {
-    if (!allowedStatuses.includes(lifecycleStatus)) {
-      throw new BadRequestException(
-        `Instrument status ${lifecycleStatus} does not permit ${action}`,
-      );
+    if (!allowedStatuses.includes(status)) {
+      throw new BadRequestException(`Instrument status ${status} does not permit ${action}`);
     }
   }
 }

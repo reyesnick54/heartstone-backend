@@ -18,6 +18,18 @@ import { InspectorQualificationService } from './planning/inspector-qualificatio
 @Module({
   imports: [DatabaseModule, SessionsModule, AuthorityModule],
   controllers: [ComplianceController],
+import { ComplianceDashboardService } from './oversight/compliance-dashboard.service';
+import { ComplianceMonitoringService } from './oversight/compliance-monitoring.service';
+import { ComplianceProjectionService } from './oversight/compliance-projection.service';
+import { ComplianceRevalidationService } from './oversight/compliance-revalidation.service';
+import { ComplianceStatusController } from './oversight/compliance-status.controller';
+import { ComplianceStatusBoundaryService } from './oversight/compliance-status-boundary.service';
+import { ComplianceReviewService } from './reviews/compliance-review.service';
+import { ComplianceSubmissionService } from './submissions/compliance-submission.service';
+
+@Module({
+  imports: [DatabaseModule, SessionsModule],
+  controllers: [ComplianceController, ComplianceStatusController],
   providers: [
     ComplianceBoundaryService,
     ObligationRecurrenceService,
@@ -29,6 +41,13 @@ import { InspectorQualificationService } from './planning/inspector-qualificatio
     InspectionAssignmentService,
     InspectorQualificationService,
     InspectionScheduleService,
+    ComplianceSubmissionService,
+    ComplianceReviewService,
+    ComplianceStatusBoundaryService,
+    ComplianceProjectionService,
+    ComplianceMonitoringService,
+    ComplianceDashboardService,
+    ComplianceRevalidationService,
   ],
   exports: [
     ComplianceBoundaryService,
@@ -41,6 +60,13 @@ import { InspectorQualificationService } from './planning/inspector-qualificatio
     InspectionAssignmentService,
     InspectorQualificationService,
     InspectionScheduleService,
+    ComplianceSubmissionService,
+    ComplianceReviewService,
+    ComplianceStatusBoundaryService,
+    ComplianceProjectionService,
+    ComplianceMonitoringService,
+    ComplianceDashboardService,
+    ComplianceRevalidationService,
   ],
 })
 export class ComplianceModule {}

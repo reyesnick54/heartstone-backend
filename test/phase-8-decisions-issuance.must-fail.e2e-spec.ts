@@ -484,24 +484,32 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
 
   it('37. evidence packet must belong to the specified case', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
+    const sourceCase = await prisma.case.findUniqueOrThrow({ where: { id: fixture.caseId } });
+    const sourceApplication = await prisma.application.findUniqueOrThrow({
+      where: { id: sourceCase.applicationId },
+    });
+    const otherApplication = await prisma.application.create({
+      data: {
+        applicantIdentityId: sourceApplication.applicantIdentityId,
+        governmentServiceId: sourceApplication.governmentServiceId,
+        governmentServiceVersionId: sourceApplication.governmentServiceVersionId,
+        formDefinitionId: sourceApplication.formDefinitionId,
+        formVersionId: sourceApplication.formVersionId,
+        configurationFingerprint: 'other-fingerprint',
+        applicantCategory: sourceApplication.applicantCategory,
+        status: 'SUBMITTED',
+      },
+    });
     const otherCase = await prisma.case.create({
       data: {
         caseNumber: `${fixture.marker}-OTHER-CASE`,
-        applicationId: (
-          await prisma.application.findFirstOrThrow({
-            where: { applicantIdentityId: fixture.applicantIdentityId },
-          })
-        ).id,
-        applicantIdentityId: fixture.applicantIdentityId,
-        governmentServiceId: (
-          await prisma.governmentService.findFirstOrThrow({
-            where: { code: `${fixture.marker}-SVC` },
-          })
-        ).id,
-        governmentServiceVersionId: (await prisma.governmentServiceVersion.findFirstOrThrow()).id,
+        applicationId: otherApplication.id,
+        applicantIdentityId: sourceCase.applicantIdentityId,
+        governmentServiceId: sourceCase.governmentServiceId,
+        governmentServiceVersionId: sourceCase.governmentServiceVersionId,
         responsibleInstitutionId: fixture.institutionId,
         responsibleDepartmentId: fixture.departmentId,
-        workflowVersionId: (await prisma.workflowVersion.findFirstOrThrow()).id,
+        workflowVersionId: sourceCase.workflowVersionId,
         configurationFingerprint: 'other-fingerprint',
         status: 'DECISION_PENDING',
       },

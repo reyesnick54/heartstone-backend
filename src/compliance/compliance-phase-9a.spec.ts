@@ -161,8 +161,12 @@ describe('Phase 9A compliance foundation', () => {
       expect(occurrences[0]?.lawfulDueDate.toISOString()).toBe('2026-01-31T00:00:00.000Z');
       expect(occurrences[1]?.occurrenceNumber).toBe(2);
       expect(occurrences[2]?.occurrenceNumber).toBe(3);
+      const secondOccurrence = occurrences[1];
+      if (!secondOccurrence) {
+        throw new Error('Expected second occurrence');
+      }
       expect(occurrences[2]?.lawfulDueDate.getTime()).toBeGreaterThan(
-        occurrences[1]!.lawfulDueDate.getTime(),
+        secondOccurrence.lawfulDueDate.getTime(),
       );
     });
   });
@@ -225,14 +229,11 @@ describe('Phase 9A compliance foundation', () => {
         dueDate: new Date('2026-03-31T00:00:00.000Z'),
       });
 
-      expect(prisma.continuingObligation.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            description: 'Submit quarterly environmental reports.',
-            approvedConditionText: 'Submit quarterly environmental reports.',
-          }),
-        }),
-      );
+      const [[createCall]] = prisma.continuingObligation.create.mock.calls as [
+        [{ data: { description: string; approvedConditionText: string } }],
+      ];
+      expect(createCall.data.description).toBe('Submit quarterly environmental reports.');
+      expect(createCall.data.approvedConditionText).toBe('Submit quarterly environmental reports.');
       expect(result.description).toBe('Submit quarterly environmental reports.');
     });
 

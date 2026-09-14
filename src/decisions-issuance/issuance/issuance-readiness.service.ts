@@ -188,7 +188,7 @@ export class IssuanceReadinessService {
 
     check(
       ISSUANCE_READINESS_CHECK_CODES.DECISION_HAS_REASONS,
-      !!decision && decision.matterDecided.trim().length > 0,
+      !!decision && (decision.matterDecided?.trim().length ?? 0) > 0,
     );
 
     check(

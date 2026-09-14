@@ -95,7 +95,7 @@ export class InstrumentDeliveryService {
     }
 
     if (!instrument.instrumentTypeVersion) {
-      throw new InstrumentNotFoundException(instrument.id);
+      throw new InstrumentNotFoundException(input.officialInstrumentId);
     }
 
     const classification =

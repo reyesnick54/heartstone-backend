@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ContinuingObligationSourceType,
   ContinuingObligationStatus,
@@ -176,7 +181,9 @@ export class ContinuingObligationService {
       obligation.approvedConditionText &&
       obligation.description !== obligation.approvedConditionText
     ) {
-      throw new ForbiddenException('Stored obligation description diverges from approved condition text');
+      throw new ForbiddenException(
+        'Stored obligation description diverges from approved condition text',
+      );
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -253,6 +260,33 @@ export class ContinuingObligationService {
       superseded: await this.findById(existing.id),
       replacement: await this.findById(replacement.id),
     };
+  }
+
+  async extendDeadline(input: {
+    obligationId: string;
+    extensionAuthorityReference: string;
+    effectiveExtendedDueDate: Date;
+  }) {
+    this.boundary.assertExtensionRequiresAuthority(
+      input.effectiveExtendedDueDate,
+      input.extensionAuthorityReference,
+    );
+
+    const obligation = await this.prisma.continuingObligation.findUnique({
+      where: { id: input.obligationId },
+    });
+    if (!obligation) {
+      throw new NotFoundException(`ContinuingObligation ${input.obligationId} not found`);
+    }
+
+    return this.prisma.continuingObligation.update({
+      where: { id: input.obligationId },
+      data: {
+        extensionAuthorityReference: input.extensionAuthorityReference,
+        extensionGrantedAt: new Date(),
+        effectiveExtendedDueDate: input.effectiveExtendedDueDate,
+      },
+    });
   }
 
   async getStatusHistory(obligationId: string) {

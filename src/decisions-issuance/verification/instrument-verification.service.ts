@@ -236,7 +236,7 @@ export class InstrumentVerificationService {
 
     if (!typeVersion) {
       return {
-        verificationStatus: InstrumentVerificationStatus.NOT_PUBLICLY_DISCLOSABLE,
+        verificationStatus: InstrumentVerificationStatus.UNKNOWN_OR_UNVERIFIABLE,
         verificationTimestamp,
         verificationUri: record.verificationUri,
         qrReferenceDisclaimer:

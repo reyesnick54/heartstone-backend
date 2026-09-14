@@ -80,7 +80,9 @@ describe('Phase 8F delivery, receipt, and verification (integration)', () => {
     const { attempt } = await deliveryService.sendDelivery(delivery.id, fixture.officialIdentityId);
     await deliveryService.markFailed(delivery.id, attempt.id, 'temporary provider outage');
 
-    const stillIssued = await prisma.officialInstrument.findUnique({ where: { id: instrument.id } });
+    const stillIssued = await prisma.officialInstrument.findUnique({
+      where: { id: instrument.id },
+    });
     expect(stillIssued?.status).toBe(OfficialInstrumentStatus.ISSUED);
 
     const { attempt: retryAttempt } = await deliveryService.sendDelivery(

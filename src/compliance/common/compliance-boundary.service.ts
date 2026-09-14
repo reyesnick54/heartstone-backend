@@ -1,14 +1,15 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import {
-  ContinuingObligationStatus,
-  ObligationStatusChangeActor,
-} from '@prisma/client';
+import { ContinuingObligationStatus, ObligationStatusChangeActor } from '@prisma/client';
 
 import {
   ALLOWED_RECURRENCE_RULE_TYPES,
+  CONSEQUENTIAL_REVIEW_STATUSES,
   type ControlledRecurrenceConfiguration,
+  FORBIDDEN_AI_COMPLIANCE_ACTIONS,
   FORBIDDEN_CLIENT_OBLIGATION_FIELDS,
+  FORBIDDEN_COMPLIANCE_REVIEW_CLIENT_FIELDS,
+  FORBIDDEN_COMPLIANCE_SUBMISSION_CLIENT_FIELDS,
   HOLDER_ALLOWED_OBLIGATION_STATUSES,
   PROTECTED_OBLIGATION_STATUS_FIELDS,
   REVIEWER_ALLOWED_OBLIGATION_STATUSES,
@@ -54,9 +55,7 @@ export class ComplianceBoundaryService {
 
     if (actor === ObligationStatusChangeActor.HOLDER) {
       if (!HOLDER_ALLOWED_OBLIGATION_STATUSES.includes(targetStatus as never)) {
-        throw new ForbiddenException(
-          `Holder may not set obligation status to ${targetStatus}`,
-        );
+        throw new ForbiddenException(`Holder may not set obligation status to ${targetStatus}`);
       }
       return;
     }
@@ -88,7 +87,10 @@ export class ComplianceBoundaryService {
     }
   }
 
-  assertAiCannotChangeDeadline(payload: Record<string, unknown>, actor: ObligationStatusChangeActor): void {
+  assertAiCannotChangeDeadline(
+    payload: Record<string, unknown>,
+    actor: ObligationStatusChangeActor,
+  ): void {
     if (actor === ObligationStatusChangeActor.AI_ASSISTANCE && 'dueDate' in payload) {
       throw new ForbiddenException('AI cannot change lawful obligation deadlines');
     }
@@ -151,6 +153,55 @@ export class ComplianceBoundaryService {
           `Obligation status cannot be changed via ordinary PATCH (${field})`,
         );
       }
+    }
+  }
+
+  rejectForbiddenSubmissionFields(payload: Record<string, unknown>): void {
+    for (const field of FORBIDDEN_COMPLIANCE_SUBMISSION_CLIENT_FIELDS) {
+      if (field in payload) {
+        throw new BadRequestException(`Client may not set compliance submission field: ${field}`);
+      }
+    }
+  }
+
+  rejectForbiddenReviewFields(payload: Record<string, unknown>): void {
+    for (const field of FORBIDDEN_COMPLIANCE_REVIEW_CLIENT_FIELDS) {
+      if (field in payload) {
+        throw new BadRequestException(`Client may not set compliance review field: ${field}`);
+      }
+    }
+  }
+
+  assertAiCannotFinalize(action: string, isAiActor = false): void {
+    if (isAiActor && FORBIDDEN_AI_COMPLIANCE_ACTIONS.includes(action as never)) {
+      throw new ForbiddenException(`AI assistance cannot perform compliance action: ${action}`);
+    }
+  }
+
+  assertAuthorizedReviewerPresent(
+    reviewerOfficeholderId: string | undefined,
+    status: string,
+  ): void {
+    if (
+      CONSEQUENTIAL_REVIEW_STATUSES.includes(
+        status as (typeof CONSEQUENTIAL_REVIEW_STATUSES)[number],
+      ) &&
+      !reviewerOfficeholderId
+    ) {
+      throw new BadRequestException(
+        'Consequential compliance review outcomes require an identified officeholder reviewer',
+      );
+    }
+  }
+
+  assertExtensionRequiresAuthority(
+    effectiveExtendedDueDate: Date | undefined,
+    extensionAuthorityReference: string | undefined,
+  ): void {
+    if (effectiveExtendedDueDate && !extensionAuthorityReference?.trim()) {
+      throw new BadRequestException(
+        'Deadline extension requires an explicit extension authority reference',
+      );
     }
   }
 }

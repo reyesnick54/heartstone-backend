@@ -369,6 +369,10 @@ export class DecisionReadinessService {
       reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_WRONG_PURPOSE);
     }
 
+    if (packetVersion.packet.caseId !== caseId) {
+      reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_MISSING);
+    }
+
     if (masterFileId && packetVersion.packet.masterAdministrativeFileId !== masterFileId) {
       reasonCodes.push(DECISION_READINESS_REASON_CODES.EVIDENCE_PACKET_MISSING);
     }

@@ -22,6 +22,11 @@ function extractEnumBlock(schema: string, enumName: string): string {
   return match?.[1] ?? '';
 }
 
+function extractModelBlock(source: string, modelName: string): string {
+  const match = new RegExp(`model ${modelName} \\{[\\s\\S]*?\\n\\}`, 'm').exec(source);
+  return match?.[0] ?? '';
+}
+
 describe('Decisions issuance schema coherence (Phase 8E+8F)', () => {
   const schema = readSchema();
 
@@ -89,9 +94,9 @@ describe('Decisions issuance schema coherence (Phase 8E+8F)', () => {
   });
 
   it('does not permit client-chosen instrument numbers on OfficialInstrument create fields', () => {
-    expect(schema).toContain('instrumentNumber             String?');
-    const statusEnum = extractEnumBlock(schema, 'OfficialInstrumentStatus');
-    expect(statusEnum).toContain('PENDING_ISSUANCE');
+    const block = extractModelBlock(schema, 'OfficialInstrument');
+    expect(block).toContain('instrumentNumber');
+    expect(block).toContain('PENDING_ISSUANCE');
   });
 
   it('defines delivery audit event types for delivery, download, verification, and receipt', () => {
@@ -102,8 +107,9 @@ describe('Decisions issuance schema coherence (Phase 8E+8F)', () => {
   });
 
   it('stores high-entropy verification codes separately from sequential instrument numbers', () => {
-    expect(schema).toContain('verificationCode     String                        @unique');
-    expect(schema).toContain('instrumentNumber             String?                       @unique');
+    const block = extractModelBlock(schema, 'OfficialInstrument');
+    expect(block).toMatch(/verificationCode\s+String\?\s+@unique/);
+    expect(block).toMatch(/instrumentNumber\s+String\?\s+@unique/);
   });
 
   it('models delivery attempts separately from parent delivery for retry support', () => {

@@ -1,10 +1,10 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import {
+  GovernmentDecisionStatus,
+  GovernmentDecisionType,
   InstrumentJurisdictionScope,
-  InstrumentLifecycleDecisionStatus,
-  InstrumentLifecycleDecisionType,
-  InstrumentLifecycleStatus,
+  OfficialInstrumentStatus,
   PriorVersionTreatment,
   ReviewStayStatus,
   SurrenderType,
@@ -53,7 +53,7 @@ describe('InstrumentLifecycleService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
-    instrumentLifecycleDecision: {
+    governmentDecision: {
       findFirst: jest.fn(),
     },
   };
@@ -85,37 +85,42 @@ describe('InstrumentLifecycleService', () => {
 
   describe('boundary guards', () => {
     it('rejects ordinary PATCH of instrument status', () => {
-      expect(() => { boundary.assertClientCannotPatchInstrumentStatus({
-          lifecycleStatus: InstrumentLifecycleStatus.REVOKED,
-        }); },
-      ).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertClientCannotPatchInstrumentStatus({
+          status: OfficialInstrumentStatus.REVOKED,
+        });
+      }).toThrow(ForbiddenException);
     });
 
     it('rejects clerical correction that alters substantive scope', () => {
-      expect(() => { boundary.assertClericalCorrectionScope({ altersScope: true }); },
-      ).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertClericalCorrectionScope({ altersScope: true });
+      }).toThrow(BadRequestException);
     });
 
     it('rejects technical admin creating suspension decision', () => {
-      expect(() => { boundary.assertTechnicalAdminCannotCreateSuspensionDecision({
+      expect(() => {
+        boundary.assertTechnicalAdminCannotCreateSuspensionDecision({
           actorRoleMarker: TECHNICAL_ADMIN_ROLE_MARKER,
           isCreatingDecision: true,
-        }); },
-      ).toThrow(ForbiddenException);
+        });
+      }).toThrow(ForbiddenException);
     });
 
     it('rejects ABSEZ revocation represented as national', () => {
-      expect(() => { boundary.assertAbsezRevocationNotNational({
+      expect(() => {
+        boundary.assertAbsezRevocationNotNational({
           jurisdictionScope: InstrumentJurisdictionScope.ABSEZ,
           representsNationalRevocation: true,
-        }); },
-      ).toThrow(/ABSEZ/i);
+        });
+      }).toThrow(/ABSEZ/i);
     });
   });
 
   describe('renewal guards', () => {
     it('requires current evidence for renewal', () => {
-      expect(() => { guard.assertRenewalEligibility({
+      expect(() => {
+        guard.assertRenewalEligibility({
           currentEvidenceIds: [],
           identityVerified: true,
           ownershipVerified: true,
@@ -123,12 +128,13 @@ describe('InstrumentLifecycleService', () => {
           priorApprovalReliedUpon: false,
           paymentReceived: false,
           decisionFinalized: true,
-        }); },
-      ).toThrow(/current evidence/i);
+        });
+      }).toThrow(/current evidence/i);
     });
 
     it('rejects payment-only renewal', () => {
-      expect(() => { guard.assertRenewalEligibility({
+      expect(() => {
+        guard.assertRenewalEligibility({
           currentEvidenceIds: ['ev-1'],
           identityVerified: true,
           ownershipVerified: true,
@@ -136,21 +142,22 @@ describe('InstrumentLifecycleService', () => {
           priorApprovalReliedUpon: false,
           paymentReceived: true,
           decisionFinalized: false,
-        }); },
-      ).toThrow(/payment alone/i);
+        });
+      }).toThrow(/payment alone/i);
     });
   });
 
   describe('reinstatement guards', () => {
     it('does not auto-reinstate on suspension expiry alone', () => {
-      expect(() => { guard.assertReinstatementPrerequisitesResolved({
+      expect(() => {
+        guard.assertReinstatementPrerequisitesResolved({
           priorSuspensionExpired: true,
           correctiveEvidenceProvided: true,
           inspectionVerified: true,
           professionalVerified: true,
           newDecisionFinalized: false,
-        }); },
-      ).toThrow(/does not automatically reinstate/i);
+        });
+      }).toThrow(/does not automatically reinstate/i);
     });
   });
 
@@ -199,13 +206,13 @@ describe('InstrumentLifecycleService', () => {
     it('creates new version and supersedes prior without deleting', async () => {
       decisionService.assertDecisionFinalized.mockResolvedValue({
         id: 'decision-amend',
-        status: InstrumentLifecycleDecisionStatus.FINALIZED,
-        decisionType: InstrumentLifecycleDecisionType.AMEND,
+        decisionStatus: GovernmentDecisionStatus.FINALIZED,
+        lifecycleDecisionType: GovernmentDecisionType.AMEND,
       });
 
       const activeInstrument = {
         id: 'inst-1',
-        lifecycleStatus: InstrumentLifecycleStatus.EFFECTIVE,
+        status: OfficialInstrumentStatus.EFFECTIVE,
         currentVersion: {
           id: 'v1',
           versionNumber: 1,
@@ -217,7 +224,7 @@ describe('InstrumentLifecycleService', () => {
       };
       const amendedInstrument = {
         id: 'inst-1',
-        lifecycleStatus: InstrumentLifecycleStatus.AMENDED,
+        status: OfficialInstrumentStatus.AMENDED,
         versions: [{ id: 'v1' }, { id: 'v2' }],
         lifecycleEvents: [],
         currentVersion: { id: 'v2' },
@@ -228,7 +235,7 @@ describe('InstrumentLifecycleService', () => {
         .mockResolvedValueOnce(activeInstrument)
         .mockResolvedValueOnce(amendedInstrument);
 
-      prisma.instrumentLifecycleDecision.findFirst.mockResolvedValue(null);
+      prisma.governmentDecision.findFirst.mockResolvedValue(null);
       prisma.instrumentLifecycleEvent.findFirst.mockResolvedValue(null);
       prisma.officialInstrumentVersion.create.mockResolvedValue({ id: 'v2', versionNumber: 2 });
       prisma.instrumentAmendmentRecord.create.mockResolvedValue({ id: 'amend-1' });
@@ -237,7 +244,7 @@ describe('InstrumentLifecycleService', () => {
       prisma.officialInstrument.update.mockResolvedValue({});
 
       const result = await service.amendInstrument({
-        officialInstrumentId: 'inst-1',
+        instrumentId: 'inst-1',
         controllingDecisionId: 'decision-amend',
         authorityReference: 'auth-1',
         affectedScope: 'Expanded operating area',
@@ -250,12 +257,12 @@ describe('InstrumentLifecycleService', () => {
         expect.objectContaining({
           where: { id: 'v1' },
           data: expect.objectContaining({
-            isCurrentLifecycle: false,
+            isCurrent: false,
             supersededByVersionId: 'v2',
           }) as Record<string, unknown>,
         }),
       );
-      expect(result.lifecycleStatus).toBe(InstrumentLifecycleStatus.AMENDED);
+      expect(result.status).toBe(OfficialInstrumentStatus.AMENDED);
     });
   });
 
@@ -263,12 +270,12 @@ describe('InstrumentLifecycleService', () => {
     it('records continuing obligations in lifecycle metadata', async () => {
       decisionService.assertDecisionFinalized.mockResolvedValue({
         id: 'decision-surrender',
-        status: InstrumentLifecycleDecisionStatus.FINALIZED,
+        status: GovernmentDecisionStatus.FINALIZED,
       });
 
       prisma.officialInstrument.findUnique.mockResolvedValue({
         id: 'inst-1',
-        lifecycleStatus: InstrumentLifecycleStatus.EFFECTIVE,
+        status: OfficialInstrumentStatus.EFFECTIVE,
       });
 
       prisma.instrumentSurrenderRecord.create.mockResolvedValue({ id: 'surrender-1' });
@@ -277,7 +284,7 @@ describe('InstrumentLifecycleService', () => {
       prisma.officialInstrument.update.mockResolvedValue({});
 
       await service.surrenderInstrument({
-        officialInstrumentId: 'inst-1',
+        instrumentId: 'inst-1',
         controllingDecisionId: 'decision-surrender',
         surrenderType: SurrenderType.APPLICANT_REQUEST,
         effectiveAt: new Date(),
@@ -305,16 +312,13 @@ describe('InstrumentLifecycleService', () => {
         publicVerificationStatus: 'SUSPENDED',
       });
 
-      await verification.updateVerificationCache(
-        'inst-1',
-        InstrumentLifecycleStatus.SUSPENDED,
-      );
+      await verification.updateVerificationCache('inst-1', OfficialInstrumentStatus.SUSPENDED);
 
       expect(prisma.officialInstrument.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             publicVerificationStatus: 'SUSPENDED',
-            lifecycleStatus: InstrumentLifecycleStatus.SUSPENDED,
+            status: OfficialInstrumentStatus.SUSPENDED,
           }) as Record<string, unknown>,
         }),
       );
