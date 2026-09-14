@@ -1,6 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  CONSEQUENTIAL_USE_IMPACT_AREAS,
+  DIGITAL_TWIN_MODES,
+  DIGITAL_TWIN_SOURCE_STATUSES,
+  DIGITAL_TWIN_TYPES,
+} from './intelligence.constants';
+import { PHASE_12F_ENUM_NAMES, PHASE_12F_MODEL_NAMES } from './intelligence-schema.constants';
 import { INTELLIGENCE_ALERT_STATUSES, RISK_EVIDENCE_BASIS_VALUES } from './intelligence.constants';
 import { PHASE_12E_ENUM_NAMES, PHASE_12E_MODEL_NAMES } from './intelligence-schema.constants';
 import {
@@ -14,6 +21,9 @@ import {
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
 
+describe('Phase 12F schema guard', () => {
+  for (const modelName of PHASE_12F_MODEL_NAMES) {
+    it(`defines model ${modelName} exactly once`, () => {
 describe('Phase 12E intelligence schema', () => {
   for (const modelName of PHASE_12E_MODEL_NAMES) {
 describe('Phase 12B intelligence schema', () => {
@@ -24,6 +34,7 @@ describe('Phase 12B intelligence schema', () => {
     });
   }
 
+  for (const enumName of PHASE_12F_ENUM_NAMES) {
   for (const enumName of PHASE_12E_ENUM_NAMES) {
     it(`defines ${enumName}`, () => {
   for (const enumName of PHASE_12B_ENUM_NAMES) {
@@ -32,6 +43,41 @@ describe('Phase 12B intelligence schema', () => {
     });
   }
 
+  for (const twinType of DIGITAL_TWIN_TYPES) {
+    it(`supports digital twin type ${twinType}`, () => {
+      expect(schema).toContain(twinType);
+    });
+  }
+
+  for (const mode of DIGITAL_TWIN_MODES) {
+    it(`supports digital twin mode ${mode}`, () => {
+      expect(schema).toContain(mode);
+    });
+  }
+
+  for (const sourceStatus of DIGITAL_TWIN_SOURCE_STATUSES) {
+    it(`supports digital twin source status ${sourceStatus}`, () => {
+      expect(schema).toContain(sourceStatus);
+    });
+  }
+
+  for (const impactArea of CONSEQUENTIAL_USE_IMPACT_AREAS) {
+    it(`supports consequential use impact area ${impactArea}`, () => {
+      expect(schema).toContain(impactArea);
+    });
+  }
+
+  it('marks twin as non-authoritative by default', () => {
+    expect(schema).toContain('isAuthoritativeRecord');
+    expect(schema).toContain('@default(false)');
+  });
+
+  it('requires rollback plan for live transition', () => {
+    expect(schema).toContain('rollbackPlanReference');
+  });
+
+  it('keeps snapshots immutable', () => {
+    expect(schema).toContain('isImmutable');
   it('keeps compliance MonitoringRule separate from intelligence monitoring', () => {
     expect(schema.match(/model MonitoringRule \{/g)).toHaveLength(1);
     expect(schema.match(/model IntelligenceMonitoringRule \{/g)).toHaveLength(1);

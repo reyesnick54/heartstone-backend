@@ -128,6 +128,7 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  ownedDigitalTwinDefinitions    DigitalTwinDefinition[]
   analysisRequests             AnalysisRequest[]
   intelligenceMonitoringRules  IntelligenceMonitoringRule[]
   riskDefinitions              RiskDefinition[]
@@ -252,6 +253,52 @@ model Office {
 }
 
 model Officeholder {
+  id                            String                        @id @default(uuid()) @db.Uuid
+  code                          String                        @unique
+  name                          String
+  description                   String?
+  status                        StructuralLifecycleStatus     @default(ACTIVE)
+  createdAt                     DateTime                      @default(now())
+  updatedAt                     DateTime                      @updatedAt
+  appointments                  Appointment[]
+  delegationsAsDelegator        Delegation[]                  @relation("DelegationDelegatorOfficeholder")
+  delegationsAsRecipient        Delegation[]                  @relation("DelegationRecipientOfficeholder")
+  identityLinks                 IdentityOfficeholderLink[]
+  functionAuthorityAssignments  FunctionAuthorityAssignment[]
+  ownedGovernmentServices       GovernmentService[]
+  managedCases                  Case[]                        @relation("CaseManager")
+  caseEvents                    CaseEvent[]                   @relation("CaseEventOfficeholder")
+  communicationsAsSender        CaseCommunication[]           @relation("CommunicationSenderOfficeholder")
+  evidenceVerifications         EvidenceVerification[]        @relation("EvidenceVerificationVerifierOfficeholder")
+  evidencePurposeAcceptances    EvidencePurposeAcceptance[]   @relation("EvidencePurposeAcceptanceReviewerOfficeholder")
+  evidenceQualityAssessments    EvidenceQualityAssessment[]   @relation("EvidenceQualityAssessorOfficeholder")
+  departmentalReviewsAsReviewer DepartmentalReviewRecord[]    @relation("DepartmentalReviewReviewerOfficeholder")
+  inspectionInspectors          InspectionInspector[]
+  custodyEventsAsCustodian      EvidenceCustodyEvent[]        @relation("EvidenceCustodyCustodianOfficeholder")
+  custodyEventsAsWitness        EvidenceCustodyEvent[]        @relation("EvidenceCustodyWitnessOfficeholder")
+  assembledEvidencePackets      EvidencePacketVersion[]       @relation("EvidencePacketAssembler")
+  authorizedPacketExclusions    EvidencePacketItemExclusion[] @relation("EvidencePacketExclusionAuthorizer")
+  recordCorrectionsApproved     RecordCorrection[]            @relation("RecordCorrectionApproverOfficeholder")
+  recordIntegrityEvents         RecordIntegrityEvent[]        @relation("RecordIntegrityActorOfficeholder")
+  recordAccessEvents            RecordAccessEvent[]           @relation("RecordAccessOfficeholder")
+  decisionReadinessProposed     DecisionReadinessAssessment[] @relation("DecisionReadinessProposedOfficeholder")
+  decisionParticipants          DecisionParticipant[]         @relation("DecisionParticipantOfficeholder")
+  governmentDecisionsMade       GovernmentDecision[]          @relation("GovernmentDecisionOfficeholder")
+  issuedOfficialInstruments     OfficialInstrument[]          @relation("OfficialInstrumentIssuerOfficeholder")
+  issuanceEventsAsIssuer        IssuanceEvent[]               @relation("IssuanceEventIssuerOfficeholder")
+  instrumentsHeld               OfficialInstrument[]          @relation("InstrumentHolderOfficeholder")
+  instrumentLifecycleEvents     InstrumentLifecycleEvent[]    @relation("InstrumentLifecycleActorOfficeholder")
+  reviewReferencesAsAppellant   DecisionReviewReference[]     @relation("ReviewAppellantOfficeholder")
+  complianceProjectionSubjects  ComplianceStatusProjection[]  @relation("ComplianceProjectionSubjectOfficeholder")
+  complianceReviewsAsReviewer   ComplianceReview[]            @relation("ComplianceReviewReviewerOfficeholder")
+  reviewAssignmentsAsReviewer   ReviewAssignment[]            @relation("ReviewAssignmentReviewerOfficeholder")
+  redressDecisionsAsReviewer    RedressDecision[]             @relation("RedressDecisionReviewerOfficeholder")
+  interimReliefDecisionsAsReviewer InterimReliefDecision[]    @relation("InterimReliefDecisionReviewerOfficeholder")
+  reviewStayRecordsAsDecider    ReviewStayRecord[]            @relation("ReviewStayDeciderOfficeholder")
+  digitalTwinDefinitionsOwned   DigitalTwinDefinition[]       @relation("DigitalTwinInstitutionalOwner")
+  digitalTwinSourcesOwned       DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
+  simulationReviewsConducted    SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
+  consequentialUseReviewsConducted ConsequentialUseReview[]   @relation("ConsequentialUseOfficeholderReviewer")
   id                               String                        @id @default(uuid()) @db.Uuid
   code                             String                        @unique
   name                             String
@@ -597,6 +644,10 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  digitalTwinSourcesOwned            DigitalTwinSource[]           @relation("DigitalTwinSourceOwner")
+  digitalTwinModeRecords             DigitalTwinModeRecord[]       @relation("DigitalTwinModeRecorder")
+  simulationReviewsConducted         SimulationReview[]            @relation("SimulationReviewReviewer")
+  consequentialUseReviewsConducted   ConsequentialUseReview[]      @relation("ConsequentialUseReviewer")
   analysisRequestsRequested          AnalysisRequest[]             @relation("AnalysisRequestRequester")
   analysisRunsExecuted               AnalysisRun[]                 @relation("AnalysisRunExecutor")
   analysisHumanReviews               AnalysisHumanReview[]         @relation("AnalysisHumanReviewer")
@@ -7512,6 +7563,438 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+// ─── Phase 12F: Digital Twin, Scenario Simulation, Consequential-Use Controls ─
+
+enum DigitalTwinType {
+  INSTITUTION
+  DEPARTMENT
+  SERVICE
+  APPLICATION
+  CASE
+  PROJECT
+  INFRASTRUCTURE
+  DEPENDENCY
+  AUTHORITY
+  WORKFLOW
+  OTHER_APPROVED
+}
+
+enum DigitalTwinDefinitionStatus {
+  DRAFT
+  UNDER_REVIEW
+  ACTIVE
+  SUSPENDED
+  RETIRED
+  SAFE_HALTED
+}
+
+enum DigitalTwinPrivacyClassification {
+  PUBLIC
+  INTERNAL
+  RESTRICTED
+  CONFIDENTIAL
+  HIGHLY_CONFIDENTIAL
+}
+
+enum DigitalTwinMode {
+  DESIGN
+  TRAINING
+  SIMULATION
+  TEST
+  SHADOW
+  ADVISORY
+  CONTROLLED_PILOT
+  APPROVED_LIVE_REFERENCE
+}
+
+enum DigitalTwinSourceStatus {
+  AUTHORITATIVE
+  SUPPORTING
+  MODELED
+  UNVERIFIED
+}
+
+enum DigitalTwinRelationshipType {
+  PARENT
+  CHILD
+  DEPENDS_ON
+  SUPPORTS
+  REPRESENTS
+  RELATED
+}
+
+enum SimulationScenarioStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum SimulationRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SimulationReviewOutcome {
+  DRAFT
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  NEEDS_REVISION
+}
+
+enum ConsequentialUseReviewDecision {
+  APPROVED
+  REJECTED
+  CONDITIONAL
+  SAFE_HALT
+  DEFERRED
+}
+
+enum ConsequentialUseImpactArea {
+  PERSON
+  PROJECT
+  INSTITUTION
+  PUBLIC_SERVICE
+  FINANCIAL_INTEREST
+  INFRASTRUCTURE
+  LEGAL_POSITION
+  GOVERNMENT_DECISION
+}
+
+enum SimulationToLiveTransitionStatus {
+  PROPOSED
+  TESTING
+  SECURITY_REVIEW
+  PENDING_ACCEPTANCE
+  ACCEPTED
+  SUSPENDED
+  ROLLED_BACK
+}
+
+model DigitalTwinDefinition {
+  id                              String                         @id @default(uuid()) @db.Uuid
+  twinCode                        String                         @unique
+  representedSubjectType          DigitalTwinType
+  representedSubjectId            String                         @db.Uuid
+  representedSubjectReference     String
+  institutionalOwnerId            String                         @db.Uuid
+  institutionalOwnerOfficeholderId String?                       @db.Uuid
+  purpose                         String
+  scope                           String
+  permittedUses                   Json                           @default("[]")
+  prohibitedUses                  Json                           @default("[]")
+  sourceRequirements              String
+  privacyClassification           DigitalTwinPrivacyClassification @default(INTERNAL)
+  status                          DigitalTwinDefinitionStatus      @default(DRAFT)
+  isAuthoritativeRecord           Boolean                        @default(false)
+  preventsPersonalProfileExpansion Boolean                       @default(true)
+  staleAsOf                       DateTime?
+  isStale                         Boolean                        @default(false)
+  isIncomplete                    Boolean                        @default(false)
+  isInconsistent                  Boolean                        @default(false)
+  isCompromised                   Boolean                        @default(false)
+  outsideApprovedUse              Boolean                        @default(false)
+  createdAt                       DateTime                       @default(now())
+  updatedAt                       DateTime                       @updatedAt
+  institutionalOwner              Institution                    @relation(fields: [institutionalOwnerId], references: [id])
+  institutionalOwnerOfficeholder  Officeholder?                  @relation("DigitalTwinInstitutionalOwner", fields: [institutionalOwnerOfficeholderId], references: [id])
+  versions                        DigitalTwinVersion[]
+  outgoingRelationships           DigitalTwinRelationship[]      @relation("DigitalTwinRelationshipFrom")
+  incomingRelationships           DigitalTwinRelationship[]      @relation("DigitalTwinRelationshipTo")
+
+  @@index([representedSubjectType, representedSubjectId])
+  @@index([institutionalOwnerId])
+  @@index([status])
+  @@map("digital_twin_definitions")
+}
+
+model DigitalTwinVersion {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  definitionId          String                  @db.Uuid
+  versionNumber         Int
+  versionLabel          String
+  configuration         Json                    @default("{}")
+  modelVersionReference String?
+  effectiveFrom         DateTime                @default(now())
+  effectiveTo           DateTime?
+  isCurrent             Boolean                 @default(false)
+  createdAt             DateTime                @default(now())
+  definition            DigitalTwinDefinition   @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  sources               DigitalTwinSource[]
+  modeRecords           DigitalTwinModeRecord[]
+  snapshots             DigitalTwinSnapshot[]
+  scenarios             SimulationScenario[]
+  simulationRuns        SimulationRun[]
+  consequentialUseReviews ConsequentialUseReview[]
+  liveTransitionRecords SimulationToLiveTransitionRecord[]
+
+  @@unique([definitionId, versionNumber])
+  @@index([definitionId])
+  @@index([isCurrent])
+  @@map("digital_twin_versions")
+}
+
+model DigitalTwinSource {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  twinVersionId         String                  @db.Uuid
+  sourceName            String
+  sourceStatus          DigitalTwinSourceStatus
+  integrationReference  String
+  evidenceReference     String?
+  freshnessAsOf         DateTime
+  ownerIdentityId       String?                 @db.Uuid
+  ownerOfficeholderId   String?                 @db.Uuid
+  lastUpdatedAt         DateTime
+  limitations           String
+  isDisclosed           Boolean                 @default(false)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  twinVersion           DigitalTwinVersion      @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  ownerIdentity         Identity?               @relation("DigitalTwinSourceOwner", fields: [ownerIdentityId], references: [id])
+  ownerOfficeholder     Officeholder?           @relation("DigitalTwinSourceOfficeholderOwner", fields: [ownerOfficeholderId], references: [id])
+
+  @@index([twinVersionId])
+  @@index([sourceStatus])
+  @@map("digital_twin_sources")
+}
+
+model DigitalTwinRelationship {
+  id                  String                      @id @default(uuid()) @db.Uuid
+  fromDefinitionId    String                      @db.Uuid
+  toDefinitionId      String                      @db.Uuid
+  relationshipType    DigitalTwinRelationshipType
+  isModeledOnly       Boolean                     @default(true)
+  notes               String?
+  createdAt           DateTime                    @default(now())
+  fromDefinition      DigitalTwinDefinition       @relation("DigitalTwinRelationshipFrom", fields: [fromDefinitionId], references: [id], onDelete: Cascade)
+  toDefinition        DigitalTwinDefinition       @relation("DigitalTwinRelationshipTo", fields: [toDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([fromDefinitionId, toDefinitionId, relationshipType])
+  @@index([fromDefinitionId])
+  @@index([toDefinitionId])
+  @@map("digital_twin_relationships")
+}
+
+model DigitalTwinModeRecord {
+  id                    String             @id @default(uuid()) @db.Uuid
+  twinVersionId         String             @db.Uuid
+  mode                  DigitalTwinMode
+  recordedAt            DateTime           @default(now())
+  recordedByIdentityId  String?            @db.Uuid
+  rationale             String
+  isOperationalControl  Boolean            @default(false)
+  createdAt             DateTime           @default(now())
+  twinVersion           DigitalTwinVersion @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  recordedByIdentity    Identity?          @relation("DigitalTwinModeRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([twinVersionId])
+  @@index([mode])
+  @@map("digital_twin_mode_records")
+}
+
+model DigitalTwinSnapshot {
+  id              String             @id @default(uuid()) @db.Uuid
+  twinVersionId   String             @db.Uuid
+  snapshotAt      DateTime           @default(now())
+  snapshotPayload Json
+  snapshotHash    String
+  isImmutable     Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  twinVersion     DigitalTwinVersion @relation(fields: [twinVersionId], references: [id], onDelete: Cascade)
+  scenarios       SimulationScenario[] @relation("ScenarioInputSnapshot")
+  simulationRuns  SimulationRun[]    @relation("RunInputSnapshot")
+  simulationInputs SimulationInput[]
+
+  @@index([twinVersionId])
+  @@index([snapshotAt])
+  @@map("digital_twin_snapshots")
+}
+
+model SimulationScenario {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  scenarioCode          String                   @unique
+  purpose               String
+  scenarioDescription   String
+  twinVersionId         String                   @db.Uuid
+  inputSnapshotId       String?                  @db.Uuid
+  modelVersionReference String
+  parameters            Json                     @default("{}")
+  scenarioDate          DateTime
+  limitations           String
+  isPrediction          Boolean                  @default(false)
+  status                SimulationScenarioStatus @default(DRAFT)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  twinVersion           DigitalTwinVersion       @relation(fields: [twinVersionId], references: [id])
+  inputSnapshot         DigitalTwinSnapshot?     @relation("ScenarioInputSnapshot", fields: [inputSnapshotId], references: [id])
+  runs                  SimulationRun[]
+
+  @@index([twinVersionId])
+  @@index([status])
+  @@map("simulation_scenarios")
+}
+
+model SimulationRun {
+  id              String              @id @default(uuid()) @db.Uuid
+  scenarioId      String              @db.Uuid
+  runNumber       Int
+  twinVersionId   String              @db.Uuid
+  inputSnapshotId String              @db.Uuid
+  mode            DigitalTwinMode     @default(SIMULATION)
+  status          SimulationRunStatus @default(PENDING)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  scenario        SimulationScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  twinVersion     DigitalTwinVersion  @relation(fields: [twinVersionId], references: [id])
+  inputSnapshot   DigitalTwinSnapshot @relation("RunInputSnapshot", fields: [inputSnapshotId], references: [id])
+  inputs          SimulationInput[]
+  outputs         SimulationOutput[]
+  assumptions     SimulationAssumption[]
+  uncertainties   SimulationUncertainty[]
+  reviews         SimulationReview[]
+  consequentialUseReviews ConsequentialUseReview[]
+
+  @@unique([scenarioId, runNumber])
+  @@index([scenarioId])
+  @@index([twinVersionId])
+  @@index([status])
+  @@map("simulation_runs")
+}
+
+model SimulationInput {
+  id              String              @id @default(uuid()) @db.Uuid
+  simulationRunId String              @db.Uuid
+  inputSnapshotId String              @db.Uuid
+  inputPayload    Json
+  recordedAt      DateTime            @default(now())
+  simulationRun   SimulationRun       @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  inputSnapshot   DigitalTwinSnapshot @relation(fields: [inputSnapshotId], references: [id])
+
+  @@index([simulationRunId])
+  @@map("simulation_inputs")
+}
+
+model SimulationOutput {
+  id                      String        @id @default(uuid()) @db.Uuid
+  simulationRunId         String        @db.Uuid
+  outputPayload           Json
+  outputType              String
+  isAdvisoryOnly          Boolean       @default(true)
+  presentedAsPrediction   Boolean       @default(false)
+  createdAt               DateTime      @default(now())
+  simulationRun           SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  consequentialUseReviews ConsequentialUseReview[]
+
+  @@index([simulationRunId])
+  @@map("simulation_outputs")
+}
+
+model SimulationAssumption {
+  id                  String        @id @default(uuid()) @db.Uuid
+  simulationRunId     String        @db.Uuid
+  assumptionText      String
+  assumptionCategory  String?
+  recordedAt          DateTime      @default(now())
+  simulationRun       SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+
+  @@index([simulationRunId])
+  @@map("simulation_assumptions")
+}
+
+model SimulationUncertainty {
+  id                     String        @id @default(uuid()) @db.Uuid
+  simulationRunId        String        @db.Uuid
+  uncertaintyDescription String
+  uncertaintyLevel       String?
+  recordedAt             DateTime      @default(now())
+  simulationRun          SimulationRun @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+
+  @@index([simulationRunId])
+  @@map("simulation_uncertainties")
+}
+
+model SimulationReview {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  simulationRunId         String                  @db.Uuid
+  reviewerIdentityId      String?                 @db.Uuid
+  reviewerOfficeholderId  String?                 @db.Uuid
+  outcome                 SimulationReviewOutcome @default(DRAFT)
+  reviewNotes             String?
+  reviewedAt              DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  simulationRun           SimulationRun           @relation(fields: [simulationRunId], references: [id], onDelete: Cascade)
+  reviewerIdentity        Identity?               @relation("SimulationReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder    Officeholder?           @relation("SimulationReviewOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
+
+  @@index([simulationRunId])
+  @@map("simulation_reviews")
+}
+
+model ConsequentialUseReview {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  twinVersionId            String                         @db.Uuid
+  simulationRunId          String?                        @db.Uuid
+  simulationOutputId       String?                        @db.Uuid
+  representedSubjectType   DigitalTwinType
+  representedSubjectId     String                         @db.Uuid
+  impactAreas              Json                           @default("[]")
+  reviewerIdentityId       String                         @db.Uuid
+  reviewerOfficeholderId   String?                        @db.Uuid
+  authorityReference       String
+  evidenceReference        String?
+  decision                 ConsequentialUseReviewDecision
+  reasons                  String
+  limitations              String
+  conditions               String?
+  reviewedAt               DateTime                       @default(now())
+  isStaleTwinBlocked       Boolean                        @default(false)
+  missingDataDisclosed     Boolean                        @default(false)
+  proposedUse              String
+  alternativesConsidered   String?
+  conflictNotes            String?
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  twinVersion              DigitalTwinVersion             @relation(fields: [twinVersionId], references: [id])
+  simulationRun            SimulationRun?                 @relation(fields: [simulationRunId], references: [id])
+  simulationOutput         SimulationOutput?              @relation(fields: [simulationOutputId], references: [id])
+  reviewerIdentity         Identity                       @relation("ConsequentialUseReviewer", fields: [reviewerIdentityId], references: [id])
+  reviewerOfficeholder     Officeholder?                  @relation("ConsequentialUseOfficeholderReviewer", fields: [reviewerOfficeholderId], references: [id])
+
+  @@index([twinVersionId])
+  @@index([simulationRunId])
+  @@index([decision])
+  @@map("consequential_use_reviews")
+}
+
+model SimulationToLiveTransitionRecord {
+  id                           String                           @id @default(uuid()) @db.Uuid
+  twinVersionId                String                           @db.Uuid
+  exactVersionLabel            String
+  acceptedMode                 DigitalTwinMode
+  testingCompleted             Boolean                          @default(false)
+  securityReviewCompleted      Boolean                          @default(false)
+  authorityReference           String
+  institutionalAcceptanceReference String
+  rollbackPlanReference        String
+  trainingCompleted            Boolean                          @default(false)
+  effectiveDate                DateTime?
+  suspensionTriggers           Json                             @default("[]")
+  status                       SimulationToLiveTransitionStatus @default(PROPOSED)
+  technicalSuccessAcknowledged Boolean                          @default(false)
+  liveActivationAuthorized     Boolean                          @default(false)
+  recordedAt                   DateTime                         @default(now())
+  createdAt                    DateTime                         @default(now())
+  updatedAt                    DateTime                         @updatedAt
+  twinVersion                  DigitalTwinVersion               @relation(fields: [twinVersionId], references: [id])
+
+  @@index([twinVersionId])
+  @@index([status])
+  @@map("simulation_to_live_transition_records")
 // ─── Phase 12E: Evidence-Supported Analysis, Monitoring, Alerting and Risk ───
 
 enum AnalysisFunctionType {
