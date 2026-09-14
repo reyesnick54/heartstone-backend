@@ -147,6 +147,10 @@ model Institution {
   analysisRequests                 AnalysisRequest[]
   intelligenceMonitoringRules      IntelligenceMonitoringRule[]
   riskDefinitions                  RiskDefinition[]
+  criticalServiceDefinitions       CriticalServiceDefinition[]      @relation("CriticalServiceOwnerInstitution")
+  businessImpactAssessments        BusinessImpactAssessment[]
+  backupDefinitions                BackupDefinition[]               @relation("BackupDefinitionOwnerInstitution")
+  recoveryExercises                RecoveryExercise[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -278,6 +282,10 @@ model Officeholder {
   capabilityOwnerAssignmentsAsInstitutionalOwner CapabilityOwnerAssignment[] @relation("CapabilityInstitutionalOwner")
   operationalActivationsAccountable OperationalActivationRecord[]
   exitAcceptancesRecorded          ExitAcceptanceRecord[]
+  manualOperationAuthorizations    ManualOperationAuthorization[] @relation("ManualOperationAuthorizingOfficeholder")
+  continuityDecisions              ContinuityDecision[]           @relation("ContinuityDecisionOfficeholder")
+  resumptionAuthorizations         ResumptionAuthorization[]      @relation("ResumptionAuthorizingOfficeholder")
+
   @@map("officeholders")
 }
 
@@ -295,6 +303,9 @@ model Appointment {
   decisionParticipants DecisionParticipant[]
   governmentDecisions  GovernmentDecision[]
   reviewAssignments    ReviewAssignment[]
+  manualOperationAuthorizations ManualOperationAuthorization[]
+  continuityDecisions  ContinuityDecision[]
+  resumptionAuthorizations ResumptionAuthorization[]
 
   @@index([officeId])
   @@index([officeholderId])
@@ -322,6 +333,9 @@ model Delegation {
   structuredScopes        DelegationStructuredScope[]
   governmentDecisions     GovernmentDecision[]
   reviewAssignments       ReviewAssignment[]
+  manualOperationAuthorizations ManualOperationAuthorization[]
+  continuityDecisions     ContinuityDecision[]
+  resumptionAuthorizations ResumptionAuthorization[]
 
   @@index([institutionId])
   @@map("delegations")
@@ -656,7 +670,20 @@ model Identity {
   credentialShutdownsPerformed             CredentialShutdownRecord[]             @relation("CredentialShutdownPerformer")
   integrationShutdownsPerformed            IntegrationShutdownRecord[]            @relation("IntegrationShutdownPerformer")
   exitAcceptancesRecorded                  ExitAcceptanceRecord[]                 @relation("ExitAcceptanceRecorder")
-
+  businessImpactAssessments                BusinessImpactAssessment[]             @relation("BusinessImpactAssessor")
+  manualOperationAuthorizationsAsAuthorizer ManualOperationAuthorization[]        @relation("ManualOperationAuthorizer")
+  manualOperationAuthorizationsAsActor     ManualOperationAuthorization[]        @relation("ManualOperationActor")
+  manualOperationAuthorizationsAsSegregatedApprover ManualOperationAuthorization[] @relation("ManualOperationSegregatedApprover")
+  continuityEventsDetected                 ContinuityEvent[]                      @relation("ContinuityEventDetector")
+  continuityDecisions                      ContinuityDecision[]                   @relation("ContinuityDecisionMaker")
+  backupDefinitionsOwned                   BackupDefinition[]                     @relation("BackupDefinitionOwner")
+  restoreTestsConducted                    RestoreTest[]                          @relation("RestoreTestTester")
+  recoveryExercisesLed                     RecoveryExercise[]                     @relation("RecoveryExerciseLead")
+  recoveryActionsAssigned                  RecoveryAction[]                       @relation("RecoveryActionAssignee")
+  manualDigitalReconciliations             ManualDigitalReconciliation[]          @relation("ManualDigitalReconciler")
+  resumptionTechnicalRecommendations       ResumptionReadinessAssessment[]        @relation("ResumptionTechnicalRecommender")
+  resumptionAuthorizations                 ResumptionAuthorization[]            @relation("ResumptionAuthorizer")
+  continuityCorrectiveActionsAssigned      ContinuityCorrectiveAction[]           @relation("ContinuityCorrectiveActionAssignee")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1047,6 +1074,9 @@ model FunctionAuthorityRecord {
   redressDecisions              RedressDecision[]                @relation("RedressDecisionFunctionAuthority")
   interimReliefDecisions        InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
   reviewStayRecords             ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
+  manualOperationAuthorizations ManualOperationAuthorization[]
+  continuityDecisions           ContinuityDecision[]
+  resumptionAuthorizations      ResumptionAuthorization[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -12189,4 +12219,735 @@ model ExitAcceptanceRecord {
   @@index([decommissioningExecutionId])
   @@index([acceptanceOutcome])
   @@map("exit_acceptance_records")
+}
+// ─── Phase 13D: Business Continuity, Backup, Disaster Recovery ────────────────
+
+enum ConfigurationConfirmationStatus {
+  CONFIRMED
+  UNCONFIRMED
+  TBD
+}
+
+enum CriticalServiceCriticality {
+  TIER_1_ESSENTIAL
+  TIER_2_IMPORTANT
+  TIER_3_SUPPORTING
+  UNCLASSIFIED
+}
+
+enum CriticalServiceDefinitionStatus {
+  DRAFT
+  UNDER_REVIEW
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum ContinuityScenarioType {
+  DATABASE_OUTAGE
+  STORAGE_OUTAGE
+  HOSTING_OUTAGE
+  NETWORK_OUTAGE
+  IDENTITY_OUTAGE
+  INTEGRATION_OUTAGE
+  PAYMENT_OUTAGE
+  NOTIFICATION_OUTAGE
+  AI_PROVIDER_OUTAGE
+  CYBERATTACK
+  CREDENTIAL_COMPROMISE
+  RECORDS_CORRUPTION
+  DATA_LOSS
+  WORKFORCE_DISRUPTION
+  PARTNER_OUTAGE
+}
+
+enum ContinuityDependencyType {
+  INTERNAL_SYSTEM
+  EXTERNAL_INTEGRATION
+  IDENTITY_PROVIDER
+  PAYMENT_PROVIDER
+  NOTIFICATION_PROVIDER
+  AI_PROVIDER
+  PARTNER_ORGANIZATION
+  WORKFORCE
+  OTHER_APPROVED
+}
+
+enum SinglePointOfFailureStatus {
+  IDENTIFIED
+  MITIGATED
+  ACCEPTED_RISK
+  CLOSED
+}
+
+enum ContinuityProcedureStatus {
+  DRAFT
+  APPROVED
+  SUSPENDED
+  RETIRED
+}
+
+enum ManualOperationProcedureStatus {
+  DRAFT
+  APPROVED
+  SUSPENDED
+  RETIRED
+}
+
+enum ManualOperationAuthorizationStatus {
+  REQUESTED
+  AUTHORIZED
+  ACTIVE
+  EXPIRED
+  REVOKED
+  REJECTED
+}
+
+enum ContinuityEventStatus {
+  DETECTED
+  ASSESSED
+  CONTINUITY_MODE_ACTIVE
+  RECOVERING
+  RESUMPTION_PENDING
+  RESOLVED
+  SAFE_HALTED
+}
+
+enum ContinuityOperatingMode {
+  NORMAL
+  CONTINUITY
+  MANUAL
+  SAFE_HALT
+}
+
+enum ContinuityDecisionType {
+  SAFE_HALT
+  CONTINUE_UNAFFECTED
+  ACTIVATE_MANUAL
+  ACTIVATE_CONTINUITY_MODE
+  DECLARE_DISASTER
+  OTHER_APPROVED
+}
+
+enum BackupTargetType {
+  SYSTEM
+  DATABASE
+  STORAGE
+}
+
+enum BackupLocationClass {
+  ON_PREMISES
+  OFFSITE
+  CLOUD
+  AIR_GAP
+  TBD
+}
+
+enum BackupDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum BackupRecoverabilityStatus {
+  UNVERIFIED
+  VERIFIED
+  FAILED_VERIFICATION
+}
+
+enum RestoreTestResult {
+  PASSED
+  PASSED_WITH_LIMITATIONS
+  FAILED
+  UNVERIFIED
+}
+
+enum RecoveryExerciseStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum RecoveryActionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  DEFERRED
+}
+
+enum BacklogRecoveryPlanStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  COMPLETED
+  SUSPENDED
+}
+
+enum BacklogPriorityBasis {
+  APPROVED_LAWFUL_CRITERION
+  HIGH_VALUE_INVESTOR
+  POLITICALLY_IMPORTANT_APPLICANT
+  EXECUTIVE_REQUEST
+  LARGEST_FEE
+}
+
+enum ManualDigitalReconciliationStatus {
+  PENDING
+  RECONCILED
+  DISCREPANCY_FOUND
+  CORRECTED
+  VERIFIED
+}
+
+enum ResumptionReadinessStatus {
+  DRAFT
+  UNDER_REVIEW
+  READY_FOR_AUTHORIZATION
+  NOT_READY
+  AUTHORIZED
+}
+
+enum ResumptionAuthorizationStatus {
+  PENDING
+  GRANTED
+  DENIED
+  EXPIRED
+  REVOKED
+}
+
+enum ContinuityCorrectiveActionStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  VERIFIED
+}
+
+enum ContinuityCorrectiveActionSourceType {
+  RESTORE_TEST
+  RECOVERY_EXERCISE
+  RESUMPTION
+  CONTINUITY_EVENT
+  BACKUP_EXECUTION
+  OTHER_APPROVED
+}
+
+enum BusinessImpactAssessmentStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  SUPERSEDED
+}
+
+enum RecoveryObjectiveType {
+  RTO
+  RPO
+  MTI
+  MINIMUM_SERVICE
+  OTHER_APPROVED
+}
+
+model CriticalServiceDefinition {
+  id                                   String                          @id @default(uuid()) @db.Uuid
+  serviceCode                          String                          @unique
+  name                                 String
+  description                          String?
+  institutionalOwnerInstitutionId      String                          @db.Uuid
+  authorityBasisReference              String
+  authorityBasisConfirmationStatus     ConfigurationConfirmationStatus @default(TBD)
+  criticality                          CriticalServiceCriticality        @default(UNCLASSIFIED)
+  minimumServiceDescription            String
+  maximumTolerableInterruptionMinutes  Int?
+  mtiConfirmationStatus                ConfigurationConfirmationStatus   @default(TBD)
+  rtoMinutes                           Int?
+  rtoConfirmationStatus                ConfigurationConfirmationStatus   @default(TBD)
+  rpoMinutes                           Int?
+  rpoConfirmationStatus                ConfigurationConfirmationStatus   @default(TBD)
+  fallbackDescription                  String?
+  fallbackConfirmationStatus           ConfigurationConfirmationStatus   @default(TBD)
+  recoveryPriority                     Int?
+  recoveryPriorityConfirmationStatus   ConfigurationConfirmationStatus   @default(TBD)
+  safeHaltConditions                   String?
+  status                               CriticalServiceDefinitionStatus   @default(DRAFT)
+  createdAt                            DateTime                        @default(now())
+  updatedAt                            DateTime                        @updatedAt
+  institutionalOwner                   Institution                     @relation("CriticalServiceOwnerInstitution", fields: [institutionalOwnerInstitutionId], references: [id])
+  businessImpactAssessments            BusinessImpactAssessment[]
+  recoveryObjectives                   RecoveryObjective[]
+  dependencies                         ContinuityDependency[]
+  singlePointsOfFailure                SinglePointOfFailure[]
+  continuityProcedures                 ContinuityProcedure[]
+
+  @@index([institutionalOwnerInstitutionId])
+  @@index([status])
+  @@map("critical_service_definitions")
+}
+
+model BusinessImpactAssessment {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  assessmentNumber            String                         @unique
+  criticalServiceDefinitionId String                         @db.Uuid
+  impactSummary               String
+  financialImpactNotes        String?
+  operationalImpactNotes      String?
+  reputationalImpactNotes     String?
+  assessedByIdentityId        String                         @db.Uuid
+  institutionId               String?                        @db.Uuid
+  status                      BusinessImpactAssessmentStatus @default(DRAFT)
+  assessedAt                  DateTime?
+  createdAt                   DateTime                       @default(now())
+  updatedAt                   DateTime                       @updatedAt
+  criticalServiceDefinition   CriticalServiceDefinition      @relation(fields: [criticalServiceDefinitionId], references: [id], onDelete: Cascade)
+  assessedBy                  Identity                       @relation("BusinessImpactAssessor", fields: [assessedByIdentityId], references: [id])
+  institution                 Institution?                   @relation(fields: [institutionId], references: [id])
+
+  @@index([criticalServiceDefinitionId])
+  @@index([status])
+  @@map("business_impact_assessments")
+}
+
+model RecoveryObjective {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  criticalServiceDefinitionId String                          @db.Uuid
+  objectiveType               RecoveryObjectiveType
+  targetValueMinutes          Int?
+  confirmationStatus          ConfigurationConfirmationStatus @default(TBD)
+  lawfulBasisReference        String?
+  notes                       String?
+  createdAt                   DateTime                        @default(now())
+  updatedAt                   DateTime                        @updatedAt
+  criticalServiceDefinition   CriticalServiceDefinition       @relation(fields: [criticalServiceDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([criticalServiceDefinitionId])
+  @@map("recovery_objectives")
+}
+
+model ContinuityDependency {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  criticalServiceDefinitionId String                   @db.Uuid
+  dependencyType              ContinuityDependencyType
+  dependencyReference         String
+  dependencyDescription       String
+  isCritical                  Boolean                  @default(true)
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+  criticalServiceDefinition   CriticalServiceDefinition @relation(fields: [criticalServiceDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([criticalServiceDefinitionId])
+  @@map("continuity_dependencies")
+}
+
+model SinglePointOfFailure {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  criticalServiceDefinitionId String                     @db.Uuid
+  componentReference          String
+  componentDescription        String
+  mitigationReference         String?
+  status                      SinglePointOfFailureStatus @default(IDENTIFIED)
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  criticalServiceDefinition   CriticalServiceDefinition  @relation(fields: [criticalServiceDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([criticalServiceDefinitionId])
+  @@map("single_points_of_failure")
+}
+
+model ContinuityProcedure {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  procedureCode               String                    @unique
+  title                       String
+  description                 String
+  criticalServiceDefinitionId String?                   @db.Uuid
+  scenarioTypes               Json                      @default("[]")
+  steps                       Json                      @default("[]")
+  status                      ContinuityProcedureStatus @default(DRAFT)
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  criticalServiceDefinition   CriticalServiceDefinition? @relation(fields: [criticalServiceDefinitionId], references: [id])
+
+  @@index([criticalServiceDefinitionId])
+  @@index([status])
+  @@map("continuity_procedures")
+}
+
+model ManualOperationProcedure {
+  id                              String                         @id @default(uuid()) @db.Uuid
+  procedureCode                   String                         @unique
+  title                           String
+  description                     String
+  preservesIdentity               Boolean                        @default(true)
+  preservesOfficeholder           Boolean                        @default(true)
+  preservesAuthority              Boolean                        @default(true)
+  preservesSegregationOfDuties    Boolean                        @default(true)
+  preservesDateTime               Boolean                        @default(true)
+  preservesEvidence               Boolean                        @default(true)
+  preservesRecordNumber           Boolean                        @default(true)
+  preservesDecisionProvenance     Boolean                        @default(true)
+  preservesNotice                 Boolean                        @default(true)
+  preservesFinancialControls      Boolean                        @default(true)
+  preservesLaterReconciliation    Boolean                        @default(true)
+  segregationOfDutiesRequirements String
+  evidenceRequirements            String
+  financialControlRequirements    String
+  status                          ManualOperationProcedureStatus @default(DRAFT)
+  createdAt                       DateTime                       @default(now())
+  updatedAt                       DateTime                       @updatedAt
+  authorizations                  ManualOperationAuthorization[]
+
+  @@index([status])
+  @@map("manual_operation_procedures")
+}
+
+model ManualOperationAuthorization {
+  id                           String                             @id @default(uuid()) @db.Uuid
+  authorizationReference       String                             @unique
+  manualOperationProcedureId   String                             @db.Uuid
+  continuityEventId            String?                            @db.Uuid
+  authorizedByOfficeholderId   String                             @db.Uuid
+  authorizedByIdentityId       String                             @db.Uuid
+  functionAuthorityRecordId      String                             @db.Uuid
+  appointmentId                String                             @db.Uuid
+  delegationId                 String?                            @db.Uuid
+  actorIdentityId              String                             @db.Uuid
+  segregatedApproverIdentityId String                             @db.Uuid
+  emergencyAuthorityReference  String?
+  expiresAt                    DateTime
+  status                       ManualOperationAuthorizationStatus @default(REQUESTED)
+  createdAt                    DateTime                           @default(now())
+  updatedAt                    DateTime                           @updatedAt
+  manualOperationProcedure     ManualOperationProcedure           @relation(fields: [manualOperationProcedureId], references: [id])
+  continuityEvent              ContinuityEvent?                   @relation(fields: [continuityEventId], references: [id])
+  authorizedByOfficeholder     Officeholder                       @relation("ManualOperationAuthorizingOfficeholder", fields: [authorizedByOfficeholderId], references: [id])
+  authorizedBy                 Identity                           @relation("ManualOperationAuthorizer", fields: [authorizedByIdentityId], references: [id])
+  actor                        Identity                           @relation("ManualOperationActor", fields: [actorIdentityId], references: [id])
+  segregatedApprover           Identity                           @relation("ManualOperationSegregatedApprover", fields: [segregatedApproverIdentityId], references: [id])
+  functionAuthorityRecord      FunctionAuthorityRecord            @relation(fields: [functionAuthorityRecordId], references: [id])
+  appointment                  Appointment                        @relation(fields: [appointmentId], references: [id])
+  delegation                   Delegation?                        @relation(fields: [delegationId], references: [id])
+
+  @@index([manualOperationProcedureId])
+  @@index([continuityEventId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("manual_operation_authorizations")
+}
+
+model ContinuityEvent {
+  id                            String                  @id @default(uuid()) @db.Uuid
+  eventNumber                   String                  @unique
+  scenarioType                  ContinuityScenarioType
+  detectedAt                    DateTime                @default(now())
+  status                        ContinuityEventStatus   @default(DETECTED)
+  operatingMode                 ContinuityOperatingMode @default(NORMAL)
+  impactSummary                 String?
+  detectedByIdentityId          String?                 @db.Uuid
+  safeHaltScope                 String?
+  technicalRecoveryCompletedAt  DateTime?
+  institutionalResumptionAt     DateTime?
+  createdAt                     DateTime                @default(now())
+  updatedAt                     DateTime                @updatedAt
+  detectedBy                    Identity?               @relation("ContinuityEventDetector", fields: [detectedByIdentityId], references: [id])
+  decisions                     ContinuityDecision[]
+  manualOperationAuthorizations ManualOperationAuthorization[]
+  recoveryActions               RecoveryAction[]
+  backlogRecoveryPlans          BacklogRecoveryPlan[]
+  resumptionReadinessAssessments ResumptionReadinessAssessment[]
+
+  @@index([status])
+  @@index([scenarioType])
+  @@map("continuity_events")
+}
+
+model ContinuityDecision {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  continuityEventId           String                 @db.Uuid
+  decisionType                ContinuityDecisionType
+  decidedByOfficeholderId     String                 @db.Uuid
+  decidedByIdentityId         String                 @db.Uuid
+  functionAuthorityRecordId   String                 @db.Uuid
+  appointmentId               String                 @db.Uuid
+  delegationId                String?                @db.Uuid
+  decisionNotes               String
+  decidedAt                   DateTime               @default(now())
+  emergencyAuthorityExpiresAt DateTime?
+  createdAt                   DateTime               @default(now())
+  continuityEvent             ContinuityEvent        @relation(fields: [continuityEventId], references: [id], onDelete: Cascade)
+  decidedByOfficeholder       Officeholder           @relation("ContinuityDecisionOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  decidedBy                   Identity               @relation("ContinuityDecisionMaker", fields: [decidedByIdentityId], references: [id])
+  functionAuthorityRecord     FunctionAuthorityRecord @relation(fields: [functionAuthorityRecordId], references: [id])
+  appointment                 Appointment            @relation(fields: [appointmentId], references: [id])
+  delegation                  Delegation?            @relation(fields: [delegationId], references: [id])
+
+  @@index([continuityEventId])
+  @@map("continuity_decisions")
+}
+
+model BackupDefinition {
+  id                            String                     @id @default(uuid()) @db.Uuid
+  backupCode                    String                     @unique
+  name                          String
+  targetType                    BackupTargetType
+  scopeDescription              String
+  scheduleExpression            String?
+  scheduleConfirmationStatus    ConfigurationConfirmationStatus @default(TBD)
+  encryptionMethod              String?
+  encryptionConfirmationStatus  ConfigurationConfirmationStatus @default(TBD)
+  retentionPolicyDescription    String?
+  retentionConfirmationStatus   ConfigurationConfirmationStatus @default(TBD)
+  locationClass                 BackupLocationClass        @default(TBD)
+  ownerIdentityId               String                     @db.Uuid
+  ownerInstitutionId            String?                    @db.Uuid
+  verificationProcedureReference String?
+  lastSuccessfulBackupAt        DateTime?
+  lastTestedRestoreAt           DateTime?
+  recoverabilityStatus          BackupRecoverabilityStatus @default(UNVERIFIED)
+  status                        BackupDefinitionStatus     @default(DRAFT)
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  owner                         Identity                   @relation("BackupDefinitionOwner", fields: [ownerIdentityId], references: [id])
+  ownerInstitution              Institution?               @relation("BackupDefinitionOwnerInstitution", fields: [ownerInstitutionId], references: [id])
+  executionRecords              BackupExecutionRecord[]
+  restoreTests                  RestoreTest[]
+
+  @@index([status])
+  @@index([recoverabilityStatus])
+  @@map("backup_definitions")
+}
+
+model BackupExecutionRecord {
+  id                      String           @id @default(uuid()) @db.Uuid
+  backupDefinitionId      String           @db.Uuid
+  executionStartedAt      DateTime
+  executionCompletedAt    DateTime?
+  success                 Boolean          @default(false)
+  backupLocationReference String?
+  encryptionVerified      Boolean          @default(false)
+  sizeBytes               BigInt?
+  checksumHash            String?
+  notes                   String?
+  createdAt               DateTime         @default(now())
+  backupDefinition        BackupDefinition @relation(fields: [backupDefinitionId], references: [id], onDelete: Cascade)
+  restoreTests            RestoreTest[]
+
+  @@index([backupDefinitionId])
+  @@index([executionStartedAt])
+  @@map("backup_execution_records")
+}
+
+model RestoreTest {
+  id                              String            @id @default(uuid()) @db.Uuid
+  testReference                   String            @unique
+  backupDefinitionId              String            @db.Uuid
+  backupExecutionRecordId         String?           @db.Uuid
+  testStartedAt                   DateTime
+  testCompletedAt                 DateTime?
+  result                          RestoreTestResult @default(UNVERIFIED)
+  backupAvailabilityVerified      Boolean           @default(false)
+  decryptionVerified              Boolean           @default(false)
+  integrityVerified               Boolean           @default(false)
+  completenessVerified            Boolean           @default(false)
+  databaseConsistencyVerified     Boolean           @default(false)
+  objectIntegrityVerified         Boolean           @default(false)
+  auditHistoryVerified            Boolean           @default(false)
+  signatureHashVerified           Boolean           @default(false)
+  applicationCompatibilityVerified Boolean          @default(false)
+  rpoAchieved                     Boolean           @default(false)
+  rtoAchieved                     Boolean           @default(false)
+  limitationsNotes                String?
+  testedByIdentityId              String            @db.Uuid
+  createdAt                       DateTime          @default(now())
+  updatedAt                       DateTime          @updatedAt
+  backupDefinition                BackupDefinition  @relation(fields: [backupDefinitionId], references: [id], onDelete: Cascade)
+  backupExecutionRecord           BackupExecutionRecord? @relation(fields: [backupExecutionRecordId], references: [id])
+  testedBy                        Identity          @relation("RestoreTestTester", fields: [testedByIdentityId], references: [id])
+  correctiveActions               ContinuityCorrectiveAction[]
+
+  @@index([backupDefinitionId])
+  @@index([result])
+  @@map("restore_tests")
+}
+
+model RecoveryExercise {
+  id                         String                 @id @default(uuid()) @db.Uuid
+  exerciseReference          String                 @unique
+  scenarioType               ContinuityScenarioType
+  title                      String
+  description                String
+  status                     RecoveryExerciseStatus @default(PLANNED)
+  isArchitectureTest         Boolean                @default(true)
+  doesNotGuaranteeRecovery   Boolean                @default(true)
+  institutionId              String?                @db.Uuid
+  leadIdentityId               String                 @db.Uuid
+  plannedAt                  DateTime?
+  startedAt                  DateTime?
+  completedAt                DateTime?
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+  institution                Institution?           @relation(fields: [institutionId], references: [id])
+  lead                       Identity               @relation("RecoveryExerciseLead", fields: [leadIdentityId], references: [id])
+  recoveryActions              RecoveryAction[]
+  correctiveActions            ContinuityCorrectiveAction[]
+
+  @@index([scenarioType])
+  @@index([status])
+  @@map("recovery_exercises")
+}
+
+model RecoveryAction {
+  id                   String               @id @default(uuid()) @db.Uuid
+  recoveryExerciseId   String?              @db.Uuid
+  continuityEventId    String?              @db.Uuid
+  actionDescription    String
+  status               RecoveryActionStatus @default(OPEN)
+  assignedToIdentityId String?              @db.Uuid
+  dueAt                DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  recoveryExercise     RecoveryExercise?    @relation(fields: [recoveryExerciseId], references: [id])
+  continuityEvent      ContinuityEvent?     @relation(fields: [continuityEventId], references: [id])
+  assignedTo           Identity?            @relation("RecoveryActionAssignee", fields: [assignedToIdentityId], references: [id])
+
+  @@index([recoveryExerciseId])
+  @@index([continuityEventId])
+  @@index([status])
+  @@map("recovery_actions")
+}
+
+model BacklogRecoveryPlan {
+  id                               String                    @id @default(uuid()) @db.Uuid
+  planReference                    String                    @unique
+  continuityEventId                String?                   @db.Uuid
+  prioritizationCriteriaReference  String
+  approvedCriteriaDocumentReference String
+  forbiddenFavoritismAcknowledged  Boolean                   @default(true)
+  status                           BacklogRecoveryPlanStatus @default(DRAFT)
+  backlogItems                     Json                      @default("[]")
+  createdAt                        DateTime                  @default(now())
+  updatedAt                        DateTime                  @updatedAt
+  continuityEvent                  ContinuityEvent?          @relation(fields: [continuityEventId], references: [id])
+
+  @@index([continuityEventId])
+  @@index([status])
+  @@map("backlog_recovery_plans")
+}
+
+model ManualDigitalReconciliation {
+  id                              String                            @id @default(uuid()) @db.Uuid
+  reconciliationReference         String                            @unique
+  manualRecordReference           String
+  digitizedRepresentationReference String
+  reconcilerIdentityId            String                            @db.Uuid
+  comparisonNotes                 String
+  discrepancyDescription        String?
+  correctionNotes                 String?
+  verificationNotes               String?
+  auditLinkReference              String?
+  manualOriginalPreserved         Boolean                           @default(true)
+  status                          ManualDigitalReconciliationStatus @default(PENDING)
+  createdAt                       DateTime                          @default(now())
+  updatedAt                       DateTime                          @updatedAt
+  reconciler                      Identity                          @relation("ManualDigitalReconciler", fields: [reconcilerIdentityId], references: [id])
+
+  @@index([status])
+  @@map("manual_digital_reconciliations")
+}
+
+model ResumptionReadinessAssessment {
+  id                              String                    @id @default(uuid()) @db.Uuid
+  assessmentReference             String                    @unique
+  continuityEventId               String                    @db.Uuid
+  identityTrustEvaluated          Boolean                   @default(false)
+  identityTrustNotes              String?
+  authorityEvaluated              Boolean                   @default(false)
+  authorityNotes                  String?
+  recordIntegrityEvaluated        Boolean                   @default(false)
+  recordIntegrityNotes            String?
+  securityPostureEvaluated        Boolean                   @default(false)
+  securityPostureNotes            String?
+  dependenciesEvaluated           Boolean                   @default(false)
+  dependenciesNotes               String?
+  requiredPersonnelEvaluated      Boolean                   @default(false)
+  requiredPersonnelNotes          String?
+  dataStateEvaluated              Boolean                   @default(false)
+  dataStateNotes                  String?
+  integrationsEvaluated           Boolean                   @default(false)
+  integrationsNotes               String?
+  backlogEvaluated                Boolean                   @default(false)
+  backlogNotes                    String?
+  knownDefectsEvaluated           Boolean                   @default(false)
+  knownDefectsNotes               String?
+  residualRiskEvaluated           Boolean                   @default(false)
+  residualRiskNotes               String?
+  monitoringEvaluated             Boolean                   @default(false)
+  monitoringNotes                 String?
+  fallbackEvaluated               Boolean                   @default(false)
+  fallbackNotes                   String?
+  overallStatus                   ResumptionReadinessStatus @default(DRAFT)
+  technicalRecommendationNotes    String?
+  technicalRecommenderIdentityId String?                  @db.Uuid
+  technicalRecoveryComplete       Boolean                   @default(false)
+  createdAt                       DateTime                  @default(now())
+  updatedAt                       DateTime                  @updatedAt
+  continuityEvent                 ContinuityEvent           @relation(fields: [continuityEventId], references: [id], onDelete: Cascade)
+  technicalRecommender            Identity?                 @relation("ResumptionTechnicalRecommender", fields: [technicalRecommenderIdentityId], references: [id])
+  authorizations                  ResumptionAuthorization[]
+
+  @@index([continuityEventId])
+  @@index([overallStatus])
+  @@map("resumption_readiness_assessments")
+}
+
+model ResumptionAuthorization {
+  id                              String                        @id @default(uuid()) @db.Uuid
+  authorizationReference          String                        @unique
+  resumptionReadinessAssessmentId String                        @db.Uuid
+  authorizingOfficeholderId       String                        @db.Uuid
+  authorizingIdentityId           String                        @db.Uuid
+  functionAuthorityRecordId       String                        @db.Uuid
+  appointmentId                   String                        @db.Uuid
+  delegationId                    String?                       @db.Uuid
+  status                          ResumptionAuthorizationStatus @default(PENDING)
+  authorizedAt                    DateTime?
+  expiresAt                       DateTime?
+  denialReason                    String?
+  createdAt                       DateTime                      @default(now())
+  updatedAt                       DateTime                      @updatedAt
+  resumptionReadinessAssessment   ResumptionReadinessAssessment @relation(fields: [resumptionReadinessAssessmentId], references: [id], onDelete: Cascade)
+  authorizingOfficeholder         Officeholder                  @relation("ResumptionAuthorizingOfficeholder", fields: [authorizingOfficeholderId], references: [id])
+  authorizingIdentity             Identity                      @relation("ResumptionAuthorizer", fields: [authorizingIdentityId], references: [id])
+  functionAuthorityRecord         FunctionAuthorityRecord       @relation(fields: [functionAuthorityRecordId], references: [id])
+  appointment                     Appointment                   @relation(fields: [appointmentId], references: [id])
+  delegation                      Delegation?                   @relation(fields: [delegationId], references: [id])
+
+  @@index([resumptionReadinessAssessmentId])
+  @@index([status])
+  @@map("resumption_authorizations")
+}
+
+model ContinuityCorrectiveAction {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  correctiveActionReference  String                             @unique
+  sourceType               ContinuityCorrectiveActionSourceType
+  sourceReferenceId        String                             @db.Uuid
+  restoreTestId            String?                            @db.Uuid
+  recoveryExerciseId       String?                            @db.Uuid
+  description              String
+  status                   ContinuityCorrectiveActionStatus   @default(OPEN)
+  assignedToIdentityId     String?                            @db.Uuid
+  dueAt                    DateTime?
+  closedAt                 DateTime?
+  verificationNotes        String?
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  restoreTest              RestoreTest?                       @relation(fields: [restoreTestId], references: [id])
+  recoveryExercise         RecoveryExercise?                  @relation(fields: [recoveryExerciseId], references: [id])
+  assignedTo               Identity?                          @relation("ContinuityCorrectiveActionAssignee", fields: [assignedToIdentityId], references: [id])
+
+  @@index([status])
+  @@index([sourceType])
+  @@map("continuity_corrective_actions")
 }
