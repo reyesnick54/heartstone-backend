@@ -128,6 +128,7 @@ model Institution {
   complianceMattersResponsible ComplianceMatter[]
   complianceStatusProjections  ComplianceStatusProjection[]
   monitoringRules              MonitoringRule[]
+  strategicProjectProfiles     StrategicProjectProfile[]
   dashboardDefinitions             DashboardDefinition[]
   dashboardAccessPolicies          DashboardAccessPolicy[]
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
@@ -213,6 +214,7 @@ model Department {
   complianceMattersResponsible  ComplianceMatter[]
   complianceStatusProjections   ComplianceStatusProjection[]
   monitoringRules               MonitoringRule[]
+  strategicProjectProfiles      StrategicProjectProfile[]
   dashboardDefinitions          DashboardDefinition[]
   dashboardAccessPolicies       DashboardAccessPolicy[]
   dashboardIndicatorProjections DashboardIndicatorProjection[]
@@ -592,6 +594,15 @@ model Identity {
   reviewStayRecordsAsDecider         ReviewStayRecord[]            @relation("ReviewStayDecider")
   redressReviewRecordSnapshotsCaptured RedressReviewRecordSnapshot[] @relation("RedressReviewRecordSnapshotCapturer")
   redressImplementationActions       RedressImplementationAction[] @relation("RedressImplementationActionResponsible")
+  performanceClaimsAsserted          PerformanceClaim[]            @relation("PerformanceClaimAsserter")
+  performanceClaimsReviewed          PerformanceClaim[]            @relation("PerformanceClaimReviewer")
+  strategicProjectStagesRecorded     StrategicProjectStage[]       @relation("StrategicProjectStageRecorder")
+  strategicProjectMilestonesReported StrategicProjectMilestone[]   @relation("StrategicProjectMilestoneReporter")
+  capitalEvidenceRecorded            CapitalEvidenceRecord[]       @relation("CapitalEvidenceRecorder")
+  employmentEvidenceRecorded         EmploymentEvidenceRecord[]    @relation("EmploymentEvidenceRecorder")
+  infrastructureDeliveryRecorded     InfrastructureDeliveryRecord[] @relation("InfrastructureDeliveryRecorder")
+  sectorObservationsRecorded         SectorDevelopmentObservation[] @relation("SectorObservationRecorder")
+  projectStatusProjectionsDerived    ProjectStatusProjection[]     @relation("ProjectStatusProjectionDeriver")
   dashboardAccessPolicies            DashboardAccessPolicy[]
   dashboardQueryAudits                 DashboardQueryAudit[]
   dashboardSnapshotsCaptured         DashboardSnapshot[]           @relation("DashboardSnapshotCapturer")
@@ -2356,6 +2367,7 @@ model Case {
   internalAdministrativeReviews     InternalAdministrativeReview[]
   redressMatters                    RedressMatter[]
   externalReviewReferrals           ExternalReviewReferral[]
+  strategicProjectProfiles          StrategicProjectProfile[]
   dashboardIndicatorProjections     DashboardIndicatorProjection[]
   feeAssessments                    FeeAssessment[]
   invoices                          Invoice[]
@@ -7487,6 +7499,386 @@ model JudicialReviewInformationRecord {
   @@map("judicial_review_information_records")
 }
 
+// ─── Phase 12A: Performance Claims ───────────────────────────────────────────
+
+enum PerformanceClaimCategory {
+  INVESTMENT
+  EMPLOYMENT
+  EXPORTS
+  REVENUES
+  SECTOR_GROWTH
+  LOCAL_PARTICIPATION
+  ECONOMIC_IMPACT
+  OTHER
+}
+
+enum PerformanceClaimReviewStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  PUBLIC
+}
+
+model PerformanceClaim {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  claimReference              String                       @unique
+  category                    PerformanceClaimCategory
+  assertedValue               Json                         @default("{}")
+  assertedByIdentityId        String                       @db.Uuid
+  reviewStatus                PerformanceClaimReviewStatus @default(DRAFT)
+  requiresClaimReview         Boolean                      @default(true)
+  humanReviewedAt             DateTime?
+  humanReviewedByIdentityId   String?                      @db.Uuid
+  attributionMetadata         Json                         @default("{}")
+  externalFactorNotes         String?
+  independentVerificationRefs Json                         @default("[]")
+  isApplicantAssertion        Boolean                      @default(true)
+  isPublic                    Boolean                      @default(false)
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  assertedBy                  Identity                     @relation("PerformanceClaimAsserter", fields: [assertedByIdentityId], references: [id])
+  humanReviewedBy             Identity?                    @relation("PerformanceClaimReviewer", fields: [humanReviewedByIdentityId], references: [id])
+  economicClaimLinks          StrategicProjectEconomicClaim[]
+
+  @@index([category])
+  @@index([reviewStatus])
+  @@index([assertedByIdentityId])
+  @@map("performance_claims")
+}
+
+// ─── Phase 12C: Strategic Project and Economic Development Intelligence ──────
+
+enum StrategicProjectLifecycleStage {
+  INQUIRY
+  QUALIFICATION
+  APPLICATION
+  UNDER_REVIEW
+  CONDITIONALLY_ADVANCING
+  APPROVED
+  PRE_IMPLEMENTATION
+  IMPLEMENTATION
+  PARTIALLY_OPERATIONAL
+  OPERATIONAL
+  SUSPENDED
+  CLOSED
+}
+
+enum StrategicProjectMilestoneStatus {
+  PLANNED
+  REPORTED
+  SUBMITTED
+  REVIEWED
+  VERIFIED
+  ACCEPTED
+  COMPLETED
+  REVALIDATED
+  DISPUTED
+  SUPERSEDED
+}
+
+enum CapitalEvidenceClassification {
+  PROPOSED
+  INDICATED
+  COMMITTED
+  CONTRACTED
+  FUNDED
+  AVAILABLE
+  DEPLOYED
+  VERIFIED_DEPLOYED
+}
+
+enum EmploymentEvidenceClassification {
+  FORECAST
+  PLANNED
+  COMMITTED
+  OFFERED
+  ONBOARDED
+  ACTIVE_VERIFIED
+  ENDED
+}
+
+enum InfrastructureDeliveryStage {
+  CONCEPT
+  DESIGN
+  PROCUREMENT
+  CONTRACTED
+  CONSTRUCTION_REPORTED
+  CONSTRUCTION_VERIFIED
+  COMMISSIONING
+  ACCEPTED
+  OPERATIONAL
+  REVALIDATED
+}
+
+enum StrategicProjectDependencyType {
+  GOVERNMENT
+  PROFESSIONAL
+  UTILITY
+  FINANCE
+  LAND
+  PLANNING
+  ENVIRONMENTAL
+  CUSTOMS
+  IMMIGRATION
+  LABOUR
+  SECURITY
+  TECHNOLOGY
+  SUPPLIER
+  INFRASTRUCTURE
+}
+
+enum StrategicProjectDependencyOwnerType {
+  GOVERNMENT
+  APPLICANT
+  THIRD_PARTY
+  UTILITY
+  PROFESSIONAL
+  FINANCIAL_INSTITUTION
+  SUPPLIER
+  OTHER
+}
+
+enum StrategicProjectRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ProjectStatusProjectionAudience {
+  OFFICIAL
+  EXECUTIVE
+  PUBLIC
+  SPONSOR
+}
+
+model StrategicProjectProfile {
+  id                                 String                         @id @default(uuid()) @db.Uuid
+  projectCode                        String                         @unique
+  title                              String
+  description                        String?
+  sponsoringInstitutionId            String                         @db.Uuid
+  responsibleDepartmentId            String                         @db.Uuid
+  caseId                             String?                        @db.Uuid
+  sectorCode                         String?
+  currentStage                       StrategicProjectLifecycleStage @default(INQUIRY)
+  adverseStatusPreserved             Boolean                        @default(false)
+  attributionMetadata                Json                           @default("{}")
+  externalFactorNotes                String?
+  announcementDate                   DateTime?
+  doesNotInferApprovalFromActivity   Boolean                        @default(true)
+  createdAt                          DateTime                       @default(now())
+  updatedAt                          DateTime                       @updatedAt
+  sponsoringInstitution              Institution                    @relation(fields: [sponsoringInstitutionId], references: [id])
+  responsibleDepartment              Department                     @relation(fields: [responsibleDepartmentId], references: [id])
+  case                               Case?                          @relation(fields: [caseId], references: [id])
+  stageHistory                       StrategicProjectStage[]
+  milestones                         StrategicProjectMilestone[]
+  dependencies                       StrategicProjectDependency[]
+  risks                              StrategicProjectRisk[]
+  economicClaims                     StrategicProjectEconomicClaim[]
+  capitalEvidence                    CapitalEvidenceRecord[]
+  employmentEvidence                 EmploymentEvidenceRecord[]
+  infrastructureRecords              InfrastructureDeliveryRecord[]
+  statusProjections                  ProjectStatusProjection[]
+
+  @@index([sponsoringInstitutionId])
+  @@index([responsibleDepartmentId])
+  @@index([caseId])
+  @@index([currentStage])
+  @@index([sectorCode])
+  @@map("strategic_project_profiles")
+}
+
+model StrategicProjectStage {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  profileId                   String                         @db.Uuid
+  stage                       StrategicProjectLifecycleStage
+  institutionalStateReference String
+  effectiveFrom               DateTime
+  effectiveUntil              DateTime?
+  recordedByIdentityId        String                         @db.Uuid
+  sourceRecordType            String?
+  sourceRecordId              String?
+  doesNotInferApproval        Boolean                        @default(true)
+  recordedAt                  DateTime                       @default(now())
+  profile                     StrategicProjectProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  recordedBy                  Identity                       @relation("StrategicProjectStageRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([stage])
+  @@index([effectiveFrom])
+  @@map("strategic_project_stages")
+}
+
+model StrategicProjectMilestone {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  profileId                   String                          @db.Uuid
+  title                       String
+  description                 String?
+  status                      StrategicProjectMilestoneStatus @default(PLANNED)
+  plannedDate                 DateTime?
+  reportedDate                DateTime?
+  verifiedDate                DateTime?
+  completedDate               DateTime?
+  reportedByIdentityId        String?                         @db.Uuid
+  evidenceRecordRefs          Json                            @default("[]")
+  independentVerificationRefs Json                            @default("[]")
+  createdAt                   DateTime                        @default(now())
+  updatedAt                   DateTime                        @updatedAt
+  profile                     StrategicProjectProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reportedBy                  Identity?                       @relation("StrategicProjectMilestoneReporter", fields: [reportedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([status])
+  @@map("strategic_project_milestones")
+}
+
+model StrategicProjectDependency {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  profileId             String                            @db.Uuid
+  dependencyType        StrategicProjectDependencyType
+  ownerType             StrategicProjectDependencyOwnerType
+  ownerReference        String
+  ownerName             String?
+  description           String?
+  statusSummary         String?
+  isGovernmentOwned     Boolean                           @default(false)
+  sourceDataRefs        Json                              @default("[]")
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  profile               StrategicProjectProfile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([dependencyType])
+  @@index([ownerType])
+  @@map("strategic_project_dependencies")
+}
+
+model StrategicProjectRisk {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  profileId             String                    @db.Uuid
+  title                 String
+  description           String?
+  riskLevel             StrategicProjectRiskLevel @default(MEDIUM)
+  riskScore             Int?
+  doesNotAffectApproval Boolean                   @default(true)
+  methodologyVersion    String?
+  sourceDataRefs        Json                      @default("[]")
+  recordedAt            DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  profile               StrategicProjectProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([riskLevel])
+  @@map("strategic_project_risks")
+}
+
+model StrategicProjectEconomicClaim {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  profileId          String                  @db.Uuid
+  performanceClaimId String                  @db.Uuid
+  claimSummary       String?
+  createdAt          DateTime                @default(now())
+  profile            StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  performanceClaim   PerformanceClaim        @relation(fields: [performanceClaimId], references: [id])
+
+  @@unique([profileId, performanceClaimId])
+  @@index([profileId])
+  @@index([performanceClaimId])
+  @@map("strategic_project_economic_claims")
+}
+
+model CapitalEvidenceRecord {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  profileId                   String                        @db.Uuid
+  classification              CapitalEvidenceClassification
+  amount                      Decimal                       @db.Decimal(18, 2)
+  currency                    String                        @default("USD")
+  evidenceRecordRefs          Json                          @default("[]")
+  independentVerificationRefs Json                          @default("[]")
+  recordedByIdentityId        String                        @db.Uuid
+  recordedAt                  DateTime                      @default(now())
+  profile                     StrategicProjectProfile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  recordedBy                  Identity                      @relation("CapitalEvidenceRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([classification])
+  @@map("capital_evidence_records")
+}
+
+model EmploymentEvidenceRecord {
+  id                          String                           @id @default(uuid()) @db.Uuid
+  profileId                   String                           @db.Uuid
+  classification              EmploymentEvidenceClassification
+  headcount                   Int
+  evidenceRecordRefs          Json                             @default("[]")
+  independentVerificationRefs Json                             @default("[]")
+  recordedByIdentityId        String                           @db.Uuid
+  recordedAt                  DateTime                         @default(now())
+  profile                     StrategicProjectProfile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  recordedBy                  Identity                         @relation("EmploymentEvidenceRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([classification])
+  @@map("employment_evidence_records")
+}
+
+model InfrastructureDeliveryRecord {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  profileId                   String                      @db.Uuid
+  stage                       InfrastructureDeliveryStage
+  digitalTwinStatus           String?
+  physicalCompletionVerified  Boolean                     @default(false)
+  dashboardStatus             String?
+  evidenceRecordRefs          Json                        @default("[]")
+  independentVerificationRefs Json                        @default("[]")
+  recordedByIdentityId        String                      @db.Uuid
+  recordedAt                  DateTime                    @default(now())
+  profile                     StrategicProjectProfile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  recordedBy                  Identity                    @relation("InfrastructureDeliveryRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([stage])
+  @@map("infrastructure_delivery_records")
+}
+
+model SectorDevelopmentObservation {
+  id                          String    @id @default(uuid()) @db.Uuid
+  sectorCode                  String
+  observationSummary          String
+  attributionMetadata         Json      @default("{}")
+  externalFactorNotes         String?
+  sourceDataRefs              Json      @default("[]")
+  doesNotClaimNationalCausation Boolean @default(true)
+  recordedByIdentityId        String    @db.Uuid
+  recordedAt                  DateTime  @default(now())
+  recordedBy                  Identity  @relation("SectorObservationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([sectorCode])
+  @@map("sector_development_observations")
+}
+
+model ProjectStatusProjection {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  profileId                   String                          @db.Uuid
+  audience                    ProjectStatusProjectionAudience
+  derivedStage                StrategicProjectLifecycleStage
+  projectionDisclaimer        String
+  sourceDataRefs              Json                            @default("[]")
+  evidenceCutoffAt            DateTime?
+  adverseStatusPreserved      Boolean                         @default(false)
+  projectionVersion           Int                             @default(1)
+  lastDerivedAt               DateTime                        @default(now())
+  derivedByIdentityId         String?                         @db.Uuid
+  profile                     StrategicProjectProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  derivedBy                   Identity?                       @relation("ProjectStatusProjectionDeriver", fields: [derivedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([audience])
+  @@map("project_status_projections")
 // ─── Phase 12B: Executive Command Console and Departmental Intelligence ─────────
 
 enum DashboardConsoleType {
