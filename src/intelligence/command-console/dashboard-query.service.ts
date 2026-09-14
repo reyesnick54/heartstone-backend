@@ -2,8 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DashboardConsoleType, type DashboardFilterDimension } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { DASHBOARD_PROJECTION_DISCLAIMER, DASHBOARD_STATUS_DISCLAIMER } from '../intelligence.constants';
-import { DashboardAccessPolicyService, type EvaluateDashboardAccessInput } from './dashboard-access-policy.service';
+import {
+  DASHBOARD_PROJECTION_DISCLAIMER,
+  DASHBOARD_STATUS_DISCLAIMER,
+} from '../intelligence.constants';
+import {
+  DashboardAccessPolicyService,
+  type EvaluateDashboardAccessInput,
+} from './dashboard-access-policy.service';
 import { DashboardDefinitionService } from './dashboard-definition.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
 
@@ -96,9 +102,7 @@ export class DashboardQueryService {
       this.projectionService.formatProjectionResponse(projection),
     );
 
-    const distinctStatusCodes = [
-      ...new Set(projections.map((p) => p.statusDictionaryEntry.code)),
-    ];
+    const distinctStatusCodes = [...new Set(projections.map((p) => p.statusDictionaryEntry.code))];
 
     return {
       consoleKind,

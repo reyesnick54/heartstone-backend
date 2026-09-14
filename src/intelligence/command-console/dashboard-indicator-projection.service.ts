@@ -57,7 +57,9 @@ export class DashboardIndicatorProjectionService {
     });
 
     if (!indicator) {
-      throw new NotFoundException(`Indicator definition "${input.indicatorDefinitionId}" was not found`);
+      throw new NotFoundException(
+        `Indicator definition "${input.indicatorDefinitionId}" was not found`,
+      );
     }
 
     const evidencePacketId = input.drilldowns.find((d) => d.evidencePacketId)?.evidencePacketId;
@@ -69,7 +71,9 @@ export class DashboardIndicatorProjectionService {
     );
 
     if (indicator.drilldownRequired && input.drilldowns.length === 0) {
-      throw new BadRequestException('Material indicator requires drilldown references to authoritative records');
+      throw new BadRequestException(
+        'Material indicator requires drilldown references to authoritative records',
+      );
     }
 
     const now = input.calculatedAt ?? new Date();

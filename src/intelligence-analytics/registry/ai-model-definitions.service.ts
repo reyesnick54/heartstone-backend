@@ -1,9 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import {
-  AIModelDefinitionStatus,
-  AIModelVersionStatus,
-  Prisma,
-} from '@prisma/client';
+import { AIModelDefinitionStatus, AIModelVersionStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { AiGovernanceBoundaryService } from '../common/ai-governance-boundary.service';

@@ -77,11 +77,7 @@ export class DashboardBoundaryService {
     evidencePacketId: string | null | undefined,
     requiresEvidencePacket: boolean,
   ) {
-    if (
-      requiresEvidencePacket &&
-      colorSemantic === 'POSITIVE_PRESENTATION' &&
-      !evidencePacketId
-    ) {
+    if (requiresEvidencePacket && colorSemantic === 'POSITIVE_PRESENTATION' && !evidencePacketId) {
       throw new BadRequestException(
         'Green/positive presentation indicator blocked: required evidence packet is missing',
       );

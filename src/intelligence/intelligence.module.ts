@@ -32,11 +32,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
 
 @Module({
   imports: [DatabaseModule, SessionsModule],
-  controllers: [
-    IntelligenceController,
-    CommandConsoleController,
-    StrategicProjectController,
-  ],
+  controllers: [IntelligenceController, CommandConsoleController, StrategicProjectController],
   providers: [
     IntelligenceBoundaryService,
     AnalysisService,

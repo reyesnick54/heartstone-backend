@@ -36,7 +36,13 @@ export interface CreateIndicatorDefinitionInput {
 export interface CreateWidgetDefinitionInput {
   code: string;
   title: string;
-  widgetType: 'INDICATOR_TILE' | 'INDICATOR_LIST' | 'FILTER_PANEL' | 'SUMMARY_TABLE' | 'TREND_CHART' | 'DRILLDOWN_PANEL';
+  widgetType:
+    | 'INDICATOR_TILE'
+    | 'INDICATOR_LIST'
+    | 'FILTER_PANEL'
+    | 'SUMMARY_TABLE'
+    | 'TREND_CHART'
+    | 'DRILLDOWN_PANEL';
   indicatorDefinitionId?: string;
   displayOrder?: number;
   filterConfig?: Prisma.InputJsonValue;
