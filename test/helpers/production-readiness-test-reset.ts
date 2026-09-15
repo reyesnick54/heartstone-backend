@@ -1,6 +1,26 @@
 import { type PrismaService } from '../../src/database/prisma.service';
 
 export async function resetProductionReadinessData(prisma: PrismaService): Promise<void> {
+  await prisma.continuityCorrectiveAction.deleteMany();
+  await prisma.resumptionAuthorization.deleteMany();
+  await prisma.resumptionReadinessAssessment.deleteMany();
+  await prisma.manualDigitalReconciliation.deleteMany();
+  await prisma.backlogRecoveryPlan.deleteMany();
+  await prisma.recoveryAction.deleteMany();
+  await prisma.recoveryExercise.deleteMany();
+  await prisma.restoreTest.deleteMany();
+  await prisma.backupExecutionRecord.deleteMany();
+  await prisma.backupDefinition.deleteMany();
+  await prisma.continuityDecision.deleteMany();
+  await prisma.manualOperationAuthorization.deleteMany();
+  await prisma.continuityEvent.deleteMany();
+  await prisma.manualOperationProcedure.deleteMany();
+  await prisma.continuityProcedure.deleteMany();
+  await prisma.singlePointOfFailure.deleteMany();
+  await prisma.continuityDependency.deleteMany();
+  await prisma.recoveryObjective.deleteMany();
+  await prisma.businessImpactAssessment.deleteMany();
+  await prisma.criticalServiceDefinition.deleteMany();
   await prisma.exitAcceptanceRecord.deleteMany();
   await prisma.integrationShutdownRecord.deleteMany();
   await prisma.credentialShutdownRecord.deleteMany();
