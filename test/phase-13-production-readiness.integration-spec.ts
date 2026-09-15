@@ -112,6 +112,10 @@ describe('Phase 13 production readiness (integration)', () => {
       verificationNotes: 'Issuance suspended; applications continue to safe boundary only',
     });
 
+    const verifiedAction = await prisma.productionCorrectiveAction.findUniqueOrThrow({
+      where: { id: action.id },
+    });
+
     const suspension = await suspensions.issueSuspension({
       scope: OperationalSuspensionScope.ISSUANCE_CAPABILITY,
       targetReference: 'issuance-capability',
@@ -121,7 +125,7 @@ describe('Phase 13 production readiness (integration)', () => {
 
     expect(suspension.status).toBe(OperationalSuspensionStatus.ACTIVE);
     expect(suspension.preserveRecords).toBe(true);
-    expect(action.status).toBe(ProductionCorrectiveActionStatus.VERIFIED);
+    expect(verifiedAction.status).toBe(ProductionCorrectiveActionStatus.VERIFIED);
   });
 
   it('E2E 10 — material change triggers revalidation requirement', async () => {

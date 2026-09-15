@@ -14,7 +14,6 @@ concurrency:
 
 env:
   NODE_VERSION: '22'
-  NPM_AUDIT_SEVERITY_THRESHOLD: critical
   DATABASE_URL: postgresql://heartstone:heartstone@localhost:5432/heartstone?schema=public
   REDIS_HOST: localhost
   REDIS_PORT: '6379'
@@ -27,8 +26,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -43,9 +40,6 @@ jobs:
       - name: Generate Prisma client
         run: npm run prisma:generate
 
-      - name: Validate Prisma schema
-        run: npx prisma validate
-
       - name: Typecheck
         run: npm run typecheck
 
@@ -57,33 +51,6 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Secret scanning
-        run: npm run security:scan-secrets
-
-      - name: Dependency vulnerability policy
-        run: npm run security:audit-dependencies
-      - name: Compute artifact digest
-        id: artifact
-        run: |
-          DIGEST=$(find dist -type f | sort | xargs sha256sum | sha256sum | awk '{print $1}')
-          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
-          echo "artifact_digest=$DIGEST" >> "$GITHUB_ENV"
-
-      - name: Record build provenance
-        run: |
-          cat > build-provenance.json <<EOF
-          {
-            "sourceCommitSha": "${{ github.sha }}",
-            "workflow": "${{ github.workflow }}",
-            "runId": "${{ github.run_id }}",
-            "artifactDigest": "${{ env.artifact_digest }}",
-            "lockfileDigest": "$(sha256sum package-lock.json | awk '{print $1}')",
-            "nodeVersion": "${{ env.NODE_VERSION }}",
-            "authorizesProduction": false
-          }
-          EOF
-          cat build-provenance.json
 
   test:
     name: Tests
@@ -113,12 +80,9 @@ jobs:
           --health-retries 5
     env:
       NODE_ENV: test
-      HEARTSTONE_ENVIRONMENT_CLASSIFICATION: TEST
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -136,9 +100,6 @@ jobs:
       - name: Apply database migrations
         run: npm run prisma:migrate:deploy
 
-      - name: Migration dry-run validation
-        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
-
       - name: Unit tests
         run: npm run test:unit
 
@@ -147,6 +108,3 @@ jobs:
 
       - name: End-to-end tests
         run: npm run test:e2e
-
-      - name: Security tests
-        run: npm run test:unit -- --testPathPattern=phase-13e

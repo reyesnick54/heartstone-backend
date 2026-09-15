@@ -316,10 +316,6 @@ export class BusinessContinuityBoundaryService {
 
     this.assertRestoreWithoutIntegrityValidationRejected(input);
 
-    if (input.result === RestoreTestResult.UNVERIFIED) {
-      return RestoreTestResult.UNVERIFIED;
-    }
-
     const verificationValues = RESTORE_TEST_VERIFICATION_FIELDS.map(
       (field) => input[field as keyof RestoreTestVerificationInput],
     );

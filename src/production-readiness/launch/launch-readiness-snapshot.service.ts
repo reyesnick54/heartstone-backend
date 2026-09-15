@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LaunchEventType, type LaunchReadinessSnapshot,Prisma } from '@prisma/client';
+import { LaunchEventType, type LaunchReadinessSnapshot, Prisma } from '@prisma/client';
 
 import { generateReferenceNumber } from '../../application-processing/common/reference-number.util';
 import { PrismaService } from '../../database/prisma.service';

@@ -25,10 +25,16 @@ describe('Phase 13A must-fail gates', () => {
 
     it('rejects technical completion as production-ready evidence', () => {
       expect(() => {
-        boundary.assertTechnicalCompletionCannotAuthorizeProduction(['CI_PIPELINE_SUCCESS', 'BUILD_SUCCESS']);
+        boundary.assertTechnicalCompletionCannotAuthorizeProduction([
+          'CI_PIPELINE_SUCCESS',
+          'BUILD_SUCCESS',
+        ]);
       }).toThrow(BadRequestException);
       expect(() => {
-        boundary.assertTechnicalCompletionCannotAuthorizeProduction(['CI_PIPELINE_SUCCESS', 'BUILD_SUCCESS']);
+        boundary.assertTechnicalCompletionCannotAuthorizeProduction([
+          'CI_PIPELINE_SUCCESS',
+          'BUILD_SUCCESS',
+        ]);
       }).toThrow(OPERATIONAL_READINESS_REASON_CODES.TECHNICAL_COMPLETION_NOT_PRODUCTION_READY);
     });
 
@@ -38,7 +44,9 @@ describe('Phase 13A must-fail gates', () => {
           CapabilityMaturityState.INSTITUTIONALLY_ACCEPTED,
           ['PRODUCTION_READINESS_ASSESSMENT'],
         );
-      }).toThrow(OPERATIONAL_READINESS_REASON_CODES.PRODUCTION_READINESS_NOT_INSTITUTIONAL_ACCEPTANCE);
+      }).toThrow(
+        OPERATIONAL_READINESS_REASON_CODES.PRODUCTION_READINESS_NOT_INSTITUTIONAL_ACCEPTANCE,
+      );
     });
 
     it('rejects institutional acceptance without mandatory activation conditions', () => {
@@ -47,14 +55,17 @@ describe('Phase 13A must-fail gates', () => {
           CapabilityMaturityState.OPERATIONALLY_ACTIVATED,
           false,
         );
-      }).toThrow(OPERATIONAL_READINESS_REASON_CODES.INSTITUTIONAL_ACCEPTANCE_NOT_OPERATIONAL_ACTIVATION);
+      }).toThrow(
+        OPERATIONAL_READINESS_REASON_CODES.INSTITUTIONAL_ACCEPTANCE_NOT_OPERATIONAL_ACTIVATION,
+      );
     });
 
     it('rejects pilot success as production authorization', () => {
       expect(() => {
-        boundary.assertPilotSuccessCannotAuthorizeProduction(CapabilityMaturityState.PRODUCTION_READY, [
-          'PILOT_SUCCESS',
-        ]);
+        boundary.assertPilotSuccessCannotAuthorizeProduction(
+          CapabilityMaturityState.PRODUCTION_READY,
+          ['PILOT_SUCCESS'],
+        );
       }).toThrow(OPERATIONAL_READINESS_REASON_CODES.PILOT_SUCCESS_NOT_PRODUCTION_AUTHORIZATION);
     });
 
@@ -94,13 +105,19 @@ describe('Phase 13A must-fail gates', () => {
 
     it('blocks AI from advancing maturity', () => {
       expect(() => {
-        boundary.assertAiActorCannotAct(AI_ACTOR_ROLE_MARKER, `${AI_ACTOR_IDENTITY_PREFIX}reviewer`);
+        boundary.assertAiActorCannotAct(
+          AI_ACTOR_ROLE_MARKER,
+          `${AI_ACTOR_IDENTITY_PREFIX}reviewer`,
+        );
       }).toThrow(OPERATIONAL_READINESS_REASON_CODES.AI_CANNOT_ADVANCE_MATURITY);
     });
 
     it('blocks suspended capability from appearing operational', () => {
       expect(() => {
-        boundary.assertSuspendedCannotAppearOperational(true, CapabilityMaturityState.OPERATIONALLY_ACTIVATED);
+        boundary.assertSuspendedCannotAppearOperational(
+          true,
+          CapabilityMaturityState.OPERATIONALLY_ACTIVATED,
+        );
       }).toThrow(OPERATIONAL_READINESS_REASON_CODES.SUSPENDED_CANNOT_APPEAR_OPERATIONAL);
     });
 
@@ -133,13 +150,19 @@ describe('Phase 13A must-fail gates', () => {
   describe('Maturity transition rules', () => {
     it('forbids arbitrary maturity skipping', () => {
       expect(
-        isValidMaturityAdvancement(CapabilityMaturityState.CONCEPTUAL, CapabilityMaturityState.PRODUCTION_READY),
+        isValidMaturityAdvancement(
+          CapabilityMaturityState.CONCEPTUAL,
+          CapabilityMaturityState.PRODUCTION_READY,
+        ),
       ).toBe(false);
     });
 
     it('allows single-step advancement along the canonical path', () => {
       expect(
-        isValidMaturityAdvancement(CapabilityMaturityState.CONCEPTUAL, CapabilityMaturityState.DESIGNED),
+        isValidMaturityAdvancement(
+          CapabilityMaturityState.CONCEPTUAL,
+          CapabilityMaturityState.DESIGNED,
+        ),
       ).toBe(true);
     });
 

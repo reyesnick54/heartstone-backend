@@ -7,7 +7,10 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { isValidMaturityAdvancement, requiresProductionReadinessGate } from '../common/maturity-transition.util';
+import {
+  isValidMaturityAdvancement,
+  requiresProductionReadinessGate,
+} from '../common/maturity-transition.util';
 import { OperationalReadinessBoundaryService } from '../common/operational-readiness-boundary.service';
 import { OPERATIONAL_READINESS_REASON_CODES } from '../operational-readiness.constants';
 import { CapabilityDefinitionService } from './capability-definition.service';
@@ -57,7 +60,9 @@ export class CapabilityMaturityService {
   ) {}
 
   async createAssessment(input: CreateMaturityAssessmentInput) {
-    const definition = await this.definitionService.findDefinitionById(input.capabilityDefinitionId);
+    const definition = await this.definitionService.findDefinitionById(
+      input.capabilityDefinitionId,
+    );
     const version = await this.prisma.capabilityVersion.findUnique({
       where: { id: input.capabilityVersionId },
     });
@@ -88,7 +93,10 @@ export class CapabilityMaturityService {
     this.boundary.assertEvidenceRequiredForAdvancement(input.evidence?.length ?? 0);
 
     if (requiresProductionReadinessGate(input.requestedMaturity)) {
-      await this.assertProductionReadinessGate(input.capabilityDefinitionId, input.capabilityVersionId);
+      await this.assertProductionReadinessGate(
+        input.capabilityDefinitionId,
+        input.capabilityVersionId,
+      );
     }
 
     return this.prisma.capabilityMaturityAssessment.create({
@@ -104,7 +112,7 @@ export class CapabilityMaturityService {
         institutionalOwnerId: input.institutionalOwnerId,
         technicalOwnerIdentityId: input.technicalOwnerIdentityId,
         requirements: (input.requirements ?? []) as Prisma.InputJsonValue,
-        evidence: (input.evidence ?? []),
+        evidence: input.evidence ?? [],
         openDefects: (input.openDefects ?? []) as Prisma.InputJsonValue,
         residualRisks: (input.residualRisks ?? []) as Prisma.InputJsonValue,
         dependencies: (input.dependencies ?? []) as Prisma.InputJsonValue,
@@ -169,7 +177,11 @@ export class CapabilityMaturityService {
       capabilityVersionId: string;
       currentMaturity: CapabilityMaturityState;
       requestedMaturity: CapabilityMaturityState;
-      capabilityDefinition: { isSuspended: boolean; isRetired: boolean; replacedByCapabilityId: string | null };
+      capabilityDefinition: {
+        isSuspended: boolean;
+        isRetired: boolean;
+        replacedByCapabilityId: string | null;
+      };
     },
     changedByIdentityId: string,
   ) {
@@ -183,7 +195,8 @@ export class CapabilityMaturityService {
       Boolean(assessment.capabilityDefinition.replacedByCapabilityId),
     );
 
-    const isOperational = assessment.requestedMaturity === CapabilityMaturityState.OPERATIONALLY_ACTIVATED;
+    const isOperational =
+      assessment.requestedMaturity === CapabilityMaturityState.OPERATIONALLY_ACTIVATED;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.capabilityMaturityHistory.create({
@@ -212,7 +225,10 @@ export class CapabilityMaturityService {
     });
   }
 
-  private async assertProductionReadinessGate(capabilityDefinitionId: string, capabilityVersionId: string) {
+  private async assertProductionReadinessGate(
+    capabilityDefinitionId: string,
+    capabilityVersionId: string,
+  ) {
     const assessment = await this.prisma.productionReadinessAssessment.findFirst({
       where: { capabilityDefinitionId, capabilityVersionId },
       orderBy: { createdAt: 'desc' },
@@ -220,7 +236,9 @@ export class CapabilityMaturityService {
     });
 
     if (!assessment) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.EVIDENCE_REQUIRED_FOR_ADVANCEMENT);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.EVIDENCE_REQUIRED_FOR_ADVANCEMENT,
+      );
     }
 
     const acceptableStatuses: ProductionReadinessStatus[] = [
@@ -229,7 +247,9 @@ export class CapabilityMaturityService {
     ];
 
     if (!acceptableStatuses.includes(assessment.overallStatus)) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.TECHNICAL_COMPLETION_NOT_PRODUCTION_READY);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.TECHNICAL_COMPLETION_NOT_PRODUCTION_READY,
+      );
     }
 
     const hasCriticalBlockers = assessment.requirements.some(
@@ -239,7 +259,9 @@ export class CapabilityMaturityService {
     );
 
     if (hasCriticalBlockers) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.UNRESOLVED_CRITICAL_CONDITION);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.UNRESOLVED_CRITICAL_CONDITION,
+      );
     }
   }
 }

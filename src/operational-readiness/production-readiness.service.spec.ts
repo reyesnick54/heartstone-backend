@@ -26,7 +26,11 @@ describe('ProductionReadinessService', () => {
   };
 
   const boundary = new OperationalReadinessBoundaryService();
-  const service = new ProductionReadinessService(prisma as never, boundary, definitionService as never);
+  const service = new ProductionReadinessService(
+    prisma as never,
+    boundary,
+    definitionService as never,
+  );
 
   it('links replayable readiness evidence', async () => {
     prisma.productionReadinessAssessment.create.mockResolvedValue({ id: 'assess-1' });

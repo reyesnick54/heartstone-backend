@@ -35,7 +35,10 @@ export class CapabilityDependencyService {
     private readonly definitionService: CapabilityDefinitionService,
   ) {}
 
-  async createDependency(input: CreateCapabilityDependencyInput, clientPayload?: Record<string, unknown>) {
+  async createDependency(
+    input: CreateCapabilityDependencyInput,
+    clientPayload?: Record<string, unknown>,
+  ) {
     if (clientPayload) {
       this.boundary.rejectClientProtectedDependencyFields(clientPayload);
     }

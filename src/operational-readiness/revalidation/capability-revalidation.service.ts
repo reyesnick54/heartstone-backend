@@ -20,7 +20,9 @@ export class CapabilityRevalidationService {
   ) {}
 
   async recordRevalidationRequirement(input: RecordRevalidationInput) {
-    const definition = await this.definitionService.findDefinitionById(input.capabilityDefinitionId);
+    const definition = await this.definitionService.findDefinitionById(
+      input.capabilityDefinitionId,
+    );
 
     const requirement = await this.prisma.capabilityRevalidationRequirement.create({
       data: {

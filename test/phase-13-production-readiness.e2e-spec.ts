@@ -6,7 +6,10 @@ import { type App } from 'supertest/types';
 import { type PrismaService } from '../src/database/prisma.service';
 import { LaunchReadinessSnapshotService } from '../src/production-readiness/launch/launch-readiness-snapshot.service';
 import { OperationalActivationService } from '../src/production-readiness/launch/operational-activation.service';
-import { PRODUCTION_READINESS_BOUNDARY_DISCLAIMER } from '../src/production-readiness/production-readiness.constants';
+import {
+  PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
+  PRODUCTION_READINESS_REASON_CODES,
+} from '../src/production-readiness/production-readiness.constants';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { buildPassedGateRequirements, seedPhase13Fixture } from './helpers/phase-13-test-fixtures';
 
@@ -28,7 +31,7 @@ describe('Phase 13 production readiness (e2e)', () => {
 
   it('exposes production readiness boundary disclaimer via HTTP', async () => {
     const response = await request(app.getHttpServer())
-      .get('/production-readiness/boundary-disclaimer')
+      .get('/api/v1/production-readiness/boundary-disclaimer')
       .expect(200);
 
     const body = response.body as {
@@ -69,21 +72,22 @@ describe('Phase 13 production readiness (e2e)', () => {
       requestedScope: [fixture.governmentServiceVersionId],
     });
 
-    const unacceptedActivation = await activation.activateOperationally({
-      launchReadinessSnapshotId: snapshot.id,
-      accountableOwnerIdentityId: fixture.accountableOwnerIdentityId,
-      performedByIdentityId: fixture.operatorIdentityId,
-      performedByIdentityType: IdentityType.INDIVIDUAL,
-      scopeDescription: 'Attempt to activate unaccepted service',
-      acceptedReleaseCommit: fixture.releaseCommit,
-      acceptedArtifactDigest: fixture.artifactDigest,
-      gateRequirements: buildPassedGateRequirements(),
-      acceptedScope: [fixture.governmentServiceVersionId],
-      requestedScope: [unacceptedServiceVersionId],
-    });
-
     expect(platformLaunch.outcome).toBe(OperationalActivationOutcome.ACTIVATED);
-    expect(unacceptedActivation.outcome).not.toBe(OperationalActivationOutcome.ACTIVATED);
+
+    await expect(
+      activation.activateOperationally({
+        launchReadinessSnapshotId: snapshot.id,
+        accountableOwnerIdentityId: fixture.accountableOwnerIdentityId,
+        performedByIdentityId: fixture.operatorIdentityId,
+        performedByIdentityType: IdentityType.INDIVIDUAL,
+        scopeDescription: 'Attempt to activate unaccepted service',
+        acceptedReleaseCommit: fixture.releaseCommit,
+        acceptedArtifactDigest: fixture.artifactDigest,
+        gateRequirements: buildPassedGateRequirements(),
+        acceptedScope: [fixture.governmentServiceVersionId],
+        requestedScope: [unacceptedServiceVersionId],
+      }),
+    ).rejects.toThrow(PRODUCTION_READINESS_REASON_CODES.ACTIVATION_EXCEEDS_SCOPE);
   });
 
   it('E2E 9 — rollback preserves official records (no history erasure)', async () => {

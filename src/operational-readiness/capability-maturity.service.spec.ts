@@ -62,7 +62,10 @@ describe('CapabilityMaturityService', () => {
         replacedByCapabilityId: null,
       },
     });
-    prisma.capabilityMaturityAssessment.update.mockResolvedValue({ id: 'assess-1', decision: 'APPROVED' });
+    prisma.capabilityMaturityAssessment.update.mockResolvedValue({
+      id: 'assess-1',
+      decision: 'APPROVED',
+    });
 
     await service.createAssessment({
       capabilityDefinitionId: 'cap-1',
