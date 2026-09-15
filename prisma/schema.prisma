@@ -670,6 +670,32 @@ model Identity {
   credentialShutdownsPerformed             CredentialShutdownRecord[]             @relation("CredentialShutdownPerformer")
   integrationShutdownsPerformed            IntegrationShutdownRecord[]            @relation("IntegrationShutdownPerformer")
   exitAcceptancesRecorded                  ExitAcceptanceRecord[]                 @relation("ExitAcceptanceRecorder")
+  securityAssetsOwned                SecurityAsset[]               @relation("SecurityAssetOwner")
+  securityControlDefinitionsOwned    SecurityControlDefinition[]   @relation("SecurityControlDefinitionOwner")
+  securityControlImplementationsOwned SecurityControlImplementation[] @relation("SecurityControlImplementationOwner")
+  securityControlAssessmentsConducted SecurityControlAssessment[]  @relation("SecurityControlAssessmentAssessor")
+  securityFindingsOwned              SecurityFinding[]             @relation("SecurityFindingOwner")
+  securityExceptionsOwned            SecurityException[]           @relation("SecurityExceptionOwner")
+  securityExceptionsApproved         SecurityException[]           @relation("SecurityExceptionApprover")
+  vulnerabilityFindingsOwned         VulnerabilityFinding[]        @relation("VulnerabilityFindingOwner")
+  vulnerabilityRemediationsOwned     VulnerabilityRemediation[]    @relation("VulnerabilityRemediationOwner")
+  securityAssuranceReviewsConducted  SecurityAssuranceReview[]     @relation("SecurityAssuranceReviewReviewer")
+  cryptographicAssetsOwned           CryptographicAsset[]          @relation("CryptographicAssetOwner")
+  cryptographicPoliciesOwned         CryptographicPolicy[]         @relation("CryptographicPolicyOwner")
+  cryptographicAgilityAssessmentsConducted CryptographicAgilityAssessment[] @relation("CryptographicAgilityAssessor")
+  postQuantumMigrationItemsOwned     PostQuantumMigrationItem[]    @relation("PostQuantumMigrationItemOwner")
+  softwareComponentRecordsOwned      SoftwareComponentRecord[]     @relation("SoftwareComponentRecordOwner")
+  sbomRecordsOwned                   SoftwareBillOfMaterialsRecord[] @relation("SoftwareBillOfMaterialsRecordOwner")
+  dependencyVulnerabilityRecordsOwned DependencyVulnerabilityRecord[] @relation("DependencyVulnerabilityRecordOwner")
+  buildProvenanceRecordsOwned        BuildProvenanceRecord[]       @relation("BuildProvenanceRecordOwner")
+  releaseArtifactAttestationsApproved ReleaseArtifactAttestation[] @relation("ReleaseArtifactAttestationApprover")
+  vendorSecurityAssessmentsConducted VendorSecurityAssessment[]    @relation("VendorSecurityAssessmentAssessor")
+  privilegedAccessReviewsConducted   PrivilegedAccessReview[]      @relation("PrivilegedAccessReviewReviewer")
+  serviceIdentityReviewsConducted    ServiceIdentityReview[]       @relation("ServiceIdentityReviewReviewer")
+  credentialRotationRecordsOwned     CredentialRotationRecord[]    @relation("CredentialRotationRecordOwner")
+  breakGlassAccessEventsAsActor      BreakGlassAccessEvent[]       @relation("BreakGlassAccessActor")
+  breakGlassAccessEventsApproved     BreakGlassAccessEvent[]       @relation("BreakGlassAccessApprover")
+  securityTestExecutionsConducted    SecurityTestExecution[]       @relation("SecurityTestExecutionExecutor")
   businessImpactAssessments                BusinessImpactAssessment[]             @relation("BusinessImpactAssessor")
   manualOperationAuthorizationsAsAuthorizer ManualOperationAuthorization[]        @relation("ManualOperationAuthorizer")
   manualOperationAuthorizationsAsActor     ManualOperationAuthorization[]        @relation("ManualOperationActor")
@@ -706,6 +732,7 @@ model Credential {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   identity     Identity         @relation(fields: [identityId], references: [id])
+  rotationRecords CredentialRotationRecord[]
 
   @@index([identityId])
   @@index([status])
@@ -12220,6 +12247,772 @@ model ExitAcceptanceRecord {
   @@index([acceptanceOutcome])
   @@map("exit_acceptance_records")
 }
+
+// ─── Phase 13B: Cybersecurity Hardening, Identity Assurance, Cryptography and Supply-Chain Security ─
+
+enum SecurityControlDomain {
+  IDENTITY
+  AUTHENTICATION
+  AUTHORIZATION
+  PRIVILEGED_ACCESS
+  SEGREGATION_OF_DUTIES
+  NETWORK
+  APPLICATION
+  DATABASE
+  API
+  INTEGRATION
+  HOST
+  CONTAINER
+  BUILD_PIPELINE
+  SECRETS
+  CRYPTOGRAPHY
+  LOGGING
+  MONITORING
+  DATA_PROTECTION
+  BACKUP
+  RECOVERY
+  INCIDENT_RESPONSE
+  VULNERABILITY
+  SUPPLY_CHAIN
+  VENDOR
+  AI_SECURITY
+  PHYSICAL_DEPENDENCY_REFERENCE
+}
+
+enum SecurityFindingSeverity {
+  INFORMATIONAL
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}
+
+enum SecurityControlImplementationStatus {
+  PLANNED
+  IMPLEMENTED
+  PARTIALLY_IMPLEMENTED
+  NOT_IMPLEMENTED
+  EXCEPTION
+  DECOMMISSIONED
+}
+
+enum SecurityControlAssessmentResult {
+  PASS
+  FAIL
+  PARTIAL
+  NOT_TESTED
+  DEFERRED
+}
+
+enum SecurityExceptionStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  EXPIRED
+  REVOKED
+}
+
+enum VulnerabilityFindingStatus {
+  OPEN
+  TRIAGED
+  IN_REMEDIATION
+  REMEDIATED
+  ACCEPTED_RISK
+  FALSE_POSITIVE
+}
+
+enum VulnerabilityRemediationStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+  FAILED
+}
+
+enum SecurityAssuranceReviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  DEFERRED
+}
+
+enum CryptographicMigrationStatus {
+  CURRENT
+  DEPRECATED
+  MIGRATION_REQUIRED
+  MIGRATED
+  LEGACY_VERIFICATION_ONLY
+}
+
+enum PostQuantumMigrationStatus {
+  IDENTIFIED
+  ASSESSED
+  NOT_YET_MIGRATED
+  PILOT
+  VALIDATION
+  MIGRATED
+  REVALIDATION_REQUIRED
+  DEFERRED_WITH_ACCEPTED_RISK
+}
+
+enum SoftwareComponentType {
+  APPLICATION
+  LIBRARY
+  FRAMEWORK
+  RUNTIME
+  CONTAINER
+  OPERATING_SYSTEM
+  FIRMWARE
+  OTHER
+}
+
+enum BuildProvenanceStatus {
+  RECORDED
+  VERIFIED
+  UNVERIFIABLE
+  REJECTED
+}
+
+enum ReleaseAttestationStatus {
+  PENDING
+  ATTESTED
+  REJECTED
+  REVOKED
+}
+
+enum VendorSecurityAssessmentStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  CONDITIONAL
+  REJECTED
+  EXPIRED
+}
+
+enum PrivilegedAccessReviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+enum ServiceIdentityReviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLIANT
+  NON_COMPLIANT
+  OVERDUE
+}
+
+enum CredentialRotationStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  OVERDUE
+}
+
+enum BreakGlassAccessStatus {
+  REQUESTED
+  APPROVED
+  ACTIVE
+  EXPIRED
+  REVOKED
+  REVIEWED
+}
+
+enum SecurityEnvironment {
+  DEVELOPMENT
+  TEST
+  STAGING
+  PRODUCTION
+}
+
+enum SecurityTestCategory {
+  AUTHORIZATION_BYPASS
+  IDOR
+  MASS_ASSIGNMENT
+  PRIVILEGE_ESCALATION
+  BROKEN_AUTHENTICATION
+  SESSION_FIXATION
+  TOKEN_REPLAY
+  CSRF
+  SSRF
+  INJECTION
+  XSS
+  TEMPLATE_INJECTION
+  PATH_TRAVERSAL
+  UNSAFE_DESERIALIZATION
+  FILE_UPLOAD_ABUSE
+  RATE_LIMITING
+  RESOURCE_EXHAUSTION
+  SECRETS_LEAKAGE
+  PII_LEAKAGE
+  WEBHOOK_SPOOFING
+  SIGNATURE_REPLAY
+  CROSS_TENANT_LEAKAGE
+  AGENT_TOOL_PRIVILEGE_ESCALATION
+}
+
+enum ProductionReadinessGateStatus {
+  NOT_EVALUATED
+  BLOCKED
+  CONDITIONALLY_READY
+  READY
+}
+
+model SecurityAsset {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  assetCode                 String                  @unique
+  name                      String
+  description               String?
+  assetType                 String
+  environment               SecurityEnvironment
+  ownerIdentityId           String                  @db.Uuid
+  criticality               SecurityFindingSeverity @default(MODERATE)
+  isProductionConsequential   Boolean                 @default(false)
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  owner                     Identity                @relation("SecurityAssetOwner", fields: [ownerIdentityId], references: [id])
+  controlImplementations    SecurityControlImplementation[]
+
+  @@index([ownerIdentityId])
+  @@map("security_assets")
+}
+
+model SecurityControlDefinition {
+  id                  String                @id @default(uuid()) @db.Uuid
+  controlCode         String                @unique
+  title               String
+  description         String?
+  domain              SecurityControlDomain
+  requirementSource   String
+  ownerIdentityId     String                @db.Uuid
+  isMandatory         Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  owner               Identity              @relation("SecurityControlDefinitionOwner", fields: [ownerIdentityId], references: [id])
+  implementations     SecurityControlImplementation[]
+  exceptions          SecurityException[]
+
+  @@index([domain])
+  @@map("security_control_definitions")
+}
+
+model SecurityControlImplementation {
+  id                        String                            @id @default(uuid()) @db.Uuid
+  implementationCode        String                            @unique
+  controlDefinitionId       String                            @db.Uuid
+  assetId                   String                            @db.Uuid
+  ownerIdentityId           String                            @db.Uuid
+  requirementSource         String
+  implementationDescription String
+  environment               SecurityEnvironment
+  evidenceReference         String?
+  testMethod                String
+  status                    SecurityControlImplementationStatus @default(PLANNED)
+  lastTestedAt              DateTime?
+  nextReviewAt              DateTime?
+  createdAt                 DateTime                          @default(now())
+  updatedAt                 DateTime                          @updatedAt
+  controlDefinition         SecurityControlDefinition         @relation(fields: [controlDefinitionId], references: [id])
+  asset                     SecurityAsset                     @relation(fields: [assetId], references: [id])
+  owner                     Identity                          @relation("SecurityControlImplementationOwner", fields: [ownerIdentityId], references: [id])
+  assessments               SecurityControlAssessment[]
+  findings                  SecurityFinding[]
+  exceptions                SecurityException[]
+
+  @@index([controlDefinitionId])
+  @@index([assetId])
+  @@index([status])
+  @@map("security_control_implementations")
+}
+
+model SecurityControlAssessment {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  assessmentNumber    String                        @unique
+  implementationId    String                        @db.Uuid
+  assessorIdentityId  String                        @db.Uuid
+  result              SecurityControlAssessmentResult
+  findingsSummary     String?
+  evidenceReference   String?
+  assessedAt          DateTime                      @default(now())
+  createdAt           DateTime                      @default(now())
+  implementation      SecurityControlImplementation @relation(fields: [implementationId], references: [id])
+  assessor            Identity                      @relation("SecurityControlAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  findings            SecurityFinding[]
+
+  @@index([implementationId])
+  @@map("security_control_assessments")
+}
+
+model SecurityFinding {
+  id                String                  @id @default(uuid()) @db.Uuid
+  findingNumber     String                  @unique
+  title             String
+  description       String
+  severity          SecurityFindingSeverity
+  domain            SecurityControlDomain
+  implementationId  String?                 @db.Uuid
+  assessmentId      String?                 @db.Uuid
+  ownerIdentityId   String                  @db.Uuid
+  riskAccepted      Boolean                 @default(false)
+  isOpen            Boolean                 @default(true)
+  identifiedAt      DateTime                @default(now())
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  implementation    SecurityControlImplementation? @relation(fields: [implementationId], references: [id])
+  assessment        SecurityControlAssessment?     @relation(fields: [assessmentId], references: [id])
+  owner             Identity                @relation("SecurityFindingOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([severity])
+  @@index([isOpen])
+  @@map("security_findings")
+}
+
+model SecurityException {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  exceptionNumber       String                  @unique
+  controlDefinitionId   String                  @db.Uuid
+  implementationId      String?                 @db.Uuid
+  businessJustification String
+  scopeDescription      String
+  compensatingControls  String
+  riskDescription       String
+  ownerIdentityId       String                  @db.Uuid
+  approverIdentityId    String?                 @db.Uuid
+  status                SecurityExceptionStatus @default(REQUESTED)
+  severity              SecurityFindingSeverity
+  isPermanent           Boolean                 @default(false)
+  expiresAt             DateTime
+  reviewDate            DateTime
+  approvedAt            DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  controlDefinition     SecurityControlDefinition      @relation(fields: [controlDefinitionId], references: [id])
+  implementation        SecurityControlImplementation? @relation(fields: [implementationId], references: [id])
+  owner                 Identity                       @relation("SecurityExceptionOwner", fields: [ownerIdentityId], references: [id])
+  approver              Identity?                      @relation("SecurityExceptionApprover", fields: [approverIdentityId], references: [id])
+
+  @@index([status])
+  @@index([expiresAt])
+  @@map("security_exceptions")
+}
+
+model VulnerabilityFinding {
+  id                String                     @id @default(uuid()) @db.Uuid
+  findingNumber     String                     @unique
+  title             String
+  description       String
+  severity          SecurityFindingSeverity
+  cveId             String?
+  affectedComponent String
+  status            VulnerabilityFindingStatus @default(OPEN)
+  ownerIdentityId   String                     @db.Uuid
+  identifiedAt      DateTime                   @default(now())
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  owner             Identity                   @relation("VulnerabilityFindingOwner", fields: [ownerIdentityId], references: [id])
+  remediations      VulnerabilityRemediation[]
+
+  @@index([status])
+  @@map("vulnerability_findings")
+}
+
+model VulnerabilityRemediation {
+  id                  String                         @id @default(uuid()) @db.Uuid
+  remediationNumber   String                         @unique
+  findingId           String                         @db.Uuid
+  ownerIdentityId     String                         @db.Uuid
+  planDescription     String
+  status              VulnerabilityRemediationStatus @default(PLANNED)
+  targetCompletionAt  DateTime?
+  completedAt         DateTime?
+  verifiedAt          DateTime?
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
+  finding             VulnerabilityFinding           @relation(fields: [findingId], references: [id])
+  owner               Identity                       @relation("VulnerabilityRemediationOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([findingId])
+  @@map("vulnerability_remediations")
+}
+
+model SecurityAssuranceReview {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  reviewNumber                String                        @unique
+  title                       String
+  scopeDescription            String
+  reviewerIdentityId          String                        @db.Uuid
+  status                      SecurityAssuranceReviewStatus @default(SCHEDULED)
+  scheduledAt                 DateTime
+  completedAt                 DateTime?
+  findingsSummary             String?
+  accreditationGranted        Boolean                       @default(false)
+  operationalActivationApproved Boolean                     @default(false)
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  reviewer                    Identity                      @relation("SecurityAssuranceReviewReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@map("security_assurance_reviews")
+}
+
+model CryptographicKeyReference {
+  id                     String              @id @default(uuid()) @db.Uuid
+  referenceCode          String              @unique
+  secretManagerReference String
+  algorithm              String
+  keyPurpose             String
+  effectiveFrom          DateTime
+  expiresAt              DateTime?
+  rotationScheduleDays   Int?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  cryptographicAssets    CryptographicAsset[]
+
+  @@map("cryptographic_key_references")
+}
+
+model CertificateReference {
+  id                     String              @id @default(uuid()) @db.Uuid
+  referenceCode          String              @unique
+  secretManagerReference String
+  subject                String
+  issuer                 String
+  serialNumber           String?
+  effectiveFrom          DateTime
+  expiresAt              DateTime
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  cryptographicAssets    CryptographicAsset[]
+
+  @@map("certificate_references")
+}
+
+model TrustAnchorReference {
+  id                     String              @id @default(uuid()) @db.Uuid
+  referenceCode          String              @unique
+  secretManagerReference String
+  anchorName             String
+  anchorType             String
+  effectiveFrom          DateTime
+  expiresAt              DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  cryptographicAssets    CryptographicAsset[]
+
+  @@map("trust_anchor_references")
+}
+
+model CryptographicAsset {
+  id                            String                     @id @default(uuid()) @db.Uuid
+  assetCode                     String                     @unique
+  name                          String
+  algorithm                     String
+  algorithmVersion              String
+  purpose                       String
+  dataOrSystemReference         String
+  keyReferenceId                String?                    @db.Uuid
+  certificateReferenceId        String?                    @db.Uuid
+  trustAnchorReferenceId        String?                    @db.Uuid
+  ownerIdentityId               String                     @db.Uuid
+  effectiveFrom                 DateTime
+  expiresAt                     DateTime?
+  rotationScheduleDays          Int?
+  cryptographicStrengthBits     Int?
+  migrationStatus               CryptographicMigrationStatus @default(CURRENT)
+  claimsPostQuantumSecurity     Boolean                    @default(false)
+  postQuantumValidated          Boolean                    @default(false)
+  historicalVerificationPreserved Boolean                  @default(true)
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  keyReference                  CryptographicKeyReference? @relation(fields: [keyReferenceId], references: [id])
+  certificateReference          CertificateReference?      @relation(fields: [certificateReferenceId], references: [id])
+  trustAnchorReference          TrustAnchorReference?      @relation(fields: [trustAnchorReferenceId], references: [id])
+  owner                         Identity                   @relation("CryptographicAssetOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([migrationStatus])
+  @@map("cryptographic_assets")
+}
+
+model CryptographicPolicy {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  policyCode           String                       @unique
+  title                String
+  description          String?
+  minimumKeyStrengthBits Int
+  approvedAlgorithms   String[]
+  deprecatedAlgorithms String[]                     @default([])
+  ownerIdentityId      String                       @db.Uuid
+  effectiveFrom        DateTime
+  effectiveUntil       DateTime?
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+  owner                Identity                     @relation("CryptographicPolicyOwner", fields: [ownerIdentityId], references: [id])
+  agilityAssessments   CryptographicAgilityAssessment[]
+
+  @@map("cryptographic_policies")
+}
+
+model CryptographicAgilityAssessment {
+  id                                  String              @id @default(uuid()) @db.Uuid
+  assessmentNumber                    String              @unique
+  policyId                            String              @db.Uuid
+  assessorIdentityId                  String              @db.Uuid
+  canVersionAlgorithms                Boolean             @default(false)
+  canRotateKeys                       Boolean             @default(false)
+  canReplaceCertificates              Boolean             @default(false)
+  canChangeTrustAnchors               Boolean             @default(false)
+  canIdentifyAffectedRecords          Boolean             @default(false)
+  preservesHistoricalVerification     Boolean             @default(false)
+  canMigrateWithoutDestroyingEvidence Boolean             @default(false)
+  assessedAt                          DateTime            @default(now())
+  createdAt                           DateTime            @default(now())
+  policy                              CryptographicPolicy @relation(fields: [policyId], references: [id])
+  assessor                            Identity            @relation("CryptographicAgilityAssessor", fields: [assessorIdentityId], references: [id])
+
+  @@index([policyId])
+  @@map("cryptographic_agility_assessments")
+}
+
+model PostQuantumMigrationItem {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  itemCode                String                     @unique
+  componentReference      String
+  currentAlgorithm        String
+  targetAlgorithm         String?
+  status                  PostQuantumMigrationStatus @default(IDENTIFIED)
+  ownerIdentityId         String                     @db.Uuid
+  riskAcceptanceReference String?
+  identifiedAt            DateTime                   @default(now())
+  migratedAt              DateTime?
+  revalidationDueAt       DateTime?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  owner                   Identity                   @relation("PostQuantumMigrationItemOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([status])
+  @@map("post_quantum_migration_items")
+}
+
+model SoftwareComponentRecord {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  componentCode               String                          @unique
+  name                        String
+  version                     String
+  componentType               SoftwareComponentType
+  purl                        String?
+  license                     String?
+  ownerIdentityId             String                          @db.Uuid
+  createdAt                   DateTime                        @default(now())
+  updatedAt                   DateTime                        @updatedAt
+  owner                       Identity                        @relation("SoftwareComponentRecordOwner", fields: [ownerIdentityId], references: [id])
+  dependencyVulnerabilityRecords DependencyVulnerabilityRecord[]
+
+  @@map("software_component_records")
+}
+
+model SoftwareBillOfMaterialsRecord {
+  id                  String   @id @default(uuid()) @db.Uuid
+  sbomCode            String   @unique
+  releaseReference    String
+  format              String   @default("CycloneDX")
+  artifactDigest      String
+  componentInventory  Json
+  generatedAt         DateTime @default(now())
+  ownerIdentityId     String   @db.Uuid
+  createdAt           DateTime @default(now())
+  owner               Identity @relation("SoftwareBillOfMaterialsRecordOwner", fields: [ownerIdentityId], references: [id])
+  releaseAttestations ReleaseArtifactAttestation[]
+
+  @@map("software_bill_of_materials_records")
+}
+
+model DependencyVulnerabilityRecord {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  recordNumber           String                  @unique
+  componentId            String?                 @db.Uuid
+  packageName            String
+  packageVersion         String
+  cveId                  String?
+  severity               SecurityFindingSeverity
+  isProductionBlocking   Boolean                 @default(false)
+  dispositionReference   String?
+  ownerIdentityId        String                  @db.Uuid
+  detectedAt             DateTime                @default(now())
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  component              SoftwareComponentRecord? @relation(fields: [componentId], references: [id])
+  owner                  Identity                @relation("DependencyVulnerabilityRecordOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([severity])
+  @@index([isProductionBlocking])
+  @@map("dependency_vulnerability_records")
+}
+
+model BuildProvenanceRecord {
+  id                  String                @id @default(uuid()) @db.Uuid
+  provenanceCode      String                @unique
+  sourceCommitSha     String
+  buildId             String
+  buildSystem         String
+  testRunReference    String?
+  artifactDigest      String
+  status              BuildProvenanceStatus @default(RECORDED)
+  verificationMethod  String?
+  ownerIdentityId     String                @db.Uuid
+  recordedAt          DateTime              @default(now())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  owner               Identity              @relation("BuildProvenanceRecordOwner", fields: [ownerIdentityId], references: [id])
+  releaseAttestations ReleaseArtifactAttestation[]
+
+  @@index([status])
+  @@map("build_provenance_records")
+}
+
+model ReleaseArtifactAttestation {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  attestationNumber   String                   @unique
+  releaseReference    String
+  sourceCommitSha     String
+  buildProvenanceId   String                   @db.Uuid
+  sbomRecordId        String?                  @db.Uuid
+  artifactDigest      String
+  signatureReference  String?
+  isSigned            Boolean                  @default(false)
+  status              ReleaseAttestationStatus @default(PENDING)
+  approverIdentityId  String?                  @db.Uuid
+  approvedAt          DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  buildProvenance     BuildProvenanceRecord    @relation(fields: [buildProvenanceId], references: [id])
+  sbomRecord          SoftwareBillOfMaterialsRecord? @relation(fields: [sbomRecordId], references: [id])
+  approver            Identity?                @relation("ReleaseArtifactAttestationApprover", fields: [approverIdentityId], references: [id])
+
+  @@index([status])
+  @@map("release_artifact_attestations")
+}
+
+model VendorSecurityAssessment {
+  id                  String                         @id @default(uuid()) @db.Uuid
+  assessmentNumber    String                         @unique
+  vendorName          String
+  vendorReference     String
+  assessorIdentityId  String                         @db.Uuid
+  status              VendorSecurityAssessmentStatus @default(PENDING)
+  findingsSummary     String?
+  expiresAt           DateTime?
+  assessedAt          DateTime?
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
+  assessor            Identity                       @relation("VendorSecurityAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+
+  @@map("vendor_security_assessments")
+}
+
+model PrivilegedAccessReview {
+  id                          String                       @id @default(uuid()) @db.Uuid
+  reviewNumber                String                       @unique
+  subjectIdentityId           String                       @db.Uuid
+  reviewerIdentityId          String                       @db.Uuid
+  environment                 SecurityEnvironment
+  accessPurpose               String
+  approvedScope               String
+  status                      PrivilegedAccessReviewStatus @default(SCHEDULED)
+  accessGrantedAt             DateTime?
+  accessExpiresAt             DateTime?
+  revokedAt                   DateTime?
+  isSharedAdministratorAccount Boolean                     @default(false)
+  reviewCompletedAt           DateTime?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  reviewer                    Identity                     @relation("PrivilegedAccessReviewReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@map("privileged_access_reviews")
+}
+
+model BreakGlassAccessEvent {
+  id                            String                 @id @default(uuid()) @db.Uuid
+  eventNumber                   String                 @unique
+  actorIdentityId               String                 @db.Uuid
+  approverIdentityId            String?                @db.Uuid
+  reason                        String
+  approvedScope                 String
+  status                        BreakGlassAccessStatus @default(REQUESTED)
+  environment                   SecurityEnvironment
+  requestedAt                   DateTime               @default(now())
+  approvedAt                    DateTime?
+  activatedAt                   DateTime?
+  expiresAt                     DateTime
+  revokedAt                     DateTime?
+  postEventReviewCompleted      Boolean                @default(false)
+  postEventReviewAt             DateTime?
+  enhancedLoggingReference      String?
+  createsInstitutionalAuthority Boolean                @default(false)
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  actor                         Identity               @relation("BreakGlassAccessActor", fields: [actorIdentityId], references: [id])
+  approver                      Identity?              @relation("BreakGlassAccessApprover", fields: [approverIdentityId], references: [id])
+
+  @@index([status])
+  @@index([expiresAt])
+  @@map("break_glass_access_events")
+}
+
+model ServiceIdentityReview {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  reviewNumber              String                      @unique
+  serviceIdentityId         String                      @db.Uuid
+  reviewerIdentityId        String                      @db.Uuid
+  identityCategory          String
+  status                    ServiceIdentityReviewStatus @default(SCHEDULED)
+  isAnonymousOrShared       Boolean                     @default(false)
+  isConsequentialEnvironment Boolean                    @default(false)
+  scheduledAt               DateTime
+  completedAt               DateTime?
+  findingsSummary           String?
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  reviewer                  Identity                    @relation("ServiceIdentityReviewReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@map("service_identity_reviews")
+}
+
+model CredentialRotationRecord {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  rotationNumber            String                   @unique
+  credentialId              String                   @db.Uuid
+  ownerIdentityId           String                   @db.Uuid
+  status                    CredentialRotationStatus @default(SCHEDULED)
+  scheduledAt               DateTime
+  completedAt               DateTime?
+  secretManagerReference    String
+  previousReferenceRetained Boolean                  @default(true)
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  credential                Credential               @relation(fields: [credentialId], references: [id])
+  owner                     Identity                 @relation("CredentialRotationRecordOwner", fields: [ownerIdentityId], references: [id])
+
+  @@index([status])
+  @@map("credential_rotation_records")
+}
+
+model SecurityTestExecution {
+  id                  String               @id @default(uuid()) @db.Uuid
+  executionNumber     String               @unique
+  category            SecurityTestCategory
+  environment         SecurityEnvironment
+  executorIdentityId  String               @db.Uuid
+  targetReference     String
+  passed              Boolean
+  findingsSummary     String?
+  executedAt          DateTime             @default(now())
+  createdAt           DateTime             @default(now())
+  executor            Identity             @relation("SecurityTestExecutionExecutor", fields: [executorIdentityId], references: [id])
+
+  @@index([category])
+  @@map("security_test_executions")
 // ─── Phase 13D: Business Continuity, Backup, Disaster Recovery ────────────────
 
 enum ConfigurationConfirmationStatus {
