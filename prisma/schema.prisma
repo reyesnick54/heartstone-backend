@@ -140,6 +140,20 @@ model Institution {
   dashboardAccessPolicies          DashboardAccessPolicy[]
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections    DashboardIndicatorProjection[]
+  metricDefinitions                MetricDefinition[]              @relation("MetricDefinitionInstitution")
+  reportingDashboardIndicators     ReportingDashboardIndicator[]   @relation("ReportingDashboardIndicatorInstitution")
+  reportingDashboardSnapshots      ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotInstitution")
+  reportDefinitions                ReportDefinition[]              @relation("ReportDefinitionInstitution")
+  feeSchedules                    FeeSchedule[]
+  integrationDefinitions          IntegrationDefinition[]
+  paymentProviderConfigurations   PaymentProviderConfiguration[]
+  communicationTemplates          CommunicationTemplate[]
+  mandatoryCommunicationRules     MandatoryCommunicationRule[]
+  authoritativeSourceDesignations AuthoritativeSourceDesignation[]
+  reconciliationBatches           ReconciliationBatch[]
+  communicationPreferences        CommunicationPreference[]
+  supportCoveragePlans            SupportCoveragePlan[]           @relation("SupportCoveragePlanInstitution")
+  operationalRoleRequirements     OperationalRoleRequirement[]    @relation("OperationalRoleRequirementInstitution")
   strategicProjectProfiles         StrategicProjectProfile[]
   performanceFrameworks            PerformanceFramework[]
   ownedMetricDefinitions           MetricDefinition[]               @relation("MetricDefinitionOwnerInstitution")
@@ -197,6 +211,15 @@ model Department {
   dashboardDefinitions          DashboardDefinition[]
   dashboardAccessPolicies       DashboardAccessPolicy[]
   dashboardIndicatorProjections DashboardIndicatorProjection[]
+  metricDefinitions             MetricDefinition[]             @relation("MetricDefinitionDepartment")
+  reportingDashboardIndicators  ReportingDashboardIndicator[]  @relation("ReportingDashboardIndicatorDepartment")
+  reportingDashboardSnapshots   ReportingDashboardSnapshot[]   @relation("ReportingDashboardSnapshotDepartment")
+  reportDefinitions             ReportDefinition[]             @relation("ReportDefinitionDepartment")
+  operationalRoleRequirements   OperationalRoleRequirement[]   @relation("OperationalRoleRequirementDepartment")
+  operatorReadinessProfiles     OperatorReadinessProfile[]     @relation("OperatorReadinessDepartment")
+  supportCoveragePlans          SupportCoveragePlan[]          @relation("SupportCoveragePlanDepartment")
+  departmentReadinessAssessments DepartmentReadinessAssessment[] @relation("DepartmentReadinessDepartment")
+  staffingReadinessAssessments  StaffingReadinessAssessment[]  @relation("StaffingReadinessDepartment")
   strategicProjectProfiles      StrategicProjectProfile[]
   ownedMetricDefinitions        MetricDefinition[]             @relation("MetricDefinitionOwnerDepartment")
 
@@ -276,6 +299,26 @@ model Officeholder {
   digitalTwinSourcesOwned       DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
   simulationReviewsConducted    SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
   consequentialUseReviewsConducted ConsequentialUseReview[]   @relation("ConsequentialUseOfficeholderReviewer")
+  institutionalMetricClaimsApproved InstitutionalMetricClaim[] @relation("InstitutionalMetricClaimApproverOfficeholder")
+  reportDefinitionsOwned          ReportDefinition[]         @relation("ReportDefinitionOwnerOfficeholder")
+  reportDefinitionVersionsOwned   ReportDefinitionVersion[]  @relation("ReportDefinitionVersionOwnerOfficeholder")
+  reportApprovalsAsApprover       ReportApproval[]           @relation("ReportApproverOfficeholder")
+  reportPublicationsAsPublisher   ReportPublication[]        @relation("ReportPublisherOfficeholder")
+  reportCorrectionsAsCorrector    ReportCorrection[]         @relation("ReportCorrectionOfficeholder")
+  operatorReadinessProfiles       OperatorReadinessProfile[] @relation("OperatorReadinessOfficeholder")
+  operatorQualifications          OperatorQualification[]    @relation("OperatorQualificationOfficeholder")
+  qualificationAssessments        OperatorCompetencyAssessment[] @relation("CompetencyAssessmentAssessorOfficeholder")
+  practicalAssessmentsConducted   PracticalAssessment[]        @relation("PracticalAssessmentAssessorOfficeholder")
+  authorityBoundaryAssessmentsConducted AuthorityBoundaryAssessment[] @relation("AuthorityBoundaryAssessorOfficeholder")
+  securityPrivacyAssessmentsConducted SecurityPrivacyAssessment[] @relation("SecurityPrivacyAssessorOfficeholder")
+  continuityAssessmentsConducted  ContinuityCompetencyAssessment[] @relation("ContinuityAssessmentAssessorOfficeholder")
+  supportAssignments              SupportAssignment[]          @relation("SupportAssignmentOfficeholder")
+  onCallAssignments               OnCallAssignment[]           @relation("OnCallAssignmentOfficeholder")
+  onCallAlternateAssignments      OnCallAssignment[]           @relation("OnCallAlternateOfficeholder")
+  successionAssignmentsAsPrimary  SuccessionAssignment[]       @relation("SuccessionPrimaryOfficeholder")
+  successionAssignmentsAsAlternate SuccessionAssignment[]    @relation("SuccessionAlternateOfficeholder")
+  departmentReadinessAssessments  DepartmentReadinessAssessment[] @relation("DepartmentReadinessAssessorOfficeholder")
+  staffingReadinessAssessments    StaffingReadinessAssessment[] @relation("StaffingReadinessAssessorOfficeholder")
   capabilityMaturityAssessmentsAsInstitutionalOwner CapabilityMaturityAssessment[] @relation("CapabilityMaturityInstitutionalOwner")
   activationConditionsAsOwner     ActivationCondition[]      @relation("ActivationConditionOfficeholderOwner")
   capabilityDependenciesAsOwner   CapabilityDependency[]     @relation("CapabilityDependencyOfficeholderOwner")
@@ -303,6 +346,7 @@ model Appointment {
   decisionParticipants DecisionParticipant[]
   governmentDecisions  GovernmentDecision[]
   reviewAssignments    ReviewAssignment[]
+  operatorQualifications OperatorQualification[]
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions  ContinuityDecision[]
   resumptionAuthorizations ResumptionAuthorization[]
@@ -333,6 +377,8 @@ model Delegation {
   structuredScopes        DelegationStructuredScope[]
   governmentDecisions     GovernmentDecision[]
   reviewAssignments       ReviewAssignment[]
+  operatorQualifications  OperatorQualification[]
+  operatorAccessReviews   OperatorAccessReview[]
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions     ContinuityDecision[]
   resumptionAuthorizations ResumptionAuthorization[]
@@ -676,6 +722,21 @@ model Identity {
   reportPublicationsAsPublisher        ReportPublication[]               @relation("ReportPublisher")
   reportCorrectionsRecorded            ReportCorrection[]                @relation("ReportCorrectionRecorder")
   reportClaimRevalidationsRecorded     ReportClaimRevalidationRecord[]   @relation("ReportClaimRevalidationRecorder")
+  operatorReadinessProfiles            OperatorReadinessProfile[]        @relation("OperatorReadinessIdentity")
+  operatorQualifications               OperatorQualification[]           @relation("OperatorQualificationIdentity")
+  qualificationAssessmentsConducted      OperatorCompetencyAssessment[]  @relation("CompetencyAssessmentAssessor")
+  practicalAssessmentsConducted        PracticalAssessment[]             @relation("PracticalAssessmentAssessor")
+  authorityBoundaryAssessmentsConducted AuthorityBoundaryAssessment[]    @relation("AuthorityBoundaryAssessor")
+  securityPrivacyAssessmentsConducted  SecurityPrivacyAssessment[]       @relation("SecurityPrivacyAssessor")
+  continuityAssessmentsConducted       ContinuityCompetencyAssessment[]  @relation("ContinuityAssessmentAssessor")
+  trainingCompletionsRecorded          TrainingCompletion[]              @relation("TrainingCompletionRecorder")
+  supportAssignments                   SupportAssignment[]               @relation("SupportAssignmentIdentity")
+  onCallAssignments                    OnCallAssignment[]                @relation("OnCallAssignmentIdentity")
+  onCallAlternateAssignments           OnCallAssignment[]                @relation("OnCallAlternateIdentity")
+  departmentReadinessAssessments         DepartmentReadinessAssessment[]   @relation("DepartmentReadinessAssessor")
+  staffingReadinessAssessments         StaffingReadinessAssessment[]     @relation("StaffingReadinessAssessor")
+  operatorAccessReviewsInitiated       OperatorAccessReview[]            @relation("OperatorAccessReviewInitiator")
+  qualificationExpiryEventsRecorded    QualificationExpiryEvent[]        @relation("QualificationExpiryRecorder")
   changeRequestsRequested              ChangeRequest[]                   @relation("ChangeRequestRequester")
   changeAssessmentsConducted           ChangeAssessment[]                @relation("ChangeAssessmentAssessor")
   releaseApprovalsGranted              ReleaseApproval[]                 @relation("ReleaseApprovalApprover")
@@ -1120,6 +1181,9 @@ model FunctionAuthorityRecord {
   redressDecisions              RedressDecision[]                @relation("RedressDecisionFunctionAuthority")
   interimReliefDecisions        InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
   reviewStayRecords             ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
+  reportPublicationAuthorities  ReportDefinitionVersion[]        @relation("ReportPublicationAuthority")
+  operationalRoleRequirements   OperationalRoleRequirement[]     @relation("OperationalRoleRequirementFunction")
+  operatorQualifications        OperatorQualification[]          @relation("OperatorQualificationFunction")
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions           ContinuityDecision[]
   resumptionAuthorizations      ResumptionAuthorization[]
@@ -14169,4 +14233,590 @@ model DataTransferApproval {
   @@index([targetEnvironmentId])
   @@index([status])
   @@map("data_transfer_approvals")
+}
+
+// ─── Phase 13F: Workforce, Operator Competency, Support and Departmental Operational Readiness ─
+
+enum OperatorQualificationStatus {
+  QUALIFIED
+  QUALIFIED_WITH_CONDITIONS
+  NOT_QUALIFIED
+  SUSPENDED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum DepartmentReadinessStatus {
+  NOT_READY
+  PARTIALLY_READY
+  READY_WITH_CONDITIONS
+  READY
+  SUSPENDED
+}
+
+enum StaffingReadinessStatus {
+  NOT_READY
+  PARTIALLY_READY
+  READY_WITH_CONDITIONS
+  READY
+  SUSPENDED
+}
+
+enum OperationalRoleRequirementStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum CompetencyAssessmentOutcome {
+  PASSED
+  PASSED_WITH_CONDITIONS
+  FAILED
+  PENDING
+  EXPIRED
+}
+
+enum TrainingCompletionStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum OperatorAccessReviewTrigger {
+  APPOINTMENT_EXPIRED
+  DELEGATION_REVOKED
+  QUALIFICATION_EXPIRED
+  OPERATOR_SUSPENDED
+  DEPARTMENT_ASSIGNMENT_ENDED
+}
+
+enum OperatorAccessReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QualificationExpiryEventType {
+  TRAINING_EXPIRED
+  PROFESSIONAL_QUALIFICATION_EXPIRED
+  RECERTIFICATION_OVERDUE
+  COMPETENCY_ASSESSMENT_EXPIRED
+}
+
+enum SupportCoveragePlanStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum SupportTier {
+  TIER_1
+  TIER_2
+  TIER_3
+  EXECUTIVE
+  VENDOR
+}
+
+enum OnCallAssignmentStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SuccessionAssignmentStatus {
+  DESIGNATED
+  ACTIVE
+  WITHDRAWN
+  ACTIVATED
+}
+
+model OperationalRoleRequirement {
+  id                                  String                           @id @default(uuid()) @db.Uuid
+  code                                String
+  name                                String
+  description                         String?
+  institutionId                       String                           @db.Uuid
+  departmentId                        String                           @db.Uuid
+  functionAuthorityRecordId           String                           @db.Uuid
+  appointmentRequired                 Boolean                          @default(true)
+  delegationRequired                  Boolean                          @default(false)
+  professionalQualificationReference  String?
+  trainingRequirementId               String?                          @db.Uuid
+  requiresKnowledgeAssessment         Boolean                          @default(true)
+  requiresPracticalAssessment         Boolean                          @default(true)
+  requiresAuthorityBoundaryAssessment Boolean                          @default(true)
+  requiresSecurityPrivacyAssessment   Boolean                          @default(true)
+  requiresContinuityAssessment        Boolean                          @default(true)
+  supervisionRequired                 Boolean                          @default(false)
+  recertificationIntervalDays         Int?
+  expirationPolicy                    String?
+  alternateRequirementConfigured      Boolean                          @default(false)
+  isHighConsequence                   Boolean                          @default(false)
+  status                              OperationalRoleRequirementStatus @default(DRAFT)
+  createdAt                           DateTime                         @default(now())
+  updatedAt                           DateTime                         @updatedAt
+  institution                         Institution                      @relation("OperationalRoleRequirementInstitution", fields: [institutionId], references: [id])
+  department                          Department                       @relation("OperationalRoleRequirementDepartment", fields: [departmentId], references: [id])
+  functionAuthorityRecord             FunctionAuthorityRecord          @relation("OperationalRoleRequirementFunction", fields: [functionAuthorityRecordId], references: [id])
+  trainingRequirement                 TrainingRequirement?             @relation(fields: [trainingRequirementId], references: [id])
+  operatorQualifications              OperatorQualification[]
+  successionAssignments               SuccessionAssignment[]
+
+  @@unique([institutionId, code])
+  @@index([departmentId])
+  @@index([functionAuthorityRecordId])
+  @@index([status])
+  @@map("operational_role_requirements")
+}
+
+model TrainingRequirement {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  code                        String                     @unique
+  name                        String
+  description                 String?
+  providerReference           String?
+  isGovernmentAuthority       Boolean                    @default(false)
+  validityPeriodDays          Int?
+  recertificationRequired     Boolean                    @default(false)
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  operationalRoleRequirements OperationalRoleRequirement[]
+  trainingCompletions         TrainingCompletion[]
+
+  @@map("training_requirements")
+}
+
+model OperatorReadinessProfile {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  identityId              String                       @db.Uuid
+  officeholderId          String?                      @db.Uuid
+  departmentId            String?                      @db.Uuid
+  notes                   String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  identity                Identity                     @relation("OperatorReadinessIdentity", fields: [identityId], references: [id])
+  officeholder            Officeholder?                @relation("OperatorReadinessOfficeholder", fields: [officeholderId], references: [id])
+  department              Department?                  @relation("OperatorReadinessDepartment", fields: [departmentId], references: [id])
+  qualifications          OperatorQualification[]
+  competencyAssessments   OperatorCompetencyAssessment[]
+
+  @@unique([identityId, departmentId])
+  @@index([officeholderId])
+  @@index([departmentId])
+  @@map("operator_readiness_profiles")
+}
+
+model OperatorQualification {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  qualificationNumber           String                      @unique
+  operatorReadinessProfileId    String                      @db.Uuid
+  operationalRoleRequirementId  String                      @db.Uuid
+  identityId                    String                      @db.Uuid
+  officeholderId                String?                     @db.Uuid
+  appointmentId                 String?                     @db.Uuid
+  delegationId                  String?                     @db.Uuid
+  functionAuthorityRecordId     String                      @db.Uuid
+  scope                         String
+  status                        OperatorQualificationStatus @default(NOT_QUALIFIED)
+  conditions                    String?
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  assessmentAuthorityOfficeholderId String?                 @db.Uuid
+  isAiAssessed                  Boolean                     @default(false)
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  operatorReadinessProfile      OperatorReadinessProfile    @relation(fields: [operatorReadinessProfileId], references: [id])
+  operationalRoleRequirement    OperationalRoleRequirement  @relation(fields: [operationalRoleRequirementId], references: [id])
+  identity                      Identity                    @relation("OperatorQualificationIdentity", fields: [identityId], references: [id])
+  officeholder                  Officeholder?               @relation("OperatorQualificationOfficeholder", fields: [officeholderId], references: [id])
+  appointment                   Appointment?                @relation(fields: [appointmentId], references: [id])
+  delegation                    Delegation?                 @relation(fields: [delegationId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord     @relation("OperatorQualificationFunction", fields: [functionAuthorityRecordId], references: [id])
+  competencyAssessments         OperatorCompetencyAssessment[]
+  trainingCompletions           TrainingCompletion[]
+  practicalAssessments          PracticalAssessment[]
+  authorityBoundaryAssessments  AuthorityBoundaryAssessment[]
+  securityPrivacyAssessments    SecurityPrivacyAssessment[]
+  continuityCompetencyAssessments ContinuityCompetencyAssessment[]
+  expiryEvents                  QualificationExpiryEvent[]
+  accessReviews                 OperatorAccessReview[]
+
+  @@index([operatorReadinessProfileId])
+  @@index([operationalRoleRequirementId])
+  @@index([identityId])
+  @@index([officeholderId])
+  @@index([status])
+  @@index([effectiveUntil])
+  @@map("operator_qualifications")
+}
+
+model OperatorCompetencyAssessment {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  operatorReadinessProfileId  String                      @db.Uuid
+  operatorQualificationId     String?                     @db.Uuid
+  assessorIdentityId          String                      @db.Uuid
+  assessorOfficeholderId      String?                     @db.Uuid
+  assessmentType              String
+  score                       Decimal?                    @db.Decimal(5, 2)
+  passingScore                Decimal?                    @db.Decimal(5, 2)
+  outcome                     CompetencyAssessmentOutcome @default(PENDING)
+  evidenceReference           String?
+  isAttendanceOnly            Boolean                     @default(false)
+  isAiAssessed                Boolean                     @default(false)
+  assessedAt                  DateTime                    @default(now())
+  expiresAt                   DateTime?
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  operatorReadinessProfile    OperatorReadinessProfile    @relation(fields: [operatorReadinessProfileId], references: [id])
+  operatorQualification       OperatorQualification?      @relation(fields: [operatorQualificationId], references: [id])
+  assessorIdentity            Identity                    @relation("CompetencyAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder          Officeholder?               @relation("CompetencyAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorReadinessProfileId])
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("operator_competency_assessments")
+}
+
+model TrainingCompletion {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                   @db.Uuid
+  trainingRequirementId     String                   @db.Uuid
+  recordedByIdentityId      String                   @db.Uuid
+  providerReference         String?
+  status                    TrainingCompletionStatus @default(ENROLLED)
+  completedAt               DateTime?
+  expiresAt                 DateTime?
+  score                     Decimal?                 @db.Decimal(5, 2)
+  evidenceReference         String?
+  isAttendanceOnly          Boolean                  @default(false)
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  operatorQualification     OperatorQualification    @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  trainingRequirement       TrainingRequirement      @relation(fields: [trainingRequirementId], references: [id])
+  recordedBy                Identity                 @relation("TrainingCompletionRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([trainingRequirementId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("training_completions")
+}
+
+model PracticalAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  practicalEvidenceReference String?
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("PracticalAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("PracticalAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("practical_assessments")
+}
+
+model AuthorityBoundaryAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  boundaryScopeVerified     Boolean                     @default(false)
+  delegationScopeVerified   Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("AuthorityBoundaryAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("AuthorityBoundaryAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("authority_boundary_assessments")
+}
+
+model SecurityPrivacyAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  securityCleared           Boolean                     @default(false)
+  privacyCleared            Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("SecurityPrivacyAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("SecurityPrivacyAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("security_privacy_assessments")
+}
+
+model ContinuityCompetencyAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  continuityPlanVerified    Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("ContinuityAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("ContinuityAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("continuity_competency_assessments")
+}
+
+model SupportCoveragePlan {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  planCode                    String
+  name                        String
+  institutionId               String                    @db.Uuid
+  departmentId                String?                   @db.Uuid
+  serviceHours                String?
+  isTwentyFourSeven           Boolean                   @default(false)
+  supportTiers                Json                      @default("[]")
+  incidentContacts            Json                      @default("[]")
+  securityEscalationContacts  Json                      @default("[]")
+  recordsEscalationContacts   Json                      @default("[]")
+  integrationSupportContacts  Json                      @default("[]")
+  paymentSupportContacts      Json                      @default("[]")
+  aiEscalationContacts        Json                      @default("[]")
+  continuityResponseContacts  Json                      @default("[]")
+  vendorContacts              Json                      @default("[]")
+  contactsRestricted          Boolean                   @default(true)
+  status                      SupportCoveragePlanStatus @default(DRAFT)
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  institution                 Institution               @relation("SupportCoveragePlanInstitution", fields: [institutionId], references: [id])
+  department                  Department?               @relation("SupportCoveragePlanDepartment", fields: [departmentId], references: [id])
+  assignments                 SupportAssignment[]
+  onCallAssignments           OnCallAssignment[]
+
+  @@unique([institutionId, planCode])
+  @@index([departmentId])
+  @@index([status])
+  @@map("support_coverage_plans")
+}
+
+model SupportAssignment {
+  id                      String              @id @default(uuid()) @db.Uuid
+  supportCoveragePlanId   String              @db.Uuid
+  identityId              String              @db.Uuid
+  officeholderId          String?             @db.Uuid
+  supportTier             SupportTier
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  isNamedOwner            Boolean             @default(false)
+  isOperationalCoverage   Boolean             @default(true)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  supportCoveragePlan     SupportCoveragePlan @relation(fields: [supportCoveragePlanId], references: [id])
+  identity                Identity            @relation("SupportAssignmentIdentity", fields: [identityId], references: [id])
+  officeholder            Officeholder?       @relation("SupportAssignmentOfficeholder", fields: [officeholderId], references: [id])
+
+  @@index([supportCoveragePlanId])
+  @@index([identityId])
+  @@index([effectiveUntil])
+  @@map("support_assignments")
+}
+
+model OnCallAssignment {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  supportCoveragePlanId   String                 @db.Uuid
+  primaryIdentityId       String                 @db.Uuid
+  primaryOfficeholderId   String?                @db.Uuid
+  alternateIdentityId     String?                @db.Uuid
+  alternateOfficeholderId String?                @db.Uuid
+  coverageStart           DateTime
+  coverageEnd             DateTime
+  status                  OnCallAssignmentStatus @default(SCHEDULED)
+  contactDataRestricted   Boolean                @default(true)
+  restrictedContactRef    String?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  supportCoveragePlan     SupportCoveragePlan    @relation(fields: [supportCoveragePlanId], references: [id])
+  primaryIdentity         Identity               @relation("OnCallAssignmentIdentity", fields: [primaryIdentityId], references: [id])
+  primaryOfficeholder     Officeholder?          @relation("OnCallAssignmentOfficeholder", fields: [primaryOfficeholderId], references: [id])
+  alternateIdentity       Identity?              @relation("OnCallAlternateIdentity", fields: [alternateIdentityId], references: [id])
+  alternateOfficeholder   Officeholder?          @relation("OnCallAlternateOfficeholder", fields: [alternateOfficeholderId], references: [id])
+
+  @@index([supportCoveragePlanId])
+  @@index([primaryIdentityId])
+  @@index([coverageStart, coverageEnd])
+  @@index([status])
+  @@map("on_call_assignments")
+}
+
+model SuccessionAssignment {
+  id                            String                     @id @default(uuid()) @db.Uuid
+  operationalRoleRequirementId  String                     @db.Uuid
+  primaryOfficeholderId         String                     @db.Uuid
+  alternateOfficeholderId       String                     @db.Uuid
+  status                        SuccessionAssignmentStatus @default(DESIGNATED)
+  alternateAppointmentRequired  Boolean                    @default(true)
+  alternateDelegationRequired   Boolean                    @default(false)
+  alternateQualificationRequired Boolean                   @default(true)
+  effectiveFrom                 DateTime
+  effectiveUntil                DateTime?
+  notes                         String?
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  operationalRoleRequirement    OperationalRoleRequirement @relation(fields: [operationalRoleRequirementId], references: [id])
+  primaryOfficeholder           Officeholder               @relation("SuccessionPrimaryOfficeholder", fields: [primaryOfficeholderId], references: [id])
+  alternateOfficeholder         Officeholder               @relation("SuccessionAlternateOfficeholder", fields: [alternateOfficeholderId], references: [id])
+
+  @@index([operationalRoleRequirementId])
+  @@index([primaryOfficeholderId])
+  @@index([alternateOfficeholderId])
+  @@index([status])
+  @@map("succession_assignments")
+}
+
+model DepartmentReadinessAssessment {
+  id                              String                    @id @default(uuid()) @db.Uuid
+  assessmentNumber                String                    @unique
+  departmentId                    String                    @db.Uuid
+  assessorIdentityId              String                    @db.Uuid
+  assessorOfficeholderId          String?                   @db.Uuid
+  status                          DepartmentReadinessStatus   @default(NOT_READY)
+  mandateAssessed                 Boolean                   @default(false)
+  headAssessed                    Boolean                   @default(false)
+  officeholdersAssessed             Boolean                   @default(false)
+  staffingAssessed                Boolean                   @default(false)
+  qualificationsAssessed          Boolean                   @default(false)
+  proceduresAssessed              Boolean                   @default(false)
+  recordsAssessed                 Boolean                   @default(false)
+  technologyAssessed              Boolean                   @default(false)
+  securityAssessed                Boolean                   @default(false)
+  trainingAssessed                Boolean                   @default(false)
+  dependenciesAssessed            Boolean                   @default(false)
+  supportAssessed                 Boolean                   @default(false)
+  continuityAssessed              Boolean                   @default(false)
+  testsAssessed                   Boolean                   @default(false)
+  acceptanceAssessed              Boolean                   @default(false)
+  activationAuthorityAssessed     Boolean                   @default(false)
+  conditions                      String?
+  supportCoverageGapDetected      Boolean                   @default(false)
+  staffingShortageDetected        Boolean                   @default(false)
+  isInstitutionalAcceptance       Boolean                   @default(false)
+  selfActivated                   Boolean                   @default(false)
+  assessedAt                      DateTime                  @default(now())
+  createdAt                       DateTime                  @default(now())
+  updatedAt                       DateTime                  @updatedAt
+  department                      Department                @relation("DepartmentReadinessDepartment", fields: [departmentId], references: [id])
+  assessorIdentity                Identity                  @relation("DepartmentReadinessAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder            Officeholder?             @relation("DepartmentReadinessAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+  staffingAssessments             StaffingReadinessAssessment[]
+
+  @@index([departmentId])
+  @@index([assessorIdentityId])
+  @@index([status])
+  @@map("department_readiness_assessments")
+}
+
+model StaffingReadinessAssessment {
+  id                              String                  @id @default(uuid()) @db.Uuid
+  departmentReadinessAssessmentId String                  @db.Uuid
+  departmentId                    String                  @db.Uuid
+  assessorIdentityId              String                  @db.Uuid
+  assessorOfficeholderId          String?                 @db.Uuid
+  status                          StaffingReadinessStatus @default(NOT_READY)
+  requiredPositions               Int
+  filledPositions                 Int
+  qualifiedPositions              Int
+  mandatoryControlOperable        Boolean                 @default(false)
+  shortageBlocksReadiness         Boolean                 @default(false)
+  notes                           String?
+  assessedAt                      DateTime                @default(now())
+  createdAt                       DateTime                @default(now())
+  updatedAt                       DateTime                @updatedAt
+  departmentReadinessAssessment   DepartmentReadinessAssessment @relation(fields: [departmentReadinessAssessmentId], references: [id], onDelete: Cascade)
+  department                      Department              @relation("StaffingReadinessDepartment", fields: [departmentId], references: [id])
+  assessorIdentity                Identity                @relation("StaffingReadinessAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder            Officeholder?           @relation("StaffingReadinessAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([departmentReadinessAssessmentId])
+  @@index([departmentId])
+  @@index([status])
+  @@map("staffing_readiness_assessments")
+}
+
+model QualificationExpiryEvent {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  operatorQualificationId String                       @db.Uuid
+  eventType               QualificationExpiryEventType
+  recordedByIdentityId    String                       @db.Uuid
+  expiredAt               DateTime
+  notes                   String?
+  accessReviewTriggered   Boolean                      @default(false)
+  createdAt               DateTime                     @default(now())
+  operatorQualification   OperatorQualification        @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  recordedBy              Identity                     @relation("QualificationExpiryRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([eventType])
+  @@index([expiredAt])
+  @@map("qualification_expiry_events")
+}
+
+model OperatorAccessReview {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId String                      @db.Uuid
+  trigger                 OperatorAccessReviewTrigger
+  status                  OperatorAccessReviewStatus  @default(PENDING)
+  initiatedByIdentityId   String                      @db.Uuid
+  delegationId            String?                     @db.Uuid
+  appointmentId           String?                     @db.Uuid
+  findings                String?
+  accessRetained          Boolean                     @default(false)
+  completedAt             DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  operatorQualification   OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  initiatedBy             Identity                    @relation("OperatorAccessReviewInitiator", fields: [initiatedByIdentityId], references: [id])
+  delegation              Delegation?                 @relation(fields: [delegationId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([trigger])
+  @@index([status])
+  @@map("operator_access_reviews")
 }

@@ -116,7 +116,29 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.performanceClaim.deleteMany();
 }
 
+export async function resetProductionReadinessData(prisma: PrismaService): Promise<void> {
+  await prisma.operatorAccessReview.deleteMany();
+  await prisma.qualificationExpiryEvent.deleteMany();
+  await prisma.staffingReadinessAssessment.deleteMany();
+  await prisma.departmentReadinessAssessment.deleteMany();
+  await prisma.successionAssignment.deleteMany();
+  await prisma.onCallAssignment.deleteMany();
+  await prisma.supportAssignment.deleteMany();
+  await prisma.supportCoveragePlan.deleteMany();
+  await prisma.continuityCompetencyAssessment.deleteMany();
+  await prisma.securityPrivacyAssessment.deleteMany();
+  await prisma.authorityBoundaryAssessment.deleteMany();
+  await prisma.practicalAssessment.deleteMany();
+  await prisma.trainingCompletion.deleteMany();
+  await prisma.operatorCompetencyAssessment.deleteMany();
+  await prisma.operatorQualification.deleteMany();
+  await prisma.operatorReadinessProfile.deleteMany();
+  await prisma.operationalRoleRequirement.deleteMany();
+  await prisma.trainingRequirement.deleteMany();
+}
+
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetProductionReadinessData(prisma);
   await resetIntelligenceData(prisma);
   await resetFinancialData(prisma);
   await resetApplicationProcessingData(prisma);
