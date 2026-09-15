@@ -140,6 +140,22 @@ model Institution {
   dashboardAccessPolicies          DashboardAccessPolicy[]
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections    DashboardIndicatorProjection[]
+  metricDefinitions                MetricDefinition[]              @relation("MetricDefinitionInstitution")
+  institutionalAcceptanceDossiers  InstitutionalAcceptanceDossier[] @relation("InstitutionalAcceptanceDossierInstitution")
+  featureActivations               FeatureActivation[]             @relation("FeatureActivationInstitution")
+  reportingDashboardIndicators     ReportingDashboardIndicator[]   @relation("ReportingDashboardIndicatorInstitution")
+  reportingDashboardSnapshots      ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotInstitution")
+  reportDefinitions                ReportDefinition[]              @relation("ReportDefinitionInstitution")
+  feeSchedules                    FeeSchedule[]
+  integrationDefinitions          IntegrationDefinition[]
+  paymentProviderConfigurations   PaymentProviderConfiguration[]
+  communicationTemplates          CommunicationTemplate[]
+  mandatoryCommunicationRules     MandatoryCommunicationRule[]
+  authoritativeSourceDesignations AuthoritativeSourceDesignation[]
+  reconciliationBatches           ReconciliationBatch[]
+  communicationPreferences        CommunicationPreference[]
+  supportCoveragePlans            SupportCoveragePlan[]           @relation("SupportCoveragePlanInstitution")
+  operationalRoleRequirements     OperationalRoleRequirement[]    @relation("OperationalRoleRequirementInstitution")
   strategicProjectProfiles         StrategicProjectProfile[]
   performanceFrameworks            PerformanceFramework[]
   ownedMetricDefinitions           MetricDefinition[]               @relation("MetricDefinitionOwnerInstitution")
@@ -197,6 +213,15 @@ model Department {
   dashboardDefinitions          DashboardDefinition[]
   dashboardAccessPolicies       DashboardAccessPolicy[]
   dashboardIndicatorProjections DashboardIndicatorProjection[]
+  metricDefinitions             MetricDefinition[]             @relation("MetricDefinitionDepartment")
+  reportingDashboardIndicators  ReportingDashboardIndicator[]  @relation("ReportingDashboardIndicatorDepartment")
+  reportingDashboardSnapshots   ReportingDashboardSnapshot[]   @relation("ReportingDashboardSnapshotDepartment")
+  reportDefinitions             ReportDefinition[]             @relation("ReportDefinitionDepartment")
+  operationalRoleRequirements   OperationalRoleRequirement[]   @relation("OperationalRoleRequirementDepartment")
+  operatorReadinessProfiles     OperatorReadinessProfile[]     @relation("OperatorReadinessDepartment")
+  supportCoveragePlans          SupportCoveragePlan[]          @relation("SupportCoveragePlanDepartment")
+  departmentReadinessAssessments DepartmentReadinessAssessment[] @relation("DepartmentReadinessDepartment")
+  staffingReadinessAssessments  StaffingReadinessAssessment[]  @relation("StaffingReadinessDepartment")
   strategicProjectProfiles      StrategicProjectProfile[]
   ownedMetricDefinitions        MetricDefinition[]             @relation("MetricDefinitionOwnerDepartment")
 
@@ -276,6 +301,34 @@ model Officeholder {
   digitalTwinSourcesOwned       DigitalTwinSource[]           @relation("DigitalTwinSourceOfficeholderOwner")
   simulationReviewsConducted    SimulationReview[]            @relation("SimulationReviewOfficeholderReviewer")
   consequentialUseReviewsConducted ConsequentialUseReview[]   @relation("ConsequentialUseOfficeholderReviewer")
+  institutionalMetricClaimsApproved InstitutionalMetricClaim[] @relation("InstitutionalMetricClaimApproverOfficeholder")
+  reportDefinitionsOwned          ReportDefinition[]         @relation("ReportDefinitionOwnerOfficeholder")
+  reportDefinitionVersionsOwned   ReportDefinitionVersion[]  @relation("ReportDefinitionVersionOwnerOfficeholder")
+  reportApprovalsAsApprover       ReportApproval[]           @relation("ReportApproverOfficeholder")
+  reportPublicationsAsPublisher   ReportPublication[]        @relation("ReportPublisherOfficeholder")
+  reportCorrectionsAsCorrector    ReportCorrection[]         @relation("ReportCorrectionOfficeholder")
+  acceptanceDossiersOwned         InstitutionalAcceptanceDossier[] @relation("AcceptanceDossierAccountableOwner")
+  acceptanceVersionsOwned         AcceptanceDossierVersion[] @relation("AcceptanceVersionAccountableOwner")
+  acceptanceDecisionsMade         AcceptanceDecision[]       @relation("AcceptanceDecisionDecider")
+  acceptanceSignatures            AcceptanceSignature[]      @relation("AcceptanceSignatureSigner")
+  acceptanceConditionsOwned       AcceptanceCondition[]      @relation("AcceptanceConditionOwner")
+  residualRisksOwned              ResidualRisk[]             @relation("ResidualRiskOwner")
+  residualRiskAcceptancesMade     ResidualRiskAcceptance[]   @relation("ResidualRiskAcceptanceOfficeholder")
+  productionActivationDecisionsMade ProductionActivationDecision[] @relation("ProductionActivationDecisionOfficeholder")
+  operatorReadinessProfiles       OperatorReadinessProfile[] @relation("OperatorReadinessOfficeholder")
+  operatorQualifications          OperatorQualification[]    @relation("OperatorQualificationOfficeholder")
+  qualificationAssessments        OperatorCompetencyAssessment[] @relation("CompetencyAssessmentAssessorOfficeholder")
+  practicalAssessmentsConducted   PracticalAssessment[]        @relation("PracticalAssessmentAssessorOfficeholder")
+  authorityBoundaryAssessmentsConducted AuthorityBoundaryAssessment[] @relation("AuthorityBoundaryAssessorOfficeholder")
+  securityPrivacyAssessmentsConducted SecurityPrivacyAssessment[] @relation("SecurityPrivacyAssessorOfficeholder")
+  continuityAssessmentsConducted  ContinuityCompetencyAssessment[] @relation("ContinuityAssessmentAssessorOfficeholder")
+  supportAssignments              SupportAssignment[]          @relation("SupportAssignmentOfficeholder")
+  onCallAssignments               OnCallAssignment[]           @relation("OnCallAssignmentOfficeholder")
+  onCallAlternateAssignments      OnCallAssignment[]           @relation("OnCallAlternateOfficeholder")
+  successionAssignmentsAsPrimary  SuccessionAssignment[]       @relation("SuccessionPrimaryOfficeholder")
+  successionAssignmentsAsAlternate SuccessionAssignment[]    @relation("SuccessionAlternateOfficeholder")
+  departmentReadinessAssessments  DepartmentReadinessAssessment[] @relation("DepartmentReadinessAssessorOfficeholder")
+  staffingReadinessAssessments    StaffingReadinessAssessment[] @relation("StaffingReadinessAssessorOfficeholder")
   capabilityMaturityAssessmentsAsInstitutionalOwner CapabilityMaturityAssessment[] @relation("CapabilityMaturityInstitutionalOwner")
   activationConditionsAsOwner     ActivationCondition[]      @relation("ActivationConditionOfficeholderOwner")
   capabilityDependenciesAsOwner   CapabilityDependency[]     @relation("CapabilityDependencyOfficeholderOwner")
@@ -303,6 +356,7 @@ model Appointment {
   decisionParticipants DecisionParticipant[]
   governmentDecisions  GovernmentDecision[]
   reviewAssignments    ReviewAssignment[]
+  operatorQualifications OperatorQualification[]
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions  ContinuityDecision[]
   resumptionAuthorizations ResumptionAuthorization[]
@@ -333,6 +387,8 @@ model Delegation {
   structuredScopes        DelegationStructuredScope[]
   governmentDecisions     GovernmentDecision[]
   reviewAssignments       ReviewAssignment[]
+  operatorQualifications  OperatorQualification[]
+  operatorAccessReviews   OperatorAccessReview[]
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions     ContinuityDecision[]
   resumptionAuthorizations ResumptionAuthorization[]
@@ -639,6 +695,74 @@ model Identity {
   intelligenceAlertVerifications   IntelligenceAlertVerification[] @relation("IntelligenceAlertVerifier")
   intelligenceAlertDispositions      IntelligenceAlertDisposition[] @relation("IntelligenceAlertDisposer")
   riskReviews                        RiskReview[]                  @relation("RiskReviewer")
+  performanceClaimsAsserted          PerformanceClaim[]            @relation("PerformanceClaimAsserter")
+  performanceClaimsReviewed          PerformanceClaim[]            @relation("PerformanceClaimReviewer")
+  strategicProjectStagesRecorded     StrategicProjectStage[]       @relation("StrategicProjectStageRecorder")
+  strategicProjectMilestonesReported StrategicProjectMilestone[]   @relation("StrategicProjectMilestoneReporter")
+  capitalEvidenceRecorded            CapitalEvidenceRecord[]       @relation("CapitalEvidenceRecorder")
+  employmentEvidenceRecorded         EmploymentEvidenceRecord[]    @relation("EmploymentEvidenceRecorder")
+  infrastructureDeliveryRecorded     InfrastructureDeliveryRecord[] @relation("InfrastructureDeliveryRecorder")
+  sectorObservationsRecorded         SectorDevelopmentObservation[] @relation("SectorObservationRecorder")
+  projectStatusProjectionsDerived    ProjectStatusProjection[]     @relation("ProjectStatusProjectionDeriver")
+  dashboardAccessPolicies            DashboardAccessPolicy[]
+  dashboardQueryAudits                 DashboardQueryAudit[]
+  dashboardSnapshotsCaptured         DashboardSnapshot[]           @relation("DashboardSnapshotCapturer")
+  dashboardIndicatorProjectionsOwned   DashboardIndicatorProjection[] @relation("DashboardIndicatorOwner")
+  feeScheduleVersionApprovals          FeeScheduleVersion[]              @relation("FeeScheduleVersionApprover")
+  feeAdjustmentRequestsRequested       FeeAdjustmentRequest[]            @relation("FeeAdjustmentRequestRequester")
+  feeAdjustmentDecisionsDecided        FeeAdjustmentDecision[]           @relation("FeeAdjustmentDecisionDecider")
+  refundRequestsRequested              RefundRequest[]                   @relation("RefundRequestRequester")
+  refundAuthorizationsAuthorized       RefundAuthorization[]             @relation("RefundAuthorizationAuthorizer")
+  financialApprovalsApproved           FinancialApprovalRecord[]         @relation("FinancialApprovalApprover")
+  integrationAcceptanceAssessments     IntegrationAcceptanceRecord[]     @relation("IntegrationAcceptanceAssessor")
+  sourceDiscrepancyResolutions         SourceDiscrepancyResolution[]     @relation("SourceDiscrepancyResolver")
+  integrationRecoveryVerifications     IntegrationRecoveryEvent[]        @relation("IntegrationRecoveryVerifier")
+  communicationRecipients              CommunicationRecipient[]          @relation("CommunicationRecipientIdentity")
+  communicationPreferences             CommunicationPreference[]         @relation("CommunicationPreferenceIdentity")
+  accessibilityAccommodations          AccessibilityAccommodation[]      @relation("AccessibilityAccommodationIdentity")
+  translationRecords                   TranslationRecord[]               @relation("TranslationRecordTranslator")
+  reconciliationExceptionsOwned        ReconciliationException[]         @relation("ReconciliationExceptionOwner")
+  metricCalculationRunsExecuted        MetricCalculationRun[]            @relation("MetricCalculationRunner")
+  reportingDashboardSnapshotsCaptured  ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotCapturer")
+  reportDefinitionsOwned               ReportDefinition[]                @relation("ReportDefinitionOwner")
+  reportDefinitionVersionsOwned        ReportDefinitionVersion[]         @relation("ReportDefinitionVersionOwner")
+  reportGenerationRunsInitiated        ReportGenerationRun[]             @relation("ReportGenerationRunInitiator")
+  reportReviewsConducted               ReportReview[]                    @relation("ReportReviewer")
+  reportApprovalsAsApprover            ReportApproval[]                  @relation("ReportApprover")
+  reportPublicationsAsPublisher        ReportPublication[]               @relation("ReportPublisher")
+  reportCorrectionsRecorded            ReportCorrection[]                @relation("ReportCorrectionRecorder")
+  reportClaimRevalidationsRecorded     ReportClaimRevalidationRecord[]   @relation("ReportClaimRevalidationRecorder")
+  acceptanceReviewsConducted           AcceptanceReview[]                @relation("AcceptanceReviewReviewer")
+  acceptanceLevelAchievementsRecorded  AcceptanceLevelAchievement[]      @relation("AcceptanceLevelAchiever")
+  residualRiskAcceptancesDecided       ResidualRiskAcceptance[]          @relation("ResidualRiskAcceptanceDecider")
+  productionActivationRequestsSubmitted ProductionActivationRequest[]  @relation("ProductionActivationRequestSubmitter")
+  productionActivationDecisionsDecided ProductionActivationDecision[]  @relation("ProductionActivationDecisionDecider")
+  activationCommunicationsSent         ActivationCommunication[]         @relation("ActivationCommunicationSender")
+  activationAuditRecordsRecorded     ActivationAuditRecord[]           @relation("ActivationAuditRecorder")
+  operatorReadinessProfiles            OperatorReadinessProfile[]        @relation("OperatorReadinessIdentity")
+  operatorQualifications               OperatorQualification[]           @relation("OperatorQualificationIdentity")
+  qualificationAssessmentsConducted      OperatorCompetencyAssessment[]  @relation("CompetencyAssessmentAssessor")
+  practicalAssessmentsConducted        PracticalAssessment[]             @relation("PracticalAssessmentAssessor")
+  authorityBoundaryAssessmentsConducted AuthorityBoundaryAssessment[]    @relation("AuthorityBoundaryAssessor")
+  securityPrivacyAssessmentsConducted  SecurityPrivacyAssessment[]       @relation("SecurityPrivacyAssessor")
+  continuityAssessmentsConducted       ContinuityCompetencyAssessment[]  @relation("ContinuityAssessmentAssessor")
+  trainingCompletionsRecorded          TrainingCompletion[]              @relation("TrainingCompletionRecorder")
+  supportAssignments                   SupportAssignment[]               @relation("SupportAssignmentIdentity")
+  onCallAssignments                    OnCallAssignment[]                @relation("OnCallAssignmentIdentity")
+  onCallAlternateAssignments           OnCallAssignment[]                @relation("OnCallAlternateIdentity")
+  departmentReadinessAssessments         DepartmentReadinessAssessment[]   @relation("DepartmentReadinessAssessor")
+  staffingReadinessAssessments         StaffingReadinessAssessment[]     @relation("StaffingReadinessAssessor")
+  operatorAccessReviewsInitiated       OperatorAccessReview[]            @relation("OperatorAccessReviewInitiator")
+  qualificationExpiryEventsRecorded    QualificationExpiryEvent[]        @relation("QualificationExpiryRecorder")
+  changeRequestsRequested              ChangeRequest[]                   @relation("ChangeRequestRequester")
+  changeAssessmentsConducted           ChangeAssessment[]                @relation("ChangeAssessmentAssessor")
+  releaseApprovalsGranted              ReleaseApproval[]                 @relation("ReleaseApprovalApprover")
+  deploymentRecordsInitiated           DeploymentRecord[]                @relation("DeploymentInitiator")
+  emergencyChangesAuthorized           EmergencyChange[]                 @relation("EmergencyChangeAuthorizer")
+  configurationChangesRequested        ConfigurationChange[]             @relation("ConfigurationChangeRequester")
+  featureActivationsPerformed          FeatureActivation[]               @relation("FeatureActivationActor")
+  dataTransferApprovalsGranted         DataTransferApproval[]            @relation("DataTransferApprovalApprover")
+  rollbackExecutionsInitiated          RollbackExecution[]               @relation("RollbackExecutionInitiator")
   capabilityMaturityAssessmentsAsTechnicalOwner CapabilityMaturityAssessment[] @relation("CapabilityMaturityTechnicalOwner")
   capabilityMaturityAssessmentsAsReviewer CapabilityMaturityAssessment[] @relation("CapabilityMaturityReviewer")
   capabilityMaturityHistoryChanges     CapabilityMaturityHistory[]       @relation("CapabilityMaturityHistoryChanger")
@@ -1101,6 +1225,12 @@ model FunctionAuthorityRecord {
   redressDecisions              RedressDecision[]                @relation("RedressDecisionFunctionAuthority")
   interimReliefDecisions        InterimReliefDecision[]          @relation("InterimReliefDecisionFunctionAuthority")
   reviewStayRecords             ReviewStayRecord[]               @relation("ReviewStayFunctionAuthority")
+  reportPublicationAuthorities  ReportDefinitionVersion[]        @relation("ReportPublicationAuthority")
+  acceptanceDossierAuthorities  InstitutionalAcceptanceDossier[] @relation("AcceptanceDossierAuthorityFunction")
+  acceptanceVersionAuthorities  AcceptanceDossierVersion[]       @relation("AcceptanceVersionAuthorityFunction")
+  residualRiskAuthorities       ResidualRisk[]                   @relation("ResidualRiskAuthorityFunction")
+  operationalRoleRequirements   OperationalRoleRequirement[]     @relation("OperationalRoleRequirementFunction")
+  operatorQualifications        OperatorQualification[]          @relation("OperatorQualificationFunction")
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions           ContinuityDecision[]
   resumptionAuthorizations      ResumptionAuthorization[]
@@ -1371,6 +1501,14 @@ model AuthorityEvaluationRecord {
   redressDecisions                RedressDecision[]             @relation("RedressDecisionAuthority")
   interimReliefDecisions          InterimReliefDecision[]       @relation("InterimReliefDecisionAuthority")
   reviewStayRecords               ReviewStayRecord[]            @relation("ReviewStayAuthority")
+  reportApprovals                 ReportApproval[]              @relation("ReportApprovalAuthority")
+  reportPublications              ReportPublication[]           @relation("ReportPublicationAuthority")
+  reportCorrections               ReportCorrection[]            @relation("ReportCorrectionAuthority")
+  acceptanceLevelAchievements   AcceptanceLevelAchievement[]  @relation("AcceptanceLevelAuthority")
+  acceptanceDecisions             AcceptanceDecision[]          @relation("AcceptanceDecisionAuthority")
+  residualRiskAcceptances         ResidualRiskAcceptance[]      @relation("ResidualRiskAcceptanceAuthority")
+  productionActivationDecisions   ProductionActivationDecision[] @relation("ProductionActivationAuthority")
+  productionActivationFreshEvaluations ProductionActivationDecision[] @relation("ProductionActivationFreshAuthority")
   operationalActivations          OperationalActivationRecord[]
   operationalRevalidations        OperationalRevalidation[]
   operationalSuspensions          OperationalSuspension[]
@@ -1583,6 +1721,7 @@ model GovernmentService {
   decisionTypes               DecisionType[]
   feeSchedules                FeeSchedule[]
   mandatoryCommunicationRules MandatoryCommunicationRule[]
+  featureActivations          FeatureActivation[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -3421,6 +3560,8 @@ model EvidenceRecord {
   packetItems                     EvidencePacketItem[]
   packetExclusions                EvidencePacketItemExclusion[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
+  evidenceDashboardDecisionTraces EvidenceDashboardDecisionTrace[] @relation("TraceEvidenceRecord")
+  acceptanceEvidenceLinks         AcceptanceEvidenceLink[]         @relation("AcceptanceEvidenceLink")
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -11199,6 +11340,19 @@ model RiskReview {
   @@map("risk_reviews")
 }
 
+// ─── Phase 13C: Production Reliability, Observability, Performance and Health ─
+
+enum ServiceReliabilityDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ServiceLevelObjectiveStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
 // ─── Phase 13A: Operational Readiness and Activation Foundation ───────────────
 
 enum CapabilitySubjectType {
@@ -11749,6 +11903,598 @@ enum OperationalActivationStatus {
   RETIRED
 }
 
+enum ServiceLevelIndicatorType {
+  AVAILABILITY
+  LATENCY
+  ERROR_RATE
+  QUEUE_DEPTH
+  WORKFLOW_THROUGHPUT
+  DATABASE_PERFORMANCE
+  INTEGRATION_AVAILABILITY
+  NOTIFICATION_DELIVERY
+  PAYMENT_PROCESSING
+  EVIDENCE_STORAGE
+  AI_SERVICE_AVAILABILITY
+  BACKGROUND_JOBS
+}
+
+enum SliMeasurementStatus {
+  RECORDED
+  QUALIFIED
+  STALE
+  DISPUTED
+}
+
+enum TechnicalHealthState {
+  LIVE
+  READY
+  DEGRADED
+  NOT_READY
+}
+
+enum DependencyType {
+  DATABASE
+  CACHE
+  STORAGE
+  EXTERNAL_INTEGRATION
+  PAYMENT_PROVIDER
+  NOTIFICATION_PROVIDER
+  AI_PROVIDER
+  IDENTITY_PROVIDER
+}
+
+enum DependencyHealthState {
+  HEALTHY
+  DEGRADED
+  UNAVAILABLE
+  UNKNOWN
+  STALE
+}
+
+enum CapacityProfileStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum CapacityAssessmentStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+}
+
+enum PerformanceTestScenarioType {
+  NORMAL
+  PEAK
+  BURST
+  DEGRADED
+  LARGE_DOCUMENT
+  HIGH_CONCURRENCY
+  QUEUE_BACKLOG
+  SLOW_EXTERNAL_DEPENDENCY
+}
+
+enum PerformanceTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+}
+
+enum LoadTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+  BLOCKED_UNSAFE_TARGET
+}
+
+enum StressTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+  BLOCKED_UNSAFE_TARGET
+}
+
+enum ResourceSaturationLevel {
+  NORMAL
+  ELEVATED
+  HIGH
+  CRITICAL
+  EXHAUSTED
+}
+
+enum OperationalHealthEventType {
+  DEGRADATION
+  RECOVERY
+  CAPACITY_WARNING
+  DEPENDENCY_FAILURE
+  SLO_BREACH_SIGNAL
+  RATE_LIMIT_PRESSURE
+  PERFORMANCE_ANOMALY
+  OTHER
+}
+
+enum ObservabilitySignalType {
+  STRUCTURED_LOG
+  METRIC
+  TRACE
+  HEALTH_CHECK
+  DEPENDENCY_HEALTH
+}
+
+enum LogClassification {
+  PUBLIC
+  OPERATIONAL
+  SECURITY_SENSITIVE
+  RESTRICTED
+  PII_RESTRICTED
+}
+
+enum OperationalAlertRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum OperationalAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum OperationalAlertEventStatus {
+  FIRED
+  ACKNOWLEDGED
+  ESCALATED
+  RESOLVED
+  SUPPRESSED
+  FALSE_POSITIVE
+}
+
+enum OperationalRunbookStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum SupportEscalationRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum RateLimitScope {
+  AUTHENTICATION
+  PUBLIC_VERIFICATION
+  SEARCH
+  UPLOAD
+  WEBHOOK
+  ANALYTICS_AI
+}
+
+model ServiceReliabilityDefinition {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  code                     String                             @unique
+  name                     String
+  description              String?
+  status                   ServiceReliabilityDefinitionStatus @default(DRAFT)
+  serviceReference         String
+  institutionalDisclaimer  String                             @default("Technical reliability definitions do not establish institutional service acceptance or legal authority.")
+  correlationId            String?
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  objectives               ServiceLevelObjective[]
+  capacityProfiles         CapacityProfile[]
+  performanceTestRuns      PerformanceTestRun[]
+  loadTestRuns             LoadTestRun[]
+  stressTestRuns           StressTestRun[]
+  observabilitySignals     ObservabilitySignalDefinition[]
+  alertRules               OperationalAlertRule[]
+  runbooks                 OperationalRunbook[]
+  escalationRules          SupportEscalationRule[]
+
+  @@index([status])
+  @@index([serviceReference])
+  @@index([correlationId])
+  @@map("service_reliability_definitions")
+}
+
+model ServiceLevelObjective {
+  id                           String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId      String                      @db.Uuid
+  code                         String
+  name                         String
+  status                       ServiceLevelObjectiveStatus @default(DRAFT)
+  approvedTargetValue          String
+  approvedTargetUnit           String
+  approvedTargetReference      String
+  evaluationWindow             String
+  notGuaranteedDisclaimer      String                      @default("Configured service target is not a contractual SLA or guaranteed availability.")
+  effectiveFrom                DateTime
+  effectiveUntil               DateTime?
+  correlationId                String?
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @updatedAt
+  reliabilityDefinition        ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  indicators                   ServiceLevelIndicator[]
+  availabilityMeasurements     AvailabilityMeasurement[]
+  latencyMeasurements          LatencyMeasurement[]
+  alertRules                   OperationalAlertRule[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("service_level_objectives")
+}
+
+model ServiceLevelIndicator {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  objectiveId           String                    @db.Uuid
+  code                  String
+  name                  String
+  indicatorType         ServiceLevelIndicatorType
+  measurementUnit       String
+  approvedThreshold     String
+  approvedThresholdRef  String
+  correlationId         String?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  objective             ServiceLevelObjective     @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  availabilityMeasurements AvailabilityMeasurement[]
+  latencyMeasurements   LatencyMeasurement[]
+
+  @@unique([objectiveId, code])
+  @@index([objectiveId])
+  @@index([indicatorType])
+  @@index([correlationId])
+  @@map("service_level_indicators")
+}
+
+model AvailabilityMeasurement {
+  id                 String               @id @default(uuid()) @db.Uuid
+  objectiveId        String               @db.Uuid
+  indicatorId        String               @db.Uuid
+  measuredValue      String
+  measurementStatus  SliMeasurementStatus @default(RECORDED)
+  windowStart        DateTime
+  windowEnd          DateTime
+  isHttp200Only      Boolean              @default(false)
+  notes              String?
+  correlationId      String?
+  createdAt          DateTime             @default(now())
+  objective          ServiceLevelObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  indicator          ServiceLevelIndicator @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+
+  @@index([objectiveId])
+  @@index([indicatorId])
+  @@index([windowStart])
+  @@index([correlationId])
+  @@map("availability_measurements")
+}
+
+model LatencyMeasurement {
+  id                 String               @id @default(uuid()) @db.Uuid
+  objectiveId        String               @db.Uuid
+  indicatorId        String               @db.Uuid
+  measuredValueMs    Float
+  measurementStatus  SliMeasurementStatus @default(RECORDED)
+  percentile         String?
+  windowStart        DateTime
+  windowEnd          DateTime
+  notes              String?
+  correlationId      String?
+  createdAt          DateTime             @default(now())
+  objective          ServiceLevelObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  indicator          ServiceLevelIndicator @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+
+  @@index([objectiveId])
+  @@index([indicatorId])
+  @@index([windowStart])
+  @@index([correlationId])
+  @@map("latency_measurements")
+}
+
+model CapacityProfile {
+  id                      String                @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                @db.Uuid
+  code                    String
+  name                    String
+  status                  CapacityProfileStatus @default(DRAFT)
+  expectedUsers           Int?
+  concurrentSessions      Int?
+  requestsPerMinute       Int?
+  caseVolumePerDay        Int?
+  documentVolumePerDay    Int?
+  storageBytes            BigInt?
+  integrationThroughput   Int?
+  notificationThroughput  Int?
+  paymentThroughput       Int?
+  aiWorkloadUnits         Int?
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  correlationId           String?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  assessments             CapacityAssessment[]
+  saturationRecords       ResourceSaturationRecord[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("capacity_profiles")
+}
+
+model CapacityAssessment {
+  id                String                   @id @default(uuid()) @db.Uuid
+  profileId         String                   @db.Uuid
+  assessmentNumber  String                   @unique
+  status            CapacityAssessmentStatus @default(DRAFT)
+  assessedAt        DateTime                 @default(now())
+  findings          String
+  headroomPercent   Float?
+  exhaustionRisk    Boolean                  @default(false)
+  safeFailApplied   Boolean                  @default(false)
+  correlationId     String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  profile           CapacityProfile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("capacity_assessments")
+}
+
+model PerformanceTestRun {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                      @db.Uuid
+  runNumber               String                      @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  PerformanceTestRunStatus    @default(PLANNED)
+  targetEnvironment       String
+  usesProductionData      Boolean                     @default(false)
+  productionDataApproved  Boolean                     @default(false)
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([scenarioType])
+  @@index([correlationId])
+  @@map("performance_test_runs")
+}
+
+model LoadTestRun {
+  id                      String            @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String            @db.Uuid
+  runNumber               String            @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  LoadTestRunStatus @default(PLANNED)
+  targetEnvironment       String
+  isProductionTarget      Boolean           @default(false)
+  productionTestAuthorized Boolean          @default(false)
+  virtualUsers            Int?
+  durationSeconds         Int?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("load_test_runs")
+}
+
+model StressTestRun {
+  id                      String              @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String              @db.Uuid
+  runNumber               String              @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  StressTestRunStatus @default(PLANNED)
+  targetEnvironment       String
+  isProductionTarget      Boolean             @default(false)
+  productionTestAuthorized Boolean            @default(false)
+  peakMultiplier          Float?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("stress_test_runs")
+}
+
+model ResourceSaturationRecord {
+  id                String                  @id @default(uuid()) @db.Uuid
+  profileId         String                  @db.Uuid
+  resourceType      String
+  saturationLevel   ResourceSaturationLevel
+  utilizationPercent Float
+  safeFailTriggered Boolean                 @default(false)
+  recordedAt        DateTime                @default(now())
+  notes             String?
+  correlationId     String?
+  createdAt         DateTime                @default(now())
+  profile           CapacityProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([saturationLevel])
+  @@index([recordedAt])
+  @@index([correlationId])
+  @@map("resource_saturation_records")
+}
+
+model OperationalHealthEvent {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  eventNumber           String                     @unique
+  eventType             OperationalHealthEventType
+  technicalHealthState  TechnicalHealthState
+  dependencyType        DependencyType?
+  dependencyReference   String?
+  dependencyHealthState DependencyHealthState?
+  isStaleIntegration    Boolean                    @default(false)
+  affectedCapabilityRef String?
+  summary               String
+  notInstitutionalStatus Boolean                   @default(true)
+  correlationId         String?
+  recordedAt            DateTime                   @default(now())
+  createdAt             DateTime                   @default(now())
+
+  @@index([eventType])
+  @@index([technicalHealthState])
+  @@index([dependencyType])
+  @@index([correlationId])
+  @@index([recordedAt])
+  @@map("operational_health_events")
+}
+
+model ObservabilitySignalDefinition {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                  @db.Uuid
+  code                    String
+  name                    String
+  signalType              ObservabilitySignalType
+  logClassification       LogClassification       @default(OPERATIONAL)
+  redactionPolicy         Json                    @default("[]")
+  correlationPropagation  Boolean                 @default(true)
+  metricName              String?
+  traceSpanName           String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([signalType])
+  @@map("observability_signal_definitions")
+}
+
+model OperationalAlertRule {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                     @db.Uuid
+  objectiveId             String?                    @db.Uuid
+  code                    String
+  name                    String
+  status                  OperationalAlertRuleStatus @default(DRAFT)
+  severity                OperationalAlertSeverity
+  conditionDescription    String
+  thresholdConfig         Json
+  isIncident              Boolean                    @default(false)
+  notInstitutionalDecision Boolean                   @default(true)
+  runbookId               String?                    @db.Uuid
+  correlationId           String?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  objective               ServiceLevelObjective?     @relation(fields: [objectiveId], references: [id])
+  runbook                 OperationalRunbook?        @relation(fields: [runbookId], references: [id])
+  alertEvents             OperationalAlertEvent[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([objectiveId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("operational_alert_rules")
+}
+
+model OperationalAlertEvent {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  ruleId                String                      @db.Uuid
+  alertNumber           String                      @unique
+  status                OperationalAlertEventStatus @default(FIRED)
+  severity              OperationalAlertSeverity
+  observedCondition     String
+  isIncident            Boolean                     @default(false)
+  notInstitutionalDecision Boolean                  @default(true)
+  sloViolationObserved  Boolean                     @default(false)
+  requirementsWaived    Boolean                     @default(false)
+  correlationId         String?
+  firedAt               DateTime                    @default(now())
+  acknowledgedAt        DateTime?
+  resolvedAt            DateTime?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  rule                  OperationalAlertRule        @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([status])
+  @@index([correlationId])
+  @@index([firedAt])
+  @@map("operational_alert_events")
+}
+
+model OperationalRunbook {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                   @db.Uuid
+  code                    String
+  name                    String
+  status                  OperationalRunbookStatus @default(DRAFT)
+  scenarioType            String
+  procedureMarkdown       String
+  escalationNotes         String?
+  correlationId           String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  alertRules              OperationalAlertRule[]
+  escalationRules         SupportEscalationRule[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([scenarioType])
+  @@map("operational_runbooks")
+}
+
+model SupportEscalationRule {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                      @db.Uuid
+  runbookId               String?                     @db.Uuid
+  code                    String
+  name                    String
+  status                  SupportEscalationRuleStatus @default(DRAFT)
+  triggerCondition        String
+  escalationTarget        String
+  mandatoryProcessFallback String?
+  correlationId           String?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  runbook                 OperationalRunbook?         @relation(fields: [runbookId], references: [id])
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([runbookId])
+  @@index([status])
+  @@map("support_escalation_rules")
 enum OperationalActivationOutcome {
   ACTIVATED
   BLOCKED
@@ -13743,4 +14489,1819 @@ model ContinuityCorrectiveAction {
   @@index([status])
   @@index([sourceType])
   @@map("continuity_corrective_actions")
+}
+
+// ─── Phase 13E: Environment Separation, Release Governance and Change Control ───
+
+enum PlatformEnvironmentClassification {
+  LOCAL
+  DEVELOPMENT
+  TEST
+  INTEGRATION
+  SANDBOX
+  STAGING
+  PILOT
+  PRODUCTION
+  DISASTER_RECOVERY
+}
+
+enum EnvironmentDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum ReleaseDefinitionStatus {
+  DRAFT
+  BUILDING
+  AWAITING_APPROVAL
+  APPROVED
+  RELEASED
+  SUPERSEDED
+  REJECTED
+}
+
+enum ReleaseArtifactStatus {
+  PENDING
+  BUILT
+  ACCEPTED
+  REJECTED
+  SUPERSEDED
+}
+
+enum ReleaseApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum DeploymentRecordStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  VERIFIED
+  ROLLED_BACK
+}
+
+enum DeploymentVerificationStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
+enum RollbackPlanStatus {
+  DRAFT
+  APPROVED
+  EXECUTED
+  SUPERSEDED
+}
+
+enum RollbackExecutionStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  ABORTED
+}
+
+enum ChangeRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IMPLEMENTED
+  CANCELLED
+}
+
+enum ChangeAssessmentOutcome {
+  PENDING
+  APPROVED
+  REJECTED
+  CONDITIONAL
+}
+
+enum EmergencyChangeStatus {
+  DRAFT
+  ACTIVE
+  IMPLEMENTED
+  EXPIRED
+  RETROSPECTIVE_ACCEPTED
+  RETROSPECTIVE_REJECTED
+}
+
+enum ConfigurationItemStatus {
+  DRAFT
+  ACTIVE
+  DEPRECATED
+  RETIRED
+}
+
+enum ConfigurationChangeStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  APPLIED
+  ROLLED_BACK
+}
+
+enum FeatureActivationStatus {
+  DEPLOYED_ONLY
+  TECHNICALLY_ENABLED
+  INSTITUTIONALLY_ACTIVATED
+  SUSPENDED
+}
+
+enum ReleaseRevalidationTriggerType {
+  MATERIAL_CONFIGURATION_CHANGE
+  INTEGRATION_ENDPOINT_CHANGE
+  AI_MODEL_UPDATE
+  SCHEMA_MIGRATION
+  SECURITY_ASSESSMENT_CHANGE
+  AUTHORITY_POLICY_CHANGE
+  MATERIAL_FEATURE_CHANGE
+}
+
+enum CiPipelineRunStatus {
+  PENDING
+  RUNNING
+  PASSED
+  FAILED
+}
+
+enum DataTransferApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EnvironmentIntegrationMode {
+  MOCK
+  SANDBOX
+  STAGING
+  LIVE
+}
+
+model EnvironmentDefinition {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  code                       String                            @unique
+  name                       String
+  description                String?
+  classification             PlatformEnvironmentClassification
+  status                     EnvironmentDefinitionStatus       @default(DRAFT)
+  credentialsNamespace       String
+  secretsNamespace           String
+  dataPartitionKey           String
+  integrationEndpointPrefix  String
+  integrationMode            EnvironmentIntegrationMode          @default(MOCK)
+  accessControlPolicy        Json                              @default("{}")
+  allowsProductionSemantics  Boolean                           @default(false)
+  configurationBaselines     EnvironmentConfigurationBaseline[]
+  credentialBindings         EnvironmentCredentialBinding[]
+  integrationEndpoints       EnvironmentIntegrationEndpoint[]
+  deploymentRecords          DeploymentRecord[]
+  featureActivations         FeatureActivation[]
+  dataTransferApprovalsFrom  DataTransferApproval[]            @relation("DataTransferSourceEnvironment")
+  dataTransferApprovalsTo    DataTransferApproval[]            @relation("DataTransferTargetEnvironment")
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+
+  @@index([classification])
+  @@index([status])
+  @@map("environment_definitions")
+}
+
+model EnvironmentConfigurationBaseline {
+  id                      String                @id @default(uuid()) @db.Uuid
+  environmentDefinitionId String                @db.Uuid
+  version                 String
+  configurationDigest     String
+  baselineContent         Json                  @default("{}")
+  effectiveFrom           DateTime              @default(now())
+  effectiveUntil          DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  environmentDefinition   EnvironmentDefinition @relation(fields: [environmentDefinitionId], references: [id])
+  releaseDefinitions      ReleaseDefinition[]
+
+  @@unique([environmentDefinitionId, version])
+  @@index([environmentDefinitionId])
+  @@map("environment_configuration_baselines")
+}
+
+model EnvironmentCredentialBinding {
+  id                      String                @id @default(uuid()) @db.Uuid
+  environmentDefinitionId String                @db.Uuid
+  credentialReference     String
+  credentialNamespace     String
+  isProductionCredential  Boolean               @default(false)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  environmentDefinition   EnvironmentDefinition @relation(fields: [environmentDefinitionId], references: [id])
+
+  @@unique([environmentDefinitionId, credentialReference])
+  @@index([environmentDefinitionId])
+  @@map("environment_credential_bindings")
+}
+
+model EnvironmentIntegrationEndpoint {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  environmentDefinitionId String                     @db.Uuid
+  endpointKey             String
+  endpointUrl             String
+  integrationMode         EnvironmentIntegrationMode @default(MOCK)
+  isLiveGovernmentEndpoint Boolean                   @default(false)
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  environmentDefinition   EnvironmentDefinition      @relation(fields: [environmentDefinitionId], references: [id])
+
+  @@unique([environmentDefinitionId, endpointKey])
+  @@index([environmentDefinitionId])
+  @@map("environment_integration_endpoints")
+}
+
+model ReleaseDefinition {
+  id                              String                           @id @default(uuid()) @db.Uuid
+  version                         String                           @unique
+  sourceCommitSha                 String
+  buildIdentifier                 String
+  status                          ReleaseDefinitionStatus          @default(DRAFT)
+  schemaMigrationSet              Json                             @default("[]")
+  featureManifest                 Json                             @default("[]")
+  knownDefects                    Json                             @default("[]")
+  securityAssessmentRef           String?
+  testEvidenceRef                 String?
+  releaseNotes                    String?
+  configurationBaselineId         String?                          @db.Uuid
+  configurationBaseline           EnvironmentConfigurationBaseline? @relation(fields: [configurationBaselineId], references: [id])
+  artifacts                       ReleaseArtifact[]
+  rollbackPlans                   RollbackPlan[]
+  revalidationTriggers            ReleaseRevalidationTrigger[]
+  createdAt                       DateTime                         @default(now())
+  updatedAt                       DateTime                         @updatedAt
+
+  @@index([status])
+  @@index([configurationBaselineId])
+  @@map("release_definitions")
+}
+
+model ReleaseArtifact {
+  id                  String                @id @default(uuid()) @db.Uuid
+  releaseDefinitionId String                @db.Uuid
+  artifactDigest      String                @unique
+  sbomDigest          String
+  provenanceRef       String?
+  status              ReleaseArtifactStatus @default(PENDING)
+  acceptedAt          DateTime?
+  immutable           Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  releaseDefinition   ReleaseDefinition     @relation(fields: [releaseDefinitionId], references: [id])
+  approvals           ReleaseApproval[]
+  deploymentRecords   DeploymentRecord[]
+
+  @@index([releaseDefinitionId])
+  @@index([status])
+  @@map("release_artifacts")
+}
+
+model ReleaseApproval {
+  id                       String                @id @default(uuid()) @db.Uuid
+  releaseArtifactId        String                @db.Uuid
+  approverIdentityId       String                @db.Uuid
+  status                   ReleaseApprovalStatus @default(PENDING)
+  artifactDigestAtApproval String
+  approvedAt               DateTime?
+  notes                    String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  releaseArtifact          ReleaseArtifact       @relation(fields: [releaseArtifactId], references: [id])
+  approver                 Identity              @relation("ReleaseApprovalApprover", fields: [approverIdentityId], references: [id])
+
+  @@index([releaseArtifactId])
+  @@index([approverIdentityId])
+  @@index([status])
+  @@map("release_approvals")
+}
+
+model DeploymentRecord {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  environmentDefinitionId String                 @db.Uuid
+  releaseArtifactId       String                 @db.Uuid
+  changeRequestId         String?                @db.Uuid
+  deployedByIdentityId    String                 @db.Uuid
+  status                  DeploymentRecordStatus @default(PLANNED)
+  deployedAt              DateTime?
+  notes                   String?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  environmentDefinition   EnvironmentDefinition  @relation(fields: [environmentDefinitionId], references: [id])
+  releaseArtifact         ReleaseArtifact        @relation(fields: [releaseArtifactId], references: [id])
+  changeRequest           ChangeRequest?         @relation(fields: [changeRequestId], references: [id])
+  deployedBy              Identity               @relation("DeploymentInitiator", fields: [deployedByIdentityId], references: [id])
+  verifications           DeploymentVerification[]
+  rollbackExecutions      RollbackExecution[]
+
+  @@index([environmentDefinitionId])
+  @@index([releaseArtifactId])
+  @@index([changeRequestId])
+  @@index([status])
+  @@map("deployment_records")
+}
+
+model DeploymentVerification {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  deploymentRecordId String                       @db.Uuid
+  verificationType   String
+  status             DeploymentVerificationStatus @default(PENDING)
+  evidence           Json                         @default("{}")
+  verifiedAt         DateTime?
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  deploymentRecord   DeploymentRecord             @relation(fields: [deploymentRecordId], references: [id])
+
+  @@index([deploymentRecordId])
+  @@index([status])
+  @@map("deployment_verifications")
+}
+
+model RollbackPlan {
+  id                          String             @id @default(uuid()) @db.Uuid
+  releaseDefinitionId         String             @db.Uuid
+  targetArtifactDigest        String
+  databaseStrategy            Json               @default("{}")
+  externalTransactionStrategy Json               @default("{}")
+  preservesOfficialRecords    Boolean            @default(true)
+  status                      RollbackPlanStatus @default(DRAFT)
+  createdAt                   DateTime           @default(now())
+  updatedAt                   DateTime           @updatedAt
+  releaseDefinition           ReleaseDefinition  @relation(fields: [releaseDefinitionId], references: [id])
+  executions                  RollbackExecution[]
+  emergencyChanges            EmergencyChange[]
+
+  @@index([releaseDefinitionId])
+  @@index([status])
+  @@map("rollback_plans")
+}
+
+model RollbackExecution {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  rollbackPlanId          String                  @db.Uuid
+  deploymentRecordId      String                  @db.Uuid
+  initiatedByIdentityId   String                  @db.Uuid
+  status                  RollbackExecutionStatus @default(PLANNED)
+  preservesOfficialRecords Boolean                @default(true)
+  executedAt              DateTime?
+  notes                   String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  rollbackPlan            RollbackPlan            @relation(fields: [rollbackPlanId], references: [id])
+  deploymentRecord        DeploymentRecord        @relation(fields: [deploymentRecordId], references: [id])
+  initiatedBy             Identity                @relation("RollbackExecutionInitiator", fields: [initiatedByIdentityId], references: [id])
+
+  @@index([rollbackPlanId])
+  @@index([deploymentRecordId])
+  @@index([status])
+  @@map("rollback_executions")
+}
+
+model ChangeRequest {
+  id                    String              @id @default(uuid()) @db.Uuid
+  changeNumber          String              @unique
+  scope                 String
+  reason                String
+  requesterIdentityId   String              @db.Uuid
+  affectedCapabilities  Json                @default("[]")
+  authorityImpact       Json                @default("{}")
+  securityImpact        Json                @default("{}")
+  privacyImpact         Json                @default("{}")
+  recordsImpact         Json                @default("{}")
+  integrationImpact     Json                @default("{}")
+  aiImpact              Json                @default("{}")
+  continuityImpact      Json                @default("{}")
+  migrationImpact       Json                @default("{}")
+  testRequirements      Json                @default("[]")
+  rollbackPlanRef       String?
+  reviewers             Json                @default("[]")
+  status                ChangeRequestStatus @default(DRAFT)
+  changeWindowStart     DateTime?
+  changeWindowEnd       DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  requester             Identity            @relation("ChangeRequestRequester", fields: [requesterIdentityId], references: [id])
+  assessments           ChangeAssessment[]
+  deploymentRecords     DeploymentRecord[]
+
+  @@index([requesterIdentityId])
+  @@index([status])
+  @@map("change_requests")
+}
+
+model ChangeAssessment {
+  id                   String                  @id @default(uuid()) @db.Uuid
+  changeRequestId      String                  @db.Uuid
+  assessorIdentityId   String                  @db.Uuid
+  outcome              ChangeAssessmentOutcome @default(PENDING)
+  findings             Json                    @default("{}")
+  requiresRevalidation Boolean                 @default(false)
+  assessedAt           DateTime                @default(now())
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  changeRequest        ChangeRequest           @relation(fields: [changeRequestId], references: [id])
+  assessor             Identity                @relation("ChangeAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+
+  @@index([changeRequestId])
+  @@index([assessorIdentityId])
+  @@map("change_assessments")
+}
+
+model EmergencyChange {
+  id                              String                @id @default(uuid()) @db.Uuid
+  incidentRef                     String
+  necessity                       String
+  scope                           String
+  authorizedActorIdentityId       String                @db.Uuid
+  isTemporary                     Boolean               @default(true)
+  riskAssessment                  Json                  @default("{}")
+  rollbackPlanId                  String?               @db.Uuid
+  retrospectiveDeadline           DateTime
+  status                          EmergencyChangeStatus @default(DRAFT)
+  cannotAlterInstitutionalAuthority Boolean             @default(true)
+  postChangeReviewNotes           String?
+  createdAt                       DateTime              @default(now())
+  updatedAt                       DateTime              @updatedAt
+  authorizedActor                 Identity              @relation("EmergencyChangeAuthorizer", fields: [authorizedActorIdentityId], references: [id])
+  rollbackPlan                    RollbackPlan?         @relation(fields: [rollbackPlanId], references: [id])
+
+  @@index([authorizedActorIdentityId])
+  @@index([status])
+  @@index([rollbackPlanId])
+  @@map("emergency_changes")
+}
+
+model ConfigurationItem {
+  id                String                  @id @default(uuid()) @db.Uuid
+  key               String                  @unique
+  name              String
+  description       String?
+  currentVersion    String
+  status            ConfigurationItemStatus @default(DRAFT)
+  environmentScope  String?
+  isMaterial        Boolean                 @default(false)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  changes           ConfigurationChange[]
+
+  @@index([status])
+  @@map("configuration_items")
+}
+
+model ConfigurationChange {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  configurationItemId   String                    @db.Uuid
+  fromVersion           String
+  toVersion             String
+  changeDigest          String
+  status                ConfigurationChangeStatus @default(DRAFT)
+  requesterIdentityId   String                    @db.Uuid
+  triggersRevalidation  Boolean                   @default(false)
+  appliedAt             DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  configurationItem     ConfigurationItem         @relation(fields: [configurationItemId], references: [id])
+  requester             Identity                  @relation("ConfigurationChangeRequester", fields: [requesterIdentityId], references: [id])
+
+  @@index([configurationItemId])
+  @@index([requesterIdentityId])
+  @@index([status])
+  @@map("configuration_changes")
+}
+
+model FeatureActivation {
+  id                         String                  @id @default(uuid()) @db.Uuid
+  featureKey                 String
+  environmentDefinitionId    String                  @db.Uuid
+  governmentServiceId        String?                 @db.Uuid
+  status                     FeatureActivationStatus @default(DEPLOYED_ONLY)
+  technicallyEnabledAt       DateTime?
+  institutionallyActivatedAt DateTime?
+  activatedByIdentityId      String?                 @db.Uuid
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+  environmentDefinition      EnvironmentDefinition   @relation(fields: [environmentDefinitionId], references: [id])
+  governmentService          GovernmentService?      @relation(fields: [governmentServiceId], references: [id])
+  activatedBy                Identity?               @relation("FeatureActivationActor", fields: [activatedByIdentityId], references: [id])
+
+  @@unique([featureKey, environmentDefinitionId])
+  @@index([environmentDefinitionId])
+  @@index([governmentServiceId])
+  @@index([status])
+  @@map("feature_activations")
+}
+
+model ReleaseRevalidationTrigger {
+  id                  String                         @id @default(uuid()) @db.Uuid
+  triggerType         ReleaseRevalidationTriggerType
+  sourceRecordType    String
+  sourceRecordId      String                         @db.Uuid
+  releaseDefinitionId String?                        @db.Uuid
+  reason              String
+  revalidationRequired Boolean                       @default(true)
+  recordedAt          DateTime                       @default(now())
+  releaseDefinition   ReleaseDefinition?             @relation(fields: [releaseDefinitionId], references: [id])
+
+  @@index([releaseDefinitionId])
+  @@index([sourceRecordType, sourceRecordId])
+  @@map("release_revalidation_triggers")
+}
+
+model CiPipelineRun {
+  id                 String              @id @default(uuid()) @db.Uuid
+  pipelineIdentifier String
+  sourceCommitSha    String
+  lockfileDigest     String
+  artifactDigest     String?
+  status             CiPipelineRunStatus @default(PENDING)
+  checksPassed       Json                @default("{}")
+  provenanceRef      String?
+  authorizesProduction Boolean           @default(false)
+  completedAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([sourceCommitSha])
+  @@index([status])
+  @@map("ci_pipeline_runs")
+}
+
+model DataTransferApproval {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  sourceEnvironmentId       String                     @db.Uuid
+  targetEnvironmentId       String                     @db.Uuid
+  deidentificationProcessRef String
+  status                    DataTransferApprovalStatus @default(PENDING)
+  approvedByIdentityId      String?                    @db.Uuid
+  approvedAt                DateTime?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  sourceEnvironment         EnvironmentDefinition      @relation("DataTransferSourceEnvironment", fields: [sourceEnvironmentId], references: [id])
+  targetEnvironment         EnvironmentDefinition      @relation("DataTransferTargetEnvironment", fields: [targetEnvironmentId], references: [id])
+  approvedBy                Identity?                  @relation("DataTransferApprovalApprover", fields: [approvedByIdentityId], references: [id])
+
+  @@index([sourceEnvironmentId])
+  @@index([targetEnvironmentId])
+  @@index([status])
+  @@map("data_transfer_approvals")
+}
+
+// ─── Phase 13F: Workforce, Operator Competency, Support and Departmental Operational Readiness ─
+
+enum OperatorQualificationStatus {
+  QUALIFIED
+  QUALIFIED_WITH_CONDITIONS
+  NOT_QUALIFIED
+  SUSPENDED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum DepartmentReadinessStatus {
+  NOT_READY
+  PARTIALLY_READY
+  READY_WITH_CONDITIONS
+  READY
+  SUSPENDED
+}
+
+enum StaffingReadinessStatus {
+  NOT_READY
+  PARTIALLY_READY
+  READY_WITH_CONDITIONS
+  READY
+  SUSPENDED
+}
+
+enum OperationalRoleRequirementStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum CompetencyAssessmentOutcome {
+  PASSED
+  PASSED_WITH_CONDITIONS
+  FAILED
+  PENDING
+  EXPIRED
+}
+
+enum TrainingCompletionStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum OperatorAccessReviewTrigger {
+  APPOINTMENT_EXPIRED
+  DELEGATION_REVOKED
+  QUALIFICATION_EXPIRED
+  OPERATOR_SUSPENDED
+  DEPARTMENT_ASSIGNMENT_ENDED
+}
+
+enum OperatorAccessReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QualificationExpiryEventType {
+  TRAINING_EXPIRED
+  PROFESSIONAL_QUALIFICATION_EXPIRED
+  RECERTIFICATION_OVERDUE
+  COMPETENCY_ASSESSMENT_EXPIRED
+}
+
+enum SupportCoveragePlanStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum SupportTier {
+  TIER_1
+  TIER_2
+  TIER_3
+  EXECUTIVE
+  VENDOR
+}
+
+enum OnCallAssignmentStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SuccessionAssignmentStatus {
+  DESIGNATED
+  ACTIVE
+  WITHDRAWN
+  ACTIVATED
+}
+
+model OperationalRoleRequirement {
+  id                                  String                           @id @default(uuid()) @db.Uuid
+  code                                String
+  name                                String
+  description                         String?
+  institutionId                       String                           @db.Uuid
+  departmentId                        String                           @db.Uuid
+  functionAuthorityRecordId           String                           @db.Uuid
+  appointmentRequired                 Boolean                          @default(true)
+  delegationRequired                  Boolean                          @default(false)
+  professionalQualificationReference  String?
+  trainingRequirementId               String?                          @db.Uuid
+  requiresKnowledgeAssessment         Boolean                          @default(true)
+  requiresPracticalAssessment         Boolean                          @default(true)
+  requiresAuthorityBoundaryAssessment Boolean                          @default(true)
+  requiresSecurityPrivacyAssessment   Boolean                          @default(true)
+  requiresContinuityAssessment        Boolean                          @default(true)
+  supervisionRequired                 Boolean                          @default(false)
+  recertificationIntervalDays         Int?
+  expirationPolicy                    String?
+  alternateRequirementConfigured      Boolean                          @default(false)
+  isHighConsequence                   Boolean                          @default(false)
+  status                              OperationalRoleRequirementStatus @default(DRAFT)
+  createdAt                           DateTime                         @default(now())
+  updatedAt                           DateTime                         @updatedAt
+  institution                         Institution                      @relation("OperationalRoleRequirementInstitution", fields: [institutionId], references: [id])
+  department                          Department                       @relation("OperationalRoleRequirementDepartment", fields: [departmentId], references: [id])
+  functionAuthorityRecord             FunctionAuthorityRecord          @relation("OperationalRoleRequirementFunction", fields: [functionAuthorityRecordId], references: [id])
+  trainingRequirement                 TrainingRequirement?             @relation(fields: [trainingRequirementId], references: [id])
+  operatorQualifications              OperatorQualification[]
+  successionAssignments               SuccessionAssignment[]
+
+  @@unique([institutionId, code])
+  @@index([departmentId])
+  @@index([functionAuthorityRecordId])
+  @@index([status])
+  @@map("operational_role_requirements")
+}
+
+model TrainingRequirement {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  code                        String                     @unique
+  name                        String
+  description                 String?
+  providerReference           String?
+  isGovernmentAuthority       Boolean                    @default(false)
+  validityPeriodDays          Int?
+  recertificationRequired     Boolean                    @default(false)
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  operationalRoleRequirements OperationalRoleRequirement[]
+  trainingCompletions         TrainingCompletion[]
+
+  @@map("training_requirements")
+}
+
+model OperatorReadinessProfile {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  identityId              String                       @db.Uuid
+  officeholderId          String?                      @db.Uuid
+  departmentId            String?                      @db.Uuid
+  notes                   String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  identity                Identity                     @relation("OperatorReadinessIdentity", fields: [identityId], references: [id])
+  officeholder            Officeholder?                @relation("OperatorReadinessOfficeholder", fields: [officeholderId], references: [id])
+  department              Department?                  @relation("OperatorReadinessDepartment", fields: [departmentId], references: [id])
+  qualifications          OperatorQualification[]
+  competencyAssessments   OperatorCompetencyAssessment[]
+
+  @@unique([identityId, departmentId])
+  @@index([officeholderId])
+  @@index([departmentId])
+  @@map("operator_readiness_profiles")
+}
+
+model OperatorQualification {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  qualificationNumber           String                      @unique
+  operatorReadinessProfileId    String                      @db.Uuid
+  operationalRoleRequirementId  String                      @db.Uuid
+  identityId                    String                      @db.Uuid
+  officeholderId                String?                     @db.Uuid
+  appointmentId                 String?                     @db.Uuid
+  delegationId                  String?                     @db.Uuid
+  functionAuthorityRecordId     String                      @db.Uuid
+  scope                         String
+  status                        OperatorQualificationStatus @default(NOT_QUALIFIED)
+  conditions                    String?
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  assessmentAuthorityOfficeholderId String?                 @db.Uuid
+  isAiAssessed                  Boolean                     @default(false)
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  operatorReadinessProfile      OperatorReadinessProfile    @relation(fields: [operatorReadinessProfileId], references: [id])
+  operationalRoleRequirement    OperationalRoleRequirement  @relation(fields: [operationalRoleRequirementId], references: [id])
+  identity                      Identity                    @relation("OperatorQualificationIdentity", fields: [identityId], references: [id])
+  officeholder                  Officeholder?               @relation("OperatorQualificationOfficeholder", fields: [officeholderId], references: [id])
+  appointment                   Appointment?                @relation(fields: [appointmentId], references: [id])
+  delegation                    Delegation?                 @relation(fields: [delegationId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord     @relation("OperatorQualificationFunction", fields: [functionAuthorityRecordId], references: [id])
+  competencyAssessments         OperatorCompetencyAssessment[]
+  trainingCompletions           TrainingCompletion[]
+  practicalAssessments          PracticalAssessment[]
+  authorityBoundaryAssessments  AuthorityBoundaryAssessment[]
+  securityPrivacyAssessments    SecurityPrivacyAssessment[]
+  continuityCompetencyAssessments ContinuityCompetencyAssessment[]
+  expiryEvents                  QualificationExpiryEvent[]
+  accessReviews                 OperatorAccessReview[]
+
+  @@index([operatorReadinessProfileId])
+  @@index([operationalRoleRequirementId])
+  @@index([identityId])
+  @@index([officeholderId])
+  @@index([status])
+  @@index([effectiveUntil])
+  @@map("operator_qualifications")
+}
+
+model OperatorCompetencyAssessment {
+  id                          String                      @id @default(uuid()) @db.Uuid
+  operatorReadinessProfileId  String                      @db.Uuid
+  operatorQualificationId     String?                     @db.Uuid
+  assessorIdentityId          String                      @db.Uuid
+  assessorOfficeholderId      String?                     @db.Uuid
+  assessmentType              String
+  score                       Decimal?                    @db.Decimal(5, 2)
+  passingScore                Decimal?                    @db.Decimal(5, 2)
+  outcome                     CompetencyAssessmentOutcome @default(PENDING)
+  evidenceReference           String?
+  isAttendanceOnly            Boolean                     @default(false)
+  isAiAssessed                Boolean                     @default(false)
+  assessedAt                  DateTime                    @default(now())
+  expiresAt                   DateTime?
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  operatorReadinessProfile    OperatorReadinessProfile    @relation(fields: [operatorReadinessProfileId], references: [id])
+  operatorQualification       OperatorQualification?      @relation(fields: [operatorQualificationId], references: [id])
+  assessorIdentity            Identity                    @relation("CompetencyAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder          Officeholder?               @relation("CompetencyAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorReadinessProfileId])
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("operator_competency_assessments")
+}
+
+model TrainingCompletion {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                   @db.Uuid
+  trainingRequirementId     String                   @db.Uuid
+  recordedByIdentityId      String                   @db.Uuid
+  providerReference         String?
+  status                    TrainingCompletionStatus @default(ENROLLED)
+  completedAt               DateTime?
+  expiresAt                 DateTime?
+  score                     Decimal?                 @db.Decimal(5, 2)
+  evidenceReference         String?
+  isAttendanceOnly          Boolean                  @default(false)
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  operatorQualification     OperatorQualification    @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  trainingRequirement       TrainingRequirement      @relation(fields: [trainingRequirementId], references: [id])
+  recordedBy                Identity                 @relation("TrainingCompletionRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([trainingRequirementId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("training_completions")
+}
+
+model PracticalAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  practicalEvidenceReference String?
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("PracticalAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("PracticalAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("practical_assessments")
+}
+
+model AuthorityBoundaryAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  boundaryScopeVerified     Boolean                     @default(false)
+  delegationScopeVerified   Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("AuthorityBoundaryAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("AuthorityBoundaryAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("authority_boundary_assessments")
+}
+
+model SecurityPrivacyAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  securityCleared           Boolean                     @default(false)
+  privacyCleared            Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("SecurityPrivacyAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("SecurityPrivacyAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("security_privacy_assessments")
+}
+
+model ContinuityCompetencyAssessment {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId   String                      @db.Uuid
+  assessorIdentityId        String                      @db.Uuid
+  assessorOfficeholderId    String?                     @db.Uuid
+  outcome                   CompetencyAssessmentOutcome @default(PENDING)
+  continuityPlanVerified    Boolean                     @default(false)
+  notes                     String?
+  assessedAt                DateTime                    @default(now())
+  expiresAt                 DateTime?
+  isAiAssessed              Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  operatorQualification     OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  assessorIdentity          Identity                    @relation("ContinuityAssessmentAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder        Officeholder?               @relation("ContinuityAssessmentAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([assessorIdentityId])
+  @@index([outcome])
+  @@map("continuity_competency_assessments")
+}
+
+model SupportCoveragePlan {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  planCode                    String
+  name                        String
+  institutionId               String                    @db.Uuid
+  departmentId                String?                   @db.Uuid
+  serviceHours                String?
+  isTwentyFourSeven           Boolean                   @default(false)
+  supportTiers                Json                      @default("[]")
+  incidentContacts            Json                      @default("[]")
+  securityEscalationContacts  Json                      @default("[]")
+  recordsEscalationContacts   Json                      @default("[]")
+  integrationSupportContacts  Json                      @default("[]")
+  paymentSupportContacts      Json                      @default("[]")
+  aiEscalationContacts        Json                      @default("[]")
+  continuityResponseContacts  Json                      @default("[]")
+  vendorContacts              Json                      @default("[]")
+  contactsRestricted          Boolean                   @default(true)
+  status                      SupportCoveragePlanStatus @default(DRAFT)
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  institution                 Institution               @relation("SupportCoveragePlanInstitution", fields: [institutionId], references: [id])
+  department                  Department?               @relation("SupportCoveragePlanDepartment", fields: [departmentId], references: [id])
+  assignments                 SupportAssignment[]
+  onCallAssignments           OnCallAssignment[]
+
+  @@unique([institutionId, planCode])
+  @@index([departmentId])
+  @@index([status])
+  @@map("support_coverage_plans")
+}
+
+model SupportAssignment {
+  id                      String              @id @default(uuid()) @db.Uuid
+  supportCoveragePlanId   String              @db.Uuid
+  identityId              String              @db.Uuid
+  officeholderId          String?             @db.Uuid
+  supportTier             SupportTier
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  isNamedOwner            Boolean             @default(false)
+  isOperationalCoverage   Boolean             @default(true)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  supportCoveragePlan     SupportCoveragePlan @relation(fields: [supportCoveragePlanId], references: [id])
+  identity                Identity            @relation("SupportAssignmentIdentity", fields: [identityId], references: [id])
+  officeholder            Officeholder?       @relation("SupportAssignmentOfficeholder", fields: [officeholderId], references: [id])
+
+  @@index([supportCoveragePlanId])
+  @@index([identityId])
+  @@index([effectiveUntil])
+  @@map("support_assignments")
+}
+
+model OnCallAssignment {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  supportCoveragePlanId   String                 @db.Uuid
+  primaryIdentityId       String                 @db.Uuid
+  primaryOfficeholderId   String?                @db.Uuid
+  alternateIdentityId     String?                @db.Uuid
+  alternateOfficeholderId String?                @db.Uuid
+  coverageStart           DateTime
+  coverageEnd             DateTime
+  status                  OnCallAssignmentStatus @default(SCHEDULED)
+  contactDataRestricted   Boolean                @default(true)
+  restrictedContactRef    String?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  supportCoveragePlan     SupportCoveragePlan    @relation(fields: [supportCoveragePlanId], references: [id])
+  primaryIdentity         Identity               @relation("OnCallAssignmentIdentity", fields: [primaryIdentityId], references: [id])
+  primaryOfficeholder     Officeholder?          @relation("OnCallAssignmentOfficeholder", fields: [primaryOfficeholderId], references: [id])
+  alternateIdentity       Identity?              @relation("OnCallAlternateIdentity", fields: [alternateIdentityId], references: [id])
+  alternateOfficeholder   Officeholder?          @relation("OnCallAlternateOfficeholder", fields: [alternateOfficeholderId], references: [id])
+
+  @@index([supportCoveragePlanId])
+  @@index([primaryIdentityId])
+  @@index([coverageStart, coverageEnd])
+  @@index([status])
+  @@map("on_call_assignments")
+}
+
+model SuccessionAssignment {
+  id                            String                     @id @default(uuid()) @db.Uuid
+  operationalRoleRequirementId  String                     @db.Uuid
+  primaryOfficeholderId         String                     @db.Uuid
+  alternateOfficeholderId       String                     @db.Uuid
+  status                        SuccessionAssignmentStatus @default(DESIGNATED)
+  alternateAppointmentRequired  Boolean                    @default(true)
+  alternateDelegationRequired   Boolean                    @default(false)
+  alternateQualificationRequired Boolean                   @default(true)
+  effectiveFrom                 DateTime
+  effectiveUntil                DateTime?
+  notes                         String?
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  operationalRoleRequirement    OperationalRoleRequirement @relation(fields: [operationalRoleRequirementId], references: [id])
+  primaryOfficeholder           Officeholder               @relation("SuccessionPrimaryOfficeholder", fields: [primaryOfficeholderId], references: [id])
+  alternateOfficeholder         Officeholder               @relation("SuccessionAlternateOfficeholder", fields: [alternateOfficeholderId], references: [id])
+
+  @@index([operationalRoleRequirementId])
+  @@index([primaryOfficeholderId])
+  @@index([alternateOfficeholderId])
+  @@index([status])
+  @@map("succession_assignments")
+}
+
+model DepartmentReadinessAssessment {
+  id                              String                    @id @default(uuid()) @db.Uuid
+  assessmentNumber                String                    @unique
+  departmentId                    String                    @db.Uuid
+  assessorIdentityId              String                    @db.Uuid
+  assessorOfficeholderId          String?                   @db.Uuid
+  status                          DepartmentReadinessStatus   @default(NOT_READY)
+  mandateAssessed                 Boolean                   @default(false)
+  headAssessed                    Boolean                   @default(false)
+  officeholdersAssessed             Boolean                   @default(false)
+  staffingAssessed                Boolean                   @default(false)
+  qualificationsAssessed          Boolean                   @default(false)
+  proceduresAssessed              Boolean                   @default(false)
+  recordsAssessed                 Boolean                   @default(false)
+  technologyAssessed              Boolean                   @default(false)
+  securityAssessed                Boolean                   @default(false)
+  trainingAssessed                Boolean                   @default(false)
+  dependenciesAssessed            Boolean                   @default(false)
+  supportAssessed                 Boolean                   @default(false)
+  continuityAssessed              Boolean                   @default(false)
+  testsAssessed                   Boolean                   @default(false)
+  acceptanceAssessed              Boolean                   @default(false)
+  activationAuthorityAssessed     Boolean                   @default(false)
+  conditions                      String?
+  supportCoverageGapDetected      Boolean                   @default(false)
+  staffingShortageDetected        Boolean                   @default(false)
+  isInstitutionalAcceptance       Boolean                   @default(false)
+  selfActivated                   Boolean                   @default(false)
+  assessedAt                      DateTime                  @default(now())
+  createdAt                       DateTime                  @default(now())
+  updatedAt                       DateTime                  @updatedAt
+  department                      Department                @relation("DepartmentReadinessDepartment", fields: [departmentId], references: [id])
+  assessorIdentity                Identity                  @relation("DepartmentReadinessAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder            Officeholder?             @relation("DepartmentReadinessAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+  staffingAssessments             StaffingReadinessAssessment[]
+
+  @@index([departmentId])
+  @@index([assessorIdentityId])
+  @@index([status])
+  @@map("department_readiness_assessments")
+}
+
+model StaffingReadinessAssessment {
+  id                              String                  @id @default(uuid()) @db.Uuid
+  departmentReadinessAssessmentId String                  @db.Uuid
+  departmentId                    String                  @db.Uuid
+  assessorIdentityId              String                  @db.Uuid
+  assessorOfficeholderId          String?                 @db.Uuid
+  status                          StaffingReadinessStatus @default(NOT_READY)
+  requiredPositions               Int
+  filledPositions                 Int
+  qualifiedPositions              Int
+  mandatoryControlOperable        Boolean                 @default(false)
+  shortageBlocksReadiness         Boolean                 @default(false)
+  notes                           String?
+  assessedAt                      DateTime                @default(now())
+  createdAt                       DateTime                @default(now())
+  updatedAt                       DateTime                @updatedAt
+  departmentReadinessAssessment   DepartmentReadinessAssessment @relation(fields: [departmentReadinessAssessmentId], references: [id], onDelete: Cascade)
+  department                      Department              @relation("StaffingReadinessDepartment", fields: [departmentId], references: [id])
+  assessorIdentity                Identity                @relation("StaffingReadinessAssessor", fields: [assessorIdentityId], references: [id])
+  assessorOfficeholder            Officeholder?           @relation("StaffingReadinessAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+
+  @@index([departmentReadinessAssessmentId])
+  @@index([departmentId])
+  @@index([status])
+  @@map("staffing_readiness_assessments")
+}
+
+model QualificationExpiryEvent {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  operatorQualificationId String                       @db.Uuid
+  eventType               QualificationExpiryEventType
+  recordedByIdentityId    String                       @db.Uuid
+  expiredAt               DateTime
+  notes                   String?
+  accessReviewTriggered   Boolean                      @default(false)
+  createdAt               DateTime                     @default(now())
+  operatorQualification   OperatorQualification        @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  recordedBy              Identity                     @relation("QualificationExpiryRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([eventType])
+  @@index([expiredAt])
+  @@map("qualification_expiry_events")
+}
+
+model OperatorAccessReview {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  operatorQualificationId String                      @db.Uuid
+  trigger                 OperatorAccessReviewTrigger
+  status                  OperatorAccessReviewStatus  @default(PENDING)
+  initiatedByIdentityId   String                      @db.Uuid
+  delegationId            String?                     @db.Uuid
+  appointmentId           String?                     @db.Uuid
+  findings                String?
+  accessRetained          Boolean                     @default(false)
+  completedAt             DateTime?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  operatorQualification   OperatorQualification       @relation(fields: [operatorQualificationId], references: [id], onDelete: Cascade)
+  initiatedBy             Identity                    @relation("OperatorAccessReviewInitiator", fields: [initiatedByIdentityId], references: [id])
+  delegation              Delegation?                 @relation(fields: [delegationId], references: [id])
+
+  @@index([operatorQualificationId])
+  @@index([trigger])
+  @@index([status])
+  @@map("operator_access_reviews")
+}
+
+// ─── Phase 13E/13G: Production Readiness, Institutional Acceptance, Activation ─
+
+enum FeatureActivationStatus {
+  DEPLOYED
+  OPERATIONALLY_AVAILABLE
+  SUSPENDED
+  ROLLED_BACK
+}
+
+enum AcceptanceDossierStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AcceptanceDossierVersionStatus {
+  DRAFT
+  SUBMITTED_FOR_FINAL_ACCEPTANCE
+  FROZEN_ACCEPTED
+  SUPERSEDED
+}
+
+enum AcceptanceLevel {
+  RECEIPT
+  ADMINISTRATIVE_COMPLETENESS
+  DISCOVERY
+  DESIGN
+  PROTOTYPE
+  TEST
+  PILOT
+  TECHNICAL_PRODUCTION
+  OPERATIONAL
+  DEPARTMENTAL
+  WORKFLOW
+  INTEGRATION
+  AI_AGENT
+  ISSUANCE
+  INSTITUTIONAL
+  OPERATIONAL_ACTIVATION
+  REVALIDATION
+}
+
+enum AcceptanceReviewClass {
+  INSTITUTIONAL
+  OPERATIONAL
+  TECHNICAL
+  SECURITY
+  PRIVACY
+  RECORDS
+  CONTINUITY
+  LEGAL
+  PROFESSIONAL
+  INTEGRATION
+  AI_GOVERNANCE
+  ACCESSIBILITY
+  FINANCIAL
+  OTHER_CONFIGURED
+}
+
+enum AcceptanceReviewStatus {
+  PENDING
+  IN_REVIEW
+  SATISFACTORY
+  DEFICIENCY_IDENTIFIED
+  REJECTED
+}
+
+enum AcceptanceDecisionOutcome {
+  ACCEPTED
+  ACCEPTED_WITH_CONDITIONS
+  REJECTED
+  RETURNED_FOR_CORRECTION
+  DEFERRED
+  SUSPENDED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum AcceptanceConditionStatus {
+  OPEN
+  VERIFIED
+  MISSED
+  WAIVED
+}
+
+enum AcceptanceDefectSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AcceptanceDefectStatus {
+  OPEN
+  RESOLVED
+  WAIVED
+  DEFERRED
+}
+
+enum ResidualRiskCategory {
+  TECHNICAL
+  OPERATIONAL
+  SECURITY
+  PRIVACY
+  LEGAL
+  CONTINUITY
+  INTEGRATION
+  WORKFORCE
+  FINANCIAL
+  REPUTATIONAL
+  OTHER
+}
+
+enum ResidualRiskLikelihood {
+  RARE
+  UNLIKELY
+  POSSIBLE
+  LIKELY
+  ALMOST_CERTAIN
+}
+
+enum ResidualRiskImpact {
+  NEGLIGIBLE
+  MINOR
+  MODERATE
+  MAJOR
+  SEVERE
+}
+
+enum ResidualRiskStatus {
+  OPEN
+  ACCEPTED
+  MITIGATED
+  REJECTED
+  DEFERRED
+  EXPIRED
+}
+
+enum ResidualRiskDecision {
+  ACCEPT
+  ACCEPT_WITH_CONDITIONS
+  MITIGATE_BEFORE_ACTIVATION
+  TRANSFER_OR_SHARE_IF_AUTHORIZED
+  AVOID
+  DEFER
+  REJECT
+}
+
+enum ProductionActivationRequestStatus {
+  DRAFT
+  SUBMITTED
+  DECIDED
+  WITHDRAWN
+}
+
+enum ProductionActivationDecisionOutcome {
+  APPROVED
+  APPROVED_WITH_RESTRICTIONS
+  DEFERRED
+  REJECTED
+  SUSPENDED
+}
+
+enum ActivationScopeType {
+  DEPARTMENT
+  SERVICE
+  USER
+  USER_POPULATION
+  APPLICANT_POPULATION
+  INTEGRATION
+  ENVIRONMENT
+  LOCATION
+  DATE_RANGE
+  FUNCTION
+}
+
+enum ActivationCommunicationAudience {
+  USERS
+  STAFF
+  SUPPORT
+  PARTNERS
+  GOVERNMENT_INTERFACE
+}
+
+enum ActivationAuditEventType {
+  REQUEST_SUBMITTED
+  DECISION_RECORDED
+  SCOPE_VALIDATED
+  FEATURE_TRANSITIONED
+  COMMUNICATION_SENT
+  SUSPENSION_TRIGGERED
+  ROLLBACK_INITIATED
+}
+
+model FeatureActivation {
+  id                             String                  @id @default(uuid()) @db.Uuid
+  featureCode                    String
+  releaseReference               String
+  institutionId                  String                  @db.Uuid
+  environment                    String
+  status                         FeatureActivationStatus @default(DEPLOYED)
+  deployedAt                     DateTime                @default(now())
+  operationallyAvailableAt       DateTime?
+  productionActivationDecisionId String?                 @db.Uuid
+  activationScopeId              String?                 @db.Uuid
+  createdAt                      DateTime                @default(now())
+  updatedAt                      DateTime                @updatedAt
+  institution                    Institution             @relation("FeatureActivationInstitution", fields: [institutionId], references: [id])
+  productionActivationDecision   ProductionActivationDecision? @relation(fields: [productionActivationDecisionId], references: [id])
+  activationScope                ActivationScope?        @relation(fields: [activationScopeId], references: [id])
+
+  @@unique([featureCode, releaseReference, environment, institutionId])
+  @@index([institutionId])
+  @@index([status])
+  @@map("feature_activations")
+}
+
+model InstitutionalAcceptanceDossier {
+  id                                String                  @id @default(uuid()) @db.Uuid
+  dossierNumber                     String                  @unique
+  institutionId                     String                  @db.Uuid
+  accountableOwnerOfficeholderId    String                  @db.Uuid
+  acceptanceAuthorityFunctionRecordId String                @db.Uuid
+  currentVersionId                  String?                 @unique @db.Uuid
+  status                            AcceptanceDossierStatus @default(ACTIVE)
+  createdAt                         DateTime                @default(now())
+  updatedAt                         DateTime                @updatedAt
+  institution                       Institution             @relation("InstitutionalAcceptanceDossierInstitution", fields: [institutionId], references: [id])
+  accountableOwner                  Officeholder            @relation("AcceptanceDossierAccountableOwner", fields: [accountableOwnerOfficeholderId], references: [id])
+  acceptanceAuthorityFunction       FunctionAuthorityRecord @relation("AcceptanceDossierAuthorityFunction", fields: [acceptanceAuthorityFunctionRecordId], references: [id])
+  versions                          AcceptanceDossierVersion[] @relation("DossierVersions")
+  currentVersion                    AcceptanceDossierVersion? @relation("DossierCurrentVersion", fields: [currentVersionId], references: [id])
+  productionActivationRequests      ProductionActivationRequest[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@map("institutional_acceptance_dossiers")
+}
+
+model AcceptanceDossierVersion {
+  id                                String                         @id @default(uuid()) @db.Uuid
+  dossierId                         String                         @db.Uuid
+  versionNumber                     Int
+  status                            AcceptanceDossierVersionStatus @default(DRAFT)
+  subjectSummary                    String
+  scopeDescription                  String
+  exclusions                        Json                           @default("[]")
+  versionConfiguration              Json                           @default("{}")
+  environment                       String
+  releaseReference                  String
+  effectiveFrom                     DateTime?
+  effectiveUntil                    DateTime?
+  authorityBasis                    String
+  accountableOwnerOfficeholderId    String                         @db.Uuid
+  acceptanceAuthorityFunctionRecordId String                       @db.Uuid
+  requirementsBaseline              Json                           @default("[]")
+  evidenceIndex                     Json                           @default("[]")
+  sourceCrosswalk                   Json                           @default("{}")
+  assumptions                       Json                           @default("[]")
+  technicalReadiness                Json                           @default("{}")
+  operationalReadiness              Json                           @default("{}")
+  workforceReadiness                Json                           @default("{}")
+  institutionalReadiness            Json                           @default("{}")
+  continuityReadiness               Json                           @default("{}")
+  integrationReadiness              Json                           @default("{}")
+  supportReadiness                  Json                           @default("{}")
+  trainingQualification             Json                           @default("{}")
+  limitations                       Json                           @default("[]")
+  suspensionTriggers                Json                           @default("[]")
+  rollbackPlan                      Json                           @default("{}")
+  revalidationDate                  DateTime?
+  contentHash                       String
+  submittedForFinalAcceptanceAt     DateTime?
+  frozenAt                          DateTime?
+  createdAt                         DateTime                       @default(now())
+  updatedAt                         DateTime                       @updatedAt
+  dossier                           InstitutionalAcceptanceDossier   @relation("DossierVersions", fields: [dossierId], references: [id])
+  accountableOwner                  Officeholder                   @relation("AcceptanceVersionAccountableOwner", fields: [accountableOwnerOfficeholderId], references: [id])
+  acceptanceAuthorityFunction       FunctionAuthorityRecord        @relation("AcceptanceVersionAuthorityFunction", fields: [acceptanceAuthorityFunctionRecordId], references: [id])
+  currentForDossier                 InstitutionalAcceptanceDossier?  @relation("DossierCurrentVersion")
+  subjects                          AcceptanceSubject[]
+  requirements                      AcceptanceRequirement[]
+  evidenceLinks                     AcceptanceEvidenceLink[]
+  testResults                       AcceptanceTestResult[]
+  defects                           AcceptanceDefect[]
+  exceptions                        AcceptanceException[]
+  conditions                        AcceptanceCondition[]
+  dependencies                      AcceptanceDependency[]
+  levelAchievements                 AcceptanceLevelAchievement[]
+  reviews                           AcceptanceReview[]
+  decisions                         AcceptanceDecision[]
+  residualRisks                     ResidualRisk[]
+  productionActivationRequests      ProductionActivationRequest[]
+
+  @@unique([dossierId, versionNumber])
+  @@index([dossierId])
+  @@index([status])
+  @@map("acceptance_dossier_versions")
+}
+
+model AcceptanceSubject {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  subjectType      String
+  subjectReference String
+  subjectLabel     String
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_subjects")
+}
+
+model AcceptanceRequirement {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  requirementCode  String
+  description      String
+  mandatory        Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_requirements")
+}
+
+model AcceptanceEvidenceLink {
+  id                String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId  String                 @db.Uuid
+  evidenceRecordId  String?                @db.Uuid
+  externalReference String?
+  description       String
+  createdAt         DateTime               @default(now())
+  dossierVersion    AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  evidenceRecord    EvidenceRecord?        @relation("AcceptanceEvidenceLink", fields: [evidenceRecordId], references: [id])
+
+  @@index([dossierVersionId])
+  @@index([evidenceRecordId])
+  @@map("acceptance_evidence_links")
+}
+
+model AcceptanceTestResult {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  testReference    String
+  outcome          String
+  executedAt       DateTime
+  notes            String?
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_test_results")
+}
+
+model AcceptanceDefect {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  description      String
+  severity         AcceptanceDefectSeverity
+  status           AcceptanceDefectStatus @default(OPEN)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_defects")
+}
+
+model AcceptanceException {
+  id               String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId String                 @db.Uuid
+  description      String
+  justification    String?
+  createdAt        DateTime               @default(now())
+  dossierVersion   AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_exceptions")
+}
+
+model AcceptanceCondition {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  dossierVersionId      String?                   @db.Uuid
+  acceptanceDecisionId  String?                   @db.Uuid
+  residualRiskAcceptanceId String?                @db.Uuid
+  conditionText         String
+  ownerOfficeholderId   String                    @db.Uuid
+  deadline              DateTime?
+  verificationMethod    String?
+  effectIfMissed        String?
+  status                AcceptanceConditionStatus @default(OPEN)
+  verifiedAt            DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  dossierVersion        AcceptanceDossierVersion? @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  acceptanceDecision    AcceptanceDecision?       @relation(fields: [acceptanceDecisionId], references: [id], onDelete: Cascade)
+  residualRiskAcceptance ResidualRiskAcceptance?  @relation(fields: [residualRiskAcceptanceId], references: [id], onDelete: Cascade)
+  ownerOfficeholder     Officeholder              @relation("AcceptanceConditionOwner", fields: [ownerOfficeholderId], references: [id])
+
+  @@index([dossierVersionId])
+  @@index([acceptanceDecisionId])
+  @@index([ownerOfficeholderId])
+  @@index([status])
+  @@map("acceptance_conditions")
+}
+
+model AcceptanceDependency {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId    String                 @db.Uuid
+  dependencyType      String
+  dependencyReference String
+  dependencyLabel     String
+  satisfied           Boolean                @default(false)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  dossierVersion      AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+
+  @@index([dossierVersionId])
+  @@map("acceptance_dependencies")
+}
+
+model AcceptanceLevelAchievement {
+  id                          String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId            String                 @db.Uuid
+  acceptanceLevel             AcceptanceLevel
+  achievedAt                  DateTime               @default(now())
+  achievedByIdentityId        String                 @db.Uuid
+  authorityEvaluationRecordId String?
+  basisReference              String?
+  notes                       String?
+  dossierVersion              AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  achievedBy                  Identity               @relation("AcceptanceLevelAchiever", fields: [achievedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("AcceptanceLevelAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@unique([dossierVersionId, acceptanceLevel])
+  @@index([dossierVersionId])
+  @@index([acceptanceLevel])
+  @@map("acceptance_level_achievements")
+}
+
+model AcceptanceReview {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  dossierVersionId   String                 @db.Uuid
+  reviewClass        AcceptanceReviewClass
+  status             AcceptanceReviewStatus @default(PENDING)
+  reviewerIdentityId String?
+  findings           String?
+  reviewedAt         DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  dossierVersion     AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  reviewer           Identity?              @relation("AcceptanceReviewReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@unique([dossierVersionId, reviewClass])
+  @@index([dossierVersionId])
+  @@index([reviewClass])
+  @@map("acceptance_reviews")
+}
+
+model AcceptanceDecision {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  dossierVersionId            String                    @db.Uuid
+  outcome                     AcceptanceDecisionOutcome
+  acceptanceLevel             AcceptanceLevel
+  decidedByOfficeholderId     String                    @db.Uuid
+  authorityEvaluationRecordId String?
+  reason                      String?
+  decidedAt                   DateTime                  @default(now())
+  createdAt                   DateTime                  @default(now())
+  dossierVersion              AcceptanceDossierVersion  @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  decidedByOfficeholder       Officeholder              @relation("AcceptanceDecisionDecider", fields: [decidedByOfficeholderId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("AcceptanceDecisionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  signatures                  AcceptanceSignature[]
+  conditions                  AcceptanceCondition[]
+
+  @@index([dossierVersionId])
+  @@index([outcome])
+  @@map("acceptance_decisions")
+}
+
+model AcceptanceSignature {
+  id                   String             @id @default(uuid()) @db.Uuid
+  acceptanceDecisionId String             @db.Uuid
+  signerOfficeholderId String             @db.Uuid
+  signatureReference   String
+  signedAt             DateTime           @default(now())
+  acceptanceDecision   AcceptanceDecision @relation(fields: [acceptanceDecisionId], references: [id], onDelete: Cascade)
+  signerOfficeholder   Officeholder       @relation("AcceptanceSignatureSigner", fields: [signerOfficeholderId], references: [id])
+
+  @@index([acceptanceDecisionId])
+  @@map("acceptance_signatures")
+}
+
+model ResidualRisk {
+  id                                    String               @id @default(uuid()) @db.Uuid
+  dossierVersionId                        String               @db.Uuid
+  description                           String
+  category                              ResidualRiskCategory
+  affectedCapability                    String
+  likelihood                            ResidualRiskLikelihood
+  impact                                ResidualRiskImpact
+  controls                              Json                 @default("[]")
+  remainingExposure                     String
+  limitations                           Json                 @default("[]")
+  ownerOfficeholderId                   String               @db.Uuid
+  riskAcceptanceAuthorityFunctionRecordId String             @db.Uuid
+  expirationDate                        DateTime?
+  reviewDate                            DateTime?
+  isCritical                            Boolean              @default(false)
+  status                                ResidualRiskStatus   @default(OPEN)
+  createdAt                             DateTime             @default(now())
+  updatedAt                             DateTime             @updatedAt
+  dossierVersion                        AcceptanceDossierVersion @relation(fields: [dossierVersionId], references: [id], onDelete: Cascade)
+  ownerOfficeholder                     Officeholder         @relation("ResidualRiskOwner", fields: [ownerOfficeholderId], references: [id])
+  riskAcceptanceAuthorityFunction       FunctionAuthorityRecord @relation("ResidualRiskAuthorityFunction", fields: [riskAcceptanceAuthorityFunctionRecordId], references: [id])
+  acceptances                           ResidualRiskAcceptance[]
+
+  @@index([dossierVersionId])
+  @@index([status])
+  @@index([isCritical])
+  @@map("residual_risks")
+}
+
+model ResidualRiskAcceptance {
+  id                          String               @id @default(uuid()) @db.Uuid
+  residualRiskId              String               @db.Uuid
+  decision                    ResidualRiskDecision
+  decidedByOfficeholderId     String               @db.Uuid
+  decidedByIdentityId         String               @db.Uuid
+  authorityEvaluationRecordId String?
+  reason                      String?
+  decidedAt                   DateTime             @default(now())
+  createdAt                   DateTime             @default(now())
+  residualRisk                ResidualRisk         @relation(fields: [residualRiskId], references: [id], onDelete: Cascade)
+  decidedByOfficeholder       Officeholder         @relation("ResidualRiskAcceptanceOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  decidedBy                   Identity             @relation("ResidualRiskAcceptanceDecider", fields: [decidedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("ResidualRiskAcceptanceAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  conditions                  AcceptanceCondition[]
+
+  @@index([residualRiskId])
+  @@index([decision])
+  @@map("residual_risk_acceptances")
+}
+
+model ProductionActivationRequest {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  requestNumber         String                            @unique
+  dossierId             String                            @db.Uuid
+  dossierVersionId      String                            @db.Uuid
+  acceptedReleaseReference String
+  environment           String
+  effectiveDate         DateTime
+  monitoringPlan        Json                              @default("{}")
+  supportPlan           Json                              @default("{}")
+  rollbackPlan          Json                              @default("{}")
+  safeHaltPlan          Json                              @default("{}")
+  revalidationDate      DateTime?
+  status                ProductionActivationRequestStatus @default(DRAFT)
+  submittedByIdentityId String?
+  submittedAt           DateTime?
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  dossier               InstitutionalAcceptanceDossier      @relation(fields: [dossierId], references: [id])
+  dossierVersion        AcceptanceDossierVersion          @relation(fields: [dossierVersionId], references: [id])
+  submittedBy           Identity?                         @relation("ProductionActivationRequestSubmitter", fields: [submittedByIdentityId], references: [id])
+  scopes                ActivationScope[]
+  decision              ProductionActivationDecision?
+  auditRecords          ActivationAuditRecord[]
+
+  @@index([dossierId])
+  @@index([dossierVersionId])
+  @@index([status])
+  @@map("production_activation_requests")
+}
+
+model ProductionActivationDecision {
+  id                              String                              @id @default(uuid()) @db.Uuid
+  activationRequestId             String                              @unique @db.Uuid
+  outcome                         ProductionActivationDecisionOutcome
+  decidedByOfficeholderId         String                              @db.Uuid
+  decidedByIdentityId             String                              @db.Uuid
+  authorityEvaluationRecordId     String?
+  freshAuthorityEvaluationRecordId String?
+  securityPrivacyStatus           String
+  recordsControlsStatus           String
+  continuityReadinessVerified     Boolean                             @default(false)
+  workforceQualified              Boolean                             @default(false)
+  integrationsAccepted            Boolean                             @default(false)
+  residualRisksAccepted           Boolean                             @default(false)
+  monitoringConfigured            Boolean                             @default(false)
+  rollbackCapable                 Boolean                             @default(false)
+  restrictions                    Json                                @default("[]")
+  replaySnapshot                  Json                                @default("{}")
+  reason                          String?
+  decidedAt                       DateTime                            @default(now())
+  createdAt                       DateTime                            @default(now())
+  activationRequest               ProductionActivationRequest         @relation(fields: [activationRequestId], references: [id])
+  decidedByOfficeholder           Officeholder                        @relation("ProductionActivationDecisionOfficeholder", fields: [decidedByOfficeholderId], references: [id])
+  decidedBy                       Identity                            @relation("ProductionActivationDecisionDecider", fields: [decidedByIdentityId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord?          @relation("ProductionActivationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  freshAuthorityEvaluationRecord  AuthorityEvaluationRecord?          @relation("ProductionActivationFreshAuthority", fields: [freshAuthorityEvaluationRecordId], references: [id])
+  scopes                          ActivationScope[]
+  communications                  ActivationCommunication[]
+  auditRecords                    ActivationAuditRecord[]
+  featureActivations              FeatureActivation[]
+
+  @@index([outcome])
+  @@map("production_activation_decisions")
+}
+
+model ActivationScope {
+  id                    String                         @id @default(uuid()) @db.Uuid
+  activationRequestId   String?                        @db.Uuid
+  activationDecisionId  String?                        @db.Uuid
+  scopeType             ActivationScopeType
+  scopeReference        String
+  scopeLabel            String
+  constraints           Json                           @default("{}")
+  createdAt             DateTime                       @default(now())
+  activationRequest     ProductionActivationRequest?   @relation(fields: [activationRequestId], references: [id], onDelete: Cascade)
+  activationDecision    ProductionActivationDecision?  @relation(fields: [activationDecisionId], references: [id], onDelete: Cascade)
+  featureActivations    FeatureActivation[]
+
+  @@index([activationRequestId])
+  @@index([activationDecisionId])
+  @@index([scopeType])
+  @@map("activation_scopes")
+}
+
+model ActivationCommunication {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  activationDecisionId     String                          @db.Uuid
+  audienceType             ActivationCommunicationAudience
+  communicationReference   String
+  sentAt                   DateTime                        @default(now())
+  sentByIdentityId         String                          @db.Uuid
+  notes                    String?
+  activationDecision       ProductionActivationDecision    @relation(fields: [activationDecisionId], references: [id], onDelete: Cascade)
+  sentBy                   Identity                        @relation("ActivationCommunicationSender", fields: [sentByIdentityId], references: [id])
+
+  @@index([activationDecisionId])
+  @@map("activation_communications")
+}
+
+model ActivationAuditRecord {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  eventType            ActivationAuditEventType
+  activationRequestId  String?                   @db.Uuid
+  activationDecisionId String?                   @db.Uuid
+  actorIdentityId      String                    @db.Uuid
+  eventSnapshot        Json                      @default("{}")
+  recordedAt           DateTime                  @default(now())
+  activationRequest    ProductionActivationRequest? @relation(fields: [activationRequestId], references: [id])
+  activationDecision   ProductionActivationDecision? @relation(fields: [activationDecisionId], references: [id])
+  actor                Identity                  @relation("ActivationAuditRecorder", fields: [actorIdentityId], references: [id])
+
+  @@index([activationRequestId])
+  @@index([activationDecisionId])
+  @@index([eventType])
+  @@map("activation_audit_records")
 }
