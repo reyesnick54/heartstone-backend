@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AiModelGovernanceService } from './ai/ai-model-governance.service';
@@ -11,14 +12,31 @@ import { ConfigurationGovernanceService } from './configuration/configuration-go
 import { EnvironmentRegistryService } from './environments/environment-registry.service';
 import { EnvironmentSeparationService } from './environments/environment-separation.service';
 import { FeatureActivationService } from './features/feature-activation.service';
+import { LaunchGateService } from './launch/launch-gate.service';
+import { LaunchReadinessSnapshotService } from './launch/launch-readiness-snapshot.service';
+import { OperationalActivationService } from './launch/operational-activation.service';
+import {
+  CapabilityReplacementService,
+  CapabilityRetirementService,
+  DecommissioningService,
+  ExitAcceptanceService,
+} from './lifecycle/decommissioning.service';
 import { ProductionReadinessController } from './production-readiness.controller';
 import { DeploymentService } from './releases/deployment.service';
 import { ReleaseGovernanceService } from './releases/release-governance.service';
 import { ReleaseRevalidationService } from './releases/release-revalidation.service';
 import { RollbackService } from './releases/rollback.service';
+import {
+  ProductionDefectService,
+  StabilizationService,
+} from './stabilization/stabilization.service';
+import {
+  OperationalRevalidationService,
+  OperationalSuspensionService,
+} from './suspension/operational-suspension.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule],
+  imports: [DatabaseModule, SessionsModule, AuthorityModule],
   controllers: [ProductionReadinessController],
   providers: [
     ProductionReadinessBoundaryService,
@@ -34,44 +52,6 @@ import { RollbackService } from './releases/rollback.service';
     ConfigurationGovernanceService,
     FeatureActivationService,
     CiGovernanceService,
-  ],
-  exports: [
-    ProductionReadinessBoundaryService,
-    EnvironmentRegistryService,
-    EnvironmentSeparationService,
-    ReleaseGovernanceService,
-    DeploymentService,
-    ChangeManagementService,
-    FeatureActivationService,
-    CiGovernanceService,
-import { AuthorityModule } from '../authority/authority.module';
-import { DatabaseModule } from '../database/database.module';
-import { SessionsModule } from '../identity/sessions/sessions.module';
-import { ProductionReadinessBoundaryService } from './common/production-readiness-boundary.service';
-import { LaunchGateService } from './launch/launch-gate.service';
-import { LaunchReadinessSnapshotService } from './launch/launch-readiness-snapshot.service';
-import { OperationalActivationService } from './launch/operational-activation.service';
-import {
-  CapabilityReplacementService,
-  CapabilityRetirementService,
-  DecommissioningService,
-  ExitAcceptanceService,
-} from './lifecycle/decommissioning.service';
-import { ProductionReadinessController } from './production-readiness.controller';
-import {
-  ProductionDefectService,
-  StabilizationService,
-} from './stabilization/stabilization.service';
-import {
-  OperationalRevalidationService,
-  OperationalSuspensionService,
-} from './suspension/operational-suspension.service';
-
-@Module({
-  imports: [DatabaseModule, SessionsModule, AuthorityModule],
-  controllers: [ProductionReadinessController],
-  providers: [
-    ProductionReadinessBoundaryService,
     LaunchReadinessSnapshotService,
     LaunchGateService,
     OperationalActivationService,
@@ -86,6 +66,13 @@ import {
   ],
   exports: [
     ProductionReadinessBoundaryService,
+    EnvironmentRegistryService,
+    EnvironmentSeparationService,
+    ReleaseGovernanceService,
+    DeploymentService,
+    ChangeManagementService,
+    FeatureActivationService,
+    CiGovernanceService,
     LaunchReadinessSnapshotService,
     LaunchGateService,
     OperationalActivationService,

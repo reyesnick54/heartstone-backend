@@ -10,16 +10,17 @@ import { CurrentSession } from '../identity/auth/decorators/current-session.deco
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ChangeManagementService } from './changes/change-management.service';
-import { EmergencyChangeService } from './changes/emergency-change.service';
 import { CiGovernanceService } from './ci/ci-governance.service';
 import { ConfigurationGovernanceService } from './configuration/configuration-governance.service';
 import { EnvironmentRegistryService } from './environments/environment-registry.service';
 import { EnvironmentSeparationService } from './environments/environment-separation.service';
 import { FeatureActivationService } from './features/feature-activation.service';
-import { PRODUCTION_READINESS_BOUNDARY_DISCLAIMER } from './production-readiness.constants';
+import {
+  PHASE_13_BOUNDARY_DISCLAIMERS,
+  PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
+} from './production-readiness.constants';
 import { DeploymentService } from './releases/deployment.service';
 import { ReleaseGovernanceService } from './releases/release-governance.service';
-import { RollbackService } from './releases/rollback.service';
 
 @ApiTags('production-readiness')
 @Controller('production-readiness')
@@ -31,9 +32,7 @@ export class ProductionReadinessController {
     private readonly environmentSeparation: EnvironmentSeparationService,
     private readonly releaseGovernance: ReleaseGovernanceService,
     private readonly deployment: DeploymentService,
-    private readonly rollback: RollbackService,
     private readonly changeManagement: ChangeManagementService,
-    private readonly emergencyChange: EmergencyChangeService,
     private readonly configurationGovernance: ConfigurationGovernanceService,
     private readonly featureActivation: FeatureActivationService,
     private readonly ciGovernance: CiGovernanceService,
@@ -41,8 +40,14 @@ export class ProductionReadinessController {
 
   @Get('boundary')
   @ApiOperation({ summary: 'Production readiness boundary disclaimer' })
-  getBoundaryDisclaimer(): { disclaimer: string } {
-    return { disclaimer: PRODUCTION_READINESS_BOUNDARY_DISCLAIMER };
+  getBoundaryDisclaimer(): {
+    disclaimer: string;
+    invariants: typeof PHASE_13_BOUNDARY_DISCLAIMERS;
+  } {
+    return {
+      disclaimer: PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
+      invariants: PHASE_13_BOUNDARY_DISCLAIMERS,
+    };
   }
 
   @Post('environments')
@@ -182,23 +187,5 @@ export class ProductionReadinessController {
       environmentDefinitionId: body.environmentDefinitionId,
       activatedByIdentityId: session.identityId,
     });
-import { Controller, Get } from '@nestjs/common';
-
-import {
-  PHASE_13_BOUNDARY_DISCLAIMERS,
-  PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
-} from './production-readiness.constants';
-
-@Controller('production-readiness')
-export class ProductionReadinessController {
-  @Get('boundary-disclaimer')
-  getBoundaryDisclaimer(): {
-    disclaimer: string;
-    invariants: typeof PHASE_13_BOUNDARY_DISCLAIMERS;
-  } {
-    return {
-      disclaimer: PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
-      invariants: PHASE_13_BOUNDARY_DISCLAIMERS,
-    };
   }
 }

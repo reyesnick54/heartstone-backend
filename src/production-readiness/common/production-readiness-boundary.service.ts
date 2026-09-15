@@ -1,20 +1,19 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { PlatformEnvironmentClassification, ReleaseArtifactStatus } from '@prisma/client';
-
-import {
-  NON_PRODUCTION_CLASSIFICATIONS,
-  PRODUCTION_CAPABLE_CLASSIFICATIONS,
 import {
   IdentityType,
   LaunchGateOutcome,
   OperationalActivationOutcome,
+  PlatformEnvironmentClassification,
   ProductionCorrectiveActionStatus,
+  ReleaseArtifactStatus,
 } from '@prisma/client';
 
 import {
   FORBIDDEN_CLIENT_ACTIVATION_FIELDS,
   FORBIDDEN_CLIENT_GATE_FIELDS,
   FORBIDDEN_CLIENT_SUSPENSION_FIELDS,
+  NON_PRODUCTION_CLASSIFICATIONS,
+  PRODUCTION_CAPABLE_CLASSIFICATIONS,
   PRODUCTION_READINESS_REASON_CODES,
 } from '../production-readiness.constants';
 
@@ -176,6 +175,9 @@ export class ProductionReadinessBoundaryService {
   assertEmergencyChangeNotExpired(retrospectiveDeadline: Date, status: string): void {
     if (status === 'ACTIVE' && retrospectiveDeadline.getTime() < Date.now()) {
       throw new ForbiddenException(PRODUCTION_READINESS_REASON_CODES.EMERGENCY_CHANGE_EXPIRED);
+    }
+  }
+
   rejectClientActivationFields(payload: Record<string, unknown>): void {
     for (const field of FORBIDDEN_CLIENT_ACTIVATION_FIELDS) {
       if (field in payload && payload[field] !== undefined) {
@@ -461,7 +463,7 @@ export class ProductionReadinessBoundaryService {
     }
   }
 
-  assertUnsignedArtifactBlocked(signed: boolean): void {
+  assertReleaseArtifactSignatureRequired(signed: boolean): void {
     if (!signed) {
       throw new ForbiddenException(PRODUCTION_READINESS_REASON_CODES.UNSIGNED_ARTIFACT);
     }

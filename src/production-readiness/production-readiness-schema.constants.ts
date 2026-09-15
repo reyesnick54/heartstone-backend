@@ -41,6 +41,8 @@ export const PHASE_13E_ENUM_NAMES = [
   'CiPipelineRunStatus',
   'DataTransferApprovalStatus',
   'EnvironmentIntegrationMode',
+] as const;
+
 export const PHASE_13_MODEL_NAMES = [
   'LaunchReadinessSnapshot',
   'LaunchEvent',

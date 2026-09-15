@@ -1,26 +1,25 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { PLATFORM_ENVIRONMENT_CLASSIFICATIONS } from './production-readiness.constants';
-import {
-  PHASE_13E_ENUM_NAMES,
-  PHASE_13E_MODEL_NAMES,
-} from './production-readiness-schema.constants';
 import {
   LAUNCH_GATE_REQUIREMENTS,
   MUST_FAIL_INVARIANT_COUNT,
   PHASE_13_BOUNDARY_DISCLAIMERS,
+  PLATFORM_ENVIRONMENT_CLASSIFICATIONS,
   STABILIZATION_MONITORING_CATEGORIES,
 } from './production-readiness.constants';
-import { PHASE_13_ENUM_NAMES, PHASE_13_MODEL_NAMES } from './production-readiness-schema.constants';
+import {
+  PHASE_13_ENUM_NAMES,
+  PHASE_13_MODEL_NAMES,
+  PHASE_13E_ENUM_NAMES,
+  PHASE_13E_MODEL_NAMES,
+} from './production-readiness-schema.constants';
 
 const schemaPath = join(__dirname, '../../prisma/schema.prisma');
 const schema = readFileSync(schemaPath, 'utf8');
 
 describe('Phase 13E schema guard', () => {
   for (const modelName of PHASE_13E_MODEL_NAMES) {
-describe('Phase 13 production readiness schema guard', () => {
-  for (const modelName of PHASE_13_MODEL_NAMES) {
     it(`defines model ${modelName} exactly once`, () => {
       const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
       expect(matches).toHaveLength(1);
@@ -28,7 +27,6 @@ describe('Phase 13 production readiness schema guard', () => {
   }
 
   for (const enumName of PHASE_13E_ENUM_NAMES) {
-  for (const enumName of PHASE_13_ENUM_NAMES) {
     it(`defines enum ${enumName}`, () => {
       expect(schema).toContain(`enum ${enumName}`);
     });
@@ -39,6 +37,22 @@ describe('Phase 13 production readiness schema guard', () => {
       expect(schema).toContain(classification);
     });
   }
+});
+
+describe('Phase 13 production readiness schema guard', () => {
+  for (const modelName of PHASE_13_MODEL_NAMES) {
+    it(`defines model ${modelName} exactly once`, () => {
+      const matches = schema.match(new RegExp(`model ${modelName} \\{`, 'g'));
+      expect(matches).toHaveLength(1);
+    });
+  }
+
+  for (const enumName of PHASE_13_ENUM_NAMES) {
+    it(`defines enum ${enumName}`, () => {
+      expect(schema).toContain(`enum ${enumName}`);
+    });
+  }
+
   it('requires launch readiness snapshot integrity hash', () => {
     expect(schema).toContain('integrityHash');
   });

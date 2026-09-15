@@ -639,43 +639,6 @@ model Identity {
   intelligenceAlertVerifications   IntelligenceAlertVerification[] @relation("IntelligenceAlertVerifier")
   intelligenceAlertDispositions      IntelligenceAlertDisposition[] @relation("IntelligenceAlertDisposer")
   riskReviews                        RiskReview[]                  @relation("RiskReviewer")
-  performanceClaimsAsserted          PerformanceClaim[]            @relation("PerformanceClaimAsserter")
-  performanceClaimsReviewed          PerformanceClaim[]            @relation("PerformanceClaimReviewer")
-  strategicProjectStagesRecorded     StrategicProjectStage[]       @relation("StrategicProjectStageRecorder")
-  strategicProjectMilestonesReported StrategicProjectMilestone[]   @relation("StrategicProjectMilestoneReporter")
-  capitalEvidenceRecorded            CapitalEvidenceRecord[]       @relation("CapitalEvidenceRecorder")
-  employmentEvidenceRecorded         EmploymentEvidenceRecord[]    @relation("EmploymentEvidenceRecorder")
-  infrastructureDeliveryRecorded     InfrastructureDeliveryRecord[] @relation("InfrastructureDeliveryRecorder")
-  sectorObservationsRecorded         SectorDevelopmentObservation[] @relation("SectorObservationRecorder")
-  projectStatusProjectionsDerived    ProjectStatusProjection[]     @relation("ProjectStatusProjectionDeriver")
-  dashboardAccessPolicies            DashboardAccessPolicy[]
-  dashboardQueryAudits                 DashboardQueryAudit[]
-  dashboardSnapshotsCaptured         DashboardSnapshot[]           @relation("DashboardSnapshotCapturer")
-  dashboardIndicatorProjectionsOwned   DashboardIndicatorProjection[] @relation("DashboardIndicatorOwner")
-  feeScheduleVersionApprovals          FeeScheduleVersion[]              @relation("FeeScheduleVersionApprover")
-  feeAdjustmentRequestsRequested       FeeAdjustmentRequest[]            @relation("FeeAdjustmentRequestRequester")
-  feeAdjustmentDecisionsDecided        FeeAdjustmentDecision[]           @relation("FeeAdjustmentDecisionDecider")
-  refundRequestsRequested              RefundRequest[]                   @relation("RefundRequestRequester")
-  refundAuthorizationsAuthorized       RefundAuthorization[]             @relation("RefundAuthorizationAuthorizer")
-  financialApprovalsApproved           FinancialApprovalRecord[]         @relation("FinancialApprovalApprover")
-  integrationAcceptanceAssessments     IntegrationAcceptanceRecord[]     @relation("IntegrationAcceptanceAssessor")
-  sourceDiscrepancyResolutions         SourceDiscrepancyResolution[]     @relation("SourceDiscrepancyResolver")
-  integrationRecoveryVerifications     IntegrationRecoveryEvent[]        @relation("IntegrationRecoveryVerifier")
-  communicationRecipients              CommunicationRecipient[]          @relation("CommunicationRecipientIdentity")
-  communicationPreferences             CommunicationPreference[]         @relation("CommunicationPreferenceIdentity")
-  accessibilityAccommodations          AccessibilityAccommodation[]      @relation("AccessibilityAccommodationIdentity")
-  translationRecords                   TranslationRecord[]               @relation("TranslationRecordTranslator")
-  reconciliationExceptionsOwned        ReconciliationException[]         @relation("ReconciliationExceptionOwner")
-  metricCalculationRunsExecuted        MetricCalculationRun[]            @relation("MetricCalculationRunner")
-  reportingDashboardSnapshotsCaptured  ReportingDashboardSnapshot[]    @relation("ReportingDashboardSnapshotCapturer")
-  reportDefinitionsOwned               ReportDefinition[]                @relation("ReportDefinitionOwner")
-  reportDefinitionVersionsOwned        ReportDefinitionVersion[]         @relation("ReportDefinitionVersionOwner")
-  reportGenerationRunsInitiated        ReportGenerationRun[]             @relation("ReportGenerationRunInitiator")
-  reportReviewsConducted               ReportReview[]                    @relation("ReportReviewer")
-  reportApprovalsAsApprover            ReportApproval[]                  @relation("ReportApprover")
-  reportPublicationsAsPublisher        ReportPublication[]               @relation("ReportPublisher")
-  reportCorrectionsRecorded            ReportCorrection[]                @relation("ReportCorrectionRecorder")
-  reportClaimRevalidationsRecorded     ReportClaimRevalidationRecord[]   @relation("ReportClaimRevalidationRecorder")
   changeRequestsRequested              ChangeRequest[]                   @relation("ChangeRequestRequester")
   changeAssessmentsConducted           ChangeAssessment[]                @relation("ChangeAssessmentAssessor")
   releaseApprovalsGranted              ReleaseApproval[]                 @relation("ReleaseApprovalApprover")
@@ -11232,6 +11195,10 @@ enum ServiceLevelObjectiveStatus {
   DRAFT
   APPROVED
   ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
 // ─── Phase 13A: Operational Readiness and Activation Foundation ───────────────
 
 enum CapabilitySubjectType {
@@ -12374,6 +12341,8 @@ model SupportEscalationRule {
   @@index([runbookId])
   @@index([status])
   @@map("support_escalation_rules")
+}
+
 enum OperationalActivationOutcome {
   ACTIVATED
   BLOCKED

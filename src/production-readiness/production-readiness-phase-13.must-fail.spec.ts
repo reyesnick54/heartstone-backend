@@ -248,7 +248,7 @@ describe('Phase 13 must-fail invariants', () => {
   describe('artifact and secret handling', () => {
     it('26. Unsigned release artifact blocked', () => {
       expect(() => {
-        boundary.assertUnsignedArtifactBlocked(false);
+        boundary.assertReleaseArtifactSignatureRequired(false);
       }).toThrow(PRODUCTION_READINESS_REASON_CODES.UNSIGNED_ARTIFACT);
     });
 
