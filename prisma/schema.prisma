@@ -11172,6 +11172,19 @@ model RiskReview {
   @@map("risk_reviews")
 }
 
+// ─── Phase 13C: Production Reliability, Observability, Performance and Health ─
+
+enum ServiceReliabilityDefinitionStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ServiceLevelObjectiveStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
 // ─── Phase 13A: Operational Readiness and Activation Foundation ───────────────
 
 enum CapabilitySubjectType {
@@ -11722,6 +11735,598 @@ enum OperationalActivationStatus {
   RETIRED
 }
 
+enum ServiceLevelIndicatorType {
+  AVAILABILITY
+  LATENCY
+  ERROR_RATE
+  QUEUE_DEPTH
+  WORKFLOW_THROUGHPUT
+  DATABASE_PERFORMANCE
+  INTEGRATION_AVAILABILITY
+  NOTIFICATION_DELIVERY
+  PAYMENT_PROCESSING
+  EVIDENCE_STORAGE
+  AI_SERVICE_AVAILABILITY
+  BACKGROUND_JOBS
+}
+
+enum SliMeasurementStatus {
+  RECORDED
+  QUALIFIED
+  STALE
+  DISPUTED
+}
+
+enum TechnicalHealthState {
+  LIVE
+  READY
+  DEGRADED
+  NOT_READY
+}
+
+enum DependencyType {
+  DATABASE
+  CACHE
+  STORAGE
+  EXTERNAL_INTEGRATION
+  PAYMENT_PROVIDER
+  NOTIFICATION_PROVIDER
+  AI_PROVIDER
+  IDENTITY_PROVIDER
+}
+
+enum DependencyHealthState {
+  HEALTHY
+  DEGRADED
+  UNAVAILABLE
+  UNKNOWN
+  STALE
+}
+
+enum CapacityProfileStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum CapacityAssessmentStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+}
+
+enum PerformanceTestScenarioType {
+  NORMAL
+  PEAK
+  BURST
+  DEGRADED
+  LARGE_DOCUMENT
+  HIGH_CONCURRENCY
+  QUEUE_BACKLOG
+  SLOW_EXTERNAL_DEPENDENCY
+}
+
+enum PerformanceTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+}
+
+enum LoadTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+  BLOCKED_UNSAFE_TARGET
+}
+
+enum StressTestRunStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  FAILED
+  ABORTED
+  BLOCKED_UNSAFE_TARGET
+}
+
+enum ResourceSaturationLevel {
+  NORMAL
+  ELEVATED
+  HIGH
+  CRITICAL
+  EXHAUSTED
+}
+
+enum OperationalHealthEventType {
+  DEGRADATION
+  RECOVERY
+  CAPACITY_WARNING
+  DEPENDENCY_FAILURE
+  SLO_BREACH_SIGNAL
+  RATE_LIMIT_PRESSURE
+  PERFORMANCE_ANOMALY
+  OTHER
+}
+
+enum ObservabilitySignalType {
+  STRUCTURED_LOG
+  METRIC
+  TRACE
+  HEALTH_CHECK
+  DEPENDENCY_HEALTH
+}
+
+enum LogClassification {
+  PUBLIC
+  OPERATIONAL
+  SECURITY_SENSITIVE
+  RESTRICTED
+  PII_RESTRICTED
+}
+
+enum OperationalAlertRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum OperationalAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum OperationalAlertEventStatus {
+  FIRED
+  ACKNOWLEDGED
+  ESCALATED
+  RESOLVED
+  SUPPRESSED
+  FALSE_POSITIVE
+}
+
+enum OperationalRunbookStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum SupportEscalationRuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum RateLimitScope {
+  AUTHENTICATION
+  PUBLIC_VERIFICATION
+  SEARCH
+  UPLOAD
+  WEBHOOK
+  ANALYTICS_AI
+}
+
+model ServiceReliabilityDefinition {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  code                     String                             @unique
+  name                     String
+  description              String?
+  status                   ServiceReliabilityDefinitionStatus @default(DRAFT)
+  serviceReference         String
+  institutionalDisclaimer  String                             @default("Technical reliability definitions do not establish institutional service acceptance or legal authority.")
+  correlationId            String?
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  objectives               ServiceLevelObjective[]
+  capacityProfiles         CapacityProfile[]
+  performanceTestRuns      PerformanceTestRun[]
+  loadTestRuns             LoadTestRun[]
+  stressTestRuns           StressTestRun[]
+  observabilitySignals     ObservabilitySignalDefinition[]
+  alertRules               OperationalAlertRule[]
+  runbooks                 OperationalRunbook[]
+  escalationRules          SupportEscalationRule[]
+
+  @@index([status])
+  @@index([serviceReference])
+  @@index([correlationId])
+  @@map("service_reliability_definitions")
+}
+
+model ServiceLevelObjective {
+  id                           String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId      String                      @db.Uuid
+  code                         String
+  name                         String
+  status                       ServiceLevelObjectiveStatus @default(DRAFT)
+  approvedTargetValue          String
+  approvedTargetUnit           String
+  approvedTargetReference      String
+  evaluationWindow             String
+  notGuaranteedDisclaimer      String                      @default("Configured service target is not a contractual SLA or guaranteed availability.")
+  effectiveFrom                DateTime
+  effectiveUntil               DateTime?
+  correlationId                String?
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @updatedAt
+  reliabilityDefinition        ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  indicators                   ServiceLevelIndicator[]
+  availabilityMeasurements     AvailabilityMeasurement[]
+  latencyMeasurements          LatencyMeasurement[]
+  alertRules                   OperationalAlertRule[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("service_level_objectives")
+}
+
+model ServiceLevelIndicator {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  objectiveId           String                    @db.Uuid
+  code                  String
+  name                  String
+  indicatorType         ServiceLevelIndicatorType
+  measurementUnit       String
+  approvedThreshold     String
+  approvedThresholdRef  String
+  correlationId         String?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  objective             ServiceLevelObjective     @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  availabilityMeasurements AvailabilityMeasurement[]
+  latencyMeasurements   LatencyMeasurement[]
+
+  @@unique([objectiveId, code])
+  @@index([objectiveId])
+  @@index([indicatorType])
+  @@index([correlationId])
+  @@map("service_level_indicators")
+}
+
+model AvailabilityMeasurement {
+  id                 String               @id @default(uuid()) @db.Uuid
+  objectiveId        String               @db.Uuid
+  indicatorId        String               @db.Uuid
+  measuredValue      String
+  measurementStatus  SliMeasurementStatus @default(RECORDED)
+  windowStart        DateTime
+  windowEnd          DateTime
+  isHttp200Only      Boolean              @default(false)
+  notes              String?
+  correlationId      String?
+  createdAt          DateTime             @default(now())
+  objective          ServiceLevelObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  indicator          ServiceLevelIndicator @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+
+  @@index([objectiveId])
+  @@index([indicatorId])
+  @@index([windowStart])
+  @@index([correlationId])
+  @@map("availability_measurements")
+}
+
+model LatencyMeasurement {
+  id                 String               @id @default(uuid()) @db.Uuid
+  objectiveId        String               @db.Uuid
+  indicatorId        String               @db.Uuid
+  measuredValueMs    Float
+  measurementStatus  SliMeasurementStatus @default(RECORDED)
+  percentile         String?
+  windowStart        DateTime
+  windowEnd          DateTime
+  notes              String?
+  correlationId      String?
+  createdAt          DateTime             @default(now())
+  objective          ServiceLevelObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  indicator          ServiceLevelIndicator @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+
+  @@index([objectiveId])
+  @@index([indicatorId])
+  @@index([windowStart])
+  @@index([correlationId])
+  @@map("latency_measurements")
+}
+
+model CapacityProfile {
+  id                      String                @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                @db.Uuid
+  code                    String
+  name                    String
+  status                  CapacityProfileStatus @default(DRAFT)
+  expectedUsers           Int?
+  concurrentSessions      Int?
+  requestsPerMinute       Int?
+  caseVolumePerDay        Int?
+  documentVolumePerDay    Int?
+  storageBytes            BigInt?
+  integrationThroughput   Int?
+  notificationThroughput  Int?
+  paymentThroughput       Int?
+  aiWorkloadUnits         Int?
+  effectiveFrom           DateTime
+  effectiveUntil          DateTime?
+  correlationId           String?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  assessments             CapacityAssessment[]
+  saturationRecords       ResourceSaturationRecord[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("capacity_profiles")
+}
+
+model CapacityAssessment {
+  id                String                   @id @default(uuid()) @db.Uuid
+  profileId         String                   @db.Uuid
+  assessmentNumber  String                   @unique
+  status            CapacityAssessmentStatus @default(DRAFT)
+  assessedAt        DateTime                 @default(now())
+  findings          String
+  headroomPercent   Float?
+  exhaustionRisk    Boolean                  @default(false)
+  safeFailApplied   Boolean                  @default(false)
+  correlationId     String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  profile           CapacityProfile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("capacity_assessments")
+}
+
+model PerformanceTestRun {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                      @db.Uuid
+  runNumber               String                      @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  PerformanceTestRunStatus    @default(PLANNED)
+  targetEnvironment       String
+  usesProductionData      Boolean                     @default(false)
+  productionDataApproved  Boolean                     @default(false)
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([scenarioType])
+  @@index([correlationId])
+  @@map("performance_test_runs")
+}
+
+model LoadTestRun {
+  id                      String            @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String            @db.Uuid
+  runNumber               String            @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  LoadTestRunStatus @default(PLANNED)
+  targetEnvironment       String
+  isProductionTarget      Boolean           @default(false)
+  productionTestAuthorized Boolean          @default(false)
+  virtualUsers            Int?
+  durationSeconds         Int?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("load_test_runs")
+}
+
+model StressTestRun {
+  id                      String              @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String              @db.Uuid
+  runNumber               String              @unique
+  scenarioType            PerformanceTestScenarioType
+  status                  StressTestRunStatus @default(PLANNED)
+  targetEnvironment       String
+  isProductionTarget      Boolean             @default(false)
+  productionTestAuthorized Boolean            @default(false)
+  peakMultiplier          Float?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  summary                 String?
+  correlationId           String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("stress_test_runs")
+}
+
+model ResourceSaturationRecord {
+  id                String                  @id @default(uuid()) @db.Uuid
+  profileId         String                  @db.Uuid
+  resourceType      String
+  saturationLevel   ResourceSaturationLevel
+  utilizationPercent Float
+  safeFailTriggered Boolean                 @default(false)
+  recordedAt        DateTime                @default(now())
+  notes             String?
+  correlationId     String?
+  createdAt         DateTime                @default(now())
+  profile           CapacityProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([saturationLevel])
+  @@index([recordedAt])
+  @@index([correlationId])
+  @@map("resource_saturation_records")
+}
+
+model OperationalHealthEvent {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  eventNumber           String                     @unique
+  eventType             OperationalHealthEventType
+  technicalHealthState  TechnicalHealthState
+  dependencyType        DependencyType?
+  dependencyReference   String?
+  dependencyHealthState DependencyHealthState?
+  isStaleIntegration    Boolean                    @default(false)
+  affectedCapabilityRef String?
+  summary               String
+  notInstitutionalStatus Boolean                   @default(true)
+  correlationId         String?
+  recordedAt            DateTime                   @default(now())
+  createdAt             DateTime                   @default(now())
+
+  @@index([eventType])
+  @@index([technicalHealthState])
+  @@index([dependencyType])
+  @@index([correlationId])
+  @@index([recordedAt])
+  @@map("operational_health_events")
+}
+
+model ObservabilitySignalDefinition {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                  @db.Uuid
+  code                    String
+  name                    String
+  signalType              ObservabilitySignalType
+  logClassification       LogClassification       @default(OPERATIONAL)
+  redactionPolicy         Json                    @default("[]")
+  correlationPropagation  Boolean                 @default(true)
+  metricName              String?
+  traceSpanName           String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([signalType])
+  @@map("observability_signal_definitions")
+}
+
+model OperationalAlertRule {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                     @db.Uuid
+  objectiveId             String?                    @db.Uuid
+  code                    String
+  name                    String
+  status                  OperationalAlertRuleStatus @default(DRAFT)
+  severity                OperationalAlertSeverity
+  conditionDescription    String
+  thresholdConfig         Json
+  isIncident              Boolean                    @default(false)
+  notInstitutionalDecision Boolean                   @default(true)
+  runbookId               String?                    @db.Uuid
+  correlationId           String?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  objective               ServiceLevelObjective?     @relation(fields: [objectiveId], references: [id])
+  runbook                 OperationalRunbook?        @relation(fields: [runbookId], references: [id])
+  alertEvents             OperationalAlertEvent[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([objectiveId])
+  @@index([status])
+  @@index([correlationId])
+  @@map("operational_alert_rules")
+}
+
+model OperationalAlertEvent {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  ruleId                String                      @db.Uuid
+  alertNumber           String                      @unique
+  status                OperationalAlertEventStatus @default(FIRED)
+  severity              OperationalAlertSeverity
+  observedCondition     String
+  isIncident            Boolean                     @default(false)
+  notInstitutionalDecision Boolean                  @default(true)
+  sloViolationObserved  Boolean                     @default(false)
+  requirementsWaived    Boolean                     @default(false)
+  correlationId         String?
+  firedAt               DateTime                    @default(now())
+  acknowledgedAt        DateTime?
+  resolvedAt            DateTime?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  rule                  OperationalAlertRule        @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([status])
+  @@index([correlationId])
+  @@index([firedAt])
+  @@map("operational_alert_events")
+}
+
+model OperationalRunbook {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                   @db.Uuid
+  code                    String
+  name                    String
+  status                  OperationalRunbookStatus @default(DRAFT)
+  scenarioType            String
+  procedureMarkdown       String
+  escalationNotes         String?
+  correlationId           String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  alertRules              OperationalAlertRule[]
+  escalationRules         SupportEscalationRule[]
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([status])
+  @@index([scenarioType])
+  @@map("operational_runbooks")
+}
+
+model SupportEscalationRule {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  reliabilityDefinitionId String                      @db.Uuid
+  runbookId               String?                     @db.Uuid
+  code                    String
+  name                    String
+  status                  SupportEscalationRuleStatus @default(DRAFT)
+  triggerCondition        String
+  escalationTarget        String
+  mandatoryProcessFallback String?
+  correlationId           String?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  reliabilityDefinition   ServiceReliabilityDefinition @relation(fields: [reliabilityDefinitionId], references: [id], onDelete: Cascade)
+  runbook                 OperationalRunbook?         @relation(fields: [runbookId], references: [id])
+
+  @@unique([reliabilityDefinitionId, code])
+  @@index([reliabilityDefinitionId])
+  @@index([runbookId])
+  @@index([status])
+  @@map("support_escalation_rules")
 enum OperationalActivationOutcome {
   ACTIVATED
   BLOCKED
