@@ -165,7 +165,7 @@ describe('Phase 12C strategic project intelligence (integration)', () => {
         evidenceRecordRefs: [{ type: 'EvidenceRecord', id: 'evidence-2' }],
         recordedByIdentityId: fixture.officialIdentityId,
       }),
-    ).rejects.toThrow('Proposed capital is not committed');
+    ).rejects.toThrow('Capital classification cannot skip evidence-backed escalation levels');
   });
 
   it('does not count employment forecast as verified employment', async () => {

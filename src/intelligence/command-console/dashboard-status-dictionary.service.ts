@@ -32,10 +32,7 @@ export class DashboardStatusDictionaryService {
 
   async createEntry(input: CreateStatusDictionaryEntryInput) {
     this.boundaryService.assertStatusDoesNotCreateAuthority(input.meaning);
-    this.boundaryService.assertColorSemanticIsPresentationOnly(
-      input.colorSemantic,
-      input.meaning,
-    );
+    this.boundaryService.assertColorSemanticIsPresentationOnly(input.colorSemantic, input.meaning);
 
     const latest = await this.prisma.dashboardStatusDictionaryEntry.findFirst({
       where: { code: input.code, institutionId: input.institutionId ?? null },
