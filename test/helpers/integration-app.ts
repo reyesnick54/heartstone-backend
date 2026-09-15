@@ -34,9 +34,6 @@ export async function createIntegrationApp(): Promise<{
 }
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
-  await resetProductionReadinessData(prisma);
-  await resetOperationalReadinessData(prisma);
-  await resetCybersecurityData(prisma);
   await prisma.securityAuditEvent.deleteMany();
   await prisma.session.deleteMany();
   await prisma.identityOfficeholderLink.deleteMany();
@@ -119,73 +116,7 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.performanceClaim.deleteMany();
 }
 
-export async function resetOperationalReadinessData(prisma: PrismaService): Promise<void> {
-  await prisma.capabilityRevalidationRequirement.deleteMany();
-  await prisma.capabilitySafeHaltCondition.deleteMany();
-  await prisma.capabilityOwnerAssignment.deleteMany();
-  await prisma.capabilityDependency.deleteMany();
-  await prisma.activationRestriction.deleteMany();
-  await prisma.activationCondition.deleteMany();
-  await prisma.productionReadinessEvidence.deleteMany();
-  await prisma.productionReadinessRequirement.deleteMany();
-  await prisma.productionReadinessAssessment.deleteMany();
-  await prisma.capabilityMaturityHistory.deleteMany();
-  await prisma.capabilityMaturityAssessment.deleteMany();
-  await prisma.capabilityVersion.deleteMany();
-  await prisma.capabilityDefinition.deleteMany();
-}
-
-export async function resetCybersecurityData(prisma: PrismaService): Promise<void> {
-  await prisma.securityTestExecution.deleteMany();
-  await prisma.credentialRotationRecord.deleteMany();
-  await prisma.serviceIdentityReview.deleteMany();
-  await prisma.breakGlassAccessEvent.deleteMany();
-  await prisma.privilegedAccessReview.deleteMany();
-  await prisma.vendorSecurityAssessment.deleteMany();
-  await prisma.releaseArtifactAttestation.deleteMany();
-  await prisma.buildProvenanceRecord.deleteMany();
-  await prisma.dependencyVulnerabilityRecord.deleteMany();
-  await prisma.softwareBillOfMaterialsRecord.deleteMany();
-  await prisma.softwareComponentRecord.deleteMany();
-  await prisma.postQuantumMigrationItem.deleteMany();
-  await prisma.cryptographicAgilityAssessment.deleteMany();
-  await prisma.cryptographicAsset.deleteMany();
-  await prisma.cryptographicPolicy.deleteMany();
-  await prisma.trustAnchorReference.deleteMany();
-  await prisma.certificateReference.deleteMany();
-  await prisma.cryptographicKeyReference.deleteMany();
-  await prisma.securityAssuranceReview.deleteMany();
-  await prisma.vulnerabilityRemediation.deleteMany();
-  await prisma.vulnerabilityFinding.deleteMany();
-  await prisma.securityException.deleteMany();
-  await prisma.securityFinding.deleteMany();
-  await prisma.securityControlAssessment.deleteMany();
-  await prisma.securityControlImplementation.deleteMany();
-  await prisma.securityControlDefinition.deleteMany();
-  await prisma.securityAsset.deleteMany();
-export async function resetProductionReadinessData(prisma: PrismaService): Promise<void> {
-  await prisma.operatorAccessReview.deleteMany();
-  await prisma.qualificationExpiryEvent.deleteMany();
-  await prisma.staffingReadinessAssessment.deleteMany();
-  await prisma.departmentReadinessAssessment.deleteMany();
-  await prisma.successionAssignment.deleteMany();
-  await prisma.onCallAssignment.deleteMany();
-  await prisma.supportAssignment.deleteMany();
-  await prisma.supportCoveragePlan.deleteMany();
-  await prisma.continuityCompetencyAssessment.deleteMany();
-  await prisma.securityPrivacyAssessment.deleteMany();
-  await prisma.authorityBoundaryAssessment.deleteMany();
-  await prisma.practicalAssessment.deleteMany();
-  await prisma.trainingCompletion.deleteMany();
-  await prisma.operatorCompetencyAssessment.deleteMany();
-  await prisma.operatorQualification.deleteMany();
-  await prisma.operatorReadinessProfile.deleteMany();
-  await prisma.operationalRoleRequirement.deleteMany();
-  await prisma.trainingRequirement.deleteMany();
-}
-
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
-  await resetProductionReadinessData(prisma);
   await resetIntelligenceData(prisma);
   await resetFinancialData(prisma);
   await resetApplicationProcessingData(prisma);
@@ -205,10 +136,18 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.jurisdiction.deleteMany();
 }
 
+export async function resetComplianceOversightData(prisma: PrismaService): Promise<void> {
+  await prisma.complianceAlert.deleteMany();
+  await prisma.complianceRevalidationRecord.deleteMany();
+  await prisma.complianceMonitoringEvent.deleteMany();
+  await prisma.complianceIndicator.deleteMany();
+  await prisma.complianceStatusProjection.deleteMany();
+  await prisma.monitoringRule.deleteMany();
+}
+
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetProductionReadinessData(prisma);
-  await resetOperationalReadinessData(prisma);
-  await resetCybersecurityData(prisma);
+  await resetComplianceOversightData(prisma);
   await resetIntelligenceData(prisma);
   await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);

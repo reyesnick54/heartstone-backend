@@ -52,8 +52,8 @@ describe('Phase 12A measurement schema', () => {
 
   it('defaults measured performance claim attribution to NOT_ESTABLISHED', () => {
     const block = /model MeasuredPerformanceClaim \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
-    expect(block).toContain(
-      'attributionClassification  PerformanceAttributionClassification @default(NOT_ESTABLISHED)',
+    expect(block).toMatch(
+      /attributionClassification\s+PerformanceAttributionClassification\s+@default\(NOT_ESTABLISHED\)/,
     );
   });
 

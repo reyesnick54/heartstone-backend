@@ -16,7 +16,9 @@ export function isValidMaturityAdvancement(
   }
 
   if (requested === CapabilityMaturityState.SUSPENDED) {
-    return current !== CapabilityMaturityState.RETIRED && current !== CapabilityMaturityState.REPLACED;
+    return (
+      current !== CapabilityMaturityState.RETIRED && current !== CapabilityMaturityState.REPLACED
+    );
   }
 
   if (requested === CapabilityMaturityState.REVALIDATION_REQUIRED) {
@@ -53,9 +55,7 @@ export function requiresProductionReadinessGate(requested: CapabilityMaturitySta
   return requested === CapabilityMaturityState.PRODUCTION_READY;
 }
 
-export function requiresInstitutionalAcceptanceGate(
-  requested: CapabilityMaturityState,
-): boolean {
+export function requiresInstitutionalAcceptanceGate(requested: CapabilityMaturityState): boolean {
   return requested === CapabilityMaturityState.INSTITUTIONALLY_ACCEPTED;
 }
 

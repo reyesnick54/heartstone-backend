@@ -2,7 +2,6 @@ import * as Joi from 'joi';
 
 interface ValidatedEnvironment {
   NODE_ENV: string;
-  HEARTSTONE_ENVIRONMENT_CLASSIFICATION?: string;
   CORS_ORIGINS?: string;
   CORS_ENABLED?: string;
   AUTH_LOCAL_PASSWORD_ENABLED?: string;
@@ -26,19 +25,6 @@ export const envValidationSchema = Joi.object({
   SESSION_TOKEN_BYTES: Joi.number().integer().min(16).max(64).default(32),
   SESSION_RENEWAL_THRESHOLD_SECONDS: Joi.number().integer().min(0).max(43200).default(900),
   AUTH_LOCAL_PASSWORD_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
-  HEARTSTONE_ENVIRONMENT_CLASSIFICATION: Joi.string()
-    .valid(
-      'LOCAL',
-      'DEVELOPMENT',
-      'TEST',
-      'INTEGRATION',
-      'SANDBOX',
-      'STAGING',
-      'PILOT',
-      'PRODUCTION',
-      'DISASTER_RECOVERY',
-    )
-    .optional(),
 }).custom((value, helpers) => {
   const env = value as ValidatedEnvironment;
   const nodeEnv = env.NODE_ENV;
@@ -57,33 +43,6 @@ export const envValidationSchema = Joi.object({
   if (nodeEnv === 'production' && localPasswordEnabled) {
     return helpers.error('any.custom', {
       message: 'AUTH_LOCAL_PASSWORD_ENABLED=true is not allowed when NODE_ENV=production',
-    });
-  }
-
-  const nonProductionClassifications = [
-    'LOCAL',
-    'DEVELOPMENT',
-    'TEST',
-    'INTEGRATION',
-    'SANDBOX',
-    'STAGING',
-  ];
-  const envClassification = env.HEARTSTONE_ENVIRONMENT_CLASSIFICATION;
-
-  if (
-    envClassification &&
-    nonProductionClassifications.includes(envClassification) &&
-    nodeEnv === 'production'
-  ) {
-    return helpers.error('any.custom', {
-      message:
-        'NODE_ENV=production is not allowed when HEARTSTONE_ENVIRONMENT_CLASSIFICATION is non-production',
-    });
-  }
-
-  if (envClassification === 'PRODUCTION' && nodeEnv !== 'production') {
-    return helpers.error('any.custom', {
-      message: 'HEARTSTONE_ENVIRONMENT_CLASSIFICATION=PRODUCTION requires NODE_ENV=production',
     });
   }
 

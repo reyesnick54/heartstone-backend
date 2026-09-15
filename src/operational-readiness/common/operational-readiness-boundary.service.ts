@@ -74,7 +74,11 @@ export class OperationalReadinessBoundaryService {
   }
 
   assertAiCannotAdvanceMaturity(action: string, actorRoleMarker?: string): void {
-    if (!FORBIDDEN_AI_MATURITY_ACTIONS.includes(action as (typeof FORBIDDEN_AI_MATURITY_ACTIONS)[number])) {
+    if (
+      !FORBIDDEN_AI_MATURITY_ACTIONS.includes(
+        action as (typeof FORBIDDEN_AI_MATURITY_ACTIONS)[number],
+      )
+    ) {
       return;
     }
 
@@ -139,8 +143,9 @@ export class OperationalReadinessBoundaryService {
     evidenceTypes: string[],
   ): void {
     const hasPilotOnly =
-      evidenceTypes.some((type) => (PILOT_SUCCESS_EVIDENCE_TYPES as readonly string[]).includes(type)) &&
-      !evidenceTypes.some((type) => type === 'PRODUCTION_READINESS_ASSESSMENT');
+      evidenceTypes.some((type) =>
+        (PILOT_SUCCESS_EVIDENCE_TYPES as readonly string[]).includes(type),
+      ) && !evidenceTypes.some((type) => type === 'PRODUCTION_READINESS_ASSESSMENT');
 
     if (
       hasPilotOnly &&
@@ -212,17 +217,24 @@ export class OperationalReadinessBoundaryService {
 
   assertUnresolvedCriticalConditionsBlock(hasUnresolvedCriticalConditions: boolean): void {
     if (hasUnresolvedCriticalConditions) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.UNRESOLVED_CRITICAL_CONDITION);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.UNRESOLVED_CRITICAL_CONDITION,
+      );
     }
   }
 
-  assertSuspendedCannotAppearOperational(isSuspended: boolean, requestedMaturity: CapabilityMaturityState): void {
+  assertSuspendedCannotAppearOperational(
+    isSuspended: boolean,
+    requestedMaturity: CapabilityMaturityState,
+  ): void {
     if (
       isSuspended &&
       (requestedMaturity === CapabilityMaturityState.OPERATIONALLY_ACTIVATED ||
         requestedMaturity === CapabilityMaturityState.INSTITUTIONALLY_ACCEPTED)
     ) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.SUSPENDED_CANNOT_APPEAR_OPERATIONAL);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.SUSPENDED_CANNOT_APPEAR_OPERATIONAL,
+      );
     }
   }
 
@@ -245,7 +257,10 @@ export class OperationalReadinessBoundaryService {
     status: ProductionReadinessStatus,
     measurableConditions: string[],
   ): void {
-    if (status === ProductionReadinessStatus.READY_WITH_CONDITIONS && measurableConditions.length === 0) {
+    if (
+      status === ProductionReadinessStatus.READY_WITH_CONDITIONS &&
+      measurableConditions.length === 0
+    ) {
       throw new BadRequestException(
         OPERATIONAL_READINESS_REASON_CODES.READY_WITH_CONDITIONS_REQUIRES_MEASURABLE,
       );
@@ -254,7 +269,9 @@ export class OperationalReadinessBoundaryService {
 
   assertEvidenceRequiredForAdvancement(evidenceCount: number): void {
     if (evidenceCount === 0) {
-      throw new BadRequestException(OPERATIONAL_READINESS_REASON_CODES.EVIDENCE_REQUIRED_FOR_ADVANCEMENT);
+      throw new BadRequestException(
+        OPERATIONAL_READINESS_REASON_CODES.EVIDENCE_REQUIRED_FOR_ADVANCEMENT,
+      );
     }
   }
 
@@ -266,7 +283,10 @@ export class OperationalReadinessBoundaryService {
 
   validateMaturityAdvancement(context: MaturityAdvancementContext): void {
     this.assertAiActorCannotAct(context.actorRoleMarker, context.actorIdentityId);
-    this.assertSuspendedCannotAppearOperational(context.isSuspended ?? false, context.requestedMaturity);
+    this.assertSuspendedCannotAppearOperational(
+      context.isSuspended ?? false,
+      context.requestedMaturity,
+    );
     this.assertRetiredCannotReactivateWithoutReplacement(
       context.isRetired ?? false,
       context.requestedMaturity,
@@ -278,7 +298,10 @@ export class OperationalReadinessBoundaryService {
       context.acceptsInstitutionalRisk ?? false,
     );
     this.assertTechnicalCompletionCannotAuthorizeProduction(context.evidenceTypes);
-    this.assertPilotSuccessCannotAuthorizeProduction(context.requestedMaturity, context.evidenceTypes);
+    this.assertPilotSuccessCannotAuthorizeProduction(
+      context.requestedMaturity,
+      context.evidenceTypes,
+    );
     this.assertProductionReadinessCannotSetInstitutionalAcceptance(
       context.requestedMaturity,
       context.evidenceTypes,

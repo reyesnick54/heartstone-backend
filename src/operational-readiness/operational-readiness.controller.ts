@@ -130,17 +130,23 @@ export class OperationalReadinessController {
   }
 
   @Post('activation/conditions')
-  createActivationCondition(@Body() body: Parameters<ActivationGovernanceService['createCondition']>[0]) {
+  createActivationCondition(
+    @Body() body: Parameters<ActivationGovernanceService['createCondition']>[0],
+  ) {
     return this.activationGovernanceService.createCondition(body);
   }
 
   @Post('activation/restrictions')
-  createActivationRestriction(@Body() body: Parameters<ActivationGovernanceService['createRestriction']>[0]) {
+  createActivationRestriction(
+    @Body() body: Parameters<ActivationGovernanceService['createRestriction']>[0],
+  ) {
     return this.activationGovernanceService.createRestriction(body);
   }
 
   @Post('activation/safe-halt-conditions')
-  createSafeHaltCondition(@Body() body: Parameters<ActivationGovernanceService['createSafeHaltCondition']>[0]) {
+  createSafeHaltCondition(
+    @Body() body: Parameters<ActivationGovernanceService['createSafeHaltCondition']>[0],
+  ) {
     return this.activationGovernanceService.createSafeHaltCondition(body);
   }
 
@@ -152,7 +158,10 @@ export class OperationalReadinessController {
   @Post('dependencies')
   createDependency(@Body() body: Parameters<CapabilityDependencyService['createDependency']>[0]) {
     this.boundary.rejectClientProtectedDependencyFields(body as unknown as Record<string, unknown>);
-    return this.dependencyService.createDependency(body, body as unknown as Record<string, unknown>);
+    return this.dependencyService.createDependency(
+      body,
+      body as unknown as Record<string, unknown>,
+    );
   }
 
   @Get('dependencies/:capabilityDefinitionId')
@@ -161,7 +170,10 @@ export class OperationalReadinessController {
   }
 
   @Post('owners/assignments')
-  assignOwners(@Body() body: Parameters<CapabilityOwnerService['assignOwners']>[0], @CurrentSession() session: SessionContextDto) {
+  assignOwners(
+    @Body() body: Parameters<CapabilityOwnerService['assignOwners']>[0],
+    @CurrentSession() session: SessionContextDto,
+  ) {
     return this.ownerService.assignOwners({
       ...body,
       assignedByIdentityId: session.identityId,
@@ -173,7 +185,9 @@ export class OperationalReadinessController {
     @Body()
     body: {
       capabilityDefinitionId: string;
-      trigger: Parameters<CapabilityRevalidationService['recordRevalidationRequirement']>[0]['trigger'];
+      trigger: Parameters<
+        CapabilityRevalidationService['recordRevalidationRequirement']
+      >[0]['trigger'];
       description: string;
     },
     @CurrentSession() session: SessionContextDto,

@@ -141,7 +141,9 @@ export class ProductionReadinessService {
     } else if (
       requirements.some((r) => r.status === ProductionReadinessStatus.READY_WITH_CONDITIONS) &&
       !requirements.some(
-        (r) => r.status === ProductionReadinessStatus.NOT_READY || r.status === ProductionReadinessStatus.SAFE_HALTED,
+        (r) =>
+          r.status === ProductionReadinessStatus.NOT_READY ||
+          r.status === ProductionReadinessStatus.SAFE_HALTED,
       )
     ) {
       overallStatus = ProductionReadinessStatus.READY_WITH_CONDITIONS;

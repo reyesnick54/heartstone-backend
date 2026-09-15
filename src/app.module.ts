@@ -11,7 +11,6 @@ import { envValidationSchema } from './config/env.validation';
 import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
-import { CybersecurityModule } from './cybersecurity/cybersecurity.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
@@ -24,7 +23,6 @@ import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
-import { ProductionReliabilityModule } from './production-reliability/production-reliability.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
@@ -60,11 +58,9 @@ import { SystemModule } from './system/system.module';
     DecisionsModule,
     DecisionsIssuanceModule,
     ComplianceModule,
-    CybersecurityModule,
     RedressModule,
     IntelligenceModule,
     OperationalSupportModule,
-    ProductionReliabilityModule,
     OperationalReadinessModule,
     ProductionReadinessModule,
   ],

@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { PHASE_13A_ENUM_NAMES, PHASE_13A_MODEL_NAMES } from './operational-readiness-schema.constants';
+import {
+  PHASE_13A_ENUM_NAMES,
+  PHASE_13A_MODEL_NAMES,
+} from './operational-readiness-schema.constants';
 
 describe('Operational readiness schema (Phase 13A)', () => {
   const schema = readFileSync(join(process.cwd(), 'prisma/schema.prisma'), 'utf8');

@@ -6,13 +6,20 @@ import {
   MATURITY_ADVANCEMENT_PATH,
   PHASE_13A_BOUNDARY_DISCLAIMER,
 } from './operational-readiness.constants';
-import { PHASE_13A_ENUM_NAMES, PHASE_13A_MODEL_NAMES } from './operational-readiness-schema.constants';
+import {
+  PHASE_13A_ENUM_NAMES,
+  PHASE_13A_MODEL_NAMES,
+} from './operational-readiness-schema.constants';
 
 describe('Phase 13A invariants', () => {
   it('declares core boundary disclaimer separating authority, readiness, acceptance, and activation', () => {
     expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain('Authority does not equal activation');
-    expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain('Technical completion does not equal production readiness');
-    expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain('Production readiness does not equal institutional acceptance');
+    expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain(
+      'Technical completion does not equal production readiness',
+    );
+    expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain(
+      'Production readiness does not equal institutional acceptance',
+    );
     expect(PHASE_13A_BOUNDARY_DISCLAIMER).toContain(
       'Institutional acceptance does not equal operational activation',
     );
