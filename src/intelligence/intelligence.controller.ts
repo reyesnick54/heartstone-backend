@@ -1,18 +1,37 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AnalysisService } from './analysis/analysis.service';
+import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
+import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
+import { CreateMetricBaselineDto } from './dto/create-metric-baseline.dto';
+import { CreateMetricDefinitionDto } from './dto/create-metric-definition.dto';
+import { CreateMetricDefinitionVersionDto } from './dto/create-metric-definition-version.dto';
+import { CreatePerformanceClaimDto } from './dto/create-performance-claim.dto';
+import { CreatePerformanceFrameworkDto } from './dto/create-performance-framework.dto';
+import { RecordMetricCalculationRunDto } from './dto/record-metric-calculation-run.dto';
+import { ReviewPerformanceClaimDto } from './dto/review-performance-claim.dto';
 import { PHASE_12F_BOUNDARY_DISCLAIMER } from './intelligence.constants';
+import { MetricBaselineService } from './metrics/metric-baseline.service';
+import { MetricDefinitionService } from './metrics/metric-definition.service';
+import { PerformanceFrameworkService } from './metrics/performance-framework.service';
 import { IntelligenceMonitoringService } from './monitoring/intelligence-monitoring.service';
 import { RiskAssessmentService } from './risk/risk-assessment.service';
 import { SimulationService } from './simulation/simulation.service';
 
+@ApiTags('intelligence')
 @Controller('intelligence')
 export class IntelligenceController {
   constructor(
     private readonly boundary: IntelligenceBoundaryService,
+    private readonly frameworkService: PerformanceFrameworkService,
+    private readonly metricDefinitionService: MetricDefinitionService,
+    private readonly baselineService: MetricBaselineService,
+    private readonly calculationRunService: MetricCalculationRunService,
+    private readonly claimService: MeasuredPerformanceClaimService,
     private readonly digitalTwin: DigitalTwinService,
     private readonly simulation: SimulationService,
     private readonly consequentialUse: ConsequentialUseService,
@@ -22,8 +41,76 @@ export class IntelligenceController {
   ) {}
 
   @Get('boundary')
-  getBoundaryDisclaimer(): { disclaimer: string } {
+  @ApiOperation({ summary: 'Performance measurement boundary metadata' })
+  getBoundary() {
+    return this.boundary.boundaryMetadata();
+  }
+
+  @Get('twin-simulation/boundary')
+  @ApiOperation({ summary: 'Digital twin and simulation boundary disclaimer' })
+  getTwinSimulationBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: PHASE_12F_BOUNDARY_DISCLAIMER };
+  }
+
+  @Post('frameworks')
+  createFramework(@Body() dto: CreatePerformanceFrameworkDto) {
+    return this.frameworkService.create(dto);
+  }
+
+  @Get('frameworks/:id')
+  getFramework(@Param('id', ParseUUIDPipe) id: string) {
+    return this.frameworkService.findById(id);
+  }
+
+  @Post('metrics')
+  createMetric(@Body() dto: CreateMetricDefinitionDto) {
+    return this.metricDefinitionService.createDefinition(dto);
+  }
+
+  @Post('metrics/:id/versions')
+  createMetricVersion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateMetricDefinitionVersionDto,
+  ) {
+    return this.metricDefinitionService.createVersion(id, dto);
+  }
+
+  @Post('metrics/:id/publish')
+  publishMetric(@Param('id', ParseUUIDPipe) id: string) {
+    return this.metricDefinitionService.publishDefinition(id);
+  }
+
+  @Post('metric-versions/:id/activate')
+  activateMetricVersion(@Param('id', ParseUUIDPipe) id: string) {
+    return this.metricDefinitionService.activateVersion(id);
+  }
+
+  @Post('baselines')
+  createBaseline(@Body() dto: CreateMetricBaselineDto) {
+    return this.baselineService.create(dto);
+  }
+
+  @Post('calculation-runs')
+  recordCalculationRun(@Body() dto: RecordMetricCalculationRunDto) {
+    return this.calculationRunService.recordRun(dto, process.env.API_VERSION ?? 'v1');
+  }
+
+  @Post('claims')
+  createClaim(@Body() dto: CreatePerformanceClaimDto & { ownerIdentityId: string }) {
+    return this.claimService.create(dto, dto.ownerIdentityId);
+  }
+
+  @Post('claims/:id/review')
+  reviewClaim(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReviewPerformanceClaimDto & { reviewerIdentityId: string; actorType?: string },
+  ) {
+    return this.claimService.review(
+      id,
+      dto.reviewerIdentityId,
+      dto,
+      dto.actorType ?? 'HUMAN_REVIEWER',
+    );
   }
 
   @Post('digital-twins/definitions')
@@ -109,7 +196,6 @@ export class IntelligenceController {
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
     return this.consequentialUse.proposeLiveTransition(body);
   }
-
 
   @Post('analysis/requests')
   createAnalysisRequest(@Body() body: Parameters<AnalysisService['createRequest']>[0]) {

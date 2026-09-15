@@ -77,8 +77,9 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('proves dashboard status cannot create authority', async () => {
-    expect(() => { boundaryService.assertStatusDoesNotCreateAuthority('This status grants permission to decide'); },
-    ).toThrow();
+    expect(() => {
+      boundaryService.assertStatusDoesNotCreateAuthority('This status grants permission to decide');
+    }).toThrow();
 
     const fixture = await seedPhase12BFixture(prisma);
     const projection = await projectionService.deriveProjection({
@@ -152,7 +153,11 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
   it('keeps stale status visible with explicit markers', async () => {
     const fixture = await seedPhase12BFixture(prisma);
-    const projection = await createStaleProjection(prisma, fixture, DashboardDataQuality.STALE_CACHED);
+    const projection = await createStaleProjection(
+      prisma,
+      fixture,
+      DashboardDataQuality.STALE_CACHED,
+    );
 
     const response = await queryService.queryExecutiveConsole({
       identityId: fixture.executiveIdentityId,

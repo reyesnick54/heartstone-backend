@@ -152,6 +152,88 @@ export const DEPARTMENTAL_INDICATOR_CATEGORIES = [
   'CORRECTIVE_ACTIONS',
 ] as const;
 
+export const PHASE_12A_MEASUREMENT_MODEL_NAMES = [
+  'PerformanceFramework',
+  'MetricDefinition',
+  'MetricDefinitionVersion',
+  'MetricBaseline',
+  'MetricCalculationRun',
+  'MetricObservation',
+  'MetricDependencyClassification',
+  'MetricDataQualityAssessment',
+  'MeasuredPerformanceClaim',
+  'MeasuredPerformanceClaimEvidenceLink',
+  'MeasuredPerformanceClaimReview',
+  'MeasuredPerformanceClaimRevalidation',
+] as const;
+
+export const PHASE_12A_MEASUREMENT_ENUM_NAMES = [
+  'MetricCategory',
+  'MetricDefinitionStatus',
+  'MetricDefinitionVersionStatus',
+  'MetricAggregationMethod',
+  'MetricCalculationMethodType',
+  'MetricReportingFrequency',
+  'MetricBaselineQualityStatus',
+  'MetricBaselineMethod',
+  'MetricDependencyTimeClassification',
+  'MetricDataQualityDimension',
+  'MetricDataQualityResult',
+  'PerformanceClaimStatus',
+  'PerformanceAttributionClassification',
+  'PerformanceClaimReviewOutcome',
+] as const;
+
+export const METRIC_CATEGORIES = [
+  'SERVICE_TIMELINESS',
+  'COMPLETENESS',
+  'DECISION_INTEGRITY',
+  'APPLICANT_EXPERIENCE',
+  'SECURITY_PRIVACY',
+  'OPERATIONAL_RESILIENCE',
+  'INSTITUTIONAL_COORDINATION',
+  'AI_GOVERNANCE',
+  'ECONOMIC_DEVELOPMENT',
+  'FINANCIAL',
+  'COMPLIANCE',
+  'REDRESS',
+  'INTEGRATION',
+  'WORKFORCE',
+  'OTHER_APPROVED',
+] as const;
+
+export const METRIC_DEPENDENCY_TIME_CLASSIFICATIONS = [
+  'ABSEZ_CONTROLLED_TIME',
+  'APPLICANT_TIME',
+  'EXTERNAL_DEPENDENCY_TIME',
+  'PROFESSIONAL_DEPENDENCY_TIME',
+  'GOVERNMENT_RETAINED_TIME',
+  'SYSTEM_OUTAGE_TIME',
+  'EXCLUDED_AUTHORIZED_TIME',
+] as const;
+
+export const PERFORMANCE_CLAIM_STATUSES = [
+  'DRAFT',
+  'UNDER_REVIEW',
+  'VERIFIED_FOR_STATED_PURPOSE',
+  'QUALIFIED',
+  'APPROVED_FOR_INTERNAL_USE',
+  'APPROVED_FOR_PUBLICATION',
+  'WITHDRAWN',
+  'SUPERSEDED',
+  'EXPIRED',
+  'SAFE_HALTED',
+] as const;
+
+export const PERFORMANCE_ATTRIBUTION_CLASSIFICATIONS = [
+  'OBSERVED',
+  'ASSOCIATED',
+  'CONTRIBUTORY',
+  'PLAUSIBLE_CONTRIBUTION',
+  'CAUSAL_WITH_APPROVED_METHOD',
+  'NOT_ESTABLISHED',
+] as const;
+
 export const DASHBOARD_FILTER_DIMENSIONS = [
   'DEPARTMENT',
   'SERVICE',
