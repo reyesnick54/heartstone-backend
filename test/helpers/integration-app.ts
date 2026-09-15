@@ -10,6 +10,7 @@ import { resetApplicationProcessingData } from './application-processing-test-re
 import { resetAuthorityData } from './authority-test-reset';
 import { resetFinancialData } from './financial-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
+import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
 
 export async function createIntegrationApp(): Promise<{
@@ -136,6 +137,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetProductionReadinessData(prisma);
   await resetIntelligenceData(prisma);
   await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);
