@@ -14,6 +14,7 @@ concurrency:
 
 env:
   NODE_VERSION: '22'
+  NPM_AUDIT_SEVERITY_THRESHOLD: critical
   DATABASE_URL: postgresql://heartstone:heartstone@localhost:5432/heartstone?schema=public
   REDIS_HOST: localhost
   REDIS_PORT: '6379'
@@ -57,6 +58,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Secret scanning
+        run: npm run security:scan-secrets
+
+      - name: Dependency vulnerability policy
+        run: npm run security:audit-dependencies
       - name: Compute artifact digest
         id: artifact
         run: |
