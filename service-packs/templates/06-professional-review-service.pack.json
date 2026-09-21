@@ -1,0 +1,199 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template with reserved professional review gate. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-professional-review",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Professional-Review Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "PROFESSIONAL"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-PROFESSIONAL-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Professional review",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue certification",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROF-REVIEW-ASSIGNED",
+          "templateCode": "TEMPLATE-PROF-REVIEW-NOTICE",
+          "triggerStageKey": "professional-review"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROF-CREDENTIAL",
+          "TEMPLATE-CONTINUING-EDUCATION"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROF-BACKLOG",
+          "label": "Professional review backlog",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROFESSIONAL-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "professional-review"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROF-REGISTRY",
+          "dependencyType": "PROFESSIONAL_REGISTRY",
+          "description": "Professional registry lookup"
+        }
+      ],
+      "description": "NON_PRODUCTION professional-review template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template professional credential",
+          "evidenceCode": "TEMPLATE-PROF-CREDENTIAL",
+          "label": "Professional credential",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        },
+        {
+          "description": "Template CPD evidence",
+          "evidenceCode": "TEMPLATE-CONTINUING-EDUCATION",
+          "label": "Continuing education record",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 175,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-PROF-FEE",
+          "label": "Certification fee",
+          "waivable": false
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROF-FORM",
+          "formName": "Professional certification",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "professionalRegistrationNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Registration number",
+                  "required": true
+                }
+              ],
+              "label": "Credentials",
+              "sectionKey": "credentials"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-PROF-CERT"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supportsRenewal": true,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Professional certificate",
+          "outputCode": "TEMPLATE-PROF-CERT",
+          "outputType": "CERTIFICATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template professional appeal route",
+          "label": "Professional appeal",
+          "routeCode": "TEMPLATE-PROF-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROFESSIONAL-REVIEW",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PROFESSIONAL",
+      "serviceName": "Template Professional Review Service",
+      "serviceSlug": "template-professional-review",
+      "serviceType": "CERTIFICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "professional-review",
+          "label": "Professional review SLA",
+          "ruleCode": "TEMPLATE-PROF-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROFESSIONAL-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Professional review",
+          "stageKey": "professional-review",
+          "stepType": "PROFESSIONAL_REVIEW"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isIssuanceStage": true,
+          "label": "Issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

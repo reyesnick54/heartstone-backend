@@ -11,6 +11,7 @@ import { GovernmentServicesService } from './government-services/government-serv
 import { PublicServiceDiscoveryController } from './public/public-service-discovery.controller';
 import { PublicServiceDiscoveryService } from './public/public-service-discovery.service';
 import { PublicServiceFamiliesController } from './public/public-service-families.controller';
+import { ServicePackModule } from './service-pack/service-pack.module';
 import { ServicePackDeploymentModule } from './service-packs/service-pack-deployment.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { ServicePackDeploymentModule } from './service-packs/service-pack-deploy
     SessionsModule,
     GovernmentServiceVersionsModule,
     ActivationGovernanceModule,
+    ServicePackModule,
     ServicePackDeploymentModule,
     FormsModule,
   ],
@@ -31,6 +33,7 @@ import { ServicePackDeploymentModule } from './service-packs/service-pack-deploy
   exports: [
     PublicServiceDiscoveryService,
     ActivationGovernanceModule,
+    ServicePackModule,
     ServicePackDeploymentModule,
     FormsModule,
     GovernmentServicesService,

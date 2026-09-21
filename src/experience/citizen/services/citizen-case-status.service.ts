@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CaseEventPublicVisibility } from '@prisma/client';
 
 import { CasesService } from '../../../application-processing/cases/cases.service';
+import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { PrismaService } from '../../../database/prisma.service';
 import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { CitizenAccessService } from '../../common/citizen-access.service';

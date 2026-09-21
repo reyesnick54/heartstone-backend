@@ -1,0 +1,214 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template where issuance depends on inspection outcomes. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-inspection-dependent",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Inspection-Dependent Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-INSPECTION-SCHEDULE",
+          "isConsequential": false,
+          "publicStageLabel": "Schedule inspection",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "functionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Verify inspection",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue permit",
+          "sequenceOrder": 3
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-INSPECTION-SCHEDULED",
+          "templateCode": "TEMPLATE-INSPECTION-NOTICE",
+          "triggerStageKey": "inspection"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-SITE-PLAN"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-INSPECTION-BACKLOG",
+          "label": "Inspection backlog",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-INSPECTION-SCHEDULER",
+          "dependencyType": "OPERATIONAL",
+          "description": "Inspection scheduling dependency"
+        }
+      ],
+      "description": "NON_PRODUCTION inspection-dependent template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template site plan evidence",
+          "evidenceCode": "TEMPLATE-SITE-PLAN",
+          "label": "Site plan",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "Template inspection report",
+          "evidenceCode": "TEMPLATE-INSPECTION-REPORT",
+          "label": "Inspection report",
+          "required": true,
+          "verificationCategory": "INSPECTION"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-INSPECTION-FEE",
+          "label": "Inspection fee",
+          "waivable": false
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-INSPECTION-FORM",
+          "formName": "Permit with inspection",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteAddress",
+                  "fieldType": "ADDRESS",
+                  "label": "Site address",
+                  "required": true
+                }
+              ],
+              "label": "Site details",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-PERMIT"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supportsRenewal": true,
+        "validityPeriodDays": 180
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Permit certificate",
+          "outputCode": "TEMPLATE-PERMIT",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template inspection appeal route",
+          "label": "Inspection appeal",
+          "routeCode": "TEMPLATE-INSPECTION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-INSPECTION-SERVICE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-INSPECTION",
+      "serviceName": "Template Inspection-Dependent Service",
+      "serviceSlug": "template-inspection-service",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "inspection",
+          "label": "Inspection completion SLA",
+          "ruleCode": "TEMPLATE-INSPECTION-SLA",
+          "targetDays": 21
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Inspection",
+          "stageKey": "inspection",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}
