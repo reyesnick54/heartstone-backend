@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
+import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
@@ -42,6 +43,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
   imports: [DatabaseModule, SessionsModule],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
+    SessionAuthGuard,
     DashboardBoundaryService,
     DashboardStatusDictionaryService,
     DashboardDefinitionService,

@@ -73,4 +73,15 @@ describe('DashboardBoundaryService', () => {
       service.assertTechnicalAdminNotSubstantiveUser(true, true);
     }).toThrow(ForbiddenException);
   });
+
+  it('rejects client-supplied actor identity fields', () => {
+    expect(() => {
+      service.rejectClientSuppliedActorIdentity({
+        identityId: '00000000-0000-4000-8000-000000000001',
+      });
+    }).toThrow(ForbiddenException);
+    expect(() => {
+      service.rejectClientSuppliedActorIdentity({ technicalPermissionOnly: true });
+    }).toThrow(ForbiddenException);
+  });
 });

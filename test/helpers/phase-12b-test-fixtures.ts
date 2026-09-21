@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
+import { type INestApplication } from '@nestjs/common';
 import {
+  AuthenticationMethodType,
   DashboardAccessPurpose,
   DashboardColorSemantic,
   DashboardConsoleType,
@@ -14,17 +16,24 @@ import {
   DashboardStatusDictionaryOwnerType,
   IdentityType,
 } from '@prisma/client';
+import request from 'supertest';
+import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
+import { asLoginResponseBody } from './identity-test-types';
 
 export interface Phase12BFixtureContext {
   institutionId: string;
   departmentAId: string;
   departmentBId: string;
   executiveIdentityId: string;
+  executiveSessionToken: string;
   deptAIdentityId: string;
+  deptASessionToken: string;
   deptBIdentityId: string;
+  deptBSessionToken: string;
   technicalAdminIdentityId: string;
+  technicalAdminSessionToken: string;
   authoritativeRecordId: string;
   evidencePacketId: string;
   executiveDashboardId: string;
@@ -37,7 +46,10 @@ export interface Phase12BFixtureContext {
   evidenceRequiredIndicatorId: string;
 }
 
-export async function seedPhase12BFixture(prisma: PrismaService): Promise<Phase12BFixtureContext> {
+export async function seedPhase12BFixture(
+  prisma: PrismaService,
+  app?: INestApplication<App>,
+): Promise<Phase12BFixtureContext> {
   const jurisdiction = await prisma.jurisdiction.create({
     data: { code: 'PH12B', name: 'Phase 12B Jurisdiction', type: 'NATIONAL' },
   });
@@ -87,10 +99,54 @@ export async function seedPhase12BFixture(prisma: PrismaService): Promise<Phase1
     });
   };
 
+  const createSessionForIdentity = async (identityId: string, loginIdentifier: string) => {
+    if (!app) {
+      return '';
+    }
+
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/credentials')
+      .send({ identityId, type: 'PASSWORD', password: 'Phase12B123!' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/authentication-methods')
+      .send({ identityId, type: AuthenticationMethodType.PASSWORD })
+      .expect(201);
+
+    const login = asLoginResponseBody(
+      (
+        await request(app.getHttpServer())
+          .post('/api/v1/identity/auth/login')
+          .send({ loginIdentifier, password: 'Phase12B123!' })
+          .expect(201)
+      ).body,
+    );
+
+    return login.sessionToken;
+  };
+
   const executiveIdentity = await createIdentity('Executive User');
   const deptAIdentity = await createIdentity('Dept A User');
   const deptBIdentity = await createIdentity('Dept B User');
   const technicalAdminIdentity = await createIdentity('Technical Admin');
+
+  const executiveSessionToken = await createSessionForIdentity(
+    executiveIdentity.id,
+    'executive-user@phase12b.test',
+  );
+  const deptASessionToken = await createSessionForIdentity(
+    deptAIdentity.id,
+    'dept-a-user@phase12b.test',
+  );
+  const deptBSessionToken = await createSessionForIdentity(
+    deptBIdentity.id,
+    'dept-b-user@phase12b.test',
+  );
+  const technicalAdminSessionToken = await createSessionForIdentity(
+    technicalAdminIdentity.id,
+    'technical-admin@phase12b.test',
+  );
 
   const statusEntry = await prisma.dashboardStatusDictionaryEntry.create({
     data: {
@@ -280,6 +336,15 @@ export async function seedPhase12BFixture(prisma: PrismaService): Promise<Phase1
         sensitivityLevel: DashboardSensitivityLevel.HIGHLY_RESTRICTED,
         substantiveAccessRequired: true,
       },
+      {
+        dashboardDefinitionId: executiveDashboard.id,
+        identityId: technicalAdminIdentity.id,
+        institutionId: institution.id,
+        purpose: DashboardAccessPurpose.TECHNICAL_OPERATIONS,
+        sensitivityLevel: DashboardSensitivityLevel.RESTRICTED,
+        technicalPermissionCode: 'TECHNICAL_DASHBOARD_ADMIN',
+        substantiveAccessRequired: false,
+      },
     ],
   });
 
@@ -291,9 +356,13 @@ export async function seedPhase12BFixture(prisma: PrismaService): Promise<Phase1
     departmentAId: departmentA.id,
     departmentBId: departmentB.id,
     executiveIdentityId: executiveIdentity.id,
+    executiveSessionToken,
     deptAIdentityId: deptAIdentity.id,
+    deptASessionToken,
     deptBIdentityId: deptBIdentity.id,
+    deptBSessionToken,
     technicalAdminIdentityId: technicalAdminIdentity.id,
+    technicalAdminSessionToken,
     authoritativeRecordId,
     evidencePacketId,
     executiveDashboardId: executiveDashboard.id,

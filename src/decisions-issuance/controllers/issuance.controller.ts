@@ -2,8 +2,9 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { AuthorityActionType } from '@prisma/client';
 
-import { RequiresAuthority } from '../../authority/policy/authority-policy.decorator';
-import { AuthorityPolicyGuard } from '../../authority/policy/authority-policy.guard';
+import { ConsequentialAction } from '../../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../../authority/consequential-action/consequential-action.guard';
+import { resolveFunctionFromInstrumentTypeVersion } from '../../authority/consequential-action/consequential-action-resolvers';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
@@ -14,7 +15,7 @@ import { IssuanceReadinessService } from '../issuance/issuance-readiness.service
 
 @ApiTags('Official Instrument Issuance')
 @Controller('decisions-issuance')
-@UseGuards(SessionAuthGuard, AuthorityPolicyGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 export class IssuanceController {
   constructor(
     private readonly issuanceService: IssuanceService,
@@ -22,7 +23,11 @@ export class IssuanceController {
   ) {}
 
   @Post('readiness/assess')
-  @RequiresAuthority({ action: AuthorityActionType.ISSUE })
+  @ConsequentialAction({
+    action: AuthorityActionType.ISSUE,
+    functionResolver: resolveFunctionFromInstrumentTypeVersion,
+    institutionalFieldPrefixes: ['issuer'],
+  })
   @ApiCreatedResponse({ description: 'Issuance readiness assessment recorded' })
   assessReadiness(
     @CurrentSession() session: SessionContextDto,
@@ -51,7 +56,11 @@ export class IssuanceController {
   }
 
   @Post('issue')
-  @RequiresAuthority({ action: AuthorityActionType.ISSUE })
+  @ConsequentialAction({
+    action: AuthorityActionType.ISSUE,
+    functionResolver: resolveFunctionFromInstrumentTypeVersion,
+    institutionalFieldPrefixes: ['issuer'],
+  })
   @ApiCreatedResponse({ description: 'Official instrument issued' })
   issue(@CurrentSession() session: SessionContextDto, @Body() dto: IssueOfficialInstrumentDto) {
     return this.issuanceService.issue({

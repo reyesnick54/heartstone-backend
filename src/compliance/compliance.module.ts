@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ComplianceBoundaryService } from './common/compliance-boundary.service';
@@ -17,7 +18,7 @@ import { ComplianceReviewService } from './reviews/compliance-review.service';
 import { ComplianceSubmissionService } from './submissions/compliance-submission.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule],
+  imports: [DatabaseModule, SessionsModule, AuthorityModule],
   controllers: [ComplianceController, ComplianceStatusController],
   providers: [
     ComplianceBoundaryService,

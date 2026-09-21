@@ -5,21 +5,22 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthorityEvaluationOutcome } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
-import { AuthorityEvaluationService } from '../evaluation/authority-evaluation.service';
-import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
+import {
+  AUTHORITY_EVALUATION_REQUEST_KEY,
+  CONSEQUENTIAL_ACTION_EVALUATION_KEY,
+} from '../consequential-action/consequential-action.guard';
+import { ConsequentialActionService } from '../consequential-action/consequential-action.service';
+import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority-evaluation-response.dto';
 import { AUTHORITY_POLICY_KEY, type AuthorityPolicyMetadata } from './authority-policy.decorator';
 
+/** Backward-compatible adapter; prefer {@link ConsequentialActionGuard} for new routes. */
 @Injectable()
 export class AuthorityPolicyGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly evaluationService: AuthorityEvaluationService,
-    private readonly functionRecords: FunctionAuthorityRecordsService,
-    private readonly prisma: PrismaService,
+    private readonly consequentialActionService: ConsequentialActionService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,8 +35,11 @@ export class AuthorityPolicyGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<{
       session?: SessionContextDto;
-      authorityEvaluation?: unknown;
       body?: Record<string, unknown>;
+      params?: Record<string, string>;
+      query?: Record<string, string>;
+      [AUTHORITY_EVALUATION_REQUEST_KEY]?: AuthorityEvaluationResponseDto;
+      [CONSEQUENTIAL_ACTION_EVALUATION_KEY]?: AuthorityEvaluationResponseDto;
     }>();
 
     const session = request.session;
@@ -43,90 +47,19 @@ export class AuthorityPolicyGuard implements CanActivate {
       throw new ForbiddenException('Authenticated session required for authority evaluation');
     }
 
-    const body = request.body ?? {};
-    const functionAuthorityRecordId = await this.resolveFunctionId(policy, body);
+    const evaluation = await this.consequentialActionService.assertLegacyPolicyAllowed(
+      session,
+      policy,
+      {
+        body: request.body,
+        params: request.params,
+        query: request.query,
+      },
+    );
 
-    const result = await this.evaluationService.evaluate({
-      identityId: session.identityId,
-      functionAuthorityRecordId,
-      action: policy.action,
-      officeholderId: this.readInstitutionalField(body, 'officeholderId'),
-      officeId: this.readInstitutionalField(body, 'officeId'),
-      appointmentId: this.readInstitutionalField(body, 'appointmentId'),
-      delegationId: this.readInstitutionalField(body, 'delegationId'),
-      evidenceProvided: body.evidenceProvided as string[] | undefined,
-      qualificationCodes: body.qualificationCodes as string[] | undefined,
-      transactionAmount: body.transactionAmount as number | undefined,
-      scopeValue: body.scopeValue as string | undefined,
-      hasSecondApproval: body.hasSecondApproval as boolean | undefined,
-      hasConsultation: body.hasConsultation as boolean | undefined,
-      hasSupervision: body.hasSupervision as boolean | undefined,
-      hasLiaison: body.hasLiaison as boolean | undefined,
-      isSelfApproval: body.isSelfApproval as boolean | undefined,
-      isConflicted: body.isConflicted as boolean | undefined,
-      isRecused: body.isRecused as boolean | undefined,
-      priorActions: body.priorActions as never,
-      externalDataAccessOnly: body.externalDataAccessOnly as boolean | undefined,
-    });
-
-    request.authorityEvaluation = result;
-
-    if (result.outcome !== AuthorityEvaluationOutcome.ALLOW) {
-      throw new ForbiddenException({
-        message: 'Authority evaluation did not permit this action.',
-        evaluation: result,
-      });
-    }
+    request[AUTHORITY_EVALUATION_REQUEST_KEY] = evaluation;
+    request[CONSEQUENTIAL_ACTION_EVALUATION_KEY] = evaluation;
 
     return true;
-  }
-
-  private readInstitutionalField(
-    body: Record<string, unknown>,
-    field: 'officeholderId' | 'officeId' | 'appointmentId' | 'delegationId',
-  ): string | undefined {
-    const direct = body[field];
-    if (typeof direct === 'string') {
-      return direct;
-    }
-
-    const prefixes = ['issuer', 'decisionMaker', 'proposedDecisionMaker'] as const;
-    for (const prefix of prefixes) {
-      const key = `${prefix}${field.charAt(0).toUpperCase()}${field.slice(1)}`;
-      const value = body[key];
-      if (typeof value === 'string') {
-        return value;
-      }
-    }
-
-    return undefined;
-  }
-
-  private async resolveFunctionId(
-    policy: AuthorityPolicyMetadata,
-    body: Record<string, unknown>,
-  ): Promise<string> {
-    if (policy.functionAuthorityRecordId) {
-      return policy.functionAuthorityRecordId;
-    }
-
-    if (policy.functionCode) {
-      const record = await this.functionRecords.findByCode(policy.functionCode);
-      return record.id;
-    }
-
-    const instrumentTypeVersionId = body.instrumentTypeVersionId;
-    if (typeof instrumentTypeVersionId === 'string') {
-      const typeVersion = await this.prisma.instrumentTypeVersion.findUnique({
-        where: { id: instrumentTypeVersionId },
-        select: { issuanceFunctionAuthorityRecordId: true },
-      });
-
-      if (typeVersion?.issuanceFunctionAuthorityRecordId) {
-        return typeVersion.issuanceFunctionAuthorityRecordId;
-      }
-    }
-
-    throw new ForbiddenException('Authority policy is misconfigured');
   }
 }
