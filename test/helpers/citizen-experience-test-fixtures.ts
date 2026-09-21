@@ -21,10 +21,7 @@ import {
   uploadTestDocument,
 } from './evidence-records-test-fixtures';
 import { asLoginResponseBody } from './identity-test-types';
-import {
-  issueInstrumentForDecision,
-  seedSignedSealedDocuments,
-} from './phase-8-test-fixtures';
+import { issueInstrumentForDecision, seedSignedSealedDocuments } from './phase-8-test-fixtures';
 import { executeGovernmentDecision } from './phase-8-test-fixtures';
 import {
   calculateAndInvoiceFees,
@@ -322,7 +319,7 @@ export async function seedRepresentativeCitizenFixture(
   const { signatureDocumentVersionId, sealDocumentVersionId } = await seedSignedSealedDocuments(
     prisma,
     base.institutionId,
-    marker,
+    `${marker}-REP`,
   );
   const issuance = app.get(IssuanceService);
   const orgIssue = await issuance.issue({
