@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DashboardConsoleType, type DashboardFilterDimension } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { type AuthenticatedPrincipal } from '../../identity/auth/domain/authenticated-principal';
 import {
   DASHBOARD_PROJECTION_DISCLAIMER,
   DASHBOARD_STATUS_DISCLAIMER,
@@ -13,7 +14,15 @@ import {
 import { DashboardDefinitionService } from './dashboard-definition.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
 
-export interface DashboardQueryInput extends EvaluateDashboardAccessInput {
+export interface DashboardQueryInput {
+  actor: AuthenticatedPrincipal;
+  dashboardDefinitionId: string;
+  institutionId?: string;
+  departmentId?: string;
+  purpose: EvaluateDashboardAccessInput['purpose'];
+  sensitivityScope: EvaluateDashboardAccessInput['sensitivityScope'];
+  securityClearanceLevel?: string;
+  caseAssignmentId?: string;
   filters?: Partial<Record<DashboardFilterDimension, string>>;
 }
 
@@ -28,8 +37,15 @@ export class DashboardQueryService {
 
   async queryExecutiveConsole(input: DashboardQueryInput) {
     await this.accessPolicyService.evaluateAccess({
-      ...input,
+      actor: input.actor,
+      dashboardDefinitionId: input.dashboardDefinitionId,
+      institutionId: input.institutionId,
+      departmentId: input.departmentId,
       purpose: input.purpose,
+      sensitivityScope: input.sensitivityScope,
+      securityClearanceLevel: input.securityClearanceLevel,
+      caseAssignmentId: input.caseAssignmentId,
+      queryFilters: input.filters,
     });
 
     const definition = await this.prisma.dashboardDefinition.findUniqueOrThrow({
@@ -59,8 +75,15 @@ export class DashboardQueryService {
 
   async queryDepartmentalConsole(input: DashboardQueryInput) {
     await this.accessPolicyService.evaluateAccess({
-      ...input,
+      actor: input.actor,
+      dashboardDefinitionId: input.dashboardDefinitionId,
+      institutionId: input.institutionId,
+      departmentId: input.departmentId,
       purpose: input.purpose,
+      sensitivityScope: input.sensitivityScope,
+      securityClearanceLevel: input.securityClearanceLevel,
+      caseAssignmentId: input.caseAssignmentId,
+      queryFilters: input.filters,
     });
 
     const definition = await this.prisma.dashboardDefinition.findUniqueOrThrow({

@@ -1,13 +1,20 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  DashboardAccessPurpose,
+  DashboardConsoleType,
+  DashboardSensitivityLevel,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { type AuthenticatedPrincipal } from '../../identity/auth/domain/authenticated-principal';
+import { DashboardAccessPolicyService } from './dashboard-access-policy.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
 
 export interface CaptureSnapshotInput {
+  actor: AuthenticatedPrincipal;
   dashboardVersionId: string;
-  capturedByIdentityId: string;
   projectionIds: string[];
 }
 
@@ -16,9 +23,33 @@ export class DashboardSnapshotService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly projectionService: DashboardIndicatorProjectionService,
+    private readonly accessPolicyService: DashboardAccessPolicyService,
   ) {}
 
   async captureSnapshot(input: CaptureSnapshotInput) {
+    const version = await this.prisma.dashboardVersion.findUnique({
+      where: { id: input.dashboardVersionId },
+      include: { dashboardDefinition: true },
+    });
+
+    if (!version) {
+      throw new NotFoundException(`Dashboard version "${input.dashboardVersionId}" was not found`);
+    }
+
+    const definition = version.dashboardDefinition;
+
+    await this.accessPolicyService.evaluateAccess({
+      actor: input.actor,
+      dashboardDefinitionId: definition.id,
+      institutionId: definition.institutionId ?? undefined,
+      departmentId: definition.departmentId ?? undefined,
+      purpose:
+        definition.consoleType === DashboardConsoleType.EXECUTIVE_COMMAND
+          ? DashboardAccessPurpose.EXECUTIVE_BRIEFING
+          : DashboardAccessPurpose.DEPARTMENT_MANAGEMENT,
+      sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
+    });
+
     const projections = await this.prisma.dashboardIndicatorProjection.findMany({
       where: { id: { in: input.projectionIds }, dashboardVersionId: input.dashboardVersionId },
       include: {
@@ -47,7 +78,7 @@ export class DashboardSnapshotService {
     return this.prisma.dashboardSnapshot.create({
       data: {
         dashboardVersionId: input.dashboardVersionId,
-        capturedByIdentityId: input.capturedByIdentityId,
+        capturedByIdentityId: input.actor.identityId,
         snapshotPayload,
         snapshotHash,
         replayToken: randomUUID(),
@@ -56,14 +87,33 @@ export class DashboardSnapshotService {
     });
   }
 
-  async replaySnapshot(replayToken: string) {
+  async replaySnapshot(replayToken: string, actor: AuthenticatedPrincipal) {
     const snapshot = await this.prisma.dashboardSnapshot.findUnique({
       where: { replayToken },
+      include: {
+        dashboardVersion: {
+          include: { dashboardDefinition: true },
+        },
+      },
     });
 
     if (!snapshot) {
       throw new NotFoundException(`Snapshot with replay token "${replayToken}" was not found`);
     }
+
+    const definition = snapshot.dashboardVersion.dashboardDefinition;
+
+    await this.accessPolicyService.evaluateAccess({
+      actor,
+      dashboardDefinitionId: definition.id,
+      institutionId: definition.institutionId ?? undefined,
+      departmentId: definition.departmentId ?? undefined,
+      purpose:
+        definition.consoleType === DashboardConsoleType.EXECUTIVE_COMMAND
+          ? DashboardAccessPurpose.EXECUTIVE_BRIEFING
+          : DashboardAccessPurpose.DEPARTMENT_MANAGEMENT,
+      sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
+    });
 
     return {
       id: snapshot.id,

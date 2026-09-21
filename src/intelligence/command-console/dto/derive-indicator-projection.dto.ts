@@ -104,10 +104,6 @@ export class DeriveIndicatorProjectionDto {
   @IsString()
   limitations?: string;
 
-  @IsOptional()
-  @IsUUID()
-  ownerIdentityId?: string;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DrilldownReferenceDto)
