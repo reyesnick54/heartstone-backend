@@ -8,7 +8,6 @@ import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
-import { resetFinancialData } from './financial-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
@@ -118,7 +117,7 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
   await resetIntelligenceData(prisma);
-  await resetFinancialData(prisma);
+  await resetOperationalSupportData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);

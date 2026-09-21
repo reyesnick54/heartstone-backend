@@ -21,6 +21,10 @@ import {
   uploadTestDocument,
 } from './evidence-records-test-fixtures';
 import { asLoginResponseBody } from './identity-test-types';
+import {
+  issueInstrumentForDecision,
+  seedSignedSealedDocuments,
+} from './phase-8-test-fixtures';
 import { executeGovernmentDecision } from './phase-8-test-fixtures';
 import {
   calculateAndInvoiceFees,
@@ -135,42 +139,29 @@ export async function seedCitizenExperienceFixture(
     },
   });
 
-  const issuance = app.get(IssuanceService);
+  const { signatureDocumentVersionId, sealDocumentVersionId } = await seedSignedSealedDocuments(
+    prisma,
+    phase11.institutionId,
+    marker,
+  );
 
-  const activeIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    scope: { summary: 'Active license scope' },
-    effectiveFrom: new Date('2026-01-01'),
-    effectiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const activeIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
+    signatureDocumentVersionId,
+    sealDocumentVersionId,
     idempotencyKey: `${marker}-active-instrument`,
   });
 
   await prisma.officialInstrument.update({
     where: { id: activeIssue.instrument.id },
-    data: { status: OfficialInstrumentStatus.EFFECTIVE },
+    data: {
+      status: OfficialInstrumentStatus.EFFECTIVE,
+      effectiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
   });
 
-  const revokedIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    scope: { summary: 'Revoked permit scope' },
-    effectiveFrom: new Date('2025-01-01'),
-    effectiveUntil: new Date('2026-12-31'),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const revokedIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
+    signatureDocumentVersionId,
+    sealDocumentVersionId,
     idempotencyKey: `${marker}-revoked-instrument`,
   });
 
@@ -179,19 +170,9 @@ export async function seedCitizenExperienceFixture(
     data: { status: OfficialInstrumentStatus.REVOKED },
   });
 
-  const expiredIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    scope: { summary: 'Expired registration scope' },
-    effectiveFrom: new Date('2024-01-01'),
-    effectiveUntil: new Date('2025-01-01'),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const expiredIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
+    signatureDocumentVersionId,
+    sealDocumentVersionId,
     idempotencyKey: `${marker}-expired-instrument`,
   });
 
@@ -338,8 +319,12 @@ export async function seedRepresentativeCitizenFixture(
     },
   });
 
+  const { signatureDocumentVersionId, sealDocumentVersionId } = await seedSignedSealedDocuments(
+    prisma,
+    base.institutionId,
+    marker,
+  );
   const issuance = app.get(IssuanceService);
-
   const orgIssue = await issuance.issue({
     governmentDecisionId: base.governmentDecisionId,
     instrumentTypeVersionId: base.instrumentTypeVersionId,
@@ -349,6 +334,8 @@ export async function seedRepresentativeCitizenFixture(
     issuerOfficeId: base.officeId,
     issuerAppointmentId: base.appointmentId,
     holderOrganizationId: organization.id,
+    signatureDocumentVersionId,
+    sealDocumentVersionId,
     scope: { summary: 'Organization-held permit' },
     effectiveFrom: new Date('2026-01-01'),
     effectiveUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
