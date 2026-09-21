@@ -14,10 +14,7 @@ import { ComplianceProjectionService } from '../src/compliance/oversight/complia
 import { ComplianceRevalidationService } from '../src/compliance/oversight/compliance-revalidation.service';
 import { ComplianceStatusBoundaryService } from '../src/compliance/oversight/compliance-status-boundary.service';
 import { type PrismaService } from '../src/database/prisma.service';
-import {
-  authHeader,
-  ensureIntegrationAdminSession,
-} from './helpers/identity-provisioning.fixture';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { type Phase8FixtureContext, seedPhase8Fixture } from './helpers/phase-8-test-fixtures';
 

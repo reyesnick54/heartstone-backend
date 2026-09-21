@@ -5,10 +5,7 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import { asInstitutionBody, asJurisdictionBody } from './helpers/government-test-types';
-import {
-  authHeader,
-  ensureIntegrationAdminSession,
-} from './helpers/identity-provisioning.fixture';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
 describe('Government structure (e2e)', () => {

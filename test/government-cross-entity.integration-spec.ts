@@ -25,10 +25,7 @@ import {
   asOfficeBody,
   asOfficeholderBody,
 } from './helpers/government-test-types';
-import {
-  authHeader,
-  ensureIntegrationAdminSession,
-} from './helpers/identity-provisioning.fixture';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
 describe('Government cross-entity structure integrity (integration)', () => {

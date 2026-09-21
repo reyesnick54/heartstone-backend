@@ -12,10 +12,7 @@ import {
   asFormValidationResultBody,
   asFormVersionBody,
 } from './helpers/forms-test-types';
-import {
-  authHeader,
-  ensureIntegrationAdminSession,
-} from './helpers/identity-provisioning.fixture';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Forms engine (integration)', () => {
@@ -208,11 +205,7 @@ describe('Forms engine (integration)', () => {
 
     const version = asFormVersionBody(versionResponse.body);
     const schema = asFormSchemaBody(
-      (
-        await http
-          .get(`/api/v1/forms/versions/${version.id}/schema`)
-          .expect(200)
-      ).body,
+      (await http.get(`/api/v1/forms/versions/${version.id}/schema`).expect(200)).body,
     );
 
     const firstSection = schema.sections[0];
@@ -246,9 +239,7 @@ describe('Forms engine (integration)', () => {
       .expect(201);
 
     const versionId = asFormVersionBody(versionResponse.body).id;
-    await http
-      .patch(`/api/v1/forms/versions/${versionId}/publish`)
-      .expect(200);
+    await http.patch(`/api/v1/forms/versions/${versionId}/publish`).expect(200);
 
     const invalidResponse = await http
       .post('/api/v1/forms/validate-response')
@@ -369,11 +360,7 @@ describe('Forms engine (integration)', () => {
       .expect(200);
 
     const reconstructed = asFormReconstructBody(
-      (
-        await http
-          .get(`/api/v1/forms/versions/${v1Id}/reconstruct`)
-          .expect(200)
-      ).body,
+      (await http.get(`/api/v1/forms/versions/${v1Id}/reconstruct`).expect(200)).body,
     );
 
     expect(reconstructed.version).toBe(1);

@@ -18,10 +18,7 @@ import {
   asAuthorityEvaluationBody,
   asFunctionAuthorityRecordBody,
 } from './helpers/authority-test-types';
-import {
-  authHeader,
-  ensureIntegrationAdminSession,
-} from './helpers/identity-provisioning.fixture';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Authority Engine (e2e)', () => {
