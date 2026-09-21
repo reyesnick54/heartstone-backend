@@ -8,6 +8,9 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { RedressBoundaryService } from '../common/redress-boundary.service';
 import { REDRESS_MATTER_NUMBER_PREFIX } from '../redress.constants';
 
@@ -32,6 +35,7 @@ export class RedressMatterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: RedressBoundaryService,
+    private readonly resourceAccess: ResourceAccessService,
   ) {}
 
   async fileMatter(input: FileRedressMatterInput) {
@@ -134,7 +138,11 @@ export class RedressMatterService {
     }
   }
 
-  async findById(id: string) {
+  async findById(id: string, session?: SessionContextDto) {
+    if (session) {
+      await this.resourceAccess.assertVisibility(session, ScopedResourceType.REDRESS_MATTER, id);
+    }
+
     const matter = await this.prisma.redressMatter.findUnique({
       where: { id },
       include: {

@@ -18,7 +18,9 @@ describe('EvidenceRecordsService (unit)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new EvidenceRecordsService(prisma as never);
+    service = new EvidenceRecordsService(prisma as never, {
+      assertVisibility: jest.fn(),
+    } as never);
   });
 
   it('treats received status as distinct from verified', async () => {

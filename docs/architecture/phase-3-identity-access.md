@@ -69,6 +69,10 @@ See `docs/architecture/actor-context-trust-boundary.md` for the authenticated ac
 - `POST /identity/auth/logout`
 - `GET /identity/me` (protected)
 
+## Institutional scope enforcement (Phase 14)
+
+Authentication establishes actor identity. A separate institutional scope layer (`src/institutional-scope/`) enforces resource ownership before domain services return data. See [phase-14-institutional-scope-enforcement.md](./phase-14-institutional-scope-enforcement.md).
+
 ## Explicit exclusions (Phase 4+)
 
 - Authority Engine evaluation

@@ -56,8 +56,11 @@ export class ComplianceController {
 
   @Get('matters/:id')
   @ApiOperation({ summary: 'Fetch a compliance matter with obligations' })
-  async getMatter(@Param('id', ParseUUIDPipe) id: string) {
-    return this.complianceMatters.findById(id);
+  async getMatter(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.complianceMatters.findById(id, session);
   }
 
   @Get('matters/:id/obligations')

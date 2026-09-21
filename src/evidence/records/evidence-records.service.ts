@@ -2,13 +2,19 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EvidenceRecordStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { generateEvidenceNumber } from '../common/evidence-reference.util';
 import { EvidenceRecordNotFoundException } from '../common/exceptions/evidence.exceptions';
 import { ReceiveEvidenceDto } from './dto/receive-evidence.dto';
 
 @Injectable()
 export class EvidenceRecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly resourceAccess: ResourceAccessService,
+  ) {}
 
   async receiveEvidence(_submitterIdentityId: string, dto: ReceiveEvidenceDto) {
     const caseRecord = await this.prisma.case.findUnique({
@@ -57,7 +63,15 @@ export class EvidenceRecordsService {
     });
   }
 
-  async getById(evidenceId: string) {
+  async getById(evidenceId: string, session?: SessionContextDto) {
+    if (session) {
+      await this.resourceAccess.assertVisibility(
+        session,
+        ScopedResourceType.EVIDENCE_RECORD,
+        evidenceId,
+      );
+    }
+
     const record = await this.prisma.evidenceRecord.findUnique({
       where: { id: evidenceId },
       include: {

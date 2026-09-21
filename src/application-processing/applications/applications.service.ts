@@ -14,6 +14,9 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { FormResponseValidationService } from '../../service-catalog/forms/form-response-validation.service';
 import {
   APPLICATION_NUMBER_PREFIX,
@@ -38,6 +41,7 @@ export class ApplicationsService {
     private readonly prisma: PrismaService,
     private readonly validation: ApplicationProcessingValidationService,
     private readonly formValidation: FormResponseValidationService,
+    private readonly resourceAccess: ResourceAccessService,
     @Inject(forwardRef(() => CasesService))
     private readonly casesService: CasesService,
   ) {}
@@ -101,12 +105,8 @@ export class ApplicationsService {
     });
   }
 
-  async updateDraft(
-    applicationId: string,
-    applicantIdentityId: string,
-    dto: UpdateApplicationDraftDto,
-  ) {
-    const application = await this.findOwnedApplication(applicationId, applicantIdentityId);
+  async updateDraft(session: SessionContextDto, applicationId: string, dto: UpdateApplicationDraftDto) {
+    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
 
     if (application.status !== ApplicationStatus.DRAFT) {
       throw new ImmutableSubmissionException('Only draft applications can be updated');
@@ -118,8 +118,8 @@ export class ApplicationsService {
     });
   }
 
-  async submit(applicationId: string, applicantIdentityId: string, dto: SubmitApplicationDto) {
-    const application = await this.findOwnedApplication(applicationId, applicantIdentityId);
+  async submit(session: SessionContextDto, applicationId: string, dto: SubmitApplicationDto) {
+    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
 
     if (application.status !== ApplicationStatus.DRAFT) {
       throw new ImmutableSubmissionException();
@@ -127,7 +127,7 @@ export class ApplicationsService {
 
     if (dto.idempotencyKey) {
       const existing = await this.prisma.application.findFirst({
-        where: { applicantIdentityId, idempotencyKey: dto.idempotencyKey },
+        where: { applicantIdentityId: session.identityId, idempotencyKey: dto.idempotencyKey },
         include: { submissions: true },
       });
       if (existing && existing.id !== applicationId && existing.submissions.length > 0) {
@@ -217,19 +217,8 @@ export class ApplicationsService {
     };
   }
 
-  async submitCorrection(
-    applicationId: string,
-    applicantIdentityId: string,
-    dto: SubmitApplicationDto,
-  ) {
-    const application = await this.prisma.application.findUnique({
-      where: { id: applicationId },
-      include: { case: true, submissions: { orderBy: { sequenceNumber: 'desc' } } },
-    });
-
-    if (application?.applicantIdentityId !== applicantIdentityId) {
-      throw new NotFoundException('Application not found');
-    }
+  async submitCorrection(session: SessionContextDto, applicationId: string, dto: SubmitApplicationDto) {
+    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
 
     if (application.case?.status !== 'WAITING_APPLICANT') {
       throw new ForbiddenException(
@@ -311,21 +300,34 @@ export class ApplicationsService {
     };
   }
 
-  async findById(applicationId: string, applicantIdentityId: string) {
-    return this.findOwnedApplication(applicationId, applicantIdentityId);
+  async findById(session: SessionContextDto, applicationId: string) {
+    return this.findAccessibleApplication(session, applicationId, 'visibility');
   }
 
-  private async findOwnedApplication(applicationId: string, applicantIdentityId: string) {
+  private async findAccessibleApplication(
+    session: SessionContextDto,
+    applicationId: string,
+    mode: 'visibility' | 'modification',
+  ) {
+    if (mode === 'modification') {
+      await this.resourceAccess.assertModification(
+        session,
+        ScopedResourceType.APPLICATION,
+        applicationId,
+        { maskEnumeration: true },
+      );
+    } else {
+      await this.resourceAccess.assertVisibility(session, ScopedResourceType.APPLICATION, applicationId, {
+        maskEnumeration: true,
+      });
+    }
+
     const application = await this.prisma.application.findUnique({
       where: { id: applicationId },
       include: { submissions: { orderBy: { sequenceNumber: 'asc' } }, case: true },
     });
 
     if (!application) {
-      throw new NotFoundException('Application not found');
-    }
-
-    if (application.applicantIdentityId !== applicantIdentityId) {
       throw new NotFoundException('Application not found');
     }
 

@@ -16,6 +16,7 @@ import {
 import { AuthorityEvaluationService } from '../authority/evaluation/authority-evaluation.service';
 import { InstitutionalActorResolver } from '../authority/institutional-actor/institutional-actor-resolver.service';
 import { PrismaService } from '../database/prisma.service';
+import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
 import { RedressImplementationService } from './implementation/redress-implementation.service';
@@ -92,6 +93,14 @@ describe('Phase 10G redress disposition', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: AuthorityEvaluationService, useValue: authorityEvaluation },
         { provide: InstitutionalActorResolver, useValue: actorResolver },
+        {
+          provide: ResourceAccessService,
+          useValue: {
+            assertVisibility: jest.fn(),
+            assertModification: jest.fn(),
+            assertInstitutionalBoundary: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

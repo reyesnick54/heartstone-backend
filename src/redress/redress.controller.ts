@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthorityActionType } from '@prisma/client';
 
 import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
@@ -51,8 +52,10 @@ export class RedressController {
   }
 
   @Get('matters/:id')
-  getMatter(@Param('id') id: string) {
-    return this.matters.findById(id);
+  @UseGuards(SessionAuthGuard)
+  @ApiBearerAuth()
+  getMatter(@CurrentSession() session: SessionContextDto, @Param('id') id: string) {
+    return this.matters.findById(id, session);
   }
 
   @Post('decisions')

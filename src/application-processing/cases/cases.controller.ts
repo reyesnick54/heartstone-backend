@@ -24,7 +24,7 @@ export class CasesController {
 
   @Get(':id')
   findOne(@CurrentSession() session: SessionContextDto, @Param('id', ParseUUIDPipe) id: string) {
-    return this.casesService.findById(id, session.identityId);
+    return this.casesService.findById(session, id);
   }
 
   @Get(':id/applicant-status')
@@ -32,7 +32,7 @@ export class CasesController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.casesService.getApplicantStatus(id, session.identityId);
+    return this.casesService.getApplicantStatus(session, id);
   }
 
   @Post(':id/workflow/steps/:stepKey/complete')

@@ -9,6 +9,9 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
 import { CASE_NUMBER_PREFIX } from '../application-processing.constants';
 import { CaseAccessDeniedException } from '../common/exceptions/application-processing.exceptions';
@@ -29,6 +32,7 @@ export class CasesService {
     private readonly caseEvents: CaseEventsService,
     private readonly publicStatus: CasePublicStatusService,
     private readonly masterFileService: MasterAdministrativeFileService,
+    private readonly resourceAccess: ResourceAccessService,
   ) {}
 
   async createFromSubmission(application: Application, submission: ApplicationSubmission) {
@@ -101,7 +105,9 @@ export class CasesService {
     return caseRecord;
   }
 
-  async findById(caseId: string, requesterIdentityId: string, isOfficial = false) {
+  async findById(session: SessionContextDto, caseId: string) {
+    await this.resourceAccess.assertVisibility(session, ScopedResourceType.CASE, caseId);
+
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
       include: {
@@ -125,15 +131,13 @@ export class CasesService {
       throw new NotFoundException('Case not found');
     }
 
-    if (!isOfficial && caseRecord.application.applicantIdentityId !== requesterIdentityId) {
-      throw new CaseAccessDeniedException();
-    }
-
     return caseRecord;
   }
 
-  async getApplicantStatus(caseId: string, applicantIdentityId: string) {
-    const view = await this.publicStatus.getApplicantView(caseId, applicantIdentityId);
+  async getApplicantStatus(session: SessionContextDto, caseId: string) {
+    await this.resourceAccess.assertVisibility(session, ScopedResourceType.CASE, caseId);
+
+    const view = await this.publicStatus.getApplicantView(caseId, session.identityId);
     if (!view) {
       throw new CaseAccessDeniedException();
     }
