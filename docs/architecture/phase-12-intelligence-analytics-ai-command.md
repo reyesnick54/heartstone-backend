@@ -199,6 +199,29 @@ Phase 12B covers dashboard definitions, versions, widgets, indicators, projectio
 
 Clients cannot set `authorityGranted`, `delegationId`, `governmentDecisionId`, `approved`, `refused`, or `issued` on dashboard payloads.
 
+### Command console actor context (Phase 12B hardening)
+
+All routes under `POST/GET /intelligence/command-console/**` require `SessionAuthGuard` and derive actor identity from `@CurrentActor()` (server session), never from request bodies.
+
+| Client-supplied field (forbidden) | Server-derived replacement |
+|---|---|
+| `identityId` | `CurrentActor.identityId` from authenticated session |
+| `userAccountId` | `CurrentActor.userAccountId` |
+| `officeholderId`, `appointmentId`, `delegationId` | Not accepted; dashboard access is not authority resolution |
+| `capturedByIdentityId` | Authenticated actor on snapshot capture |
+| `ownerIdentityId` | Authenticated actor on projection derive |
+| `technicalPermissionOnly` | Evaluated server-side from access policies |
+
+`institutionId` and `departmentId` in query bodies are **requested scope filters only**. `DashboardAccessPolicyService` verifies the authenticated actor holds a matching substantive access policy for the requested institution/department, purpose, sensitivity, case assignment, and security clearance before returning projections. Denied attempts are recorded in `DashboardQueryAudit`.
+
+Preserved invariants:
+
+- Dashboard visibility ≠ authority
+- Dashboard access ≠ delegation
+- Dashboard access ≠ case disposition
+- Executive view ≠ command authority
+- Successful dashboard query does **not** produce `AuthorityEvaluationOutcome.ALLOW`
+
 ---
 
 ## Domain 3 — Strategic Projects & Delivery Evidence (Phase 12C)
@@ -655,6 +678,16 @@ All routes are under `/api/v1/intelligence/*`, guarded by `SessionAuthGuard`.
 - `GET /intelligence/dashboards/executive/:institutionId/:dashboardCode`
 - `GET /intelligence/dashboards/departmental/:institutionId/:dashboardCode`
 
+### Command console (12B — session-protected)
+
+All routes require bearer session token. Actor identity is never accepted from the client.
+
+- `POST /intelligence/command-console/projections/derive`
+- `POST /intelligence/command-console/executive/query`
+- `POST /intelligence/command-console/departmental/query`
+- `POST /intelligence/command-console/snapshots/capture`
+- `GET /intelligence/command-console/snapshots/replay/:replayToken`
+
 ### Strategic projects (12C)
 
 - `POST /intelligence/strategic-projects`
@@ -697,7 +730,7 @@ Phase 12 uses the following concurrency patterns:
 |---|---|---|
 | Unique reference generation | Time-based prefixes (`MCR-`, `AIE-`, `ARN-`, etc.) | Prevents reference collision in normal operation; not cryptographically unique |
 | Composite uniqueness | `@@unique([institutionId, code])` on definitions | Prevents duplicate catalog codes per institution |
-| Institution scoping | `institutionId` on all tenant records | Logical isolation; not yet enforced at controller against session |
+| Institution scoping | `institutionId` on all tenant records | Command console routes enforce institution/department scope against authenticated actor entitlements |
 | Safe-halt evaluation | Read-check-write on run status before consequential path | Failed/safe-halted runs rejected before completion |
 | Optimistic locking | Not implemented | Concurrent projection writes may produce multiple `DashboardIndicatorProjection` rows; latest selected by `computedAt` ordering |
 | Transactional boundaries | Single-record Prisma creates/updates | Multi-step lifecycles (claim review → verify → publish) not wrapped in explicit transactions yet |

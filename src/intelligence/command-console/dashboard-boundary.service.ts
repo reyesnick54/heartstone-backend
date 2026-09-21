@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 
 import {
+  FORBIDDEN_CLIENT_COMMAND_CONSOLE_IDENTITY_FIELDS,
   FORBIDDEN_CLIENT_DASHBOARD_FIELDS,
   FORBIDDEN_COLOR_LEGAL_MAPPINGS,
   FORBIDDEN_STATUS_COLLAPSE_GROUPS,
@@ -16,6 +17,21 @@ export class DashboardBoundaryService {
         );
       }
     }
+  }
+
+  rejectClientSuppliedActorIdentity(payload: Record<string, unknown>): void {
+    for (const field of FORBIDDEN_CLIENT_COMMAND_CONSOLE_IDENTITY_FIELDS) {
+      if (field in payload && payload[field] !== undefined) {
+        throw new ForbiddenException(
+          `Clients cannot supply command console identity field "${field}"; actor context is derived from the authenticated session`,
+        );
+      }
+    }
+  }
+
+  assertDashboardAccessDoesNotGrantAuthority(): void {
+    // Dashboard visibility is informational only; substantive authority requires
+    // a separate AuthorityEvaluationService evaluation and must never be inferred here.
   }
 
   assertStatusDoesNotCreateAuthority(statusMeaning: string) {

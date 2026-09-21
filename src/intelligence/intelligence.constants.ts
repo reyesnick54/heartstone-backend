@@ -412,6 +412,18 @@ export const FORBIDDEN_CLIENT_DASHBOARD_FIELDS = [
   'impliesIssuance',
 ] as const;
 
+/** Client must never supply actor identity or entitlement claims on command-console routes. */
+export const FORBIDDEN_CLIENT_COMMAND_CONSOLE_IDENTITY_FIELDS = [
+  'identityId',
+  'userAccountId',
+  'officeholderId',
+  'appointmentId',
+  'delegationId',
+  'capturedByIdentityId',
+  'ownerIdentityId',
+  'technicalPermissionOnly',
+] as const;
+
 export const FORBIDDEN_STATUS_COLLAPSE_GROUPS = [
   ['RECOMMENDED', 'APPROVED', 'ISSUED'],
   ['REPORTED', 'VERIFIED', 'ACHIEVED'],
@@ -434,4 +446,7 @@ export const PHASE_12B_INVARIANTS = [
   'Widgets cannot invent unsupported status dictionary entries',
   'Dashboard cannot collapse recommended/approved/issued',
   'Dashboard cannot collapse reported/verified/achieved',
+  'Command console identity is server-derived from authenticated session',
+  'Requested institution or department scope is verified against actor entitlements',
+  'Dashboard access does not produce authority evaluation ALLOW',
 ] as const;
