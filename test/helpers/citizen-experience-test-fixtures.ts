@@ -13,7 +13,7 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../../src/database/prisma.service';
+import { PrismaService } from '../../src/database/prisma.service';
 import { IssuanceService } from '../../src/decisions-issuance/issuance/issuance.service';
 import { CommunicationMessageService } from '../../src/operational-support/communications/communication-message.service';
 import {
