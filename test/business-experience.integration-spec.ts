@@ -32,6 +32,7 @@ import {
   asBusinessProjectsBody,
 } from './helpers/business-experience-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { calculateAndInvoiceFees } from './helpers/phase-11-test-fixtures';
 
 describe('Business Experience API (integration)', () => {
   let app: INestApplication<App>;
@@ -225,6 +226,8 @@ describe('Business Experience API (integration)', () => {
   });
 
   it('states that payment does not imply approval', async () => {
+    await calculateAndInvoiceFees(app, fixture.phase11Base);
+
     const response = await request(app.getHttpServer())
       .get(
         `/api/v1/experience/business/organizations/${fixture.organizationId}/payments?page=1&pageSize=20`,
@@ -242,10 +245,6 @@ describe('Business Experience API (integration)', () => {
     const instrumentTypeVersion = await prisma.instrumentTypeVersion.findFirstOrThrow({
       select: { id: true },
     });
-
-    if (!fixture.governmentDecisionId) {
-      throw new Error('Expected government decision in business fixture');
-    }
 
     const instrument = await prisma.officialInstrument.create({
       data: {
@@ -420,10 +419,6 @@ describe('Business Experience API (integration)', () => {
     const instrumentTypeVersion = await prisma.instrumentTypeVersion.findFirstOrThrow({
       select: { id: true },
     });
-
-    if (!fixture.governmentDecisionId) {
-      throw new Error('Expected government decision in business fixture');
-    }
 
     await prisma.officialInstrument.create({
       data: {

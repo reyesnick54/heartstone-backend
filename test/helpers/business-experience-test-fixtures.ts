@@ -14,7 +14,8 @@ import { CaseFoundationService } from '../../src/application-processing/cases/ca
 import { type PrismaService } from '../../src/database/prisma.service';
 import { StrategicProjectProfileService } from '../../src/intelligence/strategic-projects/strategic-project-profile.service';
 import { provisionAuthenticatedIdentity } from './identity-provisioning.fixture';
-import { calculateAndInvoiceFees, seedPhase11Fixture } from './phase-11-test-fixtures';
+import { executeGovernmentDecision } from './phase-8-test-fixtures';
+import { type Phase11FixtureContext, seedPhase11Fixture } from './phase-11-test-fixtures';
 
 export const NON_PRODUCTION_BUSINESS_EXPERIENCE_MARKER = 'NON_PRODUCTION_BUSINESS_EXPERIENCE';
 
@@ -28,7 +29,7 @@ export interface BusinessExperienceFixtureContext {
   outsiderSessionToken: string;
   applicationId: string;
   caseId: string;
-  invoiceId: string;
+  phase11Base: Phase11FixtureContext;
   otherOrganizationId: string;
   otherProjectId: string;
   institutionId: string;
@@ -40,7 +41,7 @@ export interface BusinessExperienceFixtureContext {
   formVersionId: string;
   officialSessionToken: string;
   masterAdministrativeFileId: string;
-  governmentDecisionId: string | null;
+  governmentDecisionId: string;
 }
 
 export async function seedBusinessExperienceFixture(
@@ -139,7 +140,9 @@ export async function seedBusinessExperienceFixture(
     data: { applicantIdentityId: representative.identityId },
   });
 
-  const { invoice } = await calculateAndInvoiceFees(app, base);
+  const governmentDecision = await executeGovernmentDecision(app, base, 'APPROVED', {
+    matterDecided: 'Business experience fixture decision',
+  });
 
   const foundation = app.get(CaseFoundationService);
 
@@ -196,7 +199,7 @@ export async function seedBusinessExperienceFixture(
     outsiderSessionToken: outsider.sessionToken,
     applicationId: caseRecord.applicationId,
     caseId: base.caseId,
-    invoiceId: invoice.id,
+    phase11Base: base,
     otherOrganizationId: otherOrganization.id,
     otherProjectId: otherProject.id,
     institutionId: base.institutionId,
@@ -208,6 +211,6 @@ export async function seedBusinessExperienceFixture(
     formVersionId: application.formVersionId,
     officialSessionToken: base.officialSessionToken,
     masterAdministrativeFileId: base.masterAdministrativeFileId,
-    governmentDecisionId: base.governmentDecisionId ?? null,
+    governmentDecisionId: governmentDecision.id,
   };
 }
