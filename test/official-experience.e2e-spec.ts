@@ -215,6 +215,7 @@ describe('Official Experience API (e2e)', () => {
       'other.official@test.gov',
       'OtherOfficial123!',
     );
+
     await prisma.caseAssignment.create({
       data: {
         caseId: submitResult.case.id,
@@ -483,6 +484,7 @@ describe('Official Experience API (e2e)', () => {
       'tech.admin@test.gov',
       'TechAdmin123!',
     );
+
     await request(app.getHttpServer())
       .get('/api/v1/experience/official/me')
       .set('Authorization', `Bearer ${adminSessionToken}`)
