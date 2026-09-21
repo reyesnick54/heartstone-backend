@@ -1,0 +1,208 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for renewal of existing authorizations. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-renewal",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Renewal Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "PROFESSIONAL"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-RENEWAL-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Verify renewal eligibility",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-RENEWAL-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue renewed authorization",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-RENEWAL-REMINDER",
+          "templateCode": "TEMPLATE-RENEWAL-NOTICE",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CURRENT-LICENSE",
+          "TEMPLATE-COMPLIANCE-STATEMENT"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-RENEWAL-EXPIRING",
+          "label": "Expiring authorizations",
+          "metricType": "EXPIRY_WINDOW"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-RENEWAL-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "verify"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PRIOR-LICENSE",
+          "dependencyType": "PRIOR_AUTHORIZATION",
+          "description": "Requires valid prior license"
+        }
+      ],
+      "description": "NON_PRODUCTION renewal template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template current license evidence",
+          "evidenceCode": "TEMPLATE-CURRENT-LICENSE",
+          "label": "Current license",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "Template compliance statement",
+          "evidenceCode": "TEMPLATE-COMPLIANCE-STATEMENT",
+          "label": "Compliance statement",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 100,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-RENEWAL-FEE",
+          "label": "Renewal fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-RENEWAL-FORM",
+          "formName": "Renewal application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "existingLicenseNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Existing license number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "changesDeclared",
+                  "fieldType": "BOOLEAN",
+                  "label": "Changes declared",
+                  "required": true
+                }
+              ],
+              "label": "Renewal details",
+              "sectionKey": "renewal"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-RENEWAL-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-RENEWED-LICENSE"
+        ]
+      },
+      "lifecycle": {
+        "supersessionPolicyCode": "TEMPLATE-SUPERSEDE-PRIOR",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Renewed license",
+          "outputCode": "TEMPLATE-RENEWED-LICENSE",
+          "outputType": "LICENCE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template renewal review route",
+          "label": "Renewal review",
+          "routeCode": "TEMPLATE-RENEWAL-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-LICENSE-RENEWAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-RENEWAL",
+      "serviceName": "Template License Renewal",
+      "serviceSlug": "template-license-renewal",
+      "serviceType": "LICENCE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Renewal SLA",
+          "ruleCode": "TEMPLATE-RENEWAL-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-RENEWAL-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-RENEWAL-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Verify eligibility",
+          "stageKey": "verify",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-RENEWAL-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isIssuanceStage": true,
+          "label": "Issue renewal",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

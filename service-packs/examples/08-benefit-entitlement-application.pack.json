@@ -1,0 +1,223 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for benefit and entitlement determination services. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-benefit-entitlement",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Benefit / Entitlement Application Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Benefit intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Entitlement determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-BENEFIT-DECISION",
+          "templateCode": "TEMPLATE-BENEFIT-DECISION-NOTICE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-INCOME-PROOF",
+          "TEMPLATE-RESIDENCY-PROOF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BENEFIT-PENDING",
+          "label": "Pending determinations",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "TEMPLATE-BENEFIT-SLA-RISK",
+          "label": "SLA at-risk benefits",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-ELIGIBILITY-ENGINE",
+          "dependencyType": "ELIGIBILITY_RULES",
+          "description": "Configured eligibility rule set"
+        }
+      ],
+      "description": "NON_PRODUCTION benefit/entitlement template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template income evidence",
+          "evidenceCode": "TEMPLATE-INCOME-PROOF",
+          "label": "Income proof",
+          "required": true,
+          "retentionPolicyCode": "TEMPLATE-RETENTION-7Y",
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "Template residency evidence",
+          "evidenceCode": "TEMPLATE-RESIDENCY-PROOF",
+          "label": "Residency proof",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BENEFIT-FORM",
+          "formName": "Benefit application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "householdSize",
+                  "fieldType": "INTEGER",
+                  "label": "Household size",
+                  "required": true
+                },
+                {
+                  "fieldKey": "incomeBand",
+                  "fieldType": "SELECT",
+                  "label": "Income band",
+                  "required": true
+                }
+              ],
+              "label": "Eligibility",
+              "sectionKey": "eligibility"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-BENEFIT-NOTICE"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supportsRenewal": true,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Entitlement notice",
+          "outputCode": "TEMPLATE-BENEFIT-NOTICE",
+          "outputType": "DECISION_NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template benefit appeal route",
+          "label": "Benefit appeal",
+          "routeCode": "TEMPLATE-BENEFIT-APPEAL",
+          "routeType": "APPEAL"
+        },
+        {
+          "description": "Template benefit complaint route",
+          "label": "Benefit complaint",
+          "routeCode": "TEMPLATE-BENEFIT-COMPLAINT",
+          "routeType": "COMPLAINT"
+        }
+      ],
+      "serviceCode": "TEMPLATE-BENEFIT-ENTITLEMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-BENEFIT",
+      "serviceName": "Template Benefit / Entitlement Application",
+      "serviceSlug": "template-benefit-entitlement",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Benefit determination SLA",
+          "ruleCode": "TEMPLATE-BENEFIT-SLA",
+          "targetDays": 28
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Eligibility review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Entitlement decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Issue entitlement notice",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heartstone.local/schemas/service-pack-manifest.schema.json",
+  "title": "HeartStone Service Pack Manifest",
+  "description": "Declarative authoring manifest for HeartStone government service configuration. All examples must be NON_PRODUCTION / TEMPLATE ONLY.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "packLabel",
+    "packId",
+    "packVersion",
+    "packName",
+    "description",
+    "institutionCode",
+    "deploymentIntent",
+    "services"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "packLabel": { "type": "string", "enum": ["NON_PRODUCTION", "TEMPLATE_ONLY"] },
+    "packId": { "type": "string", "minLength": 3 },
+    "packVersion": { "type": "string", "minLength": 1 },
+    "packName": { "type": "string", "minLength": 3 },
+    "description": { "type": "string", "minLength": 10 },
+    "institutionCode": { "type": "string", "minLength": 3 },
+    "departmentCode": { "type": "string" },
+    "deploymentIntent": {
+      "type": "object",
+      "required": [
+        "targetMaturityStatus",
+        "targetPublicAvailability",
+        "requiresInstitutionalAcceptance",
+        "requiresOperationalActivation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "targetMaturityStatus": { "type": "string", "const": "DRAFT" },
+        "targetPublicAvailability": {
+          "type": "string",
+          "enum": ["HIDDEN", "UNDER_DEVELOPMENT", "INFORMATION_ONLY"]
+        },
+        "requiresInstitutionalAcceptance": { "type": "boolean", "const": true },
+        "requiresOperationalActivation": { "type": "boolean", "const": true }
+      }
+    },
+    "services": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/serviceDefinition" }
+    }
+  },
+  "$defs": {
+    "serviceDefinition": {
+      "type": "object",
+      "required": [
+        "serviceCode",
+        "serviceSlug",
+        "serviceName",
+        "serviceFamilyCode",
+        "serviceType",
+        "description",
+        "applicantCategories",
+        "authorityFunctions",
+        "forms",
+        "evidenceRequirements",
+        "workflowStages",
+        "completenessReview",
+        "slaRules",
+        "fees",
+        "outputs",
+        "communications",
+        "dependencies",
+        "decisionStages",
+        "issuance",
+        "lifecycle",
+        "redress",
+        "dashboardIndicators"
+      ],
+      "properties": {
+        "serviceCode": { "type": "string" },
+        "serviceSlug": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "serviceFamilyCode": { "type": "string" },
+        "serviceType": { "type": "string" },
+        "description": { "type": "string" },
+        "applicantCategories": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "authorityFunctions": { "type": "array", "items": { "$ref": "#/$defs/authorityFunction" } },
+        "forms": { "type": "array", "items": { "$ref": "#/$defs/formDefinition" }, "minItems": 1 },
+        "evidenceRequirements": { "type": "array", "items": { "$ref": "#/$defs/evidenceRequirement" } },
+        "workflowStages": { "type": "array", "items": { "$ref": "#/$defs/workflowStage" }, "minItems": 1 },
+        "completenessReview": { "$ref": "#/$defs/completenessReview" },
+        "slaRules": { "type": "array", "items": { "$ref": "#/$defs/slaRule" } },
+        "fees": { "type": "array", "items": { "$ref": "#/$defs/feeDefinition" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/outputDefinition" } },
+        "communications": { "type": "array", "items": { "$ref": "#/$defs/communication" } },
+        "dependencies": { "type": "array", "items": { "$ref": "#/$defs/dependency" } },
+        "decisionStages": { "type": "array", "items": { "$ref": "#/$defs/decisionStage" } },
+        "issuance": { "$ref": "#/$defs/issuanceConfig" },
+        "lifecycle": { "$ref": "#/$defs/lifecycleConfig" },
+        "redress": { "type": "array", "items": { "$ref": "#/$defs/redressRoute" } },
+        "dashboardIndicators": { "type": "array", "items": { "$ref": "#/$defs/dashboardIndicator" } }
+      }
+    },
+    "authorityFunction": {
+      "type": "object",
+      "required": ["functionCode", "publicStageLabel", "authorityActionType", "sequenceOrder", "isConsequential"],
+      "properties": {
+        "functionCode": { "type": "string" },
+        "publicStageLabel": { "type": "string" },
+        "authorityActionType": { "type": "string" },
+        "sequenceOrder": { "type": "integer", "minimum": 1 },
+        "isConsequential": { "type": "boolean" }
+      }
+    },
+    "formDefinition": {
+      "type": "object",
+      "required": ["formCode", "formName", "versionLabel", "sections"],
+      "properties": {
+        "formCode": { "type": "string" },
+        "formName": { "type": "string" },
+        "versionLabel": { "type": "string" },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/formSection" }, "minItems": 1 }
+      }
+    },
+    "formSection": {
+      "type": "object",
+      "required": ["sectionKey", "label", "fields"],
+      "properties": {
+        "sectionKey": { "type": "string" },
+        "label": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/formField" }, "minItems": 1 }
+      }
+    },
+    "formField": {
+      "type": "object",
+      "required": ["fieldKey", "label", "fieldType", "required"],
+      "properties": {
+        "fieldKey": { "type": "string" },
+        "label": { "type": "string" },
+        "fieldType": { "type": "string" },
+        "required": { "type": "boolean" },
+        "dataClassification": { "type": "string" }
+      }
+    },
+    "evidenceRequirement": {
+      "type": "object",
+      "required": ["evidenceCode", "label", "description", "required", "verificationCategory"],
+      "properties": {
+        "evidenceCode": { "type": "string" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "required": { "type": "boolean" },
+        "verificationCategory": { "type": "string" },
+        "retentionPolicyCode": { "type": "string" }
+      }
+    },
+    "workflowStage": {
+      "type": "object",
+      "required": ["stageKey", "label", "displayOrder", "stepType", "consequenceLevel"],
+      "properties": {
+        "stageKey": { "type": "string" },
+        "label": { "type": "string" },
+        "displayOrder": { "type": "integer", "minimum": 1 },
+        "stepType": { "type": "string" },
+        "authorityFunctionCode": { "type": "string" },
+        "authorityActionType": { "type": "string" },
+        "consequenceLevel": { "type": "string" },
+        "isDecisionStage": { "type": "boolean" },
+        "isIssuanceStage": { "type": "boolean" }
+      }
+    },
+    "completenessReview": {
+      "type": "object",
+      "required": ["enabled", "requiredEvidenceCodes"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "deficiencyNoticeTemplateCode": { "type": "string" },
+        "requiredEvidenceCodes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "slaRule": {
+      "type": "object",
+      "required": ["ruleCode", "label", "targetDays", "clockStartsAtStageKey"],
+      "properties": {
+        "ruleCode": { "type": "string" },
+        "label": { "type": "string" },
+        "targetDays": { "type": "integer", "minimum": 1 },
+        "clockStartsAtStageKey": { "type": "string" },
+        "pauseConditions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "feeDefinition": {
+      "type": "object",
+      "required": ["feeCode", "label", "amount", "currencyCode", "waivable"],
+      "properties": {
+        "feeCode": { "type": "string" },
+        "label": { "type": "string" },
+        "amount": { "type": "number", "minimum": 0 },
+        "currencyCode": { "type": "string" },
+        "waivable": { "type": "boolean" }
+      }
+    },
+    "outputDefinition": {
+      "type": "object",
+      "required": ["outputCode", "label", "outputType", "deliveryChannel"],
+      "properties": {
+        "outputCode": { "type": "string" },
+        "label": { "type": "string" },
+        "outputType": { "type": "string" },
+        "deliveryChannel": { "type": "string" }
+      }
+    },
+    "communication": {
+      "type": "object",
+      "required": ["communicationCode", "triggerStageKey", "channel", "templateCode"],
+      "properties": {
+        "communicationCode": { "type": "string" },
+        "triggerStageKey": { "type": "string" },
+        "channel": { "type": "string" },
+        "templateCode": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "required": ["dependencyCode", "dependencyType", "description"],
+      "properties": {
+        "dependencyCode": { "type": "string" },
+        "dependencyType": { "type": "string" },
+        "description": { "type": "string" },
+        "externalIntegrationCode": { "type": "string" }
+      }
+    },
+    "decisionStage": {
+      "type": "object",
+      "required": ["stageKey", "decisionActorFunctionCode", "requiresSecondApproval"],
+      "properties": {
+        "stageKey": { "type": "string" },
+        "decisionActorFunctionCode": { "type": "string" },
+        "requiresSecondApproval": { "type": "boolean" }
+      }
+    },
+    "issuanceConfig": {
+      "type": "object",
+      "required": ["issuanceStageKey", "issuanceFunctionCode", "outputCodes"],
+      "properties": {
+        "issuanceStageKey": { "type": "string" },
+        "issuanceFunctionCode": { "type": "string" },
+        "outputCodes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "lifecycleConfig": {
+      "type": "object",
+      "required": ["supportsRenewal"],
+      "properties": {
+        "supportsRenewal": { "type": "boolean" },
+        "renewalServiceCode": { "type": "string" },
+        "validityPeriodDays": { "type": "integer", "minimum": 1 },
+        "supersessionPolicyCode": { "type": "string" }
+      }
+    },
+    "redressRoute": {
+      "type": "object",
+      "required": ["routeCode", "label", "routeType", "description"],
+      "properties": {
+        "routeCode": { "type": "string" },
+        "label": { "type": "string" },
+        "routeType": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "dashboardIndicator": {
+      "type": "object",
+      "required": ["indicatorCode", "label", "metricType"],
+      "properties": {
+        "indicatorCode": { "type": "string" },
+        "label": { "type": "string" },
+        "metricType": { "type": "string" },
+        "threshold": { "type": "number" }
+      }
+    }
+  }
+}

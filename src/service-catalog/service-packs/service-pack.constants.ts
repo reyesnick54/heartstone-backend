@@ -1,0 +1,123 @@
+import { APPLICANT_CATEGORIES } from '../service-catalog-schema.constants';
+
+/** Marker required on every service-pack manifest and template. */
+export const SERVICE_PACK_NON_PRODUCTION_LABEL = 'NON_PRODUCTION' as const;
+
+/** Secondary marker for canonical templates. */
+export const SERVICE_PACK_TEMPLATE_ONLY_LABEL = 'TEMPLATE_ONLY' as const;
+
+export const SERVICE_PACK_SCHEMA_VERSION = '1.0.0';
+
+export const SERVICE_PACK_ALLOWED_LABELS = [
+  SERVICE_PACK_NON_PRODUCTION_LABEL,
+  SERVICE_PACK_TEMPLATE_ONLY_LABEL,
+] as const;
+
+/** Pack manifests may only declare draft / non-operational deployment intent. */
+export const SERVICE_PACK_ALLOWED_MATURITY_STATUSES = ['DRAFT'] as const;
+
+export const SERVICE_PACK_ALLOWED_PUBLIC_AVAILABILITY = [
+  'HIDDEN',
+  'UNDER_DEVELOPMENT',
+  'INFORMATION_ONLY',
+] as const;
+
+export const SERVICE_PACK_GOVERNANCE_BYPASS_FIELDS = [
+  'maturityStatus',
+  'publicAvailability',
+  'skipInstitutionalAcceptance',
+  'skipOperationalActivation',
+  'forceActivation',
+  'autoActivate',
+  'bypassActivationGovernance',
+  'directActivation',
+  'activationOverride',
+] as const;
+
+export const SERVICE_PACK_FORBIDDEN_MATURITY_VALUES = [
+  'ACTIVE',
+  'ACCEPTED',
+  'TESTED',
+  'CONFIGURED',
+  'APPROVED',
+  'RECOGNIZED',
+] as const;
+
+export const SERVICE_PACK_FORBIDDEN_AVAILABILITY_VALUES = [
+  'ACTIVE',
+  'PRE_APPLICATION',
+  'PILOT_ONLY',
+] as const;
+
+export const SERVICE_PACK_APPLICANT_CATEGORIES = APPLICANT_CATEGORIES;
+
+export const SERVICE_PACK_WORKFLOW_STEP_TYPES = [
+  'INTAKE',
+  'COMPLETENESS_REVIEW',
+  'SUBSTANTIVE_REVIEW',
+  'EXTERNAL_REFERRAL',
+  'INTERNAL_COORDINATION',
+  'PROFESSIONAL_REVIEW',
+  'DECISION_GATE',
+  'ISSUANCE_GATE',
+  'PARALLEL_JOIN',
+] as const;
+
+export const SERVICE_PACK_AUTHORITY_ACTION_TYPES = [
+  'RETRIEVE',
+  'SUMMARIZE',
+  'PREPARE',
+  'REVIEW',
+  'VERIFY',
+  'APPROVE',
+  'DECIDE',
+  'SIGN',
+  'ISSUE',
+  'INSPECT',
+  'ENFORCE',
+] as const;
+
+/**
+ * Canonical NON_PRODUCTION authority function codes referenced by templates.
+ * These are authoring placeholders — not verified legal authority assignments.
+ */
+export const SERVICE_PACK_AUTHORITY_FUNCTION_REGISTRY = [
+  'TEMPLATE-AUTH-REGISTRATION-INTAKE',
+  'TEMPLATE-AUTH-REGISTRATION-VERIFY',
+  'TEMPLATE-AUTH-LICENSE-REVIEW',
+  'TEMPLATE-AUTH-LICENSE-ISSUANCE',
+  'TEMPLATE-AUTH-RENEWAL-VERIFY',
+  'TEMPLATE-AUTH-RENEWAL-ISSUANCE',
+  'TEMPLATE-AUTH-INSPECTION-SCHEDULE',
+  'TEMPLATE-AUTH-INSPECTION-VERIFY',
+  'TEMPLATE-AUTH-EXTERNAL-REFERRAL',
+  'TEMPLATE-AUTH-EXTERNAL-DETERMINATION',
+  'TEMPLATE-AUTH-PROFESSIONAL-REVIEW',
+  'TEMPLATE-AUTH-MULTI-DEPT-COORD',
+  'TEMPLATE-AUTH-MULTI-DEPT-DECIDE',
+  'TEMPLATE-AUTH-BENEFIT-INTAKE',
+  'TEMPLATE-AUTH-BENEFIT-DETERMINE',
+  'TEMPLATE-AUTH-INVESTOR-APPROVAL',
+  'TEMPLATE-AUTH-INVESTOR-ISSUANCE',
+  'TEMPLATE-AUTH-HIGH-SENSITIVITY-REVIEW',
+  'TEMPLATE-AUTH-HIGH-SENSITIVITY-APPROVE',
+  'TEMPLATE-AUTH-HIGH-SENSITIVITY-ISSUE',
+] as const;
+
+export const SERVICE_PACK_HIGH_RISK_CHANGE_TYPES = [
+  'SERVICE_REMOVED',
+  'NEW_AUTHORITY_FUNCTION',
+  'DECISION_ACTOR_CHANGE',
+  'EVIDENCE_REQUIREMENT_REMOVED',
+  'REVIEW_GATE_REDUCED',
+  'NEW_EXTERNAL_INTEGRATION',
+  'NEW_SENSITIVE_DATA_FIELD',
+  'RETENTION_BEHAVIOR_CHANGED',
+  'FEE_CHANGED',
+  'ELIGIBILITY_RULE_CHANGED',
+  'WORKFLOW_STAGE_REMOVED',
+  'SLA_RELAXED',
+  'OUTPUT_DEFINITION_CHANGED',
+] as const;
+
+export type ServicePackHighRiskChangeType = (typeof SERVICE_PACK_HIGH_RISK_CHANGE_TYPES)[number];

@@ -1,0 +1,203 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template requiring external authority determination. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-external-authority",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "External-Authority-Dependent Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "INVESTOR"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External referral",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-DETERMINATION",
+          "isConsequential": true,
+          "publicStageLabel": "External determination",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue authorization",
+          "sequenceOrder": 3
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EXTERNAL-REFERRAL-SENT",
+          "templateCode": "TEMPLATE-EXTERNAL-REFERRAL-NOTICE",
+          "triggerStageKey": "external-referral"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EXTERNAL-CONSENT"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EXTERNAL-PENDING",
+          "label": "Awaiting external response",
+          "metricType": "EXTERNAL_WAIT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EXTERNAL-DETERMINATION",
+          "requiresSecondApproval": true,
+          "stageKey": "external-determination"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EXT-AUTH-INTEGRATION",
+          "dependencyType": "EXTERNAL_AUTHORITY",
+          "description": "External authority integration",
+          "externalIntegrationCode": "TEMPLATE-EXT-AUTH-API"
+        }
+      ],
+      "description": "NON_PRODUCTION external-authority template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template external consent evidence",
+          "evidenceCode": "TEMPLATE-EXTERNAL-CONSENT",
+          "label": "External authority consent",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EXTERNAL-FORM",
+          "formName": "External referral application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "externalCaseReference",
+                  "fieldType": "IDENTIFIER",
+                  "label": "External case reference",
+                  "required": true
+                }
+              ],
+              "label": "Referral details",
+              "sectionKey": "referral"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-EXTERNAL-AUTH"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false,
+        "validityPeriodDays": 730
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Authorization letter",
+          "outputCode": "TEMPLATE-EXTERNAL-AUTH",
+          "outputType": "AUTHORIZATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template external review route",
+          "label": "External review",
+          "routeCode": "TEMPLATE-EXTERNAL-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-EXTERNAL-AUTHORITY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EXTERNAL",
+      "serviceName": "Template External Authority Service",
+      "serviceSlug": "template-external-authority",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "external-referral",
+          "label": "External determination SLA",
+          "pauseConditions": [
+            "AWAITING_EXTERNAL_RESPONSE"
+          ],
+          "ruleCode": "TEMPLATE-EXTERNAL-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "External referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-DETERMINATION",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "External determination",
+          "stageKey": "external-determination",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

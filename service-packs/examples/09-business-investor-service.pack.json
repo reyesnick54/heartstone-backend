@@ -1,0 +1,217 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for business and investor-facing services. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-business-investor",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Business / Investor Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "INVESTOR",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-INVESTOR-APPROVAL",
+          "isConsequential": true,
+          "publicStageLabel": "Investor approval",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-INVESTOR-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue investor authorization",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-INVESTOR-STATUS",
+          "templateCode": "TEMPLATE-INVESTOR-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BUSINESS-PLAN",
+          "TEMPLATE-SOURCE-OF-FUNDS"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-INVESTOR-PIPELINE",
+          "label": "Investor pipeline value",
+          "metricType": "AGGREGATE_VALUE"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-INVESTOR-APPROVAL",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-INVESTOR-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Investor registry lookup",
+          "externalIntegrationCode": "TEMPLATE-INVESTOR-REGISTRY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION business/investor template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template business plan evidence",
+          "evidenceCode": "TEMPLATE-BUSINESS-PLAN",
+          "label": "Business plan",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "Template source-of-funds evidence",
+          "evidenceCode": "TEMPLATE-SOURCE-OF-FUNDS",
+          "label": "Source of funds",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 500,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-INVESTOR-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-INVESTOR-FORM",
+          "formName": "Investor application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "investmentAmount",
+                  "fieldType": "CURRENCY",
+                  "label": "Investment amount",
+                  "required": true
+                },
+                {
+                  "fieldKey": "sector",
+                  "fieldType": "SELECT",
+                  "label": "Sector",
+                  "required": true
+                }
+              ],
+              "label": "Investment details",
+              "sectionKey": "investment"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-INVESTOR-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-INVESTOR-AUTH"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supportsRenewal": true,
+        "validityPeriodDays": 1095
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Investor authorization",
+          "outputCode": "TEMPLATE-INVESTOR-AUTH",
+          "outputType": "AUTHORIZATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template investor appeal route",
+          "label": "Investor appeal",
+          "routeCode": "TEMPLATE-INVESTOR-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-BUSINESS-INVESTOR",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-INVESTOR",
+      "serviceName": "Template Business / Investor Service",
+      "serviceSlug": "template-business-investor",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Investor approval SLA",
+          "ruleCode": "TEMPLATE-INVESTOR-SLA",
+          "targetDays": 40
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INVESTOR-APPROVAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Investment review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INVESTOR-APPROVAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Approval decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INVESTOR-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}
