@@ -41,7 +41,7 @@ type AccessibleInstrument = Prisma.OfficialInstrumentGetPayload<{
     };
     currentVersion: true;
     verificationRecords: { orderBy: { createdAt: 'desc' }; take: 1 };
-    case: { select: { applicantIdentityId: true; organizationId: true } };
+    case: { select: { applicantIdentityId: true } };
   };
 }>;
 
@@ -74,7 +74,7 @@ export class CitizenCredentialsProjectionService {
       where: {
         OR: [
           { holderIdentityId: scope.identityId },
-          { caseId: { in: scope.caseIds } },
+          ...(scope.caseIds.length > 0 ? [{ caseId: { in: scope.caseIds } }] : []),
           ...(scope.organizationIds.length > 0
             ? [{ holderOrganizationId: { in: scope.organizationIds } }]
             : []),
@@ -114,7 +114,7 @@ export class CitizenCredentialsProjectionService {
       },
       currentVersion: true,
       verificationRecords: { orderBy: { createdAt: 'desc' as const }, take: 1 },
-      case: { select: { applicantIdentityId: true, organizationId: true } },
+      case: { select: { applicantIdentityId: true } },
     };
   }
 

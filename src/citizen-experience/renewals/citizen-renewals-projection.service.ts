@@ -57,7 +57,7 @@ export class CitizenRenewalsProjectionService {
       where: {
         OR: [
           { holderIdentityId: scope.identityId },
-          { caseId: { in: scope.caseIds } },
+          ...(scope.caseIds.length > 0 ? [{ caseId: { in: scope.caseIds } }] : []),
           ...(scope.organizationIds.length > 0
             ? [{ holderOrganizationId: { in: scope.organizationIds } }]
             : []),
