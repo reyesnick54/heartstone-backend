@@ -7,7 +7,7 @@ import { PrismaService } from '../src/database/prisma.service';
 import { asInstitutionListBody, asJurisdictionBody } from './helpers/government-test-types';
 import {
   authHeader,
-  provisionIntegrationAdminSession,
+  ensureIntegrationAdminSession,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
@@ -18,7 +18,7 @@ describe('Government structure (integration)', () => {
 
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
-    const admin = await provisionIntegrationAdminSession(app, prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
     adminSessionToken = admin.sessionToken;
   });
 

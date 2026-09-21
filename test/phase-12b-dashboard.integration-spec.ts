@@ -20,7 +20,7 @@ import { DashboardQueryService } from '../src/intelligence/command-console/dashb
 import { DashboardSnapshotService } from '../src/intelligence/command-console/dashboard-snapshot.service';
 import {
   authHeader,
-  provisionIntegrationAdminSession,
+  ensureIntegrationAdminSession,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { toDashboardActor } from './helpers/phase-12b-actor.util';
@@ -53,7 +53,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    const admin = await provisionIntegrationAdminSession(app, prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
     adminSessionToken = admin.sessionToken;
   });
 

@@ -11,7 +11,7 @@ import {
 } from './helpers/authority-test-types';
 import {
   authHeader,
-  provisionIntegrationAdminSession,
+  ensureIntegrationAdminSession,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -26,7 +26,7 @@ describe('Authority domain (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    const admin = await provisionIntegrationAdminSession(app, prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
     adminSessionToken = admin.sessionToken;
   });
 
