@@ -1,11 +1,8 @@
 import { type INestApplication } from '@nestjs/common';
 import {
-  AccountStatus,
   ApplicantCategory,
-  AuthenticationMethodType,
   DashboardConsoleType,
   DashboardDefinitionStatus,
-  IdentityType,
   RepresentativeAuthorityStatus,
   SecurityAuditEventType,
 } from '@prisma/client';
@@ -18,7 +15,7 @@ import {
   ScopedResourceType,
 } from '../src/institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../src/institutional-scope/resource-access.service';
-import { asLoginResponseBody } from './helpers/identity-test-types';
+import { provisionAuthenticatedIdentity } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   type Phase6FixtureContext,
@@ -50,45 +47,15 @@ describe('Institutional scope enforcement (integration)', () => {
 
   async function createCitizenSession(loginSuffix: string) {
     const marker = `scope-${loginSuffix}`;
-    const person = await prisma.person.create({
-      data: { givenName: 'Scope', familyName: loginSuffix },
-    });
-    const account = await prisma.userAccount.create({
-      data: {
-        loginIdentifier: `${marker}@test.gov`,
-        personId: person.id,
-        status: AccountStatus.ACTIVE,
-      },
-    });
-    const identity = await prisma.identity.create({
-      data: {
-        type: IdentityType.INDIVIDUAL,
-        displayName: `Scope ${loginSuffix}`,
-        userAccountId: account.id,
-        personId: person.id,
-      },
+    const identity = await provisionAuthenticatedIdentity(app, prisma, {
+      loginIdentifier: `${marker}@test.gov`,
+      password: 'ScopeTest123!',
+      givenName: 'Scope',
+      familyName: loginSuffix,
+      displayName: `Scope ${loginSuffix}`,
     });
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: identity.id, type: 'PASSWORD', password: 'ScopeTest123!' })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
-      .expect(201);
-
-    const login = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier: `${marker}@test.gov`, password: 'ScopeTest123!' })
-          .expect(201)
-      ).body,
-    );
-
-    return { identityId: identity.id, sessionToken: login.sessionToken };
+    return { identityId: identity.identityId, sessionToken: identity.sessionToken };
   }
 
   async function submitApplicationForApplicant(sessionToken: string) {
