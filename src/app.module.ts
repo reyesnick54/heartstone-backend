@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
+import { CitizenExperienceModule } from './citizen-experience/citizen-experience.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import { ComplianceModule } from './compliance/compliance.module';
 import appConfig from './config/app.config';
@@ -51,6 +52,7 @@ import { SystemModule } from './system/system.module';
     AuthorityModule,
     ServiceCatalogModule,
     ApplicationProcessingModule,
+    CitizenExperienceModule,
     RecordsModule,
     EvidenceRecordsModule,
     EvidenceModule,

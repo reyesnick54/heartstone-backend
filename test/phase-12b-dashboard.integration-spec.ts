@@ -19,6 +19,7 @@ import { DashboardIndicatorProjectionService } from '../src/intelligence/command
 import { DashboardQueryService } from '../src/intelligence/command-console/dashboard-query.service';
 import { DashboardSnapshotService } from '../src/intelligence/command-console/dashboard-snapshot.service';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { toDashboardActor } from './helpers/phase-12b-actor.util';
 import {
   createStaleProjection,
   type Phase12BFixtureContext,
@@ -54,7 +55,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('blocks green indicator without required evidence', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     await expect(
       projectionService.deriveProjection({
@@ -81,7 +82,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
       boundaryService.assertStatusDoesNotCreateAuthority('This status grants permission to decide');
     }).toThrow();
 
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
     const projection = await projectionService.deriveProjection({
       indicatorDefinitionId: fixture.indicatorDefinitionId,
       dashboardVersionId: fixture.executiveVersionId,
@@ -105,11 +106,11 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('prevents executive user bypassing case sensitivity without assignment', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     await expect(
       accessPolicyService.evaluateAccess({
-        identityId: fixture.executiveIdentityId,
+        actor: toDashboardActor(fixture.executiveIdentityId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -120,13 +121,13 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('prevents department user seeing another department restricted data without purpose', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     await createDepartmentalProjection(prisma, fixture, fixture.departmentBId);
 
     await expect(
       queryService.queryDepartmentalConsole({
-        identityId: fixture.deptAIdentityId,
+        actor: toDashboardActor(fixture.deptAIdentityId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -137,22 +138,21 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('prevents technical admin from automatic substantive access', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     await expect(
       accessPolicyService.evaluateAccess({
-        identityId: fixture.technicalAdminIdentityId,
+        actor: toDashboardActor(fixture.technicalAdminIdentityId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.TECHNICAL_OPERATIONS,
         sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
-        technicalPermissionOnly: true,
       }),
     ).rejects.toThrow(ForbiddenException);
   });
 
   it('keeps stale status visible with explicit markers', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
     const projection = await createStaleProjection(
       prisma,
       fixture,
@@ -160,7 +160,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
     );
 
     const response = await queryService.queryExecutiveConsole({
-      identityId: fixture.executiveIdentityId,
+      actor: toDashboardActor(fixture.executiveIdentityId),
       dashboardDefinitionId: fixture.executiveDashboardId,
       institutionId: fixture.institutionId,
       purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -176,7 +176,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('shows estimated, disputed, modeled, and external-reported data distinctly', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
     const qualities = [
       DashboardDataQuality.ESTIMATED,
       DashboardDataQuality.DISPUTED,
@@ -215,7 +215,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
     }
 
     const response = await queryService.queryExecutiveConsole({
-      identityId: fixture.executiveIdentityId,
+      actor: toDashboardActor(fixture.executiveIdentityId),
       dashboardDefinitionId: fixture.executiveDashboardId,
       institutionId: fixture.institutionId,
       purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -232,7 +232,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('drilldown reaches authoritative record', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     const projection = await projectionService.deriveProjection({
       indicatorDefinitionId: fixture.indicatorDefinitionId,
@@ -264,7 +264,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('snapshot is immutable and replayable', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     const projection = await projectionService.deriveProjection({
       indicatorDefinitionId: fixture.indicatorDefinitionId,
@@ -284,14 +284,18 @@ describe('Phase 12B executive command console and departmental intelligence (int
     });
 
     const snapshot = await snapshotService.captureSnapshot({
+      actor: toDashboardActor(fixture.executiveIdentityId),
       dashboardVersionId: fixture.executiveVersionId,
-      capturedByIdentityId: fixture.executiveIdentityId,
       projectionIds: [projection.id],
     });
 
     expect(snapshot.isImmutable).toBe(true);
+    expect(snapshot.capturedByIdentityId).toBe(fixture.executiveIdentityId);
 
-    const replay = await snapshotService.replaySnapshot(snapshot.replayToken);
+    const replay = await snapshotService.replaySnapshot(
+      snapshot.replayToken,
+      toDashboardActor(fixture.executiveIdentityId),
+    );
     expect(replay.payload).toEqual(snapshot.snapshotPayload);
     expect(replay.snapshotHash).toBe(snapshot.snapshotHash);
 
@@ -323,10 +327,11 @@ describe('Phase 12B executive command console and departmental intelligence (int
   });
 
   it('rejects client attempts to set dashboard projection via API', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
 
     await request(app.getHttpServer())
       .post('/api/v1/intelligence/command-console/projections/derive')
+      .set('Authorization', `Bearer ${fixture.executiveSessionToken}`)
       .send({
         indicatorDefinitionId: fixture.indicatorDefinitionId,
         dashboardVersionId: fixture.executiveVersionId,
@@ -338,8 +343,22 @@ describe('Phase 12B executive command console and departmental intelligence (int
       .expect(400);
   });
 
+  it('requires authentication for command console endpoints', async () => {
+    const fixture = await seedPhase12BFixture(prisma, app);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/intelligence/command-console/executive/query')
+      .send({
+        dashboardDefinitionId: fixture.executiveDashboardId,
+        institutionId: fixture.institutionId,
+        purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
+        sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
+      })
+      .expect(401);
+  });
+
   it('publishes dashboard version without collapsing distinct statuses', async () => {
-    const fixture = await seedPhase12BFixture(prisma);
+    const fixture = await seedPhase12BFixture(prisma, app);
     const version = await definitionService.publishVersion(fixture.executiveVersionId);
     expect(version.status).toBe('PUBLISHED');
   });
