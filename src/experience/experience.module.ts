@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { BusinessExperienceModule } from './business/business-experience.module';
 import { CitizenExperienceModule } from './citizen/citizen-experience.module';
 import { ExperienceCommonModule } from './common/experience-common.module';
 import { DepartmentModule } from './department/department.module';
@@ -11,6 +12,7 @@ import { PlatformAdminModule } from './platform-admin/platform-admin.module';
   imports: [
     ExperienceCommonModule,
     CitizenExperienceModule,
+    BusinessExperienceModule,
     OfficialModule,
     DepartmentModule,
     ExecutiveModule,
@@ -19,6 +21,7 @@ import { PlatformAdminModule } from './platform-admin/platform-admin.module';
   exports: [
     ExperienceCommonModule,
     CitizenExperienceModule,
+    BusinessExperienceModule,
     OfficialModule,
     DepartmentModule,
     ExecutiveModule,

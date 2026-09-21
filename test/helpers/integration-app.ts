@@ -139,6 +139,17 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetComplianceOversightData(prisma: PrismaService): Promise<void> {
+  await prisma.complianceReviewItem.deleteMany();
+  await prisma.complianceReview.deleteMany();
+  await prisma.complianceSubmission.updateMany({ data: { currentVersionId: null } });
+  await prisma.complianceSubmissionVersion.deleteMany();
+  await prisma.complianceSubmission.deleteMany();
+  await prisma.obligationStatusHistory.deleteMany();
+  await prisma.obligationEvidenceLink.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.updateMany({ data: { supersededByObligationId: null } });
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceMatter.deleteMany();
   await prisma.complianceAlert.deleteMany();
   await prisma.complianceRevalidationRecord.deleteMany();
   await prisma.complianceMonitoringEvent.deleteMany();
