@@ -1,0 +1,229 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for high-sensitivity services with enhanced review gates. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-high-sensitivity",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "High-Sensitivity Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "GOVERNMENT_ENTITY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Sensitivity review",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-APPROVE",
+          "isConsequential": true,
+          "publicStageLabel": "Sensitivity approval",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Controlled issuance",
+          "sequenceOrder": 3
+        }
+      ],
+      "communications": [
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "TEMPLATE-HIGH-SENS-NOTICE",
+          "templateCode": "TEMPLATE-HIGH-SENS-DECISION-NOTICE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "TEMPLATE-HIGH-SENS-DEFICIENCY",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-SECURITY-CLEARANCE",
+          "TEMPLATE-AUTHORIZED-REQUEST"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-HIGH-SENS-PENDING",
+          "label": "Pending high-sensitivity cases",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "TEMPLATE-HIGH-SENS-ESCALATIONS",
+          "label": "Escalated sensitivity reviews",
+          "metricType": "ESCALATION_COUNT",
+          "threshold": 3
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-APPROVE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-SECURITY-CLEARANCE-VERIFY",
+          "dependencyType": "SECURITY_VERIFICATION",
+          "description": "Security clearance verification",
+          "externalIntegrationCode": "TEMPLATE-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION high-sensitivity template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template security clearance evidence",
+          "evidenceCode": "TEMPLATE-SECURITY-CLEARANCE",
+          "label": "Security clearance",
+          "required": true,
+          "retentionPolicyCode": "TEMPLATE-RETENTION-10Y",
+          "verificationCategory": "PROFESSIONAL"
+        },
+        {
+          "description": "Template authorized request evidence",
+          "evidenceCode": "TEMPLATE-AUTHORIZED-REQUEST",
+          "label": "Authorized request letter",
+          "required": true,
+          "retentionPolicyCode": "TEMPLATE-RETENTION-10Y",
+          "verificationCategory": "SIGNATURE"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-HIGH-SENS-FORM",
+          "formName": "High-sensitivity application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "dataClassification": "RESTRICTED",
+                  "fieldKey": "securityClearanceLevel",
+                  "fieldType": "SELECT",
+                  "label": "Clearance level",
+                  "required": true
+                },
+                {
+                  "dataClassification": "HIGHLY_RESTRICTED",
+                  "fieldKey": "needToKnowJustification",
+                  "fieldType": "TEXTAREA",
+                  "label": "Need-to-know justification",
+                  "required": true
+                }
+              ],
+              "label": "Classified details",
+              "sectionKey": "classified"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-HIGH-SENS-AUTH"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supersessionPolicyCode": "TEMPLATE-HIGH-SENS-SUPERSEDE",
+        "supportsRenewal": true,
+        "validityPeriodDays": 180
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Controlled authorization",
+          "outputCode": "TEMPLATE-HIGH-SENS-AUTH",
+          "outputType": "AUTHORIZATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template high-sensitivity review route",
+          "label": "Restricted review route",
+          "routeCode": "TEMPLATE-HIGH-SENS-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-HIGH-SENSITIVITY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-HIGH-SENSITIVITY",
+      "serviceName": "Template High-Sensitivity Service",
+      "serviceSlug": "template-high-sensitivity",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "High-sensitivity SLA",
+          "ruleCode": "TEMPLATE-HIGH-SENS-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Sensitivity review",
+          "stageKey": "sensitivity-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-APPROVE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Approval decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-HIGH-SENSITIVITY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Controlled issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

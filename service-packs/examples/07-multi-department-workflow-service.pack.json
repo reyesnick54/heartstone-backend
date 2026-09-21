@@ -1,0 +1,227 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template coordinating multiple departments. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-multi-department",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Multi-Department Workflow Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "GOVERNMENT_ENTITY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-MULTI-DEPT-COORD",
+          "isConsequential": false,
+          "publicStageLabel": "Coordinate departments",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-MULTI-DEPT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Joint decision",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue authorization",
+          "sequenceOrder": 3
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-MULTI-DEPT-STATUS",
+          "templateCode": "TEMPLATE-COORDINATION-STATUS",
+          "triggerStageKey": "coordination"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-DEPT-A-INPUT",
+          "TEMPLATE-DEPT-B-INPUT"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-MULTI-DEPT-WAIT",
+          "label": "Awaiting department input",
+          "metricType": "COORDINATION_WAIT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-MULTI-DEPT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-DEPT-A",
+          "dependencyType": "INTERNAL_DEPARTMENT",
+          "description": "Department A coordination"
+        },
+        {
+          "dependencyCode": "TEMPLATE-DEPT-B",
+          "dependencyType": "INTERNAL_DEPARTMENT",
+          "description": "Department B coordination"
+        }
+      ],
+      "description": "NON_PRODUCTION multi-department template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template department A evidence",
+          "evidenceCode": "TEMPLATE-DEPT-A-INPUT",
+          "label": "Department A input",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "Template department B evidence",
+          "evidenceCode": "TEMPLATE-DEPT-B-INPUT",
+          "label": "Department B input",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 300,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-MULTI-DEPT-FEE",
+          "label": "Coordination fee",
+          "waivable": false
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-MULTI-DEPT-FORM",
+          "formName": "Multi-department application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "involvedDepartments",
+                  "fieldType": "MULTISELECT",
+                  "label": "Involved departments",
+                  "required": true
+                }
+              ],
+              "label": "Coordination details",
+              "sectionKey": "coordination"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-MULTI-DEPT-AUTH"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Joint authorization",
+          "outputCode": "TEMPLATE-MULTI-DEPT-AUTH",
+          "outputType": "AUTHORIZATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template multi-department review route",
+          "label": "Multi-department review",
+          "routeCode": "TEMPLATE-MULTI-DEPT-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-MULTI-DEPT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-MULTI-DEPT",
+      "serviceName": "Template Multi-Department Service",
+      "serviceSlug": "template-multi-department",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "coordination",
+          "label": "Multi-department SLA",
+          "ruleCode": "TEMPLATE-MULTI-DEPT-SLA",
+          "targetDays": 35
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-MULTI-DEPT-COORD",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Internal coordination",
+          "stageKey": "coordination",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Parallel join",
+          "stageKey": "parallel-join",
+          "stepType": "PARALLEL_JOIN"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-MULTI-DEPT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Joint decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isIssuanceStage": true,
+          "label": "Issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}
