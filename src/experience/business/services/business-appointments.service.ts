@@ -22,7 +22,8 @@ export class BusinessAppointmentsService {
   ): Promise<CitizenAppointmentsResponseDto> {
     await this.businessAccess.assertOrganizationAccess(organizationId, identityId);
 
-    const accessibleOrganizations = await this.businessAccess.listAccessibleOrganizations(identityId);
+    const accessibleOrganizations =
+      await this.businessAccess.listAccessibleOrganizations(identityId);
     const representedOrganizationIds = accessibleOrganizations.map((org) => org.organizationId);
 
     const where = this.appointmentAccess.buildBusinessWhere(
