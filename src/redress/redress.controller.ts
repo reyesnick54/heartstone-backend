@@ -1,5 +1,15 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { AuthorityActionType } from '@prisma/client';
 
+import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import {
+  resolveFunctionFromRedressMatter,
+  resolveResourceFromRedressMatter,
+} from '../authority/consequential-action/consequential-action-resolvers';
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
+import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
 import { CreateExternalReviewReferralDto } from './dto/create-external-review-referral.dto';
@@ -46,9 +56,22 @@ export class RedressController {
   }
 
   @Post('decisions')
-  recordDecision(@Body() body: Parameters<RedressDecisionService['recordDecision']>[0]) {
+  @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
+  @ConsequentialAction({
+    action: AuthorityActionType.HEAR_REVIEW,
+    functionResolver: resolveFunctionFromRedressMatter,
+    resourceResolver: resolveResourceFromRedressMatter,
+    institutionalFieldPrefixes: ['reviewer'],
+  })
+  recordDecision(
+    @CurrentSession() session: SessionContextDto,
+    @Body() body: Parameters<RedressDecisionService['recordDecision']>[0],
+  ) {
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
-    return this.decisions.recordDecision(body);
+    return this.decisions.recordDecision({
+      ...body,
+      reviewerIdentityId: body.reviewerIdentityId || session.identityId,
+    });
   }
 
   @Post('interim-relief/requests')
@@ -57,8 +80,21 @@ export class RedressController {
   }
 
   @Post('interim-relief/decisions')
-  decideInterimRelief(@Body() body: Parameters<InterimReliefService['decideInterimRelief']>[0]) {
-    return this.interimRelief.decideInterimRelief(body);
+  @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
+  @ConsequentialAction({
+    action: AuthorityActionType.HEAR_REVIEW,
+    functionResolver: resolveFunctionFromRedressMatter,
+    resourceResolver: resolveResourceFromRedressMatter,
+    institutionalFieldPrefixes: ['reviewer'],
+  })
+  decideInterimRelief(
+    @CurrentSession() session: SessionContextDto,
+    @Body() body: Parameters<InterimReliefService['decideInterimRelief']>[0],
+  ) {
+    return this.interimRelief.decideInterimRelief({
+      ...body,
+      reviewerIdentityId: body.reviewerIdentityId || session.identityId,
+    });
   }
 
   @Get('decisions/:id/implementation-status')
