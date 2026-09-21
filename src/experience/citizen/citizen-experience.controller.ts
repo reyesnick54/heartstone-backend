@@ -1,20 +1,36 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { CancelServiceAppointmentDto } from '../../scheduling/service-appointments/dto/cancel-service-appointment.dto';
+import { RescheduleServiceAppointmentDto } from '../../scheduling/service-appointments/dto/reschedule-service-appointment.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CitizenActionsResponseDto } from './dto/citizen-action.dto';
 import {
   CitizenApplicationDetailDto,
   CitizenApplicationsResponseDto,
 } from './dto/citizen-application.dto';
+import {
+  CitizenAppointmentDetailDto,
+  CitizenAppointmentsResponseDto,
+} from './dto/citizen-appointment.dto';
 import { CitizenCaseStatusResponseDto } from './dto/citizen-case-status-response.dto';
 import { CitizenHomeResponseDto } from './dto/citizen-home-response.dto';
 import { CitizenMeResponseDto } from './dto/citizen-me-response.dto';
 import { CitizenActionCenterService } from './services/citizen-action-center.service';
 import { CitizenApplicationsService } from './services/citizen-applications.service';
+import { CitizenAppointmentsService } from './services/citizen-appointments.service';
 import { CitizenCaseStatusService } from './services/citizen-case-status.service';
 import { CitizenHomeService } from './services/citizen-home.service';
 import { CitizenMeService } from './services/citizen-me.service';
@@ -30,6 +46,7 @@ export class CitizenExperienceController {
     private readonly actionCenterService: CitizenActionCenterService,
     private readonly applicationsService: CitizenApplicationsService,
     private readonly caseStatusService: CitizenCaseStatusService,
+    private readonly appointmentsService: CitizenAppointmentsService,
   ) {}
 
   @Get('me')
@@ -86,5 +103,54 @@ export class CitizenExperienceController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CitizenCaseStatusResponseDto> {
     return this.caseStatusService.getCaseStatus(session, id);
+  }
+
+  @Get('appointments')
+  @ApiOperation({ summary: 'List service appointments for the authenticated citizen' })
+  @ApiOkResponse({ type: CitizenAppointmentsResponseDto })
+  listAppointments(
+    @CurrentSession() session: SessionContextDto,
+    @Query() query: PaginationQueryDto,
+  ): Promise<CitizenAppointmentsResponseDto> {
+    return this.appointmentsService.listAppointments(session.identityId, query);
+  }
+
+  @Get('appointments/:id')
+  @ApiOperation({ summary: 'Get a single service appointment for the authenticated citizen' })
+  @ApiOkResponse({ type: CitizenAppointmentDetailDto })
+  getAppointment(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CitizenAppointmentDetailDto> {
+    return this.appointmentsService.getAppointment(session.identityId, id);
+  }
+
+  @Post('appointments/:id/confirm')
+  @ApiOperation({ summary: 'Confirm a scheduled service appointment' })
+  confirmAppointment(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.appointmentsService.confirmAppointment(session.identityId, id);
+  }
+
+  @Post('appointments/:id/reschedule-request')
+  @ApiOperation({ summary: 'Request rescheduling of a service appointment' })
+  requestReschedule(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RescheduleServiceAppointmentDto,
+  ) {
+    return this.appointmentsService.requestReschedule(session.identityId, id, dto);
+  }
+
+  @Post('appointments/:id/cancel')
+  @ApiOperation({ summary: 'Cancel a service appointment' })
+  cancelAppointment(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CancelServiceAppointmentDto,
+  ) {
+    return this.appointmentsService.cancelAppointment(session.identityId, id, dto);
   }
 }

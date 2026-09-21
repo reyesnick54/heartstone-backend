@@ -30,6 +30,7 @@ import { ProductionReadinessModule } from './production-readiness/production-rea
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
+import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
@@ -57,6 +58,7 @@ import { SystemModule } from './system/system.module';
     InstitutionalScopeModule,
     AuthorityModule,
     ServiceCatalogModule,
+    SchedulingModule,
     ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,

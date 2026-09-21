@@ -153,6 +153,10 @@ model Institution {
   businessImpactAssessments        BusinessImpactAssessment[]
   backupDefinitions                BackupDefinition[]               @relation("BackupDefinitionOwnerInstitution")
   recoveryExercises                RecoveryExercise[]
+  appointmentReasons               AppointmentReason[]
+  appointmentLocations             AppointmentLocation[]
+  appointmentSlots                 AppointmentSlot[]
+  serviceAppointments              ServiceAppointment[]
   servicePacks                     ServicePack[]
 
   @@unique([jurisdictionId, code])
@@ -203,6 +207,11 @@ model Department {
   dashboardIndicatorProjections DashboardIndicatorProjection[]
   strategicProjectProfiles      StrategicProjectProfile[]
   ownedMetricDefinitions        MetricDefinition[]             @relation("MetricDefinitionOwnerDepartment")
+  appointmentReasons            AppointmentReason[]
+  appointmentLocations          AppointmentLocation[]
+  appointmentResources          AppointmentResource[]
+  appointmentSlots              AppointmentSlot[]
+  serviceAppointments           ServiceAppointment[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -289,6 +298,8 @@ model Officeholder {
   manualOperationAuthorizations    ManualOperationAuthorization[] @relation("ManualOperationAuthorizingOfficeholder")
   continuityDecisions              ContinuityDecision[]           @relation("ContinuityDecisionOfficeholder")
   resumptionAuthorizations         ResumptionAuthorization[]      @relation("ResumptionAuthorizingOfficeholder")
+  appointmentResources             AppointmentResource[]          @relation("AppointmentResourceOfficeholder")
+  serviceAppointmentsAssigned      ServiceAppointment[]           @relation("ServiceAppointmentAssignedOfficeholder")
 
   @@map("officeholders")
 }
@@ -693,6 +704,16 @@ model Identity {
   resumptionTechnicalRecommendations       ResumptionReadinessAssessment[]        @relation("ResumptionTechnicalRecommender")
   resumptionAuthorizations                 ResumptionAuthorization[]            @relation("ResumptionAuthorizer")
   continuityCorrectiveActionsAssigned      ContinuityCorrectiveAction[]           @relation("ContinuityCorrectiveActionAssignee")
+  appointmentResources                     AppointmentResource[]                  @relation("AppointmentResourceIdentity")
+  appointmentParticipants                  AppointmentParticipant[]               @relation("AppointmentParticipantIdentity")
+  serviceAppointmentsCreated               ServiceAppointment[]                   @relation("ServiceAppointmentCreator")
+  serviceAppointmentsAssignedOfficial      ServiceAppointment[]                   @relation("ServiceAppointmentAssignedOfficial")
+  appointmentReschedulesRequested          AppointmentReschedule[]                @relation("AppointmentRescheduleRequester")
+  appointmentReschedulesApproved           AppointmentReschedule[]                @relation("AppointmentRescheduleApprover")
+  appointmentCancellations                 AppointmentCancellation[]              @relation("AppointmentCancellationActor")
+  appointmentAttendancesRecorded           AppointmentAttendance[]                @relation("AppointmentAttendanceRecorder")
+  appointmentOutcomeReferencesRecorded     AppointmentOutcomeReference[]          @relation("AppointmentOutcomeRecorder")
+  serviceAppointmentAuditEvents            ServiceAppointmentAuditEvent[]         @relation("ServiceAppointmentAuditActor")
   servicePackVersionsAccepted              ServicePackVersion[]                   @relation("ServicePackVersionAccepter")
   servicePackImports                       ServicePackImport[]                    @relation("ServicePackImportActor")
   servicePackValidationResults             ServicePackValidationResult[]          @relation("ServicePackValidationActor")
@@ -741,6 +762,8 @@ model Organization {
   instrumentDeliveriesAsRecipient InstrumentDelivery[]              @relation("InstrumentDeliveryRecipientOrganization")
   instrumentReceiptsAsRecipient   InstrumentReceiptAcknowledgment[] @relation("InstrumentReceiptRecipientOrganization")
   complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
+  appointmentParticipants       AppointmentParticipant[]
+  serviceAppointments             ServiceAppointment[]
 
   @@index([status])
   @@map("organizations")
@@ -1568,6 +1591,9 @@ model GovernmentService {
   decisionTypes               DecisionType[]
   feeSchedules                FeeSchedule[]
   mandatoryCommunicationRules MandatoryCommunicationRule[]
+  appointmentReasons          AppointmentReason[]
+  appointmentSlots            AppointmentSlot[]
+  serviceAppointments         ServiceAppointment[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2278,6 +2304,7 @@ model Application {
   case                       Case?
   masterAdministrativeFile   MasterAdministrativeFile?
   feeAssessments             FeeAssessment[]
+  serviceAppointments        ServiceAppointment[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2386,6 +2413,7 @@ model Case {
   dashboardIndicatorProjections     DashboardIndicatorProjection[]
   strategicProjectProfiles          StrategicProjectProfile[]
   analysisRequests                  AnalysisRequest[]
+  serviceAppointments               ServiceAppointment[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -8397,6 +8425,7 @@ model CommunicationMessage {
   recipients                     CommunicationRecipient[]
   deliveries                     CommunicationDelivery[]
   mafIndexEntries                CommunicationMafIndexEntry[]
+  serviceAppointmentReminders    ServiceAppointmentReminder[]
 
   @@index([caseId])
   @@index([masterAdministrativeFileId])
@@ -13024,6 +13053,340 @@ model ContinuityCorrectiveAction {
   @@index([status])
   @@index([sourceType])
   @@map("continuity_corrective_actions")
+}
+
+// === Government Service Scheduling (distinct from institutional officeholder Appointment) ===
+
+enum ServiceAppointmentStatus {
+  REQUESTED
+  SCHEDULED
+  CONFIRMED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum AppointmentLocationKind {
+  PHYSICAL
+  VIRTUAL
+  HYBRID
+}
+
+enum AppointmentParticipantRole {
+  APPLICANT
+  REPRESENTATIVE
+  OFFICIAL
+  RESOURCE
+  OBSERVER
+}
+
+enum AppointmentRescheduleStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AppointmentAttendanceStatus {
+  EXPECTED
+  CHECKED_IN
+  CHECKED_OUT
+  NO_SHOW
+}
+
+enum ServiceAppointmentAuditEventType {
+  CREATED
+  CONFIRMED
+  RESCHEDULE_REQUESTED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+  REMINDER_SCHEDULED
+}
+
+enum AppointmentOutcomeReferenceType {
+  CASE_EVENT
+  DOCUMENT
+  NOTE
+  EXTERNAL_REFERENCE
+}
+
+model AppointmentReason {
+  id                  String             @id @default(uuid()) @db.Uuid
+  code                String             @unique
+  name                String
+  description         String?
+  institutionId       String?            @db.Uuid
+  departmentId        String?            @db.Uuid
+  governmentServiceId String?            @db.Uuid
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  institution         Institution?       @relation(fields: [institutionId], references: [id])
+  department          Department?        @relation(fields: [departmentId], references: [id])
+  governmentService   GovernmentService? @relation(fields: [governmentServiceId], references: [id])
+  serviceAppointments ServiceAppointment[]
+
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([governmentServiceId])
+  @@map("appointment_reasons")
+}
+
+model AppointmentLocation {
+  id                String                  @id @default(uuid()) @db.Uuid
+  locationReference String                  @unique
+  name              String
+  kind              AppointmentLocationKind
+  institutionId     String?                 @db.Uuid
+  departmentId      String?                 @db.Uuid
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  region            String?
+  postalCode        String?
+  virtualMeetingUrl String?
+  isActive          Boolean                 @default(true)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  institution       Institution?            @relation(fields: [institutionId], references: [id])
+  department        Department?             @relation(fields: [departmentId], references: [id])
+  slots             AppointmentSlot[]
+  serviceAppointments ServiceAppointment[]
+
+  @@index([institutionId])
+  @@index([departmentId])
+  @@map("appointment_locations")
+}
+
+model AppointmentResource {
+  id                String             @id @default(uuid()) @db.Uuid
+  resourceReference String             @unique
+  name              String
+  resourceType      String
+  officeholderId    String?            @db.Uuid
+  identityId        String?            @db.Uuid
+  departmentId      String?            @db.Uuid
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  officeholder      Officeholder?      @relation("AppointmentResourceOfficeholder", fields: [officeholderId], references: [id])
+  identity          Identity?          @relation("AppointmentResourceIdentity", fields: [identityId], references: [id])
+  department        Department?        @relation(fields: [departmentId], references: [id])
+  slots             AppointmentSlot[]
+  assignedAppointments ServiceAppointment[]
+
+  @@index([departmentId])
+  @@index([officeholderId])
+  @@index([identityId])
+  @@map("appointment_resources")
+}
+
+model AppointmentSlot {
+  id                  String             @id @default(uuid()) @db.Uuid
+  slotReference       String             @unique
+  institutionId       String             @db.Uuid
+  departmentId        String?            @db.Uuid
+  governmentServiceId String?            @db.Uuid
+  locationId          String?            @db.Uuid
+  resourceId          String?            @db.Uuid
+  startsAt            DateTime
+  endsAt              DateTime
+  capacity            Int                @default(1)
+  bookedCount         Int                @default(0)
+  isAvailable         Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  institution         Institution        @relation(fields: [institutionId], references: [id])
+  department          Department?        @relation(fields: [departmentId], references: [id])
+  governmentService   GovernmentService? @relation(fields: [governmentServiceId], references: [id])
+  location            AppointmentLocation? @relation(fields: [locationId], references: [id])
+  resource            AppointmentResource? @relation(fields: [resourceId], references: [id])
+  serviceAppointments ServiceAppointment[]
+
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([governmentServiceId])
+  @@index([startsAt])
+  @@map("appointment_slots")
+}
+
+model ServiceAppointment {
+  id                           String                   @id @default(uuid()) @db.Uuid
+  appointmentReference         String                   @unique
+  status                       ServiceAppointmentStatus @default(REQUESTED)
+  institutionId                String                   @db.Uuid
+  departmentId                 String?                  @db.Uuid
+  governmentServiceId          String?                  @db.Uuid
+  applicationId                String?                  @db.Uuid
+  caseId                       String?                  @db.Uuid
+  organizationId               String?                  @db.Uuid
+  appointmentReasonId          String?                  @db.Uuid
+  appointmentSlotId            String?                  @db.Uuid
+  appointmentLocationId        String?                  @db.Uuid
+  assignedResourceId           String?                  @db.Uuid
+  assignedOfficialIdentityId   String?                  @db.Uuid
+  assignedOfficialOfficeholderId String?                @db.Uuid
+  scheduledStartsAt            DateTime?
+  scheduledEndsAt              DateTime?
+  confirmedAt                  DateTime?
+  completedAt                  DateTime?
+  cancelledAt                  DateTime?
+  isVirtual                    Boolean                  @default(false)
+  virtualMeetingUrl            String?
+  operationalNotes             String?
+  createdByIdentityId          String?                  @db.Uuid
+  createdAt                    DateTime                 @default(now())
+  updatedAt                    DateTime                 @updatedAt
+  institution                  Institution              @relation(fields: [institutionId], references: [id])
+  department                   Department?              @relation(fields: [departmentId], references: [id])
+  governmentService            GovernmentService?       @relation(fields: [governmentServiceId], references: [id])
+  application                  Application?             @relation(fields: [applicationId], references: [id])
+  case                         Case?                    @relation(fields: [caseId], references: [id])
+  organization                 Organization?            @relation(fields: [organizationId], references: [id])
+  appointmentReason            AppointmentReason?       @relation(fields: [appointmentReasonId], references: [id])
+  appointmentSlot              AppointmentSlot?         @relation(fields: [appointmentSlotId], references: [id])
+  appointmentLocation          AppointmentLocation?     @relation(fields: [appointmentLocationId], references: [id])
+  assignedResource             AppointmentResource?     @relation(fields: [assignedResourceId], references: [id])
+  assignedOfficialIdentity     Identity?                @relation("ServiceAppointmentAssignedOfficial", fields: [assignedOfficialIdentityId], references: [id])
+  assignedOfficialOfficeholder Officeholder?            @relation("ServiceAppointmentAssignedOfficeholder", fields: [assignedOfficialOfficeholderId], references: [id])
+  createdBy                    Identity?                @relation("ServiceAppointmentCreator", fields: [createdByIdentityId], references: [id])
+  participants                 AppointmentParticipant[]
+  reschedules                  AppointmentReschedule[]
+  cancellation                 AppointmentCancellation?
+  attendance                   AppointmentAttendance?
+  outcomeReferences            AppointmentOutcomeReference[]
+  auditEvents                  ServiceAppointmentAuditEvent[]
+  reminders                    ServiceAppointmentReminder[]
+
+  @@index([status])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([governmentServiceId])
+  @@index([applicationId])
+  @@index([caseId])
+  @@index([organizationId])
+  @@index([scheduledStartsAt])
+  @@map("service_appointments")
+}
+
+model AppointmentParticipant {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String                     @db.Uuid
+  identityId           String                     @db.Uuid
+  role                 AppointmentParticipantRole
+  organizationId       String?                    @db.Uuid
+  isPrimary            Boolean                    @default(false)
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  serviceAppointment   ServiceAppointment         @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  identity             Identity                   @relation("AppointmentParticipantIdentity", fields: [identityId], references: [id])
+  organization         Organization?              @relation(fields: [organizationId], references: [id])
+
+  @@unique([serviceAppointmentId, identityId, role])
+  @@index([identityId])
+  @@index([organizationId])
+  @@map("appointment_participants")
+}
+
+model AppointmentReschedule {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String                      @db.Uuid
+  requestedByIdentityId String                     @db.Uuid
+  previousStartsAt     DateTime?
+  previousEndsAt       DateTime?
+  requestedStartsAt    DateTime?
+  requestedEndsAt      DateTime?
+  reason               String?
+  status               AppointmentRescheduleStatus @default(PENDING)
+  approvedByIdentityId String?                     @db.Uuid
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  serviceAppointment   ServiceAppointment          @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  requestedBy          Identity                    @relation("AppointmentRescheduleRequester", fields: [requestedByIdentityId], references: [id])
+  approvedBy           Identity?                   @relation("AppointmentRescheduleApprover", fields: [approvedByIdentityId], references: [id])
+
+  @@index([serviceAppointmentId])
+  @@index([requestedByIdentityId])
+  @@map("appointment_reschedules")
+}
+
+model AppointmentCancellation {
+  id                   String             @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String             @unique @db.Uuid
+  cancelledByIdentityId String            @db.Uuid
+  reason               String?
+  cancelledAt          DateTime           @default(now())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  serviceAppointment   ServiceAppointment @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  cancelledBy          Identity           @relation("AppointmentCancellationActor", fields: [cancelledByIdentityId], references: [id])
+
+  @@map("appointment_cancellations")
+}
+
+model AppointmentAttendance {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String                    @unique @db.Uuid
+  attendanceStatus     AppointmentAttendanceStatus @default(EXPECTED)
+  checkedInAt          DateTime?
+  checkedOutAt         DateTime?
+  recordedByIdentityId String?                   @db.Uuid
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  serviceAppointment   ServiceAppointment        @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  recordedBy           Identity?                 @relation("AppointmentAttendanceRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@map("appointment_attendances")
+}
+
+model AppointmentOutcomeReference {
+  id                   String                        @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String                        @db.Uuid
+  referenceType        AppointmentOutcomeReferenceType
+  referenceId          String
+  description          String?
+  recordedAt           DateTime                      @default(now())
+  recordedByIdentityId String?                       @db.Uuid
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  serviceAppointment   ServiceAppointment            @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  recordedBy           Identity?                     @relation("AppointmentOutcomeRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([serviceAppointmentId])
+  @@map("appointment_outcome_references")
+}
+
+model ServiceAppointmentAuditEvent {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  serviceAppointmentId String                           @db.Uuid
+  eventType            ServiceAppointmentAuditEventType
+  actorIdentityId      String?                          @db.Uuid
+  metadata             Json                             @default("{}")
+  recordedAt           DateTime                         @default(now())
+  serviceAppointment   ServiceAppointment               @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  actor                Identity?                        @relation("ServiceAppointmentAuditActor", fields: [actorIdentityId], references: [id])
+
+  @@index([serviceAppointmentId])
+  @@index([eventType])
+  @@map("service_appointment_audit_events")
+}
+
+model ServiceAppointmentReminder {
+  id                     String               @id @default(uuid()) @db.Uuid
+  serviceAppointmentId   String               @db.Uuid
+  communicationMessageId String?              @db.Uuid
+  scheduledFor           DateTime
+  sentAt                 DateTime?
+  isOperationalReminder  Boolean              @default(true)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  serviceAppointment     ServiceAppointment   @relation(fields: [serviceAppointmentId], references: [id], onDelete: Cascade)
+  communicationMessage   CommunicationMessage? @relation(fields: [communicationMessageId], references: [id])
+
+  @@index([serviceAppointmentId])
+  @@index([communicationMessageId])
+  @@map("service_appointment_reminders")
 }
 
 // ─── Service Pack Deployment Lifecycle ───────────────────────────────────────

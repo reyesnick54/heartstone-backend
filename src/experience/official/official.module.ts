@@ -4,9 +4,11 @@ import { AuthorityModule } from '../../authority/authority.module';
 import { DatabaseModule } from '../../database/database.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { OfficialExperienceGuard } from './guards/official-experience.guard';
 import { OfficialController } from './official.controller';
 import { OfficialAlertsService } from './services/official-alerts.service';
+import { OfficialAppointmentsService } from './services/official-appointments.service';
 import { OfficialAvailableActionsService } from './services/official-available-actions.service';
 import { OfficialCasesService } from './services/official-cases.service';
 import { OfficialContextService } from './services/official-context.service';
@@ -16,7 +18,7 @@ import { OfficialWorkQueueService } from './services/official-work-queue.service
 import { OfficialWorkspaceService } from './services/official-workspace.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthorityModule],
+  imports: [DatabaseModule, SessionsModule, AuthorityModule, SchedulingModule],
   controllers: [OfficialController],
   providers: [
     SessionAuthGuard,
@@ -29,6 +31,7 @@ import { OfficialWorkspaceService } from './services/official-workspace.service'
     OfficialCasesService,
     OfficialAvailableActionsService,
     OfficialAlertsService,
+    OfficialAppointmentsService,
   ],
   exports: [
     OfficialContextService,
@@ -39,6 +42,7 @@ import { OfficialWorkspaceService } from './services/official-workspace.service'
     OfficialCasesService,
     OfficialAvailableActionsService,
     OfficialAlertsService,
+    OfficialAppointmentsService,
   ],
 })
 export class OfficialModule {}

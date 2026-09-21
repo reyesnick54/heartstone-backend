@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import {
   ApplicationStatus,
+  AppointmentParticipantRole,
   CaseEventPublicVisibility,
   CaseStatus,
   GovernmentServicePublicAvailability,
   InvoiceStatus,
   OfficialInstrumentStatus,
   RedressMatterStatus,
+  ServiceAppointmentStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
@@ -72,6 +74,7 @@ export class CitizenHomeService {
       upcomingExpirations,
       unreadMessages,
       appealsRedressMatters,
+      upcomingAppointments,
       recentCases,
       appliedServiceIds,
     ] = await Promise.all([
@@ -155,6 +158,30 @@ export class CitizenHomeService {
           status: { in: OPEN_REDRESS_STATUSES },
         },
       }),
+      this.prisma.serviceAppointment.count({
+        where: {
+          participants: {
+            some: {
+              identityId,
+              role: {
+                in: [
+                  AppointmentParticipantRole.APPLICANT,
+                  AppointmentParticipantRole.REPRESENTATIVE,
+                ],
+              },
+            },
+          },
+          status: {
+            in: [
+              ServiceAppointmentStatus.REQUESTED,
+              ServiceAppointmentStatus.SCHEDULED,
+              ServiceAppointmentStatus.CONFIRMED,
+              ServiceAppointmentStatus.RESCHEDULED,
+            ],
+          },
+          scheduledStartsAt: { gte: now },
+        },
+      }),
       this.prisma.case.findMany({
         where: caseWhere,
         include: {
@@ -202,6 +229,7 @@ export class CitizenHomeService {
         upcomingExpirations,
         unreadMessages,
         appealsRedressMatters,
+        upcomingAppointments,
       },
       recentItems: recentCases.map((caseRecord) => ({
         itemType: 'CASE',

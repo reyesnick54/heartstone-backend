@@ -103,5 +103,8 @@ export class OfficialWorkspaceResponseDto {
   intelligenceAlerts!: WorkspaceAlertSummaryDto[];
 
   @ApiProperty()
+  upcomingAppointments!: number;
+
+  @ApiProperty()
   assignmentDoesNotImplyAuthority!: true;
 }

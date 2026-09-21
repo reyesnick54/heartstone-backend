@@ -30,6 +30,9 @@ export class CitizenHomeCountSummaryDto {
 
   @ApiProperty()
   appealsRedressMatters!: number;
+
+  @ApiProperty()
+  upcomingAppointments!: number;
 }
 
 export class CitizenHomeRecentItemDto {

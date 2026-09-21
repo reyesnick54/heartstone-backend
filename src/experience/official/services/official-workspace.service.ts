@@ -13,6 +13,7 @@ import {
   IntelligenceAlertStatus,
   OfficialInstrumentStatus,
   ReviewAssignmentStatus,
+  ServiceAppointmentStatus,
   WorkflowStepType,
 } from '@prisma/client';
 
@@ -193,6 +194,20 @@ export class OfficialWorkspaceService {
       take: 50,
     });
 
+    const upcomingAppointments = await this.prisma.serviceAppointment.count({
+      where: {
+        departmentId: { in: context.scope.departmentIds },
+        status: {
+          in: [
+            ServiceAppointmentStatus.SCHEDULED,
+            ServiceAppointmentStatus.CONFIRMED,
+            ServiceAppointmentStatus.RESCHEDULED,
+          ],
+        },
+        scheduledStartsAt: { gte: now },
+      },
+    });
+
     const intelligenceAlerts = await this.prisma.intelligenceMonitoringAlert.findMany({
       where: {
         responsibleRecipientIdentityId: context.identityId,
@@ -256,6 +271,7 @@ export class OfficialWorkspaceService {
         observedCondition: alert.observedCondition,
         status: alert.status,
       })),
+      upcomingAppointments,
       assignmentDoesNotImplyAuthority: true,
     };
   }

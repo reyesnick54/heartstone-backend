@@ -11,6 +11,10 @@ import {
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { CurrentOfficialContext } from './decorators/current-official-context.decorator';
 import { OfficialAlertsResponseDto } from './dto/official-alerts-response.dto';
+import {
+  OfficialAppointmentDetailResponseDto,
+  OfficialAppointmentsListResponseDto,
+} from './dto/official-appointments-response.dto';
 import { OfficialAvailableActionsResponseDto } from './dto/official-available-actions-response.dto';
 import {
   OfficialCaseDetailResponseDto,
@@ -25,6 +29,7 @@ import {
 } from './guards/official-experience.guard';
 import { OFFICIAL_EXPERIENCE_API_TAG } from './official-experience.constants';
 import { OfficialAlertsService } from './services/official-alerts.service';
+import { OfficialAppointmentsService } from './services/official-appointments.service';
 import { OfficialAvailableActionsService } from './services/official-available-actions.service';
 import { OfficialCasesService } from './services/official-cases.service';
 import { OfficialMeService } from './services/official-me.service';
@@ -44,6 +49,7 @@ export class OfficialController {
     private readonly casesService: OfficialCasesService,
     private readonly availableActionsService: OfficialAvailableActionsService,
     private readonly alertsService: OfficialAlertsService,
+    private readonly appointmentsService: OfficialAppointmentsService,
   ) {}
 
   @Get('me')
@@ -130,5 +136,26 @@ export class OfficialController {
     @CurrentOfficialContext() context: ResolvedOfficialContext,
   ): Promise<OfficialAlertsResponseDto> {
     return this.alertsService.listAlerts(context);
+  }
+
+  @Get('appointments')
+  @RequiresSubstantiveOfficialAccess()
+  @ApiOperation({ summary: 'List service appointments within official institutional scope' })
+  @ApiOkResponse({ type: OfficialAppointmentsListResponseDto })
+  listAppointments(
+    @CurrentOfficialContext() context: ResolvedOfficialContext,
+  ): Promise<OfficialAppointmentsListResponseDto> {
+    return this.appointmentsService.listAppointments(context);
+  }
+
+  @Get('appointments/:id')
+  @RequiresSubstantiveOfficialAccess()
+  @ApiOperation({ summary: 'Get service appointment detail within official scope' })
+  @ApiOkResponse({ type: OfficialAppointmentDetailResponseDto })
+  getAppointment(
+    @CurrentOfficialContext() context: ResolvedOfficialContext,
+    @Param('id', ParseUUIDPipe) appointmentId: string,
+  ): Promise<OfficialAppointmentDetailResponseDto> {
+    return this.appointmentsService.getAppointment(context, appointmentId);
   }
 }
