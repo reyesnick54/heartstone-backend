@@ -47,10 +47,7 @@ export class SessionAuthGuard implements CanActivate {
     const session = await this.sessionsService.validateSessionToken(token);
     request.session = session;
 
-    const actor = await this.actorContextService.resolveFromSessionContext({ session });
-    request.actor = actor;
-
-    this.actorContextService.assertNoClientIdentitySubstitution(actor, request.body);
+    request.actor = await this.actorContextService.resolveFromSessionContext({ session });
 
     return true;
   }
