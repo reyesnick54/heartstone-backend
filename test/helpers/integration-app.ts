@@ -136,6 +136,21 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.jurisdiction.deleteMany();
 }
 
+export async function resetSchedulingData(prisma: PrismaService): Promise<void> {
+  await prisma.serviceAppointmentReminder.deleteMany();
+  await prisma.serviceAppointmentAuditEvent.deleteMany();
+  await prisma.appointmentOutcomeReference.deleteMany();
+  await prisma.appointmentAttendance.deleteMany();
+  await prisma.appointmentCancellation.deleteMany();
+  await prisma.appointmentReschedule.deleteMany();
+  await prisma.appointmentParticipant.deleteMany();
+  await prisma.serviceAppointment.deleteMany();
+  await prisma.appointmentSlot.deleteMany();
+  await prisma.appointmentResource.deleteMany();
+  await prisma.appointmentLocation.deleteMany();
+  await prisma.appointmentReason.deleteMany();
+}
+
 export async function resetComplianceOversightData(prisma: PrismaService): Promise<void> {
   await prisma.complianceAlert.deleteMany();
   await prisma.complianceRevalidationRecord.deleteMany();
@@ -146,6 +161,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetSchedulingData(prisma);
   await resetProductionReadinessData(prisma);
   await resetComplianceOversightData(prisma);
   await resetIntelligenceData(prisma);
