@@ -77,7 +77,10 @@ export class IntelligenceController {
   @Post('frameworks')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  createFramework(@CurrentActor() actor: ActorContextDto, @Body() dto: CreatePerformanceFrameworkDto) {
+  createFramework(
+    @CurrentActor() actor: ActorContextDto,
+    @Body() dto: CreatePerformanceFrameworkDto,
+  ) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     this.scope.assertInstitutionAccess(actor, dto.institutionId);
     return this.frameworkService.create(dto);
@@ -86,7 +89,10 @@ export class IntelligenceController {
   @Get('frameworks/:id')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getFramework(@CurrentActor() actor: ActorContextDto, @Param('id', ParseUUIDPipe) id: string) {
+  async getFramework(
+    @CurrentActor() actor: ActorContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     const framework = await this.frameworkService.findById(id);
     this.scope.assertInstitutionAccess(actor, framework.institutionId);
     return framework;
@@ -119,7 +125,10 @@ export class IntelligenceController {
   @Post('metrics/:id/publish')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async publishMetric(@CurrentActor() actor: ActorContextDto, @Param('id', ParseUUIDPipe) id: string) {
+  async publishMetric(
+    @CurrentActor() actor: ActorContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     const definition = await this.metricDefinitionService.findDefinitionById(id);
     this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.publishDefinition(id);
@@ -133,7 +142,9 @@ export class IntelligenceController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const version = await this.metricDefinitionService.findVersionById(id);
-    const definition = await this.metricDefinitionService.findDefinitionById(version.metricDefinitionId);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
     this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.activateVersion(id);
   }
@@ -141,10 +152,15 @@ export class IntelligenceController {
   @Post('baselines')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async createBaseline(@CurrentActor() actor: ActorContextDto, @Body() dto: CreateMetricBaselineDto) {
+  async createBaseline(
+    @CurrentActor() actor: ActorContextDto,
+    @Body() dto: CreateMetricBaselineDto,
+  ) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     const version = await this.metricDefinitionService.findVersionById(dto.metricVersionId);
-    const definition = await this.metricDefinitionService.findDefinitionById(version.metricDefinitionId);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
     this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.baselineService.create(dto);
   }
@@ -158,7 +174,9 @@ export class IntelligenceController {
   ) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     const version = await this.metricDefinitionService.findVersionById(dto.metricVersionId);
-    const definition = await this.metricDefinitionService.findDefinitionById(version.metricDefinitionId);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
     this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.calculationRunService.recordRun(dto, process.env.API_VERSION ?? 'v1');
   }
@@ -428,10 +446,7 @@ export class IntelligenceController {
   @Post('analysis/runs/:runId/complete')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async completeAnalysisRun(
-    @CurrentActor() actor: ActorContextDto,
-    @Param('runId') runId: string,
-  ) {
+  async completeAnalysisRun(@CurrentActor() actor: ActorContextDto, @Param('runId') runId: string) {
     const run = await this.analysisService.findRunById(runId);
     this.scope.assertInstitutionAccess(actor, run.request.institutionId);
     return this.analysisService.completeRun(runId);
@@ -455,7 +470,8 @@ export class IntelligenceController {
   @ApiBearerAuth()
   createMonitoringRule(
     @CurrentActor() actor: ActorContextDto,
-    @Body() body: Omit<
+    @Body()
+    body: Omit<
       Parameters<IntelligenceMonitoringService['createRule']>[0],
       'ownerIdentityId' | 'reviewerIdentityId'
     >,
@@ -499,7 +515,8 @@ export class IntelligenceController {
   @ApiBearerAuth()
   async generateAlert(
     @CurrentActor() actor: ActorContextDto,
-    @Body() body: Omit<
+    @Body()
+    body: Omit<
       Parameters<IntelligenceMonitoringService['generateAlert']>[0],
       'responsibleRecipientIdentityId'
     >,
@@ -518,7 +535,8 @@ export class IntelligenceController {
   @ApiBearerAuth()
   async verifyAlert(
     @CurrentActor() actor: ActorContextDto,
-    @Body() body: Omit<Parameters<IntelligenceMonitoringService['verifyAlert']>[0], 'verifierIdentityId'>,
+    @Body()
+    body: Omit<Parameters<IntelligenceMonitoringService['verifyAlert']>[0], 'verifierIdentityId'>,
   ) {
     this.guardOperationalPayload(actor, body);
     this.scope.assertAiActorCannotBypassActorContext(actor, 'verifyAlert');
@@ -542,7 +560,11 @@ export class IntelligenceController {
   @ApiBearerAuth()
   async disposeAlert(
     @CurrentActor() actor: ActorContextDto,
-    @Body() body: Omit<Parameters<IntelligenceMonitoringService['disposeAlert']>[0], 'disposedByIdentityId'>,
+    @Body()
+    body: Omit<
+      Parameters<IntelligenceMonitoringService['disposeAlert']>[0],
+      'disposedByIdentityId'
+    >,
   ) {
     this.guardOperationalPayload(actor, body);
     this.scope.assertAiActorCannotBypassActorContext(actor, 'disposeAlert');

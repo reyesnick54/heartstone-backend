@@ -1,9 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import {
-  CredentialStatus,
-  IdentityOfficeholderLinkStatus,
-  IdentityType,
-} from '@prisma/client';
+import { CredentialStatus, IdentityOfficeholderLinkStatus, IdentityType } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
 import { isAppointmentCurrent } from '../../../government/common/appointment-current.util';
@@ -101,10 +97,16 @@ export class ActorContextService {
     authenticationMethods: { isEnabled: boolean }[],
     credentials: { status: CredentialStatus }[],
   ): boolean {
-    if (authenticationMethods.length > 0 && authenticationMethods.every((method) => !method.isEnabled)) {
+    if (
+      authenticationMethods.length > 0 &&
+      authenticationMethods.every((method) => !method.isEnabled)
+    ) {
       return true;
     }
 
-    return credentials.length > 0 && credentials.every((credential) => credential.status === CredentialStatus.REVOKED);
+    return (
+      credentials.length > 0 &&
+      credentials.every((credential) => credential.status === CredentialStatus.REVOKED)
+    );
   }
 }

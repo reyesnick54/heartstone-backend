@@ -26,29 +26,33 @@ describe('IntelligenceInstitutionalScopeService', () => {
   };
 
   it('rejects forged owner identity fields', () => {
-    expect(() => { service.rejectForgedActorIdentityFields({ ownerIdentityId: 'identity-b' }, actor); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      service.rejectForgedActorIdentityFields({ ownerIdentityId: 'identity-b' }, actor);
+    }).toThrow(ForbiddenException);
   });
 
   it('rejects forged reviewer identity fields', () => {
-    expect(() => { service.rejectForgedActorIdentityFields({ reviewerIdentityId: 'identity-b' }, actor); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      service.rejectForgedActorIdentityFields({ reviewerIdentityId: 'identity-b' }, actor);
+    }).toThrow(ForbiddenException);
   });
 
   it('rejects client authority indicators', () => {
-    expect(() => { service.rejectClientAuthorityIndicators({ authorityGranted: true }); }).toThrow(
-      ForbiddenException,
-    );
+    expect(() => {
+      service.rejectClientAuthorityIndicators({ authorityGranted: true });
+    }).toThrow(ForbiddenException);
   });
 
   it('blocks cross-institution access', () => {
-    expect(() => { service.assertInstitutionAccess(actor, 'inst-b'); }).toThrow(ForbiddenException);
+    expect(() => {
+      service.assertInstitutionAccess(actor, 'inst-b');
+    }).toThrow(ForbiddenException);
   });
 
   it('blocks technical access from substantive dashboard action', () => {
-    expect(() => { service.assertTechnicalAccessNotSubstantiveAuthority(true); }).toThrow(
-      ForbiddenException,
-    );
+    expect(() => {
+      service.assertTechnicalAccessNotSubstantiveAuthority(true);
+    }).toThrow(ForbiddenException);
   });
 
   it('blocks AI actors from bypassing actor-context enforcement', () => {
@@ -61,7 +65,8 @@ describe('IntelligenceInstitutionalScopeService', () => {
       isAiActor: true,
       isSuspendedAiAgent: false,
     };
-    expect(() => { service.assertAiActorCannotBypassActorContext(aiActor, 'reviewPerformanceClaim'); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      service.assertAiActorCannotBypassActorContext(aiActor, 'reviewPerformanceClaim');
+    }).toThrow(ForbiddenException);
   });
 });

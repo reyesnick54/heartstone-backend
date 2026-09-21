@@ -168,7 +168,10 @@ export class CommandConsoleController {
     description: 'Replay requires authenticated actor with verified dashboard access entitlements.',
   })
   @ApiOkResponse({ description: 'Immutable snapshot payload for replay' })
-  replaySnapshot(@CurrentActor() actor: ActorContextDto, @Param('replayToken') replayToken: string) {
+  replaySnapshot(
+    @CurrentActor() actor: ActorContextDto,
+    @Param('replayToken') replayToken: string,
+  ) {
     return this.snapshotService.replaySnapshot(replayToken, actor);
   }
 }

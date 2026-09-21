@@ -57,7 +57,9 @@ export class IntelligenceInstitutionalScopeService {
 
     this.assertActorHasInstitutionalScope(actor);
 
-    const allowed = actor.institutionalScopes.some((scope) => scope.institutionId === institutionId);
+    const allowed = actor.institutionalScopes.some(
+      (scope) => scope.institutionId === institutionId,
+    );
     if (!allowed) {
       throw new ForbiddenException('Cross-institution intelligence access denied');
     }

@@ -18,6 +18,7 @@ import { DashboardSnapshotService } from './command-console/dashboard-snapshot.s
 import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
 import { IntelligenceConsequentialAuthorityService } from './common/intelligence-consequential-authority.service';
+import { IntelligenceForbiddenClientFieldsInterceptor } from './common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from './common/intelligence-institutional-scope.service';
 import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
@@ -70,6 +71,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     ProjectStatusProjectionService,
     IntelligenceBoundaryService,
     IntelligenceInstitutionalScopeService,
+    IntelligenceForbiddenClientFieldsInterceptor,
     IntelligenceConsequentialAuthorityService,
     PerformanceFrameworkService,
     MetricDefinitionService,
@@ -106,6 +108,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     ProjectStatusProjectionService,
     IntelligenceBoundaryService,
     IntelligenceInstitutionalScopeService,
+    IntelligenceForbiddenClientFieldsInterceptor,
     IntelligenceConsequentialAuthorityService,
     PerformanceFrameworkService,
     MetricDefinitionService,

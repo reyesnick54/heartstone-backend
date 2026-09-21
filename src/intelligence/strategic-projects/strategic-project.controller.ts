@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 
@@ -6,6 +15,7 @@ import { CurrentActor } from '../../identity/auth/decorators/current-actor.decor
 import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
 import { ActorContextGuard } from '../../identity/auth/guards/actor-context.guard';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { IntelligenceForbiddenClientFieldsInterceptor } from '../common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { StrategicProjectBoundaryService } from '../common/strategic-project-boundary.service';
 import { CreateStrategicProjectProfileDto } from '../dto/create-strategic-project-profile.dto';
@@ -20,6 +30,7 @@ const STRATEGIC_PROJECT_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
 @ApiTags('intelligence/strategic-projects')
 @ApiBearerAuth()
 @UseGuards(...STRATEGIC_PROJECT_GUARDS)
+@UseInterceptors(IntelligenceForbiddenClientFieldsInterceptor)
 @Controller('intelligence/strategic-projects')
 export class StrategicProjectController {
   constructor(
@@ -31,7 +42,10 @@ export class StrategicProjectController {
   ) {}
 
   @Post()
-  createProfile(@CurrentActor() actor: ActorContextDto, @Body() dto: CreateStrategicProjectProfileDto) {
+  createProfile(
+    @CurrentActor() actor: ActorContextDto,
+    @Body() dto: CreateStrategicProjectProfileDto,
+  ) {
     this.guardPayload(actor, dto as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedProjectFields(dto as unknown as Record<string, unknown>);
     this.scopeService.assertInstitutionalTarget(actor, {
