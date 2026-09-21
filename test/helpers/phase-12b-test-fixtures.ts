@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
+  AppointmentStatus,
   DashboardAccessPurpose,
   DashboardColorSemantic,
   DashboardConsoleType,
@@ -14,6 +15,7 @@ import {
   DashboardSourceAvailability,
   DashboardStalenessState,
   DashboardStatusDictionaryOwnerType,
+  IdentityOfficeholderLinkStatus,
   IdentityType,
 } from '@prisma/client';
 import { type App } from 'supertest/types';
@@ -135,6 +137,49 @@ export async function seedPhase12BFixture(
     technicalAdminIdentity.id,
     'technical-admin@phase12b.test',
   );
+
+  const linkIdentityToDepartmentOffice = async (
+    identityId: string,
+    departmentId: string,
+    marker: string,
+  ) => {
+    const office = await prisma.office.create({
+      data: {
+        departmentId,
+        code: `${marker}-OFF`,
+        name: `${marker} Office`,
+      },
+    });
+
+    const officeholder = await prisma.officeholder.create({
+      data: {
+        code: `${marker}-OH`,
+        name: `${marker} Official`,
+      },
+    });
+
+    await prisma.appointment.create({
+      data: {
+        officeId: office.id,
+        officeholderId: officeholder.id,
+        status: AppointmentStatus.ACTIVE,
+        effectiveFrom: new Date('2020-01-01'),
+      },
+    });
+
+    await prisma.identityOfficeholderLink.create({
+      data: {
+        identityId,
+        officeholderId: officeholder.id,
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+      },
+    });
+  };
+
+  await linkIdentityToDepartmentOffice(executiveIdentity.id, departmentA.id, 'PH12B-EXEC');
+  await linkIdentityToDepartmentOffice(deptAIdentity.id, departmentA.id, 'PH12B-DEPT-A');
+  await linkIdentityToDepartmentOffice(deptBIdentity.id, departmentB.id, 'PH12B-DEPT-B');
+  await linkIdentityToDepartmentOffice(technicalAdminIdentity.id, departmentA.id, 'PH12B-TECH');
 
   const statusEntry = await prisma.dashboardStatusDictionaryEntry.create({
     data: {

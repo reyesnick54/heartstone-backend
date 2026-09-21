@@ -1,7 +1,4 @@
-import {
-  IdentityType,
-  RepresentativeAuthorityStatus,
-} from '@prisma/client';
+import { IdentityType, RepresentativeAuthorityStatus } from '@prisma/client';
 
 import { InstitutionalScopeService } from './institutional-scope.service';
 import {

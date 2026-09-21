@@ -29,6 +29,8 @@ export interface AssertResourceAccessInput {
   maskEnumeration?: boolean;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class ResourceAccessService {
   constructor(
@@ -106,9 +108,7 @@ export class ResourceAccessService {
     });
   }
 
-  async evaluateWithoutThrow(
-    input: AssertResourceAccessInput,
-  ): Promise<ScopeEvaluationResult> {
+  async evaluateWithoutThrow(input: AssertResourceAccessInput): Promise<ScopeEvaluationResult> {
     const actor = await this.actorContext.buildFromSession({
       session: input.session,
       isTechnicalAdministrator: input.isTechnicalAdministrator,
@@ -152,7 +152,7 @@ export class ResourceAccessService {
       eventType: SecurityAuditEventType.SCOPE_ACCESS_DENIED,
       identityId: input.session.identityId,
       userAccountId: input.session.userAccountId ?? undefined,
-      sessionId: input.session.sessionId,
+      sessionId: UUID_PATTERN.test(input.session.sessionId) ? input.session.sessionId : undefined,
       actorIdentityId: input.session.identityId,
       metadata: {
         domain: 'institutional-scope',

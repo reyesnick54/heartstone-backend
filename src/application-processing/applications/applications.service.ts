@@ -105,8 +105,16 @@ export class ApplicationsService {
     });
   }
 
-  async updateDraft(session: SessionContextDto, applicationId: string, dto: UpdateApplicationDraftDto) {
-    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
+  async updateDraft(
+    session: SessionContextDto,
+    applicationId: string,
+    dto: UpdateApplicationDraftDto,
+  ) {
+    const application = await this.findAccessibleApplication(
+      session,
+      applicationId,
+      'modification',
+    );
 
     if (application.status !== ApplicationStatus.DRAFT) {
       throw new ImmutableSubmissionException('Only draft applications can be updated');
@@ -119,7 +127,11 @@ export class ApplicationsService {
   }
 
   async submit(session: SessionContextDto, applicationId: string, dto: SubmitApplicationDto) {
-    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
+    const application = await this.findAccessibleApplication(
+      session,
+      applicationId,
+      'modification',
+    );
 
     if (application.status !== ApplicationStatus.DRAFT) {
       throw new ImmutableSubmissionException();
@@ -217,8 +229,16 @@ export class ApplicationsService {
     };
   }
 
-  async submitCorrection(session: SessionContextDto, applicationId: string, dto: SubmitApplicationDto) {
-    const application = await this.findAccessibleApplication(session, applicationId, 'modification');
+  async submitCorrection(
+    session: SessionContextDto,
+    applicationId: string,
+    dto: SubmitApplicationDto,
+  ) {
+    const application = await this.findAccessibleApplication(
+      session,
+      applicationId,
+      'modification',
+    );
 
     if (application.case?.status !== 'WAITING_APPLICANT') {
       throw new ForbiddenException(
@@ -317,9 +337,14 @@ export class ApplicationsService {
         { maskEnumeration: true },
       );
     } else {
-      await this.resourceAccess.assertVisibility(session, ScopedResourceType.APPLICATION, applicationId, {
-        maskEnumeration: true,
-      });
+      await this.resourceAccess.assertVisibility(
+        session,
+        ScopedResourceType.APPLICATION,
+        applicationId,
+        {
+          maskEnumeration: true,
+        },
+      );
     }
 
     const application = await this.prisma.application.findUnique({

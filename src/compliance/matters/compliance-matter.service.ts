@@ -66,11 +66,7 @@ export class ComplianceMatterService {
 
   async findById(id: string, session?: SessionContextDto) {
     if (session) {
-      await this.resourceAccess.assertVisibility(
-        session,
-        ScopedResourceType.COMPLIANCE_MATTER,
-        id,
-      );
+      await this.resourceAccess.assertVisibility(session, ScopedResourceType.COMPLIANCE_MATTER, id);
     }
 
     const matter = await this.prisma.complianceMatter.findUnique({

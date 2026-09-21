@@ -41,9 +41,6 @@ export function maskDeniedAsNotFound(
   return new InstitutionalScopeDeniedException(reason);
 }
 
-export function buildDenialMessage(
-  intent: ScopeAccessIntent,
-  reason: ScopeDenialReason,
-): string {
+export function buildDenialMessage(intent: ScopeAccessIntent, reason: ScopeDenialReason): string {
   return `Institutional scope ${intent} denied: ${reason}`;
 }

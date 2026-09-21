@@ -18,7 +18,10 @@ export interface OwnershipResolution {
 export class ResourceOwnershipResolver {
   constructor(private readonly prisma: PrismaService) {}
 
-  async resolve(resourceType: ScopedResourceType, resourceId: string): Promise<OwnershipResolution> {
+  async resolve(
+    resourceType: ScopedResourceType,
+    resourceId: string,
+  ): Promise<OwnershipResolution> {
     switch (resourceType) {
       case ScopedResourceType.INSTITUTION:
         return this.resolveInstitution(resourceId);
@@ -194,7 +197,10 @@ export class ResourceOwnershipResolver {
       departmentId: application.case?.responsibleDepartmentId,
     };
 
-    const linkageIssue = this.validateInstitutionalLinkage(ScopedResourceType.APPLICATION, ownership);
+    const linkageIssue = this.validateInstitutionalLinkage(
+      ScopedResourceType.APPLICATION,
+      ownership,
+    );
     if (linkageIssue) {
       return { found: true, ownership, denialReason: linkageIssue };
     }
@@ -395,7 +401,11 @@ export class ResourceOwnershipResolver {
     };
 
     if (!ownership.institutionId) {
-      return { found: true, ownership, denialReason: ScopeDenialReason.MISSING_INSTITUTIONAL_LINKAGE };
+      return {
+        found: true,
+        ownership,
+        denialReason: ScopeDenialReason.MISSING_INSTITUTIONAL_LINKAGE,
+      };
     }
 
     return { found: true, ownership };

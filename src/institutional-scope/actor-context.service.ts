@@ -64,7 +64,9 @@ export class ActorContextService {
         effectiveFrom: authority.effectiveFrom,
         effectiveUntil: authority.effectiveUntil,
       })),
-      organizationMembershipIds: identity.memberships.map((membership) => membership.organizationId),
+      organizationMembershipIds: identity.memberships.map(
+        (membership) => membership.organizationId,
+      ),
       isTechnicalAdministrator: input.isTechnicalAdministrator ?? false,
     };
   }

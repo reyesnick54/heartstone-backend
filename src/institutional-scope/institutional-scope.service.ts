@@ -29,7 +29,10 @@ export class InstitutionalScopeService {
       };
     }
 
-    if (resolution.denialReason && resolution.denialReason !== ScopeDenialReason.RESOURCE_NOT_FOUND) {
+    if (
+      resolution.denialReason &&
+      resolution.denialReason !== ScopeDenialReason.RESOURCE_NOT_FOUND
+    ) {
       return {
         allowed: false,
         reason: resolution.denialReason,
