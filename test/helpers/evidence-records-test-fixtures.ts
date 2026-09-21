@@ -8,14 +8,13 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
+import { type PrismaService } from '../../src/database/prisma.service';
 import { type TestMalwareScanningAdapter } from '../../src/evidence-records/adapters/test-malware-scanning.adapter';
 import { NON_PRODUCTION_EVIDENCE_RECORDS_FIXTURE_MARKER } from '../../src/evidence-records/evidence-records.constants';
 import { MALWARE_SCANNING_PORT } from '../../src/evidence-records/ports/malware-scanning.port';
 import { asDocumentRecordBody, asDocumentVersionBody } from './evidence-records-test-types';
-import { type PrismaService } from '../../src/database/prisma.service';
 import {
   createPasswordAuthenticationMethodViaPrisma,
-  createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
   provisionIdentityViaPrisma,
 } from './identity-provisioning.fixture';

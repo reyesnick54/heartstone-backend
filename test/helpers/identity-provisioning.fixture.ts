@@ -1,3 +1,4 @@
+import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   AuthenticationMethodType,
@@ -7,7 +8,6 @@ import {
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
-import { type INestApplication } from '@nestjs/common';
 
 import { hashSecret } from '../../src/identity/common/crypto.util';
 import { asLoginResponseBody } from './identity-test-types';
@@ -74,7 +74,7 @@ export async function provisionIdentityViaPrisma(
 }
 
 export async function loginAndGetSessionToken(
-  app: INestApplication<App>,
+  app: INestApplication<App> | { getHttpServer: () => App },
   loginIdentifier: string,
   password: string,
 ): Promise<string> {

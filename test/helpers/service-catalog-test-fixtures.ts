@@ -1,3 +1,4 @@
+import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   AuthorityClassification,
@@ -6,7 +7,6 @@ import {
   InstitutionType,
   JurisdictionType,
 } from '@prisma/client';
-import { type INestApplication } from '@nestjs/common';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
@@ -27,7 +27,7 @@ export interface ServiceCatalogFixtureContext {
 }
 
 export async function seedServiceCatalogFixture(
-  app: INestApplication<App>,
+  app: INestApplication<App> | { getHttpServer: () => App },
   prisma: PrismaService,
 ): Promise<ServiceCatalogFixtureContext> {
   const jurisdiction = await prisma.jurisdiction.create({
