@@ -1,0 +1,185 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for low-complexity registration services. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-simple-registration",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Simple Registration Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REGISTRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit registration",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-REGISTRATION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Confirm registration",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REG-ACK",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "TEMPLATE-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-ID-DOC"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REG-PENDING",
+          "label": "Pending registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REGISTRATION-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "verify"
+        }
+      ],
+      "dependencies": [],
+      "description": "NON_PRODUCTION simple registration template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-ID-DOC",
+          "label": "Identity document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REG-FORM",
+          "formName": "Registration intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "email",
+                  "fieldType": "EMAIL",
+                  "label": "Email",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REGISTRATION-VERIFY",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-REG-CONFIRMATION"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registration confirmation",
+          "outputCode": "TEMPLATE-REG-CONFIRMATION",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template review route",
+          "label": "Administrative review",
+          "routeCode": "TEMPLATE-REG-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-SIMPLE-REGISTRATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REGISTRATION",
+      "serviceName": "Template Simple Registration",
+      "serviceSlug": "template-simple-registration",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Registration decision SLA",
+          "ruleCode": "TEMPLATE-REG-SLA",
+          "targetDays": 10
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REGISTRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REGISTRATION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Verify registration",
+          "stageKey": "verify",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REGISTRATION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isIssuanceStage": true,
+          "label": "Issue confirmation",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}

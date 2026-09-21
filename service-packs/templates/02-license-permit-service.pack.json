@@ -1,0 +1,204 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Canonical template for licensure and permit services with fees and issuance. NON_PRODUCTION / TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-license-permit",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "License / Permit Service Template",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "PROFESSIONAL"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "License review",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "isConsequential": true,
+          "publicStageLabel": "Issue license",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-LICENSE-FEE-NOTICE",
+          "templateCode": "TEMPLATE-FEE-NOTICE",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "TEMPLATE-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BUSINESS-REG",
+          "TEMPLATE-QUALIFICATION"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LICENSE-SLA-RISK",
+          "label": "SLA at-risk licenses",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LICENSE-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "substantive"
+        }
+      ],
+      "dependencies": [],
+      "description": "NON_PRODUCTION license/permit template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template business registration evidence",
+          "evidenceCode": "TEMPLATE-BUSINESS-REG",
+          "label": "Business registration",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        },
+        {
+          "description": "Template qualification evidence",
+          "evidenceCode": "TEMPLATE-QUALIFICATION",
+          "label": "Professional qualification",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 250,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-LICENSE-FEE",
+          "label": "Application fee",
+          "waivable": false
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LICENSE-FORM",
+          "formName": "License application",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "businessName",
+                  "fieldType": "TEXT",
+                  "label": "Business name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "licenseClass",
+                  "fieldType": "SELECT",
+                  "label": "License class",
+                  "required": true
+                }
+              ],
+              "label": "Business details",
+              "sectionKey": "business"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-LICENSE-CERT"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "TEMPLATE-LICENSE-RENEWAL",
+        "supportsRenewal": true,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "License certificate",
+          "outputCode": "TEMPLATE-LICENSE-CERT",
+          "outputType": "LICENCE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template appeal route",
+          "label": "License appeal",
+          "routeCode": "TEMPLATE-LICENSE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-LICENSE-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LICENSING",
+      "serviceName": "Template License / Permit",
+      "serviceSlug": "template-license-permit",
+      "serviceType": "LICENCE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "License decision SLA",
+          "ruleCode": "TEMPLATE-LICENSE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Substantive review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LICENSE-ISSUANCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isIssuanceStage": true,
+          "label": "Issue license",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    }
+  ]
+}
