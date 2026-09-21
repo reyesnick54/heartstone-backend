@@ -71,12 +71,22 @@ export async function seedCitizenExperienceFixture(
 ): Promise<CitizenExperienceFixtureContext> {
   const phase11 = await seedPhase11Fixture(app, prisma);
   const marker = NON_PRODUCTION_CITIZEN_EXPERIENCE_MARKER;
-  const governmentDecisionId = await ensureGovernmentDecision(app, phase11);
 
   const caseRecord = await prisma.case.findUniqueOrThrow({
     where: { id: phase11.caseId },
     select: { applicationId: true },
   });
+
+  await prisma.application.update({
+    where: { id: caseRecord.applicationId },
+    data: { applicantIdentityId: phase11.applicantIdentityId },
+  });
+  await prisma.case.update({
+    where: { id: phase11.caseId },
+    data: { applicantIdentityId: phase11.applicantIdentityId },
+  });
+
+  const governmentDecisionId = await ensureGovernmentDecision(app, phase11);
 
   await prisma.instrumentTypeVersion.update({
     where: { id: phase11.instrumentTypeVersionId },
