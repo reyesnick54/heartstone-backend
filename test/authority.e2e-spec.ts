@@ -18,16 +18,20 @@ import {
   asAuthorityEvaluationBody,
   asFunctionAuthorityRecordBody,
 } from './helpers/authority-test-types';
+import {
+  authHeader,
+  ensureIntegrationAdminSession,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Authority Engine (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let fixtures: Phase4TestFixtures;
+  let adminSessionToken: string;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
-    prisma = app.get(PrismaService);
+    ({ app, prisma } = await createIntegrationApp());
     fixtures = new Phase4TestFixtures(
       prisma,
       app.get(GoverningSourcesService),
@@ -38,6 +42,8 @@ describe('Authority Engine (e2e)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
 
   afterAll(async () => {
@@ -74,7 +80,7 @@ describe('Authority Engine (e2e)', () => {
 
     const allowResponse = await request(app.getHttpServer())
       .post('/api/v1/authority/evaluate')
-      .set('Authorization', 'Bearer authority-e2e-token')
+      .set(authHeader('authority-e2e-token'))
       .send({
         functionAuthorityRecordId: owned.functionId,
         action: AuthorityActionType.DECIDE,
@@ -95,7 +101,7 @@ describe('Authority Engine (e2e)', () => {
 
     const denyOther = await request(app.getHttpServer())
       .post('/api/v1/authority/evaluate')
-      .set('Authorization', 'Bearer authority-e2e-token')
+      .set(authHeader('authority-e2e-token'))
       .send({
         functionAuthorityRecordId: otherFunction.functionId,
         action: AuthorityActionType.DECIDE,
@@ -129,7 +135,7 @@ describe('Authority Engine (e2e)', () => {
 
     const withDelegation = await request(app.getHttpServer())
       .post('/api/v1/authority/evaluate')
-      .set('Authorization', 'Bearer delegation-e2e-token')
+      .set(authHeader('delegation-e2e-token'))
       .send({
         functionAuthorityRecordId: delegated.functionId,
         action: AuthorityActionType.APPROVE,
@@ -150,7 +156,7 @@ describe('Authority Engine (e2e)', () => {
 
     const afterRevoke = await request(app.getHttpServer())
       .post('/api/v1/authority/evaluate')
-      .set('Authorization', 'Bearer delegation-e2e-token')
+      .set(authHeader('delegation-e2e-token'))
       .send({
         functionAuthorityRecordId: delegated.functionId,
         action: AuthorityActionType.APPROVE,
@@ -168,6 +174,7 @@ describe('Authority Engine (e2e)', () => {
   it('function cannot be activated through ordinary create endpoint', async () => {
     const created = await request(app.getHttpServer())
       .post('/api/v1/authority/functions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: `${NON_PRODUCTION_FIXTURE_MARKER}-DRAFT`,
         name: 'Draft Function',
