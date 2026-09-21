@@ -27,5 +27,6 @@ import { CitizenMeService } from './services/citizen-me.service';
     CitizenCaseStatusService,
     CitizenServicesService,
   ],
+  exports: [CitizenActionCenterService, CitizenAccessService],
 })
 export class CitizenExperienceModule {}
