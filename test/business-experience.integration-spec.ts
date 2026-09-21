@@ -32,6 +32,7 @@ import {
   asBusinessProjectsBody,
 } from './helpers/business-experience-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { issueInstrumentForDecision } from './helpers/phase-8-test-fixtures';
 import { calculateAndInvoiceFees } from './helpers/phase-11-test-fixtures';
 
 describe('Business Experience API (integration)', () => {
@@ -242,27 +243,20 @@ describe('Business Experience API (integration)', () => {
   });
 
   it('reflects authoritative compliance records in compliance listing', async () => {
-    const instrumentTypeVersion = await prisma.instrumentTypeVersion.findFirstOrThrow({
-      select: { id: true },
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture.phase11Base,
+      fixture.governmentDecisionId,
+      { idempotencyKey: 'BIZ-COMPLIANCE-TEST' },
+    );
 
-    const instrument = await prisma.officialInstrument.create({
-      data: {
-        instrumentTypeVersionId: instrumentTypeVersion.id,
-        governmentDecisionId: fixture.governmentDecisionId,
-        caseId: fixture.caseId,
-        masterAdministrativeFileId: fixture.masterAdministrativeFileId,
-        issuerInstitutionId: fixture.institutionId,
-        holderOrganizationId: fixture.organizationId,
-        instrumentNumber: 'BIZ-LIC-001',
-        status: OfficialInstrumentStatus.ISSUED,
-        effectiveFrom: new Date(),
-        scope: { activity: 'regulated' },
-      },
+    await prisma.officialInstrument.update({
+      where: { id: issued.instrument.id },
+      data: { holderOrganizationId: fixture.organizationId, holderIdentityId: null },
     });
 
     const instrumentVersion = await prisma.officialInstrumentVersion.findFirstOrThrow({
-      where: { officialInstrumentId: instrument.id },
+      where: { officialInstrumentId: issued.instrument.id },
       select: { id: true },
     });
 
@@ -271,7 +265,7 @@ describe('Business Experience API (integration)', () => {
         complianceMatterNumber: 'BIZ-CM-001',
         masterAdministrativeFileId: fixture.masterAdministrativeFileId,
         caseId: fixture.caseId,
-        officialInstrumentId: instrument.id,
+        officialInstrumentId: issued.instrument.id,
         holderOrganizationId: fixture.organizationId,
         responsibleInstitutionId: fixture.institutionId,
         responsibleDepartmentId: fixture.departmentId,
@@ -416,23 +410,20 @@ describe('Business Experience API (integration)', () => {
   });
 
   it('lists organization-held licenses for authorized member', async () => {
-    const instrumentTypeVersion = await prisma.instrumentTypeVersion.findFirstOrThrow({
-      select: { id: true },
-    });
+    const issued = await issueInstrumentForDecision(
+      app,
+      fixture.phase11Base,
+      fixture.governmentDecisionId,
+      { idempotencyKey: 'BIZ-LICENSE-TEST' },
+    );
 
-    await prisma.officialInstrument.create({
+    await prisma.officialInstrument.update({
+      where: { id: issued.instrument.id },
       data: {
-        instrumentTypeVersionId: instrumentTypeVersion.id,
-        governmentDecisionId: fixture.governmentDecisionId,
-        caseId: fixture.caseId,
-        masterAdministrativeFileId: fixture.masterAdministrativeFileId,
-        issuerInstitutionId: fixture.institutionId,
         holderOrganizationId: fixture.organizationId,
-        instrumentNumber: 'BIZ-LIC-002',
+        holderIdentityId: null,
         status: OfficialInstrumentStatus.EFFECTIVE,
-        effectiveFrom: new Date(),
         effectiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        scope: { activity: 'regulated' },
       },
     });
 
