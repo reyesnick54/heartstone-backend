@@ -9,6 +9,7 @@ import {
 
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
+import { ClientIdentitySubstitutionGuard } from '../../identity/auth/guards/client-identity-substitution.guard';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
@@ -19,7 +20,10 @@ import { CaptureSnapshotDto } from './dto/capture-snapshot.dto';
 import { DeriveIndicatorProjectionDto } from './dto/derive-indicator-projection.dto';
 import { QueryDashboardDto } from './dto/query-dashboard.dto';
 
-const COMMAND_CONSOLE_GUARDS = [IntelligenceSuspendedAiGuard] as const;
+const COMMAND_CONSOLE_GUARDS = [
+  ClientIdentitySubstitutionGuard,
+  IntelligenceSuspendedAiGuard,
+] as const;
 
 @ApiTags('intelligence/command-console')
 @ApiBearerAuth()

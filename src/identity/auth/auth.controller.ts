@@ -14,6 +14,7 @@ import { CurrentSession } from './decorators/current-session.decorator';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SessionContextDto } from './dto/session-context.dto';
+import { ClientIdentitySubstitutionGuard } from './guards/client-identity-substitution.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 
 @ApiTags('identity-auth')
@@ -33,7 +34,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke the current session' })
   @ApiOkResponse({ description: 'Session revoked' })
