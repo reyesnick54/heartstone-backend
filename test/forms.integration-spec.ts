@@ -12,18 +12,30 @@ import {
   asFormValidationResultBody,
   asFormVersionBody,
 } from './helpers/forms-test-types';
+import {
+  authHeader,
+  provisionIntegrationAdminSession,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Forms engine (integration)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
+  let adminSessionToken: string;
+
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
   });
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const admin = await provisionIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
+
+  function authed() {
+    return request(app.getHttpServer()).set(authHeader(adminSessionToken));
+  }
 
   afterAll(async () => {
     await app.close();
@@ -35,7 +47,7 @@ describe('Forms engine (integration)', () => {
   }> {
     const { serviceVersionId } = await seedFormsGovernmentServiceVersion(prisma);
 
-    const definitionResponse = await request(app.getHttpServer())
+    const definitionResponse = await authed()
       .post('/api/v1/forms/definitions')
       .send({
         code: 'NON_PRODUCTION-business-license-form',
@@ -127,7 +139,7 @@ describe('Forms engine (integration)', () => {
   it('creates form versions linked to a government service version', async () => {
     const { serviceVersionId, formDefinitionId } = await seedServiceCatalogFixture();
 
-    const versionResponse = await request(app.getHttpServer())
+    const versionResponse = await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -151,7 +163,7 @@ describe('Forms engine (integration)', () => {
   it('enforces published version immutability and supports supersession', async () => {
     const { formDefinitionId } = await seedServiceCatalogFixture();
 
-    const v1Response = await request(app.getHttpServer())
+    const v1Response = await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -162,14 +174,14 @@ describe('Forms engine (integration)', () => {
 
     const v1Id = asFormVersionBody(v1Response.body).id;
 
-    await request(app.getHttpServer()).patch(`/api/v1/forms/versions/${v1Id}/publish`).expect(200);
+    await authed().patch(`/api/v1/forms/versions/${v1Id}/publish`).expect(200);
 
-    await request(app.getHttpServer())
+    await authed()
       .patch(`/api/v1/forms/versions/${v1Id}`)
       .send({ title: { default: 'Mutated title' } })
       .expect(400);
 
-    const v2Response = await request(app.getHttpServer())
+    const v2Response = await authed()
       .post(`/api/v1/forms/definitions/${formDefinitionId}/versions/next`)
       .send({
         title: { default: 'Business License Application v2' },
@@ -178,7 +190,7 @@ describe('Forms engine (integration)', () => {
       .expect(201);
     const v2 = asFormVersionBody(v2Response.body);
 
-    await request(app.getHttpServer()).patch(`/api/v1/forms/versions/${v2.id}/publish`).expect(200);
+    await authed().patch(`/api/v1/forms/versions/${v2.id}/publish`).expect(200);
 
     const v1 = await prisma.formVersion.findUnique({ where: { id: v1Id } });
     expect(v1?.status).toBe(FormVersionStatus.SUPERSEDED);
@@ -188,7 +200,7 @@ describe('Forms engine (integration)', () => {
   it('renders ordered sections and fields and preserves declaration version text', async () => {
     const { formDefinitionId } = await seedServiceCatalogFixture();
 
-    const versionResponse = await request(app.getHttpServer())
+    const versionResponse = await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -200,7 +212,7 @@ describe('Forms engine (integration)', () => {
     const version = asFormVersionBody(versionResponse.body);
     const schema = asFormSchemaBody(
       (
-        await request(app.getHttpServer())
+        await authed()
           .get(`/api/v1/forms/versions/${version.id}/schema`)
           .expect(200)
       ).body,
@@ -227,7 +239,7 @@ describe('Forms engine (integration)', () => {
   it('validates responses statelessly without creating applications or cases', async () => {
     const { formDefinitionId } = await seedServiceCatalogFixture();
 
-    const versionResponse = await request(app.getHttpServer())
+    const versionResponse = await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -237,11 +249,11 @@ describe('Forms engine (integration)', () => {
       .expect(201);
 
     const versionId = asFormVersionBody(versionResponse.body).id;
-    await request(app.getHttpServer())
+    await authed()
       .patch(`/api/v1/forms/versions/${versionId}/publish`)
       .expect(200);
 
-    const invalidResponse = await request(app.getHttpServer())
+    const invalidResponse = await authed()
       .post('/api/v1/forms/validate-response')
       .send({
         formVersionId: versionId,
@@ -262,7 +274,7 @@ describe('Forms engine (integration)', () => {
       prisma.formDefinition.count(),
     ]);
 
-    const validResponse = await request(app.getHttpServer())
+    const validResponse = await authed()
       .post('/api/v1/forms/validate-response')
       .send({
         formVersionId: versionId,
@@ -288,7 +300,7 @@ describe('Forms engine (integration)', () => {
   it('rejects circular conditional dependencies', async () => {
     const { formDefinitionId } = await seedServiceCatalogFixture();
 
-    await request(app.getHttpServer())
+    await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -335,7 +347,7 @@ describe('Forms engine (integration)', () => {
   it('keeps old form versions reconstructable after supersession', async () => {
     const { formDefinitionId } = await seedServiceCatalogFixture();
 
-    const v1Response = await request(app.getHttpServer())
+    const v1Response = await authed()
       .post('/api/v1/forms/versions')
       .send({
         formDefinitionId,
@@ -345,9 +357,9 @@ describe('Forms engine (integration)', () => {
       .expect(201);
 
     const v1Id = asFormVersionBody(v1Response.body).id;
-    await request(app.getHttpServer()).patch(`/api/v1/forms/versions/${v1Id}/publish`).expect(200);
+    await authed().patch(`/api/v1/forms/versions/${v1Id}/publish`).expect(200);
 
-    const v2Response = await request(app.getHttpServer())
+    const v2Response = await authed()
       .post(`/api/v1/forms/definitions/${formDefinitionId}/versions/next`)
       .send({
         title: { default: 'Business License Application v2' },
@@ -355,13 +367,13 @@ describe('Forms engine (integration)', () => {
       })
       .expect(201);
 
-    await request(app.getHttpServer())
+    await authed()
       .patch(`/api/v1/forms/versions/${asFormVersionBody(v2Response.body).id}/publish`)
       .expect(200);
 
     const reconstructed = asFormReconstructBody(
       (
-        await request(app.getHttpServer())
+        await authed()
           .get(`/api/v1/forms/versions/${v1Id}/reconstruct`)
           .expect(200)
       ).body,
