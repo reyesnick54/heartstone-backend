@@ -2,6 +2,8 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 
 import { SecurityAuditService } from '../audit/security-audit.service';
+import { type ActorContext } from '../auth/context/actor-context.types';
+import { CurrentActor } from '../auth/decorators/current-actor.decorator';
 import { CurrentSession } from '../auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
@@ -22,6 +24,9 @@ export class ProtectedProfileResponseDto {
 
   @ApiProperty()
   governmentAuthorityNote!: string;
+
+  @ApiProperty({ example: false })
+  hasInstitutionalRelationships!: boolean;
 }
 
 @ApiTags('identity-protected')
@@ -39,6 +44,7 @@ export class ProtectedController {
   @ApiOkResponse({ type: ProtectedProfileResponseDto })
   async getProfile(
     @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
   ): Promise<ProtectedProfileResponseDto> {
     this.authorityBoundary.assertNoGovernmentAuthorityFromAuthenticationOnly({
       identityId: session.identityId,
@@ -60,6 +66,7 @@ export class ProtectedController {
       hasGovernmentAuthority: false,
       governmentAuthorityNote:
         'Authentication establishes identity only; government authority requires function-level evaluation.',
+      hasInstitutionalRelationships: actor.hasInstitutionalRelationships,
     };
   }
 }

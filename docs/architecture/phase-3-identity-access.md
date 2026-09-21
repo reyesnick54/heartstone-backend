@@ -41,8 +41,12 @@ Officeholder, Appointment, Delegation, Institution, and Jurisdiction remain in `
 - Password credentials are hashed with scrypt before storage.
 - Sessions use opaque random tokens; only SHA-256 hashes are stored.
 - `SessionAuthGuard` validates: token exists, not revoked, not expired, account active.
+- After session validation, `ActorContextService` derives the canonical `ActorContext` from server-side session state (never from client payload identity fields).
+- `@CurrentActor()` exposes the server-resolved actor context to protected controllers.
 - Bearer token in `Authorization` header for protected endpoints.
 - Revoked sessions are rejected with audit events.
+
+See `docs/architecture/actor-context-trust-boundary.md` for the authenticated actor context trust boundary.
 
 ## OIDC / MFA / service identity boundaries
 
