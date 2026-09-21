@@ -1,3 +1,4 @@
+import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   ApplicantCategory,
@@ -21,7 +22,6 @@ import {
   WorkflowStepType,
   WorkflowTransitionJoinType,
 } from '@prisma/client';
-import { type INestApplication } from '@nestjs/common';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/application-processing/application-processing.constants';
@@ -61,7 +61,7 @@ export interface Phase6FixtureContext {
 }
 
 export async function seedPhase6Fixture(
-  app: INestApplication<App>,
+  app: INestApplication<App> | { getHttpServer: () => App },
   prisma: PrismaService,
 ): Promise<Phase6FixtureContext> {
   const marker = NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER;

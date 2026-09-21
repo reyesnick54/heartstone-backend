@@ -1,7 +1,6 @@
 import {
   AccountStatus,
   AppointmentStatus,
-  AuthenticationMethodType,
   FormDefinitionStatus,
   FormFieldType,
   FormVersionStatus,
@@ -16,7 +15,6 @@ import {
   WorkflowStepType,
   WorkflowVersionStatus,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/application-processing/application-processing.constants';
@@ -28,7 +26,6 @@ import {
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
-import { asLoginResponseBody } from './identity-test-types';
 
 export interface ApplicationProcessingFixtureContext {
   jurisdictionId: string;

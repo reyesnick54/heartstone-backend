@@ -5,8 +5,8 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import { hashToken } from '../src/identity/common/crypto.util';
-import { asLoginResponseBody } from './helpers/identity-test-types';
 import { provisionIdentityViaPrisma } from './helpers/identity-provisioning.fixture';
+import { asLoginResponseBody } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Phase 3C authentication boundary (integration)', () => {
