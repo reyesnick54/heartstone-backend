@@ -98,6 +98,7 @@ export interface ProtectedProfileBody {
   assuranceLevel: string;
   hasGovernmentAuthority: false;
   governmentAuthorityNote: string;
+  hasInstitutionalRelationships: boolean;
 }
 
 export function asPersonBody(body: unknown): PersonBody {

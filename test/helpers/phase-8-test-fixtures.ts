@@ -55,6 +55,56 @@ export interface Phase8FixtureContext extends Phase8SessionContext {
   sealDocumentVersionId?: string;
 }
 
+async function provisionSessionForIdentity(
+  app: INestApplication<App>,
+  prisma: PrismaService,
+  identityId: string,
+  loginIdentifier: string,
+): Promise<{ identityId: string; sessionToken: string }> {
+  const identity = await prisma.identity.findUniqueOrThrow({
+    where: { id: identityId },
+    select: { id: true, personId: true, userAccountId: true },
+  });
+
+  let userAccountId = identity.userAccountId;
+
+  if (!userAccountId) {
+    const account = await prisma.userAccount.create({
+      data: {
+        loginIdentifier,
+        personId: identity.personId,
+        status: AccountStatus.ACTIVE,
+      },
+    });
+    userAccountId = account.id;
+    await prisma.identity.update({
+      where: { id: identity.id },
+      data: { userAccountId: account.id },
+    });
+  }
+
+  await request(app.getHttpServer())
+    .post('/api/v1/identity/credentials')
+    .send({ identityId: identity.id, type: 'PASSWORD', password: 'Phase8123!' })
+    .expect(201);
+
+  await request(app.getHttpServer())
+    .post('/api/v1/identity/authentication-methods')
+    .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
+    .expect(201);
+
+  const login = asLoginResponseBody(
+    (
+      await request(app.getHttpServer())
+        .post('/api/v1/identity/auth/login')
+        .send({ loginIdentifier, password: 'Phase8123!' })
+        .expect(201)
+    ).body,
+  );
+
+  return { identityId: identity.id, sessionToken: login.sessionToken };
+}
+
 async function createSessionIdentity(
   app: INestApplication<App>,
   marker: string,
@@ -376,7 +426,12 @@ export async function seedPhase8Fixture(
     });
   }
 
-  const applicant = await createSessionIdentity(app, marker, 'applicant', prisma);
+  const applicant = await provisionSessionForIdentity(
+    app,
+    prisma,
+    base.decisionMakerIdentityId,
+    `${marker}-applicant@test.gov`,
+  );
   const official = await createSessionIdentity(app, marker, 'official', prisma);
   const approver = await createSessionIdentity(app, marker, 'approver', prisma);
 

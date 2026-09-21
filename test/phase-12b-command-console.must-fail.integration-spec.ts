@@ -117,7 +117,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
         sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
       })
-      .expect(400);
+      .expect(403);
   });
 
   it('must-fail: technical administrator does not gain substantive executive access', async () => {
