@@ -1,0 +1,33 @@
+export const EXPERIENCE_DEEP_LINK_ROUTES = {
+  CITIZEN_APPLICATION_DETAIL: 'citizen.application.detail',
+  CITIZEN_CASE_STATUS: 'citizen.case.status',
+  CITIZEN_CASE_MESSAGES: 'citizen.case.messages',
+  CITIZEN_PAYMENT_INVOICE: 'citizen.payment.invoice',
+  CITIZEN_INSTRUMENT_DETAIL: 'citizen.instrument.detail',
+  CITIZEN_DOCUMENT_DETAIL: 'citizen.document.detail',
+  CITIZEN_MESSAGE_DETAIL: 'citizen.message.detail',
+  BUSINESS_OVERVIEW: 'business.overview',
+  OFFICIAL_CASE_DETAIL: 'official.case.detail',
+  OFFICIAL_CASE_ACTIONS: 'official.case.actions',
+  OFFICIAL_EVIDENCE_DETAIL: 'official.evidence.detail',
+} as const;
+
+export type ExperienceDeepLinkRoute =
+  (typeof EXPERIENCE_DEEP_LINK_ROUTES)[keyof typeof EXPERIENCE_DEEP_LINK_ROUTES];
+
+export const EXPERIENCE_DEEP_LINK_PARAM_REQUIREMENTS: Record<
+  ExperienceDeepLinkRoute,
+  readonly string[]
+> = {
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_APPLICATION_DETAIL]: ['applicationId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_CASE_STATUS]: ['caseId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_CASE_MESSAGES]: ['caseId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_PAYMENT_INVOICE]: ['invoiceId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_INSTRUMENT_DETAIL]: ['instrumentId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_DOCUMENT_DETAIL]: ['documentId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.CITIZEN_MESSAGE_DETAIL]: ['messageId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.BUSINESS_OVERVIEW]: ['organizationId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.OFFICIAL_CASE_DETAIL]: ['caseId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.OFFICIAL_CASE_ACTIONS]: ['caseId'],
+  [EXPERIENCE_DEEP_LINK_ROUTES.OFFICIAL_EVIDENCE_DETAIL]: ['evidenceId'],
+};
