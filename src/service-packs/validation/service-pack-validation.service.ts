@@ -78,7 +78,7 @@ export class ServicePackValidationService {
           servicePackVersionId: version.id,
           importId: request.importId,
           outcome,
-          issues: allIssues,
+          issues: allIssues as unknown as Prisma.InputJsonValue,
           manifestVersion: version.manifestVersion,
           manifestChecksum,
           validatedByIdentityId: request.validatedByIdentityId,
