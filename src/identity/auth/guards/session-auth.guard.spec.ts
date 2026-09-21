@@ -1,6 +1,8 @@
 import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AssuranceLevel } from '@prisma/client';
 
+import { IS_PUBLIC_KEY } from '../../../security/decorators/public.decorator';
 import { type ActorContextService } from '../context/actor-context.service';
 import { SessionAuthGuard } from './session-auth.guard';
 
@@ -12,10 +14,14 @@ describe('SessionAuthGuard', () => {
     resolveFromSessionContext: jest.fn(),
     assertNoClientIdentitySubstitution: jest.fn(),
   };
+  const reflector = {
+    getAllAndOverride: jest.fn().mockReturnValue(false),
+  };
 
   const guard = new SessionAuthGuard(
     sessionsService as never,
     actorContextService as unknown as ActorContextService,
+    reflector as unknown as Reflector,
   );
 
   function createContext(headers: Record<string, string>, body?: Record<string, unknown>) {
@@ -30,12 +36,26 @@ describe('SessionAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => request,
       }),
+      getHandler: () => ({}),
+      getClass: () => ({}),
       request,
     } as unknown as ExecutionContext & { request: typeof request };
   }
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('allows @Public routes without authorization', async () => {
+    reflector.getAllAndOverride.mockReturnValueOnce(true);
+    const context = createContext({});
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(sessionsService.validateSessionToken).not.toHaveBeenCalled();
+    expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
   });
 
   it('rejects missing authorization header', async () => {

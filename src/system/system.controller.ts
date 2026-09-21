@@ -2,6 +2,7 @@ import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ReadinessCheckResult } from '../health/health.service';
+import { Public } from '../security/decorators/public.decorator';
 import { HealthResponseDto, ReadyResponseDto, VersionResponseDto } from './dto/system-response.dto';
 import { SystemService } from './system.service';
 
@@ -10,6 +11,7 @@ import { SystemService } from './system.service';
 export class SystemController {
   constructor(private readonly systemService: SystemService) {}
 
+  @Public()
   @Get('health')
   @ApiOperation({ summary: 'Verify the application process is alive' })
   @ApiOkResponse({ type: HealthResponseDto })
@@ -17,6 +19,7 @@ export class SystemController {
     return this.systemService.getHealth();
   }
 
+  @Public()
   @Get('ready')
   @ApiOperation({ summary: 'Verify required backend dependencies are available' })
   @ApiOkResponse({ type: ReadyResponseDto })
@@ -30,6 +33,7 @@ export class SystemController {
     return result;
   }
 
+  @Public()
   @Get('version')
   @ApiOperation({ summary: 'Return application and build metadata' })
   @ApiOkResponse({ type: VersionResponseDto })

@@ -5,6 +5,12 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import {
+  authHeader,
+  createPasswordAuthenticationMethodViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './helpers/identity-provisioning.fixture';
+import {
   asIdentityBody,
   asLoginResponseBody,
   asOrganizationBody,
@@ -32,15 +38,28 @@ describe('Phase 3 Identity & Access (integration)', () => {
     await app.close();
   });
 
+  async function bootstrapSession(): Promise<string> {
+    const bootstrap = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier: 'bootstrap@test.gov',
+      password: 'BootstrapPass123!',
+    });
+    await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    return loginAndGetSessionToken(app, bootstrap.loginIdentifier, bootstrap.password);
+  }
+
   it('completes the identity lifecycle: person → account → identity → credential → auth → protected', async () => {
+    const bootstrapToken = await bootstrapSession();
+
     const personRes = await request(app.getHttpServer())
       .post('/api/v1/identity/persons')
+      .set(authHeader(bootstrapToken))
       .send({ givenName: 'Jane', familyName: 'Citizen' })
       .expect(201);
     const person = asPersonBody(personRes.body);
 
     const accountRes = await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(bootstrapToken))
       .send({
         loginIdentifier: 'jane.citizen@test.gov',
         personId: person.id,
@@ -51,6 +70,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(bootstrapToken))
       .send({
         type: IdentityType.INDIVIDUAL,
         displayName: 'Jane Citizen',
@@ -62,6 +82,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/credentials')
+      .set(authHeader(bootstrapToken))
       .send({
         identityId: identity.id,
         type: 'PASSWORD',
@@ -71,6 +92,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/authentication-methods')
+      .set(authHeader(bootstrapToken))
       .send({
         identityId: identity.id,
         type: AuthenticationMethodType.PASSWORD,
@@ -109,14 +131,18 @@ describe('Phase 3 Identity & Access (integration)', () => {
   });
 
   it('creates organization, membership, and representative authority', async () => {
+    const bootstrapToken = await bootstrapSession();
+
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(bootstrapToken))
       .send({ code: 'TEST-ORG', name: 'Test Organization' })
       .expect(201);
     const org = asOrganizationBody(orgRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(bootstrapToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Test Organization Identity',
@@ -127,6 +153,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/memberships')
+      .set(authHeader(bootstrapToken))
       .send({
         organizationId: org.id,
         identityId: identity.id,
@@ -136,6 +163,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/representative-authorities')
+      .set(authHeader(bootstrapToken))
       .send({
         organizationId: org.id,
         identityId: identity.id,

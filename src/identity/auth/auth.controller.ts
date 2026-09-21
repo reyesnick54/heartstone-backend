@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { type Request } from 'express';
 
+import { Public } from '../../security/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { CurrentSession } from './decorators/current-session.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -20,6 +21,7 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('login')
   @ApiOperation({ summary: 'Authenticate with password and create a session' })
   @ApiCreatedResponse({ type: LoginResponseDto })

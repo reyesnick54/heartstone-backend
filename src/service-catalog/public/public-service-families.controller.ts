@@ -1,10 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../../security/decorators/public.decorator';
 import { PublicServiceFamilyResponseDto } from './dto/public-service-response.dto';
 import { PublicServiceDiscoveryService } from './public-service-discovery.service';
 
 @ApiTags('public-service-families')
+@Public()
 @Controller('public/service-families')
 export class PublicServiceFamiliesController {
   constructor(private readonly publicServiceDiscoveryService: PublicServiceDiscoveryService) {}

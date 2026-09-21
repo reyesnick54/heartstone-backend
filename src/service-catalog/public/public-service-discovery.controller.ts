@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../../security/decorators/public.decorator';
 import type {
   PublicEligibilityResult,
   PublicServiceDetail,
@@ -17,6 +18,7 @@ import { QueryServiceStartPackageDto } from './dto/query-service-start-package.d
 import { PublicServiceDiscoveryService } from './public-service-discovery.service';
 
 @ApiTags('public-services')
+@Public()
 @Controller('public/services')
 export class PublicServiceDiscoveryController {
   constructor(private readonly publicServiceDiscoveryService: PublicServiceDiscoveryService) {}

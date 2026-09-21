@@ -248,7 +248,7 @@ describe('Phase 6G case timeline, communications, and applicant status', () => {
 
     const dashboardResponse = await request(app.getHttpServer())
       .get(`/api/v1/cases/${caseId}/dashboard`)
-      .set('Authorization', `Bearer ${fixture.applicantSessionToken}`)
+      .set('Authorization', `Bearer ${fixture.officialSessionToken}`)
       .expect(200);
 
     const dashboard = asCaseDashboardBody(dashboardResponse.body);

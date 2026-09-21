@@ -12,6 +12,12 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import {
+  authHeader,
+  createPasswordAuthenticationMethodViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './helpers/identity-provisioning.fixture';
+import {
   asCredentialBody,
   asIdentityBody,
   asIdentityListBody,
@@ -26,6 +32,7 @@ import { createIntegrationApp, resetAllTestData } from './helpers/integration-ap
 describe('Phase 3B Identity administration (integration)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
+  let sessionToken: string;
 
   beforeAll(async () => {
     const setup = await createIntegrationApp();
@@ -35,6 +42,16 @@ describe('Phase 3B Identity administration (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const bootstrap = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier: 'bootstrap@test.gov',
+      password: 'BootstrapPass123!',
+    });
+    await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    sessionToken = await loginAndGetSessionToken(
+      app,
+      bootstrap.loginIdentifier,
+      bootstrap.password,
+    );
   });
 
   afterAll(async () => {
@@ -44,12 +61,14 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('creates person, account, and identity with linkage', async () => {
     const personRes = await request(app.getHttpServer())
       .post('/api/v1/identity/persons')
+      .set(authHeader(sessionToken))
       .send({ givenName: 'Alex', familyName: 'Rivera' })
       .expect(201);
     const person = asPersonBody(personRes.body);
 
     const accountRes = await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(sessionToken))
       .send({
         loginIdentifier: 'alex.rivera@test.gov',
         personId: person.id,
@@ -61,11 +80,13 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const activatedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/user-accounts/${account.id}/activate`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asUserAccountBody(activatedRes.body).status).toBe(AccountStatus.ACTIVE);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.INDIVIDUAL,
         displayName: 'Alex Rivera',
@@ -77,6 +98,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const listRes = await request(app.getHttpServer())
       .get(`/api/v1/identity/identities?userAccountId=${account.id}`)
+      .set(authHeader(sessionToken))
       .expect(200);
 
     const identities = asIdentityListBody(listRes.body);
@@ -87,11 +109,13 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('rejects duplicate user account login identifiers', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(sessionToken))
       .send({ loginIdentifier: 'dup@test.gov' })
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(sessionToken))
       .send({ loginIdentifier: 'dup@test.gov' })
       .expect(409);
   });
@@ -99,17 +123,20 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('manages organization membership lifecycle', async () => {
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(sessionToken))
       .send({ code: 'LIFECYCLE-ORG', name: 'Lifecycle Org' })
       .expect(201);
     const org = asOrganizationBody(orgRes.body);
 
     const activatedOrgRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/organizations/${org.id}/activate`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asOrganizationBody(activatedOrgRes.body).status).toBe(OrganizationStatus.ACTIVE);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Lifecycle Org Identity',
@@ -120,6 +147,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const membershipRes = await request(app.getHttpServer())
       .post('/api/v1/identity/memberships')
+      .set(authHeader(sessionToken))
       .send({
         organizationId: org.id,
         identityId: identity.id,
@@ -130,16 +158,19 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const suspendedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/memberships/${membership.id}/suspend`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asMembershipBody(suspendedRes.body).status).toBe(MembershipStatus.SUSPENDED);
 
     const reactivatedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/memberships/${membership.id}/activate`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asMembershipBody(reactivatedRes.body).status).toBe(MembershipStatus.ACTIVE);
 
     const endedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/memberships/${membership.id}/end`)
+      .set(authHeader(sessionToken))
       .expect(200);
     const ended = asMembershipBody(endedRes.body);
     expect(ended.status).toBe(MembershipStatus.REVOKED);
@@ -149,12 +180,14 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('manages representative authority lifecycle', async () => {
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(sessionToken))
       .send({ code: 'REP-ORG', name: 'Rep Org' })
       .expect(201);
     const org = asOrganizationBody(orgRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Rep Org Identity',
@@ -165,6 +198,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const repRes = await request(app.getHttpServer())
       .post('/api/v1/identity/representative-authorities')
+      .set(authHeader(sessionToken))
       .send({
         organizationId: org.id,
         identityId: identity.id,
@@ -176,6 +210,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const endedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/representative-authorities/${rep.id}/end`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asRepresentativeAuthorityBody(endedRes.body).status).toBe(
       RepresentativeAuthorityStatus.ENDED,
@@ -185,12 +220,14 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('creates credential metadata without exposing secrets', async () => {
     const personRes = await request(app.getHttpServer())
       .post('/api/v1/identity/persons')
+      .set(authHeader(sessionToken))
       .send({ givenName: 'Cred', familyName: 'User' })
       .expect(201);
     const person = asPersonBody(personRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.INDIVIDUAL,
         displayName: 'Credential User',
@@ -201,6 +238,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const createRes = await request(app.getHttpServer())
       .post('/api/v1/identity/credentials')
+      .set(authHeader(sessionToken))
       .send({
         identityId: identity.id,
         type: 'PASSWORD',
@@ -215,27 +253,32 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     const activatedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/credentials/${credential.id}/activate`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asCredentialBody(activatedRes.body).status).toBe(CredentialStatus.ACTIVE);
 
     const suspendedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/credentials/${credential.id}/suspend`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asCredentialBody(suspendedRes.body).status).toBe(CredentialStatus.PENDING);
 
     const revokedRes = await request(app.getHttpServer())
       .patch(`/api/v1/identity/credentials/${credential.id}/revoke`)
+      .set(authHeader(sessionToken))
       .expect(200);
     expect(asCredentialBody(revokedRes.body).status).toBe(CredentialStatus.REVOKED);
 
     await request(app.getHttpServer())
       .patch(`/api/v1/identity/credentials/${credential.id}/revoke`)
+      .set(authHeader(sessionToken))
       .expect(400);
   });
 
   it('returns validation failures for invalid identity type consistency', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Missing org ref',
@@ -246,18 +289,21 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('returns not found for missing records', async () => {
     await request(app.getHttpServer())
       .get('/api/v1/identity/user-accounts/00000000-0000-4000-8000-000000000001')
+      .set(authHeader(sessionToken))
       .expect(404);
   });
 
   it('does not create Appointment when creating OrganizationMembership', async () => {
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(sessionToken))
       .send({ code: 'BOUNDARY-ORG', name: 'Boundary Org' })
       .expect(201);
     const org = asOrganizationBody(orgRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Boundary Identity',
@@ -268,6 +314,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/memberships')
+      .set(authHeader(sessionToken))
       .send({ organizationId: org.id, identityId: identity.id })
       .expect(201);
 
@@ -278,12 +325,14 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('does not create Delegation when creating RepresentativeAuthority', async () => {
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(sessionToken))
       .send({ code: 'REP-BOUNDARY', name: 'Rep Boundary Org' })
       .expect(201);
     const org = asOrganizationBody(orgRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.ORGANIZATION,
         displayName: 'Rep Boundary Identity',
@@ -294,6 +343,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/representative-authorities')
+      .set(authHeader(sessionToken))
       .send({
         organizationId: org.id,
         identityId: identity.id,
@@ -309,6 +359,7 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('does not create Officeholder when creating UserAccount', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(sessionToken))
       .send({ loginIdentifier: 'no-officeholder@test.gov', status: AccountStatus.ACTIVE })
       .expect(201);
 
@@ -319,12 +370,14 @@ describe('Phase 3B Identity administration (integration)', () => {
   it('does not create government Permission or Authority when creating Credential', async () => {
     const personRes = await request(app.getHttpServer())
       .post('/api/v1/identity/persons')
+      .set(authHeader(sessionToken))
       .send({ givenName: 'No', familyName: 'Authority' })
       .expect(201);
     const person = asPersonBody(personRes.body);
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(sessionToken))
       .send({
         type: IdentityType.INDIVIDUAL,
         displayName: 'No Authority',
@@ -335,6 +388,7 @@ describe('Phase 3B Identity administration (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/credentials')
+      .set(authHeader(sessionToken))
       .send({
         identityId: identity.id,
         type: 'PASSWORD',

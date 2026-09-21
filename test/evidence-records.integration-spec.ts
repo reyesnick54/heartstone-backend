@@ -3,6 +3,7 @@ import {
   DocumentAssociationTargetType,
   DocumentAuthenticityStatus,
   DocumentSecurityClassification,
+  IdentityOfficeholderLinkStatus,
   MalwareScanStatus,
 } from '@prisma/client';
 import request from 'supertest';
@@ -38,7 +39,8 @@ describe('Phase 7B evidence records (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    fixture = await seedEvidenceRecordsFixture(app);
+    fixture = await seedEvidenceRecordsFixture(app, prisma);
+    await ensureOfficialHasActiveOfficeholderLink(prisma, fixture.officialIdentityId);
     malwareScanner.reset();
     malwareScanner.setScanBehavior(() => MalwareScanStatus.CLEAN);
   });
@@ -291,3 +293,34 @@ describe('Phase 7B evidence records (integration)', () => {
     expect(associations[0]?.documentVersionId).toBe(uploaded.versionId);
   });
 });
+
+async function ensureOfficialHasActiveOfficeholderLink(
+  prisma: PrismaService,
+  officialIdentityId: string,
+): Promise<void> {
+  const existingLink = await prisma.identityOfficeholderLink.findFirst({
+    where: {
+      identityId: officialIdentityId,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    },
+  });
+
+  if (existingLink) {
+    return;
+  }
+
+  const officeholder = await prisma.officeholder.create({
+    data: {
+      code: 'EVIDENCE-OFFICIAL',
+      name: 'Evidence Official Officeholder',
+    },
+  });
+
+  await prisma.identityOfficeholderLink.create({
+    data: {
+      identityId: officialIdentityId,
+      officeholderId: officeholder.id,
+      status: IdentityOfficeholderLinkStatus.ACTIVE,
+    },
+  });
+}
