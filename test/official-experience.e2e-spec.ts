@@ -17,7 +17,11 @@ import { type App } from 'supertest/types';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../src/authority/authority.constants';
 import { PrismaService } from '../src/database/prisma.service';
 import { hashToken } from '../src/identity/common/crypto.util';
-import { asLoginResponseBody } from './helpers/identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   asOfficialAvailableActionsBody,
@@ -204,23 +208,14 @@ describe('Official Experience API (e2e)', () => {
         effectiveFrom: new Date('2020-01-01'),
       },
     });
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD', password: 'OtherOfficial123!' })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD' })
-      .expect(201);
-    const otherLogin = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier: 'other.official@test.gov', password: 'OtherOfficial123!' })
-          .expect(201)
-      ).body,
+    await createPasswordCredentialViaPrisma(prisma, otherIdentity.id, 'OtherOfficial123!');
+    await createPasswordAuthenticationMethodViaPrisma(prisma, otherIdentity.id);
+    const otherSessionToken = await loginAndGetSessionToken(
+      app,
+      'other.official@test.gov',
+      'OtherOfficial123!',
     );
+    const otherLogin = { sessionToken: otherSessionToken };
 
     await prisma.caseAssignment.create({
       data: {
@@ -483,23 +478,14 @@ describe('Official Experience API (e2e)', () => {
         personId: adminPerson.id,
       },
     });
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: adminIdentity.id, type: 'PASSWORD', password: 'TechAdmin123!' })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId: adminIdentity.id, type: 'PASSWORD' })
-      .expect(201);
-    const adminLogin = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier: 'tech.admin@test.gov', password: 'TechAdmin123!' })
-          .expect(201)
-      ).body,
+    await createPasswordCredentialViaPrisma(prisma, adminIdentity.id, 'TechAdmin123!');
+    await createPasswordAuthenticationMethodViaPrisma(prisma, adminIdentity.id);
+    const adminSessionToken = await loginAndGetSessionToken(
+      app,
+      'tech.admin@test.gov',
+      'TechAdmin123!',
     );
+    const adminLogin = { sessionToken: adminSessionToken };
 
     await request(app.getHttpServer())
       .get('/api/v1/experience/official/me')
