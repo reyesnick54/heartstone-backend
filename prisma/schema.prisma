@@ -137,7 +137,8 @@ model Institution {
   reconciliationBatches            ReconciliationBatch[]
   communicationPreferences         CommunicationPreference[]
   dashboardDefinitions             DashboardDefinition[]
-  dashboardAccessPolicies          DashboardAccessPolicy[]
+  dashboardAccessPolicies               DashboardAccessPolicy[]
+  platformAdministrativeAccessPolicies  PlatformAdministrativeAccessPolicy[]
   dashboardStatusDictionaryEntries DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections    DashboardIndicatorProjection[]
   strategicProjectProfiles         StrategicProjectProfile[]
@@ -155,6 +156,7 @@ model Institution {
   appointmentLocations             AppointmentLocation[]
   appointmentSlots                 AppointmentSlot[]
   serviceAppointments              ServiceAppointment[]
+  servicePacks                     ServicePack[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -199,7 +201,8 @@ model Department {
   complianceStatusProjections   ComplianceStatusProjection[]
   monitoringRules               MonitoringRule[]
   dashboardDefinitions          DashboardDefinition[]
-  dashboardAccessPolicies       DashboardAccessPolicy[]
+  dashboardAccessPolicies              DashboardAccessPolicy[]
+  platformAdministrativeAccessPolicies PlatformAdministrativeAccessPolicy[]
   dashboardIndicatorProjections DashboardIndicatorProjection[]
   strategicProjectProfiles      StrategicProjectProfile[]
   ownedMetricDefinitions        MetricDefinition[]             @relation("MetricDefinitionOwnerDepartment")
@@ -505,6 +508,8 @@ enum SecurityAuditEventType {
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
   SCOPE_ACCESS_DENIED
+  PLATFORM_ADMIN_ACCESS_GRANTED
+  PLATFORM_ADMIN_ACCESS_DENIED
 }
 
 model Person {
@@ -621,6 +626,8 @@ model Identity {
   translationRecords                       TranslationRecord[]                    @relation("TranslationRecordTranslator")
   reconciliationExceptionsOwned            ReconciliationException[]              @relation("ReconciliationExceptionOwner")
   dashboardAccessPolicies                  DashboardAccessPolicy[]
+  platformAdministrativeAccessPolicies     PlatformAdministrativeAccessPolicy[]
+  platformAdministrativeAccessAudits       PlatformAdministrativeAccessAudit[]
   dashboardQueryAudits                     DashboardQueryAudit[]
   dashboardSnapshotsCaptured               DashboardSnapshot[]                    @relation("DashboardSnapshotCapturer")
   dashboardIndicatorProjectionsOwned       DashboardIndicatorProjection[]         @relation("DashboardIndicatorOwner")
@@ -9532,6 +9539,68 @@ model DashboardAccessPolicy {
   @@map("dashboard_access_policies")
 }
 
+enum PlatformAdministrativeAccessScope {
+  PLATFORM_WIDE
+  INSTITUTION
+  DEPARTMENT
+}
+
+enum PlatformAdministrativeAccessAuditResult {
+  GRANTED
+  DENIED_NO_POLICY
+  DENIED_SUSPENDED
+  DENIED_SUBSTANTIVE_ONLY
+}
+
+model PlatformAdministrativeAccessPolicy {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  identityId                    String?                           @db.Uuid
+  institutionId                 String?                           @db.Uuid
+  departmentId                  String?                           @db.Uuid
+  permissionCode                String
+  scope                         PlatformAdministrativeAccessScope @default(PLATFORM_WIDE)
+  canConfigureServices          Boolean                           @default(true)
+  canConfigureForms             Boolean                           @default(true)
+  canConfigureWorkflows         Boolean                           @default(true)
+  canConfigureIntegrations      Boolean                           @default(true)
+  canConfigureCommunications    Boolean                           @default(true)
+  canViewSecurity               Boolean                           @default(true)
+  canViewReadiness              Boolean                           @default(true)
+  substantiveAccessDenied       Boolean                           @default(true)
+  effectiveFrom                 DateTime?
+  effectiveUntil                DateTime?
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  identity                      Identity?                         @relation(fields: [identityId], references: [id])
+  institution                   Institution?                      @relation(fields: [institutionId], references: [id])
+  department                    Department?                       @relation(fields: [departmentId], references: [id])
+
+  @@index([identityId])
+  @@index([institutionId])
+  @@index([departmentId])
+  @@index([permissionCode])
+  @@map("platform_administrative_access_policies")
+}
+
+model PlatformAdministrativeAccessAudit {
+  id           String                                  @id @default(uuid()) @db.Uuid
+  identityId   String                                  @db.Uuid
+  sessionId    String?                                 @db.Uuid
+  endpoint     String
+  resourceType String?
+  resourceId   String?                                 @db.Uuid
+  accessResult PlatformAdministrativeAccessAuditResult
+  metadata     Json                                    @default("{}")
+  createdAt    DateTime                                @default(now())
+  identity     Identity                                @relation(fields: [identityId], references: [id])
+
+  @@index([identityId])
+  @@index([endpoint])
+  @@index([accessResult])
+  @@index([createdAt])
+  @@map("platform_administrative_access_audits")
+}
+
 // ─── Phase 12A: Performance Claims ───────────────────────────────────────────
 
 enum PerformanceClaimCategory {
@@ -13314,4 +13383,145 @@ model ServiceAppointmentReminder {
   @@index([serviceAppointmentId])
   @@index([communicationMessageId])
   @@map("service_appointment_reminders")
+}
+
+// ─── Service Pack Deployment Lifecycle ───────────────────────────────────────
+
+enum ServicePackVersionStatus {
+  COMPILED
+  ACCEPTED
+}
+
+enum ServicePackDeploymentStatus {
+  DEPLOYMENT_READY
+  DEPLOYED
+  OPERATIONALLY_INACTIVE
+  ACTIVE
+  SUSPENDED
+  ROLLED_BACK
+  SUPERSEDED
+}
+
+enum ServicePackDeploymentBindingDomain {
+  SERVICE_CATALOG
+  FORMS
+  WORKFLOWS
+  SERVICE_AUTHORITY_MAPPINGS
+  FEE_METADATA
+  EVIDENCE_REQUIREMENTS
+  OUTPUT_METADATA
+  REDRESS_ROUTES
+  COMMUNICATION_CONFIGURATION
+  INTEGRATION_REFERENCES
+  DASHBOARD_CONFIGURATION
+}
+
+enum ServicePackDeploymentAuditEventType {
+  VERSION_ACCEPTED
+  DEPLOYMENT_READY
+  DEPLOYED
+  ACTIVATION_REQUESTED
+  ACTIVATION_BLOCKED
+  ACTIVATED
+  SUSPENDED
+  ROLLBACK_INITIATED
+  ROLLBACK_COMPLETED
+  SUPERSEDED
+  FINGERPRINT_RECORDED
+}
+
+model ServicePack {
+  id            String               @id @default(uuid()) @db.Uuid
+  code          String               @unique
+  name          String
+  description   String?
+  institutionId String               @db.Uuid
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  institution   Institution          @relation(fields: [institutionId], references: [id])
+  versions      ServicePackVersion[]
+
+  @@index([institutionId])
+  @@map("service_packs")
+}
+
+model ServicePackVersion {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  servicePackId           String                   @db.Uuid
+  version                 String
+  status                  ServicePackVersionStatus @default(COMPILED)
+  compilationFingerprint  String
+  manifest                Json
+  compiledAt              DateTime                 @default(now())
+  acceptedAt              DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  servicePack             ServicePack              @relation(fields: [servicePackId], references: [id])
+  deployments             ServicePackDeployment[]
+
+  @@unique([servicePackId, version])
+  @@index([servicePackId])
+  @@index([status])
+  @@map("service_pack_versions")
+}
+
+model ServicePackDeployment {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  servicePackVersionId     String                      @db.Uuid
+  deploymentReference      String                      @unique
+  status                   ServicePackDeploymentStatus @default(DEPLOYMENT_READY)
+  configurationFingerprint String?
+  deployedAt               DateTime?
+  rolledBackAt             DateTime?
+  supersededByDeploymentId String?                     @db.Uuid
+  actorIdentityId          String                      @db.Uuid
+  reason                   String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  servicePackVersion       ServicePackVersion          @relation(fields: [servicePackVersionId], references: [id])
+  supersededByDeployment   ServicePackDeployment?      @relation("ServicePackDeploymentSupersession", fields: [supersededByDeploymentId], references: [id])
+  supersededDeployments    ServicePackDeployment[]     @relation("ServicePackDeploymentSupersession")
+  bindings                 ServicePackDeploymentBinding[]
+  auditRecords             ServicePackDeploymentAuditRecord[]
+
+  @@index([servicePackVersionId])
+  @@index([status])
+  @@index([actorIdentityId])
+  @@map("service_pack_deployments")
+}
+
+model ServicePackDeploymentBinding {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  servicePackDeploymentId String                           @db.Uuid
+  domain                  ServicePackDeploymentBindingDomain
+  domainEntityId          String                           @db.Uuid
+  domainEntityVersion     String?
+  bindingSnapshot         Json                             @default("{}")
+  isReversible            Boolean                          @default(true)
+  isActivated             Boolean                          @default(false)
+  createdAt               DateTime                         @default(now())
+  servicePackDeployment   ServicePackDeployment            @relation(fields: [servicePackDeploymentId], references: [id], onDelete: Cascade)
+
+  @@unique([servicePackDeploymentId, domain, domainEntityId])
+  @@index([servicePackDeploymentId])
+  @@index([domainEntityId])
+  @@map("service_pack_deployment_bindings")
+}
+
+model ServicePackDeploymentAuditRecord {
+  id                      String                            @id @default(uuid()) @db.Uuid
+  servicePackDeploymentId String                            @db.Uuid
+  eventType               ServicePackDeploymentAuditEventType
+  priorStatus             ServicePackDeploymentStatus?
+  newStatus               ServicePackDeploymentStatus?
+  actorIdentityId         String                            @db.Uuid
+  reason                  String?
+  metadata                Json                              @default("{}")
+  createdAt               DateTime                          @default(now())
+  servicePackDeployment   ServicePackDeployment             @relation(fields: [servicePackDeploymentId], references: [id], onDelete: Cascade)
+
+  @@index([servicePackDeploymentId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("service_pack_deployment_audit_records")
 }

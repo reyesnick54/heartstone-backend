@@ -1,17 +1,17 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../../database/prisma.service';
 import { ServiceAppointmentAccessService } from '../../../scheduling/access/service-appointment-access.service';
 import { SCHEDULING_DISCLAIMER } from '../../../scheduling/scheduling.constants';
 import { CitizenAppointmentsResponseDto } from '../../citizen/dto/citizen-appointment.dto';
-import { CitizenAccessService } from '../../common/citizen-access.service';
+import { BusinessAccessService } from '../../common/business-access.service';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
 @Injectable()
 export class BusinessAppointmentsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly citizenAccess: CitizenAccessService,
+    private readonly businessAccess: BusinessAccessService,
     private readonly appointmentAccess: ServiceAppointmentAccessService,
   ) {}
 
@@ -20,14 +20,14 @@ export class BusinessAppointmentsService {
     organizationId: string,
     query: PaginationQueryDto,
   ): Promise<CitizenAppointmentsResponseDto> {
-    const scope = await this.citizenAccess.resolveAccessibleScope(identityId);
-    if (!scope.representedOrganizationIds.includes(organizationId)) {
-      throw new ForbiddenException('Organization is outside your representative scope');
-    }
+    await this.businessAccess.assertOrganizationAccess(organizationId, identityId);
+
+    const accessibleOrganizations = await this.businessAccess.listAccessibleOrganizations(identityId);
+    const representedOrganizationIds = accessibleOrganizations.map((org) => org.organizationId);
 
     const where = this.appointmentAccess.buildBusinessWhere(
       organizationId,
-      scope.representedOrganizationIds,
+      representedOrganizationIds,
     );
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
@@ -78,7 +78,7 @@ export class BusinessAppointmentsService {
           labelKey: 'scheduling.disclaimer.no_implied_approval',
         },
       })),
-      pagination: this.citizenAccess.buildPaginationMeta(page, pageSize, totalItems),
+      pagination: this.businessAccess.buildPaginationMeta(page, pageSize, totalItems),
     };
   }
 }

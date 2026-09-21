@@ -12,6 +12,7 @@ import { PublicServiceDiscoveryController } from './public/public-service-discov
 import { PublicServiceDiscoveryService } from './public/public-service-discovery.service';
 import { PublicServiceFamiliesController } from './public/public-service-families.controller';
 import { ServicePackModule } from './service-pack/service-pack.module';
+import { ServicePackDeploymentModule } from './service-packs/service-pack-deployment.module';
 
 @Module({
   imports: [
@@ -19,8 +20,9 @@ import { ServicePackModule } from './service-pack/service-pack.module';
     SessionsModule,
     GovernmentServiceVersionsModule,
     ActivationGovernanceModule,
-    FormsModule,
     ServicePackModule,
+    ServicePackDeploymentModule,
+    FormsModule,
   ],
   controllers: [
     GovernmentServicesController,
@@ -31,9 +33,10 @@ import { ServicePackModule } from './service-pack/service-pack.module';
   exports: [
     PublicServiceDiscoveryService,
     ActivationGovernanceModule,
+    ServicePackModule,
+    ServicePackDeploymentModule,
     FormsModule,
     GovernmentServicesService,
-    ServicePackModule,
   ],
 })
 export class ServiceCatalogModule {}

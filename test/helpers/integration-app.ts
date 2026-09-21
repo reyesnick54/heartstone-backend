@@ -33,6 +33,8 @@ export async function createIntegrationApp(): Promise<{
 }
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
+  await prisma.platformAdministrativeAccessAudit.deleteMany();
+  await prisma.platformAdministrativeAccessPolicy.deleteMany();
   await prisma.securityAuditEvent.deleteMany();
   await prisma.session.deleteMany();
   await prisma.identityOfficeholderLink.deleteMany();
@@ -152,6 +154,17 @@ export async function resetSchedulingData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetComplianceOversightData(prisma: PrismaService): Promise<void> {
+  await prisma.complianceReviewItem.deleteMany();
+  await prisma.complianceReview.deleteMany();
+  await prisma.complianceSubmission.updateMany({ data: { currentVersionId: null } });
+  await prisma.complianceSubmissionVersion.deleteMany();
+  await prisma.complianceSubmission.deleteMany();
+  await prisma.obligationStatusHistory.deleteMany();
+  await prisma.obligationEvidenceLink.deleteMany();
+  await prisma.obligationSchedule.deleteMany();
+  await prisma.continuingObligation.updateMany({ data: { supersededByObligationId: null } });
+  await prisma.continuingObligation.deleteMany();
+  await prisma.complianceMatter.deleteMany();
   await prisma.complianceAlert.deleteMany();
   await prisma.complianceRevalidationRecord.deleteMany();
   await prisma.complianceMonitoringEvent.deleteMany();
