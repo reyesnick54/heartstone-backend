@@ -93,6 +93,7 @@ model Jurisdiction {
   reviewAssignments             ReviewAssignment[]
   reconsiderationProceedings    ReconsiderationProceeding[]
   internalAdministrativeReviews InternalAdministrativeReview[]
+  servicePackJurisdictionTargets ServicePack[]                 @relation("ServicePackJurisdiction")
 
   @@map("jurisdictions")
 }
@@ -707,12 +708,15 @@ model Identity {
   appointmentParticipants                  AppointmentParticipant[]               @relation("AppointmentParticipantIdentity")
   serviceAppointmentsCreated               ServiceAppointment[]                   @relation("ServiceAppointmentCreator")
   serviceAppointmentsAssignedOfficial      ServiceAppointment[]                   @relation("ServiceAppointmentAssignedOfficial")
-  appointmentReschedulesRequested          AppointmentReschedule[]              @relation("AppointmentRescheduleRequester")
+  appointmentReschedulesRequested          AppointmentReschedule[]                @relation("AppointmentRescheduleRequester")
   appointmentReschedulesApproved           AppointmentReschedule[]                @relation("AppointmentRescheduleApprover")
   appointmentCancellations                 AppointmentCancellation[]              @relation("AppointmentCancellationActor")
   appointmentAttendancesRecorded           AppointmentAttendance[]                @relation("AppointmentAttendanceRecorder")
   appointmentOutcomeReferencesRecorded     AppointmentOutcomeReference[]          @relation("AppointmentOutcomeRecorder")
   serviceAppointmentAuditEvents            ServiceAppointmentAuditEvent[]         @relation("ServiceAppointmentAuditActor")
+  servicePackVersionsAccepted              ServicePackVersion[]                   @relation("ServicePackVersionAccepter")
+  servicePackImports                       ServicePackImport[]                    @relation("ServicePackImportActor")
+  servicePackValidationResults             ServicePackValidationResult[]          @relation("ServicePackValidationActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -13431,37 +13435,53 @@ enum ServicePackDeploymentAuditEventType {
 }
 
 model ServicePack {
-  id            String               @id @default(uuid()) @db.Uuid
-  code          String               @unique
-  name          String
-  description   String?
-  institutionId String               @db.Uuid
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  institution   Institution          @relation(fields: [institutionId], references: [id])
-  versions      ServicePackVersion[]
+  id             String               @id @default(uuid()) @db.Uuid
+  code           String               @unique
+  name           String
+  description    String?
+  institutionId  String               @db.Uuid
+  jurisdictionId String?              @db.Uuid
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  institution    Institution          @relation(fields: [institutionId], references: [id])
+  jurisdiction   Jurisdiction?        @relation("ServicePackJurisdiction", fields: [jurisdictionId], references: [id])
+  versions       ServicePackVersion[]
+  imports        ServicePackImport[]
 
   @@index([institutionId])
+  @@index([jurisdictionId])
   @@map("service_packs")
 }
 
 model ServicePackVersion {
-  id                      String                   @id @default(uuid()) @db.Uuid
-  servicePackId           String                   @db.Uuid
-  version                 String
-  status                  ServicePackVersionStatus @default(COMPILED)
-  compilationFingerprint  String
-  manifest                Json
-  compiledAt              DateTime                 @default(now())
-  acceptedAt              DateTime?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
-  servicePack             ServicePack              @relation(fields: [servicePackId], references: [id])
-  deployments             ServicePackDeployment[]
+  id                       String                            @id @default(uuid()) @db.Uuid
+  servicePackId            String                            @db.Uuid
+  version                  String
+  status                   ServicePackVersionStatus          @default(COMPILED)
+  manifestVersion          String                            @default("heartstone.service-pack/v1")
+  manifestValidationStatus ServicePackManifestValidationStatus @default(DRAFT)
+  compilationFingerprint   String
+  manifestChecksum         String?
+  manifest                 Json
+  immutable                Boolean                           @default(false)
+  compiledAt               DateTime                          @default(now())
+  acceptedAt               DateTime?
+  acceptedByIdentityId     String?                           @db.Uuid
+  createdAt                DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+  servicePack              ServicePack                       @relation(fields: [servicePackId], references: [id])
+  acceptedBy               Identity?                         @relation("ServicePackVersionAccepter", fields: [acceptedByIdentityId], references: [id])
+  deployments              ServicePackDeployment[]
+  components               ServicePackComponent[]
+  dependencies             ServicePackDependency[]
+  validationResults        ServicePackValidationResult[]
+  imports                  ServicePackImport[]
 
   @@unique([servicePackId, version])
   @@index([servicePackId])
   @@index([status])
+  @@index([manifestValidationStatus])
+  @@index([manifestChecksum])
   @@map("service_pack_versions")
 }
 
@@ -13524,4 +13544,141 @@ model ServicePackDeploymentAuditRecord {
   @@index([eventType])
   @@index([createdAt])
   @@map("service_pack_deployment_audit_records")
+}
+
+// ─── Service Pack Manifest Validation (additive to deployment lifecycle) ─────
+
+enum ServicePackManifestValidationStatus {
+  DRAFT
+  VALIDATING
+  INVALID
+  VALIDATED
+  PENDING_REVIEW
+}
+
+enum ServicePackComponentKind {
+  JURISDICTION
+  INSTITUTION
+  DEPARTMENT
+  SERVICE
+  AUTHORITY_MAPPING
+  FORM
+  EVIDENCE_REQUIREMENT
+  WORKFLOW
+  FEE
+  OUTPUT
+  SLA_RULE
+  COMMUNICATION
+  INTEGRATION
+  RENEWAL
+  COMPLIANCE
+  REDRESS
+  DASHBOARD_DEFINITION
+}
+
+enum ServicePackDependencyKind {
+  DEPARTMENT
+  EXTERNAL_AUTHORITY
+  EXTERNAL_REGISTRY
+  PAYMENT_PROVIDER
+  IDENTITY_PROVIDER
+  INTEGRATION
+  PROFESSIONAL
+}
+
+enum ServicePackDependencyControlScope {
+  HEARTSTONE_CONTROLLED
+  EXTERNAL
+}
+
+enum ServicePackValidationOutcome {
+  PASSED
+  FAILED
+}
+
+enum ServicePackImportStatus {
+  RECEIVED
+  VALIDATING
+  VALIDATED
+  REJECTED
+}
+
+model ServicePackComponent {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  servicePackVersionId String                   @db.Uuid
+  componentKind        ServicePackComponentKind
+  componentCode        String
+  manifestPath         String
+  targetDomain         String?
+  targetReferenceId    String?                  @db.Uuid
+  configuration        Json                     @default("{}")
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  servicePackVersion   ServicePackVersion       @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([servicePackVersionId, componentKind, componentCode])
+  @@index([servicePackVersionId])
+  @@map("service_pack_components")
+}
+
+model ServicePackDependency {
+  id                   String                          @id @default(uuid()) @db.Uuid
+  servicePackVersionId String                          @db.Uuid
+  dependencyKind       ServicePackDependencyKind
+  dependencyCode       String
+  referenceKind        String
+  referenceId          String?                         @db.Uuid
+  referenceCode        String?
+  controlScope         ServicePackDependencyControlScope @default(EXTERNAL)
+  isRequired           Boolean                         @default(true)
+  manifestPath         String
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  servicePackVersion   ServicePackVersion              @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([servicePackVersionId, dependencyCode])
+  @@index([servicePackVersionId])
+  @@index([referenceKind, referenceId])
+  @@map("service_pack_dependencies")
+}
+
+model ServicePackValidationResult {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  servicePackVersionId  String                       @db.Uuid
+  importId              String?                      @db.Uuid
+  outcome               ServicePackValidationOutcome
+  issues                Json                         @default("[]")
+  manifestVersion       String
+  manifestChecksum      String
+  validatedAt           DateTime                     @default(now())
+  validatedByIdentityId String?                      @db.Uuid
+  servicePackVersion    ServicePackVersion           @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+  import                ServicePackImport?           @relation(fields: [importId], references: [id])
+  validatedBy           Identity?                    @relation("ServicePackValidationActor", fields: [validatedByIdentityId], references: [id])
+
+  @@index([servicePackVersionId])
+  @@index([importId])
+  @@index([outcome])
+  @@map("service_pack_validation_results")
+}
+
+model ServicePackImport {
+  id                   String                @id @default(uuid()) @db.Uuid
+  servicePackId        String                @db.Uuid
+  servicePackVersionId String?               @db.Uuid
+  manifestPayload      Json
+  manifestChecksum     String
+  status               ServicePackImportStatus @default(RECEIVED)
+  importedByIdentityId String?               @db.Uuid
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  servicePack          ServicePack           @relation(fields: [servicePackId], references: [id])
+  servicePackVersion   ServicePackVersion?   @relation(fields: [servicePackVersionId], references: [id])
+  importedBy           Identity?             @relation("ServicePackImportActor", fields: [importedByIdentityId], references: [id])
+  validationResults    ServicePackValidationResult[]
+
+  @@index([servicePackId])
+  @@index([servicePackVersionId])
+  @@index([status])
+  @@map("service_pack_imports")
 }
