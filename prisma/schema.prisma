@@ -151,6 +151,7 @@ model Institution {
   businessImpactAssessments        BusinessImpactAssessment[]
   backupDefinitions                BackupDefinition[]               @relation("BackupDefinitionOwnerInstitution")
   recoveryExercises                RecoveryExercise[]
+  servicePacks                     ServicePack[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -12951,4 +12952,145 @@ model ContinuityCorrectiveAction {
   @@index([status])
   @@index([sourceType])
   @@map("continuity_corrective_actions")
+}
+
+// ─── Service Pack Deployment Lifecycle ───────────────────────────────────────
+
+enum ServicePackVersionStatus {
+  COMPILED
+  ACCEPTED
+}
+
+enum ServicePackDeploymentStatus {
+  DEPLOYMENT_READY
+  DEPLOYED
+  OPERATIONALLY_INACTIVE
+  ACTIVE
+  SUSPENDED
+  ROLLED_BACK
+  SUPERSEDED
+}
+
+enum ServicePackDeploymentBindingDomain {
+  SERVICE_CATALOG
+  FORMS
+  WORKFLOWS
+  SERVICE_AUTHORITY_MAPPINGS
+  FEE_METADATA
+  EVIDENCE_REQUIREMENTS
+  OUTPUT_METADATA
+  REDRESS_ROUTES
+  COMMUNICATION_CONFIGURATION
+  INTEGRATION_REFERENCES
+  DASHBOARD_CONFIGURATION
+}
+
+enum ServicePackDeploymentAuditEventType {
+  VERSION_ACCEPTED
+  DEPLOYMENT_READY
+  DEPLOYED
+  ACTIVATION_REQUESTED
+  ACTIVATION_BLOCKED
+  ACTIVATED
+  SUSPENDED
+  ROLLBACK_INITIATED
+  ROLLBACK_COMPLETED
+  SUPERSEDED
+  FINGERPRINT_RECORDED
+}
+
+model ServicePack {
+  id            String               @id @default(uuid()) @db.Uuid
+  code          String               @unique
+  name          String
+  description   String?
+  institutionId String               @db.Uuid
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  institution   Institution          @relation(fields: [institutionId], references: [id])
+  versions      ServicePackVersion[]
+
+  @@index([institutionId])
+  @@map("service_packs")
+}
+
+model ServicePackVersion {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  servicePackId           String                   @db.Uuid
+  version                 String
+  status                  ServicePackVersionStatus @default(COMPILED)
+  compilationFingerprint  String
+  manifest                Json
+  compiledAt              DateTime                 @default(now())
+  acceptedAt              DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  servicePack             ServicePack              @relation(fields: [servicePackId], references: [id])
+  deployments             ServicePackDeployment[]
+
+  @@unique([servicePackId, version])
+  @@index([servicePackId])
+  @@index([status])
+  @@map("service_pack_versions")
+}
+
+model ServicePackDeployment {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  servicePackVersionId     String                      @db.Uuid
+  deploymentReference      String                      @unique
+  status                   ServicePackDeploymentStatus @default(DEPLOYMENT_READY)
+  configurationFingerprint String?
+  deployedAt               DateTime?
+  rolledBackAt             DateTime?
+  supersededByDeploymentId String?                     @db.Uuid
+  actorIdentityId          String                      @db.Uuid
+  reason                   String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  servicePackVersion       ServicePackVersion          @relation(fields: [servicePackVersionId], references: [id])
+  supersededByDeployment   ServicePackDeployment?      @relation("ServicePackDeploymentSupersession", fields: [supersededByDeploymentId], references: [id])
+  supersededDeployments    ServicePackDeployment[]     @relation("ServicePackDeploymentSupersession")
+  bindings                 ServicePackDeploymentBinding[]
+  auditRecords             ServicePackDeploymentAuditRecord[]
+
+  @@index([servicePackVersionId])
+  @@index([status])
+  @@index([actorIdentityId])
+  @@map("service_pack_deployments")
+}
+
+model ServicePackDeploymentBinding {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  servicePackDeploymentId String                           @db.Uuid
+  domain                  ServicePackDeploymentBindingDomain
+  domainEntityId          String                           @db.Uuid
+  domainEntityVersion     String?
+  bindingSnapshot         Json                             @default("{}")
+  isReversible            Boolean                          @default(true)
+  isActivated             Boolean                          @default(false)
+  createdAt               DateTime                         @default(now())
+  servicePackDeployment   ServicePackDeployment            @relation(fields: [servicePackDeploymentId], references: [id], onDelete: Cascade)
+
+  @@unique([servicePackDeploymentId, domain, domainEntityId])
+  @@index([servicePackDeploymentId])
+  @@index([domainEntityId])
+  @@map("service_pack_deployment_bindings")
+}
+
+model ServicePackDeploymentAuditRecord {
+  id                      String                            @id @default(uuid()) @db.Uuid
+  servicePackDeploymentId String                            @db.Uuid
+  eventType               ServicePackDeploymentAuditEventType
+  priorStatus             ServicePackDeploymentStatus?
+  newStatus               ServicePackDeploymentStatus?
+  actorIdentityId         String                            @db.Uuid
+  reason                  String?
+  metadata                Json                              @default("{}")
+  createdAt               DateTime                          @default(now())
+  servicePackDeployment   ServicePackDeployment             @relation(fields: [servicePackDeploymentId], references: [id], onDelete: Cascade)
+
+  @@index([servicePackDeploymentId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("service_pack_deployment_audit_records")
 }
