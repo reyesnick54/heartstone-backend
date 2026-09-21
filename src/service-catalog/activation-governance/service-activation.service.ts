@@ -15,6 +15,7 @@ import {
   ServiceTestReadinessStatus,
 } from '@prisma/client';
 
+import { ConsequentialActionService } from '../../authority/consequential-action/consequential-action.service';
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../database/prisma.service';
 import {
@@ -32,6 +33,7 @@ export class ServiceActivationService {
     private readonly prisma: PrismaService,
     private readonly readinessService: ServiceReadinessService,
     private readonly authorityEvaluation: AuthorityEvaluationService,
+    private readonly consequentialActionService: ConsequentialActionService,
   ) {}
 
   async recordInstitutionalAcceptance(
@@ -393,16 +395,27 @@ export class ServiceActivationService {
       );
     }
 
-    const evaluation = await this.authorityEvaluation.evaluate({
-      identityId: request.actor.identityId,
-      functionAuthorityRecordId: version.activationFunctionAuthorityRecordId,
-      action: AuthorityActionType.APPROVE,
-      officeholderId: request.actor.officeholderId,
-      officeId: request.actor.officeId,
-      appointmentId: request.actor.appointmentId,
-      delegationId: request.actor.delegationId,
-      at: request.effectiveAt,
-    });
+    const evaluation = await this.consequentialActionService.evaluateConsequentialAction(
+      {
+        sessionId: 'service-activation',
+        identityId: request.actor.identityId,
+        assuranceLevel: 'HIGH',
+      },
+      {
+        action: AuthorityActionType.APPROVE,
+        functionAuthorityRecordId: version.activationFunctionAuthorityRecordId,
+        requireHumanActor: true,
+      },
+      {
+        body: {
+          officeholderId: request.actor.officeholderId,
+          officeId: request.actor.officeId,
+          appointmentId: request.actor.appointmentId,
+          delegationId: request.actor.delegationId,
+          at: request.effectiveAt?.toISOString(),
+        },
+      },
+    );
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {
       return {

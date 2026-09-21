@@ -10,8 +10,8 @@ export interface AuthorityPolicyMetadata {
 }
 
 /**
+ * @deprecated Prefer {@link ConsequentialAction} from `consequential-action.decorator`.
  * Declares that a route requires authority evaluation before execution.
- * Apply only to consequential actions — not blanket GET endpoints.
  */
 export const RequiresAuthority = (metadata: AuthorityPolicyMetadata) =>
   SetMetadata(AUTHORITY_POLICY_KEY, metadata);

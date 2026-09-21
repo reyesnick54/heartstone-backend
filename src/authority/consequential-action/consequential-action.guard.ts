@@ -7,33 +7,33 @@ import {
 import { Reflector } from '@nestjs/core';
 
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
-import {
-  AUTHORITY_EVALUATION_REQUEST_KEY,
-  CONSEQUENTIAL_ACTION_EVALUATION_KEY,
-} from '../consequential-action/consequential-action.guard';
-import { ConsequentialActionService } from '../consequential-action/consequential-action.service';
 import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority-evaluation-response.dto';
-import { AUTHORITY_POLICY_KEY, type AuthorityPolicyMetadata } from './authority-policy.decorator';
+import { CONSEQUENTIAL_ACTION_KEY } from './consequential-action.decorator';
+import { ConsequentialActionService } from './consequential-action.service';
+import { type ConsequentialActionMetadata } from './consequential-action.types';
 
-/** Backward-compatible adapter; prefer {@link ConsequentialActionGuard} for new routes. */
+export const AUTHORITY_EVALUATION_REQUEST_KEY = 'authorityEvaluation';
+export const CONSEQUENTIAL_ACTION_EVALUATION_KEY = 'consequentialActionEvaluation';
+
 @Injectable()
-export class AuthorityPolicyGuard implements CanActivate {
+export class ConsequentialActionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly consequentialActionService: ConsequentialActionService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const policy = this.reflector.getAllAndOverride<AuthorityPolicyMetadata | undefined>(
-      AUTHORITY_POLICY_KEY,
+    const metadata = this.reflector.getAllAndOverride<ConsequentialActionMetadata | undefined>(
+      CONSEQUENTIAL_ACTION_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    if (!policy) {
+    if (!metadata) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<{
+    const http = context.switchToHttp();
+    const request = http.getRequest<{
       session?: SessionContextDto;
       body?: Record<string, unknown>;
       params?: Record<string, string>;
@@ -44,12 +44,14 @@ export class AuthorityPolicyGuard implements CanActivate {
 
     const session = request.session;
     if (!session) {
-      throw new ForbiddenException('Authenticated session required for authority evaluation');
+      throw new ForbiddenException(
+        'Authenticated session required for consequential action evaluation',
+      );
     }
 
-    const evaluation = await this.consequentialActionService.assertLegacyPolicyAllowed(
+    const evaluation = await this.consequentialActionService.assertConsequentialActionAllowed(
       session,
-      policy,
+      metadata,
       {
         body: request.body,
         params: request.params,

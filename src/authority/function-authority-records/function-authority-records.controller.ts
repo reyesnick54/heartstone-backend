@@ -1,7 +1,23 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FunctionAuthorityLifecycleStatus } from '@prisma/client';
+import { AuthorityActionType, FunctionAuthorityLifecycleStatus } from '@prisma/client';
 
+import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ConsequentialAction } from '../consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../consequential-action/consequential-action.guard';
+import { resolveFunctionFromRouteParam } from '../consequential-action/consequential-action-resolvers';
 import { ActivateFunctionAuthorityRecordDto } from './dto/activate-function-authority-record.dto';
 import { CreateFunctionAuthorityRecordDto } from './dto/create-function-authority-record.dto';
 import { FunctionAuthorityRecordResponseDto } from './dto/function-authority-record-response.dto';
@@ -52,12 +68,27 @@ export class FunctionAuthorityRecordsController {
   }
 
   @Patch(':id/suspend')
+  @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
+  @ConsequentialAction({
+    action: AuthorityActionType.SUSPEND,
+    functionResolver: resolveFunctionFromRouteParam,
+    institutionalFieldPrefixes: ['actor'],
+    requireHumanActor: true,
+  })
   @ApiOperation({ summary: 'Suspend an active function authority record' })
   @ApiOkResponse({ type: FunctionAuthorityRecordResponseDto })
   suspend(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActivateFunctionAuthorityRecordDto,
   ): Promise<FunctionAuthorityRecordResponseDto> {
-    return this.activationService.suspend(id, dto);
+    return this.activationService.suspend(id, {
+      actorIdentityId: dto.actorIdentityId || session.identityId,
+      officeholderId: dto.officeholderId,
+      officeId: dto.officeId,
+      appointmentId: dto.appointmentId,
+      delegationId: dto.delegationId,
+      reason: dto.reason,
+    });
   }
 }

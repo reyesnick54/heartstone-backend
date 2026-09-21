@@ -204,16 +204,15 @@ describe('Official Experience API (e2e)', () => {
         effectiveFrom: new Date('2020-01-01'),
       },
     });
-    await prisma.credential.create({
-      data: {
-        identityId: otherIdentity.id,
-        type: 'PASSWORD',
-        secretHash: hashToken('OtherOfficial123!'),
-      },
-    });
-    await prisma.authenticationMethod.create({
-      data: { identityId: otherIdentity.id, type: 'PASSWORD' },
-    });
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/credentials')
+      .send({ identityId: otherIdentity.id, type: 'PASSWORD', password: 'OtherOfficial123!' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/authentication-methods')
+      .send({ identityId: otherIdentity.id, type: 'PASSWORD' })
+      .expect(201);
     const otherLogin = asLoginResponseBody(
       (
         await request(app.getHttpServer())
@@ -484,16 +483,15 @@ describe('Official Experience API (e2e)', () => {
         personId: adminPerson.id,
       },
     });
-    await prisma.credential.create({
-      data: {
-        identityId: adminIdentity.id,
-        type: 'PASSWORD',
-        secretHash: hashToken('TechAdmin123!'),
-      },
-    });
-    await prisma.authenticationMethod.create({
-      data: { identityId: adminIdentity.id, type: 'PASSWORD' },
-    });
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/credentials')
+      .send({ identityId: adminIdentity.id, type: 'PASSWORD', password: 'TechAdmin123!' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/identity/authentication-methods')
+      .send({ identityId: adminIdentity.id, type: 'PASSWORD' })
+      .expect(201);
     const adminLogin = asLoginResponseBody(
       (
         await request(app.getHttpServer())
@@ -528,7 +526,7 @@ describe('Official Experience API (e2e)', () => {
     );
 
     expect(me.hasUniversalAuthority).toBe(false);
-    expect(me.authorityDisclaimer).toContain('does not confer universal government authority');
+    expect(me.authorityDisclaimer).toContain('do not confer universal government authority');
     expect(me.technicalCapabilities.substantiveAccessAllowed).toBe(true);
 
     const workspaceBody = (
