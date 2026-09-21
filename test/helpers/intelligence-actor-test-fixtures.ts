@@ -10,7 +10,6 @@ import {
   IdentityType,
   StructuralLifecycleStatus,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { FunctionActivationService } from '../../src/authority/function-authority-records/function-activation.service';
