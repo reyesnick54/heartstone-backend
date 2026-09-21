@@ -19,7 +19,11 @@ import { GoverningSourcesService } from '../../src/authority/governing-sources/g
 import { type PrismaService } from '../../src/database/prisma.service';
 import { hashToken } from '../../src/identity/common/crypto.util';
 import { INTELLIGENCE_CONSEQUENTIAL_REVIEW_FUNCTION_CODE } from '../../src/intelligence/intelligence.constants';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 
 export interface IntelligenceActorFixtureContext {
   institutionAId: string;
@@ -82,27 +86,13 @@ async function createPasswordSession(
     },
   });
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: identity.id, type: 'PASSWORD', password: 'Phase8123!' })
-    .expect(201);
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
-
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier, password: 'Phase8123!' })
-        .expect(201)
-    ).body,
-  );
+  await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
+  const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
 
   return {
     identityId: identity.id,
-    sessionToken: login.sessionToken,
+    sessionToken,
     officeholderId: officeholder.id,
   };
 }
