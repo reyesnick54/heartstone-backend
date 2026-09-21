@@ -12,7 +12,7 @@ import { Phase4TestFixtures } from '../src/authority/fixtures/phase-4-test-fixtu
 import { FunctionActivationService } from '../src/authority/function-authority-records/function-activation.service';
 import { FunctionAuthorityRecordsService } from '../src/authority/function-authority-records/function-authority-records.service';
 import { GoverningSourcesService } from '../src/authority/governing-sources/governing-sources.service';
-import { PrismaService } from '../src/database/prisma.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import { hashToken } from '../src/identity/common/crypto.util';
 import {
   asAuthorityEvaluationBody,

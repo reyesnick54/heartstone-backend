@@ -11,7 +11,7 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { PrismaService } from '../src/database/prisma.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import {
   asAppointmentBody,
   asDelegationBody,

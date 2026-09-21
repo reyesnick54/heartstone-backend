@@ -4,7 +4,7 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_FIXTURE_MARKER } from '../src/authority/authority.constants';
-import { PrismaService } from '../src/database/prisma.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import {
   asFunctionAuthorityRecordBody,
   asGoverningSourceBody,

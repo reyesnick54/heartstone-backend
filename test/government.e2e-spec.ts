@@ -3,7 +3,7 @@ import { InstitutionType, JurisdictionType, StructuralLifecycleStatus } from '@p
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { PrismaService } from '../src/database/prisma.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import { asInstitutionBody, asJurisdictionBody } from './helpers/government-test-types';
 import {
   authHeader,
