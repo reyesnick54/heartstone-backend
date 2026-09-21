@@ -52,11 +52,6 @@ export class CommandConsoleController {
     this.boundaryService.assertClientCannotSetDashboardProjection(
       body as unknown as Record<string, unknown>,
     );
-    this.scopeService.assertInstitutionalTarget(actor, {
-      institutionId: body.institutionId,
-      departmentId: body.departmentId,
-      caseId: body.caseId,
-    });
 
     return this.projectionService.deriveProjection({
       indicatorDefinitionId: body.indicatorDefinitionId,
@@ -100,7 +95,6 @@ export class CommandConsoleController {
       body as unknown as Record<string, unknown>,
     );
     this.scopeService.rejectClientAuthorityIndicators(body as unknown as Record<string, unknown>);
-    this.scopeService.assertInstitutionAccess(actor, body.institutionId);
 
     return this.queryService.queryExecutiveConsole({
       actor,
@@ -127,10 +121,6 @@ export class CommandConsoleController {
       body as unknown as Record<string, unknown>,
     );
     this.scopeService.rejectClientAuthorityIndicators(body as unknown as Record<string, unknown>);
-    this.scopeService.assertInstitutionalTarget(actor, {
-      institutionId: body.institutionId,
-      departmentId: body.departmentId,
-    });
 
     return this.queryService.queryDepartmentalConsole({
       actor,
