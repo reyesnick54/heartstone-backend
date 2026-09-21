@@ -1,28 +1,53 @@
 import { ForbiddenException } from '@nestjs/common';
-import { AssuranceLevel, IdentityType } from '@prisma/client';
+import { AssuranceLevel, IdentityType, SessionStatus } from '@prisma/client';
 
-import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { IntelligenceInstitutionalScopeService } from './intelligence-institutional-scope.service';
 
 describe('IntelligenceInstitutionalScopeService', () => {
   const service = new IntelligenceInstitutionalScopeService();
 
-  const actor: ActorContextDto = {
-    sessionId: 'session-1',
+  const actor: ActorContext = {
     identityId: 'identity-a',
-    assuranceLevel: AssuranceLevel.MEDIUM,
+    userAccountId: 'account-a',
+    personId: 'person-a',
+    sessionId: 'session-1',
     identityType: IdentityType.INDIVIDUAL,
-    institutionalScopes: [
+    assuranceLevel: AssuranceLevel.MEDIUM,
+    session: {
+      sessionId: 'session-1',
+      status: SessionStatus.ACTIVE,
+      assuranceLevel: AssuranceLevel.MEDIUM,
+      issuedAt: new Date(),
+      expiresAt: new Date(Date.now() + 60_000),
+      lastUsedAt: null,
+      ipAddress: null,
+      userAgent: null,
+    },
+    organizationMemberships: [],
+    representativeAuthorities: [],
+    officeholderLinks: [],
+    activeAppointments: [
       {
-        institutionId: 'inst-a',
-        departmentId: 'dept-a',
-        officeId: 'office-a',
-        officeholderId: 'oh-a',
         appointmentId: 'appt-a',
+        officeholderId: 'oh-a',
+        officeId: 'office-a',
+        departmentId: 'dept-a',
+        institutionId: 'inst-a',
+        status: 'ACTIVE',
+        effectiveFrom: new Date('2020-01-01'),
+        effectiveUntil: null,
       },
     ],
-    isAiActor: false,
-    isSuspendedAiAgent: false,
+    activeDelegations: [],
+    institutionContexts: [
+      {
+        institutionId: 'inst-a',
+        departmentIds: ['dept-a'],
+        officeIds: ['office-a'],
+      },
+    ],
+    hasInstitutionalRelationships: true,
   };
 
   it('rejects forged owner identity fields', () => {
@@ -56,14 +81,9 @@ describe('IntelligenceInstitutionalScopeService', () => {
   });
 
   it('blocks AI actors from bypassing actor-context enforcement', () => {
-    const aiActor: ActorContextDto = {
-      sessionId: actor.sessionId,
-      identityId: actor.identityId,
-      assuranceLevel: actor.assuranceLevel,
+    const aiActor: ActorContext = {
+      ...actor,
       identityType: IdentityType.SERVICE,
-      institutionalScopes: actor.institutionalScopes,
-      isAiActor: true,
-      isSuspendedAiAgent: false,
     };
     expect(() => {
       service.assertAiActorCannotBypassActorContext(aiActor, 'reviewPerformanceClaim');

@@ -477,7 +477,7 @@ Cross-cutting (Phase 4): **Access != Authority**. Session authentication and ana
 
 Canonical actor-context enforcement for all Intelligence routes is documented in [phase-12-intelligence-trust-boundary.md](./phase-12-intelligence-trust-boundary.md).
 
-Protected routes use `@CurrentActor()` with `SessionAuthGuard` + `ActorContextGuard`. Client-supplied acting identity and authority indicator fields are rejected. Institutional scope is validated through `IntelligenceInstitutionalScopeService`. Consequential actions additionally require `AuthorityEvaluationService` through `IntelligenceConsequentialAuthorityService`.
+Protected routes use `@CurrentActor()` with global `SessionAuthGuard` (canonical `ActorContext`) plus `IntelligenceSuspendedAiGuard` on Intelligence routes. Client-supplied acting identity and authority indicator fields are rejected. Institutional scope is validated through `IntelligenceInstitutionalScopeService`. Consequential actions additionally require `AuthorityEvaluationService` through `IntelligenceConsequentialAuthorityService`.
 
 ## Security controls
 

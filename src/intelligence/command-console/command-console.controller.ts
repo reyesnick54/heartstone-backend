@@ -7,11 +7,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
-import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
-import { ActorContextGuard } from '../../identity/auth/guards/actor-context.guard';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
+import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
 import { DashboardQueryService } from './dashboard-query.service';
@@ -20,7 +19,7 @@ import { CaptureSnapshotDto } from './dto/capture-snapshot.dto';
 import { DeriveIndicatorProjectionDto } from './dto/derive-indicator-projection.dto';
 import { QueryDashboardDto } from './dto/query-dashboard.dto';
 
-const COMMAND_CONSOLE_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
+const COMMAND_CONSOLE_GUARDS = [IntelligenceSuspendedAiGuard] as const;
 
 @ApiTags('intelligence/command-console')
 @ApiBearerAuth()
@@ -42,7 +41,7 @@ export class CommandConsoleController {
       'Actor identity is server-derived; clients cannot supply identity or entitlement fields.',
   })
   deriveProjection(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: DeriveIndicatorProjectionDto,
   ) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
@@ -90,7 +89,7 @@ export class CommandConsoleController {
       'Executive dashboard visibility is informational only and does not confer command authority.',
   })
   @ApiCreatedResponse({ description: 'Executive console query result with disclaimers' })
-  queryExecutive(@CurrentActor() actor: ActorContextDto, @Body() body: QueryDashboardDto) {
+  queryExecutive(@CurrentActor() actor: ActorContext, @Body() body: QueryDashboardDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
@@ -116,7 +115,7 @@ export class CommandConsoleController {
       'Departmental dashboard access is verified against authenticated actor entitlements for the requested scope.',
   })
   @ApiCreatedResponse({ description: 'Departmental console query result with disclaimers' })
-  queryDepartmental(@CurrentActor() actor: ActorContextDto, @Body() body: QueryDashboardDto) {
+  queryDepartmental(@CurrentActor() actor: ActorContext, @Body() body: QueryDashboardDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
@@ -141,7 +140,7 @@ export class CommandConsoleController {
     description: 'Snapshot capturer identity is derived from the authenticated session.',
   })
   @ApiCreatedResponse({ description: 'Immutable dashboard snapshot with replay token' })
-  captureSnapshot(@CurrentActor() actor: ActorContextDto, @Body() body: CaptureSnapshotDto) {
+  captureSnapshot(@CurrentActor() actor: ActorContext, @Body() body: CaptureSnapshotDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
@@ -158,10 +157,7 @@ export class CommandConsoleController {
     description: 'Replay requires authenticated actor with verified dashboard access entitlements.',
   })
   @ApiOkResponse({ description: 'Immutable snapshot payload for replay' })
-  replaySnapshot(
-    @CurrentActor() actor: ActorContextDto,
-    @Param('replayToken') replayToken: string,
-  ) {
+  replaySnapshot(@CurrentActor() actor: ActorContext, @Param('replayToken') replayToken: string) {
     return this.snapshotService.replaySnapshot(replayToken, actor);
   }
 }

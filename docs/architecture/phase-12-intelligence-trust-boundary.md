@@ -13,7 +13,7 @@ All protected Intelligence routes resolve a canonical authenticated `ActorContex
 - `isAiActor` — true for `IdentityType.SERVICE` identities
 - `isSuspendedAiAgent` — true when service authentication is disabled or credentials are revoked
 
-`SessionAuthGuard` + `ActorContextGuard` enforce this boundary on every non-public Intelligence route.
+Global `SessionAuthGuard` resolves canonical `ActorContext`; `IntelligenceSuspendedAiGuard` and institutional scope services enforce this boundary on every non-public Intelligence route.
 
 ## Endpoint categories
 

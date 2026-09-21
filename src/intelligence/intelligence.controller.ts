@@ -11,10 +11,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IdentityType } from '@prisma/client';
 
+import { type ActorContext } from '../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../identity/auth/decorators/current-actor.decorator';
-import { type ActorContextDto } from '../identity/auth/dto/actor-context.dto';
-import { ActorContextGuard } from '../identity/auth/guards/actor-context.guard';
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
@@ -22,6 +20,7 @@ import { IntelligenceBoundaryService } from './common/intelligence-boundary.serv
 import { IntelligenceConsequentialAuthorityService } from './common/intelligence-consequential-authority.service';
 import { IntelligenceForbiddenClientFieldsInterceptor } from './common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from './common/intelligence-institutional-scope.service';
+import { IntelligenceSuspendedAiGuard } from './common/intelligence-suspended-ai.guard';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { CreateMetricBaselineDto } from './dto/create-metric-baseline.dto';
@@ -39,7 +38,7 @@ import { IntelligenceMonitoringService } from './monitoring/intelligence-monitor
 import { RiskAssessmentService } from './risk/risk-assessment.service';
 import { SimulationService } from './simulation/simulation.service';
 
-const INTELLIGENCE_ACTOR_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
+const INTELLIGENCE_ACTOR_GUARDS = [IntelligenceSuspendedAiGuard] as const;
 
 @ApiTags('intelligence')
 @UseInterceptors(IntelligenceForbiddenClientFieldsInterceptor)
@@ -77,10 +76,7 @@ export class IntelligenceController {
   @Post('frameworks')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  createFramework(
-    @CurrentActor() actor: ActorContextDto,
-    @Body() dto: CreatePerformanceFrameworkDto,
-  ) {
+  createFramework(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceFrameworkDto) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     this.scope.assertInstitutionAccess(actor, dto.institutionId);
     return this.frameworkService.create(dto);
@@ -89,10 +85,7 @@ export class IntelligenceController {
   @Get('frameworks/:id')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getFramework(
-    @CurrentActor() actor: ActorContextDto,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async getFramework(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
     const framework = await this.frameworkService.findById(id);
     this.scope.assertInstitutionAccess(actor, framework.institutionId);
     return framework;
@@ -101,7 +94,7 @@ export class IntelligenceController {
   @Post('metrics')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  createMetric(@CurrentActor() actor: ActorContextDto, @Body() dto: CreateMetricDefinitionDto) {
+  createMetric(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricDefinitionDto) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     this.scope.assertInstitutionAccess(actor, dto.ownerInstitutionId);
     this.scope.assertDepartmentAccess(actor, dto.ownerDepartmentId);
@@ -112,7 +105,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createMetricVersion(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateMetricDefinitionVersionDto,
   ) {
@@ -125,10 +118,7 @@ export class IntelligenceController {
   @Post('metrics/:id/publish')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async publishMetric(
-    @CurrentActor() actor: ActorContextDto,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async publishMetric(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
     const definition = await this.metricDefinitionService.findDefinitionById(id);
     this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.publishDefinition(id);
@@ -138,7 +128,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async activateMetricVersion(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const version = await this.metricDefinitionService.findVersionById(id);
@@ -152,10 +142,7 @@ export class IntelligenceController {
   @Post('baselines')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async createBaseline(
-    @CurrentActor() actor: ActorContextDto,
-    @Body() dto: CreateMetricBaselineDto,
-  ) {
+  async createBaseline(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricBaselineDto) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     const version = await this.metricDefinitionService.findVersionById(dto.metricVersionId);
     const definition = await this.metricDefinitionService.findDefinitionById(
@@ -169,7 +156,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordCalculationRun(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() dto: RecordMetricCalculationRunDto,
   ) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
@@ -184,7 +171,7 @@ export class IntelligenceController {
   @Post('claims')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  createClaim(@CurrentActor() actor: ActorContextDto, @Body() dto: CreatePerformanceClaimDto) {
+  createClaim(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceClaimDto) {
     this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
     return this.claimService.create(dto, actor.identityId);
   }
@@ -193,7 +180,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async reviewClaim(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReviewPerformanceClaimDto & { actorType?: string },
   ) {
@@ -208,7 +195,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createDefinition(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['createDefinition']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -220,7 +207,7 @@ export class IntelligenceController {
   @Get('digital-twins/definitions/:id')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getDefinition(@CurrentActor() actor: ActorContextDto, @Param('id') id: string) {
+  async getDefinition(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
     const definition = await this.digitalTwin.findDefinitionById(id);
     this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return definition;
@@ -230,7 +217,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createVersion(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['createVersion']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -242,7 +229,7 @@ export class IntelligenceController {
   @Get('digital-twins/versions/:id')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getVersion(@CurrentActor() actor: ActorContextDto, @Param('id') id: string) {
+  async getVersion(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
     const version = await this.digitalTwin.findVersionById(id);
     const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
     this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
@@ -253,7 +240,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async addSource(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['addSource']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -267,7 +254,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createRelationship(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['createRelationship']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -280,7 +267,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordMode(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['recordMode']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -294,7 +281,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createSnapshot(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<DigitalTwinService['createSnapshot']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -308,7 +295,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createScenario(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<SimulationService['createScenario']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -322,7 +309,7 @@ export class IntelligenceController {
   @Get('simulations/scenarios/:id')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getScenario(@CurrentActor() actor: ActorContextDto, @Param('id') id: string) {
+  async getScenario(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
     const scenario = await this.simulation.findScenarioById(id);
     const version = await this.digitalTwin.findVersionById(scenario.twinVersionId);
     const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
@@ -334,7 +321,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async startRun(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<SimulationService['startRun']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -348,7 +335,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordOutput(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('id') id: string,
     @Body() body: Omit<Parameters<SimulationService['recordOutput']>[0], 'simulationRunId'>,
   ) {
@@ -363,7 +350,7 @@ export class IntelligenceController {
   @Post('simulations/runs/:id/complete')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async completeRun(@CurrentActor() actor: ActorContextDto, @Param('id') id: string) {
+  async completeRun(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
     const run = await this.simulation.findRunById(id);
     const version = await this.digitalTwin.findVersionById(run.twinVersionId);
     const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
@@ -375,7 +362,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordReview(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<ConsequentialUseService['recordReview']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -390,7 +377,7 @@ export class IntelligenceController {
       ...body,
       reviewerIdentityId: actor.identityId,
       reviewerIdentityType: IdentityType.INDIVIDUAL,
-      isAiActor: actor.isAiActor,
+      isAiActor: this.scope.isAiActor(actor),
     });
   }
 
@@ -398,7 +385,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async proposeLiveTransition(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<ConsequentialUseService['proposeLiveTransition']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -416,7 +403,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createAnalysisRequest(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Omit<Parameters<AnalysisService['createRequest']>[0], 'requestedByIdentityId'>,
   ) {
     this.guardOperationalPayload(actor, body);
@@ -431,7 +418,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async startAnalysisRun(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Omit<Parameters<AnalysisService['startRun']>[0], 'executedByIdentityId'>,
   ) {
     this.guardOperationalPayload(actor, body);
@@ -446,7 +433,7 @@ export class IntelligenceController {
   @Post('analysis/runs/:runId/complete')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async completeAnalysisRun(@CurrentActor() actor: ActorContextDto, @Param('runId') runId: string) {
+  async completeAnalysisRun(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
     const run = await this.analysisService.findRunById(runId);
     this.scope.assertInstitutionAccess(actor, run.request.institutionId);
     return this.analysisService.completeRun(runId);
@@ -455,7 +442,7 @@ export class IntelligenceController {
   @Get('analysis/runs/:runId/replay')
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
-  async getAnalysisReplay(@CurrentActor() actor: ActorContextDto, @Param('runId') runId: string) {
+  async getAnalysisReplay(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
     const run = await this.analysisService.findRunById(runId);
     this.scope.assertInstitutionAccess(actor, run.request.institutionId);
     if (run.request.case) {
@@ -469,7 +456,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createMonitoringRule(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body()
     body: Omit<
       Parameters<IntelligenceMonitoringService['createRule']>[0],
@@ -489,7 +476,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async activateMonitoringRule(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('ruleId') ruleId: string,
   ) {
     const rule = await this.monitoringService.findRuleById(ruleId);
@@ -501,7 +488,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordObservation(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<IntelligenceMonitoringService['recordObservation']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -514,7 +501,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async generateAlert(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body()
     body: Omit<
       Parameters<IntelligenceMonitoringService['generateAlert']>[0],
@@ -534,7 +521,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async verifyAlert(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body()
     body: Omit<Parameters<IntelligenceMonitoringService['verifyAlert']>[0], 'verifierIdentityId'>,
   ) {
@@ -559,7 +546,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async disposeAlert(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body()
     body: Omit<
       Parameters<IntelligenceMonitoringService['disposeAlert']>[0],
@@ -581,7 +568,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createRiskDefinition(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<RiskAssessmentService['createDefinition']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -593,7 +580,7 @@ export class IntelligenceController {
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createRiskAssessment(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<RiskAssessmentService['createAssessment']>[0],
   ) {
     this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
@@ -602,7 +589,7 @@ export class IntelligenceController {
     return this.riskService.createAssessment(body);
   }
 
-  private guardOperationalPayload(actor: ActorContextDto, payload: Record<string, unknown>): void {
+  private guardOperationalPayload(actor: ActorContext, payload: Record<string, unknown>): void {
     this.scope.rejectForgedActorIdentityFields(payload, actor);
     this.scope.rejectClientAuthorityIndicators(payload);
   }

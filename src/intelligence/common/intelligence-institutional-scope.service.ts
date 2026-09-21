@@ -1,7 +1,10 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { IdentityType } from '@prisma/client';
 
-import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
-import { type InstitutionalScopeEntry } from '../../identity/auth/types/institutional-scope.types';
+import {
+  type ActorContext,
+  type ActorContextAppointment,
+} from '../../identity/auth/context/actor-context.types';
 import {
   AI_ACTOR_IDENTITY_PREFIX,
   AI_ACTOR_ROLE_MARKER,
@@ -17,7 +20,7 @@ export interface InstitutionalScopeTarget {
 
 @Injectable()
 export class IntelligenceInstitutionalScopeService {
-  rejectForgedActorIdentityFields(payload: Record<string, unknown>, actor: ActorContextDto): void {
+  rejectForgedActorIdentityFields(payload: Record<string, unknown>, actor: ActorContext): void {
     for (const field of FORBIDDEN_CLIENT_ACTOR_IDENTITY_FIELDS) {
       if (!(field in payload) || payload[field] === undefined) {
         continue;
@@ -42,22 +45,22 @@ export class IntelligenceInstitutionalScopeService {
     }
   }
 
-  assertActorHasInstitutionalScope(actor: ActorContextDto): void {
-    if (actor.institutionalScopes.length === 0) {
+  assertActorHasInstitutionalScope(actor: ActorContext): void {
+    if (!actor.hasInstitutionalRelationships || actor.institutionContexts.length === 0) {
       throw new ForbiddenException(
         'Institutional intelligence operations require an active officeholder appointment scope',
       );
     }
   }
 
-  assertInstitutionAccess(actor: ActorContextDto, institutionId?: string | null): void {
+  assertInstitutionAccess(actor: ActorContext, institutionId?: string | null): void {
     if (!institutionId) {
       return;
     }
 
     this.assertActorHasInstitutionalScope(actor);
 
-    const allowed = actor.institutionalScopes.some(
+    const allowed = actor.institutionContexts.some(
       (scope) => scope.institutionId === institutionId,
     );
     if (!allowed) {
@@ -65,26 +68,28 @@ export class IntelligenceInstitutionalScopeService {
     }
   }
 
-  assertDepartmentAccess(actor: ActorContextDto, departmentId?: string | null): void {
+  assertDepartmentAccess(actor: ActorContext, departmentId?: string | null): void {
     if (!departmentId) {
       return;
     }
 
     this.assertActorHasInstitutionalScope(actor);
 
-    const allowed = actor.institutionalScopes.some((scope) => scope.departmentId === departmentId);
+    const allowed = actor.institutionContexts.some((scope) =>
+      scope.departmentIds.includes(departmentId),
+    );
     if (!allowed) {
       throw new ForbiddenException('Cross-department intelligence access denied');
     }
   }
 
-  assertInstitutionalTarget(actor: ActorContextDto, target: InstitutionalScopeTarget): void {
+  assertInstitutionalTarget(actor: ActorContext, target: InstitutionalScopeTarget): void {
     this.assertInstitutionAccess(actor, target.institutionId);
     this.assertDepartmentAccess(actor, target.departmentId);
   }
 
   assertCrossCaseRetrievalBlocked(
-    actor: ActorContextDto,
+    actor: ActorContext,
     requestedCaseId?: string | null,
     allowedCaseId?: string | null,
   ): void {
@@ -97,8 +102,8 @@ export class IntelligenceInstitutionalScopeService {
     }
   }
 
-  assertAiActorCannotBypassActorContext(actor: ActorContextDto, action: string): void {
-    if (!actor.isAiActor) {
+  assertAiActorCannotBypassActorContext(actor: ActorContext, action: string): void {
+    if (actor.identityType !== IdentityType.SERVICE) {
       return;
     }
 
@@ -115,8 +120,8 @@ export class IntelligenceInstitutionalScopeService {
     }
   }
 
-  assertHumanActorForReview(actor: ActorContextDto): void {
-    if (actor.isAiActor) {
+  assertHumanActorForReview(actor: ActorContext): void {
+    if (actor.identityType === IdentityType.SERVICE) {
       throw new ForbiddenException('AI actors cannot satisfy human review requirements');
     }
 
@@ -134,7 +139,7 @@ export class IntelligenceInstitutionalScopeService {
   }
 
   assertRecordAccessible<T extends InstitutionalScopeTarget>(
-    actor: ActorContextDto,
+    actor: ActorContext,
     record: T | null,
     label: string,
   ): T {
@@ -146,9 +151,9 @@ export class IntelligenceInstitutionalScopeService {
     return record;
   }
 
-  resolvePrimaryScope(actor: ActorContextDto): InstitutionalScopeEntry {
+  resolvePrimaryScope(actor: ActorContext): ActorContextAppointment {
     this.assertActorHasInstitutionalScope(actor);
-    const primaryScope = actor.institutionalScopes[0];
+    const primaryScope = actor.activeAppointments[0];
     if (!primaryScope) {
       throw new ForbiddenException(
         'Institutional intelligence operations require an active officeholder appointment scope',
@@ -161,5 +166,9 @@ export class IntelligenceInstitutionalScopeService {
     if (actorRoleMarker === AI_ACTOR_ROLE_MARKER) {
       throw new ForbiddenException('AI assistance cannot impersonate human actor context');
     }
+  }
+
+  isAiActor(actor: ActorContext): boolean {
+    return actor.identityType === IdentityType.SERVICE;
   }
 }

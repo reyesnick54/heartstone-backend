@@ -1,5 +1,5 @@
 import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { type Reflector } from '@nestjs/core';
 import { AssuranceLevel } from '@prisma/client';
 
 import { IS_PUBLIC_KEY } from '../../../security/decorators/public.decorator';

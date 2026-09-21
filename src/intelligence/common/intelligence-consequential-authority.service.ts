@@ -3,12 +3,12 @@ import { AuthorityActionType, AuthorityEvaluationOutcome } from '@prisma/client'
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { FunctionAuthorityRecordsService } from '../../authority/function-authority-records/function-authority-records.service';
-import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { INTELLIGENCE_CONSEQUENTIAL_REVIEW_FUNCTION_CODE } from '../intelligence.constants';
 import { IntelligenceInstitutionalScopeService } from './intelligence-institutional-scope.service';
 
 export interface AssertConsequentialAuthorityInput {
-  actor: ActorContextDto;
+  actor: ActorContext;
   action?: AuthorityActionType;
   institutionId?: string | null;
   officeholderId?: string;

@@ -11,12 +11,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
-import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
-import { ActorContextGuard } from '../../identity/auth/guards/actor-context.guard';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { IntelligenceForbiddenClientFieldsInterceptor } from '../common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
+import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
 import { StrategicProjectBoundaryService } from '../common/strategic-project-boundary.service';
 import { CreateStrategicProjectProfileDto } from '../dto/create-strategic-project-profile.dto';
 import { DeriveProjectStatusProjectionDto } from '../dto/derive-project-status-projection.dto';
@@ -25,7 +24,7 @@ import { ProjectStatusProjectionService } from './project-status-projection.serv
 import { StrategicProjectProfileService } from './strategic-project-profile.service';
 import { StrategicProjectStageService } from './strategic-project-stage.service';
 
-const STRATEGIC_PROJECT_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
+const STRATEGIC_PROJECT_GUARDS = [IntelligenceSuspendedAiGuard] as const;
 
 @ApiTags('intelligence/strategic-projects')
 @ApiBearerAuth()
@@ -43,7 +42,7 @@ export class StrategicProjectController {
 
   @Post()
   createProfile(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Body() dto: CreateStrategicProjectProfileDto,
   ) {
     this.guardPayload(actor, dto as unknown as Record<string, unknown>);
@@ -70,7 +69,7 @@ export class StrategicProjectController {
 
   @Get(':profileId')
   async getProfile(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,
   ) {
     const profile = await this.profileService.getProfile(profileId);
@@ -84,7 +83,7 @@ export class StrategicProjectController {
 
   @Post(':profileId/stages')
   async recordStage(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: RecordStrategicProjectStageDto,
   ) {
@@ -110,7 +109,7 @@ export class StrategicProjectController {
 
   @Post(':profileId/projections/derive')
   async deriveProjection(
-    @CurrentActor() actor: ActorContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: DeriveProjectStatusProjectionDto,
   ) {
@@ -131,7 +130,7 @@ export class StrategicProjectController {
     });
   }
 
-  private guardPayload(actor: ActorContextDto, payload: Record<string, unknown>): void {
+  private guardPayload(actor: ActorContext, payload: Record<string, unknown>): void {
     this.scopeService.rejectForgedActorIdentityFields(payload, actor);
     this.scopeService.rejectClientAuthorityIndicators(payload);
   }
