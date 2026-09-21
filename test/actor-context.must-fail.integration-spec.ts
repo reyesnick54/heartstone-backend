@@ -1,6 +1,5 @@
 import { type INestApplication } from '@nestjs/common';
 import {
-  AccountStatus,
   AppointmentStatus,
   AssuranceLevel,
   DelegationStatus,
@@ -16,12 +15,11 @@ import { ActorContextService } from '../src/identity/auth/context/actor-context.
 import { FORBIDDEN_ACTOR_CONTEXT_AUTHORITY_FIELDS } from '../src/identity/auth/context/actor-context.types';
 import { hashToken } from '../src/identity/common/crypto.util';
 import {
-  asIdentityBody,
-  asLoginResponseBody,
-  asPersonBody,
-  asProtectedProfileBody,
-  asUserAccountBody,
-} from './helpers/identity-test-types';
+  createPasswordAuthenticationMethodViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './helpers/identity-provisioning.fixture';
+import { asProtectedProfileBody } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Actor context must-fail invariants (integration)', () => {
@@ -47,44 +45,19 @@ describe('Actor context must-fail invariants (integration)', () => {
   });
 
   async function provisionAccount(loginIdentifier: string, password: string) {
-    const personRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/persons')
-      .send({ givenName: 'Actor', familyName: 'Test' })
-      .expect(201);
-    const person = asPersonBody(personRes.body);
-
-    const accountRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/user-accounts')
-      .send({ loginIdentifier, personId: person.id, status: AccountStatus.ACTIVE })
-      .expect(201);
-    const account = asUserAccountBody(accountRes.body);
-
-    const identityRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/identities')
-      .send({
-        type: 'INDIVIDUAL',
-        displayName: 'Actor Test',
-        userAccountId: account.id,
-        personId: person.id,
-      })
-      .expect(201);
-    const identity = asIdentityBody(identityRes.body);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: identity.id, type: 'PASSWORD', password })
-      .expect(201);
-
-    const loginRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/auth/login')
-      .send({ loginIdentifier, password })
-      .expect(201);
+    const provisioned = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier,
+      password,
+      givenName: 'Actor',
+      familyName: 'Test',
+      displayName: 'Actor Test',
+    });
+    await createPasswordAuthenticationMethodViaPrisma(prisma, provisioned.identityId);
+    const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, password);
 
     return {
-      person,
-      account,
-      identity,
-      sessionToken: asLoginResponseBody(loginRes.body).sessionToken,
+      identity: { id: provisioned.identityId },
+      sessionToken,
     };
   }
 

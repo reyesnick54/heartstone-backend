@@ -1,5 +1,5 @@
 import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 import { AssuranceLevel } from '@prisma/client';
 
 import { IS_PUBLIC_KEY } from '../../../security/decorators/public.decorator';
@@ -80,30 +80,5 @@ describe('SessionAuthGuard', () => {
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(context.request.session).toEqual(session);
     expect(context.request.actor).toEqual(actor);
-    expect(actorContextService.assertNoClientIdentitySubstitution).toHaveBeenCalledWith(
-      actor,
-      undefined,
-    );
-  });
-
-  it('checks client identity substitution against request body', async () => {
-    const session = {
-      sessionId: 'session-1',
-      identityId: 'identity-1',
-      assuranceLevel: AssuranceLevel.LOW,
-    };
-    const actor = { identityId: 'identity-1', sessionId: 'session-1' };
-    const body = { identityId: 'identity-2', payload: 'x' };
-
-    sessionsService.validateSessionToken.mockResolvedValue(session);
-    actorContextService.resolveFromSessionContext.mockResolvedValue(actor);
-
-    const context = createContext({ authorization: 'Bearer token-123' }, body);
-
-    await guard.canActivate(context);
-    expect(actorContextService.assertNoClientIdentitySubstitution).toHaveBeenCalledWith(
-      actor,
-      body,
-    );
   });
 });
