@@ -1,12 +1,14 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../../security/decorators/public.decorator';
 import {
   InstrumentVerificationService,
   PublicInstrumentVerificationResponse,
 } from './instrument-verification.service';
 
 @ApiTags('public-instruments')
+@Public()
 @Controller('public/instruments')
 export class PublicInstrumentVerificationController {
   constructor(private readonly verificationService: InstrumentVerificationService) {}

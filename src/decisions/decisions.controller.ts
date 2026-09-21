@@ -11,6 +11,7 @@ import {
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ActorContextService } from '../security/services/actor-context.service';
 import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
 import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
 import { ExecuteGovernmentDecisionDto } from './dto/execute-government-decision.dto';
@@ -26,6 +27,7 @@ export class DecisionsController {
     private readonly readiness: DecisionReadinessService,
     private readonly execution: DecisionExecutionService,
     private readonly preparation: DecisionPreparationService,
+    private readonly actorContext: ActorContextService,
   ) {}
 
   @Post('readiness/assess')
@@ -36,11 +38,20 @@ export class DecisionsController {
     institutionalFieldPrefixes: ['proposedDecisionMaker'],
   })
   @ApiOperation({ summary: 'Assess whether a case is ready for authorized government decision' })
-  assessReadiness(@Body() dto: AssessDecisionReadinessDto) {
+  assessReadiness(
+    @CurrentSession() session: SessionContextDto,
+    @Body() dto: AssessDecisionReadinessDto,
+  ) {
+    this.actorContext.assertActorIdentityMatchesSession(
+      session.identityId,
+      dto.proposedDecisionMakerIdentityId,
+      'proposedDecisionMakerIdentityId',
+    );
+
     return this.readiness.assess({
       caseId: dto.caseId,
       decisionTypeVersionId: dto.decisionTypeVersionId,
-      proposedDecisionMakerIdentityId: dto.proposedDecisionMakerIdentityId,
+      proposedDecisionMakerIdentityId: session.identityId,
       proposedDecisionMakerOfficeholderId: dto.proposedDecisionMakerOfficeholderId,
       appointmentId: dto.appointmentId,
       delegationId: dto.delegationId,
@@ -67,12 +78,18 @@ export class DecisionsController {
     @CurrentSession() session: SessionContextDto,
     @Body() dto: ExecuteGovernmentDecisionDto,
   ) {
+    this.actorContext.assertActorIdentityMatchesSession(
+      session.identityId,
+      dto.decisionMakerIdentityId,
+      'decisionMakerIdentityId',
+    );
+
     return this.execution.executeDecision({
       caseId: dto.caseId,
       decisionTypeVersionId: dto.decisionTypeVersionId,
       decisionReadinessAssessmentId: dto.decisionReadinessAssessmentId,
       evidencePacketVersionId: dto.evidencePacketVersionId,
-      decisionMakerIdentityId: dto.decisionMakerIdentityId || session.identityId,
+      decisionMakerIdentityId: session.identityId,
       decisionMakerOfficeholderId: dto.decisionMakerOfficeholderId,
       appointmentId: dto.appointmentId,
       delegationId: dto.delegationId,

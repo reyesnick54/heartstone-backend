@@ -6,7 +6,6 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -16,10 +15,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { type Request } from 'express';
 
+import { CurrentSession } from '../../../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
+import { ActorContextService } from '../../../security/services/actor-context.service';
+import { CaseAccessService } from '../../../security/services/case-access.service';
 import { CaseCommunicationService } from './case-communication.service';
 import { CaseDashboardReadService } from './case-dashboard-read.service';
 import { CaseEventService } from './case-event.service';
@@ -27,10 +28,6 @@ import { CaseMilestoneService } from './case-milestone.service';
 import { CasePublicStatusProjectionService } from './case-public-status-projection.service';
 import { CreateCaseCommunicationDto } from './dto/create-case-communication.dto';
 import { CreateCaseMilestoneDto } from './dto/create-case-milestone.dto';
-
-interface SessionRequest extends Request {
-  session?: SessionContextDto;
-}
 
 @ApiTags('cases')
 @Controller('cases')
@@ -43,45 +40,74 @@ export class CaseTimelineController {
     private readonly milestoneService: CaseMilestoneService,
     private readonly projectionService: CasePublicStatusProjectionService,
     private readonly dashboardService: CaseDashboardReadService,
+    private readonly actorContext: ActorContextService,
+    private readonly caseAccess: CaseAccessService,
   ) {}
 
   @Get(':caseId/timeline')
   @ApiOperation({ summary: 'Official case event timeline' })
   @ApiOkResponse({ description: 'Append-only operational event history' })
-  getOfficialTimeline(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getOfficialTimeline(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.caseEventService.listOfficialTimeline(caseId);
   }
 
   @Get(':caseId/timeline/applicant')
   @ApiOperation({ summary: 'Applicant-visible case timeline' })
   @ApiOkResponse({ description: 'Public-safe event history excluding internal notes' })
-  getApplicantTimeline(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getApplicantTimeline(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    await this.caseAccess.assertApplicantAccess(caseId, session.identityId);
     return this.caseEventService.listApplicantVisibleTimeline(caseId);
   }
 
   @Get(':caseId/communications')
   @ApiOperation({ summary: 'Official case communications' })
-  getOfficialCommunications(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getOfficialCommunications(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.communicationService.listOfficialCommunications(caseId);
   }
 
   @Get(':caseId/communications/applicant')
   @ApiOperation({ summary: 'Applicant-visible communications' })
-  getApplicantCommunications(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getApplicantCommunications(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    await this.caseAccess.assertApplicantAccess(caseId, session.identityId);
     return this.communicationService.listApplicantVisibleCommunications(caseId);
   }
 
   @Post(':caseId/communications')
   @ApiOperation({ summary: 'Record a case communication' })
   @ApiCreatedResponse({ description: 'Communication recorded with optional outbox enqueue' })
-  createCommunication(
+  async createCommunication(
+    @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseCommunicationDto,
   ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.caseAccess.assertApplicantOrOfficialAccess(caseId, actor);
+    this.actorContext.assertActorIdentityMatchesSession(
+      session.identityId,
+      dto.senderIdentityId,
+      'senderIdentityId',
+    );
+
     return this.communicationService.create({
       caseId,
       communicationType: dto.communicationType,
-      senderIdentityId: dto.senderIdentityId,
+      senderIdentityId: session.identityId,
       senderOfficeholderId: dto.senderOfficeholderId,
       recipientType: dto.recipientType,
       recipientReference: dto.recipientReference,
@@ -97,17 +123,25 @@ export class CaseTimelineController {
 
   @Get(':caseId/milestones')
   @ApiOperation({ summary: 'Case milestones' })
-  getMilestones(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getMilestones(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.listForCase(caseId);
   }
 
   @Post(':caseId/milestones')
   @ApiOperation({ summary: 'Create a case milestone' })
   @ApiCreatedResponse({ description: 'Milestone created' })
-  createMilestone(
+  async createMilestone(
+    @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseMilestoneDto,
   ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.create({
       caseId,
       name: dto.name,
@@ -121,7 +155,11 @@ export class CaseTimelineController {
 
   @Get(':caseId/public-status')
   @ApiOperation({ summary: 'Applicant public status projection (read-only derived)' })
-  getPublicStatus(@Param('caseId', ParseUUIDPipe) caseId: string) {
+  async getPublicStatus(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
+    await this.caseAccess.assertApplicantAccess(caseId, session.identityId);
     return this.projectionService.getApplicantProjection(caseId);
   }
 
@@ -135,12 +173,10 @@ export class CaseTimelineController {
 
   @Get(':caseId/dashboard')
   @ApiOperation({ summary: 'Official case dashboard read model' })
-  getDashboard(@Param('caseId', ParseUUIDPipe) caseId: string, @Req() req: SessionRequest) {
-    const session = req.session;
-    if (!session) {
-      throw new ForbiddenException('Authentication required');
-    }
-
+  getDashboard(
+    @CurrentSession() session: SessionContextDto,
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+  ) {
     return this.dashboardService.buildDashboard(caseId, session.identityId);
   }
 }

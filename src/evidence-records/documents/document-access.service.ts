@@ -53,6 +53,63 @@ export class DocumentAccessService {
     await this.assertClassificationAccess(version, context);
   }
 
+  async assertRecordMetadataAccess(
+    documentRecordId: string,
+    context: DocumentAccessContext,
+  ): Promise<void> {
+    const record = await this.prisma.documentRecord.findUnique({
+      where: { id: documentRecordId },
+    });
+
+    if (!record) {
+      throw new NotFoundException(`Document record "${documentRecordId}" was not found`);
+    }
+
+    const latestVersion = await this.prisma.documentVersion.findFirst({
+      where: { documentRecordId },
+      orderBy: { versionNumber: 'desc' },
+    });
+
+    if (!latestVersion) {
+      if (!context.isOfficial) {
+        throw new ForbiddenException('Document is not accessible to this identity');
+      }
+      return;
+    }
+
+    await this.assertDownloadAllowed(latestVersion, context);
+  }
+
+  async assertVersionMetadataAccess(
+    versionId: string,
+    context: DocumentAccessContext,
+  ): Promise<void> {
+    const version = await this.prisma.documentVersion.findUnique({
+      where: { id: versionId },
+    });
+
+    if (!version) {
+      throw new NotFoundException(`Document version "${versionId}" was not found`);
+    }
+
+    await this.assertDownloadAllowed(version, context);
+  }
+
+  async assertAssociationTargetAccess(
+    targetType: string,
+    targetId: string,
+    context: DocumentAccessContext,
+  ): Promise<void> {
+    if (context.isOfficial) {
+      return;
+    }
+
+    const linkedToApplicant = await this.isLinkedToApplicant([{ targetType, targetId }], context);
+    if (!linkedToApplicant) {
+      throw new ForbiddenException('Document associations are not accessible to this identity');
+    }
+  }
+
   async downloadVersion(
     versionId: string,
     context: DocumentAccessContext,
