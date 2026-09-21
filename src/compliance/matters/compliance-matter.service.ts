@@ -4,6 +4,9 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ComplianceMatterStatus, OfficialInstrumentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { COMPLIANCE_MATTER_NUMBER_PREFIX } from '../compliance.constants';
 
 export interface OpenComplianceMatterInput {
@@ -18,7 +21,10 @@ export interface OpenComplianceMatterInput {
 
 @Injectable()
 export class ComplianceMatterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly resourceAccess: ResourceAccessService,
+  ) {}
 
   async openFromIssuedInstrument(input: OpenComplianceMatterInput) {
     const instrument = await this.prisma.officialInstrument.findUnique({
@@ -58,7 +64,11 @@ export class ComplianceMatterService {
     });
   }
 
-  async findById(id: string) {
+  async findById(id: string, session?: SessionContextDto) {
+    if (session) {
+      await this.resourceAccess.assertVisibility(session, ScopedResourceType.COMPLIANCE_MATTER, id);
+    }
+
     const matter = await this.prisma.complianceMatter.findUnique({
       where: { id },
       include: {

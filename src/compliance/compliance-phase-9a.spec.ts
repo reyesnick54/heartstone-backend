@@ -9,6 +9,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
+import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import { ObligationRecurrenceService } from './common/obligation-recurrence.service';
 import { ComplianceMatterService } from './matters/compliance-matter.service';
@@ -56,6 +57,14 @@ describe('Phase 9A compliance foundation', () => {
         ComplianceMatterService,
         ContinuingObligationService,
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: ResourceAccessService,
+          useValue: {
+            assertVisibility: jest.fn(),
+            assertModification: jest.fn(),
+            assertInstitutionalBoundary: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

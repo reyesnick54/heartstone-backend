@@ -50,8 +50,11 @@ export class EvidenceController {
   }
 
   @Get('records/:id')
-  getEvidence(@Param('id', ParseUUIDPipe) id: string) {
-    return this.evidenceRecords.getById(id);
+  getEvidence(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.evidenceRecords.getById(id, session);
   }
 
   @Post('records/:id/verifications')

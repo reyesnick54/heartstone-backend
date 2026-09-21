@@ -21,6 +21,7 @@ import { ExperienceModule } from './experience/experience.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
+import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
@@ -52,6 +53,7 @@ import { SystemModule } from './system/system.module';
     SystemModule,
     GovernmentModule,
     IdentityModule,
+    InstitutionalScopeModule,
     AuthorityModule,
     ServiceCatalogModule,
     ExperienceModule,

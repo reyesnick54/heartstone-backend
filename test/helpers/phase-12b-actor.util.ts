@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { AssuranceLevel } from '@prisma/client';
 
 import { type AuthenticatedPrincipal } from '../../src/identity/auth/domain/authenticated-principal';
@@ -7,7 +9,7 @@ export function toDashboardActor(
   userAccountId?: string,
 ): AuthenticatedPrincipal {
   return {
-    sessionId: `test-session-${identityId}`,
+    sessionId: randomUUID(),
     identityId,
     userAccountId: userAccountId ?? null,
     assuranceLevel: AssuranceLevel.MEDIUM,

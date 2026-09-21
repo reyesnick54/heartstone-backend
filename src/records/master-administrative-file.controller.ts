@@ -11,6 +11,8 @@ import { PrismaService } from '../database/prisma.service';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ScopedResourceType } from '../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { MasterFileCompletenessAssessmentService } from './completeness/master-file-completeness-assessment.service';
 import { AssessMasterFileCompletenessDto } from './dto/assess-master-file-completeness.dto';
 import { MasterAdministrativeFileService } from './master-administrative-file.service';
@@ -31,6 +33,7 @@ export class MasterAdministrativeFileController {
     private readonly accessService: MasterAdministrativeFileAccessService,
     private readonly completenessAssessment: MasterFileCompletenessAssessmentService,
     private readonly prisma: PrismaService,
+    private readonly resourceAccess: ResourceAccessService,
   ) {}
 
   @Get('by-case/:caseId')
@@ -39,6 +42,7 @@ export class MasterAdministrativeFileController {
     @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
+    await this.resourceAccess.assertVisibility(session, ScopedResourceType.CASE, caseId);
     const accessContext = await this.buildAccessContext(session.identityId);
     const file = await this.masterFileService.findByCaseId(caseId);
     const accessLevel = await this.accessService.resolveAccessLevel(file, accessContext);
@@ -72,6 +76,11 @@ export class MasterAdministrativeFileController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AssessMasterFileCompletenessDto,
   ) {
+    await this.resourceAccess.assertVisibility(
+      session,
+      ScopedResourceType.MASTER_ADMINISTRATIVE_FILE,
+      id,
+    );
     const accessContext = await this.buildAccessContext(session.identityId);
     const file = await this.masterFileService.findById(id);
     await this.accessService.resolveAccessLevel(file, accessContext);
@@ -88,6 +97,11 @@ export class MasterAdministrativeFileController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
+    await this.resourceAccess.assertVisibility(
+      session,
+      ScopedResourceType.MASTER_ADMINISTRATIVE_FILE,
+      id,
+    );
     const accessContext = await this.buildAccessContext(session.identityId);
     return this.indexService.buildIndex(id, accessContext);
   }
@@ -99,6 +113,11 @@ export class MasterAdministrativeFileController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
+    await this.resourceAccess.assertVisibility(
+      session,
+      ScopedResourceType.MASTER_ADMINISTRATIVE_FILE,
+      id,
+    );
     const accessContext = await this.buildAccessContext(session.identityId);
     const file = await this.masterFileService.findById(id);
     const accessLevel = await this.accessService.resolveAccessLevel(file, accessContext);

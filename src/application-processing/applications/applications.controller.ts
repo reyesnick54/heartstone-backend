@@ -32,7 +32,7 @@ export class ApplicationsController {
 
   @Get(':id')
   findOne(@CurrentSession() session: SessionContextDto, @Param('id', ParseUUIDPipe) id: string) {
-    return this.applicationsService.findById(id, session.identityId);
+    return this.applicationsService.findById(session, id);
   }
 
   @Patch(':id/draft')
@@ -41,7 +41,7 @@ export class ApplicationsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateApplicationDraftDto,
   ) {
-    return this.applicationsService.updateDraft(id, session.identityId, dto);
+    return this.applicationsService.updateDraft(session, id, dto);
   }
 
   @Post(':id/submit')
@@ -50,7 +50,7 @@ export class ApplicationsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SubmitApplicationDto,
   ) {
-    return this.applicationsService.submit(id, session.identityId, dto);
+    return this.applicationsService.submit(session, id, dto);
   }
 
   @Post(':id/corrections')
@@ -59,6 +59,6 @@ export class ApplicationsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SubmitApplicationDto,
   ) {
-    return this.applicationsService.submitCorrection(id, session.identityId, dto);
+    return this.applicationsService.submitCorrection(session, id, dto);
   }
 }

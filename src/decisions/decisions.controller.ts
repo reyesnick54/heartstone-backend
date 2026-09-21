@@ -11,6 +11,8 @@ import {
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ScopedResourceType } from '../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { ActorContextService } from '../security/services/actor-context.service';
 import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
 import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
@@ -28,6 +30,7 @@ export class DecisionsController {
     private readonly execution: DecisionExecutionService,
     private readonly preparation: DecisionPreparationService,
     private readonly actorContext: ActorContextService,
+    private readonly resourceAccess: ResourceAccessService,
   ) {}
 
   @Post('readiness/assess')
@@ -38,10 +41,16 @@ export class DecisionsController {
     institutionalFieldPrefixes: ['proposedDecisionMaker'],
   })
   @ApiOperation({ summary: 'Assess whether a case is ready for authorized government decision' })
-  assessReadiness(
+  async assessReadiness(
     @CurrentSession() session: SessionContextDto,
     @Body() dto: AssessDecisionReadinessDto,
   ) {
+    await this.resourceAccess.assertInstitutionalBoundary(
+      session,
+      ScopedResourceType.CASE,
+      dto.caseId,
+    );
+
     this.actorContext.assertActorIdentityMatchesSession(
       session.identityId,
       dto.proposedDecisionMakerIdentityId,
@@ -74,10 +83,16 @@ export class DecisionsController {
   @ApiOperation({
     summary: 'Record an authorized government decision (requires explicit decision-maker intent)',
   })
-  executeDecision(
+  async executeDecision(
     @CurrentSession() session: SessionContextDto,
     @Body() dto: ExecuteGovernmentDecisionDto,
   ) {
+    await this.resourceAccess.assertInstitutionalBoundary(
+      session,
+      ScopedResourceType.CASE,
+      dto.caseId,
+    );
+
     this.actorContext.assertActorIdentityMatchesSession(
       session.identityId,
       dto.decisionMakerIdentityId,

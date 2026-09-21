@@ -9,6 +9,11 @@ import {
 
 import { PrismaService } from '../../database/prisma.service';
 import { type AuthenticatedPrincipal } from '../../identity/auth/domain/authenticated-principal';
+import {
+  ScopeAccessIntent,
+  ScopedResourceType,
+} from '../../institutional-scope/institutional-scope.types';
+import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
 
 export interface EvaluateDashboardAccessInput {
@@ -42,6 +47,7 @@ export class DashboardAccessPolicyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundaryService: DashboardBoundaryService,
+    private readonly resourceAccess: ResourceAccessService,
   ) {}
 
   async createPolicy(input: CreateAccessPolicyInput) {
@@ -64,6 +70,18 @@ export class DashboardAccessPolicyService {
 
   async evaluateAccess(input: EvaluateDashboardAccessInput) {
     this.boundaryService.assertDashboardAccessDoesNotGrantAuthority();
+
+    await this.resourceAccess.assertAccess({
+      session: {
+        sessionId: input.actor.sessionId,
+        identityId: input.actor.identityId,
+        userAccountId: input.actor.userAccountId,
+        assuranceLevel: input.actor.assuranceLevel,
+      },
+      resourceType: ScopedResourceType.DASHBOARD,
+      resourceId: input.dashboardDefinitionId,
+      intent: ScopeAccessIntent.VISIBILITY,
+    });
 
     const definition = await this.prisma.dashboardDefinition.findUnique({
       where: { id: input.dashboardDefinitionId },
