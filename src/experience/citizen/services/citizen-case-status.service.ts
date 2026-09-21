@@ -3,6 +3,7 @@ import { CaseEventPublicVisibility } from '@prisma/client';
 
 import { CasesService } from '../../../application-processing/cases/cases.service';
 import { PrismaService } from '../../../database/prisma.service';
+import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { CitizenAccessService } from '../../common/citizen-access.service';
 import { type CitizenCaseStatusResponseDto } from '../dto/citizen-case-status-response.dto';
 import { mapInstitutionAttribution } from '../mappers/citizen-attribution.mapper';
@@ -15,10 +16,13 @@ export class CitizenCaseStatusService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async getCaseStatus(identityId: string, caseId: string): Promise<CitizenCaseStatusResponseDto> {
-    await this.access.assertCaseAccess(caseId, identityId);
+  async getCaseStatus(
+    session: SessionContextDto,
+    caseId: string,
+  ): Promise<CitizenCaseStatusResponseDto> {
+    await this.access.assertCaseAccess(caseId, session.identityId);
 
-    const applicantView = await this.casesService.getApplicantStatus(caseId, identityId);
+    const applicantView = await this.casesService.getApplicantStatus(session, caseId);
 
     const caseRecord = await this.prisma.case.findUniqueOrThrow({
       where: { id: caseId },

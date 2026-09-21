@@ -85,6 +85,6 @@ export class CitizenExperienceController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CitizenCaseStatusResponseDto> {
-    return this.caseStatusService.getCaseStatus(session.identityId, id);
+    return this.caseStatusService.getCaseStatus(session, id);
   }
 }
