@@ -199,7 +199,7 @@ describe('Government service scheduling (integration)', () => {
     });
     const caseRecord = await prisma.case.create({
       data: {
-        caseNumber: `CASE-SCHED-${Date.now()}`,
+        caseNumber: `CASE-SCHED-${String(Date.now())}`,
         applicationId: application.id,
         applicantIdentityId: citizen.identityId,
         governmentServiceId: fixture.governmentServiceId,
