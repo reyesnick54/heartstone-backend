@@ -82,9 +82,7 @@ export class ExecutiveIndicatorService {
     const indicators: ExecutiveIndicatorView[] = consoleResult.indicators.map((indicator) => ({
       id: indicator.id,
       label: indicator.label,
-      category:
-        categoriesById.get(indicator.id) ??
-        ('INSTITUTIONAL_PERFORMANCE'),
+      category: categoriesById.get(indicator.id) ?? 'INSTITUTIONAL_PERFORMANCE',
       count: indicator.count,
       score: indicator.score,
       dataQuality: indicator.dataQuality,
