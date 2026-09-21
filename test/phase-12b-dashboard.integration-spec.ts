@@ -18,6 +18,10 @@ import { DashboardDefinitionService } from '../src/intelligence/command-console/
 import { DashboardIndicatorProjectionService } from '../src/intelligence/command-console/dashboard-indicator-projection.service';
 import { DashboardQueryService } from '../src/intelligence/command-console/dashboard-query.service';
 import { DashboardSnapshotService } from '../src/intelligence/command-console/dashboard-snapshot.service';
+import {
+  authHeader,
+  provisionIntegrationAdminSession,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { toDashboardActor } from './helpers/phase-12b-actor.util';
 import {
@@ -35,6 +39,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
   let queryService: DashboardQueryService;
   let snapshotService: DashboardSnapshotService;
   let definitionService: DashboardDefinitionService;
+  let adminSessionToken: string;
 
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
@@ -48,6 +53,8 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const admin = await provisionIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
 
   afterAll(async () => {

@@ -5,17 +5,25 @@ import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
 import { asInstitutionListBody, asJurisdictionBody } from './helpers/government-test-types';
+import {
+  authHeader,
+  provisionIntegrationAdminSession,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
 describe('Government structure (integration)', () => {
   let app: INestApplication<App>;
+  let prisma: PrismaService;
+  let adminSessionToken: string;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
+    ({ app, prisma } = await createIntegrationApp());
+    const admin = await provisionIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
 
   beforeEach(async () => {
-    await resetGovernmentData(app.get(PrismaService));
+    await resetGovernmentData(prisma);
   });
 
   afterAll(async () => {
@@ -25,6 +33,7 @@ describe('Government structure (integration)', () => {
   it('persists jurisdictions and enforces unique codes in the database', async () => {
     const createResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -39,6 +48,7 @@ describe('Government structure (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'Duplicate',
@@ -48,6 +58,7 @@ describe('Government structure (integration)', () => {
 
     const listResponse = await request(app.getHttpServer())
       .get('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .query({ status: StructuralLifecycleStatus.ACTIVE })
       .expect(200);
 
@@ -57,6 +68,7 @@ describe('Government structure (integration)', () => {
   it('persists institutions scoped to jurisdictions and enforces composite uniqueness', async () => {
     const jurisdictionResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -68,6 +80,7 @@ describe('Government structure (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -78,6 +91,7 @@ describe('Government structure (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -88,6 +102,7 @@ describe('Government structure (integration)', () => {
 
     const filteredResponse = await request(app.getHttpServer())
       .get('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .query({ jurisdictionId: jurisdiction.id })
       .expect(200);
 
@@ -102,6 +117,7 @@ describe('Government structure (integration)', () => {
   it('rejects institutions that reference missing jurisdictions at the database layer', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: '99999999-9999-4999-8999-999999999999',
         code: 'DOT',
