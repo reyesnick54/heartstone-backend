@@ -114,6 +114,97 @@ export function authHeader(sessionToken: string): { Authorization: string } {
   return { Authorization: `Bearer ${sessionToken}` };
 }
 
+const INTEGRATION_ADMIN_LOGIN = 'integration-admin@test.gov';
+const INTEGRATION_ADMIN_PASSWORD = 'IntegrationAdmin123!';
+
+export async function provisionIntegrationAdminSession(
+  app: INestApplication<App>,
+  prisma: PrismaClient,
+): Promise<ProvisionedTestIdentity> {
+  return provisionAuthenticatedIdentity(app, prisma, {
+    loginIdentifier: INTEGRATION_ADMIN_LOGIN,
+    password: INTEGRATION_ADMIN_PASSWORD,
+    displayName: 'Integration Admin',
+  });
+}
+
+export async function ensureIntegrationAdminSession(
+  app: INestApplication<App>,
+  prisma: PrismaClient,
+): Promise<ProvisionedTestIdentity> {
+  const existingAccount = await prisma.userAccount.findUnique({
+    where: { loginIdentifier: INTEGRATION_ADMIN_LOGIN },
+    include: { identities: true },
+  });
+
+  if (existingAccount) {
+    const identity = existingAccount.identities[0];
+    if (!identity) {
+      throw new Error('Integration admin account exists without an identity');
+    }
+
+    const sessionToken = await loginAndGetSessionToken(
+      app,
+      INTEGRATION_ADMIN_LOGIN,
+      INTEGRATION_ADMIN_PASSWORD,
+    );
+
+    if (!existingAccount.personId) {
+      throw new Error('Integration admin account exists without a person');
+    }
+
+    return {
+      personId: existingAccount.personId,
+      userAccountId: existingAccount.id,
+      identityId: identity.id,
+      loginIdentifier: INTEGRATION_ADMIN_LOGIN,
+      password: INTEGRATION_ADMIN_PASSWORD,
+      sessionToken,
+    };
+  }
+
+  try {
+    return await provisionIntegrationAdminSession(app, prisma);
+  } catch (error) {
+    const isDuplicateLogin =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: string }).code === 'P2002';
+
+    if (!isDuplicateLogin) {
+      throw error;
+    }
+
+    const sessionToken = await loginAndGetSessionToken(
+      app,
+      INTEGRATION_ADMIN_LOGIN,
+      INTEGRATION_ADMIN_PASSWORD,
+    );
+    const account = await prisma.userAccount.findUniqueOrThrow({
+      where: { loginIdentifier: INTEGRATION_ADMIN_LOGIN },
+      include: { identities: true },
+    });
+    const identity = account.identities[0];
+    if (!identity) {
+      throw new Error('Integration admin account exists without an identity');
+    }
+
+    if (!account.personId) {
+      throw new Error('Integration admin account exists without a person');
+    }
+
+    return {
+      personId: account.personId,
+      userAccountId: account.id,
+      identityId: identity.id,
+      loginIdentifier: INTEGRATION_ADMIN_LOGIN,
+      password: INTEGRATION_ADMIN_PASSWORD,
+      sessionToken,
+    };
+  }
+}
+
 export async function createPasswordCredentialViaPrisma(
   prisma: PrismaClient,
   identityId: string,

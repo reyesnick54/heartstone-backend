@@ -16,7 +16,7 @@ import { ComplianceStatusBoundaryService } from '../src/compliance/oversight/com
 import { type PrismaService } from '../src/database/prisma.service';
 import {
   authHeader,
-  provisionIntegrationAdminSession,
+  ensureIntegrationAdminSession,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { type Phase8FixtureContext, seedPhase8Fixture } from './helpers/phase-8-test-fixtures';
@@ -40,7 +40,7 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    const admin = await provisionIntegrationAdminSession(app, prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
     adminSessionToken = admin.sessionToken;
   });
 
