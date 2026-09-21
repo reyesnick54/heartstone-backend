@@ -69,9 +69,7 @@ async function provisionSessionForIdentity(
     select: { id: true, personId: true, userAccountId: true },
   });
 
-  let userAccountId = identity.userAccountId;
-
-  if (!userAccountId) {
+  if (!identity.userAccountId) {
     const account = await prisma.userAccount.create({
       data: {
         loginIdentifier,
@@ -79,33 +77,18 @@ async function provisionSessionForIdentity(
         status: AccountStatus.ACTIVE,
       },
     });
-    userAccountId = account.id;
     await prisma.identity.update({
       where: { id: identity.id },
       data: { userAccountId: account.id },
     });
   }
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: identity.id, type: 'PASSWORD', password: 'Phase8123!' })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
+  const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
 
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier, password: 'Phase8123!' })
-        .expect(201)
-    ).body,
-  );
-
-  return { identityId: identity.id, sessionToken: login.sessionToken };
+  return { identityId: identity.id, sessionToken };
 }
 
 async function createSessionIdentity(
