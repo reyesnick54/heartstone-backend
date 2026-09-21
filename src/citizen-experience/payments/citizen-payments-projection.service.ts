@@ -155,6 +155,34 @@ export class CitizenPaymentsProjectionService {
     return invoices;
   }
 
+  private async isInvoiceAccessible(
+    invoice: AccessibleInvoice,
+    scope: CitizenAccessScope,
+  ): Promise<boolean> {
+    if (invoice.caseId != null && scope.caseIds.includes(invoice.caseId)) {
+      return true;
+    }
+
+    if (
+      invoice.feeAssessment.applicationId != null &&
+      scope.applicationIds.includes(invoice.feeAssessment.applicationId)
+    ) {
+      return true;
+    }
+
+    if (invoice.caseId != null) {
+      const caseRecord = await this.prisma.case.findUnique({
+        where: { id: invoice.caseId },
+        select: { applicantIdentityId: true },
+      });
+      if (caseRecord?.applicantIdentityId === scope.identityId) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private async findAccessibleInvoiceById(
     scope: CitizenAccessScope,
     invoiceId: string,
@@ -168,11 +196,7 @@ export class CitizenPaymentsProjectionService {
       return null;
     }
 
-    const caseAccessible = invoice.caseId != null && scope.caseIds.includes(invoice.caseId);
-    const applicationAccessible =
-      invoice.feeAssessment.applicationId != null &&
-      scope.applicationIds.includes(invoice.feeAssessment.applicationId);
-    const accessible = caseAccessible || applicationAccessible;
+    const accessible = await this.isInvoiceAccessible(invoice, scope);
 
     if (!accessible) {
       this.boundary.assertCrossCitizenAccessAllowed(false);

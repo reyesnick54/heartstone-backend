@@ -1,22 +1,15 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
-import { type AuthenticatedPrincipal } from '../domain/authenticated-principal';
-import { type SessionContextDto } from '../dto/session-context.dto';
+import { type ActorContext } from '../context/actor-context.types';
 
 /**
  * Server-derived authenticated actor for protected routes.
- * Identity and session facts only — never legal authority conclusions.
+ * Populated by SessionAuthGuard from validated session state — never from client payload.
+ * Contains identity and institutional relationship facts only; never legal authority conclusions.
  */
 export const CurrentActor = createParamDecorator(
-  (_data: unknown, ctx: ExecutionContext): AuthenticatedPrincipal => {
-    const request = ctx.switchToHttp().getRequest<{ session: SessionContextDto }>();
-    const session = request.session;
-
-    return {
-      sessionId: session.sessionId,
-      identityId: session.identityId,
-      userAccountId: session.userAccountId,
-      assuranceLevel: session.assuranceLevel,
-    };
+  (_data: unknown, ctx: ExecutionContext): ActorContext => {
+    const request = ctx.switchToHttp().getRequest<{ actor: ActorContext }>();
+    return request.actor;
   },
 );

@@ -150,7 +150,7 @@ export class CitizenMessagesProjectionService {
           ],
         },
         OR: [
-          { caseId: { in: scope.caseIds } },
+          ...(scope.caseIds.length > 0 ? [{ caseId: { in: scope.caseIds } }] : []),
           {
             recipients: {
               some: {

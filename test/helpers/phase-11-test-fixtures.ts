@@ -13,7 +13,7 @@ import {
 } from '@prisma/client';
 import { type App } from 'supertest/types';
 
-import { type PrismaService } from '../../src/database/prisma.service';
+import { PrismaService } from '../../src/database/prisma.service';
 import { FeeAssessmentService } from '../../src/operational-support/financial/fee-assessment.service';
 import { FeeScheduleService } from '../../src/operational-support/financial/fee-schedule.service';
 import { InvoiceService } from '../../src/operational-support/financial/invoice.service';
@@ -328,11 +328,17 @@ export async function calculateAndInvoiceFees(
 ) {
   const feeAssessments = app.get(FeeAssessmentService);
   const invoices = app.get(InvoiceService);
+  const prisma = app.get(PrismaService);
+  const caseRecord = await prisma.case.findUniqueOrThrow({
+    where: { id: fixture.caseId },
+    select: { applicationId: true },
+  });
 
   const assessment = await feeAssessments.calculateAssessment({
     institutionId: fixture.institutionId,
     governmentServiceVersionId: fixture.governmentServiceVersionId,
     caseId: fixture.caseId,
+    applicationId: caseRecord.applicationId,
     masterAdministrativeFileId: fixture.masterAdministrativeFileId,
   });
 
