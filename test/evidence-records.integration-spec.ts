@@ -38,7 +38,7 @@ describe('Phase 7B evidence records (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    fixture = await seedEvidenceRecordsFixture(app);
+    fixture = await seedEvidenceRecordsFixture(app, prisma);
     malwareScanner.reset();
     malwareScanner.setScanBehavior(() => MalwareScanStatus.CLEAN);
   });

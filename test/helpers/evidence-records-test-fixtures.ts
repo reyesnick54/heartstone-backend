@@ -1,11 +1,8 @@
 import { type INestApplication } from '@nestjs/common';
 import {
-  AccountStatus,
-  AuthenticationMethodType,
   DocumentAssociationTargetType,
   DocumentSecurityClassification,
   DocumentSourceType,
-  IdentityType,
   MalwareScanStatus,
 } from '@prisma/client';
 import request from 'supertest';
@@ -15,12 +12,13 @@ import { type TestMalwareScanningAdapter } from '../../src/evidence-records/adap
 import { NON_PRODUCTION_EVIDENCE_RECORDS_FIXTURE_MARKER } from '../../src/evidence-records/evidence-records.constants';
 import { MALWARE_SCANNING_PORT } from '../../src/evidence-records/ports/malware-scanning.port';
 import { asDocumentRecordBody, asDocumentVersionBody } from './evidence-records-test-types';
+import { type PrismaService } from '../../src/database/prisma.service';
 import {
-  asIdentityBody,
-  asLoginResponseBody,
-  asPersonBody,
-  asUserAccountBody,
-} from './identity-test-types';
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './identity-provisioning.fixture';
 
 export interface EvidenceRecordsFixture {
   applicantIdentityId: string;
@@ -33,78 +31,42 @@ export interface EvidenceRecordsFixture {
 
 async function createIdentityWithSession(
   app: INestApplication<App>,
+  prisma: PrismaService,
   loginIdentifier: string,
   displayName: string,
 ): Promise<{ identityId: string; sessionToken: string }> {
-  const personRes = await request(app.getHttpServer())
-    .post('/api/v1/identity/persons')
-    .send({ givenName: displayName, familyName: NON_PRODUCTION_EVIDENCE_RECORDS_FIXTURE_MARKER })
-    .expect(201);
-  const person = asPersonBody(personRes.body);
-
-  const accountRes = await request(app.getHttpServer())
-    .post('/api/v1/identity/user-accounts')
-    .send({
-      loginIdentifier,
-      personId: person.id,
-      status: AccountStatus.ACTIVE,
-    })
-    .expect(201);
-  const account = asUserAccountBody(accountRes.body);
-
-  const identityRes = await request(app.getHttpServer())
-    .post('/api/v1/identity/identities')
-    .send({
-      type: IdentityType.INDIVIDUAL,
-      displayName,
-      userAccountId: account.id,
-      personId: person.id,
-    })
-    .expect(201);
-  const identity = asIdentityBody(identityRes.body);
-
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({
-      identityId: identity.id,
-      type: 'PASSWORD',
-      password: 'SecurePass123!',
-    })
-    .expect(201);
-
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({
-      identityId: identity.id,
-      type: AuthenticationMethodType.PASSWORD,
-    })
-    .expect(201);
-
-  const loginRes = await request(app.getHttpServer())
-    .post('/api/v1/identity/auth/login')
-    .send({ loginIdentifier, password: 'SecurePass123!' })
-    .expect(201);
-
-  const login = asLoginResponseBody(loginRes.body);
-
-  return { identityId: identity.id, sessionToken: login.sessionToken };
+  const password = 'SecurePass123!';
+  const identity = await provisionIdentityViaPrisma(prisma, {
+    loginIdentifier,
+    password,
+    givenName: displayName,
+    familyName: NON_PRODUCTION_EVIDENCE_RECORDS_FIXTURE_MARKER,
+    displayName,
+  });
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.identityId);
+  const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, password);
+  return { identityId: identity.identityId, sessionToken };
 }
 
 export async function seedEvidenceRecordsFixture(
   app: INestApplication<App>,
+  prisma: PrismaService,
 ): Promise<EvidenceRecordsFixture> {
   const applicant = await createIdentityWithSession(
     app,
+    prisma,
     'evidence-applicant@test.gov',
     'Evidence Applicant',
   );
   const otherApplicant = await createIdentityWithSession(
     app,
+    prisma,
     'evidence-other@test.gov',
     'Other Applicant',
   );
   const official = await createIdentityWithSession(
     app,
+    prisma,
     'evidence-official@test.gov',
     'Evidence Official',
   );

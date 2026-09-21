@@ -1,19 +1,21 @@
 import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
-  AuthenticationMethodType,
   CatalogLifecycleStatus,
   IdentityType,
   InstrumentDeliveryChannel,
   InstrumentTypePublicVerificationMode,
   OfficialInstrumentKind,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
 import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 import { type Phase8eFixtureContext, seedPhase8eIssuanceFixture } from './phase-8e-test-fixtures';
 
 export interface Phase8fFixtureContext extends Phase8eFixtureContext {
@@ -179,27 +181,11 @@ async function ensureIdentitySession(
   });
 
   if (!existingCredential) {
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId, type: 'PASSWORD', password: 'Phase8f123!' })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId, type: AuthenticationMethodType.PASSWORD })
-      .expect(201);
+    await createPasswordCredentialViaPrisma(prisma, identityId, 'Phase8f123!');
+    await createPasswordAuthenticationMethodViaPrisma(prisma, identityId);
   }
 
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier, password: 'Phase8f123!' })
-        .expect(201)
-    ).body,
-  );
-
-  return login.sessionToken;
+  return loginAndGetSessionToken(app, loginIdentifier, 'Phase8f123!');
 }
 
 export async function resetDecisionsIssuanceData(prisma: PrismaService): Promise<void> {

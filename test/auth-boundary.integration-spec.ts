@@ -1,16 +1,12 @@
 import { type INestApplication } from '@nestjs/common';
-import { AccountStatus, CredentialStatus } from '@prisma/client';
+import { CredentialStatus } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import { hashToken } from '../src/identity/common/crypto.util';
-import {
-  asIdentityBody,
-  asLoginResponseBody,
-  asPersonBody,
-  asUserAccountBody,
-} from './helpers/identity-test-types';
+import { asLoginResponseBody } from './helpers/identity-test-types';
+import { provisionIdentityViaPrisma } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Phase 3C authentication boundary (integration)', () => {
@@ -32,37 +28,14 @@ describe('Phase 3C authentication boundary (integration)', () => {
   });
 
   async function provisionActiveAccount(loginIdentifier: string, password: string) {
-    const personRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/persons')
-      .send({ givenName: 'Test', familyName: 'User' })
-      .expect(201);
-    const person = asPersonBody(personRes.body);
+    const provisioned = await provisionIdentityViaPrisma(prisma, { loginIdentifier, password });
 
-    const accountRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/user-accounts')
-      .send({
-        loginIdentifier,
-        personId: person.id,
-        status: AccountStatus.ACTIVE,
-      })
-      .expect(201);
-    const account = asUserAccountBody(accountRes.body);
-
-    const identityRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/identities')
-      .send({
-        type: 'INDIVIDUAL',
-        displayName: 'Test User',
-        userAccountId: account.id,
-        personId: person.id,
-      })
-      .expect(201);
-    const identity = asIdentityBody(identityRes.body);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: identity.id, type: 'PASSWORD', password })
-      .expect(201);
+    const account = await prisma.userAccount.findUniqueOrThrow({
+      where: { id: provisioned.userAccountId },
+    });
+    const identity = await prisma.identity.findUniqueOrThrow({
+      where: { id: provisioned.identityId },
+    });
 
     return { account, identity };
   }
