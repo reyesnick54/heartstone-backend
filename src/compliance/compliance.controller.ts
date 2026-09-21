@@ -1,7 +1,13 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ObligationStatusChangeActor } from '@prisma/client';
+import { AuthorityActionType, ObligationStatusChangeActor } from '@prisma/client';
 
+import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import {
+  resolveFunctionFromComplianceReview,
+  resolveResourceFromComplianceReview,
+} from '../authority/consequential-action/consequential-action-resolvers';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
@@ -20,7 +26,7 @@ import { ComplianceSubmissionService } from './submissions/compliance-submission
 
 @ApiTags('compliance')
 @Controller('compliance')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 @ApiBearerAuth()
 export class ComplianceController {
   constructor(
@@ -152,6 +158,12 @@ export class ComplianceController {
   }
 
   @Post('reviews/finalize')
+  @ConsequentialAction({
+    action: AuthorityActionType.ENFORCE,
+    functionResolver: resolveFunctionFromComplianceReview,
+    resourceResolver: resolveResourceFromComplianceReview,
+    institutionalFieldPrefixes: ['reviewer'],
+  })
   @ApiOperation({ summary: 'Finalize a compliance review with authorized reviewer' })
   async finalizeReview(
     @CurrentSession() session: SessionContextDto,
