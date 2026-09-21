@@ -42,11 +42,8 @@ describe('Citizen Experience API (e2e)', () => {
     const fixture = await seedPhase6Fixture(app, prisma);
 
     const list = asPaginatedPublicServicesBody(
-      (
-        await request(app.getHttpServer())
-          .get('/api/v1/experience/citizen/services')
-          .expect(200)
-      ).body,
+      (await request(app.getHttpServer()).get('/api/v1/experience/citizen/services').expect(200))
+        .body,
     );
 
     expect(list.items.some((item) => item.slug === fixture.serviceSlug)).toBe(true);
@@ -181,11 +178,8 @@ describe('Citizen Experience API (e2e)', () => {
     });
 
     const list = asPaginatedPublicServicesBody(
-      (
-        await request(app.getHttpServer())
-          .get('/api/v1/experience/citizen/services')
-          .expect(200)
-      ).body,
+      (await request(app.getHttpServer()).get('/api/v1/experience/citizen/services').expect(200))
+        .body,
     );
 
     expect(list.items.some((item) => item.slug === hiddenService.slug)).toBe(false);
