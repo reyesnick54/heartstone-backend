@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { IdentityType } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
@@ -20,7 +15,9 @@ export class PlatformAdminExperienceGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<PlatformAdminExperienceRequest & { session?: SessionContextDto }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<PlatformAdminExperienceRequest & { session?: SessionContextDto }>();
     const session = request.session;
 
     if (!session?.identityId) {

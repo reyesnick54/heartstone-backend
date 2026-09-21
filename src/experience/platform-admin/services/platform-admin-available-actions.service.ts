@@ -55,7 +55,8 @@ export class PlatformAdminAvailableActionsService {
         {
           actionKey: PLATFORM_ADMIN_ACTION_KEYS.SUSPEND_CONFIGURATION,
           label: 'Suspend configuration',
-          description: 'Suspend service configuration where existing governance supports suspension',
+          description:
+            'Suspend service configuration where existing governance supports suspension',
           isConsequential: true,
           executionRoute: '/service-catalog/activation-governance/suspend',
           requiresGovernedWorkflow: true,

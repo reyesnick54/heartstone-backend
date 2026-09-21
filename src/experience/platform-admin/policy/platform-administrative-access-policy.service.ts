@@ -76,7 +76,9 @@ export class PlatformAdministrativeAccessPolicyService {
     });
   }
 
-  async evaluateAccess(input: EvaluatePlatformAdminAccessInput): Promise<ResolvedPlatformAdminContext> {
+  async evaluateAccess(
+    input: EvaluatePlatformAdminAccessInput,
+  ): Promise<ResolvedPlatformAdminContext> {
     this.boundary.assertAdministrativeAccessDoesNotGrantAuthority();
     this.boundary.assertVisibilityNotSubstantiveAccess();
 
@@ -92,7 +94,9 @@ export class PlatformAdministrativeAccessPolicyService {
 
     if (identity.userAccount?.status === AccountStatus.SUSPENDED) {
       await this.recordDenied(input, PlatformAdministrativeAccessAuditResult.DENIED_SUSPENDED);
-      throw new PlatformAdminAccessDeniedException('Suspended account cannot access platform administration');
+      throw new PlatformAdminAccessDeniedException(
+        'Suspended account cannot access platform administration',
+      );
     }
 
     const now = new Date();
@@ -120,7 +124,10 @@ export class PlatformAdministrativeAccessPolicyService {
     }
 
     if (!matchingPolicy.substantiveAccessDenied) {
-      await this.recordDenied(input, PlatformAdministrativeAccessAuditResult.DENIED_SUBSTANTIVE_ONLY);
+      await this.recordDenied(
+        input,
+        PlatformAdministrativeAccessAuditResult.DENIED_SUBSTANTIVE_ONLY,
+      );
       throw new PlatformAdminAccessDeniedException(
         'Platform administrative policies must deny substantive government access',
       );

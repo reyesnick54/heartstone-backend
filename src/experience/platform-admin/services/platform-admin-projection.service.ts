@@ -17,7 +17,10 @@ import {
   PlatformAdminListItemDto,
   PlatformAdminListResponseDto,
 } from '../dto/platform-admin-response.dto';
-import { PLATFORM_ADMIN_AUTHORITY_DISCLAIMER, PLATFORM_ADMIN_CONFIGURATION_DISCLAIMER } from '../platform-admin.constants';
+import {
+  PLATFORM_ADMIN_AUTHORITY_DISCLAIMER,
+  PLATFORM_ADMIN_CONFIGURATION_DISCLAIMER,
+} from '../platform-admin.constants';
 import { type ResolvedPlatformAdminContext } from '../types/platform-admin-context.types';
 
 @Injectable()
@@ -28,9 +31,7 @@ export class PlatformAdminProjectionService {
     context: ResolvedPlatformAdminContext,
   ): Promise<PlatformAdminListResponseDto> {
     const where =
-      context.policy.institutionIds.length > 0
-        ? { id: { in: context.policy.institutionIds } }
-        : {};
+      context.policy.institutionIds.length > 0 ? { id: { in: context.policy.institutionIds } } : {};
 
     const records = await this.prisma.institution.findMany({
       where,
@@ -48,7 +49,9 @@ export class PlatformAdminProjectionService {
     );
   }
 
-  async listDepartments(context: ResolvedPlatformAdminContext): Promise<PlatformAdminListResponseDto> {
+  async listDepartments(
+    context: ResolvedPlatformAdminContext,
+  ): Promise<PlatformAdminListResponseDto> {
     const where = this.buildDepartmentScope(context);
 
     const records = await this.prisma.department.findMany({
@@ -110,9 +113,7 @@ export class PlatformAdminProjectionService {
 
   async listServices(context: ResolvedPlatformAdminContext): Promise<PlatformAdminListResponseDto> {
     const institutionScope =
-      context.policy.institutionIds.length > 0
-        ? { in: context.policy.institutionIds }
-        : undefined;
+      context.policy.institutionIds.length > 0 ? { in: context.policy.institutionIds } : undefined;
 
     const records = await this.prisma.governmentService.findMany({
       where: {
@@ -321,7 +322,9 @@ export class PlatformAdminProjectionService {
     return this.toListResponse(items);
   }
 
-  async listReadiness(context: ResolvedPlatformAdminContext): Promise<PlatformAdminListResponseDto> {
+  async listReadiness(
+    context: ResolvedPlatformAdminContext,
+  ): Promise<PlatformAdminListResponseDto> {
     if (!context.policy.canViewReadiness) {
       return this.toListResponse([]);
     }
@@ -334,7 +337,9 @@ export class PlatformAdminProjectionService {
       }),
       this.prisma.activationCondition.findMany({
         where: {
-          status: { in: [ActivationConditionStatus.PENDING, ActivationConditionStatus.UNSATISFIED] },
+          status: {
+            in: [ActivationConditionStatus.PENDING, ActivationConditionStatus.UNSATISFIED],
+          },
         },
         orderBy: [{ createdAt: 'desc' }],
         take: 50,

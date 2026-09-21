@@ -152,7 +152,9 @@ describe('Platform Admin Experience API (e2e)', () => {
     const fixture = await seedPlatformAdminFixture(app, prisma);
     const phase6 = await seedPhase6Fixture(app, prisma);
 
-    expect(() => { boundary.assertPlatformAdminCannotApproveCase(true); }).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertPlatformAdminCannotApproveCase(true);
+    }).toThrow(ForbiddenException);
 
     await request(app.getHttpServer())
       .post('/api/v1/decisions/execute')
@@ -171,8 +173,9 @@ describe('Platform Admin Experience API (e2e)', () => {
   });
 
   it('prevents platform admin from creating institutional authority through configuration alone', () => {
-    expect(() => { boundary.assertPlatformAdminCannotCreateInstitutionalAuthority(true, true); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertPlatformAdminCannotCreateInstitutionalAuthority(true, true);
+    }).toThrow(ForbiddenException);
   });
 
   it('prevents admin from making suspended service ACTIVE through generic PATCH', async () => {
@@ -184,8 +187,9 @@ describe('Platform Admin Experience API (e2e)', () => {
       data: { maturityStatus: GovernmentServiceMaturityStatus.SUSPENDED },
     });
 
-    expect(() => { boundary.assertNoDirectServiceActivation(GovernmentServiceMaturityStatus.ACTIVE); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertNoDirectServiceActivation(GovernmentServiceMaturityStatus.ACTIVE);
+    }).toThrow(ForbiddenException);
 
     await request(app.getHttpServer())
       .patch(`/api/v1/service-catalog/service-versions/${phase6.governmentServiceVersionId}`)
@@ -209,10 +213,12 @@ describe('Platform Admin Experience API (e2e)', () => {
       },
     });
 
-    expect(() => { boundary.assertCannotAlterFinalDecision(GovernmentDecisionStatus.FINALIZED); },
-    ).toThrow(ForbiddenException);
-    expect(() => { boundary.assertCannotAlterFinalDecision(GovernmentDecisionStatus.RECORDED); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertCannotAlterFinalDecision(GovernmentDecisionStatus.FINALIZED);
+    }).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertCannotAlterFinalDecision(GovernmentDecisionStatus.RECORDED);
+    }).toThrow(ForbiddenException);
   });
 
   it('prevents admin from bypassing legal hold', async () => {
@@ -230,17 +236,17 @@ describe('Platform Admin Experience API (e2e)', () => {
       },
     });
 
-    expect(() => { boundary.assertLegalHoldBlocksMutation(LegalHoldStatus.ACTIVE); }).toThrow(
-      ForbiddenException,
-    );
+    expect(() => {
+      boundary.assertLegalHoldBlocksMutation(LegalHoldStatus.ACTIVE);
+    }).toThrow(ForbiddenException);
   });
 
   it('prevents admin from activating AI agent outside approved lifecycle', async () => {
     const fixture = await seedPlatformAdminFixture(app, prisma);
 
-    expect(() => { boundary.assertAiActivationRequiresApprovedLifecycle(true); }).toThrow(
-      ForbiddenException,
-    );
+    expect(() => {
+      boundary.assertAiActivationRequiresApprovedLifecycle(true);
+    }).toThrow(ForbiddenException);
 
     const aiIdentity = await prisma.identity.create({
       data: {

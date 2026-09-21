@@ -89,7 +89,9 @@ export class PlatformAdminAvailableActionDto {
   @ApiProperty()
   executionRoute!: string;
 
-  @ApiProperty({ description: 'When true, action requires governed workflow rather than direct mutation' })
+  @ApiProperty({
+    description: 'When true, action requires governed workflow rather than direct mutation',
+  })
   requiresGovernedWorkflow!: boolean;
 }
 

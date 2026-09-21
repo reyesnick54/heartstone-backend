@@ -16,7 +16,10 @@ import {
   PlatformAdminCountSummaryDto,
   PlatformAdminHomeResponseDto,
 } from '../dto/platform-admin-response.dto';
-import { PLATFORM_ADMIN_AUTHORITY_DISCLAIMER, PLATFORM_ADMIN_CONFIGURATION_DISCLAIMER } from '../platform-admin.constants';
+import {
+  PLATFORM_ADMIN_AUTHORITY_DISCLAIMER,
+  PLATFORM_ADMIN_CONFIGURATION_DISCLAIMER,
+} from '../platform-admin.constants';
 import { type ResolvedPlatformAdminContext } from '../types/platform-admin-context.types';
 
 @Injectable()
