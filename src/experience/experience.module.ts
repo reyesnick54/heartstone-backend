@@ -6,17 +6,7 @@ import { DepartmentModule } from './department/department.module';
 import { OfficialModule } from './official/official.module';
 
 @Module({
-  imports: [
-    ExperienceCommonModule,
-    CitizenExperienceModule,
-    OfficialModule,
-    DepartmentModule,
-  ],
-  exports: [
-    ExperienceCommonModule,
-    CitizenExperienceModule,
-    OfficialModule,
-    DepartmentModule,
-  ],
+  imports: [ExperienceCommonModule, CitizenExperienceModule, OfficialModule, DepartmentModule],
+  exports: [ExperienceCommonModule, CitizenExperienceModule, OfficialModule, DepartmentModule],
 })
 export class ExperienceModule {}
