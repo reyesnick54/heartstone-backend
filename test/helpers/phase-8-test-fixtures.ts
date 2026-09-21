@@ -424,6 +424,19 @@ export async function seedPhase8Fixture(
   const official = await createSessionIdentity(app, marker, 'official', prisma);
   const approver = await createSessionIdentity(app, marker, 'approver', prisma);
 
+  const linkedCase = await prisma.case.findUniqueOrThrow({
+    where: { id: base.caseId },
+    select: { applicationId: true },
+  });
+  await prisma.case.update({
+    where: { id: base.caseId },
+    data: { applicantIdentityId: applicant.identityId },
+  });
+  await prisma.application.update({
+    where: { id: linkedCase.applicationId },
+    data: { applicantIdentityId: applicant.identityId },
+  });
+
   let officialAppointmentId = base.appointmentId;
 
   if (official.officeholderId) {
@@ -668,8 +681,9 @@ export async function issueInstrumentForDecision(
       holderIdentityId: fixture.applicantIdentityId,
       scope: { activity: 'Import/export' },
       effectiveFrom: new Date('2026-01-01').toISOString(),
-      signatureDocumentVersionId: options?.signatureDocumentVersionId,
-      sealDocumentVersionId: options?.sealDocumentVersionId,
+      signatureDocumentVersionId:
+        options?.signatureDocumentVersionId ?? fixture.signatureDocumentVersionId,
+      sealDocumentVersionId: options?.sealDocumentVersionId ?? fixture.sealDocumentVersionId,
       idempotencyKey: options?.idempotencyKey,
       freeFormFields: { holderName: 'Test Holder Ltd' },
     })
