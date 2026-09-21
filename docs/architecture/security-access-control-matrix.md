@@ -260,6 +260,23 @@ Key routes: `/production-readiness/boundary-disclaimer`.
 
 ---
 
+## Domain: experience
+
+| Field | Value |
+|---|---|
+| Route class | `AUTHENTICATED_SELF_SERVICE` (citizen experience); `AUTHENTICATED_INSTITUTIONAL` (official and department management experiences) |
+| Auth requirement | Always authenticated |
+| Scope | Citizen self-service scope; official appointment-derived case scope; department management requires configured `DEPARTMENT_MANAGEMENT` dashboard access policy |
+| Authority | None from experience visibility; consequential actions remain on domain endpoints with authority evaluation |
+| Actor source | Canonical `ActorContext` from validated session (`@CurrentActor()` for department management; official/citizen context services elsewhere) |
+| Primary invariant | Dashboard and workspace visibility do not create institutional authority or case disposition |
+
+Key routes: `/experience/citizen/*`, `/experience/official/*`, `/experience/department/*`.
+
+See also: [`official-experience-api.md`](official-experience-api.md), [`citizen-experience-api.md`](citizen-experience-api.md), [`department-management-experience.md`](department-management-experience.md).
+
+---
+
 ## System routes
 
 | Field | Value |
