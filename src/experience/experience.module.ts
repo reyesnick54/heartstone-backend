@@ -8,13 +8,13 @@ import { OfficialModule } from './official/official.module';
 import { PlatformAdminModule } from './platform-admin/platform-admin.module';
 
 @Module({
-<<<<<<< HEAD
   imports: [
     ExperienceCommonModule,
     CitizenExperienceModule,
     OfficialModule,
     DepartmentModule,
     ExecutiveModule,
+    PlatformAdminModule,
   ],
   exports: [
     ExperienceCommonModule,
@@ -22,10 +22,7 @@ import { PlatformAdminModule } from './platform-admin/platform-admin.module';
     OfficialModule,
     DepartmentModule,
     ExecutiveModule,
+    PlatformAdminModule,
   ],
-=======
-  imports: [CitizenExperienceModule, OfficialModule, PlatformAdminModule],
-  exports: [CitizenExperienceModule, OfficialModule, PlatformAdminModule],
->>>>>>> c33eacd (Add Platform Administration Experience API)
 })
 export class ExperienceModule {}
