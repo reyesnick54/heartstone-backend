@@ -86,6 +86,26 @@ export class IntelligenceMonitoringService {
     private readonly boundary: IntelligenceBoundaryService,
   ) {}
 
+  async findRuleById(ruleId: string) {
+    const rule = await this.prisma.intelligenceMonitoringRule.findUnique({
+      where: { id: ruleId },
+    });
+    if (!rule) {
+      throw new BadRequestException('Monitoring rule not found');
+    }
+    return rule;
+  }
+
+  async findAlertById(alertId: string) {
+    const alert = await this.prisma.intelligenceMonitoringAlert.findUnique({
+      where: { id: alertId },
+    });
+    if (!alert) {
+      throw new BadRequestException('Alert not found');
+    }
+    return alert;
+  }
+
   async createRule(input: CreateMonitoringRuleInput) {
     this.boundary.assertMonitoringPrivacyAuthorized({
       subjectType: input.forbiddenSubjectType,

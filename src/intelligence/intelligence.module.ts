@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 
+import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { AuthModule } from '../identity/auth/auth.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
@@ -15,6 +16,10 @@ import { DashboardQueryService } from './command-console/dashboard-query.service
 import { DashboardSnapshotService } from './command-console/dashboard-snapshot.service';
 import { DashboardStatusDictionaryService } from './command-console/dashboard-status-dictionary.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
+import { IntelligenceConsequentialAuthorityService } from './common/intelligence-consequential-authority.service';
+import { IntelligenceForbiddenClientFieldsInterceptor } from './common/intelligence-forbidden-client-fields.interceptor';
+import { IntelligenceInstitutionalScopeService } from './common/intelligence-institutional-scope.service';
+import { IntelligenceSuspendedAiGuard } from './common/intelligence-suspended-ai.guard';
 import { StrategicProjectBoundaryService } from './common/strategic-project-boundary.service';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
@@ -40,10 +45,10 @@ import { StrategicProjectRiskService } from './strategic-projects/strategic-proj
 import { StrategicProjectStageService } from './strategic-projects/strategic-project-stage.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule],
+  imports: [DatabaseModule, SessionsModule, AuthModule, AuthorityModule],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
-    SessionAuthGuard,
+    IntelligenceSuspendedAiGuard,
     DashboardBoundaryService,
     DashboardStatusDictionaryService,
     DashboardDefinitionService,
@@ -65,6 +70,9 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
     IntelligenceBoundaryService,
+    IntelligenceInstitutionalScopeService,
+    IntelligenceForbiddenClientFieldsInterceptor,
+    IntelligenceConsequentialAuthorityService,
     PerformanceFrameworkService,
     MetricDefinitionService,
     MetricBaselineService,
@@ -99,6 +107,9 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     SectorDevelopmentObservationService,
     ProjectStatusProjectionService,
     IntelligenceBoundaryService,
+    IntelligenceInstitutionalScopeService,
+    IntelligenceForbiddenClientFieldsInterceptor,
+    IntelligenceConsequentialAuthorityService,
     PerformanceFrameworkService,
     MetricDefinitionService,
     MetricBaselineService,

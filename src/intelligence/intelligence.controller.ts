@@ -1,10 +1,26 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IdentityType } from '@prisma/client';
 
+import { type ActorContext } from '../identity/auth/context/actor-context.types';
+import { CurrentActor } from '../identity/auth/decorators/current-actor.decorator';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
 import { IntelligenceBoundaryService } from './common/intelligence-boundary.service';
+import { IntelligenceConsequentialAuthorityService } from './common/intelligence-consequential-authority.service';
+import { IntelligenceForbiddenClientFieldsInterceptor } from './common/intelligence-forbidden-client-fields.interceptor';
+import { IntelligenceInstitutionalScopeService } from './common/intelligence-institutional-scope.service';
+import { IntelligenceSuspendedAiGuard } from './common/intelligence-suspended-ai.guard';
 import { ConsequentialUseService } from './consequential-use/consequential-use.service';
 import { DigitalTwinService } from './digital-twin/digital-twin.service';
 import { CreateMetricBaselineDto } from './dto/create-metric-baseline.dto';
@@ -22,11 +38,16 @@ import { IntelligenceMonitoringService } from './monitoring/intelligence-monitor
 import { RiskAssessmentService } from './risk/risk-assessment.service';
 import { SimulationService } from './simulation/simulation.service';
 
+const INTELLIGENCE_ACTOR_GUARDS = [IntelligenceSuspendedAiGuard] as const;
+
 @ApiTags('intelligence')
+@UseInterceptors(IntelligenceForbiddenClientFieldsInterceptor)
 @Controller('intelligence')
 export class IntelligenceController {
   constructor(
     private readonly boundary: IntelligenceBoundaryService,
+    private readonly scope: IntelligenceInstitutionalScopeService,
+    private readonly consequentialAuthority: IntelligenceConsequentialAuthorityService,
     private readonly frameworkService: PerformanceFrameworkService,
     private readonly metricDefinitionService: MetricDefinitionService,
     private readonly baselineService: MetricBaselineService,
@@ -41,221 +62,535 @@ export class IntelligenceController {
   ) {}
 
   @Get('boundary')
-  @ApiOperation({ summary: 'Performance measurement boundary metadata' })
+  @ApiOperation({ summary: 'Performance measurement boundary metadata (public)' })
   getBoundary() {
     return this.boundary.boundaryMetadata();
   }
 
   @Get('twin-simulation/boundary')
-  @ApiOperation({ summary: 'Digital twin and simulation boundary disclaimer' })
+  @ApiOperation({ summary: 'Digital twin and simulation boundary disclaimer (public)' })
   getTwinSimulationBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: PHASE_12F_BOUNDARY_DISCLAIMER };
   }
 
   @Post('frameworks')
-  createFramework(@Body() dto: CreatePerformanceFrameworkDto) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createFramework(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceFrameworkDto) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    this.scope.assertInstitutionAccess(actor, dto.institutionId);
     return this.frameworkService.create(dto);
   }
 
   @Get('frameworks/:id')
-  getFramework(@Param('id', ParseUUIDPipe) id: string) {
-    return this.frameworkService.findById(id);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async getFramework(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
+    const framework = await this.frameworkService.findById(id);
+    this.scope.assertInstitutionAccess(actor, framework.institutionId);
+    return framework;
   }
 
   @Post('metrics')
-  createMetric(@Body() dto: CreateMetricDefinitionDto) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createMetric(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricDefinitionDto) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    this.scope.assertInstitutionAccess(actor, dto.ownerInstitutionId);
+    this.scope.assertDepartmentAccess(actor, dto.ownerDepartmentId);
     return this.metricDefinitionService.createDefinition(dto);
   }
 
   @Post('metrics/:id/versions')
-  createMetricVersion(
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createMetricVersion(
+    @CurrentActor() actor: ActorContext,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateMetricDefinitionVersionDto,
   ) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    const definition = await this.metricDefinitionService.findDefinitionById(id);
+    this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.createVersion(id, dto);
   }
 
   @Post('metrics/:id/publish')
-  publishMetric(@Param('id', ParseUUIDPipe) id: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async publishMetric(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
+    const definition = await this.metricDefinitionService.findDefinitionById(id);
+    this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.publishDefinition(id);
   }
 
   @Post('metric-versions/:id/activate')
-  activateMetricVersion(@Param('id', ParseUUIDPipe) id: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async activateMetricVersion(
+    @CurrentActor() actor: ActorContext,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const version = await this.metricDefinitionService.findVersionById(id);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
+    this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.metricDefinitionService.activateVersion(id);
   }
 
   @Post('baselines')
-  createBaseline(@Body() dto: CreateMetricBaselineDto) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createBaseline(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricBaselineDto) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    const version = await this.metricDefinitionService.findVersionById(dto.metricVersionId);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
+    this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.baselineService.create(dto);
   }
 
   @Post('calculation-runs')
-  recordCalculationRun(@Body() dto: RecordMetricCalculationRunDto) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async recordCalculationRun(
+    @CurrentActor() actor: ActorContext,
+    @Body() dto: RecordMetricCalculationRunDto,
+  ) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    const version = await this.metricDefinitionService.findVersionById(dto.metricVersionId);
+    const definition = await this.metricDefinitionService.findDefinitionById(
+      version.metricDefinitionId,
+    );
+    this.scope.assertInstitutionAccess(actor, definition.ownerInstitutionId);
     return this.calculationRunService.recordRun(dto, process.env.API_VERSION ?? 'v1');
   }
 
   @Post('claims')
-  createClaim(@Body() dto: CreatePerformanceClaimDto & { ownerIdentityId: string }) {
-    return this.claimService.create(dto, dto.ownerIdentityId);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createClaim(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceClaimDto) {
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    return this.claimService.create(dto, actor.identityId);
   }
 
   @Post('claims/:id/review')
-  reviewClaim(
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async reviewClaim(
+    @CurrentActor() actor: ActorContext,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: ReviewPerformanceClaimDto & { reviewerIdentityId: string; actorType?: string },
+    @Body() dto: ReviewPerformanceClaimDto & { actorType?: string },
   ) {
-    return this.claimService.review(
-      id,
-      dto.reviewerIdentityId,
-      dto,
-      dto.actorType ?? 'HUMAN_REVIEWER',
-    );
+    this.guardOperationalPayload(actor, dto as unknown as Record<string, unknown>);
+    this.scope.assertAiActorCannotBypassActorContext(actor, 'reviewPerformanceClaim');
+    this.scope.assertActorRoleMarkerNotAi(dto.actorType);
+    await this.consequentialAuthority.assertConsequentialAuthority({ actor });
+    return this.claimService.review(id, actor.identityId, dto, dto.actorType ?? 'HUMAN_REVIEWER');
   }
 
   @Post('digital-twins/definitions')
-  createDefinition(@Body() body: Parameters<DigitalTwinService['createDefinition']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createDefinition(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['createDefinition']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
+    this.scope.assertInstitutionAccess(actor, body.institutionalOwnerId);
     return this.digitalTwin.createDefinition(body);
   }
 
   @Get('digital-twins/definitions/:id')
-  getDefinition(@Param('id') id: string) {
-    return this.digitalTwin.findDefinitionById(id);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async getDefinition(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
+    const definition = await this.digitalTwin.findDefinitionById(id);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
+    return definition;
   }
 
   @Post('digital-twins/versions')
-  createVersion(@Body() body: Parameters<DigitalTwinService['createVersion']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createVersion(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['createVersion']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const definition = await this.digitalTwin.findDefinitionById(body.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.digitalTwin.createVersion(body);
   }
 
   @Get('digital-twins/versions/:id')
-  getVersion(@Param('id') id: string) {
-    return this.digitalTwin.findVersionById(id);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async getVersion(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
+    const version = await this.digitalTwin.findVersionById(id);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
+    return version;
   }
 
   @Post('digital-twins/sources')
-  addSource(@Body() body: Parameters<DigitalTwinService['addSource']>[0]) {
-    return this.digitalTwin.addSource(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async addSource(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['addSource']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
+    return this.digitalTwin.addSource({ ...body, ownerIdentityId: actor.identityId });
   }
 
   @Post('digital-twins/relationships')
-  createRelationship(@Body() body: Parameters<DigitalTwinService['createRelationship']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createRelationship(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['createRelationship']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const definition = await this.digitalTwin.findDefinitionById(body.fromDefinitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.digitalTwin.createRelationship(body);
   }
 
   @Post('digital-twins/modes')
-  recordMode(@Body() body: Parameters<DigitalTwinService['recordMode']>[0]) {
-    return this.digitalTwin.recordMode(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async recordMode(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['recordMode']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
+    return this.digitalTwin.recordMode({ ...body, recordedByIdentityId: actor.identityId });
   }
 
   @Post('digital-twins/snapshots')
-  createSnapshot(@Body() body: Parameters<DigitalTwinService['createSnapshot']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createSnapshot(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<DigitalTwinService['createSnapshot']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.digitalTwin.createSnapshot(body);
   }
 
   @Post('simulations/scenarios')
-  createScenario(@Body() body: Parameters<SimulationService['createScenario']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createScenario(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<SimulationService['createScenario']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.simulation.createScenario(body);
   }
 
   @Get('simulations/scenarios/:id')
-  getScenario(@Param('id') id: string) {
-    return this.simulation.findScenarioById(id);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async getScenario(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
+    const scenario = await this.simulation.findScenarioById(id);
+    const version = await this.digitalTwin.findVersionById(scenario.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
+    return scenario;
   }
 
   @Post('simulations/runs')
-  startRun(@Body() body: Parameters<SimulationService['startRun']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async startRun(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<SimulationService['startRun']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.simulation.startRun(body);
   }
 
   @Post('simulations/runs/:id/outputs')
-  recordOutput(
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async recordOutput(
+    @CurrentActor() actor: ActorContext,
     @Param('id') id: string,
     @Body() body: Omit<Parameters<SimulationService['recordOutput']>[0], 'simulationRunId'>,
   ) {
+    this.guardOperationalPayload(actor, body);
+    const run = await this.simulation.findRunById(id);
+    const version = await this.digitalTwin.findVersionById(run.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.simulation.recordOutput({ ...body, simulationRunId: id });
   }
 
   @Post('simulations/runs/:id/complete')
-  completeRun(@Param('id') id: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async completeRun(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
+    const run = await this.simulation.findRunById(id);
+    const version = await this.digitalTwin.findVersionById(run.twinVersionId);
+    const definition = await this.digitalTwin.findDefinitionById(version.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionalOwnerId);
     return this.simulation.completeRun(id);
   }
 
   @Post('consequential-use/reviews')
-  recordReview(@Body() body: Parameters<ConsequentialUseService['recordReview']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async recordReview(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<ConsequentialUseService['recordReview']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
-    return this.consequentialUse.recordReview(body);
+    this.scope.assertAiActorCannotBypassActorContext(actor, 'recordConsequentialUseReview');
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    await this.consequentialAuthority.assertConsequentialAuthority({
+      actor,
+      institutionId: version.definition.institutionalOwnerId,
+    });
+    return this.consequentialUse.recordReview({
+      ...body,
+      reviewerIdentityId: actor.identityId,
+      reviewerIdentityType: IdentityType.INDIVIDUAL,
+      isAiActor: this.scope.isAiActor(actor),
+    });
   }
 
   @Post('consequential-use/live-transitions')
-  proposeLiveTransition(
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async proposeLiveTransition(
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<ConsequentialUseService['proposeLiveTransition']>[0],
   ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
+    this.scope.assertAiActorCannotBypassActorContext(actor, 'proposeLiveTransition');
+    const version = await this.digitalTwin.findVersionById(body.twinVersionId);
+    await this.consequentialAuthority.assertConsequentialAuthority({
+      actor,
+      institutionId: version.definition.institutionalOwnerId,
+    });
     return this.consequentialUse.proposeLiveTransition(body);
   }
 
   @Post('analysis/requests')
-  createAnalysisRequest(@Body() body: Parameters<AnalysisService['createRequest']>[0]) {
-    return this.analysisService.createRequest(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createAnalysisRequest(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Omit<Parameters<AnalysisService['createRequest']>[0], 'requestedByIdentityId'>,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    this.scope.assertInstitutionAccess(actor, body.institutionId);
+    return this.analysisService.createRequest({
+      ...body,
+      requestedByIdentityId: actor.identityId,
+    });
   }
 
   @Post('analysis/runs')
-  startAnalysisRun(@Body() body: Parameters<AnalysisService['startRun']>[0]) {
-    return this.analysisService.startRun(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async startAnalysisRun(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Omit<Parameters<AnalysisService['startRun']>[0], 'executedByIdentityId'>,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    const request = await this.analysisService.findRequestById(body.requestId);
+    this.scope.assertInstitutionAccess(actor, request.institutionId);
+    return this.analysisService.startRun({
+      ...body,
+      executedByIdentityId: actor.identityId,
+    });
   }
 
   @Post('analysis/runs/:runId/complete')
-  completeAnalysisRun(@Param('runId') runId: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async completeAnalysisRun(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
+    const run = await this.analysisService.findRunById(runId);
+    this.scope.assertInstitutionAccess(actor, run.request.institutionId);
     return this.analysisService.completeRun(runId);
   }
 
   @Get('analysis/runs/:runId/replay')
-  getAnalysisReplay(@Param('runId') runId: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async getAnalysisReplay(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
+    const run = await this.analysisService.findRunById(runId);
+    this.scope.assertInstitutionAccess(actor, run.request.institutionId);
+    if (run.request.case) {
+      this.scope.assertInstitutionAccess(actor, run.request.case.responsibleInstitutionId);
+      this.scope.assertDepartmentAccess(actor, run.request.case.responsibleDepartmentId);
+    }
     return this.analysisService.getReplayableOutput(runId);
   }
 
   @Post('monitoring/rules')
-  createMonitoringRule(@Body() body: Parameters<IntelligenceMonitoringService['createRule']>[0]) {
-    return this.monitoringService.createRule(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createMonitoringRule(
+    @CurrentActor() actor: ActorContext,
+    @Body()
+    body: Omit<
+      Parameters<IntelligenceMonitoringService['createRule']>[0],
+      'ownerIdentityId' | 'reviewerIdentityId'
+    >,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    this.scope.assertInstitutionAccess(actor, body.institutionId);
+    return this.monitoringService.createRule({
+      ...body,
+      ownerIdentityId: actor.identityId,
+      reviewerIdentityId: actor.identityId,
+    });
   }
 
   @Post('monitoring/rules/:ruleId/activate')
-  activateMonitoringRule(@Param('ruleId') ruleId: string) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async activateMonitoringRule(
+    @CurrentActor() actor: ActorContext,
+    @Param('ruleId') ruleId: string,
+  ) {
+    const rule = await this.monitoringService.findRuleById(ruleId);
+    this.scope.assertInstitutionAccess(actor, rule.institutionId);
     return this.monitoringService.activateRule(ruleId);
   }
 
   @Post('monitoring/observations')
-  recordObservation(
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async recordObservation(
+    @CurrentActor() actor: ActorContext,
     @Body() body: Parameters<IntelligenceMonitoringService['recordObservation']>[0],
   ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const rule = await this.monitoringService.findRuleById(body.ruleId);
+    this.scope.assertInstitutionAccess(actor, rule.institutionId);
     return this.monitoringService.recordObservation(body);
   }
 
   @Post('monitoring/alerts')
-  generateAlert(@Body() body: Parameters<IntelligenceMonitoringService['generateAlert']>[0]) {
-    return this.monitoringService.generateAlert(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async generateAlert(
+    @CurrentActor() actor: ActorContext,
+    @Body()
+    body: Omit<
+      Parameters<IntelligenceMonitoringService['generateAlert']>[0],
+      'responsibleRecipientIdentityId'
+    >,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    const rule = await this.monitoringService.findRuleById(body.ruleId);
+    this.scope.assertInstitutionAccess(actor, rule.institutionId);
+    return this.monitoringService.generateAlert({
+      ...body,
+      responsibleRecipientIdentityId: actor.identityId,
+    });
   }
 
   @Post('monitoring/alerts/verify')
-  verifyAlert(@Body() body: Parameters<IntelligenceMonitoringService['verifyAlert']>[0]) {
-    return this.monitoringService.verifyAlert(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async verifyAlert(
+    @CurrentActor() actor: ActorContext,
+    @Body()
+    body: Omit<Parameters<IntelligenceMonitoringService['verifyAlert']>[0], 'verifierIdentityId'>,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    this.scope.assertAiActorCannotBypassActorContext(actor, 'verifyAlert');
+    const alert = await this.monitoringService.findAlertById(body.alertId);
+    const rule = await this.monitoringService.findRuleById(alert.ruleId);
+    this.scope.assertInstitutionAccess(actor, rule.institutionId);
+    if (body.isConsequential) {
+      await this.consequentialAuthority.assertConsequentialAuthority({
+        actor,
+        institutionId: rule.institutionId,
+      });
+    }
+    return this.monitoringService.verifyAlert({
+      ...body,
+      verifierIdentityId: actor.identityId,
+    });
   }
 
   @Post('monitoring/alerts/dispose')
-  disposeAlert(@Body() body: Parameters<IntelligenceMonitoringService['disposeAlert']>[0]) {
-    return this.monitoringService.disposeAlert(body);
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async disposeAlert(
+    @CurrentActor() actor: ActorContext,
+    @Body()
+    body: Omit<
+      Parameters<IntelligenceMonitoringService['disposeAlert']>[0],
+      'disposedByIdentityId'
+    >,
+  ) {
+    this.guardOperationalPayload(actor, body);
+    this.scope.assertAiActorCannotBypassActorContext(actor, 'disposeAlert');
+    const alert = await this.monitoringService.findAlertById(body.alertId);
+    const rule = await this.monitoringService.findRuleById(alert.ruleId);
+    this.scope.assertInstitutionAccess(actor, rule.institutionId);
+    return this.monitoringService.disposeAlert({
+      ...body,
+      disposedByIdentityId: actor.identityId,
+    });
   }
 
   @Post('risk/definitions')
-  createRiskDefinition(@Body() body: Parameters<RiskAssessmentService['createDefinition']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  createRiskDefinition(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<RiskAssessmentService['createDefinition']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    this.scope.assertInstitutionAccess(actor, body.institutionId);
     return this.riskService.createDefinition(body);
   }
 
   @Post('risk/assessments')
-  createRiskAssessment(@Body() body: Parameters<RiskAssessmentService['createAssessment']>[0]) {
+  @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
+  @ApiBearerAuth()
+  async createRiskAssessment(
+    @CurrentActor() actor: ActorContext,
+    @Body() body: Parameters<RiskAssessmentService['createAssessment']>[0],
+  ) {
+    this.guardOperationalPayload(actor, body as unknown as Record<string, unknown>);
+    const definition = await this.riskService.findDefinitionById(body.definitionId);
+    this.scope.assertInstitutionAccess(actor, definition.institutionId);
     return this.riskService.createAssessment(body);
+  }
+
+  private guardOperationalPayload(actor: ActorContext, payload: Record<string, unknown>): void {
+    this.scope.rejectForgedActorIdentityFields(payload, actor);
+    this.scope.rejectClientAuthorityIndicators(payload);
   }
 }

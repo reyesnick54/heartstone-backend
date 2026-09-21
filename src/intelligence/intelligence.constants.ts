@@ -237,6 +237,33 @@ export const FORBIDDEN_METRIC_PUBLISH_FIELDS = [
   'dashboardVisible',
 ] as const;
 
+export const FORBIDDEN_CLIENT_ACTOR_IDENTITY_FIELDS = [
+  'ownerIdentityId',
+  'reviewerIdentityId',
+  'actorIdentityId',
+  'capturedByIdentityId',
+  'requestedByIdentityId',
+  'executedByIdentityId',
+  'verifierIdentityId',
+  'disposedByIdentityId',
+  'recordedByIdentityId',
+  'derivedByIdentityId',
+  'responsibleRecipientIdentityId',
+  'identityId',
+] as const;
+
+export const FORBIDDEN_CLIENT_AUTHORITY_INDICATORS = [
+  'authorityGranted',
+  'delegationId',
+  'governmentDecisionId',
+  'refused',
+  'issued',
+  'signed',
+  'decided',
+] as const;
+
+export const INTELLIGENCE_CONSEQUENTIAL_REVIEW_FUNCTION_CODE = 'INTELLIGENCE-CONSEQUENTIAL-REVIEW';
+
 export const CONFLATION_PAIRS = [
   { source: 'APPLICATION_COMPLETE', notEqual: 'APPROVED' },
   { source: 'FORECAST_EMPLOYMENT', notEqual: 'JOBS_CREATED' },
