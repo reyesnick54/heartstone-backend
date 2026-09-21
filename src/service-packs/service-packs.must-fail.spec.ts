@@ -1,8 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import {
-  ServicePackDeploymentStatus,
-  ServicePackVersionStatus,
-} from '@prisma/client';
+import { ServicePackDeploymentStatus, ServicePackVersionStatus } from '@prisma/client';
 
 import { ServicePacksBoundaryService } from './common/service-packs-boundary.service';
 import { SERVICE_PACK_REASON_CODES } from './service-packs.constants';

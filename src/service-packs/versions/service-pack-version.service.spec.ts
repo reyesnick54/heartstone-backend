@@ -1,9 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import {
-  ServicePackManifestValidationStatus,
-  ServicePackVersionStatus,
-} from '@prisma/client';
+import { ServicePackManifestValidationStatus, ServicePackVersionStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { ServicePacksBoundaryService } from '../common/service-packs-boundary.service';

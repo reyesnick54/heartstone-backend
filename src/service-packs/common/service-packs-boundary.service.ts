@@ -27,10 +27,7 @@ export class ServicePacksBoundaryService {
     }
   }
 
-  assertAcceptedVersionImmutable(
-    immutable: boolean,
-    status: ServicePackVersionStatus,
-  ): void {
+  assertAcceptedVersionImmutable(immutable: boolean, status: ServicePackVersionStatus): void {
     if (immutable || status === ServicePackVersionStatus.ACCEPTED) {
       throw new BadRequestException(SERVICE_PACK_REASON_CODES.ACCEPTED_VERSION_IMMUTABLE);
     }

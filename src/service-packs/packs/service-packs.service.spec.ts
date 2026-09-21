@@ -50,7 +50,9 @@ describe('ServicePacksService', () => {
     prisma.servicePack.findUnique.mockResolvedValue({ id: 'pack-1' });
 
     await expect(
-      service.importManifest('pack-1', { manifest: { manifestVersion: 'heartstone.service-pack/v99' } }),
+      service.importManifest('pack-1', {
+        manifest: { manifestVersion: 'heartstone.service-pack/v99' },
+      }),
     ).rejects.toThrow(ConflictException);
   });
 
