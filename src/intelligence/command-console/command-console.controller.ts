@@ -9,6 +9,7 @@ import {
 
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
 import { type AuthenticatedPrincipal } from '../../identity/auth/domain/authenticated-principal';
+import { ClientIdentitySubstitutionGuard } from '../../identity/auth/guards/client-identity-substitution.guard';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
@@ -20,7 +21,7 @@ import { QueryDashboardDto } from './dto/query-dashboard.dto';
 
 @ApiTags('intelligence/command-console')
 @ApiBearerAuth()
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
 @Controller('intelligence/command-console')
 export class CommandConsoleController {
   constructor(
