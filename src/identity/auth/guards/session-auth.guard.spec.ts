@@ -1,4 +1,4 @@
-import { type ExecutionContext,UnauthorizedException } from '@nestjs/common';
+import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AssuranceLevel } from '@prisma/client';
 
 import { type ActorContextService } from '../context/actor-context.service';

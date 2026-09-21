@@ -33,13 +33,16 @@ export class CommandConsoleController {
   @Post('projections/derive')
   @ApiOperation({
     summary: 'Derive dashboard indicator projection from authoritative records',
-    description: 'Actor identity is server-derived; clients cannot supply identity or entitlement fields.',
+    description:
+      'Actor identity is server-derived; clients cannot supply identity or entitlement fields.',
   })
   deriveProjection(
     @CurrentActor() actor: AuthenticatedPrincipal,
     @Body() body: DeriveIndicatorProjectionDto,
   ) {
-    this.boundaryService.rejectClientSuppliedActorIdentity(body as unknown as Record<string, unknown>);
+    this.boundaryService.rejectClientSuppliedActorIdentity(
+      body as unknown as Record<string, unknown>,
+    );
     this.boundaryService.assertClientCannotSetDashboardProjection(
       body as unknown as Record<string, unknown>,
     );
@@ -81,7 +84,9 @@ export class CommandConsoleController {
   })
   @ApiCreatedResponse({ description: 'Executive console query result with disclaimers' })
   queryExecutive(@CurrentActor() actor: AuthenticatedPrincipal, @Body() body: QueryDashboardDto) {
-    this.boundaryService.rejectClientSuppliedActorIdentity(body as unknown as Record<string, unknown>);
+    this.boundaryService.rejectClientSuppliedActorIdentity(
+      body as unknown as Record<string, unknown>,
+    );
     return this.queryService.queryExecutiveConsole({
       actor,
       dashboardDefinitionId: body.dashboardDefinitionId,
@@ -102,8 +107,13 @@ export class CommandConsoleController {
       'Departmental dashboard access is verified against authenticated actor entitlements for the requested scope.',
   })
   @ApiCreatedResponse({ description: 'Departmental console query result with disclaimers' })
-  queryDepartmental(@CurrentActor() actor: AuthenticatedPrincipal, @Body() body: QueryDashboardDto) {
-    this.boundaryService.rejectClientSuppliedActorIdentity(body as unknown as Record<string, unknown>);
+  queryDepartmental(
+    @CurrentActor() actor: AuthenticatedPrincipal,
+    @Body() body: QueryDashboardDto,
+  ) {
+    this.boundaryService.rejectClientSuppliedActorIdentity(
+      body as unknown as Record<string, unknown>,
+    );
     return this.queryService.queryDepartmentalConsole({
       actor,
       dashboardDefinitionId: body.dashboardDefinitionId,
@@ -124,7 +134,9 @@ export class CommandConsoleController {
   })
   @ApiCreatedResponse({ description: 'Immutable dashboard snapshot with replay token' })
   captureSnapshot(@CurrentActor() actor: AuthenticatedPrincipal, @Body() body: CaptureSnapshotDto) {
-    this.boundaryService.rejectClientSuppliedActorIdentity(body as unknown as Record<string, unknown>);
+    this.boundaryService.rejectClientSuppliedActorIdentity(
+      body as unknown as Record<string, unknown>,
+    );
     return this.snapshotService.captureSnapshot({
       actor,
       dashboardVersionId: body.dashboardVersionId,

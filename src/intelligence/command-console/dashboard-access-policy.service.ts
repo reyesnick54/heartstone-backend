@@ -154,7 +154,10 @@ export class DashboardAccessPolicyService {
             !input.caseAssignmentId
           ) {
             accessResult = DashboardQueryAuditResult.DENIED_SENSITIVITY;
-          } else if (matchingPolicy.technicalPermissionCode && matchingPolicy.substantiveAccessRequired) {
+          } else if (
+            matchingPolicy.technicalPermissionCode &&
+            matchingPolicy.substantiveAccessRequired
+          ) {
             accessResult = DashboardQueryAuditResult.DENIED_TECHNICAL_ONLY;
           } else {
             accessResult = DashboardQueryAuditResult.GRANTED;

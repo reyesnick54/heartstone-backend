@@ -51,9 +51,8 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
     const fixture = await seedPhase12BFixture(prisma, app);
     const otherInstitution = await prisma.institution.create({
       data: {
-        jurisdictionId: (
-          await prisma.jurisdiction.findFirstOrThrow({ where: { code: 'PH12B' } })
-        ).id,
+        jurisdictionId: (await prisma.jurisdiction.findFirstOrThrow({ where: { code: 'PH12B' } }))
+          .id,
         code: 'OTHER-INST',
         name: 'Other Institution',
         type: 'MINISTRY',
@@ -118,7 +117,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
         sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
       })
-      .expect(400);
+      .expect(403);
   });
 
   it('must-fail: technical administrator does not gain substantive executive access', async () => {
@@ -277,18 +276,25 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
     expect(evaluation.outcome).not.toBe(AuthorityEvaluationOutcome.ALLOW);
     expect(
       await prisma.authorityEvaluationRecord.count({
-        where: { outcome: AuthorityEvaluationOutcome.ALLOW, identityId: fixture.executiveIdentityId },
+        where: {
+          outcome: AuthorityEvaluationOutcome.ALLOW,
+          identityId: fixture.executiveIdentityId,
+        },
       }),
     ).toBe(0);
   });
 
   it('rejects client-supplied actor identity fields at boundary', () => {
     expect(() => {
-      boundaryService.rejectClientSuppliedActorIdentity({ identityId: '00000000-0000-4000-8000-000000000001' });
+      boundaryService.rejectClientSuppliedActorIdentity({
+        identityId: '00000000-0000-4000-8000-000000000001',
+      });
     }).toThrow(ForbiddenException);
 
     expect(() => {
-      boundaryService.rejectClientSuppliedActorIdentity({ capturedByIdentityId: '00000000-0000-4000-8000-000000000001' });
+      boundaryService.rejectClientSuppliedActorIdentity({
+        capturedByIdentityId: '00000000-0000-4000-8000-000000000001',
+      });
     }).toThrow(ForbiddenException);
   });
 });

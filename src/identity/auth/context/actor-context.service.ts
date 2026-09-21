@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   DelegationStatus,
   IdentityOfficeholderLinkStatus,
@@ -45,9 +41,7 @@ export class ActorContextService {
     const sessionContext = input.session;
 
     if (!sessionContext.sessionId || !sessionContext.identityId) {
-      throw new UnauthorizedException(
-        'Actor context requires server-derived session identity',
-      );
+      throw new UnauthorizedException('Actor context requires server-derived session identity');
     }
 
     const session = await this.prisma.session.findUnique({
@@ -94,9 +88,7 @@ export class ActorContextService {
 
     const officeholderIds = officeholderLinks.map((link) => link.officeholderId);
     const activeAppointments =
-      officeholderIds.length > 0
-        ? await this.loadActiveAppointments(officeholderIds, at)
-        : [];
+      officeholderIds.length > 0 ? await this.loadActiveAppointments(officeholderIds, at) : [];
     const activeDelegations =
       officeholderIds.length > 0 || activeAppointments.length > 0
         ? await this.loadActiveDelegations(officeholderIds, activeAppointments, at)
@@ -165,11 +157,7 @@ export class ActorContextService {
       const actorValue = actor[field as keyof ActorContext];
       const normalizedClientValue = clientValue;
       const normalizedActorValue =
-        typeof actorValue === 'string'
-          ? actorValue
-          : actorValue == null
-            ? ''
-            : null;
+        typeof actorValue === 'string' ? actorValue : actorValue == null ? '' : null;
 
       if (normalizedActorValue === null || normalizedClientValue !== normalizedActorValue) {
         throw new ForbiddenException(

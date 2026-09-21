@@ -168,9 +168,8 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (
-          await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } })
-        ).id,
+        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } }))
+          .id,
         identityId: identity.id,
         assuranceLevel: AssuranceLevel.MEDIUM,
       },
@@ -204,9 +203,8 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (
-          await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } })
-        ).id,
+        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } }))
+          .id,
         identityId: identity.id,
         assuranceLevel: AssuranceLevel.LOW,
       },
@@ -247,9 +245,8 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (
-          await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } })
-        ).id,
+        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } }))
+          .id,
         identityId: identity.id,
         assuranceLevel: AssuranceLevel.LOW,
       },
@@ -292,9 +289,8 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (
-          await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } })
-        ).id,
+        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } }))
+          .id,
         identityId: identity.id,
         assuranceLevel: AssuranceLevel.LOW,
       },
@@ -335,8 +331,9 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: serviceIdentity.id } }))
-          .id,
+        sessionId: (
+          await prisma.session.findFirstOrThrow({ where: { identityId: serviceIdentity.id } })
+        ).id,
         identityId: serviceIdentity.id,
         assuranceLevel: AssuranceLevel.LOW,
       },
@@ -353,9 +350,8 @@ describe('Actor context must-fail invariants (integration)', () => {
 
     const actor = await actorContextService.resolveFromSessionContext({
       session: {
-        sessionId: (
-          await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } })
-        ).id,
+        sessionId: (await prisma.session.findFirstOrThrow({ where: { identityId: identity.id } }))
+          .id,
         identityId: identity.id,
         assuranceLevel: AssuranceLevel.LOW,
       },

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { type INestApplication } from '@nestjs/common';
 import {
+  AccountStatus,
   AuthenticationMethodType,
   DashboardAccessPurpose,
   DashboardColorSemantic,
@@ -87,6 +88,7 @@ export async function seedPhase12BFixture(
       data: {
         loginIdentifier: `${name.toLowerCase().replace(/\s+/g, '-')}@phase12b.test`,
         personId: person.id,
+        status: AccountStatus.ACTIVE,
       },
     });
     return prisma.identity.create({
