@@ -119,6 +119,7 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
   await resetIntelligenceData(prisma);
   await resetFinancialData(prisma);
+  await resetOperationalSupportData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
