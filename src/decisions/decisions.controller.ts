@@ -1,6 +1,13 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthorityActionType } from '@prisma/client';
 
+import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import {
+  resolveFunctionFromDecisionTypeVersion,
+  resolveResourceFromCase,
+} from '../authority/consequential-action/consequential-action-resolvers';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
@@ -13,7 +20,7 @@ import { DecisionReadinessService } from './readiness/decision-readiness.service
 
 @ApiTags('decisions')
 @Controller('decisions')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 export class DecisionsController {
   constructor(
     private readonly readiness: DecisionReadinessService,
@@ -22,6 +29,12 @@ export class DecisionsController {
   ) {}
 
   @Post('readiness/assess')
+  @ConsequentialAction({
+    action: AuthorityActionType.DECIDE,
+    functionResolver: resolveFunctionFromDecisionTypeVersion,
+    resourceResolver: resolveResourceFromCase,
+    institutionalFieldPrefixes: ['proposedDecisionMaker'],
+  })
   @ApiOperation({ summary: 'Assess whether a case is ready for authorized government decision' })
   assessReadiness(@Body() dto: AssessDecisionReadinessDto) {
     return this.readiness.assess({
@@ -41,6 +54,12 @@ export class DecisionsController {
   }
 
   @Post('execute')
+  @ConsequentialAction({
+    action: AuthorityActionType.DECIDE,
+    functionResolver: resolveFunctionFromDecisionTypeVersion,
+    resourceResolver: resolveResourceFromCase,
+    institutionalFieldPrefixes: ['decisionMaker'],
+  })
   @ApiOperation({
     summary: 'Record an authorized government decision (requires explicit decision-maker intent)',
   })

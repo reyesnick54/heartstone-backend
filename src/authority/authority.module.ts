@@ -5,6 +5,8 @@ import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AuthorityValidationService } from './common/authority-validation.service';
 import { AuthorityConditionEvaluator } from './conditions/authority-condition-evaluator.service';
+import { ConsequentialActionGuard } from './consequential-action/consequential-action.guard';
+import { ConsequentialActionService } from './consequential-action/consequential-action.service';
 import { AuthorityDependenciesController } from './dependencies/authority-dependencies.controller';
 import { AuthorityDependenciesService } from './dependencies/authority-dependencies.service';
 import { AuthorityDependencyEvaluator } from './dependencies/authority-dependency-evaluator.service';
@@ -41,6 +43,8 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     AuthorityDependenciesService,
     AuthorityValidationService,
     SegregationOfDutyEvaluator,
+    ConsequentialActionService,
+    ConsequentialActionGuard,
     AuthorityPolicyGuard,
     AuthorityPolicyService,
     SessionAuthGuard,
@@ -51,6 +55,8 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     FunctionAuthorityRecordsService,
     GoverningSourcesService,
     InstitutionalActorResolver,
+    ConsequentialActionService,
+    ConsequentialActionGuard,
     AuthorityPolicyGuard,
     AuthorityPolicyService,
   ],
