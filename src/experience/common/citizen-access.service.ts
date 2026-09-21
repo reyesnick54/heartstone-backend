@@ -35,7 +35,10 @@ export class CitizenAccessService {
 
   buildApplicationWhere(scope: CitizenAccessibleScope): Prisma.ApplicationWhereInput {
     const orConditions: Prisma.ApplicationWhereInput[] = [
-      { applicantIdentityId: scope.identityId },
+      {
+        applicantIdentityId: scope.identityId,
+        representativeAuthorityId: null,
+      },
     ];
 
     if (scope.activeRepresentativeAuthorityIds.length > 0) {
@@ -49,21 +52,23 @@ export class CitizenAccessService {
   }
 
   buildCaseWhere(scope: CitizenAccessibleScope): Prisma.CaseWhereInput {
-    return {
-      OR: [
-        { applicantIdentityId: scope.identityId },
-        ...(scope.representedOrganizationIds.length > 0
-          ? [
-              {
-                application: {
-                  organizationId: { in: scope.representedOrganizationIds },
-                  representativeAuthorityId: { in: scope.activeRepresentativeAuthorityIds },
-                },
-              },
-            ]
-          : []),
-      ],
-    };
+    const orConditions: Prisma.CaseWhereInput[] = [
+      {
+        applicantIdentityId: scope.identityId,
+        application: { representativeAuthorityId: null },
+      },
+    ];
+
+    if (scope.activeRepresentativeAuthorityIds.length > 0) {
+      orConditions.push({
+        application: {
+          organizationId: { in: scope.representedOrganizationIds },
+          representativeAuthorityId: { in: scope.activeRepresentativeAuthorityIds },
+        },
+      });
+    }
+
+    return { OR: orConditions };
   }
 
   async assertApplicationAccess(applicationId: string, identityId: string): Promise<Application> {

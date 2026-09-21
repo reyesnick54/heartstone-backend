@@ -192,8 +192,17 @@ describe('Citizen Experience API (integration)', () => {
       },
     });
 
-    const submission = await prisma.applicationSubmission.findFirstOrThrow({
-      where: { applicationId },
+    const submission = await prisma.applicationSubmission.create({
+      data: {
+        applicationId,
+        submissionNumber: 'SUB-CITIZEN-EXP-001',
+        sequenceNumber: 1,
+        answersSnapshot: {},
+        configurationFingerprint: fixture.configurationFingerprint,
+        governmentServiceVersionId: fixture.governmentServiceVersionId,
+        formVersionId: fixture.formVersionId,
+        contentHash: 'test-content-hash',
+      },
     });
 
     await prisma.deficiencyNotice.create({
