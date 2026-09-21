@@ -32,6 +32,7 @@ import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
+import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SystemModule } from './system/system.module';
 
 @Module({
@@ -56,6 +57,7 @@ import { SystemModule } from './system/system.module';
     InstitutionalScopeModule,
     AuthorityModule,
     ServiceCatalogModule,
+    ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,
     CitizenExperienceModule,
