@@ -23,6 +23,11 @@ import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/
 import { type CaseFoundationService } from '../../src/application-processing/cases/case-foundation.service';
 import { type PrismaService } from '../../src/database/prisma.service';
 import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/common/service-configuration-hash.util';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 import { asLoginResponseBody } from './identity-test-types';
 
 export interface ApplicationProcessingFixtureContext {
@@ -271,26 +276,14 @@ export async function seedApplicationProcessingFixture(
     [applicantIdentity.id, 'Applicant123!', `${marker}-applicant@test.gov`],
     [officialIdentity.id, 'Official123!', `${marker}-official@test.gov`],
   ] as const) {
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId, type: 'PASSWORD', password })
-      .expect(201);
+    await createPasswordCredentialViaPrisma(prisma, identityId, password);
+    await createPasswordAuthenticationMethodViaPrisma(prisma, identityId);
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId, type: AuthenticationMethodType.PASSWORD })
-      .expect(201);
-
-    const loginResponse = await request(app.getHttpServer())
-      .post('/api/v1/identity/auth/login')
-      .send({ loginIdentifier: login, password })
-      .expect(201);
-
-    const body = asLoginResponseBody(loginResponse.body);
+    const sessionToken = await loginAndGetSessionToken(app, login, password);
     if (identityId === applicantIdentity.id) {
-      applicantSessionToken = body.sessionToken;
+      applicantSessionToken = sessionToken;
     } else {
-      officialSessionToken = body.sessionToken;
+      officialSessionToken = sessionToken;
     }
   }
 

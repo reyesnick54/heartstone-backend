@@ -9,7 +9,11 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
-import { asLoginResponseBody } from './helpers/identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { seedPhase6Fixture, VALID_FORM_ANSWERS } from './helpers/phase-6-test-fixtures';
 import {
@@ -314,25 +318,14 @@ describe('Phase 6 must-fail invariants (e2e)', () => {
       },
     });
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD', password: 'Other123!' });
+    await createPasswordCredentialViaPrisma(prisma, otherIdentity.id, 'Other123!');
+    await createPasswordAuthenticationMethodViaPrisma(prisma, otherIdentity.id);
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD' });
-
-    const login = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier: 'other@test.gov', password: 'Other123!' })
-      ).body,
-    );
+    const otherSessionToken = await loginAndGetSessionToken(app, 'other@test.gov', 'Other123!');
 
     await request(app.getHttpServer())
       .get(`/api/v1/cases/${caseId}`)
-      .set('Authorization', `Bearer ${login.sessionToken}`)
+      .set('Authorization', `Bearer ${otherSessionToken}`)
       .expect(403);
   });
 

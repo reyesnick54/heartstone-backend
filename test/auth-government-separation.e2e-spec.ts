@@ -1,16 +1,14 @@
 import { type INestApplication } from '@nestjs/common';
-import { AccountStatus } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import {
-  asIdentityBody,
-  asLoginResponseBody,
-  asPersonBody,
-  asProtectedProfileBody,
-  asUserAccountBody,
-} from './helpers/identity-test-types';
+  createPasswordAuthenticationMethodViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './helpers/identity-provisioning.fixture';
+import { asProtectedProfileBody } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Phase 3C must-fail: authentication does not confer government authority', () => {
@@ -32,47 +30,24 @@ describe('Phase 3C must-fail: authentication does not confer government authorit
   });
 
   it('does not create Officeholder, Appointment, Delegation, or decision authority on authentication', async () => {
-    const personRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/persons')
-      .send({ givenName: 'Citizen', familyName: 'User' })
-      .expect(201);
-    const person = asPersonBody(personRes.body);
+    const provisioned = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier: 'citizen.user@test.gov',
+      password: 'CitizenPass123!',
+      givenName: 'Citizen',
+      familyName: 'User',
+      displayName: 'Citizen User',
+    });
+    await createPasswordAuthenticationMethodViaPrisma(prisma, provisioned.identityId);
 
-    const accountRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/user-accounts')
-      .send({
-        loginIdentifier: 'citizen.user@test.gov',
-        personId: person.id,
-        status: AccountStatus.ACTIVE,
-      })
-      .expect(201);
-    const account = asUserAccountBody(accountRes.body);
-
-    const identityRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/identities')
-      .send({
-        type: 'INDIVIDUAL',
-        displayName: 'Citizen User',
-        userAccountId: account.id,
-        personId: person.id,
-      })
-      .expect(201);
-    const identity = asIdentityBody(identityRes.body);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: identity.id, type: 'PASSWORD', password: 'CitizenPass123!' })
-      .expect(201);
-
-    const loginRes = await request(app.getHttpServer())
-      .post('/api/v1/identity/auth/login')
-      .send({ loginIdentifier: 'citizen.user@test.gov', password: 'CitizenPass123!' })
-      .expect(201);
-    const login = asLoginResponseBody(loginRes.body);
+    const sessionToken = await loginAndGetSessionToken(
+      app,
+      'citizen.user@test.gov',
+      'CitizenPass123!',
+    );
 
     const profileRes = await request(app.getHttpServer())
       .get('/api/v1/identity/me')
-      .set('Authorization', `Bearer ${login.sessionToken}`)
+      .set('Authorization', `Bearer ${sessionToken}`)
       .expect(200);
     const profile = asProtectedProfileBody(profileRes.body);
 
