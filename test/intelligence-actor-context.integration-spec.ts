@@ -135,7 +135,7 @@ describe('Intelligence actor context and institutional scoping (integration)', (
         sensitivityScope: 'OFFICIAL',
         technicalPermissionOnly: true,
       })
-      .expect(403);
+      .expect(400);
   });
 
   it('rejects client-supplied authority indicators', async () => {
