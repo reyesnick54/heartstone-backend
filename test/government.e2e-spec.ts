@@ -5,17 +5,25 @@ import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
 import { asInstitutionBody, asJurisdictionBody } from './helpers/government-test-types';
+import {
+  authHeader,
+  ensureIntegrationAdminSession,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
 describe('Government structure (e2e)', () => {
   let app: INestApplication<App>;
+  let prisma: PrismaService;
+  let adminSessionToken: string;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
+    ({ app, prisma } = await createIntegrationApp());
+    const admin = await ensureIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
 
   beforeEach(async () => {
-    await resetGovernmentData(app.get(PrismaService));
+    await resetGovernmentData(prisma);
   });
 
   afterAll(async () => {
@@ -25,6 +33,7 @@ describe('Government structure (e2e)', () => {
   it('creates a jurisdiction', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -48,6 +57,7 @@ describe('Government structure (e2e)', () => {
   it('retrieves a jurisdiction by id', async () => {
     const createdResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -59,6 +69,7 @@ describe('Government structure (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get(`/api/v1/jurisdictions/${created.id}`)
+      .set(authHeader(adminSessionToken))
       .expect(200);
 
     expect(asJurisdictionBody(response.body)).toMatchObject({
@@ -70,6 +81,7 @@ describe('Government structure (e2e)', () => {
   it('updates a jurisdiction without changing immutable identifiers', async () => {
     const createdResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -81,6 +93,7 @@ describe('Government structure (e2e)', () => {
 
     await request(app.getHttpServer())
       .patch(`/api/v1/jurisdictions/${created.id}`)
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'CHANGED',
       })
@@ -88,6 +101,7 @@ describe('Government structure (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .patch(`/api/v1/jurisdictions/${created.id}`)
+      .set(authHeader(adminSessionToken))
       .send({
         name: 'Updated Federal Government',
         status: StructuralLifecycleStatus.INACTIVE,
@@ -105,6 +119,7 @@ describe('Government structure (e2e)', () => {
   it('rejects duplicate jurisdiction codes', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -114,6 +129,7 @@ describe('Government structure (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'Duplicate',
@@ -125,6 +141,7 @@ describe('Government structure (e2e)', () => {
   it('creates an institution linked to a jurisdiction', async () => {
     const jurisdictionResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -136,6 +153,7 @@ describe('Government structure (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -154,6 +172,7 @@ describe('Government structure (e2e)', () => {
   it('rejects institutions referencing a nonexistent jurisdiction', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: '99999999-9999-4999-8999-999999999999',
         code: 'DOT',
@@ -166,6 +185,7 @@ describe('Government structure (e2e)', () => {
   it('rejects duplicate institution codes within the same jurisdiction', async () => {
     const jurisdictionResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -177,6 +197,7 @@ describe('Government structure (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -187,6 +208,7 @@ describe('Government structure (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -199,6 +221,7 @@ describe('Government structure (e2e)', () => {
   it('does not expose DELETE endpoints for jurisdictions or institutions', async () => {
     const jurisdictionResponse = await request(app.getHttpServer())
       .post('/api/v1/jurisdictions')
+      .set(authHeader(adminSessionToken))
       .send({
         code: 'US-FED',
         name: 'United States Federal Government',
@@ -210,10 +233,12 @@ describe('Government structure (e2e)', () => {
 
     await request(app.getHttpServer())
       .delete(`/api/v1/jurisdictions/${jurisdiction.id}`)
+      .set(authHeader(adminSessionToken))
       .expect(404);
 
     const institutionResponse = await request(app.getHttpServer())
       .post('/api/v1/institutions')
+      .set(authHeader(adminSessionToken))
       .send({
         jurisdictionId: jurisdiction.id,
         code: 'DOT',
@@ -224,6 +249,9 @@ describe('Government structure (e2e)', () => {
 
     const institution = asInstitutionBody(institutionResponse.body);
 
-    await request(app.getHttpServer()).delete(`/api/v1/institutions/${institution.id}`).expect(404);
+    await request(app.getHttpServer())
+      .delete(`/api/v1/institutions/${institution.id}`)
+      .set(authHeader(adminSessionToken))
+      .expect(404);
   });
 });
