@@ -2,7 +2,6 @@ import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   AppointmentStatus,
-  AuthenticationMethodType,
   IdentityOfficeholderLinkStatus,
   IdentityType,
   MembershipStatus,
@@ -14,6 +13,12 @@ import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
 import { AuthorityBoundaryService } from '../src/identity/common/authority-boundary.service';
+import {
+  authHeader,
+  createPasswordAuthenticationMethodViaPrisma,
+  loginAndGetSessionToken,
+  provisionIdentityViaPrisma,
+} from './helpers/identity-provisioning.fixture';
 import {
   asIdentityBody,
   asLoginResponseBody,
@@ -42,14 +47,27 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
   });
 
   it('demonstrates full Phase 3 acceptance flow with audit events', async () => {
+    const bootstrap = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier: 'bootstrap@test.gov',
+      password: 'BootstrapPass123!',
+    });
+    await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    const bootstrapToken = await loginAndGetSessionToken(
+      app,
+      bootstrap.loginIdentifier,
+      bootstrap.password,
+    );
+
     const personRes = await request(app.getHttpServer())
       .post('/api/v1/identity/persons')
+      .set(authHeader(bootstrapToken))
       .send({ givenName: 'Alice', familyName: 'Official' })
       .expect(201);
     const person = asPersonBody(personRes.body);
 
     const accountRes = await request(app.getHttpServer())
       .post('/api/v1/identity/user-accounts')
+      .set(authHeader(bootstrapToken))
       .send({
         loginIdentifier: 'alice.official@test.gov',
         personId: person.id,
@@ -60,6 +78,7 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
 
     const identityRes = await request(app.getHttpServer())
       .post('/api/v1/identity/identities')
+      .set(authHeader(bootstrapToken))
       .send({
         type: IdentityType.INDIVIDUAL,
         displayName: 'Alice Official',
@@ -71,6 +90,7 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/credentials')
+      .set(authHeader(bootstrapToken))
       .send({
         identityId: identity.id,
         type: 'PASSWORD',
@@ -80,19 +100,22 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/authentication-methods')
+      .set(authHeader(bootstrapToken))
       .send({
         identityId: identity.id,
-        type: AuthenticationMethodType.PASSWORD,
+        type: 'PASSWORD',
       })
       .expect(201);
 
     const orgRes = await request(app.getHttpServer())
       .post('/api/v1/identity/organizations')
+      .set(authHeader(bootstrapToken))
       .send({ code: 'GOV-DEPT', name: 'Government Department' })
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/memberships')
+      .set(authHeader(bootstrapToken))
       .send({
         organizationId: (orgRes.body as { id: string }).id,
         identityId: identity.id,
@@ -103,6 +126,7 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/representative-authorities')
+      .set(authHeader(bootstrapToken))
       .send({
         organizationId: (orgRes.body as { id: string }).id,
         identityId: identity.id,
@@ -163,6 +187,7 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/identity/officeholder-links')
+      .set(authHeader(bootstrapToken))
       .send({
         identityId: identity.id,
         officeholderId: officeholder.id,

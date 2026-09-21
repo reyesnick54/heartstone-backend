@@ -2,7 +2,6 @@ import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   AppointmentStatus,
-  AuthenticationMethodType,
   AuthorityActionType,
   AuthorityClassification,
   CatalogLifecycleStatus,
@@ -25,7 +24,11 @@ import { type PrismaService } from '../../src/database/prisma.service';
 import { NON_PRODUCTION_DECISIONS_FIXTURE_MARKER } from '../../src/decisions/decisions.constants';
 import { seedPhase8bDecisionFixture } from '../../src/decisions/fixtures/phase-8b-test-fixtures';
 import { NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER } from '../../src/decisions-issuance/decisions-issuance.constants';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 import { type Phase8SessionContext } from './phase-8-test-types';
 
 export const NON_PRODUCTION_PHASE_8_FIXTURE_MARKER = NON_PRODUCTION_DECISIONS_FIXTURE_MARKER;
@@ -66,9 +69,7 @@ async function provisionSessionForIdentity(
     select: { id: true, personId: true, userAccountId: true },
   });
 
-  let userAccountId = identity.userAccountId;
-
-  if (!userAccountId) {
+  if (!identity.userAccountId) {
     const account = await prisma.userAccount.create({
       data: {
         loginIdentifier,
@@ -76,33 +77,18 @@ async function provisionSessionForIdentity(
         status: AccountStatus.ACTIVE,
       },
     });
-    userAccountId = account.id;
     await prisma.identity.update({
       where: { id: identity.id },
       data: { userAccountId: account.id },
     });
   }
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: identity.id, type: 'PASSWORD', password: 'Phase8123!' })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
+  const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
 
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier, password: 'Phase8123!' })
-        .expect(201)
-    ).body,
-  );
-
-  return { identityId: identity.id, sessionToken: login.sessionToken };
+  return { identityId: identity.id, sessionToken };
 }
 
 async function createSessionIdentity(
@@ -153,26 +139,12 @@ async function createSessionIdentity(
     });
   }
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: identity.id, type: 'PASSWORD', password: 'Phase8123!' })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: identity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
+  const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
 
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier, password: 'Phase8123!' })
-        .expect(201)
-    ).body,
-  );
-
-  return { identityId: identity.id, sessionToken: login.sessionToken, officeholderId };
+  return { identityId: identity.id, sessionToken, officeholderId };
 }
 
 async function setupIssuanceCatalog(
@@ -435,6 +407,19 @@ export async function seedPhase8Fixture(
   const official = await createSessionIdentity(app, marker, 'official', prisma);
   const approver = await createSessionIdentity(app, marker, 'approver', prisma);
 
+  const linkedCase = await prisma.case.findUniqueOrThrow({
+    where: { id: base.caseId },
+    select: { applicationId: true },
+  });
+  await prisma.case.update({
+    where: { id: base.caseId },
+    data: { applicantIdentityId: applicant.identityId },
+  });
+  await prisma.application.update({
+    where: { id: linkedCase.applicationId },
+    data: { applicantIdentityId: applicant.identityId },
+  });
+
   let officialAppointmentId = base.appointmentId;
 
   if (official.officeholderId) {
@@ -679,8 +664,9 @@ export async function issueInstrumentForDecision(
       holderIdentityId: fixture.applicantIdentityId,
       scope: { activity: 'Import/export' },
       effectiveFrom: new Date('2026-01-01').toISOString(),
-      signatureDocumentVersionId: options?.signatureDocumentVersionId,
-      sealDocumentVersionId: options?.sealDocumentVersionId,
+      signatureDocumentVersionId:
+        options?.signatureDocumentVersionId ?? fixture.signatureDocumentVersionId,
+      sealDocumentVersionId: options?.sealDocumentVersionId ?? fixture.sealDocumentVersionId,
       idempotencyKey: options?.idempotencyKey,
       freeFormFields: { holderName: 'Test Holder Ltd' },
     })

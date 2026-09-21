@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 
+import { Public } from '../security/decorators/public.decorator';
 import {
   PHASE_13_BOUNDARY_DISCLAIMERS,
   PRODUCTION_READINESS_BOUNDARY_DISCLAIMER,
@@ -7,6 +8,7 @@ import {
 
 @Controller('production-readiness')
 export class ProductionReadinessController {
+  @Public()
   @Get('boundary-disclaimer')
   getBoundaryDisclaimer(): {
     disclaimer: string;

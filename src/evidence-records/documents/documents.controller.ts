@@ -19,6 +19,7 @@ import { type Response } from 'express';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ActorContextService } from '../../security/services/actor-context.service';
 import { ForbiddenDocumentFieldsInterceptor } from '../common/forbidden-document-fields.interceptor';
 import { DocumentAccessService } from './document-access.service';
 import { DocumentAssociationsService } from './document-associations.service';
@@ -40,6 +41,7 @@ export class DocumentsController {
     private readonly versions: DocumentVersionsService,
     private readonly associations: DocumentAssociationsService,
     private readonly access: DocumentAccessService,
+    private readonly actorContext: ActorContextService,
   ) {}
 
   @Get('integrity-disclaimer')
@@ -57,7 +59,15 @@ export class DocumentsController {
   }
 
   @Get(':id')
-  findRecord(@Param('id', ParseUUIDPipe) id: string) {
+  async findRecord(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.access.assertRecordMetadataAccess(id, {
+      actorIdentityId: session.identityId,
+      isOfficial: actor.hasActiveOfficeholderLink,
+    });
     return this.records.findById(id);
   }
 
@@ -77,12 +87,28 @@ export class DocumentsController {
   }
 
   @Get(':id/versions')
-  listVersions(@Param('id', ParseUUIDPipe) documentRecordId: string) {
+  async listVersions(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) documentRecordId: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.access.assertRecordMetadataAccess(documentRecordId, {
+      actorIdentityId: session.identityId,
+      isOfficial: actor.hasActiveOfficeholderLink,
+    });
     return this.versions.listVersions(documentRecordId);
   }
 
   @Get('versions/:versionId')
-  getVersion(@Param('versionId', ParseUUIDPipe) versionId: string) {
+  async getVersion(
+    @CurrentSession() session: SessionContextDto,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+  ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.access.assertVersionMetadataAccess(versionId, {
+      actorIdentityId: session.identityId,
+      isOfficial: actor.hasActiveOfficeholderLink,
+    });
     return this.versions.getVersion(versionId);
   }
 
@@ -101,11 +127,11 @@ export class DocumentsController {
     @CurrentSession() session: SessionContextDto,
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @Res({ passthrough: false }) res: Response,
-    @Query('official') official?: string,
   ): Promise<void> {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
     const result = await this.access.downloadVersion(versionId, {
       actorIdentityId: session.identityId,
-      isOfficial: official === 'true',
+      isOfficial: actor.hasActiveOfficeholderLink,
     });
 
     res.setHeader('Content-Type', result.contentType);
@@ -127,10 +153,16 @@ export class DocumentsController {
   }
 
   @Get('associations')
-  listAssociations(
+  async listAssociations(
+    @CurrentSession() session: SessionContextDto,
     @Query('targetType') targetType: string,
     @Query('targetId', ParseUUIDPipe) targetId: string,
   ) {
+    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    await this.access.assertAssociationTargetAccess(targetType, targetId, {
+      actorIdentityId: session.identityId,
+      isOfficial: actor.hasActiveOfficeholderLink,
+    });
     return this.associations.listByTarget(targetType, targetId);
   }
 }

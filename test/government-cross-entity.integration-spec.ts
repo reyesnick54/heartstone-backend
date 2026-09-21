@@ -11,7 +11,7 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { PrismaService } from '../src/database/prisma.service';
+import { type PrismaService } from '../src/database/prisma.service';
 import {
   asAppointmentBody,
   asDelegationBody,
@@ -25,17 +25,23 @@ import {
   asOfficeBody,
   asOfficeholderBody,
 } from './helpers/government-test-types';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetGovernmentData } from './helpers/integration-app';
 
 describe('Government cross-entity structure integrity (integration)', () => {
   let app: INestApplication<App>;
+  let prisma: PrismaService;
+  let http: ReturnType<typeof request.agent>;
 
   beforeAll(async () => {
-    ({ app } = await createIntegrationApp());
+    ({ app, prisma } = await createIntegrationApp());
+    const admin = await ensureIntegrationAdminSession(app, prisma);
+    http = request.agent(app.getHttpServer());
+    http.set(authHeader(admin.sessionToken));
   });
 
   beforeEach(async () => {
-    await resetGovernmentData(app.get(PrismaService));
+    await resetGovernmentData(prisma);
   });
 
   afterAll(async () => {
@@ -43,7 +49,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   });
 
   async function seedFullStructure() {
-    const jurisdictionResponse = await request(app.getHttpServer())
+    const jurisdictionResponse = await http
       .post('/api/v1/jurisdictions')
       .send({
         code: 'US-FED',
@@ -54,7 +60,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const jurisdiction = asJurisdictionBody(jurisdictionResponse.body);
 
-    const institutionResponse = await request(app.getHttpServer())
+    const institutionResponse = await http
       .post('/api/v1/institutions')
       .send({
         jurisdictionId: jurisdiction.id,
@@ -66,7 +72,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const institution = asInstitutionBody(institutionResponse.body);
 
-    const governmentBodyResponse = await request(app.getHttpServer())
+    const governmentBodyResponse = await http
       .post('/api/v1/government-bodies')
       .send({
         institutionId: institution.id,
@@ -76,7 +82,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(201);
 
-    const departmentResponse = await request(app.getHttpServer())
+    const departmentResponse = await http
       .post('/api/v1/departments')
       .send({
         institutionId: institution.id,
@@ -87,7 +93,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const department = asDepartmentBody(departmentResponse.body);
 
-    const officeResponse = await request(app.getHttpServer())
+    const officeResponse = await http
       .post('/api/v1/offices')
       .send({
         departmentId: department.id,
@@ -96,7 +102,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(201);
 
-    const officeholderResponse = await request(app.getHttpServer())
+    const officeholderResponse = await http
       .post('/api/v1/officeholders')
       .send({
         code: 'OH-001',
@@ -104,7 +110,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(201);
 
-    const appointmentResponse = await request(app.getHttpServer())
+    const appointmentResponse = await http
       .post('/api/v1/appointments')
       .send({
         officeId: asOfficeBody(officeResponse.body).id,
@@ -129,7 +135,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   it('creates and queries a valid full government structure', async () => {
     const seeded = await seedFullStructure();
 
-    const jurisdictionStructure = await request(app.getHttpServer())
+    const jurisdictionStructure = await http
       .get(`/api/v1/jurisdictions/${seeded.jurisdiction.id}/structure`)
       .expect(200);
 
@@ -176,7 +182,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     expect(jurisdictionStructureBody).not.toHaveProperty('authority');
 
-    const institutionStructure = await request(app.getHttpServer())
+    const institutionStructure = await http
       .get(`/api/v1/institutions/${seeded.institution.id}/structure`)
       .expect(200);
 
@@ -191,7 +197,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   });
 
   it('rejects invalid parent references across the hierarchy', async () => {
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/institutions')
       .send({
         jurisdictionId: '99999999-9999-4999-8999-999999999999',
@@ -201,7 +207,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(404);
 
-    const jurisdictionResponse = await request(app.getHttpServer())
+    const jurisdictionResponse = await http
       .post('/api/v1/jurisdictions')
       .send({
         code: 'US-FED',
@@ -212,7 +218,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const institution = asInstitutionBody(
       (
-        await request(app.getHttpServer())
+        await http
           .post('/api/v1/institutions')
           .send({
             jurisdictionId: asJurisdictionBody(jurisdictionResponse.body).id,
@@ -224,7 +230,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       ).body,
     );
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/departments')
       .send({
         institutionId: '99999999-9999-4999-8999-999999999999',
@@ -233,7 +239,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(404);
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/offices')
       .send({
         departmentId: '99999999-9999-4999-8999-999999999999',
@@ -244,7 +250,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const department = asDepartmentBody(
       (
-        await request(app.getHttpServer())
+        await http
           .post('/api/v1/departments')
           .send({
             institutionId: institution.id,
@@ -257,7 +263,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const officeholder = asOfficeholderBody(
       (
-        await request(app.getHttpServer())
+        await http
           .post('/api/v1/officeholders')
           .send({
             code: 'OH-001',
@@ -267,7 +273,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       ).body,
     );
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/appointments')
       .send({
         officeId: '99999999-9999-4999-8999-999999999999',
@@ -279,7 +285,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const office = asOfficeBody(
       (
-        await request(app.getHttpServer())
+        await http
           .post('/api/v1/offices')
           .send({
             departmentId: department.id,
@@ -290,7 +296,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       ).body,
     );
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/appointments')
       .send({
         officeId: office.id,
@@ -304,7 +310,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   it('retrieves historical and inactive records when explicitly requested', async () => {
     const seeded = await seedFullStructure();
 
-    await request(app.getHttpServer())
+    await http
       .patch(`/api/v1/appointments/${seeded.appointment.id}`)
       .send({
         status: AppointmentStatus.ENDED,
@@ -312,7 +318,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(200);
 
-    const endedAppointment = await request(app.getHttpServer())
+    const endedAppointment = await http
       .get(`/api/v1/appointments/${seeded.appointment.id}`)
       .expect(200);
 
@@ -322,12 +328,12 @@ describe('Government cross-entity structure integrity (integration)', () => {
       isCurrent: false,
     });
 
-    await request(app.getHttpServer())
+    await http
       .patch(`/api/v1/institutions/${seeded.institution.id}`)
       .send({ status: StructuralLifecycleStatus.INACTIVE })
       .expect(200);
 
-    const inactiveInstitution = await request(app.getHttpServer())
+    const inactiveInstitution = await http
       .get(`/api/v1/institutions/${seeded.institution.id}`)
       .expect(200);
 
@@ -339,24 +345,24 @@ describe('Government cross-entity structure integrity (integration)', () => {
   it('calculates current appointment status using shared logic', async () => {
     const seeded = await seedFullStructure();
 
-    const currentAppointment = await request(app.getHttpServer())
+    const currentAppointment = await http
       .get(`/api/v1/appointments/${seeded.appointment.id}`)
       .expect(200);
 
     expect(asAppointmentBody(currentAppointment.body).isCurrent).toBe(true);
 
-    await request(app.getHttpServer())
+    await http
       .patch(`/api/v1/appointments/${seeded.appointment.id}`)
       .send({ status: AppointmentStatus.SUSPENDED })
       .expect(200);
 
-    const suspendedAppointment = await request(app.getHttpServer())
+    const suspendedAppointment = await http
       .get(`/api/v1/appointments/${seeded.appointment.id}`)
       .expect(200);
 
     expect(asAppointmentBody(suspendedAppointment.body).isCurrent).toBe(false);
 
-    const structure = await request(app.getHttpServer())
+    const structure = await http
       .get(`/api/v1/institutions/${seeded.institution.id}/structure`)
       .expect(200);
 
@@ -369,7 +375,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   it('supports government bodies, delegations, and external authority relationships', async () => {
     const seeded = await seedFullStructure();
 
-    const externalAuthorityResponse = await request(app.getHttpServer())
+    const externalAuthorityResponse = await http
       .post('/api/v1/external-authorities')
       .send({
         code: 'EPA-US',
@@ -380,7 +386,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
     const externalAuthority = asExternalAuthorityBody(externalAuthorityResponse.body);
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/institution-external-authorities')
       .send({
         institutionId: seeded.institution.id,
@@ -389,7 +395,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(201);
 
-    const delegationResponse = await request(app.getHttpServer())
+    const delegationResponse = await http
       .post('/api/v1/delegations')
       .send({
         institutionId: seeded.institution.id,
@@ -404,7 +410,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
     const delegation = asDelegationBody(delegationResponse.body);
     expect(delegation.scopeDescription).toBe('Temporary signing authority');
 
-    const structure = await request(app.getHttpServer())
+    const structure = await http
       .get(`/api/v1/institutions/${seeded.institution.id}/structure`)
       .expect(200);
 
@@ -421,7 +427,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
   it('rejects delegations with invalid structural relationships', async () => {
     const seeded = await seedFullStructure();
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/delegations')
       .send({
         institutionId: seeded.institution.id,
@@ -430,7 +436,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
       })
       .expect(400);
 
-    await request(app.getHttpServer())
+    await http
       .post('/api/v1/delegations')
       .send({
         institutionId: '99999999-9999-4999-8999-999999999999',
@@ -444,8 +450,6 @@ describe('Government cross-entity structure integrity (integration)', () => {
 
   it('does not expose destructive DELETE operations for material institutional records', async () => {
     const seeded = await seedFullStructure();
-    const server = app.getHttpServer();
-
     const deletePaths = [
       `/api/v1/jurisdictions/${seeded.jurisdiction.id}`,
       `/api/v1/institutions/${seeded.institution.id}`,
@@ -457,7 +461,7 @@ describe('Government cross-entity structure integrity (integration)', () => {
     ];
 
     for (const path of deletePaths) {
-      await request(server).delete(path).expect(404);
+      await http.delete(path).expect(404);
     }
   });
 });

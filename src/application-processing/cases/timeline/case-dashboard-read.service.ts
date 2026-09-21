@@ -3,6 +3,8 @@ import { AuthorityActionType } from '@prisma/client';
 
 import { AuthorityEvaluationService } from '../../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../../database/prisma.service';
+import { ActorContextService } from '../../../security/services/actor-context.service';
+import { CaseAccessService } from '../../../security/services/case-access.service';
 import { CaseEventService } from './case-event.service';
 import { CaseMilestoneService } from './case-milestone.service';
 
@@ -48,6 +50,8 @@ export class CaseDashboardReadService {
     private readonly caseEventService: CaseEventService,
     private readonly caseMilestoneService: CaseMilestoneService,
     private readonly authorityEvaluation: AuthorityEvaluationService,
+    private readonly actorContext: ActorContextService,
+    private readonly caseAccess: CaseAccessService,
   ) {}
 
   async buildDashboard(
@@ -55,6 +59,9 @@ export class CaseDashboardReadService {
     actorIdentityId: string,
     actorOfficeholderId?: string,
   ): Promise<CaseDashboardReadModel> {
+    const actor = await this.actorContext.resolveFromIdentityId(actorIdentityId);
+    await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
+
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
       include: {

@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
-  AuthenticationMethodType,
   DashboardAccessPurpose,
   DashboardColorSemantic,
   DashboardConsoleType,
@@ -17,11 +16,14 @@ import {
   DashboardStatusDictionaryOwnerType,
   IdentityType,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 
 export interface Phase12BFixtureContext {
   institutionId: string;
@@ -106,26 +108,10 @@ export async function seedPhase12BFixture(
       return '';
     }
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId, type: 'PASSWORD', password: 'Phase12B123!' })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId, type: AuthenticationMethodType.PASSWORD })
-      .expect(201);
-
-    const login = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier, password: 'Phase12B123!' })
-          .expect(201)
-      ).body,
-    );
-
-    return login.sessionToken;
+    const password = 'Phase12B123!';
+    await createPasswordCredentialViaPrisma(prisma, identityId, password);
+    await createPasswordAuthenticationMethodViaPrisma(prisma, identityId);
+    return loginAndGetSessionToken(app, loginIdentifier, password);
   };
 
   const executiveIdentity = await createIdentity('Executive User');

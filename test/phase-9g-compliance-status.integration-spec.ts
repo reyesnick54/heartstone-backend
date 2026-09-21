@@ -14,6 +14,7 @@ import { ComplianceProjectionService } from '../src/compliance/oversight/complia
 import { ComplianceRevalidationService } from '../src/compliance/oversight/compliance-revalidation.service';
 import { ComplianceStatusBoundaryService } from '../src/compliance/oversight/compliance-status-boundary.service';
 import { type PrismaService } from '../src/database/prisma.service';
+import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { type Phase8FixtureContext, seedPhase8Fixture } from './helpers/phase-8-test-fixtures';
 
@@ -24,6 +25,7 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
   let monitoringService: ComplianceMonitoringService;
   let revalidationService: ComplianceRevalidationService;
   let boundaryService: ComplianceStatusBoundaryService;
+  let adminSessionToken: string;
 
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
@@ -35,6 +37,8 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
+    const admin = await ensureIntegrationAdminSession(app, prisma);
+    adminSessionToken = admin.sessionToken;
   });
 
   afterAll(async () => {
@@ -68,6 +72,7 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/compliance/status/projections/derive')
+      .set(authHeader(adminSessionToken))
       .send({
         audience: ComplianceDashboardAudience.HOLDER,
         subjectIdentityId: fixture.applicantIdentityId,
@@ -225,6 +230,7 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
 
     const response = await request(app.getHttpServer())
       .get(`/api/v1/compliance/status/dashboards/holder/${fixture.applicantIdentityId}`)
+      .set(authHeader(adminSessionToken))
       .query({ caseId: fixture.caseId })
       .expect(200);
 
@@ -249,6 +255,7 @@ describe('Phase 9G compliance status and oversight (integration)', () => {
 
     const response = await request(app.getHttpServer())
       .get(`/api/v1/compliance/status/dashboards/executive/${fixture.institutionId}`)
+      .set(authHeader(adminSessionToken))
       .expect(200);
 
     const body = response.body as {

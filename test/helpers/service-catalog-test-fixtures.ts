@@ -1,18 +1,21 @@
+import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
-  AuthenticationMethodType,
   AuthorityClassification,
   ControlledFunctionClass,
   IdentityType,
   InstitutionType,
   JurisdictionType,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../../src/database/prisma.service';
 import { NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER } from '../../src/service-catalog/service-catalog.constants';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 
 export interface ServiceCatalogFixtureContext {
   jurisdictionId: string;
@@ -24,7 +27,7 @@ export interface ServiceCatalogFixtureContext {
 }
 
 export async function seedServiceCatalogFixture(
-  app: { getHttpServer: () => App },
+  app: INestApplication<App> | { getHttpServer: () => App },
   prisma: PrismaService,
 ): Promise<ServiceCatalogFixtureContext> {
   const jurisdiction = await prisma.jurisdiction.create({
@@ -84,39 +87,21 @@ export async function seedServiceCatalogFixture(
     },
   });
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({
-      identityId: identity.id,
-      type: 'PASSWORD',
-      password: 'CatalogAdmin123!',
-    })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, identity.id, 'CatalogAdmin123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({
-      identityId: identity.id,
-      type: AuthenticationMethodType.PASSWORD,
-    })
-    .expect(201);
-
-  const loginRes = await request(app.getHttpServer())
-    .post('/api/v1/identity/auth/login')
-    .send({
-      loginIdentifier: `${NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER}@test.gov`,
-      password: 'CatalogAdmin123!',
-    })
-    .expect(201);
-
-  const login = asLoginResponseBody(loginRes.body);
+  const sessionToken = await loginAndGetSessionToken(
+    app,
+    `${NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER}@test.gov`,
+    'CatalogAdmin123!',
+  );
 
   return {
     jurisdictionId: jurisdiction.id,
     institutionId: institution.id,
     departmentId: department.id,
     serviceFamilyId: serviceFamily.id,
-    sessionToken: login.sessionToken,
+    sessionToken,
     identityId: identity.id,
   };
 }

@@ -5,7 +5,11 @@ import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
 import { FORBIDDEN_CLIENT_EVIDENCE_FIELDS } from '../src/evidence/evidence.constants';
-import { asLoginResponseBody } from './helpers/identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './helpers/identity-provisioning.fixture';
 import { createPhase7IntegrationApp, resetAllTestData } from './helpers/phase-7-integration-app';
 import { seedPhase7Fixture } from './helpers/phase-7-test-fixtures';
 
@@ -44,25 +48,14 @@ describe('Phase 7H must-fail invariants (e2e)', () => {
       },
     });
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/credentials')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD', password: 'Other123!' });
+    await createPasswordCredentialViaPrisma(prisma, otherIdentity.id, 'Other123!');
+    await createPasswordAuthenticationMethodViaPrisma(prisma, otherIdentity.id);
 
-    await request(app.getHttpServer())
-      .post('/api/v1/identity/authentication-methods')
-      .send({ identityId: otherIdentity.id, type: 'PASSWORD' });
-
-    const login = asLoginResponseBody(
-      (
-        await request(app.getHttpServer())
-          .post('/api/v1/identity/auth/login')
-          .send({ loginIdentifier: 'p7h-other@test.gov', password: 'Other123!' })
-      ).body,
-    );
+    const otherSessionToken = await loginAndGetSessionToken(app, 'p7h-other@test.gov', 'Other123!');
 
     await request(app.getHttpServer())
       .get(`/api/v1/records/master-files/${fixture.masterFileId}`)
-      .set('Authorization', `Bearer ${login.sessionToken}`)
+      .set('Authorization', `Bearer ${otherSessionToken}`)
       .expect(403);
   });
 

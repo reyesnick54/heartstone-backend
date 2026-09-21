@@ -116,12 +116,11 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
 }
 
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
-  await resetIntelligenceData(prisma);
   await resetOperationalSupportData(prisma);
+  await resetIntelligenceData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
   await resetAuthorityData(prisma);
-  await resetOperationalSupportData(prisma);
   await prisma.delegationStructuredScope.deleteMany();
   await prisma.delegation.deleteMany();
   await prisma.appointment.deleteMany();

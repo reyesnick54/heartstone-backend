@@ -1,8 +1,8 @@
+import { type INestApplication } from '@nestjs/common';
 import {
   AccountStatus,
   ApplicantCategory,
   AppointmentStatus,
-  AuthenticationMethodType,
   AuthorityActionType,
   AuthorityClassification,
   ControlledFunctionClass,
@@ -22,13 +22,16 @@ import {
   WorkflowStepType,
   WorkflowTransitionJoinType,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER } from '../../src/application-processing/application-processing.constants';
 import { type PrismaService } from '../../src/database/prisma.service';
 import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/common/service-configuration-hash.util';
-import { asLoginResponseBody } from './identity-test-types';
+import {
+  createPasswordAuthenticationMethodViaPrisma,
+  createPasswordCredentialViaPrisma,
+  loginAndGetSessionToken,
+} from './identity-provisioning.fixture';
 
 export interface Phase6FixtureContext {
   jurisdictionId: string;
@@ -58,7 +61,7 @@ export interface Phase6FixtureContext {
 }
 
 export async function seedPhase6Fixture(
-  app: { getHttpServer: () => App },
+  app: INestApplication<App> | { getHttpServer: () => App },
   prisma: PrismaService,
 ): Promise<Phase6FixtureContext> {
   const marker = NON_PRODUCTION_APPLICATION_PROCESSING_FIXTURE_MARKER;
@@ -441,26 +444,13 @@ export async function seedPhase6Fixture(
     },
   });
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: applicantIdentity.id, type: 'PASSWORD', password: 'Applicant123!' })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, applicantIdentity.id, 'Applicant123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, applicantIdentity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: applicantIdentity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
-
-  const applicantLogin = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({
-          loginIdentifier: `${marker}-applicant@test.gov`,
-          password: 'Applicant123!',
-        })
-        .expect(201)
-    ).body,
+  const applicantSessionToken = await loginAndGetSessionToken(
+    app,
+    `${marker}-applicant@test.gov`,
+    'Applicant123!',
   );
 
   const officialPerson = await prisma.person.create({
@@ -492,26 +482,13 @@ export async function seedPhase6Fixture(
     },
   });
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: officialIdentity.id, type: 'PASSWORD', password: 'Official123!' })
-    .expect(201);
+  await createPasswordCredentialViaPrisma(prisma, officialIdentity.id, 'Official123!');
+  await createPasswordAuthenticationMethodViaPrisma(prisma, officialIdentity.id);
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: officialIdentity.id, type: AuthenticationMethodType.PASSWORD })
-    .expect(201);
-
-  const officialLogin = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({
-          loginIdentifier: `${marker}-official@test.gov`,
-          password: 'Official123!',
-        })
-        .expect(201)
-    ).body,
+  const officialSessionToken = await loginAndGetSessionToken(
+    app,
+    `${marker}-official@test.gov`,
+    'Official123!',
   );
 
   return {
@@ -533,9 +510,9 @@ export async function seedPhase6Fixture(
     configurationFingerprint,
     workflowDefinitionId: workflowDefinition.id,
     workflowVersionId: workflowVersion.id,
-    applicantSessionToken: applicantLogin.sessionToken,
+    applicantSessionToken,
     applicantIdentityId: applicantIdentity.id,
-    officialSessionToken: officialLogin.sessionToken,
+    officialSessionToken,
     officialIdentityId: officialIdentity.id,
     officialOfficeholderId: officeholder.id,
     checklistItemCodes: checklistItems.map((item) => item.itemCode),

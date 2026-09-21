@@ -14,14 +14,13 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../../src/database/prisma.service';
-import { IssuanceService } from '../../src/decisions-issuance/issuance/issuance.service';
 import { CommunicationMessageService } from '../../src/operational-support/communications/communication-message.service';
 import {
   associateDocumentToApplication,
   uploadTestDocument,
 } from './evidence-records-test-fixtures';
-import { asLoginResponseBody } from './identity-test-types';
-import { executeGovernmentDecision } from './phase-8-test-fixtures';
+import { provisionAuthenticatedIdentity } from './identity-provisioning.fixture';
+import { executeGovernmentDecision, issueInstrumentForDecision } from './phase-8-test-fixtures';
 import {
   calculateAndInvoiceFees,
   type Phase11FixtureContext,
@@ -135,22 +134,7 @@ export async function seedCitizenExperienceFixture(
     },
   });
 
-  const issuance = app.get(IssuanceService);
-
-  const activeIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    sealDocumentVersionId: phase11.sealDocumentVersionId,
-    scope: { summary: 'Active license scope' },
-    effectiveFrom: new Date('2026-01-01'),
-    effectiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const activeIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
     idempotencyKey: `${marker}-active-instrument`,
   });
 
@@ -158,24 +142,11 @@ export async function seedCitizenExperienceFixture(
     where: { id: activeIssue.instrument.id },
     data: {
       status: OfficialInstrumentStatus.EFFECTIVE,
-      effectiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      effectiveUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
     },
   });
 
-  const revokedIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    sealDocumentVersionId: phase11.sealDocumentVersionId,
-    scope: { summary: 'Revoked permit scope' },
-    effectiveFrom: new Date('2025-01-01'),
-    effectiveUntil: new Date('2026-12-31'),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const revokedIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
     idempotencyKey: `${marker}-revoked-instrument`,
   });
 
@@ -184,20 +155,7 @@ export async function seedCitizenExperienceFixture(
     data: { status: OfficialInstrumentStatus.REVOKED },
   });
 
-  const expiredIssue = await issuance.issue({
-    governmentDecisionId,
-    instrumentTypeVersionId: phase11.instrumentTypeVersionId,
-    caseId: phase11.caseId,
-    issuerIdentityId: phase11.officialIdentityId,
-    issuerOfficeholderId: phase11.officialOfficeholderId,
-    issuerOfficeId: phase11.officeId,
-    issuerAppointmentId: phase11.appointmentId,
-    holderIdentityId: phase11.applicantIdentityId,
-    sealDocumentVersionId: phase11.sealDocumentVersionId,
-    scope: { summary: 'Expired registration scope' },
-    effectiveFrom: new Date('2024-01-01'),
-    effectiveUntil: new Date('2025-01-01'),
-    freeFormFields: { holderName: 'Applicant Holder' },
+  const expiredIssue = await issueInstrumentForDecision(app, phase11, governmentDecisionId, {
     idempotencyKey: `${marker}-expired-instrument`,
   });
 
@@ -264,45 +222,15 @@ export async function createOtherCitizenSession(
   prisma: PrismaService,
 ): Promise<{ identityId: string; sessionToken: string }> {
   const marker = NON_PRODUCTION_CITIZEN_EXPERIENCE_MARKER;
-  const person = await prisma.person.create({
-    data: { givenName: 'Other', familyName: 'Citizen' },
-  });
-  const account = await prisma.userAccount.create({
-    data: {
-      loginIdentifier: `${marker}-other@test.gov`,
-      personId: person.id,
-      status: 'ACTIVE',
-    },
-  });
-  const identity = await prisma.identity.create({
-    data: {
-      type: 'INDIVIDUAL',
-      displayName: 'Other Citizen',
-      userAccountId: account.id,
-      personId: person.id,
-    },
+  const other = await provisionAuthenticatedIdentity(app, prisma, {
+    loginIdentifier: `${marker}-other@test.gov`,
+    password: 'OtherCitizen123!',
+    givenName: 'Other',
+    familyName: 'Citizen',
+    displayName: 'Other Citizen',
   });
 
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/credentials')
-    .send({ identityId: identity.id, type: 'PASSWORD', password: 'OtherCitizen123!' })
-    .expect(201);
-
-  await request(app.getHttpServer())
-    .post('/api/v1/identity/authentication-methods')
-    .send({ identityId: identity.id, type: 'PASSWORD' })
-    .expect(201);
-
-  const login = asLoginResponseBody(
-    (
-      await request(app.getHttpServer())
-        .post('/api/v1/identity/auth/login')
-        .send({ loginIdentifier: `${marker}-other@test.gov`, password: 'OtherCitizen123!' })
-        .expect(201)
-    ).body,
-  );
-
-  return { identityId: identity.id, sessionToken: login.sessionToken };
+  return { identityId: other.identityId, sessionToken: other.sessionToken };
 }
 
 export async function seedRepresentativeCitizenFixture(
@@ -344,23 +272,29 @@ export async function seedRepresentativeCitizenFixture(
     },
   });
 
-  const issuance = app.get(IssuanceService);
-  const orgIssue = await issuance.issue({
-    governmentDecisionId: base.governmentDecisionId,
-    instrumentTypeVersionId: base.instrumentTypeVersionId,
-    caseId: base.caseId,
-    issuerIdentityId: base.officialIdentityId,
-    issuerOfficeholderId: base.officialOfficeholderId,
-    issuerOfficeId: base.officeId,
-    issuerAppointmentId: base.appointmentId,
-    holderOrganizationId: organization.id,
-    sealDocumentVersionId: base.sealDocumentVersionId,
-    scope: { summary: 'Organization-held permit' },
-    effectiveFrom: new Date('2026-01-01'),
-    effectiveUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-    freeFormFields: { holderName: organization.name },
-    idempotencyKey: `${marker}-org-instrument`,
-  });
+  const orgIssueResponse = await request(app.getHttpServer())
+    .post('/api/v1/decisions-issuance/issue')
+    .set('Authorization', `Bearer ${base.officialSessionToken}`)
+    .send({
+      governmentDecisionId: base.governmentDecisionId,
+      instrumentTypeVersionId: base.instrumentTypeVersionId,
+      caseId: base.caseId,
+      issuerOfficeholderId: base.officialOfficeholderId,
+      issuerOfficeId: base.officeId,
+      issuerAppointmentId: base.appointmentId,
+      holderOrganizationId: organization.id,
+      scope: { summary: 'Organization-held permit' },
+      effectiveFrom: new Date('2026-01-01').toISOString(),
+      effectiveUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+      sealDocumentVersionId: base.sealDocumentVersionId,
+      freeFormFields: { holderName: organization.name },
+      idempotencyKey: `${marker}-org-instrument`,
+    })
+    .expect(201);
+
+  const orgIssue = orgIssueResponse.body as {
+    instrument: { id: string };
+  };
 
   return {
     representativeSessionToken: base.applicantSessionToken,

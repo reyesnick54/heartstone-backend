@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swa
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { Public } from '../../security/decorators/public.decorator';
 import type {
   PublicEligibilityResult,
   PublicServiceDetail,
@@ -24,6 +25,7 @@ import { CreateCitizenApplicationDto } from './dto/create-citizen-application.dt
 export class CitizenServicesController {
   constructor(private readonly citizenServicesService: CitizenServicesService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'Discover active government services without knowing the responsible department',
@@ -35,6 +37,7 @@ export class CitizenServicesController {
     return this.citizenServicesService.listServices(query);
   }
 
+  @Public()
   @Post('match')
   @ApiOperation({ summary: 'Match citizen needs to published government services' })
   @ApiOkResponse({ type: PublicServiceSummaryResponseDto, isArray: true })
@@ -42,6 +45,7 @@ export class CitizenServicesController {
     return this.citizenServicesService.matchServices(dto);
   }
 
+  @Public()
   @Get(':slug/start')
   @ApiOperation({ summary: 'Get a version-pinned start package for guided service intake' })
   getStartExperience(
@@ -51,6 +55,7 @@ export class CitizenServicesController {
     return this.citizenServicesService.getStartExperience(slug, query);
   }
 
+  @Public()
   @Post(':slug/eligibility')
   @ApiOperation({ summary: 'Evaluate nonbinding preliminary eligibility guidance' })
   evaluateEligibility(
@@ -72,6 +77,7 @@ export class CitizenServicesController {
     return this.citizenServicesService.createApplication(slug, session.identityId, dto);
   }
 
+  @Public()
   @Get(':slug')
   @ApiOperation({ summary: 'Get citizen-facing detail for a discoverable government service' })
   @ApiOkResponse({ type: PublicServiceSummaryResponseDto })
