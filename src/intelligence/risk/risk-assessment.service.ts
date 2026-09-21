@@ -63,6 +63,16 @@ export class RiskAssessmentService {
     private readonly boundary: IntelligenceBoundaryService,
   ) {}
 
+  async findDefinitionById(definitionId: string) {
+    const definition = await this.prisma.riskDefinition.findUnique({
+      where: { id: definitionId },
+    });
+    if (!definition) {
+      throw new BadRequestException('Risk definition not found');
+    }
+    return definition;
+  }
+
   async createDefinition(input: CreateRiskDefinitionInput) {
     if (!input.methodologyVersion.trim()) {
       throw new BadRequestException('Risk methodology must be versioned');

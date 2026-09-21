@@ -126,6 +126,26 @@ export class MetricDefinitionService {
     });
   }
 
+  async findDefinitionById(metricDefinitionId: string): Promise<MetricDefinition> {
+    const definition = await this.prisma.metricDefinition.findUnique({
+      where: { id: metricDefinitionId },
+    });
+    if (!definition) {
+      throw new NotFoundException(`Metric definition ${metricDefinitionId} not found`);
+    }
+    return definition;
+  }
+
+  async findVersionById(versionId: string): Promise<MetricDefinitionVersion> {
+    const version = await this.prisma.metricDefinitionVersion.findUnique({
+      where: { id: versionId },
+    });
+    if (!version) {
+      throw new NotFoundException(`Metric version ${versionId} not found`);
+    }
+    return version;
+  }
+
   async publishDefinition(metricDefinitionId: string): Promise<MetricDefinition> {
     const definition = await this.prisma.metricDefinition.findUnique({
       where: { id: metricDefinitionId },

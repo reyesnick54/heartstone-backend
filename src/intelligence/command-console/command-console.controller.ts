@@ -8,8 +8,10 @@ import {
 } from '@nestjs/swagger';
 
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
-import { type AuthenticatedPrincipal } from '../../identity/auth/domain/authenticated-principal';
+import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
+import { ActorContextGuard } from '../../identity/auth/guards/actor-context.guard';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
 import { DashboardIndicatorProjectionService } from './dashboard-indicator-projection.service';
 import { DashboardQueryService } from './dashboard-query.service';
@@ -18,9 +20,11 @@ import { CaptureSnapshotDto } from './dto/capture-snapshot.dto';
 import { DeriveIndicatorProjectionDto } from './dto/derive-indicator-projection.dto';
 import { QueryDashboardDto } from './dto/query-dashboard.dto';
 
+const COMMAND_CONSOLE_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
+
 @ApiTags('intelligence/command-console')
 @ApiBearerAuth()
-@UseGuards(SessionAuthGuard)
+@UseGuards(...COMMAND_CONSOLE_GUARDS)
 @Controller('intelligence/command-console')
 export class CommandConsoleController {
   constructor(
@@ -28,6 +32,7 @@ export class CommandConsoleController {
     private readonly projectionService: DashboardIndicatorProjectionService,
     private readonly queryService: DashboardQueryService,
     private readonly snapshotService: DashboardSnapshotService,
+    private readonly scopeService: IntelligenceInstitutionalScopeService,
   ) {}
 
   @Post('projections/derive')
@@ -37,15 +42,22 @@ export class CommandConsoleController {
       'Actor identity is server-derived; clients cannot supply identity or entitlement fields.',
   })
   deriveProjection(
-    @CurrentActor() actor: AuthenticatedPrincipal,
+    @CurrentActor() actor: ActorContextDto,
     @Body() body: DeriveIndicatorProjectionDto,
   ) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
+    this.scopeService.rejectClientAuthorityIndicators(body as unknown as Record<string, unknown>);
     this.boundaryService.assertClientCannotSetDashboardProjection(
       body as unknown as Record<string, unknown>,
     );
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: body.institutionId,
+      departmentId: body.departmentId,
+      caseId: body.caseId,
+    });
+
     return this.projectionService.deriveProjection({
       indicatorDefinitionId: body.indicatorDefinitionId,
       dashboardVersionId: body.dashboardVersionId,
@@ -83,10 +95,13 @@ export class CommandConsoleController {
       'Executive dashboard visibility is informational only and does not confer command authority.',
   })
   @ApiCreatedResponse({ description: 'Executive console query result with disclaimers' })
-  queryExecutive(@CurrentActor() actor: AuthenticatedPrincipal, @Body() body: QueryDashboardDto) {
+  queryExecutive(@CurrentActor() actor: ActorContextDto, @Body() body: QueryDashboardDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
+    this.scopeService.rejectClientAuthorityIndicators(body as unknown as Record<string, unknown>);
+    this.scopeService.assertInstitutionAccess(actor, body.institutionId);
+
     return this.queryService.queryExecutiveConsole({
       actor,
       dashboardDefinitionId: body.dashboardDefinitionId,
@@ -107,13 +122,16 @@ export class CommandConsoleController {
       'Departmental dashboard access is verified against authenticated actor entitlements for the requested scope.',
   })
   @ApiCreatedResponse({ description: 'Departmental console query result with disclaimers' })
-  queryDepartmental(
-    @CurrentActor() actor: AuthenticatedPrincipal,
-    @Body() body: QueryDashboardDto,
-  ) {
+  queryDepartmental(@CurrentActor() actor: ActorContextDto, @Body() body: QueryDashboardDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
+    this.scopeService.rejectClientAuthorityIndicators(body as unknown as Record<string, unknown>);
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: body.institutionId,
+      departmentId: body.departmentId,
+    });
+
     return this.queryService.queryDepartmentalConsole({
       actor,
       dashboardDefinitionId: body.dashboardDefinitionId,
@@ -133,7 +151,7 @@ export class CommandConsoleController {
     description: 'Snapshot capturer identity is derived from the authenticated session.',
   })
   @ApiCreatedResponse({ description: 'Immutable dashboard snapshot with replay token' })
-  captureSnapshot(@CurrentActor() actor: AuthenticatedPrincipal, @Body() body: CaptureSnapshotDto) {
+  captureSnapshot(@CurrentActor() actor: ActorContextDto, @Body() body: CaptureSnapshotDto) {
     this.boundaryService.rejectClientSuppliedActorIdentity(
       body as unknown as Record<string, unknown>,
     );
@@ -150,10 +168,7 @@ export class CommandConsoleController {
     description: 'Replay requires authenticated actor with verified dashboard access entitlements.',
   })
   @ApiOkResponse({ description: 'Immutable snapshot payload for replay' })
-  replaySnapshot(
-    @CurrentActor() actor: AuthenticatedPrincipal,
-    @Param('replayToken') replayToken: string,
-  ) {
+  replaySnapshot(@CurrentActor() actor: ActorContextDto, @Param('replayToken') replayToken: string) {
     return this.snapshotService.replaySnapshot(replayToken, actor);
   }
 }

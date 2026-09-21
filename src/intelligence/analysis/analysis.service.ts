@@ -78,6 +78,33 @@ export class AnalysisService {
     private readonly boundary: IntelligenceBoundaryService,
   ) {}
 
+  async findRequestById(requestId: string) {
+    const request = await this.prisma.analysisRequest.findUnique({
+      where: { id: requestId },
+    });
+    if (!request) {
+      throw new BadRequestException('Analysis request not found');
+    }
+    return request;
+  }
+
+  async findRunById(runId: string) {
+    const run = await this.prisma.analysisRun.findUnique({
+      where: { id: runId },
+      include: {
+        request: {
+          include: {
+            case: true,
+          },
+        },
+      },
+    });
+    if (!run) {
+      throw new BadRequestException('Analysis run not found');
+    }
+    return run;
+  }
+
   async createRequest(input: CreateAnalysisRequestInput) {
     const count = await this.prisma.analysisRequest.count();
     const requestNumber = `${ANALYSIS_REQUEST_NUMBER_PREFIX}-${String(count + 1).padStart(8, '0')}`;

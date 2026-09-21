@@ -340,7 +340,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
         currentStaleness: DashboardStalenessState.FRESH,
         drilldowns: [],
       })
-      .expect(400);
+      .expect(401);
   });
 
   it('requires authentication for command console endpoints', async () => {

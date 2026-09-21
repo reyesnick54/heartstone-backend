@@ -2,9 +2,11 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@n
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 
-import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
-import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
+import { type ActorContextDto } from '../../identity/auth/dto/actor-context.dto';
+import { ActorContextGuard } from '../../identity/auth/guards/actor-context.guard';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { StrategicProjectBoundaryService } from '../common/strategic-project-boundary.service';
 import { CreateStrategicProjectProfileDto } from '../dto/create-strategic-project-profile.dto';
 import { DeriveProjectStatusProjectionDto } from '../dto/derive-project-status-projection.dto';
@@ -13,9 +15,11 @@ import { ProjectStatusProjectionService } from './project-status-projection.serv
 import { StrategicProjectProfileService } from './strategic-project-profile.service';
 import { StrategicProjectStageService } from './strategic-project-stage.service';
 
+const STRATEGIC_PROJECT_GUARDS = [SessionAuthGuard, ActorContextGuard] as const;
+
 @ApiTags('intelligence/strategic-projects')
 @ApiBearerAuth()
-@UseGuards(SessionAuthGuard)
+@UseGuards(...STRATEGIC_PROJECT_GUARDS)
 @Controller('intelligence/strategic-projects')
 export class StrategicProjectController {
   constructor(
@@ -23,11 +27,19 @@ export class StrategicProjectController {
     private readonly stageService: StrategicProjectStageService,
     private readonly projectionService: ProjectStatusProjectionService,
     private readonly boundary: StrategicProjectBoundaryService,
+    private readonly scopeService: IntelligenceInstitutionalScopeService,
   ) {}
 
   @Post()
-  createProfile(@Body() dto: CreateStrategicProjectProfileDto) {
+  createProfile(@CurrentActor() actor: ActorContextDto, @Body() dto: CreateStrategicProjectProfileDto) {
+    this.guardPayload(actor, dto as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedProjectFields(dto as unknown as Record<string, unknown>);
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: dto.sponsoringInstitutionId,
+      departmentId: dto.responsibleDepartmentId,
+      caseId: dto.caseId,
+    });
+
     return this.profileService.createProfile({
       projectCode: dto.projectCode,
       title: dto.title,
@@ -43,40 +55,70 @@ export class StrategicProjectController {
   }
 
   @Get(':profileId')
-  getProfile(@Param('profileId', ParseUUIDPipe) profileId: string) {
-    return this.profileService.getProfile(profileId);
+  async getProfile(
+    @CurrentActor() actor: ActorContextDto,
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ) {
+    const profile = await this.profileService.getProfile(profileId);
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: profile.sponsoringInstitutionId,
+      departmentId: profile.responsibleDepartmentId,
+      caseId: profile.caseId,
+    });
+    return profile;
   }
 
   @Post(':profileId/stages')
-  recordStage(
+  async recordStage(
+    @CurrentActor() actor: ActorContextDto,
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: RecordStrategicProjectStageDto,
-    @CurrentSession() session: SessionContextDto,
   ) {
+    this.guardPayload(actor, dto as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedProjectFields(dto as unknown as Record<string, unknown>);
+    const profile = await this.profileService.getProfile(profileId);
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: profile.sponsoringInstitutionId,
+      departmentId: profile.responsibleDepartmentId,
+      caseId: profile.caseId,
+    });
+
     return this.stageService.recordStage({
       profileId,
       stage: dto.stage,
       institutionalStateReference: dto.institutionalStateReference,
       effectiveFrom: new Date(dto.effectiveFrom),
-      recordedByIdentityId: session.identityId,
+      recordedByIdentityId: actor.identityId,
       sourceRecordType: dto.sourceRecordType,
       sourceRecordId: dto.sourceRecordId,
     });
   }
 
   @Post(':profileId/projections/derive')
-  deriveProjection(
+  async deriveProjection(
+    @CurrentActor() actor: ActorContextDto,
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: DeriveProjectStatusProjectionDto,
-    @CurrentSession() session: SessionContextDto,
   ) {
+    this.guardPayload(actor, dto as unknown as Record<string, unknown>);
     this.boundary.rejectClientProtectedProjectFields(dto as unknown as Record<string, unknown>);
+    const profile = await this.profileService.getProfile(profileId);
+    this.scopeService.assertInstitutionalTarget(actor, {
+      institutionId: profile.sponsoringInstitutionId,
+      departmentId: profile.responsibleDepartmentId,
+      caseId: profile.caseId,
+    });
+
     return this.projectionService.deriveProjection({
       profileId,
       audience: dto.audience,
       evidenceCutoffAt: dto.evidenceCutoffAt ? new Date(dto.evidenceCutoffAt) : undefined,
-      derivedByIdentityId: session.identityId,
+      derivedByIdentityId: actor.identityId,
     });
+  }
+
+  private guardPayload(actor: ActorContextDto, payload: Record<string, unknown>): void {
+    this.scopeService.rejectForgedActorIdentityFields(payload, actor);
+    this.scopeService.rejectClientAuthorityIndicators(payload);
   }
 }
