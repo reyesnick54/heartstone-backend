@@ -78,6 +78,12 @@ describe('Planning & construction must-fail gates', () => {
         });
       }).toThrow(BadRequestException);
     });
+
+    it('AI cannot approve development or issue permits', () => {
+      expect(() => {
+        boundary.assertAiCannotIssuePermit('ISSUE_DEVELOPMENT_PERMIT');
+      }).toThrow(ForbiddenException);
+    });
   });
 
   describe('PlanningConstructionAccessService', () => {

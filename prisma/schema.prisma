@@ -106,6 +106,10 @@ model Jurisdiction {
   civilRegistryEntries           CivilRegistryEntry[]
   propertyRegistryConfiguration  PropertyRegistryConfiguration?
   propertyParcels                PropertyParcel[]
+  employerRegistryRecords        EmployerRegistryRecord[]
+  workerProfileReferences        WorkerProfileReference[]
+  occupationClassificationReferences OccupationClassificationReference[]
+  workplaceRequirementReferences WorkplaceRequirementReference[]
   developmentProjects            DevelopmentProject[]
   transportationRegistryEntries  TransportationRegistryEntry[]
   driverProfiles                 DriverProfile[]
@@ -184,6 +188,7 @@ model Institution {
   civilIdentityRecords           CivilIdentityRecord[]
   vitalEvents                    VitalEvent[]
   civilRegistryEntries           CivilRegistryEntry[]
+  employerRegistryRecords        EmployerRegistryRecord[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -407,6 +412,7 @@ model ExternalAuthority {
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
   externalReviewReferrals          ExternalReviewReferral[]
   immigrationExternalChecks        ImmigrationExternalCheck[]
+  labourExternalDependencies       LabourExternalDependency[]
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
 
   @@map("external_authorities")
@@ -791,6 +797,10 @@ model Identity {
   propertyTransferDecisions                PropertyTransferDecision[]             @relation("PropertyTransferDecider")
   propertyRegistryCertificatesIssued       PropertyRegistryCertificate[]          @relation("PropertyCertificateIssuer")
   propertyAccessAudits                     PropertyAccessAudit[]                  @relation("PropertyAccessAuditAccessor")
+  labourWorkerProfiles                     WorkerProfileReference[]               @relation("LabourWorkerProfile")
+  employmentRelationshipHistoryEvents      EmploymentRelationshipHistory[]        @relation("EmploymentRelationshipHistoryActor")
+  workPermitStatusHistoryEvents            WorkPermitStatusHistory[]              @relation("WorkPermitStatusHistoryActor")
+  labourExternalDependenciesRecorded       LabourExternalDependency[]             @relation("LabourExternalDependencyRecorder")
   developmentProjectsAsPrimaryApplicant    DevelopmentProject[]                 @relation("DevelopmentProjectPrimaryApplicant")
   developmentProjectProfessionals          DevelopmentProjectProfessional[]       @relation("DevelopmentProjectProfessionalIdentity")
   developmentAccessAudits                  DevelopmentAccessAudit[]               @relation("DevelopmentAccessAuditAccessor")
@@ -849,6 +859,7 @@ model Organization {
   corporateRegistryProfile        CorporateRegistryProfile?
   taxpayerAccounts                TaxpayerAccount[]
   propertyInterests               PropertyInterest[]                     @relation("PropertyInterestOrganization")
+  employerRegistryRecords         EmployerRegistryRecord[]
   developmentProjects             DevelopmentProject[]
   vehicleOwnershipRecords         VehicleOwnershipRecord[]
   transportOperatorRecords        TransportOperatorRecord[]
@@ -2404,6 +2415,7 @@ model Application {
   residencyApplicationProfile ResidencyApplicationProfile?
   citizenshipApplicationProfile CitizenshipApplicationProfile?
   vitalEvents                VitalEvent[]
+  workPermitApplicationProfile WorkPermitApplicationProfile?
   driverLicenseApplicationProfile DriverLicenseApplicationProfile?
 
   @@unique([applicantIdentityId, idempotencyKey])
@@ -2529,6 +2541,13 @@ model Case {
   vitalEvents                       VitalEvent[]
   civilRegistryEntries              CivilRegistryEntry[]
   civilRecordCorrectionRequests     CivilRecordCorrectionRequest[]
+  workPermitApplicationProfile      WorkPermitApplicationProfile?
+  employmentDeclarations            EmploymentDeclaration[]
+  employmentSponsorships            EmploymentSponsorship[]
+  labourMarketDeterminationReferences LabourMarketDeterminationReference[]
+  employmentComplaints              EmploymentComplaint[]
+  employmentDisputes                EmploymentDispute[]
+  labourExternalDependencies        LabourExternalDependency[]
   driverLicenseApplicationProfile   DriverLicenseApplicationProfile?
   driverTestRecords                 DriverTestRecord[]
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
@@ -3135,6 +3154,8 @@ model MasterAdministrativeFile {
   communicationMafIndexEntries         CommunicationMafIndexEntry[]
   integrationRequests                  IntegrationRequest[]
   immigrationProfiles                  ImmigrationProfile[]
+  employerRegistryRecords              EmployerRegistryRecord[]
+  workerProfileReferences              WorkerProfileReference[]
   transportationRegistryEntries        TransportationRegistryEntry[]
   driverProfiles                       DriverProfile[]
   vehicleRecords                       VehicleRecord[]
@@ -3292,6 +3313,7 @@ model DocumentRecord {
   governmentCommunicationDocuments GovernmentCommunicationDocument[]
   custodyEvents                    EvidenceCustodyEvent[]
   civilRegistrySourceReferences    CivilRegistrySourceReference[]
+  employmentContractReferences     EmploymentContractReference[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -3933,6 +3955,7 @@ model InspectionRecord {
   inspectors                InspectionInspector[]
   evidenceItems             InspectionEvidenceItem[]
   packetItems               EvidencePacketItem[]
+  labourInspectionReferences LabourInspectionReference[]
   vehicleInspection         VehicleInspection?
 
   @@index([caseId])
@@ -4991,6 +5014,9 @@ model GovernmentDecision {
   civilRegistryEntries              CivilRegistryEntry[]              @relation("CivilRegistryEntryDecision")
   civilRecordAmendments             CivilRecordAmendment[]            @relation("CivilRecordAmendmentDecision")
   civilRegistryRestrictions         CivilRegistryRestriction[]        @relation("CivilRegistryRestrictionDecision")
+  workPermitRecords                 WorkPermitRecord[]
+  workPermitStatusHistory           WorkPermitStatusHistory[]
+  labourMarketDeterminationReferences LabourMarketDeterminationReference[]
   developmentOccupancyCertificates  DevelopmentOccupancyCertificate[]
   driverLicenseRecords              DriverLicenseRecord[]
   driverQualifications              DriverQualification[]
@@ -5481,6 +5507,7 @@ model OfficialInstrument {
   visaPermissionRecords             VisaPermissionRecord[]
   residencyPermitRecords            ResidencyPermitRecord[]
   civilRegistryCertificateExtracts  CivilRegistryCertificateExtract[]
+  workPermitRecords                 WorkPermitRecord[]
   driverLicenseRecords              DriverLicenseRecord[]
   vehicleRegistrations              VehicleRegistration[]
   commercialVehiclePermits          CommercialVehiclePermit[]
@@ -6107,6 +6134,7 @@ model ComplianceMatter {
   responsibleDepartment      Department               @relation(fields: [responsibleDepartmentId], references: [id])
   continuingObligations      ContinuingObligation[]
   complianceSubmissions      ComplianceSubmission[]
+  labourComplianceMatterReferences LabourComplianceMatterReference[]
   vehicleComplianceRecords   VehicleComplianceRecord[]
 
   @@index([masterAdministrativeFileId])
@@ -7150,6 +7178,8 @@ model RedressMatter {
   regulatoryReviewReferrals           RegulatoryReviewReferral[]
   ombudsOversightReferrals            OmbudsOversightReferral[]
   judicialReviewInformationRecords    JudicialReviewInformationRecord[]
+  employmentComplaints                EmploymentComplaint[]
+  employmentDisputes                  EmploymentDispute[]
 
   @@index([routeVersionId])
   @@index([challengedDecisionId])
@@ -14619,6 +14649,9 @@ model ImmigrationProfile {
   restrictions                  ImmigrationRestriction[]
   biometricRequirements         BiometricRequirement[]
   externalChecks                ImmigrationExternalCheck[]
+  workPermitApplicationProfiles WorkPermitApplicationProfile[]
+  workPermitRecords             WorkPermitRecord[]
+  employmentSponsorships        EmploymentSponsorship[]
 
   @@index([subjectIdentityId])
   @@index([jurisdictionId])
@@ -14802,6 +14835,7 @@ model ResidencyPermitRecord {
   governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
   renewalOfPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal", fields: [renewalOfPermitId], references: [id])
   renewedByPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal")
+  workPermitCoordinationLinks WorkPermitRecord[]              @relation("WorkPermitResidencyCoordination")
 
   @@index([immigrationProfileId])
   @@index([lifecycleStatus])
@@ -17262,6 +17296,597 @@ model VitalEventEvidenceLink {
   @@unique([vitalEventId, evidenceRecordId])
   @@index([evidenceRecordId])
   @@map("vital_event_evidence_links")
+}
+// ─── Labour, Employment & Workforce Regulation Foundation ─────────────────
+
+enum LabourDataClassification {
+  PUBLIC
+  OFFICIAL
+  EMPLOYER_SCOPED
+  WORKER_SELF
+  PROTECTED_LABOUR
+  PROTECTED_WORKER
+  RESTRICTED
+}
+
+enum LabourActorPersona {
+  WORKER
+  EMPLOYER
+  EMPLOYER_REPRESENTATIVE
+  AUTHORIZED_REPRESENTATIVE
+  LABOUR_OFFICER
+  SENIOR_DECISION_OFFICER
+  COMPLIANCE_OFFICER
+  EXTERNAL_AUTHORITY_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum EmployerRegistryStatus {
+  DRAFT
+  REGISTERED
+  SUSPENDED
+  WITHDRAWN
+  CLOSED
+}
+
+enum EmploymentRelationshipStatus {
+  PROPOSED
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+  CLOSED
+}
+
+enum WorkPermitApplicationProfileStatus {
+  LINKED
+  ACTIVE
+  WITHDRAWN
+  CLOSED
+}
+
+enum WorkPermitLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  EXPIRED
+  REVOKED
+  SUSPENDED
+  SUPERSEDED
+  SURRENDERED
+}
+
+enum EmploymentDeclarationStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  WITHDRAWN
+}
+
+enum EmploymentSponsorshipStatus {
+  PROPOSED
+  ACTIVE
+  LIMITED
+  WITHDRAWN
+  CLOSED
+}
+
+enum EmploymentComplaintStatus {
+  FILED
+  UNDER_REVIEW
+  REFERRED
+  CLOSED
+  WITHDRAWN
+}
+
+enum EmploymentDisputeStatus {
+  OPEN
+  MEDIATION
+  ADJUDICATION
+  CLOSED
+  WITHDRAWN
+}
+
+enum LabourExternalDependencyType {
+  IMMIGRATION_RESIDENCY
+  IMMIGRATION_ENTRY
+  PROFESSIONAL_REGULATOR
+  OCCUPATIONAL_SAFETY
+  HEALTH_SCREENING
+  CRIMINAL_RECORD
+  EDUCATION_CREDENTIAL
+  OTHER_AUTHORIZED
+}
+
+enum LabourExternalDependencyRecordedBy {
+  EXTERNAL_AUTHORITY_LIAISON
+  INTEGRATION_SYSTEM
+  LABOUR_OFFICER
+  SYSTEM
+}
+
+model EmployerRegistryRecord {
+  id                            String                   @id @default(uuid()) @db.Uuid
+  registryNumber                String                   @unique
+  organizationId                String                   @db.Uuid
+  jurisdictionId                String?                  @db.Uuid
+  institutionId                 String?                  @db.Uuid
+  masterAdministrativeFileId    String?                  @db.Uuid
+  registrationStatus            EmployerRegistryStatus   @default(DRAFT)
+  doesNotSelfAuthorizeWorkers   Boolean                  @default(true)
+  dataClassification            LabourDataClassification @default(EMPLOYER_SCOPED)
+  registeredAt                  DateTime?
+  createdAt                     DateTime                 @default(now())
+  updatedAt                     DateTime                 @updatedAt
+  organization                  Organization             @relation(fields: [organizationId], references: [id])
+  jurisdiction                  Jurisdiction?            @relation(fields: [jurisdictionId], references: [id])
+  institution                   Institution?             @relation(fields: [institutionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  employmentRelationships       EmploymentRelationship[]
+  employmentDeclarations        EmploymentDeclaration[]
+  employmentSponsorships        EmploymentSponsorship[]
+  employerWorkforceProfiles     EmployerWorkforceProfile[]
+  employerWorkforceDeclarations EmployerWorkforceDeclaration[]
+  workPermitRecordsAsEmployer   WorkPermitRecord[]       @relation("WorkPermitEmployer")
+  labourInspectionReferences    LabourInspectionReference[]
+  employmentComplaints          EmploymentComplaint[]
+  employmentDisputes            EmploymentDispute[]
+  terminationNotifications      EmploymentTerminationNotification[]
+  labourComplianceMatterReferences LabourComplianceMatterReference[]
+
+  @@index([organizationId])
+  @@index([jurisdictionId])
+  @@index([registrationStatus])
+  @@map("employer_registry_records")
+}
+
+model WorkerProfileReference {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  profileReferenceNumber     String                   @unique
+  workerIdentityId           String                   @db.Uuid
+  jurisdictionId             String?                  @db.Uuid
+  masterAdministrativeFileId String?                  @db.Uuid
+  dataClassification         LabourDataClassification @default(PROTECTED_WORKER)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  workerIdentity             Identity                 @relation("LabourWorkerProfile", fields: [workerIdentityId], references: [id])
+  jurisdiction               Jurisdiction?          @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile? @relation(fields: [masterAdministrativeFileId], references: [id])
+  employmentRelationships    EmploymentRelationship[]
+  workPermitApplicationProfiles WorkPermitApplicationProfile[]
+  workPermitRecords          WorkPermitRecord[]
+  employmentSponsorships     EmploymentSponsorship[]
+  professionalQualifications ProfessionalQualificationReference[]
+  employmentComplaints       EmploymentComplaint[]    @relation("EmploymentComplaintWorker")
+  employmentDisputes         EmploymentDispute[]      @relation("EmploymentDisputeWorker")
+  terminationNotifications   EmploymentTerminationNotification[]
+  labourComplianceMatterReferences LabourComplianceMatterReference[]
+  labourExternalDependencies LabourExternalDependency[]
+
+  @@index([workerIdentityId])
+  @@index([jurisdictionId])
+  @@map("worker_profile_references")
+}
+
+model OccupationClassificationReference {
+  id                  String   @id @default(uuid()) @db.Uuid
+  classificationCode  String
+  classificationLabel String
+  schemeReference     String?
+  jurisdictionId      String?  @db.Uuid
+  effectiveFrom       DateTime @default(now())
+  effectiveUntil      DateTime?
+  createdAt           DateTime @default(now())
+  jurisdiction        Jurisdiction? @relation(fields: [jurisdictionId], references: [id])
+  employmentRelationships EmploymentRelationship[]
+
+  @@index([classificationCode])
+  @@index([jurisdictionId])
+  @@map("occupation_classification_references")
+}
+
+model EmploymentRelationship {
+  id                                String                       @id @default(uuid()) @db.Uuid
+  relationshipNumber                String                       @unique
+  employerRegistryRecordId          String                       @db.Uuid
+  workerProfileReferenceId          String                       @db.Uuid
+  occupationClassificationId        String?                      @db.Uuid
+  roleTitle                         String
+  status                            EmploymentRelationshipStatus @default(PROPOSED)
+  startDate                         DateTime?
+  endDate                           DateTime?
+  isGovernmentWorkAuthorization     Boolean                      @default(false)
+  currentWorkPermitRecordId         String?                      @db.Uuid
+  dataClassification                LabourDataClassification     @default(PROTECTED_LABOUR)
+  createdAt                         DateTime                     @default(now())
+  updatedAt                         DateTime                     @updatedAt
+  employerRegistryRecord            EmployerRegistryRecord       @relation(fields: [employerRegistryRecordId], references: [id])
+  workerProfileReference            WorkerProfileReference       @relation(fields: [workerProfileReferenceId], references: [id])
+  occupationClassification          OccupationClassificationReference? @relation(fields: [occupationClassificationId], references: [id])
+  currentWorkPermitRecord           WorkPermitRecord?            @relation("EmploymentRelationshipCurrentPermit", fields: [currentWorkPermitRecordId], references: [id])
+  history                           EmploymentRelationshipHistory[]
+  employmentDeclarations            EmploymentDeclaration[]
+  employmentContractReferences      EmploymentContractReference[]
+  employmentSponsorships            EmploymentSponsorship[]
+
+  @@index([employerRegistryRecordId])
+  @@index([workerProfileReferenceId])
+  @@index([status])
+  @@map("employment_relationships")
+}
+
+model EmploymentRelationshipHistory {
+  id                       String               @id @default(uuid()) @db.Uuid
+  employmentRelationshipId String               @db.Uuid
+  employerRegistryRecordId String               @db.Uuid
+  workerProfileReferenceId String               @db.Uuid
+  roleTitle                String
+  startDate                DateTime?
+  endDate                  DateTime?
+  workPermitRecordId       String?              @db.Uuid
+  changeReason             String?
+  actorIdentityId          String?              @db.Uuid
+  actorPersona             LabourActorPersona
+  recordedAt               DateTime             @default(now())
+  employmentRelationship   EmploymentRelationship @relation(fields: [employmentRelationshipId], references: [id], onDelete: Cascade)
+  workPermitRecord         WorkPermitRecord?    @relation(fields: [workPermitRecordId], references: [id])
+  actor                    Identity?            @relation("EmploymentRelationshipHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([employmentRelationshipId])
+  @@index([recordedAt])
+  @@map("employment_relationship_history")
+}
+
+model EmploymentDeclaration {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  declarationReference     String                    @unique
+  employerRegistryRecordId String                    @db.Uuid
+  employmentRelationshipId String?                   @db.Uuid
+  caseId                   String?                   @db.Uuid
+  status                   EmploymentDeclarationStatus @default(DRAFT)
+  isVerifiedGovernmentFact Boolean                   @default(false)
+  declaredAt               DateTime?
+  payloadSummary           String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  employerRegistryRecord   EmployerRegistryRecord    @relation(fields: [employerRegistryRecordId], references: [id])
+  employmentRelationship   EmploymentRelationship?   @relation(fields: [employmentRelationshipId], references: [id])
+  case                     Case?                     @relation(fields: [caseId], references: [id])
+
+  @@index([employerRegistryRecordId])
+  @@index([employmentRelationshipId])
+  @@map("employment_declarations")
+}
+
+model EmploymentContractReference {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  contractReferenceToken   String
+  employmentRelationshipId String                 @db.Uuid
+  documentRecordId         String?                @db.Uuid
+  doesNotAuthorizeWork     Boolean                @default(true)
+  doesNotIssueWorkPermit   Boolean                @default(true)
+  referencedAt             DateTime               @default(now())
+  createdAt                DateTime               @default(now())
+  employmentRelationship   EmploymentRelationship @relation(fields: [employmentRelationshipId], references: [id], onDelete: Cascade)
+  documentRecord           DocumentRecord?        @relation(fields: [documentRecordId], references: [id])
+
+  @@index([employmentRelationshipId])
+  @@map("employment_contract_references")
+}
+
+model WorkPermitApplicationProfile {
+  id                         String                             @id @default(uuid()) @db.Uuid
+  profileNumber              String                             @unique
+  workerProfileReferenceId   String                             @db.Uuid
+  caseId                     String                             @unique @db.Uuid
+  applicationId              String                             @unique @db.Uuid
+  immigrationProfileId       String?                            @db.Uuid
+  status                     WorkPermitApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotIssueWorkPermit     Boolean                            @default(true)
+  paymentDoesNotApprove      Boolean                            @default(true)
+  serviceCategoryCode        String?
+  createdAt                  DateTime                           @default(now())
+  updatedAt                  DateTime                           @updatedAt
+  workerProfileReference     WorkerProfileReference             @relation(fields: [workerProfileReferenceId], references: [id])
+  case                       Case                               @relation(fields: [caseId], references: [id])
+  application                Application                        @relation(fields: [applicationId], references: [id])
+  immigrationProfile         ImmigrationProfile?                @relation(fields: [immigrationProfileId], references: [id])
+  workPermitRecords            WorkPermitRecord[]
+
+  @@index([workerProfileReferenceId])
+  @@index([immigrationProfileId])
+  @@map("work_permit_application_profiles")
+}
+
+model WorkPermitRecord {
+  id                            String                  @id @default(uuid()) @db.Uuid
+  permitNumber                  String                  @unique
+  workerProfileReferenceId      String                  @db.Uuid
+  employerRegistryRecordId      String?                 @db.Uuid
+  workPermitApplicationProfileId String?                @db.Uuid
+  immigrationProfileId          String?                 @db.Uuid
+  linkedResidencyPermitRecordId String?                 @db.Uuid
+  governmentDecisionId          String?                 @db.Uuid
+  officialInstrumentId          String?                 @db.Uuid
+  lifecycleStatus               WorkPermitLifecycleStatus @default(NOT_ISSUED)
+  doesNotCreateResidency        Boolean                 @default(true)
+  validFrom                     DateTime?
+  validUntil                    DateTime?
+  renewalOfPermitId             String?                 @unique @db.Uuid
+  dataClassification            LabourDataClassification @default(PROTECTED_LABOUR)
+  createdAt                     DateTime                @default(now())
+  updatedAt                     DateTime                @updatedAt
+  workerProfileReference        WorkerProfileReference  @relation(fields: [workerProfileReferenceId], references: [id])
+  employerRegistryRecord        EmployerRegistryRecord? @relation("WorkPermitEmployer", fields: [employerRegistryRecordId], references: [id])
+  workPermitApplicationProfile  WorkPermitApplicationProfile? @relation(fields: [workPermitApplicationProfileId], references: [id])
+  immigrationProfile            ImmigrationProfile?     @relation(fields: [immigrationProfileId], references: [id])
+  linkedResidencyPermitRecord   ResidencyPermitRecord?  @relation("WorkPermitResidencyCoordination", fields: [linkedResidencyPermitRecordId], references: [id])
+  governmentDecision            GovernmentDecision?     @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument            OfficialInstrument?     @relation(fields: [officialInstrumentId], references: [id])
+  renewalOfPermit               WorkPermitRecord?       @relation("WorkPermitRenewal", fields: [renewalOfPermitId], references: [id])
+  renewedByPermit               WorkPermitRecord?       @relation("WorkPermitRenewal")
+  conditions                    WorkPermitCondition[]
+  statusHistory                 WorkPermitStatusHistory[]
+  employmentRelationshipHistory EmploymentRelationshipHistory[]
+  employmentRelationshipsCurrent EmploymentRelationship[] @relation("EmploymentRelationshipCurrentPermit")
+
+  @@index([workerProfileReferenceId])
+  @@index([employerRegistryRecordId])
+  @@index([lifecycleStatus])
+  @@index([immigrationProfileId])
+  @@map("work_permit_records")
+}
+
+model WorkPermitCondition {
+  id               String         @id @default(uuid()) @db.Uuid
+  workPermitRecordId String       @db.Uuid
+  conditionCode    String
+  conditionSummary String?
+  effectiveFrom    DateTime       @default(now())
+  effectiveUntil   DateTime?
+  createdAt        DateTime       @default(now())
+  workPermitRecord WorkPermitRecord @relation(fields: [workPermitRecordId], references: [id], onDelete: Cascade)
+
+  @@index([workPermitRecordId])
+  @@map("work_permit_conditions")
+}
+
+model WorkPermitStatusHistory {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  workPermitRecordId String                  @db.Uuid
+  fromStatus         WorkPermitLifecycleStatus?
+  toStatus           WorkPermitLifecycleStatus
+  actorIdentityId    String?                 @db.Uuid
+  actorPersona       LabourActorPersona
+  reason             String?
+  governmentDecisionId String?               @db.Uuid
+  recordedAt         DateTime                @default(now())
+  workPermitRecord   WorkPermitRecord        @relation(fields: [workPermitRecordId], references: [id], onDelete: Cascade)
+  actor              Identity?               @relation("WorkPermitStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  governmentDecision GovernmentDecision?     @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([workPermitRecordId])
+  @@index([recordedAt])
+  @@map("work_permit_status_history")
+}
+
+model EmploymentSponsorship {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  sponsorshipNumber        String                    @unique
+  employerRegistryRecordId String                    @db.Uuid
+  workerProfileReferenceId String                    @db.Uuid
+  employmentRelationshipId String?                   @db.Uuid
+  caseId                   String?                   @db.Uuid
+  immigrationProfileId     String?                   @db.Uuid
+  status                   EmploymentSponsorshipStatus @default(PROPOSED)
+  doesNotGrantAuthorization Boolean                  @default(true)
+  authorizedScope          Json                      @default("{}")
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  employerRegistryRecord   EmployerRegistryRecord    @relation(fields: [employerRegistryRecordId], references: [id])
+  workerProfileReference   WorkerProfileReference    @relation(fields: [workerProfileReferenceId], references: [id])
+  employmentRelationship   EmploymentRelationship?   @relation(fields: [employmentRelationshipId], references: [id])
+  case                     Case?                     @relation(fields: [caseId], references: [id])
+  immigrationProfile       ImmigrationProfile?       @relation(fields: [immigrationProfileId], references: [id])
+
+  @@index([employerRegistryRecordId])
+  @@index([workerProfileReferenceId])
+  @@index([status])
+  @@map("employment_sponsorships")
+}
+
+model LabourMarketDeterminationReference {
+  id                    String   @id @default(uuid()) @db.Uuid
+  determinationReference String  @unique
+  caseId                String?  @db.Uuid
+  outcomeCode           String?
+  isLabourDecision      Boolean  @default(false)
+  governmentDecisionId  String?  @db.Uuid
+  recordedAt            DateTime @default(now())
+  case                  Case?    @relation(fields: [caseId], references: [id])
+  governmentDecision    GovernmentDecision? @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([caseId])
+  @@map("labour_market_determination_references")
+}
+
+model ProfessionalQualificationReference {
+  id                       String               @id @default(uuid()) @db.Uuid
+  workerProfileReferenceId String               @db.Uuid
+  qualificationCode        String
+  issuingBodyReference     String?
+  isWorkAuthorization      Boolean              @default(false)
+  validatedAt              DateTime?
+  createdAt                DateTime             @default(now())
+  workerProfileReference   WorkerProfileReference @relation(fields: [workerProfileReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([workerProfileReferenceId])
+  @@map("professional_qualification_references")
+}
+
+model EmployerWorkforceProfile {
+  id                       String               @id @default(uuid()) @db.Uuid
+  employerRegistryRecordId String               @db.Uuid
+  configuredQuotaLimit     Int?
+  currentHeadcountReported Int?
+  quotaConfigured          Boolean              @default(false)
+  updatedAt                DateTime             @updatedAt
+  createdAt                DateTime             @default(now())
+  employerRegistryRecord   EmployerRegistryRecord @relation(fields: [employerRegistryRecordId], references: [id], onDelete: Cascade)
+
+  @@index([employerRegistryRecordId])
+  @@map("employer_workforce_profiles")
+}
+
+model EmployerWorkforceDeclaration {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  employerRegistryRecordId String                    @db.Uuid
+  declarationReference     String                    @unique
+  reportingPeriodCode      String?
+  headcountDeclared        Int?
+  isVerifiedGovernmentFact Boolean                   @default(false)
+  declaredAt               DateTime?
+  createdAt                DateTime                  @default(now())
+  employerRegistryRecord   EmployerRegistryRecord    @relation(fields: [employerRegistryRecordId], references: [id], onDelete: Cascade)
+
+  @@index([employerRegistryRecordId])
+  @@map("employer_workforce_declarations")
+}
+
+model LabourInspectionReference {
+  id                       String           @id @default(uuid()) @db.Uuid
+  inspectionRecordId       String           @db.Uuid
+  employerRegistryRecordId String?          @db.Uuid
+  findingSummary           String?
+  isFinalEnforcementDecision Boolean        @default(false)
+  createdAt                DateTime         @default(now())
+  inspectionRecord         InspectionRecord @relation(fields: [inspectionRecordId], references: [id])
+  employerRegistryRecord   EmployerRegistryRecord? @relation(fields: [employerRegistryRecordId], references: [id])
+
+  @@index([inspectionRecordId])
+  @@map("labour_inspection_references")
+}
+
+model LabourComplianceMatterReference {
+  id                 String           @id @default(uuid()) @db.Uuid
+  complianceMatterId String           @db.Uuid
+  employerRegistryRecordId String?    @db.Uuid
+  workerProfileReferenceId String?    @db.Uuid
+  linkageRole        String           @default("RELATED")
+  createdAt          DateTime         @default(now())
+  complianceMatter   ComplianceMatter @relation(fields: [complianceMatterId], references: [id])
+  employerRegistryRecord EmployerRegistryRecord? @relation(fields: [employerRegistryRecordId], references: [id])
+  workerProfileReference WorkerProfileReference? @relation(fields: [workerProfileReferenceId], references: [id])
+
+  @@index([complianceMatterId])
+  @@map("labour_compliance_matter_references")
+}
+
+model EmploymentComplaint {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  complaintReference       String                  @unique
+  workerProfileReferenceId String?                 @db.Uuid
+  employerRegistryRecordId String?                 @db.Uuid
+  caseId                   String?                 @db.Uuid
+  redressMatterId          String?                 @db.Uuid
+  status                   EmploymentComplaintStatus @default(FILED)
+  isVerifiedViolation      Boolean                 @default(false)
+  complaintSummary         String?
+  filedAt                  DateTime                @default(now())
+  createdAt                DateTime                @default(now())
+  workerProfileReference   WorkerProfileReference? @relation("EmploymentComplaintWorker", fields: [workerProfileReferenceId], references: [id])
+  employerRegistryRecord   EmployerRegistryRecord? @relation(fields: [employerRegistryRecordId], references: [id])
+  case                     Case?                   @relation(fields: [caseId], references: [id])
+  redressMatter            RedressMatter?          @relation(fields: [redressMatterId], references: [id])
+
+  @@index([workerProfileReferenceId])
+  @@index([employerRegistryRecordId])
+  @@index([status])
+  @@map("employment_complaints")
+}
+
+model EmploymentDispute {
+  id                       String                @id @default(uuid()) @db.Uuid
+  disputeReference         String                @unique
+  workerProfileReferenceId String?               @db.Uuid
+  employerRegistryRecordId String?               @db.Uuid
+  caseId                   String?               @db.Uuid
+  redressMatterId          String?               @db.Uuid
+  status                   EmploymentDisputeStatus @default(OPEN)
+  disputeSummary           String?
+  openedAt                 DateTime              @default(now())
+  createdAt                DateTime              @default(now())
+  workerProfileReference   WorkerProfileReference? @relation("EmploymentDisputeWorker", fields: [workerProfileReferenceId], references: [id])
+  employerRegistryRecord   EmployerRegistryRecord? @relation(fields: [employerRegistryRecordId], references: [id])
+  case                     Case?                 @relation(fields: [caseId], references: [id])
+  redressMatter            RedressMatter?        @relation(fields: [redressMatterId], references: [id])
+
+  @@index([status])
+  @@map("employment_disputes")
+}
+
+model EmploymentTerminationNotification {
+  id                       String               @id @default(uuid()) @db.Uuid
+  notificationReference    String               @unique
+  workerProfileReferenceId String               @db.Uuid
+  employerRegistryRecordId String               @db.Uuid
+  employmentRelationshipId String?              @db.Uuid
+  terminationDate          DateTime?
+  notifiedAt               DateTime             @default(now())
+  createdAt                DateTime             @default(now())
+  workerProfileReference   WorkerProfileReference @relation(fields: [workerProfileReferenceId], references: [id])
+  employerRegistryRecord   EmployerRegistryRecord @relation(fields: [employerRegistryRecordId], references: [id])
+
+  @@index([workerProfileReferenceId])
+  @@index([employerRegistryRecordId])
+  @@map("employment_termination_notifications")
+}
+
+model WorkplaceRequirementReference {
+  id                  String   @id @default(uuid()) @db.Uuid
+  requirementCode     String
+  requirementSummary  String?
+  jurisdictionId      String?  @db.Uuid
+  occupationalSafetyDependencyRef String?
+  effectiveFrom       DateTime @default(now())
+  effectiveUntil      DateTime?
+  createdAt           DateTime @default(now())
+  jurisdiction        Jurisdiction? @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([requirementCode])
+  @@map("workplace_requirement_references")
+}
+
+model LabourExternalDependency {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  dependencyReference        String                           @unique
+  caseId                     String?                          @db.Uuid
+  workerProfileReferenceId   String?                          @db.Uuid
+  externalAuthorityId        String                           @db.Uuid
+  dependencyType             LabourExternalDependencyType
+  determinationStatus        ExternalDeterminationStatus      @default(PENDING)
+  isRequired                 Boolean                          @default(false)
+  blocksDecisionWhenRequired Boolean                          @default(false)
+  isAuthenticated            Boolean                          @default(false)
+  authenticatedPayloadHash   String?
+  recordedBy                 LabourExternalDependencyRecordedBy
+  recordedByIdentityId       String?                          @db.Uuid
+  receivedAt                 DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  case                       Case?                            @relation(fields: [caseId], references: [id])
+  workerProfileReference     WorkerProfileReference?          @relation(fields: [workerProfileReferenceId], references: [id])
+  externalAuthority          ExternalAuthority                @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity         Identity?                        @relation("LabourExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([caseId])
+  @@index([workerProfileReferenceId])
+  @@index([externalAuthorityId])
+  @@map("labour_external_dependencies")
 }
 
 // ─── Land & Property Registry Foundation ─────────────────────────────────────
