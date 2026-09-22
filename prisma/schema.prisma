@@ -135,6 +135,8 @@ model Jurisdiction {
   householdRecords               HouseholdRecord[]
   educationStudentProfiles       EducationStudentProfile[]
   educationInstitutionRegistryRecords EducationInstitutionRegistryRecord[]
+  clinicalTrials                 ClinicalTrial[]
+  clinicalResearchParticipantProfiles ClinicalResearchParticipantProfile[]
   publicSafetyEngagements        PublicSafetyEngagement[]
   publicSafetyEmergencyEvents    PublicSafetyEmergencyEvent[]
   publicSafetyOfficialNotices    PublicSafetyOfficialNotice[]
@@ -222,7 +224,9 @@ model Institution {
   healthcareRegistryEntries      HealthcareRegistryEntry[]
   healthcareDataAccessPolicies   HealthcareDataAccessPolicy[]
   benefitPrograms                BenefitProgram[]
-
+  clinicalTrialSponsors          ClinicalTrialSponsor[]
+  clinicalTrialSites             ClinicalTrialSite[]
+  researchEthicsCommitteeApprovals ResearchEthicsApprovalVersion[] @relation("ResearchEthicsCommitteeInstitution")
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -379,6 +383,11 @@ model Officeholder {
   customsReleasesAuthorized        CustomsReleaseRecord[]         @relation("CustomsReleaseAuthorizer")
   publicSafetyNoticesApproved      PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticeApproverOfficeholder")
   publicSafetyNoticesPublished     PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticePublisherOfficeholder")
+  clinicalTrialInvestigators       ClinicalTrialInvestigator[]    @relation("ClinicalTrialInvestigatorOfficeholder")
+  clinicalTrialPrincipalInvestigators ClinicalTrialPrincipalInvestigator[] @relation("ClinicalTrialPrincipalInvestigatorOfficeholder")
+  researchEthicsApprovalsRecorded ResearchEthicsApprovalVersion[] @relation("ResearchEthicsApprovalRecorder")
+  clinicalTrialScreeningReviews    ClinicalTrialScreeningReview[] @relation("ClinicalTrialScreeningReviewerOfficeholder")
+  clinicalTrialEligibilityAssessments ClinicalTrialEligibilityAssessment[] @relation("ClinicalTrialEligibilityAssessorOfficeholder")
 
   @@map("officeholders")
 }
@@ -887,7 +896,14 @@ model Identity {
   educationRecordCorrectionHistoryEvents     EducationRecordCorrectionHistory[]     @relation("EducationRecordCorrectionHistoryActor")
   publicSafetyEngagementsAsReporter        PublicSafetyEngagement[]               @relation("PublicSafetyEngagementReporter")
   publicSafetyIncidentReportsAsReporter    PublicSafetyIncidentReport[]           @relation("PublicSafetyIncidentReporter")
-
+  clinicalResearchParticipantProfiles      ClinicalResearchParticipantProfile[]   @relation("ClinicalResearchParticipantSubject")
+  clinicalTrialSponsorOrganizations        ClinicalTrialSponsor[]                 @relation("ClinicalTrialSponsorOrganization")
+  clinicalTrialInvestigatorIdentities      ClinicalTrialInvestigator[]            @relation("ClinicalTrialInvestigatorIdentity")
+  clinicalTrialScreeningReviewerIdentities ClinicalTrialScreeningReview[]         @relation("ClinicalTrialScreeningReviewerIdentity")
+  clinicalTrialEligibilityAssessorIdentities ClinicalTrialEligibilityAssessment[] @relation("ClinicalTrialEligibilityAssessorIdentity")
+  clinicalRegulatoryStatusEvents           ClinicalRegulatoryStatus[]             @relation("ClinicalRegulatoryStatusActor")
+  clinicalTrialEnrollmentStatusEvents      ClinicalTrialEnrollmentStatusHistory[] @relation("ClinicalTrialEnrollmentStatusActor")
+  clinicalTrialWithdrawalRecords           ClinicalTrialWithdrawal[]              @relation("ClinicalTrialWithdrawalRecorder")
 
   @@index([userAccountId])
   @@index([personId])
@@ -22167,4 +22183,646 @@ model PublicSafetyCommunicationDelivery {
   @@index([engagementId])
   @@index([status])
   @@map("public_safety_communication_deliveries")
+}
+
+
+// --- Clinical trial registry & clinical research enrollment foundation ---
+
+enum ClinicalResearchDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_PARTICIPANT
+  PROTECTED_HEALTH
+}
+
+enum ClinicalTrialListingLifecycleStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED_FOR_LISTING
+  RECRUITING
+  ACTIVE_NOT_RECRUITING
+  SUSPENDED
+  TERMINATED
+  COMPLETED
+  ARCHIVED
+}
+
+enum ClinicalTrialRecruitmentStatus {
+  NOT_YET_RECRUITING
+  RECRUITING
+  ENROLLING_BY_INVITATION
+  ACTIVE_NOT_RECRUITING
+  COMPLETED
+  SUSPENDED
+  WITHDRAWN
+  UNKNOWN
+}
+
+enum PreliminaryTrialMatchOutcome {
+  POTENTIAL_MATCH
+  NOT_ENOUGH_INFORMATION
+  LIKELY_NOT_MATCH
+}
+
+enum ClinicalTrialEligibilityAssessmentOutcome {
+  INCOMPLETE
+  DETERMINED_MEETS_PROFESSIONAL_CRITERIA
+  DETERMINED_DOES_NOT_MEET
+  INCONCLUSIVE_REQUIRES_FOLLOWUP
+}
+
+enum ClinicalTrialScreeningReviewOutcome {
+  PENDING
+  PROCEED_TO_CONSENT
+  DECLINED_BY_PARTICIPANT
+  INELIGIBLE_BY_PROFESSIONAL_REVIEW
+  REQUIRES_ADDITIONAL_INFORMATION
+}
+
+enum ResearchEthicsApprovalStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  CONDITIONALLY_APPROVED
+  SUSPENDED
+  EXPIRED
+  WITHDRAWN
+  NOT_APPROVED
+}
+
+enum ClinicalRegulatoryApprovalStatus {
+  NOT_REQUIRED
+  PENDING
+  AUTHORIZED
+  CONDITIONALLY_AUTHORIZED
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum ClinicalTrialInterestStatus {
+  EXPRESSED
+  WITHDRAWN
+  CLOSED
+}
+
+enum ClinicalTrialScreeningStatus {
+  AUTHORIZED
+  IN_PROGRESS
+  PENDING_PROFESSIONAL_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum ClinicalTrialConsentSignatureStatus {
+  PENDING
+  SIGNED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum ClinicalTrialEnrollmentStatus {
+  PENDING
+  ENROLLED
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+  SUSPENDED
+}
+
+enum ClinicalTrialWithdrawalReasonCategory {
+  PARTICIPANT_REQUEST
+  INVESTIGATOR_DECISION
+  SAFETY
+  PROTOCOL_DEVIATION
+  LOST_TO_FOLLOWUP
+  OTHER_DOCUMENTED
+}
+
+enum ClinicalResearchActorPersona {
+  CITIZEN
+  PARTICIPANT
+  TRIAL_SPONSOR
+  SITE_COORDINATOR
+  INVESTIGATOR
+  ETHICS_COMMITTEE
+  REGULATORY_AUTHORITY
+  AUTHORIZED_PROFESSIONAL
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  SYSTEM
+}
+
+model ClinicalTrialPhaseReference {
+  id           String          @id @default(uuid()) @db.Uuid
+  code         String          @unique
+  label        String
+  description  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_phase_references")
+}
+
+model ClinicalTrialConditionReference {
+  id             String          @id @default(uuid()) @db.Uuid
+  code           String          @unique
+  label          String
+  categoryCode   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_condition_references")
+}
+
+model ClinicalTrialInterventionReference {
+  id             String          @id @default(uuid()) @db.Uuid
+  code           String          @unique
+  label          String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_intervention_references")
+}
+
+model ClinicalTrialSponsor {
+  id                     String          @id @default(uuid()) @db.Uuid
+  sponsorReference       String          @unique
+  institutionId          String?         @db.Uuid
+  organizationIdentityId String?         @db.Uuid
+  displayName            String
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  institution            Institution?    @relation(fields: [institutionId], references: [id])
+  organizationIdentity   Identity?       @relation("ClinicalTrialSponsorOrganization", fields: [organizationIdentityId], references: [id])
+  clinicalTrials         ClinicalTrial[]
+
+  @@map("clinical_trial_sponsors")
+}
+
+model ClinicalTrial {
+  id                             String                            @id @default(uuid()) @db.Uuid
+  trialNumber                    String                            @unique
+  jurisdictionId                 String                            @db.Uuid
+  sponsorId                      String                            @db.Uuid
+  listingLifecycleStatus         ClinicalTrialListingLifecycleStatus @default(DRAFT)
+  recruitmentStatus              ClinicalTrialRecruitmentStatus    @default(NOT_YET_RECRUITING)
+  phaseReferenceId               String?                           @db.Uuid
+  conditionReferenceId           String?                           @db.Uuid
+  interventionReferenceId        String?                           @db.Uuid
+  minimumAgeYears                Int?
+  maximumAgeYears                Int?
+  locationSummary                String?
+  isPubliclyDiscoverable         Boolean                           @default(false)
+  listingIsNotRegulatoryApproval Boolean                           @default(true)
+  discoveryIsNotRecommendation   Boolean                           @default(true)
+  currentTrialVersionId          String?                           @unique @db.Uuid
+  currentProtocolVersionId       String?                           @unique @db.Uuid
+  createdAt                      DateTime                          @default(now())
+  updatedAt                      DateTime                          @updatedAt
+  jurisdiction                   Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  sponsor                        ClinicalTrialSponsor              @relation(fields: [sponsorId], references: [id])
+  phaseReference                 ClinicalTrialPhaseReference?      @relation(fields: [phaseReferenceId], references: [id])
+  conditionReference             ClinicalTrialConditionReference?  @relation(fields: [conditionReferenceId], references: [id])
+  interventionReference          ClinicalTrialInterventionReference? @relation(fields: [interventionReferenceId], references: [id])
+  currentTrialVersion            ClinicalTrialVersion?             @relation("ClinicalTrialCurrentVersion", fields: [currentTrialVersionId], references: [id])
+  currentProtocolVersion         ClinicalTrialProtocolVersion?     @relation("ClinicalTrialCurrentProtocolVersion", fields: [currentProtocolVersionId], references: [id])
+  trialVersions                  ClinicalTrialVersion[]            @relation("ClinicalTrialVersions")
+  protocols                      ClinicalTrialProtocol[]
+  sites                          ClinicalTrialSite[]
+  principalInvestigators         ClinicalTrialPrincipalInvestigator[]
+  ethicsApprovals                ResearchEthicsApproval[]
+  regulatoryApprovals            ClinicalRegulatoryApproval[]
+  externalRegistryReferences     ClinicalTrialExternalRegistryReference[]
+  eligibilityCriteria            ClinicalTrialEligibilityCriterion[]
+  interests                      ClinicalTrialInterest[]
+  screenings                     ClinicalTrialScreening[]
+  consents                       ClinicalTrialConsent[]
+  enrollments                    ClinicalTrialEnrollment[]
+
+  @@index([jurisdictionId])
+  @@index([recruitmentStatus])
+  @@index([listingLifecycleStatus])
+  @@map("clinical_trials")
+}
+
+model ClinicalTrialVersion {
+  id                      String          @id @default(uuid()) @db.Uuid
+  clinicalTrialId         String          @db.Uuid
+  versionNumber           Int
+  title                   String
+  publicSummary           String
+  broadEligibilitySummary String?
+  activatedAt             DateTime?
+  isImmutable             Boolean         @default(false)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  clinicalTrial           ClinicalTrial   @relation("ClinicalTrialVersions", fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  currentForTrial         ClinicalTrial?  @relation("ClinicalTrialCurrentVersion")
+
+  @@unique([clinicalTrialId, versionNumber])
+  @@map("clinical_trial_versions")
+}
+
+model ClinicalTrialProtocol {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  clinicalTrialId    String                       @db.Uuid
+  protocolIdentifier String
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  clinicalTrial      ClinicalTrial                @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  versions           ClinicalTrialProtocolVersion[]
+
+  @@unique([clinicalTrialId, protocolIdentifier])
+  @@map("clinical_trial_protocols")
+}
+
+model ClinicalTrialProtocolVersion {
+  id               String                @id @default(uuid()) @db.Uuid
+  protocolId       String                @db.Uuid
+  versionNumber    Int
+  amendmentSummary String?
+  activatedAt      DateTime?
+  isActive         Boolean               @default(false)
+  isImmutable      Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  protocol         ClinicalTrialProtocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  currentForTrial  ClinicalTrial?        @relation("ClinicalTrialCurrentProtocolVersion")
+  enrollments      ClinicalTrialEnrollment[]
+
+  @@unique([protocolId, versionNumber])
+  @@map("clinical_trial_protocol_versions")
+}
+
+model ClinicalTrialSite {
+  id              String          @id @default(uuid()) @db.Uuid
+  clinicalTrialId String          @db.Uuid
+  siteReference   String
+  institutionId   String?         @db.Uuid
+  locationSummary String
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  clinicalTrial   ClinicalTrial   @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  institution     Institution?    @relation(fields: [institutionId], references: [id])
+  investigators   ClinicalTrialInvestigator[]
+  principalInvestigatorAssignments ClinicalTrialPrincipalInvestigator[]
+  enrollments     ClinicalTrialEnrollment[]
+
+  @@unique([clinicalTrialId, siteReference])
+  @@map("clinical_trial_sites")
+}
+
+model ClinicalTrialInvestigator {
+  id                     String            @id @default(uuid()) @db.Uuid
+  clinicalTrialSiteId    String            @db.Uuid
+  officeholderId         String?           @db.Uuid
+  professionalIdentityId String?           @db.Uuid
+  displayName            String
+  isActive               Boolean           @default(true)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  site                   ClinicalTrialSite @relation(fields: [clinicalTrialSiteId], references: [id], onDelete: Cascade)
+  officeholder           Officeholder?     @relation("ClinicalTrialInvestigatorOfficeholder", fields: [officeholderId], references: [id])
+  professionalIdentity   Identity?         @relation("ClinicalTrialInvestigatorIdentity", fields: [professionalIdentityId], references: [id])
+  principalInvestigatorAssignments ClinicalTrialPrincipalInvestigator[]
+
+  @@map("clinical_trial_investigators")
+}
+
+model ClinicalTrialPrincipalInvestigator {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  clinicalTrialId     String                   @db.Uuid
+  clinicalTrialSiteId String?                  @db.Uuid
+  investigatorId      String?                  @db.Uuid
+  officeholderId      String?                  @db.Uuid
+  displayName         String
+  effectiveFrom       DateTime                 @default(now())
+  effectiveTo         DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  clinicalTrial       ClinicalTrial            @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  site                ClinicalTrialSite?       @relation(fields: [clinicalTrialSiteId], references: [id])
+  investigator        ClinicalTrialInvestigator? @relation(fields: [investigatorId], references: [id])
+  officeholder        Officeholder?            @relation("ClinicalTrialPrincipalInvestigatorOfficeholder", fields: [officeholderId], references: [id])
+
+  @@map("clinical_trial_principal_investigators")
+}
+
+model ResearchEthicsApproval {
+  id                            String                       @id @default(uuid()) @db.Uuid
+  clinicalTrialId               String                       @db.Uuid
+  approvalReference             String                       @unique
+  status                        ResearchEthicsApprovalStatus @default(DRAFT)
+  currentVersionId              String?                      @unique @db.Uuid
+  blocksEnrollmentWhenInactive  Boolean                      @default(true)
+  sponsorSelfApprovalForbidden  Boolean                      @default(true)
+  ethicsIsNotRegulatoryApproval Boolean                      @default(true)
+  createdAt                     DateTime                     @default(now())
+  updatedAt                     DateTime                     @updatedAt
+  clinicalTrial                 ClinicalTrial                @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  currentVersion                ResearchEthicsApprovalVersion? @relation("ResearchEthicsApprovalCurrentVersion", fields: [currentVersionId], references: [id])
+  versions                      ResearchEthicsApprovalVersion[] @relation("ResearchEthicsApprovalVersions")
+
+  @@map("research_ethics_approvals")
+}
+
+model ResearchEthicsApprovalVersion {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  researchEthicsApprovalId String                       @db.Uuid
+  versionNumber            Int
+  committeeInstitutionId   String?                      @db.Uuid
+  approvedAt               DateTime?
+  expiresAt                DateTime?
+  documentReference        String?
+  recordedByOfficeholderId String?                      @db.Uuid
+  recordedByPersona        ClinicalResearchActorPersona
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  researchEthicsApproval   ResearchEthicsApproval       @relation("ResearchEthicsApprovalVersions", fields: [researchEthicsApprovalId], references: [id], onDelete: Cascade)
+  currentForApproval       ResearchEthicsApproval?      @relation("ResearchEthicsApprovalCurrentVersion")
+  committeeInstitution     Institution?                 @relation("ResearchEthicsCommitteeInstitution", fields: [committeeInstitutionId], references: [id])
+  recordedByOfficeholder   Officeholder?                @relation("ResearchEthicsApprovalRecorder", fields: [recordedByOfficeholderId], references: [id])
+
+  @@unique([researchEthicsApprovalId, versionNumber])
+  @@map("research_ethics_approval_versions")
+}
+
+model ClinicalRegulatoryApproval {
+  id                            String                         @id @default(uuid()) @db.Uuid
+  clinicalTrialId               String                         @db.Uuid
+  approvalReference             String                         @unique
+  status                        ClinicalRegulatoryApprovalStatus @default(PENDING)
+  regulatoryIsNotEthicsApproval Boolean                        @default(true)
+  blocksEnrollmentWhenInactive  Boolean                        @default(true)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  clinicalTrial                 ClinicalTrial                  @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  statusHistory                 ClinicalRegulatoryStatus[]
+
+  @@map("clinical_regulatory_approvals")
+}
+
+model ClinicalRegulatoryStatus {
+  id                           String                         @id @default(uuid()) @db.Uuid
+  clinicalRegulatoryApprovalId String                       @db.Uuid
+  fromStatus                   ClinicalRegulatoryApprovalStatus?
+  toStatus                     ClinicalRegulatoryApprovalStatus
+  changedAt                    DateTime                       @default(now())
+  actorPersona                 ClinicalResearchActorPersona
+  actorIdentityId              String?                        @db.Uuid
+  reasonSummary                String?
+  createdAt                    DateTime                       @default(now())
+  clinicalRegulatoryApproval   ClinicalRegulatoryApproval     @relation(fields: [clinicalRegulatoryApprovalId], references: [id], onDelete: Cascade)
+  actorIdentity                Identity?                      @relation("ClinicalRegulatoryStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@map("clinical_regulatory_statuses")
+}
+
+model ClinicalTrialExternalRegistryReference {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalTrialId String        @db.Uuid
+  registryCode    String
+  registryTrialId String
+  registryUrl     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clinicalTrial   ClinicalTrial @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_trial_external_registry_references")
+}
+
+model ClinicalResearchParticipantProfile {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  participantReference String                           @unique
+  subjectIdentityId    String                           @unique @db.Uuid
+  jurisdictionId       String?                          @db.Uuid
+  dataClassification   ClinicalResearchDataClassification @default(PROTECTED_PARTICIPANT)
+  dataCompartmentCode  String?
+  createdAt            DateTime                         @default(now())
+  updatedAt            DateTime                         @updatedAt
+  subjectIdentity      Identity                         @relation("ClinicalResearchParticipantSubject", fields: [subjectIdentityId], references: [id])
+  jurisdiction         Jurisdiction?                    @relation(fields: [jurisdictionId], references: [id])
+  interests            ClinicalTrialInterest[]
+  screenings           ClinicalTrialScreening[]
+  consentSignatures    ClinicalTrialConsentSignature[]
+  enrollments          ClinicalTrialEnrollment[]
+
+  @@map("clinical_research_participant_profiles")
+}
+
+model ClinicalTrialEligibilityCriterion {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalTrialId String        @db.Uuid
+  criterionCode   String
+  summary         String
+  isInclusion     Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clinicalTrial   ClinicalTrial @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicalTrialId, criterionCode])
+  @@map("clinical_trial_eligibility_criteria")
+}
+
+model ClinicalTrialInterest {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  clinicalTrialId       String                    @db.Uuid
+  participantProfileId  String                    @db.Uuid
+  status                ClinicalTrialInterestStatus @default(EXPRESSED)
+  interestIsNotEnrollment Boolean                 @default(true)
+  expressedAt           DateTime                  @default(now())
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  clinicalTrial         ClinicalTrial             @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  participantProfile    ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  screenings            ClinicalTrialScreening[]
+
+  @@index([participantProfileId])
+  @@map("clinical_trial_interests")
+}
+
+model ClinicalTrialScreening {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  clinicalTrialId            String                   @db.Uuid
+  participantProfileId       String                   @db.Uuid
+  interestId                 String?                  @db.Uuid
+  status                     ClinicalTrialScreeningStatus @default(AUTHORIZED)
+  patientAuthorizationRecordedAt DateTime             @default(now())
+  screeningDataReference     String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  clinicalTrial              ClinicalTrial            @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  participantProfile         ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  interest                   ClinicalTrialInterest?   @relation(fields: [interestId], references: [id])
+  reviews                    ClinicalTrialScreeningReview[]
+  eligibilityAssessments     ClinicalTrialEligibilityAssessment[]
+
+  @@map("clinical_trial_screenings")
+}
+
+model ClinicalTrialScreeningReview {
+  id                             String                            @id @default(uuid()) @db.Uuid
+  screeningId                    String                            @db.Uuid
+  reviewerOfficeholderId         String?                           @db.Uuid
+  reviewerProfessionalIdentityId String?                           @db.Uuid
+  reviewerPersona                ClinicalResearchActorPersona
+  outcome                        ClinicalTrialScreeningReviewOutcome @default(PENDING)
+  reasonCategoryCode             String?
+  reviewedAt                     DateTime?
+  auditReference                 String?
+  createdAt                      DateTime                          @default(now())
+  updatedAt                      DateTime                          @updatedAt
+  screening                      ClinicalTrialScreening            @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+  reviewerOfficeholder           Officeholder?                     @relation("ClinicalTrialScreeningReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  reviewerProfessionalIdentity   Identity?                         @relation("ClinicalTrialScreeningReviewerIdentity", fields: [reviewerProfessionalIdentityId], references: [id])
+
+  @@map("clinical_trial_screening_reviews")
+}
+
+model ClinicalTrialEligibilityAssessment {
+  id                             String                                @id @default(uuid()) @db.Uuid
+  screeningId                    String                                @db.Uuid
+  assessorOfficeholderId         String?                               @db.Uuid
+  assessorProfessionalIdentityId String?                               @db.Uuid
+  assessorPersona                ClinicalResearchActorPersona
+  outcome                        ClinicalTrialEligibilityAssessmentOutcome @default(INCOMPLETE)
+  isProfessionalEligibilityDecision Boolean                            @default(true)
+  aiCannotFinalizeEligibility    Boolean                               @default(true)
+  assessedAt                     DateTime?
+  reasonCategoryCode             String?
+  createdAt                      DateTime                              @default(now())
+  updatedAt                      DateTime                              @updatedAt
+  screening                      ClinicalTrialScreening                @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+  assessorOfficeholder           Officeholder?                         @relation("ClinicalTrialEligibilityAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+  assessorProfessionalIdentity   Identity?                             @relation("ClinicalTrialEligibilityAssessorIdentity", fields: [assessorProfessionalIdentityId], references: [id])
+  evidence                       ClinicalTrialEligibilityEvidence[]
+  enrollments                    ClinicalTrialEnrollment[]
+
+  @@map("clinical_trial_eligibility_assessments")
+}
+
+model ClinicalTrialEligibilityEvidence {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  eligibilityAssessmentId String                           @db.Uuid
+  evidenceReference       String
+  summary                 String?
+  createdAt               DateTime                         @default(now())
+  eligibilityAssessment   ClinicalTrialEligibilityAssessment @relation(fields: [eligibilityAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_trial_eligibility_evidence")
+}
+
+model ClinicalTrialConsent {
+  id              String                      @id @default(uuid()) @db.Uuid
+  clinicalTrialId String                      @db.Uuid
+  consentCode     String
+  title           String
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  clinicalTrial   ClinicalTrial               @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  versions        ClinicalTrialConsentVersion[]
+
+  @@unique([clinicalTrialId, consentCode])
+  @@map("clinical_trial_consents")
+}
+
+model ClinicalTrialConsentVersion {
+  id               String                        @id @default(uuid()) @db.Uuid
+  consentId        String                        @db.Uuid
+  versionNumber    Int
+  contentReference String
+  activatedAt      DateTime?
+  isActive         Boolean                       @default(false)
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
+  consent          ClinicalTrialConsent          @relation(fields: [consentId], references: [id], onDelete: Cascade)
+  signatures       ClinicalTrialConsentSignature[]
+  enrollments      ClinicalTrialEnrollment[]
+
+  @@unique([consentId, versionNumber])
+  @@map("clinical_trial_consent_versions")
+}
+
+model ClinicalTrialConsentSignature {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  participantProfileId String                            @db.Uuid
+  consentVersionId     String                            @db.Uuid
+  status               ClinicalTrialConsentSignatureStatus @default(PENDING)
+  signedAt             DateTime?
+  consentIsNotEnrollment Boolean                         @default(true)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  participantProfile   ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  consentVersion       ClinicalTrialConsentVersion         @relation(fields: [consentVersionId], references: [id])
+
+  @@map("clinical_trial_consent_signatures")
+}
+
+model ClinicalTrialEnrollment {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  enrollmentReference      String                      @unique
+  clinicalTrialId          String                      @db.Uuid
+  clinicalTrialSiteId      String                      @db.Uuid
+  participantProfileId     String                      @db.Uuid
+  protocolVersionId        String                      @db.Uuid
+  consentVersionId         String                      @db.Uuid
+  eligibilityAssessmentId  String                      @db.Uuid
+  status                   ClinicalTrialEnrollmentStatus @default(PENDING)
+  enrolledAt               DateTime?
+  participationIsNotTreatment Boolean                  @default(true)
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  clinicalTrial            ClinicalTrial               @relation(fields: [clinicalTrialId], references: [id])
+  clinicalTrialSite        ClinicalTrialSite           @relation(fields: [clinicalTrialSiteId], references: [id])
+  participantProfile       ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id])
+  protocolVersion          ClinicalTrialProtocolVersion @relation(fields: [protocolVersionId], references: [id])
+  consentVersion           ClinicalTrialConsentVersion @relation(fields: [consentVersionId], references: [id])
+  eligibilityAssessment    ClinicalTrialEligibilityAssessment @relation(fields: [eligibilityAssessmentId], references: [id])
+  statusHistory            ClinicalTrialEnrollmentStatusHistory[]
+  withdrawal               ClinicalTrialWithdrawal?
+
+  @@index([participantProfileId])
+  @@index([clinicalTrialId])
+  @@map("clinical_trial_enrollments")
+}
+
+model ClinicalTrialEnrollmentStatusHistory {
+  id              String                        @id @default(uuid()) @db.Uuid
+  enrollmentId    String                        @db.Uuid
+  fromStatus      ClinicalTrialEnrollmentStatus?
+  toStatus        ClinicalTrialEnrollmentStatus
+  changedAt       DateTime                      @default(now())
+  actorPersona    ClinicalResearchActorPersona
+  actorIdentityId String?                       @db.Uuid
+  reasonSummary   String?
+  createdAt       DateTime                      @default(now())
+  enrollment      ClinicalTrialEnrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  actorIdentity   Identity?                     @relation("ClinicalTrialEnrollmentStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@map("clinical_trial_enrollment_status_histories")
+}
+
+model ClinicalTrialWithdrawal {
+  id                          String                               @id @default(uuid()) @db.Uuid
+  enrollmentId                String                               @unique @db.Uuid
+  reasonCategory              ClinicalTrialWithdrawalReasonCategory
+  reasonSummary               String
+  withdrawnAt                 DateTime                             @default(now())
+  recordedByPersona           ClinicalResearchActorPersona
+  recordedByIdentityId        String?                              @db.Uuid
+  preservesParticipationHistory Boolean                            @default(true)
+  createdAt                   DateTime                             @default(now())
+  enrollment                  ClinicalTrialEnrollment              @relation(fields: [enrollmentId], references: [id])
+  recordedByIdentity          Identity?                            @relation("ClinicalTrialWithdrawalRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@map("clinical_trial_withdrawals")
 }

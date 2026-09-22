@@ -9,9 +9,10 @@ import { HealthcareDataAccessPolicyService } from './privacy/healthcare-data-acc
 import { HealthcarePrivacySearchService } from './privacy/healthcare-privacy-search.service';
 import { HealthcareProfessionalLicensingService } from './professional/healthcare-professional-licensing.service';
 import { HealthcareRegistryBoundaryService } from './registry/healthcare-registry-boundary.service';
+import { ClinicalResearchModule } from './research/clinical-research.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, ClinicalResearchModule],
   providers: [
     HealthcareBoundaryService,
     HealthcareRegistryBoundaryService,
@@ -31,6 +32,7 @@ import { HealthcareRegistryBoundaryService } from './registry/healthcare-registr
     HealthcareAccessAuditService,
     HealthcareBreakGlassService,
     HealthcarePrivacySearchService,
+    ClinicalResearchModule,
   ],
 })
 export class HealthcareModule {}
