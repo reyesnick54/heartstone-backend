@@ -1,0 +1,3046 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-EDUCATION",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Education vertical with placeholder rules, forms, workflows, integrations (schools, universities, examination bodies, registries, SIS), fees, and dashboard indicators.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-education-government",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Education Government Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-STUDENT-REGISTRATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Student Registration — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-FORM",
+          "formName": "Student Registration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-STUDENT-REGISTRATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-STUDENT-REGISTRATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Student Registration",
+      "serviceSlug": "student-registration",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-STUDENT-REGISTRATION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-REMINDER",
+          "templateCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Public School Enrollment Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-FORM",
+          "formName": "Public School Enrollment Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Public School Enrollment Application",
+      "serviceSlug": "public-school-enrollment",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-PUBLIC-SCHOOL-ENROLLMENT-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-REMINDER",
+          "templateCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-SCHOOL-TRANSFER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "School Transfer Request — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-FORM",
+          "formName": "School Transfer Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-SCHOOL-TRANSFER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-SCHOOL-TRANSFER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "School Transfer Request",
+      "serviceSlug": "school-transfer",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-SCHOOL-TRANSFER-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-ENROLLMENT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-REGISTER",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-INSTITUTION-REGISTRATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-REGISTER",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Institution Registration — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-FORM",
+          "formName": "Education Institution Registration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-REGISTER",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-INSTITUTION-REGISTRATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Institution Registration",
+      "serviceSlug": "institution-registration",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-INSTITUTION-REGISTRATION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-REGISTER",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-REMINDER",
+          "templateCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-INSTITUTION-LICENSE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-LICENSE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Institution License Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-FORM",
+          "formName": "Education Institution License Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-LICENSE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-INSTITUTION-LICENSE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-INSTITUTION-LICENSE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Institution License Application",
+      "serviceSlug": "institution-license",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-INSTITUTION-LICENSE-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INSTITUTION-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-ACCREDITATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-ACCREDITATION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-ACCREDITATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-ACCREDITATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-ACCREDITATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-ACCREDITATION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-ACCREDITATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-ACCREDITATION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-ACCREDITATION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-ACCREDITATION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-ACCREDITATION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-ACCREDITATION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Accreditation Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-ACCREDITATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-ACCREDITATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-ACCREDITATION-FORM",
+          "formName": "Accreditation Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-ACCREDITATION-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-ACCREDITATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-ACCREDITATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-ACCREDITATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Accreditation Application",
+      "serviceSlug": "accreditation",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-ACCREDITATION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-ACCREDITATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-REMINDER",
+          "templateCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-EDUCATOR-LICENSE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Educator License Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-FORM",
+          "formName": "Educator License Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-EDUCATOR-LICENSE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-EDUCATOR-LICENSE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Educator License Application",
+      "serviceSlug": "educator-license",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-REMINDER",
+          "templateCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Educator License Renewal — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-FORM",
+          "formName": "Educator License Renewal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Educator License Renewal",
+      "serviceSlug": "educator-license-renewal",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-EDUCATOR-LICENSE-RENEWAL-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-EDUCATOR-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-SCHOLARSHIP-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-SCHOLARSHIP-REMINDER",
+          "templateCode": "TEMPLATE-EDU-SCHOLARSHIP-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-SCHOLARSHIP-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-SCHOLARSHIP-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-SCHOLARSHIP-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-SCHOLARSHIP-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOLARSHIP-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOLARSHIP-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOLARSHIP-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOLARSHIP-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-SCHOLARSHIP-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Scholarship Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-SCHOLARSHIP-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-SCHOLARSHIP-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-SCHOLARSHIP-FORM",
+          "formName": "Scholarship Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-SCHOLARSHIP-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-SCHOLARSHIP-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-SCHOLARSHIP-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-SCHOLARSHIP",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Scholarship Application",
+      "serviceSlug": "scholarship",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-SCHOLARSHIP-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-SCHOLARSHIP-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-EDUCATION-GRANT-REMINDER",
+          "templateCode": "TEMPLATE-EDU-EDUCATION-GRANT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-EDUCATION-GRANT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATION-GRANT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-EDUCATION-GRANT-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATION-GRANT-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATION-GRANT-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATION-GRANT-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATION-GRANT-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-EDUCATION-GRANT-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Grant Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-EDUCATION-GRANT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-EDUCATION-GRANT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-EDUCATION-GRANT-FORM",
+          "formName": "Education Grant Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-EDUCATION-GRANT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-EDUCATION-GRANT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-EDUCATION-GRANT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Grant Application",
+      "serviceSlug": "education-grant",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-EDUCATION-GRANT-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-REMINDER",
+          "templateCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Student Support Program Application — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-FORM",
+          "formName": "Student Support Program Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Student Support Program Application",
+      "serviceSlug": "student-support-program",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-STUDENT-SUPPORT-PROGRAM-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-GRANT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-REMINDER",
+          "templateCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-TRANSCRIPT-REQUEST-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Transcript / Academic Record Request — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-FORM",
+          "formName": "Transcript / Academic Record Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-TRANSCRIPT-REQUEST-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Transcript / Academic Record Request",
+      "serviceSlug": "transcript-request",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-TRANSCRIPT-REQUEST-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Credential Verification Request — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-FORM",
+          "formName": "Credential Verification Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Credential Verification Request",
+      "serviceSlug": "credential-verification",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-CREDENTIAL-VERIFICATION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-RECORD-CORRECT",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-RECORD-CORRECTION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-RECORD-CORRECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-RECORD-CORRECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-RECORD-CORRECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-RECORD-CORRECTION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-RECORD-CORRECT",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-RECORD-CORRECTION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-RECORD-CORRECTION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-RECORD-CORRECTION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-RECORD-CORRECTION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-RECORD-CORRECTION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Record Correction — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-RECORD-CORRECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-RECORD-CORRECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-RECORD-CORRECTION-FORM",
+          "formName": "Education Record Correction form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-RECORD-CORRECT",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-RECORD-CORRECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-RECORD-CORRECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-RECORD-CORRECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Record Correction",
+      "serviceSlug": "record-correction",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-RECORD-CORRECTION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-RECORD-CORRECT",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INSPECTION",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-REMINDER",
+          "templateCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-INSTITUTION-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-INSPECTION",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Institution Inspection — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-FORM",
+          "formName": "Education Institution Inspection form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-INSPECTION",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-INSTITUTION-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Institution Inspection",
+      "serviceSlug": "institution-inspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-INSTITUTION-INSPECTION-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INSPECTION",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-EDU-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-EDU-APPEAL-REDRESS-REMINDER",
+          "templateCode": "TEMPLATE-EDU-APPEAL-REDRESS-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-EDU-APPEAL-REDRESS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-EDU-APPEAL-REDRESS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-EDU-APPEAL-REDRESS-SLA-RISK",
+          "label": "SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 10
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-EDU-APPEAL-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-EDU-APPEAL-REDRESS-SCHOOL-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "School reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SCHOOL"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-APPEAL-REDRESS-UNIVERSITY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "University reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-UNIVERSITY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-APPEAL-REDRESS-EXAM-BODY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Examination body reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-EXAM-BODY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-APPEAL-REDRESS-REGISTRY-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Education registry reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-REGISTRY"
+        },
+        {
+          "dependencyCode": "TEMPLATE-EDU-APPEAL-REDRESS-SIS-REF",
+          "dependencyType": "INTEGRATION",
+          "description": "Student information system reference via Integration Gateway when configured",
+          "externalIntegrationCode": "TEMPLATE-EDU-GW-SIS"
+        }
+      ],
+      "description": "Education Appeal / Redress — NON_PRODUCTION placeholder education government service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-EDU-APPEAL-REDRESS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-EDU-APPEAL-REDRESS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-EDU-APPEAL-REDRESS-FORM",
+          "formName": "Education Appeal / Redress form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-EDU-APPEAL-DECIDE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-EDU-APPEAL-REDRESS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-EDU-APPEAL-REDRESS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Education appeal / redress",
+          "routeCode": "TEMPLATE-EDU-APPEAL-REDRESS-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-EDU-APPEAL-REDRESS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-EDUCATION",
+      "serviceName": "Education Appeal / Redress",
+      "serviceSlug": "appeal-redress",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-EDU-APPEAL-REDRESS-SLA",
+          "targetDays": 20
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-INTAKE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Education review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EDU-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}
