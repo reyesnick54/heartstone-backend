@@ -267,6 +267,7 @@ model Department {
   appointmentSlots              AppointmentSlot[]
   serviceAppointments           ServiceAppointment[]
   developmentProjects           DevelopmentProject[]
+  publicSafetyEngagements       PublicSafetyEngagement[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
