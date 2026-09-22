@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ServicePackAcceptanceService } from '../../service-packs/governance/service-pack-acceptance.service';
 import { ServiceActivationService } from '../activation-governance/service-activation.service';
 import { ServicePackActivationService } from './service-pack-activation.service';
 import { buildServicePackConfigurationFingerprintFromManifest } from './service-pack-configuration-fingerprint.util';
@@ -60,7 +61,7 @@ describe('Service pack deployment lifecycle', () => {
     id: 'pack-version-1',
     servicePackId: 'pack-1',
     version: '1.0.0',
-    status: ServicePackVersionStatus.COMPILED,
+    status: ServicePackVersionStatus.ACCEPTED,
     compilationFingerprint: 'compile-fingerprint',
     manifest,
     compiledAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -169,6 +170,12 @@ describe('Service pack deployment lifecycle', () => {
         ServicePackActivationService,
         { provide: PrismaService, useValue: prisma },
         { provide: ServiceActivationService, useValue: serviceActivationService },
+        {
+          provide: ServicePackAcceptanceService,
+          useValue: {
+            assertActiveAcceptanceForDeployment: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -625,19 +632,25 @@ describe('Service pack deployment lifecycle', () => {
     expect(prisma.servicePackDeploymentAuditRecord.create).toHaveBeenCalled();
   });
 
-  it('accepts compiled service pack versions before deployment-ready marking', async () => {
+  it('requires institutional acceptance before deployment-ready marking', async () => {
+    prisma.servicePackVersion.findUnique.mockResolvedValue({
+      ...packVersion,
+      status: ServicePackVersionStatus.ACCEPTED,
+    });
+
     const result = await deploymentService.acceptServicePackVersion({
       servicePackVersionId: packVersion.id,
       actor,
     });
 
     expect(result.newStatus).toBe(ServicePackVersionStatus.ACCEPTED);
-    const acceptUpdate = prisma.servicePackVersion.update.mock.calls.at(-1) as
-      [{ data: { status: ServicePackVersionStatus } }] | undefined;
-    expect(acceptUpdate?.[0].data.status).toBe(ServicePackVersionStatus.ACCEPTED);
   });
 
   it('rejects deployment when version is not accepted', async () => {
+    prisma.servicePackVersion.findUnique.mockResolvedValue({
+      ...packVersion,
+      status: ServicePackVersionStatus.COMPILED,
+    });
     await expect(
       deploymentService.createDeployment({
         servicePackVersionId: packVersion.id,

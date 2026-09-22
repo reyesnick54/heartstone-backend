@@ -4,6 +4,7 @@ import { DatabaseModule } from '../database/database.module';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ServicePacksCommonModule } from './common/service-packs-common.module';
+import { ServicePackGovernanceModule } from './governance/service-pack-governance.module';
 import { ServicePackJurisdictionBindingService } from './jurisdiction/service-pack-jurisdiction-binding.service';
 import { ServicePacksService } from './packs/service-packs.service';
 import { ServicePackExportService } from './portability/service-pack-export.service';
@@ -19,7 +20,7 @@ import { ServicePackValidationService } from './validation/service-pack-validati
 import { ServicePackVersionService } from './versions/service-pack-version.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, ServicePacksCommonModule],
+  imports: [DatabaseModule, SessionsModule, ServicePacksCommonModule, ServicePackGovernanceModule],
   controllers: [ServicePacksRegistryController, ServicePacksController],
   providers: [
     ServicePacksService,

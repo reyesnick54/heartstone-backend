@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { ServicePackGovernanceModule } from '../../service-packs/governance/service-pack-governance.module';
 import { ActivationGovernanceModule } from '../activation-governance/activation-governance.module';
 import { ServicePackActivationService } from './service-pack-activation.service';
 import { ServicePackDeploymentService } from './service-pack-deployment.service';
@@ -7,7 +8,7 @@ import { ServicePackDeploymentAuditService } from './service-pack-deployment-aud
 import { ServicePackRollbackService } from './service-pack-rollback.service';
 
 @Module({
-  imports: [ActivationGovernanceModule],
+  imports: [ActivationGovernanceModule, ServicePackGovernanceModule],
   providers: [
     ServicePackDeploymentAuditService,
     ServicePackDeploymentService,

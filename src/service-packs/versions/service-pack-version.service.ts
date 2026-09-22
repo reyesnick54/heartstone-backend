@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Prisma,
+  ServicePackGovernanceLifecycleStatus,
   ServicePackManifestValidationStatus,
   ServicePackVersionStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { ServicePacksBoundaryService } from '../common/service-packs-boundary.service';
+import { ServicePackAcceptanceService } from '../governance/service-pack-acceptance.service';
+import { buildServicePackVersionGovernanceFingerprint } from '../governance/service-pack-version-fingerprint.util';
 
 export interface UpdateServicePackVersionDto {
   manifest?: Prisma.InputJsonValue;
@@ -17,6 +20,7 @@ export class ServicePackVersionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: ServicePacksBoundaryService,
+    private readonly governanceAcceptance: ServicePackAcceptanceService,
   ) {}
 
   async findById(id: string) {
@@ -50,14 +54,23 @@ export class ServicePackVersionService {
       throw new BadRequestException('No updatable fields provided');
     }
 
-    return this.prisma.servicePackVersion.update({
+    const updated = await this.prisma.servicePackVersion.update({
       where: { id },
       data: {
         manifest: dto.manifest,
         manifestValidationStatus: ServicePackManifestValidationStatus.DRAFT,
+        governanceLifecycleStatus: ServicePackGovernanceLifecycleStatus.NOT_IN_GOVERNANCE,
         status: ServicePackVersionStatus.COMPILED,
       },
     });
+
+    await this.governanceAcceptance.invalidateAcceptanceForFingerprintChange(
+      id,
+      'system',
+      'Manifest change materially altered version fingerprint',
+    );
+
+    return updated;
   }
 
   async markAccepted(id: string, acceptedByIdentityId?: string) {
@@ -66,9 +79,29 @@ export class ServicePackVersionService {
       throw new NotFoundException(`Service pack version ${id} not found`);
     }
 
-    if (version.manifestValidationStatus !== ServicePackManifestValidationStatus.VALIDATED) {
+    const activeAcceptance = await this.prisma.servicePackAcceptanceRecord.findFirst({
+      where: {
+        servicePackVersionId: id,
+        isActive: true,
+        versionFingerprint: buildServicePackVersionGovernanceFingerprint({
+          compilationFingerprint: version.compilationFingerprint,
+          manifestChecksum: version.manifestChecksum,
+        }),
+      },
+    });
+
+    if (!activeAcceptance) {
       throw new BadRequestException(
-        'Only manifest-validated versions may be institutionally accepted; VALIDATED != ACCEPTED until explicit acceptance',
+        'Institutional acceptance record required; technical validation alone is insufficient',
+      );
+    }
+
+    if (
+      version.governanceLifecycleStatus !==
+      ServicePackGovernanceLifecycleStatus.INSTITUTIONALLY_ACCEPTED
+    ) {
+      throw new BadRequestException(
+        'Governance lifecycle must reach institutional acceptance before version acceptance is finalized',
       );
     }
 

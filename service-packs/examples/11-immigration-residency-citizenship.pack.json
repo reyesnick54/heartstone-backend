@@ -1,0 +1,3412 @@
+{
+  "departmentCode": "NON_PRODUCTION-IMM-OPS",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION reusable immigration vertical template pack covering visas, residency, citizenship, appeals, and biometric/interview scheduling. TEMPLATE ONLY — not verified law, policy, or authority assignments.",
+  "institutionCode": "NON_PRODUCTION-IMM",
+  "packId": "non-production-immigration-residency-citizenship",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Immigration, Residency & Citizenship Government Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-VISITOR-VISA-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-VISITOR-VISA-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-VISITOR-VISA-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-VISITOR-VISA-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-VISITOR-VISA-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-VISITOR-VISA-PASSPORT",
+          "NON_PRODUCTION-IMM-VISITOR-VISA-PHOTO",
+          "NON_PRODUCTION-IMM-VISITOR-VISA-SPONSOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISITOR-VISA-INTAKE-QUEUE",
+          "label": "Visitor Visa Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISITOR-VISA-SLA-RISK",
+          "label": "Visitor Visa Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISITOR-VISA-EXTERNAL-PENDING",
+          "label": "Visitor Visa Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-VISITOR-VISA-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-VISITOR-VISA-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Visitor Visa Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-VISITOR-VISA-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-VISITOR-VISA-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION sponsor requirement placeholder",
+          "evidenceCode": "NON_PRODUCTION-IMM-VISITOR-VISA-SPONSOR",
+          "label": "Sponsor support letter",
+          "required": true,
+          "verificationCategory": "SIGNATURE"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-VISITOR-VISA-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-VISITOR-VISA-FORM",
+          "formName": "Visitor Visa Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            },
+            {
+              "fields": [
+                {
+                  "fieldKey": "sponsorName",
+                  "fieldType": "TEXT",
+                  "label": "Sponsor name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "sponsorRelationship",
+                  "fieldType": "TEXT",
+                  "label": "Relationship to applicant",
+                  "required": true
+                }
+              ],
+              "label": "Sponsor details",
+              "sectionKey": "sponsor"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-VISITOR-VISA-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-VISITOR-VISA-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 90
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-VISITOR-VISA-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-VISITOR-VISA-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-VISITOR-VISA",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Visitor Visa Application",
+      "serviceSlug": "visitor-visa",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Visitor Visa Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-VISITOR-VISA-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-VISA-EXTENSION-PASSPORT",
+          "NON_PRODUCTION-IMM-VISA-EXTENSION-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-INTAKE-QUEUE",
+          "label": "Visa Extension intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-SLA-RISK",
+          "label": "Visa Extension SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-EXTERNAL-PENDING",
+          "label": "Visa Extension unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Visa Extension. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-FORM",
+          "formName": "Visa Extension intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-VISA-EXTENSION-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-SUPERSEDE",
+        "supportsRenewal": true,
+        "validityPeriodDays": 90
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Renewed immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-CREDENTIAL",
+          "outputType": "RENEWAL"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-VISA-EXTENSION",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Visa Extension",
+      "serviceSlug": "visa-extension",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Visa Extension processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-VISA-EXTENSION-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-PASSPORT",
+          "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-INTAKE-QUEUE",
+          "label": "Residency Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-SLA-RISK",
+          "label": "Residency Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-EXTERNAL-PENDING",
+          "label": "Residency Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Residency Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-FORM",
+          "formName": "Residency Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-SUPERSEDE",
+        "supportsRenewal": true,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Residency Application",
+      "serviceSlug": "residency-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Residency Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-RESIDENCY-APPLICATION-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-PASSPORT",
+          "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-INTAKE-QUEUE",
+          "label": "Residency Renewal intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-SLA-RISK",
+          "label": "Residency Renewal SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-EXTERNAL-PENDING",
+          "label": "Residency Renewal unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Residency Renewal. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-FORM",
+          "formName": "Residency Renewal intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-SUPERSEDE",
+        "supportsRenewal": true,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Renewed immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-CREDENTIAL",
+          "outputType": "RENEWAL"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Residency Renewal",
+      "serviceSlug": "residency-renewal",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Residency Renewal processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-PASSPORT",
+          "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-PHOTO",
+          "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-SPONSOR",
+          "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-DEPENDENCY-PROOF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-INTAKE-QUEUE",
+          "label": "Dependent Residency Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-SLA-RISK",
+          "label": "Dependent Residency Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-EXTERNAL-PENDING",
+          "label": "Dependent Residency Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Dependent Residency Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION sponsor requirement placeholder",
+          "evidenceCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-SPONSOR",
+          "label": "Sponsor support letter",
+          "required": true,
+          "verificationCategory": "SIGNATURE"
+        },
+        {
+          "description": "NON_PRODUCTION dependency check evidence placeholder",
+          "evidenceCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-DEPENDENCY-PROOF",
+          "label": "Proof of dependency relationship",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-FORM",
+          "formName": "Dependent Residency Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            },
+            {
+              "fields": [
+                {
+                  "fieldKey": "sponsorName",
+                  "fieldType": "TEXT",
+                  "label": "Sponsor name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "sponsorRelationship",
+                  "fieldType": "TEXT",
+                  "label": "Relationship to applicant",
+                  "required": true
+                }
+              ],
+              "label": "Sponsor details",
+              "sectionKey": "sponsor"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Dependent Residency Application",
+      "serviceSlug": "dependent-residency",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Dependent Residency Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-DEPENDENT-RESIDENCY-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Interview scheduled",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-PASSPORT",
+          "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-INTAKE-QUEUE",
+          "label": "Long-Term Residency Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-SLA-RISK",
+          "label": "Long-Term Residency Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-EXTERNAL-PENDING",
+          "label": "Long-Term Residency Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Long-Term Residency Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-FORM",
+          "formName": "Long-Term Residency Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Long-Term Residency Application",
+      "serviceSlug": "long-term-residency",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Long-Term Residency Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-LONG-TERM-RESIDENCY-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "Interview",
+          "stageKey": "interview",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 6,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 8,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-PASSPORT",
+          "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-PHOTO",
+          "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-SPONSOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-INTAKE-QUEUE",
+          "label": "Work-Linked Residency Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-SLA-RISK",
+          "label": "Work-Linked Residency Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-EXTERNAL-PENDING",
+          "label": "Work-Linked Residency Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-LABOUR-VERIFY",
+          "dependencyType": "EXTERNAL_REGISTRY",
+          "description": "NON_PRODUCTION labour registry dependency check placeholder",
+          "externalIntegrationCode": "TEMPLATE-LABOUR-REGISTRY"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Work-Linked Residency Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION sponsor requirement placeholder",
+          "evidenceCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-SPONSOR",
+          "label": "Sponsor support letter",
+          "required": true,
+          "verificationCategory": "SIGNATURE"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-FORM",
+          "formName": "Work-Linked Residency Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            },
+            {
+              "fields": [
+                {
+                  "fieldKey": "sponsorName",
+                  "fieldType": "TEXT",
+                  "label": "Sponsor name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "sponsorRelationship",
+                  "fieldType": "TEXT",
+                  "label": "Relationship to applicant",
+                  "required": true
+                }
+              ],
+              "label": "Sponsor details",
+              "sectionKey": "sponsor"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Work-Linked Residency Application",
+      "serviceSlug": "work-linked-residency",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Work-Linked Residency Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-WORK-LINKED-RESIDENCY-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Interview scheduled",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-PASSPORT",
+          "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-INTAKE-QUEUE",
+          "label": "Citizenship Application intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-SLA-RISK",
+          "label": "Citizenship Application SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-EXTERNAL-PENDING",
+          "label": "Citizenship Application unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Citizenship Application. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-FORM",
+          "formName": "Citizenship Application intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Citizenship Application",
+      "serviceSlug": "citizenship-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Citizenship Application processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-CITIZENSHIP-APPLICATION-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "Interview",
+          "stageKey": "interview",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 6,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 8,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-PASSPORT",
+          "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-INTAKE-QUEUE",
+          "label": "Citizenship Status / Certificate Request intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-SLA-RISK",
+          "label": "Citizenship Status / Certificate Request SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-EXTERNAL-PENDING",
+          "label": "Citizenship Status / Certificate Request unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Citizenship Status / Certificate Request. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-FORM",
+          "formName": "Citizenship Status / Certificate Request intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Citizenship Status / Certificate Request",
+      "serviceSlug": "citizenship-certificate",
+      "serviceType": "REQUEST",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Citizenship Status / Certificate Request processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-CITIZENSHIP-CERTIFICATE-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "isConsequential": false,
+          "publicStageLabel": "Biometric appointment",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Decision",
+          "sequenceOrder": 6
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Credential issued",
+          "sequenceOrder": 7
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-STATUS-CORRECTION-PASSPORT",
+          "NON_PRODUCTION-IMM-STATUS-CORRECTION-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-INTAKE-QUEUE",
+          "label": "Immigration Status Correction / Review intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-SLA-RISK",
+          "label": "Immigration Status Correction / Review SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-EXTERNAL-PENDING",
+          "label": "Immigration Status Correction / Review unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Immigration Status Correction / Review. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-FORM",
+          "formName": "Immigration Status Correction / Review intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-STATUS-CORRECTION-CREDENTIAL"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "SECURE_PORTAL",
+          "label": "Immigration credential",
+          "outputCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-CREDENTIAL",
+          "outputType": "PERMIT"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Immigration Status Correction / Review",
+      "serviceSlug": "status-correction",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Immigration Status Correction / Review processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-STATUS-CORRECTION-SLA",
+          "targetDays": 45
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-BIOMETRIC",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Biometric capture",
+          "stageKey": "biometric",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 5,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 6,
+          "isDecisionStage": true,
+          "label": "Decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 7,
+          "isIssuanceStage": true,
+          "label": "Credential issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-DECISION-TEMPLATE",
+          "triggerStageKey": "document-review"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-APPEAL-REDRESS-PASSPORT",
+          "NON_PRODUCTION-IMM-APPEAL-REDRESS-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-INTAKE-QUEUE",
+          "label": "Immigration Appeal / Redress intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-SLA-RISK",
+          "label": "Immigration Appeal / Redress SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-EXTERNAL-PENDING",
+          "label": "Immigration Appeal / Redress unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-EXTERNAL-SECURITY",
+          "dependencyType": "EXTERNAL_SECURITY_CHECK",
+          "description": "NON_PRODUCTION restricted external security check — official-only",
+          "externalIntegrationCode": "TEMPLATE-IMM-SECURITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Immigration Appeal / Redress. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-APPLICATION-FEE",
+          "label": "Application fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-FORM",
+          "formName": "Immigration Appeal / Redress intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+        "issuanceStageKey": "document-review",
+        "outputCodes": []
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-SUPERSEDE",
+        "supportsRenewal": false,
+        "validityPeriodDays": 365
+      },
+      "outputs": [],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION immigration appeal route — does not overwrite original decision",
+          "label": "Administrative review",
+          "routeCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-ADMIN-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        },
+        {
+          "description": "NON_PRODUCTION external appeal coordination placeholder",
+          "label": "External tribunal referral",
+          "routeCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-EXTERNAL-APPEAL",
+          "routeType": "EXTERNAL_REFERRAL"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Immigration Appeal / Redress",
+      "serviceSlug": "appeal-redress",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Immigration Appeal / Redress processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-APPEAL-REDRESS-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "External coordination",
+          "stageKey": "external-checks",
+          "stepType": "EXTERNAL_REFERRAL"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "NON_RESIDENT",
+        "RESIDENT",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Submit application",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Under review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Interview scheduled",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "isConsequential": false,
+          "publicStageLabel": "External coordination",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "PORTAL",
+          "communicationCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-ACK",
+          "templateCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-ACK-TEMPLATE",
+          "triggerStageKey": "intake"
+        },
+        {
+          "channel": "SECURE_MESSAGE",
+          "communicationCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-DECISION-NOTICE",
+          "templateCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-DECISION-TEMPLATE",
+          "triggerStageKey": "decision"
+        }
+      ],
+      "completenessReview": {
+        "deficiencyNoticeTemplateCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-DEFICIENCY-NOTICE",
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-PASSPORT",
+          "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-PHOTO"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-INTAKE-QUEUE",
+          "label": "Biometric / Interview Appointment intake queue",
+          "metricType": "QUEUE_DEPTH"
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-SLA-RISK",
+          "label": "Biometric / Interview Appointment SLA risk",
+          "metricType": "SLA_BREACH_RISK",
+          "threshold": 5
+        },
+        {
+          "indicatorCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-EXTERNAL-PENDING",
+          "label": "Biometric / Interview Appointment unresolved external determinations",
+          "metricType": "EXTERNAL_PENDING"
+        }
+      ],
+      "decisionStages": [],
+      "dependencies": [
+        {
+          "dependencyCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-IDENTITY-VERIFY",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "NON_PRODUCTION template: Biometric / Interview Appointment. Placeholder only until jurisdiction supplies verified authority.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION placeholder passport/travel document evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-PASSPORT",
+          "label": "Passport or travel document",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION identity photograph evidence",
+          "evidenceCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-PHOTO",
+          "label": "Identity photograph",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-FORM",
+          "formName": "Biometric / Interview Appointment intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "fullName",
+                  "fieldType": "TEXT",
+                  "label": "Full legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "passportNumber",
+                  "fieldType": "IDENTIFIER",
+                  "label": "Passport or travel document number",
+                  "required": true
+                },
+                {
+                  "fieldKey": "nationality",
+                  "fieldType": "TEXT",
+                  "label": "Nationality",
+                  "required": true
+                }
+              ],
+              "label": "Applicant details",
+              "sectionKey": "applicant"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+        "issuanceStageKey": "document-review",
+        "outputCodes": [
+          "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-APPOINTMENT-CONFIRMATION"
+        ]
+      },
+      "lifecycle": {
+        "renewalServiceCode": "NON_PRODUCTION-IMM-RESIDENCY-RENEWAL",
+        "supersessionPolicyCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-SUPERSEDE",
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Appointment confirmation",
+          "outputCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-APPOINTMENT-CONFIRMATION",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION reconsideration placeholder",
+          "label": "Reconsideration request",
+          "routeCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-RECONSIDERATION",
+          "routeType": "RECONSIDERATION"
+        }
+      ],
+      "serviceCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW",
+      "serviceFamilyCode": "NON_PRODUCTION-FAMILY-IMMIGRATION",
+      "serviceName": "Biometric / Interview Appointment",
+      "serviceSlug": "biometric-interview",
+      "serviceType": "SCHEDULING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Biometric / Interview Appointment processing SLA",
+          "pauseConditions": [
+            "WAITING_APPLICANT",
+            "WAITING_EXTERNAL"
+          ],
+          "ruleCode": "NON_PRODUCTION-IMM-BIOMETRIC-INTERVIEW-SLA",
+          "targetDays": 7
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 3,
+          "label": "Document review",
+          "stageKey": "document-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-IMMIGRATION-INTERVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 4,
+          "label": "Interview",
+          "stageKey": "interview",
+          "stepType": "INTERNAL_COORDINATION"
+        }
+      ]
+    }
+  ]
+}
