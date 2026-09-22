@@ -18,7 +18,7 @@ export const TREATMENT_FOUNDATION_MODEL_NAMES = [
   'TreatmentProgramAuthorization',
   'TreatmentProgramExternalDependency',
   'PatientTreatmentStatusProjection',
-  'HealthcareDataAccessPolicy',
+  'TreatmentPatientDataAccessGrant',
 ] as const;
 
 export const TREATMENT_FOUNDATION_ENUM_NAMES = [

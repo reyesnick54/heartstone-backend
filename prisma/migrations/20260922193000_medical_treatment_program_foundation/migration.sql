@@ -367,7 +367,7 @@ CREATE TABLE "patient_treatment_status_projections" (
 );
 
 -- CreateTable
-CREATE TABLE "healthcare_data_access_policies" (
+CREATE TABLE "treatment_patient_data_access_grants" (
     "id" UUID NOT NULL,
     "policyReference" TEXT NOT NULL,
     "patientHealthcareProfileId" UUID NOT NULL,
@@ -382,7 +382,7 @@ CREATE TABLE "healthcare_data_access_policies" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "healthcare_data_access_policies_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "treatment_patient_data_access_grants_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -554,19 +554,19 @@ CREATE INDEX "patient_treatment_status_projections_patientHealthcareProfileId_id
 CREATE INDEX "patient_treatment_status_projections_treatmentEnrollmentId_idx" ON "patient_treatment_status_projections"("treatmentEnrollmentId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "healthcare_data_access_policies_policyReference_key" ON "healthcare_data_access_policies"("policyReference");
+CREATE UNIQUE INDEX "treatment_patient_data_access_grants_policyReference_key" ON "treatment_patient_data_access_grants"("policyReference");
 
 -- CreateIndex
-CREATE INDEX "healthcare_data_access_policies_patientHealthcareProfileId_idx" ON "healthcare_data_access_policies"("patientHealthcareProfileId");
+CREATE INDEX "treatment_patient_data_access_grants_patientHealthcareProfileId_idx" ON "treatment_patient_data_access_grants"("patientHealthcareProfileId");
 
 -- CreateIndex
-CREATE INDEX "healthcare_data_access_policies_patientSubjectIdentityId_idx" ON "healthcare_data_access_policies"("patientSubjectIdentityId");
+CREATE INDEX "treatment_patient_data_access_grants_patientSubjectIdentityId_idx" ON "treatment_patient_data_access_grants"("patientSubjectIdentityId");
 
 -- CreateIndex
-CREATE INDEX "healthcare_data_access_policies_granteeProviderIdentityId_idx" ON "healthcare_data_access_policies"("granteeProviderIdentityId");
+CREATE INDEX "treatment_patient_data_access_grants_granteeProviderIdentityId_idx" ON "treatment_patient_data_access_grants"("granteeProviderIdentityId");
 
 -- CreateIndex
-CREATE INDEX "healthcare_data_access_policies_granteeOrganizationId_idx" ON "healthcare_data_access_policies"("granteeOrganizationId");
+CREATE INDEX "treatment_patient_data_access_grants_granteeOrganizationId_idx" ON "treatment_patient_data_access_grants"("granteeOrganizationId");
 
 -- AddForeignKey
 ALTER TABLE "patient_healthcare_profiles" ADD CONSTRAINT "patient_healthcare_profiles_subjectIdentityId_fkey" FOREIGN KEY ("subjectIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -758,13 +758,13 @@ ALTER TABLE "patient_treatment_status_projections" ADD CONSTRAINT "patient_treat
 ALTER TABLE "patient_healthcare_profiles" ADD CONSTRAINT "patient_healthcare_profiles_currentStatusProjectionId_fkey" FOREIGN KEY ("currentStatusProjectionId") REFERENCES "patient_treatment_status_projections"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "healthcare_data_access_policies" ADD CONSTRAINT "healthcare_data_access_policies_patientHealthcareProfileId_fkey" FOREIGN KEY ("patientHealthcareProfileId") REFERENCES "patient_healthcare_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "treatment_patient_data_access_grants" ADD CONSTRAINT "treatment_patient_data_access_grants_patientHealthcareProfileId_fkey" FOREIGN KEY ("patientHealthcareProfileId") REFERENCES "patient_healthcare_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "healthcare_data_access_policies" ADD CONSTRAINT "healthcare_data_access_policies_patientSubjectIdentityId_fkey" FOREIGN KEY ("patientSubjectIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "treatment_patient_data_access_grants" ADD CONSTRAINT "treatment_patient_data_access_grants_patientSubjectIdentityId_fkey" FOREIGN KEY ("patientSubjectIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "healthcare_data_access_policies" ADD CONSTRAINT "healthcare_data_access_policies_granteeProviderIdentityId_fkey" FOREIGN KEY ("granteeProviderIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "treatment_patient_data_access_grants" ADD CONSTRAINT "treatment_patient_data_access_grants_granteeProviderIdentityId_fkey" FOREIGN KEY ("granteeProviderIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "healthcare_data_access_policies" ADD CONSTRAINT "healthcare_data_access_policies_granteeOrganizationId_fkey" FOREIGN KEY ("granteeOrganizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "treatment_patient_data_access_grants" ADD CONSTRAINT "treatment_patient_data_access_grants_granteeOrganizationId_fkey" FOREIGN KEY ("granteeOrganizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;

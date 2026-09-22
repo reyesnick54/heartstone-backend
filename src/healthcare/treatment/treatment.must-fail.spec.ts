@@ -119,7 +119,7 @@ describe('Treatment must-fail gates', () => {
 
   describe('HealthcareDataAccessPolicyService', () => {
     const prisma = {
-      healthcareDataAccessPolicy: { findFirst: jest.fn() },
+      treatmentPatientDataAccessGrant: { findFirst: jest.fn() },
       treatmentEnrollment: { findUnique: jest.fn() },
     };
 
@@ -138,7 +138,7 @@ describe('Treatment must-fail gates', () => {
     });
 
     it('provider cannot access unrelated patient', async () => {
-      prisma.healthcareDataAccessPolicy.findFirst.mockResolvedValue(null);
+      prisma.treatmentPatientDataAccessGrant.findFirst.mockResolvedValue(null);
 
       await expect(
         access.assertProviderMayAccessPatient({
@@ -146,7 +146,7 @@ describe('Treatment must-fail gates', () => {
           patientSubjectIdentityId: 'patient-2',
           requestedScope: 'viewEnrollments',
         }),
-      ).rejects.toThrow(/HealthcareDataAccessPolicy/);
+      ).rejects.toThrow(/TreatmentPatientDataAccessGrant/);
     });
   });
 

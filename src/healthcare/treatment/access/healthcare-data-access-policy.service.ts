@@ -30,7 +30,7 @@ export class HealthcareDataAccessPolicyService {
       granteeOr.push({ granteeOrganizationId: context.organizationId });
     }
 
-    const policy = await this.prisma.healthcareDataAccessPolicy.findFirst({
+    const policy = await this.prisma.treatmentPatientDataAccessGrant.findFirst({
       where: {
         patientSubjectIdentityId: context.patientSubjectIdentityId,
         isActive: true,
@@ -45,14 +45,14 @@ export class HealthcareDataAccessPolicyService {
 
     if (!policy) {
       throw new ForbiddenException(
-        'No HealthcareDataAccessPolicy grants provider access to patient',
+        'No TreatmentPatientDataAccessGrant grants provider access to patient',
       );
     }
 
     const categories = policy.authorizedDataCategories as string[];
     if (!categories.includes(context.requestedScope)) {
       throw new ForbiddenException(
-        `HealthcareDataAccessPolicy does not authorize scope: ${context.requestedScope}`,
+        `TreatmentPatientDataAccessGrant does not authorize scope: ${context.requestedScope}`,
       );
     }
   }

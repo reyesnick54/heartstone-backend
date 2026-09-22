@@ -17,7 +17,7 @@ export class ProviderHealthcareProjectionService {
   ) {}
 
   async getWorkspace(providerIdentityId: string, organizationId?: string | null) {
-    const policies = await this.prisma.healthcareDataAccessPolicy.findMany({
+    const policies = await this.prisma.treatmentPatientDataAccessGrant.findMany({
       where: {
         isActive: true,
         OR: [

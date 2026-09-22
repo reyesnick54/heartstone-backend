@@ -1,0 +1,1938 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-PUBLIC-SAFETY",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Public safety reporting, emergency assistance, inspections, recovery programs, and official notice workflows without jurisdiction-specific emergency powers.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-public-safety-emergency",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Public Safety & Emergency Government Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-ACK",
+          "templateCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Submit Public Safety Incident Report — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-FORM",
+          "formName": "Submit Public Safety Incident Report form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Submit Public Safety Incident Report output",
+          "outputCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Submit Public Safety Incident Report",
+      "serviceSlug": "template-ps-submit-incident-report",
+      "serviceType": "REPORT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-SUBMIT-INCIDENT-REPORT-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-ACK",
+          "templateCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Request Emergency Government Assistance — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-FORM",
+          "formName": "Request Emergency Government Assistance form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Request Emergency Government Assistance output",
+          "outputCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Request Emergency Government Assistance",
+      "serviceSlug": "template-ps-request-emergency-assistance",
+      "serviceType": "ASSISTANCE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-REQUEST-EMERGENCY-ASSISTANCE-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-ACK",
+          "templateCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-DISASTER-IMPACT-REPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Disaster Impact Report — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-FORM",
+          "formName": "Disaster Impact Report form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-DISASTER-IMPACT-REPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Disaster Impact Report output",
+          "outputCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Disaster Impact Report",
+      "serviceSlug": "template-ps-disaster-impact-report",
+      "serviceType": "REPORT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-DISASTER-IMPACT-REPORT-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-EXTERNAL-COORD",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority coordination",
+          "stageKey": "external-coordination",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-ACK",
+          "templateCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Disaster Relief Intake — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-FORM",
+          "formName": "Disaster Relief Intake form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Disaster Relief Intake output",
+          "outputCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Disaster Relief Intake",
+      "serviceSlug": "template-ps-disaster-relief-intake",
+      "serviceType": "INTAKE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-DISASTER-RELIEF-INTAKE-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-EXTERNAL-COORD",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority coordination",
+          "stageKey": "external-coordination",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-ACK",
+          "templateCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Public Safety Permit Application — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-FORM",
+          "formName": "Public Safety Permit Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Public Safety Permit Application output",
+          "outputCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Public Safety Permit Application",
+      "serviceSlug": "template-ps-public-safety-permit",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-PUBLIC-SAFETY-PERMIT-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-ACK",
+          "templateCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Fire Safety Inspection Request — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-FORM",
+          "formName": "Fire Safety Inspection Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Fire Safety Inspection Request output",
+          "outputCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Fire Safety Inspection Request",
+      "serviceSlug": "template-ps-fire-safety-inspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-FIRE-SAFETY-INSPECTION-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-SCHEDULE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "Inspection scheduling",
+          "stageKey": "inspection",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-ACK",
+          "templateCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-EMERGENCY-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Emergency Inspection Request — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-FORM",
+          "formName": "Emergency Inspection Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-EMERGENCY-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Emergency Inspection Request output",
+          "outputCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-EMERGENCY-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Emergency Inspection Request",
+      "serviceSlug": "template-ps-emergency-inspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-EMERGENCY-INSPECTION-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-SCHEDULE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "Inspection scheduling",
+          "stageKey": "inspection",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-ACK",
+          "templateCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Emergency Document Replacement Request — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-FORM",
+          "formName": "Emergency Document Replacement Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Emergency Document Replacement Request output",
+          "outputCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Emergency Document Replacement Request",
+      "serviceSlug": "template-ps-emergency-document-replacement",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-EMERGENCY-DOCUMENT-REPLACEMENT-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-ACK",
+          "templateCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Infrastructure Disruption Report — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-FORM",
+          "formName": "Infrastructure Disruption Report form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Infrastructure Disruption Report output",
+          "outputCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Infrastructure Disruption Report",
+      "serviceSlug": "template-ps-infrastructure-disruption",
+      "serviceType": "REPORT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-INFRASTRUCTURE-DISRUPTION-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-EXTERNAL-COORD",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority coordination",
+          "stageKey": "external-coordination",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-ACK",
+          "templateCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Emergency Shelter / Assistance Information — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-FORM",
+          "formName": "Emergency Shelter / Assistance Information form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Emergency Shelter / Assistance Information output",
+          "outputCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Emergency Shelter / Assistance Information",
+      "serviceSlug": "template-ps-shelter-assistance-info",
+      "serviceType": "INFORMATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-SHELTER-ASSISTANCE-INFO-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-ACK",
+          "templateCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-RECOVERY-ASSISTANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Recovery Assistance Application — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-FORM",
+          "formName": "Recovery Assistance Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-RECOVERY-ASSISTANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Recovery Assistance Application output",
+          "outputCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Recovery Assistance Application",
+      "serviceSlug": "template-ps-recovery-assistance",
+      "serviceType": "ASSISTANCE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-RECOVERY-ASSISTANCE-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-ASSISTANCE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-ACK",
+          "templateCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PS-DECISION-REVIEW-APPEAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-APPEAL-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [],
+      "description": "Public Safety Decision Review / Appeal — NON_PRODUCTION placeholder public safety & emergency service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-FORM",
+          "formName": "Public Safety Decision Review / Appeal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "summary",
+                  "fieldType": "TEXT",
+                  "label": "Summary",
+                  "required": true
+                }
+              ],
+              "label": "Incident / impact placeholder",
+              "sectionKey": "incident"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PS-DECISION-REVIEW-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Public Safety Decision Review / Appeal output",
+          "outputCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-OUTPUT",
+          "outputType": "CONFIRMATION"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Public safety appeal route",
+          "routeCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PUBLIC-SAFETY",
+      "serviceName": "Public Safety Decision Review / Appeal",
+      "serviceSlug": "template-ps-decision-review-appeal",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Public safety review SLA",
+          "ruleCode": "TEMPLATE-PS-DECISION-REVIEW-APPEAL-SLA",
+          "targetDays": 14
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Public safety intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Verification review",
+          "stageKey": "verification",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PUBLIC-SAFETY-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

@@ -125,15 +125,25 @@ model Jurisdiction {
   traderAccounts                 TraderAccount[]
   importerRegistrations          ImporterRegistration[]
   exporterRegistrations          ExporterRegistration[]
+  healthcareOrganizations        HealthcareOrganization[]
+  patientHealthIdentities        PatientHealthIdentity[]
+  healthcareRegistryEntries      HealthcareRegistryEntry[]
+  healthcareJurisdictionPrivacyHooks HealthcareJurisdictionPrivacyHook[]
   benefitCategories              BenefitCategory[]
   benefitPrograms                BenefitProgram[]
   benefitApplicantProfiles       BenefitApplicantProfile[]
   householdRecords               HouseholdRecord[]
   educationStudentProfiles       EducationStudentProfile[]
   educationInstitutionRegistryRecords EducationInstitutionRegistryRecord[]
+  clinicalTrials                 ClinicalTrial[]
+  clinicalResearchParticipantProfiles ClinicalResearchParticipantProfile[]
+  publicSafetyEngagements        PublicSafetyEngagement[]
+  publicSafetyEmergencyEvents    PublicSafetyEmergencyEvent[]
+  publicSafetyOfficialNotices    PublicSafetyOfficialNotice[]
+
+
   patientHealthcareProfiles      PatientHealthcareProfile[]
   treatmentPrograms              TreatmentProgram[]
-
   @@map("jurisdictions")
 }
 
@@ -212,10 +222,16 @@ model Institution {
   propertyTransfers              PropertyTransfer[]
   propertyRegistryEntries        PropertyRegistryEntry[]
   surveyRecords                  SurveyRecord[]
+  healthcareOrganizations        HealthcareOrganization[]
+  healthcareRegistryEntries      HealthcareRegistryEntry[]
+  healthcareDataAccessPolicies   HealthcareDataAccessPolicy[]
   benefitPrograms                BenefitProgram[]
+  clinicalTrialSponsors          ClinicalTrialSponsor[]
+  clinicalTrialSites             ClinicalTrialSite[]
+  researchEthicsCommitteeApprovals ResearchEthicsApprovalVersion[] @relation("ResearchEthicsCommitteeInstitution")
+
   treatmentPrograms              TreatmentProgram[]
   treatmentProgramSites          TreatmentProgramSite[]
-
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
   @@map("institutions")
@@ -270,6 +286,7 @@ model Department {
   appointmentSlots              AppointmentSlot[]
   serviceAppointments           ServiceAppointment[]
   developmentProjects           DevelopmentProject[]
+  publicSafetyEngagements       PublicSafetyEngagement[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -368,6 +385,13 @@ model Officeholder {
   customsAssessmentsIssued         CustomsAssessment[]            @relation("CustomsAssessmentIssuer")
   customsHoldsRemoved              CustomsHold[]                  @relation("CustomsHoldRemover")
   customsReleasesAuthorized        CustomsReleaseRecord[]         @relation("CustomsReleaseAuthorizer")
+  publicSafetyNoticesApproved      PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticeApproverOfficeholder")
+  publicSafetyNoticesPublished     PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticePublisherOfficeholder")
+  clinicalTrialInvestigators       ClinicalTrialInvestigator[]    @relation("ClinicalTrialInvestigatorOfficeholder")
+  clinicalTrialPrincipalInvestigators ClinicalTrialPrincipalInvestigator[] @relation("ClinicalTrialPrincipalInvestigatorOfficeholder")
+  researchEthicsApprovalsRecorded ResearchEthicsApprovalVersion[] @relation("ResearchEthicsApprovalRecorder")
+  clinicalTrialScreeningReviews    ClinicalTrialScreeningReview[] @relation("ClinicalTrialScreeningReviewerOfficeholder")
+  clinicalTrialEligibilityAssessments ClinicalTrialEligibilityAssessment[] @relation("ClinicalTrialEligibilityAssessorOfficeholder")
 
   @@map("officeholders")
 }
@@ -449,8 +473,8 @@ model ExternalAuthority {
   restrictedGoodsRequirements      RestrictedGoodsRequirement[]
   externalEligibilityDeterminations ExternalEligibilityDeterminationReference[]
   educationExternalDependencies    EducationExternalDependency[]
-  treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
 
+  treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
   @@map("external_authorities")
 }
 
@@ -602,6 +626,8 @@ model Person {
   civilPersonRecords CivilPersonRecord[]
   cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
   transferParties         TransferParty[]
+  patientHealthIdentities PatientHealthIdentity[]
+  healthcareProfessionals HealthcareProfessional[]
 
   @@map("persons")
 }
@@ -855,6 +881,14 @@ model Identity {
   traderAccountsAsPrimary                  TraderAccount[]                        @relation("TraderAccountPrimaryIdentity")
   customsStatusHistoryEvents               CustomsStatusHistory[]                 @relation("CustomsStatusHistoryActor")
   customsExternalDependenciesRecorded      CustomsExternalDependency[]            @relation("CustomsExternalDependencyRecorder")
+  patientHealthIdentitiesLinked            PatientHealthIdentity[]                @relation("PatientHealthIdentityPlatformIdentity")
+  healthcareProfessionalsLinked            HealthcareProfessional[]               @relation("HealthcareProfessionalPlatformIdentity")
+  healthcareProfessionalStatusChanges      HealthcareProfessionalStatusHistory[]  @relation("HealthcareProfessionalStatusActor")
+  patientHealthcareRelationships           PatientHealthcareRelationship[]        @relation("PatientRelationshipPlatformIdentity")
+  healthcareDataAccessConsentsGranted      HealthcareDataAccessConsent[]          @relation("HealthcareConsentPlatformIdentity")
+  healthcareRegistryVerificationsPerformed HealthcareRegistryVerification[]       @relation("HealthcareRegistryVerifierIdentity")
+  healthcareBreakGlassSessions             HealthcareBreakGlassAccessSession[]    @relation("HealthcareBreakGlassActor")
+  healthcareAccessAuditEvents              HealthcareAccessAuditEvent[]           @relation("HealthcareAccessAuditActor")
   socialProtectionApplicantProfiles        BenefitApplicantProfile[]              @relation("SocialProtectionApplicantProfile")
   socialProtectionHouseholdMembers         HouseholdMember[]                      @relation("SocialProtectionHouseholdMember")
   externalEligibilityDeterminationsRecorded ExternalEligibilityDeterminationReference[] @relation("ExternalEligibilityDeterminationRecorder")
@@ -865,6 +899,17 @@ model Identity {
   educationRecordCorrectionsAsApplicant      EducationRecordCorrection[]            @relation("EducationRecordCorrectionApplicant")
   educationExternalDependenciesRecorded      EducationExternalDependency[]          @relation("EducationExternalDependencyRecorder")
   educationRecordCorrectionHistoryEvents     EducationRecordCorrectionHistory[]     @relation("EducationRecordCorrectionHistoryActor")
+  publicSafetyEngagementsAsReporter        PublicSafetyEngagement[]               @relation("PublicSafetyEngagementReporter")
+  publicSafetyIncidentReportsAsReporter    PublicSafetyIncidentReport[]           @relation("PublicSafetyIncidentReporter")
+  clinicalResearchParticipantProfiles      ClinicalResearchParticipantProfile[]   @relation("ClinicalResearchParticipantSubject")
+  clinicalTrialSponsorOrganizations        ClinicalTrialSponsor[]                 @relation("ClinicalTrialSponsorOrganization")
+  clinicalTrialInvestigatorIdentities      ClinicalTrialInvestigator[]            @relation("ClinicalTrialInvestigatorIdentity")
+  clinicalTrialScreeningReviewerIdentities ClinicalTrialScreeningReview[]         @relation("ClinicalTrialScreeningReviewerIdentity")
+  clinicalTrialEligibilityAssessorIdentities ClinicalTrialEligibilityAssessment[] @relation("ClinicalTrialEligibilityAssessorIdentity")
+  clinicalRegulatoryStatusEvents           ClinicalRegulatoryStatus[]             @relation("ClinicalRegulatoryStatusActor")
+  clinicalTrialEnrollmentStatusEvents      ClinicalTrialEnrollmentStatusHistory[] @relation("ClinicalTrialEnrollmentStatusActor")
+  clinicalTrialWithdrawalRecords           ClinicalTrialWithdrawal[]              @relation("ClinicalTrialWithdrawalRecorder")
+
   patientHealthcareProfilesAsSubject       PatientHealthcareProfile[]             @relation("PatientHealthcareProfileSubject")
   treatmentApplicationsAsPatient             TreatmentApplication[]                 @relation("TreatmentApplicationPatient")
   treatmentReferralsAsPatient                TreatmentReferral[]                    @relation("TreatmentReferralPatient")
@@ -876,10 +921,9 @@ model Identity {
   treatmentProgramAuthorizationsRecorded     TreatmentProgramAuthorization[]        @relation("TreatmentProgramAuthorizationRecorder")
   treatmentExternalDependenciesRecorded      TreatmentProgramExternalDependency[]   @relation("TreatmentExternalDependencyRecorder")
   treatmentEnrollmentStatusHistoryEvents     TreatmentEnrollmentStatusHistory[]     @relation("TreatmentEnrollmentStatusHistoryActor")
-  healthcareDataAccessPoliciesAsGrantee      HealthcareDataAccessPolicy[]           @relation("HealthcareDataAccessGrantee")
-  healthcareDataAccessPoliciesAsPatient      HealthcareDataAccessPolicy[]           @relation("HealthcareDataAccessPatientSubject")
+  treatmentPatientDataAccessGrantsAsGrantee      TreatmentPatientDataAccessGrant[]           @relation("TreatmentPatientDataAccessGrantee")
+  treatmentPatientDataAccessGrantsAsPatientSubject      TreatmentPatientDataAccessGrant[]           @relation("TreatmentPatientDataAccessPatientSubject")
   treatmentProgramProviderLinks              TreatmentProgramProvider[]             @relation("TreatmentProgramProviderIdentity")
-
   @@index([userAccountId])
   @@index([personId])
   @@index([organizationId])
@@ -939,14 +983,16 @@ model Organization {
   transferParties                 TransferParty[]
   traderAccounts                  TraderAccount[]
   shipmentReferences              ShipmentReference[]
+  healthcareOrganizationProfiles  HealthcareOrganization[]             @relation("HealthcareOrganizationPlatformOrg")
   educationInstitutionRegistryRecords EducationInstitutionRegistryRecord[]
   educationInstitutionLicenseRecords EducationInstitutionLicenseRecord[]
   educationAccreditationRecords   EducationAccreditationRecord[]
   educationEnrollmentRecords      EducationEnrollmentRecord[]
   educationInstitutionInspectionReferences EducationInstitutionInspectionReference[]
-  treatmentProgramProviders       TreatmentProgramProvider[]
-  healthcareDataAccessPolicies    HealthcareDataAccessPolicy[]           @relation("HealthcareDataAccessGranteeOrganization")
+  publicSafetyEngagements         PublicSafetyEngagement[]
 
+  treatmentProgramProviders       TreatmentProgramProvider[]
+  treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
   @@index([status])
   @@map("organizations")
 }
@@ -1576,9 +1622,13 @@ model AuthorityEvaluationRecord {
   propertyRegistryCorrections       PropertyRegistryCorrection[]  @relation("PropertyRegistryCorrectionAuthority")
   propertyRegistryVerifications   PropertyRegistryVerification[] @relation("PropertyRegistryVerificationAuthority")
   titleVersions                   TitleVersion[]                @relation("TitleVersionAuthority")
+  healthcareRegistryEntries       HealthcareRegistryEntry[]     @relation("HealthcareRegistryEntryAuthority")
+  healthcareProfessionalLicenses  HealthcareProfessionalLicense[] @relation("HealthcareProfessionalLicenseAuthority")
+  healthcareFacilityLicenses      HealthcareFacilityLicense[]   @relation("HealthcareFacilityLicenseAuthority")
   benefitSuspensions              BenefitSuspension[]
-  treatmentEligibilityGovernmentAdminEvals TreatmentEligibilityReview[] @relation("TreatmentEligibilityGovernmentAdminEval")
 
+
+  treatmentEligibilityGovernmentAdminEvals TreatmentEligibilityReview[] @relation("TreatmentEligibilityGovernmentAdminEval")
   @@index([functionAuthorityRecordId])
   @@index([identityId])
   @@index([evaluatedAt])
@@ -1791,6 +1841,8 @@ model GovernmentService {
   serviceAppointments         ServiceAppointment[]
   vitalEvents                 VitalEvent[]
   propertyTransfers           PropertyTransfer[]
+  healthcareProfessionalLicenses HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses  HealthcareFacilityLicense[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2512,12 +2564,15 @@ model Application {
   driverLicenseApplicationProfile DriverLicenseApplicationProfile?
   propertyTransfers          PropertyTransfer[]
   customsDeclarations        CustomsDeclaration[]
+  healthcareProfessionalLicenses HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses HealthcareFacilityLicense[]
   benefitApplicationProfile  BenefitApplicationProfile?
   educationEnrollmentApplicationProfiles EducationEnrollmentApplicationProfile[]
   scholarshipApplicationProfiles ScholarshipApplicationProfile[]
   educationGrantApplicationProfiles EducationGrantApplicationProfile[]
-  treatmentApplicationProfile TreatmentApplication?
 
+
+  treatmentApplicationProfile TreatmentApplication?
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
   @@index([governmentServiceId])
@@ -2656,6 +2711,9 @@ model Case {
   propertyTransfers                 PropertyTransfer[]
   propertyRegistryEntries           PropertyRegistryEntry[]
   customsDeclarations               CustomsDeclaration[]
+  healthcareRegistryEntries         HealthcareRegistryEntry[]
+  healthcareProfessionalLicenses    HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses        HealthcareFacilityLicense[]
   benefitApplicationProfile         BenefitApplicationProfile?
   externalEligibilityDeterminations ExternalEligibilityDeterminationReference[]
   benefitReviews                    BenefitReview[]
@@ -2664,11 +2722,12 @@ model Case {
   scholarshipApplicationProfiles ScholarshipApplicationProfile[]
   educationGrantApplicationProfiles EducationGrantApplicationProfile[]
   educationExternalDependencies   EducationExternalDependency[]
+
+
   treatmentApplicationProfile       TreatmentApplication?
   treatmentReferrals                TreatmentReferral[]
   treatmentScreenings               TreatmentScreening[]
   treatmentEligibilityReviews       TreatmentEligibilityReview[]
-
   @@index([status])
   @@index([applicantIdentityId])
   @@index([governmentServiceId])
@@ -3277,8 +3336,8 @@ model MasterAdministrativeFile {
   transportOperatorRecords             TransportOperatorRecord[]
   traderAccounts                       TraderAccount[]
   benefitApplicantProfiles             BenefitApplicantProfile[]
-  patientHealthcareProfiles            PatientHealthcareProfile[]
 
+  patientHealthcareProfiles            PatientHealthcareProfile[]
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
   @@index([responsibleDepartmentId])
@@ -5160,6 +5219,9 @@ model GovernmentDecision {
   cadastrePropertyInterestHistory   CadastrePropertyInterestHistory[] @relation("CadastrePropertyInterestHistoryDecision")
   titleVersions                     TitleVersion[]                  @relation("TitleVersionDecision")
   customsReleaseDecisionReference   CustomsReleaseDecisionReference?
+  healthcareRegistryEntries         HealthcareRegistryEntry[]         @relation("HealthcareRegistryEntryDecision")
+  healthcareProfessionalLicenses    HealthcareProfessionalLicense[]   @relation("HealthcareProfessionalLicenseDecision")
+  healthcareFacilityLicenses      HealthcareFacilityLicense[]       @relation("HealthcareFacilityLicenseDecision")
   benefitEligibilityHumanDecisions  BenefitEligibilityAssessment[]    @relation("BenefitEligibilityHumanDecision")
   benefitAwards                     BenefitAward[]                    @relation("BenefitAwardDecision")
   benefitAwardVersions              BenefitAwardVersion[]             @relation("BenefitAwardVersionDecision")
@@ -5768,6 +5830,8 @@ model IssuanceEvent {
   authorityEvaluationRecord   AuthorityEvaluationRecord   @relation(fields: [authorityEvaluationRecordId], references: [id])
   numberingReservation        InstrumentNumberReservation @relation(fields: [numberingReservationId], references: [id])
   civilRegistryCertificateExtracts CivilRegistryCertificateExtract[]
+  healthcareProfessionalLicenses   HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses       HealthcareFacilityLicense[]
 
   @@index([officialInstrumentId])
   @@index([governmentDecisionId])
@@ -13607,8 +13671,8 @@ model ServiceAppointment {
   immigrationInterview         ImmigrationInterview?
   biometricRequirement         BiometricRequirement?
   driverTestRecord             DriverTestRecord?
-  treatmentAppointmentReference TreatmentAppointmentReference?
 
+  treatmentAppointmentReference TreatmentAppointmentReference?
   @@index([status])
   @@index([institutionId])
   @@index([departmentId])
@@ -20116,6 +20180,616 @@ model CustomsExternalDependency {
   @@index([customsDeclarationId])
   @@map("customs_external_dependencies")
 }
+// ─── Healthcare & Regulated Science domain (append to schema.prisma) ─────────
+
+enum HealthcareDataCategory {
+  GENERAL_HEALTH
+  CLINICAL
+  MEDICATION
+  LABORATORY
+  IMAGING
+  GENETIC
+  REPRODUCTIVE
+  MENTAL_HEALTH
+  SUBSTANCE_USE
+  RESEARCH
+  HIGHLY_RESTRICTED
+}
+
+enum HealthcareDataAccessPurpose {
+  PATIENT_SELF
+  GUARDIAN_OR_LEGAL_REPRESENTATIVE
+  TREATING_PROVIDER
+  CARE_TEAM
+  CLINICAL_RESEARCH
+  REGULATORY_OVERSIGHT
+  EMERGENCY_BREAK_GLASS
+  EXPLICIT_PURPOSE_BOUND
+  OTHER_CONFIGURED
+}
+
+enum HealthcareOrganizationStatus {
+  DRAFT
+  REGISTERED
+  SUSPENDED
+  CLOSED
+}
+
+enum HealthcareProfessionalRecordStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum HealthcareLicenseStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum HealthcareRegistryEntryStatus {
+  DRAFT
+  OFFICIAL
+  SUPERSEDED
+}
+
+enum HealthcareRegistryVerificationState {
+  UNVERIFIED
+  VERIFIED
+  FAILED
+  REVOKED
+}
+
+enum HealthcareRegulatoryStatusKind {
+  COMPLIANT
+  CONDITIONAL
+  NON_COMPLIANT
+  UNDER_REVIEW
+  SUSPENDED
+  OTHER_CONFIGURED
+}
+
+enum HealthcarePatientRelationshipKind {
+  SELF
+  GUARDIAN
+  LEGAL_REPRESENTATIVE
+  TREATING_PROVIDER
+  CARE_TEAM_MEMBER
+  CLINICAL_RESEARCH_CONTACT
+  REGULATORY_CONTACT
+  OTHER_CONFIGURED
+}
+
+enum HealthcareBreakGlassSessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  PENDING_POST_ACCESS_REVIEW
+  REVIEWED
+}
+
+enum HealthcareAccessAuditEventType {
+  SENSITIVE_READ
+  SEARCH
+  BREAK_GLASS_ACTIVATED
+  BREAK_GLASS_READ
+  POLICY_DENIED
+}
+
+enum HealthcareAccessDecision {
+  ALLOW
+  DENY
+}
+
+enum HealthcareAccreditationSubjectKind {
+  ORGANIZATION
+  FACILITY
+}
+
+enum HealthcareRegistrySubjectKind {
+  PATIENT
+  PROFESSIONAL
+  ORGANIZATION
+  FACILITY
+}
+
+model HealthcareJurisdictionPrivacyHook {
+  id                         String       @id @default(uuid()) @db.Uuid
+  jurisdictionId             String       @db.Uuid
+  configurationKey           String
+  externalPolicyPackReference String
+  description                String?
+  configurationMetadata      Json         @default("{}")
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+  jurisdiction               Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+  accessPolicies             HealthcareDataAccessPolicy[]
+
+  @@unique([jurisdictionId, configurationKey])
+  @@index([jurisdictionId])
+  @@map("healthcare_jurisdiction_privacy_hooks")
+}
+
+model HealthcareOrganization {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  organizationReference   String                       @unique
+  jurisdictionId          String                       @db.Uuid
+  institutionId           String?                      @db.Uuid
+  platformOrganizationId  String?                      @db.Uuid
+  registeredName          String
+  status                  HealthcareOrganizationStatus @default(DRAFT)
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  jurisdiction            Jurisdiction                 @relation(fields: [jurisdictionId], references: [id])
+  institution             Institution?                 @relation(fields: [institutionId], references: [id])
+  platformOrganization    Organization?                @relation("HealthcareOrganizationPlatformOrg", fields: [platformOrganizationId], references: [id])
+  facilities              HealthcareFacility[]
+  serviceLocations        HealthcareServiceLocation[]
+  accreditations          HealthcareAccreditation[]    @relation("HealthcareAccreditationOrganization")
+  regulatoryStatuses      HealthcareRegulatoryStatus[] @relation("HealthcareRegulatoryStatusOrganization")
+  registryEntries         HealthcareRegistryEntry[]    @relation("HealthcareRegistryEntryOrganization")
+  patientRelationships    PatientHealthcareRelationship[]
+
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([platformOrganizationId])
+  @@index([status])
+  @@map("healthcare_organizations")
+}
+
+model HealthcareFacilityType {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  facilities HealthcareFacility[]
+
+  @@map("healthcare_facility_types")
+}
+
+model HealthcareFacility {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  facilityReference       String                       @unique
+  healthcareOrganizationId String                      @db.Uuid
+  facilityTypeId          String                       @db.Uuid
+  displayName             String
+  operationalStatus       HealthcareOrganizationStatus @default(DRAFT)
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  healthcareOrganization  HealthcareOrganization       @relation(fields: [healthcareOrganizationId], references: [id], onDelete: Restrict)
+  facilityType            HealthcareFacilityType       @relation(fields: [facilityTypeId], references: [id])
+  serviceLocations        HealthcareServiceLocation[]
+  accreditations          HealthcareAccreditation[]    @relation("HealthcareAccreditationFacility")
+  regulatoryStatuses      HealthcareRegulatoryStatus[] @relation("HealthcareRegulatoryStatusFacility")
+  facilityLicenses        HealthcareFacilityLicense[]
+  registryEntries         HealthcareRegistryEntry[]    @relation("HealthcareRegistryEntryFacility")
+
+  @@index([healthcareOrganizationId])
+  @@index([facilityTypeId])
+  @@map("healthcare_facilities")
+}
+
+model HealthcareServiceLocation {
+  id                       String                @id @default(uuid()) @db.Uuid
+  locationReference        String                @unique
+  healthcareOrganizationId String                @db.Uuid
+  healthcareFacilityId     String?               @db.Uuid
+  label                    String
+  isVirtual                Boolean               @default(false)
+  addressSummary           String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  healthcareOrganization   HealthcareOrganization @relation(fields: [healthcareOrganizationId], references: [id], onDelete: Restrict)
+  healthcareFacility       HealthcareFacility?   @relation(fields: [healthcareFacilityId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@map("healthcare_service_locations")
+}
+
+model HealthcareProfessionalType {
+  id            String                  @id @default(uuid()) @db.Uuid
+  code          String                  @unique
+  label         String
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  professionals HealthcareProfessional[]
+
+  @@map("healthcare_professional_types")
+}
+
+model HealthcareProfessional {
+  id                      String                             @id @default(uuid()) @db.Uuid
+  professionalReference   String                             @unique
+  professionalTypeId      String                             @db.Uuid
+  linkedPlatformIdentityId String?                           @db.Uuid
+  personId                String?                            @db.Uuid
+  recordStatus            HealthcareProfessionalRecordStatus @default(DRAFT)
+  createdAt               DateTime                           @default(now())
+  updatedAt               DateTime                           @updatedAt
+  professionalType        HealthcareProfessionalType         @relation(fields: [professionalTypeId], references: [id])
+  linkedPlatformIdentity  Identity?                          @relation("HealthcareProfessionalPlatformIdentity", fields: [linkedPlatformIdentityId], references: [id])
+  person                  Person?                            @relation(fields: [personId], references: [id])
+  licenses                HealthcareProfessionalLicense[]
+  specialties             HealthcareProfessionalSpecialty[]
+  credentialReferences    HealthcareProfessionalCredentialReference[]
+  statusHistory           HealthcareProfessionalStatusHistory[]
+  regulatoryStatuses      HealthcareRegulatoryStatus[]       @relation("HealthcareRegulatoryStatusProfessional")
+  registryEntries         HealthcareRegistryEntry[]          @relation("HealthcareRegistryEntryProfessional")
+  patientRelationships    PatientHealthcareRelationship[]    @relation("PatientRelationshipProfessional")
+  consentsGranted         HealthcareDataAccessConsent[]      @relation("HealthcareConsentProfessional")
+
+  @@index([professionalTypeId])
+  @@index([linkedPlatformIdentityId])
+  @@index([personId])
+  @@index([recordStatus])
+  @@map("healthcare_professionals")
+}
+
+model HealthcareProfessionalLicense {
+  id                          String                @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId    String                @db.Uuid
+  licenseReference            String                @unique
+  licenseTypeCode             String
+  status                      HealthcareLicenseStatus @default(PENDING)
+  issuedAt                    DateTime?
+  expiresAt                   DateTime?
+  applicationId               String?               @db.Uuid
+  caseId                      String?               @db.Uuid
+  governmentServiceId         String?               @db.Uuid
+  governmentDecisionId        String?               @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  issuanceEventId             String?               @db.Uuid
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  healthcareProfessional      HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Restrict)
+  application                 Application?          @relation(fields: [applicationId], references: [id])
+  case                        Case?                 @relation(fields: [caseId], references: [id])
+  governmentService           GovernmentService?    @relation(fields: [governmentServiceId], references: [id])
+  governmentDecision          GovernmentDecision?   @relation("HealthcareProfessionalLicenseDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("HealthcareProfessionalLicenseAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  issuanceEvent               IssuanceEvent?        @relation(fields: [issuanceEventId], references: [id])
+
+  @@index([healthcareProfessionalId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("healthcare_professional_licenses")
+}
+
+model HealthcareProfessionalSpecialty {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String                 @db.Uuid
+  specialtyCode          String
+  effectiveFrom          DateTime               @default(now())
+  effectiveTo            DateTime?
+  createdAt              DateTime               @default(now())
+  healthcareProfessional HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_specialties")
+}
+
+model HealthcareProfessionalCredentialReference {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String               @db.Uuid
+  credentialKind         String
+  externalReference      String
+  recordedAt             DateTime               @default(now())
+  healthcareProfessional HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_credential_references")
+}
+
+model HealthcareProfessionalStatusHistory {
+  id                     String                             @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String                           @db.Uuid
+  fromStatus             HealthcareProfessionalRecordStatus?
+  toStatus               HealthcareProfessionalRecordStatus
+  changedAt              DateTime                           @default(now())
+  actorIdentityId        String?                            @db.Uuid
+  reasonSummary          String?
+  healthcareProfessional HealthcareProfessional             @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+  actorIdentity          Identity?                          @relation("HealthcareProfessionalStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_status_history")
+}
+
+model HealthcareAccreditation {
+  id                       String                           @id @default(uuid()) @db.Uuid
+  subjectKind              HealthcareAccreditationSubjectKind
+  healthcareOrganizationId String?                          @db.Uuid
+  healthcareFacilityId     String?                          @db.Uuid
+  accreditationBodyReference String
+  statusCode               String
+  effectiveFrom            DateTime
+  effectiveTo              DateTime?
+  createdAt                DateTime                         @default(now())
+  healthcareOrganization   HealthcareOrganization?          @relation("HealthcareAccreditationOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility       HealthcareFacility?              @relation("HealthcareAccreditationFacility", fields: [healthcareFacilityId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@map("healthcare_accreditations")
+}
+
+model HealthcareFacilityLicense {
+  id                          String                @id @default(uuid()) @db.Uuid
+  healthcareFacilityId        String                @db.Uuid
+  licenseReference            String                @unique
+  licenseTypeCode             String
+  status                      HealthcareLicenseStatus @default(PENDING)
+  issuedAt                    DateTime?
+  expiresAt                   DateTime?
+  applicationId               String?               @db.Uuid
+  caseId                      String?               @db.Uuid
+  governmentServiceId         String?               @db.Uuid
+  governmentDecisionId        String?               @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  issuanceEventId             String?               @db.Uuid
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  healthcareFacility          HealthcareFacility    @relation(fields: [healthcareFacilityId], references: [id], onDelete: Restrict)
+  application                 Application?          @relation(fields: [applicationId], references: [id])
+  case                        Case?                 @relation(fields: [caseId], references: [id])
+  governmentService           GovernmentService?    @relation(fields: [governmentServiceId], references: [id])
+  governmentDecision          GovernmentDecision?   @relation("HealthcareFacilityLicenseDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("HealthcareFacilityLicenseAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  issuanceEvent               IssuanceEvent?        @relation(fields: [issuanceEventId], references: [id])
+
+  @@index([healthcareFacilityId])
+  @@index([status])
+  @@map("healthcare_facility_licenses")
+}
+
+model HealthcareRegulatoryStatus {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  statusKind               HealthcareRegulatoryStatusKind
+  healthcareOrganizationId String?                      @db.Uuid
+  healthcareFacilityId     String?                      @db.Uuid
+  healthcareProfessionalId String?                      @db.Uuid
+  regulatoryAuthorityReference String
+  effectiveFrom            DateTime
+  effectiveTo              DateTime?
+  createdAt                DateTime                     @default(now())
+  healthcareOrganization   HealthcareOrganization?      @relation("HealthcareRegulatoryStatusOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility       HealthcareFacility?          @relation("HealthcareRegulatoryStatusFacility", fields: [healthcareFacilityId], references: [id])
+  healthcareProfessional   HealthcareProfessional?      @relation("HealthcareRegulatoryStatusProfessional", fields: [healthcareProfessionalId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_regulatory_statuses")
+}
+
+model PatientHealthIdentity {
+  id                       String                        @id @default(uuid()) @db.Uuid
+  patientReference         String                        @unique
+  jurisdictionId           String                        @db.Uuid
+  linkedPlatformIdentityId String?                       @db.Uuid
+  personId                 String?                       @db.Uuid
+  isActive                 Boolean                       @default(true)
+  createdAt                DateTime                      @default(now())
+  updatedAt                DateTime                      @updatedAt
+  jurisdiction             Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  linkedPlatformIdentity   Identity?                     @relation("PatientHealthIdentityPlatformIdentity", fields: [linkedPlatformIdentityId], references: [id])
+  person                   Person?                       @relation(fields: [personId], references: [id])
+  relationships            PatientHealthcareRelationship[]
+  identifierReferences     HealthcareIdentifierReference[]
+  registryEntries          HealthcareRegistryEntry[]     @relation("HealthcareRegistryEntryPatient")
+  consents                 HealthcareDataAccessConsent[]
+  breakGlassSessions       HealthcareBreakGlassAccessSession[]
+  accessAuditEvents        HealthcareAccessAuditEvent[]
+
+  @@index([jurisdictionId])
+  @@index([linkedPlatformIdentityId])
+  @@index([personId])
+  @@map("patient_health_identities")
+}
+
+model PatientHealthcareRelationship {
+  id                       String                            @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId  String                            @db.Uuid
+  relationshipKind         HealthcarePatientRelationshipKind
+  relatedPlatformIdentityId String?                          @db.Uuid
+  healthcareProfessionalId String?                           @db.Uuid
+  healthcareOrganizationId String?                           @db.Uuid
+  effectiveFrom            DateTime                          @default(now())
+  effectiveTo              DateTime?
+  purposeScope             Json                              @default("{}")
+  createdAt                DateTime                          @default(now())
+  patientHealthIdentity    PatientHealthIdentity             @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+  relatedPlatformIdentity  Identity?                         @relation("PatientRelationshipPlatformIdentity", fields: [relatedPlatformIdentityId], references: [id])
+  healthcareProfessional   HealthcareProfessional?           @relation("PatientRelationshipProfessional", fields: [healthcareProfessionalId], references: [id])
+  healthcareOrganization   HealthcareOrganization?           @relation(fields: [healthcareOrganizationId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@index([relatedPlatformIdentityId])
+  @@index([healthcareProfessionalId])
+  @@index([healthcareOrganizationId])
+  @@map("patient_healthcare_relationships")
+}
+
+model HealthcareIdentifierReference {
+  id                      String              @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId String              @db.Uuid
+  identifierSystem        String
+  identifierValue         String
+  isPrimary               Boolean             @default(false)
+  createdAt               DateTime            @default(now())
+  patientHealthIdentity   PatientHealthIdentity @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+
+  @@unique([identifierSystem, identifierValue])
+  @@index([patientHealthIdentityId])
+  @@map("healthcare_identifier_references")
+}
+
+model HealthcareRegistryEntry {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  entryReference              String                        @unique
+  subjectKind                 HealthcareRegistrySubjectKind
+  patientHealthIdentityId     String?                       @db.Uuid
+  healthcareProfessionalId    String?                       @db.Uuid
+  healthcareOrganizationId    String?                       @db.Uuid
+  healthcareFacilityId        String?                       @db.Uuid
+  jurisdictionId              String                        @db.Uuid
+  institutionId               String                        @db.Uuid
+  caseId                      String                        @db.Uuid
+  governmentDecisionId        String                        @db.Uuid
+  authorityEvaluationRecordId String                        @db.Uuid
+  status                      HealthcareRegistryEntryStatus @default(DRAFT)
+  registeredAt                DateTime?
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  patientHealthIdentity       PatientHealthIdentity?        @relation("HealthcareRegistryEntryPatient", fields: [patientHealthIdentityId], references: [id])
+  healthcareProfessional      HealthcareProfessional?       @relation("HealthcareRegistryEntryProfessional", fields: [healthcareProfessionalId], references: [id])
+  healthcareOrganization      HealthcareOrganization?       @relation("HealthcareRegistryEntryOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility          HealthcareFacility?           @relation("HealthcareRegistryEntryFacility", fields: [healthcareFacilityId], references: [id])
+  jurisdiction                Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  institution                 Institution                   @relation(fields: [institutionId], references: [id])
+  case                        Case                          @relation(fields: [caseId], references: [id])
+  governmentDecision          GovernmentDecision            @relation("HealthcareRegistryEntryDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord     @relation("HealthcareRegistryEntryAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  verifications               HealthcareRegistryVerification[]
+  statusHistory               HealthcareRegistryStatusHistory[]
+
+  @@index([patientHealthIdentityId])
+  @@index([healthcareProfessionalId])
+  @@index([healthcareOrganizationId])
+  @@index([caseId])
+  @@index([status])
+  @@map("healthcare_registry_entries")
+}
+
+model HealthcareRegistryVerification {
+  id                      String                            @id @default(uuid()) @db.Uuid
+  healthcareRegistryEntryId String                          @db.Uuid
+  verificationState       HealthcareRegistryVerificationState
+  methodReference         String
+  verifiedAt              DateTime?
+  verifiedByIdentityId    String?                           @db.Uuid
+  createdAt               DateTime                          @default(now())
+  healthcareRegistryEntry HealthcareRegistryEntry           @relation(fields: [healthcareRegistryEntryId], references: [id], onDelete: Cascade)
+  verifiedByIdentity      Identity?                         @relation("HealthcareRegistryVerifierIdentity", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([healthcareRegistryEntryId])
+  @@map("healthcare_registry_verifications")
+}
+
+model HealthcareRegistryStatusHistory {
+  id                      String                        @id @default(uuid()) @db.Uuid
+  healthcareRegistryEntryId String                      @db.Uuid
+  fromStatus              HealthcareRegistryEntryStatus?
+  toStatus                HealthcareRegistryEntryStatus
+  changedAt               DateTime                      @default(now())
+  reasonSummary           String?
+  healthcareRegistryEntry HealthcareRegistryEntry       @relation(fields: [healthcareRegistryEntryId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareRegistryEntryId])
+  @@map("healthcare_registry_status_history")
+}
+
+model HealthcareDataAccessPolicy {
+  id                              String                      @id @default(uuid()) @db.Uuid
+  policyKey                       String                      @unique
+  jurisdictionPrivacyHookId       String?                     @db.Uuid
+  institutionId                   String?                     @db.Uuid
+  accessPurpose                   HealthcareDataAccessPurpose
+  allowedDataCategories           HealthcareDataCategory[]
+  allowedRelationshipKinds        HealthcarePatientRelationshipKind[]
+  requiresExplicitConsent         Boolean                     @default(false)
+  requiresActiveProfessionalLicense Boolean                   @default(false)
+  requiresTreatingRelationship    Boolean                     @default(false)
+  requiresInstitutionMembership   Boolean                     @default(false)
+  legalOrRegulatoryBasisReference String?
+  priority                        Int                         @default(100)
+  effectiveFrom                   DateTime                    @default(now())
+  effectiveTo                     DateTime?
+  createdAt                       DateTime                    @default(now())
+  updatedAt                       DateTime                    @updatedAt
+  jurisdictionPrivacyHook         HealthcareJurisdictionPrivacyHook? @relation(fields: [jurisdictionPrivacyHookId], references: [id])
+  institution                     Institution?                @relation(fields: [institutionId], references: [id])
+  accessAuditEvents               HealthcareAccessAuditEvent[]
+
+  @@index([accessPurpose])
+  @@index([institutionId])
+  @@map("healthcare_data_access_policies")
+}
+
+model HealthcareDataAccessConsent {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId  String                      @db.Uuid
+  grantedToPlatformIdentityId String?                  @db.Uuid
+  grantedToProfessionalId  String?                     @db.Uuid
+  purpose                  HealthcareDataAccessPurpose
+  dataCategories           HealthcareDataCategory[]
+  legalBasisReference      String?
+  effectiveFrom            DateTime                    @default(now())
+  effectiveTo              DateTime?
+  revokedAt                DateTime?
+  createdAt                DateTime                    @default(now())
+  patientHealthIdentity    PatientHealthIdentity       @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+  grantedToPlatformIdentity Identity?                  @relation("HealthcareConsentPlatformIdentity", fields: [grantedToPlatformIdentityId], references: [id])
+  grantedToProfessional    HealthcareProfessional?     @relation("HealthcareConsentProfessional", fields: [grantedToProfessionalId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@map("healthcare_data_access_consents")
+}
+
+model HealthcareBreakGlassAccessSession {
+  id                      String                          @id @default(uuid()) @db.Uuid
+  sessionReference        String                          @unique
+  actorIdentityId         String                          @db.Uuid
+  patientHealthIdentityId String                          @db.Uuid
+  resourceScope           Json                            @default("{}")
+  reasonSummary           String
+  policyBasisReference    String
+  expiresAt               DateTime
+  status                  HealthcareBreakGlassSessionStatus @default(ACTIVE)
+  requiresPostAccessReview Boolean                        @default(true)
+  activatedAt             DateTime                        @default(now())
+  revokedAt               DateTime?
+  reviewedAt              DateTime?
+  actorIdentity           Identity                        @relation("HealthcareBreakGlassActor", fields: [actorIdentityId], references: [id])
+  patientHealthIdentity   PatientHealthIdentity           @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Restrict)
+  accessAuditEvents       HealthcareAccessAuditEvent[]
+
+  @@index([actorIdentityId])
+  @@index([patientHealthIdentityId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("healthcare_break_glass_access_sessions")
+}
+
+model HealthcareAccessAuditEvent {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  eventType               HealthcareAccessAuditEventType
+  decision                HealthcareAccessDecision
+  actorIdentityId         String?                        @db.Uuid
+  patientHealthIdentityId String?                        @db.Uuid
+  dataCategory            HealthcareDataCategory?
+  accessPurpose           HealthcareDataAccessPurpose?
+  policyId                String?                        @db.Uuid
+  breakGlassSessionId     String?                        @db.Uuid
+  metadata                Json                           @default("{}")
+  recordedAt              DateTime                       @default(now())
+  actorIdentity           Identity?                      @relation("HealthcareAccessAuditActor", fields: [actorIdentityId], references: [id])
+  patientHealthIdentity   PatientHealthIdentity?         @relation(fields: [patientHealthIdentityId], references: [id])
+  policy                  HealthcareDataAccessPolicy?    @relation(fields: [policyId], references: [id])
+  breakGlassSession       HealthcareBreakGlassAccessSession? @relation(fields: [breakGlassSessionId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@index([actorIdentityId])
+  @@index([eventType])
+  @@index([recordedAt])
+  @@map("healthcare_access_audit_events")
+}
+
 // ─── Social Protection, Public Benefits & Citizen Support Foundation ─────────
 
 enum SocialProtectionDataClassification {
@@ -20844,6 +21518,7 @@ model SocialProtectionAppealReference {
   @@index([benefitAwardId])
   @@index([redressMatterId])
   @@map("social_protection_appeal_references")
+
 }
 // ─── Education Government vertical (jurisdiction-neutral foundation) ───────────
 
@@ -21288,6 +21963,899 @@ model EducationExternalDependency {
   @@index([studentProfileId])
   @@map("education_external_dependencies")
 }
+// ─── Public Safety & Emergency Government Service Pack ───────────────────────
+
+enum PublicSafetyEngagementStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum PublicSafetyVerificationStatus {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum PublicSafetyServiceRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  CLOSED
+}
+
+enum PublicSafetyServiceRequestKind {
+  SUBMIT_INCIDENT_REPORT
+  REQUEST_EMERGENCY_ASSISTANCE
+  DISASTER_IMPACT_REPORT
+  DISASTER_RELIEF_INTAKE
+  PUBLIC_SAFETY_PERMIT_APPLICATION
+  FIRE_SAFETY_INSPECTION_REQUEST
+  EMERGENCY_INSPECTION_REQUEST
+  EMERGENCY_DOCUMENT_REPLACEMENT
+  INFRASTRUCTURE_DISRUPTION_REPORT
+  EMERGENCY_SHELTER_ASSISTANCE_INFO
+  RECOVERY_ASSISTANCE_APPLICATION
+  PUBLIC_SAFETY_DECISION_REVIEW_APPEAL
+}
+
+enum PublicSafetyEmergencyEventStatus {
+  INFORMATIONAL
+  ACTIVE_MONITORING
+  RESPONSE_COORDINATION
+  RECOVERY
+  CLOSED
+}
+
+enum PublicSafetyOfficialNoticeStatus {
+  DRAFT
+  APPROVED
+  PUBLISHED
+  WITHDRAWN
+}
+
+enum PublicSafetyInspectionRequestStatus {
+  REQUESTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum PublicSafetyExternalDependencyStatus {
+  PENDING
+  REFERRED
+  SATISFIED
+  BLOCKED
+}
+
+enum PublicSafetyCommunicationDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model PublicSafetyEngagement {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  jurisdictionId          String                       @db.Uuid
+  engagementReference     String                       @unique
+  reporterIdentityId      String?                      @db.Uuid
+  organizationId          String?                      @db.Uuid
+  responsibleDepartmentId String?                      @db.Uuid
+  status                  PublicSafetyEngagementStatus @default(ACTIVE)
+  ruleEnvironment         String                       @default("NON_PRODUCTION")
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  jurisdiction            Jurisdiction                 @relation(fields: [jurisdictionId], references: [id])
+  reporterIdentity        Identity?                    @relation("PublicSafetyEngagementReporter", fields: [reporterIdentityId], references: [id])
+  organization            Organization?                @relation(fields: [organizationId], references: [id])
+  responsibleDepartment   Department?                  @relation(fields: [responsibleDepartmentId], references: [id])
+  serviceRequests         PublicSafetyServiceRequest[]
+  incidentReports         PublicSafetyIncidentReport[]
+  recoveryApplications    PublicSafetyRecoveryAssistanceApplication[]
+  inspectionRequests      PublicSafetyInspectionRequest[]
+  externalDependencies    PublicSafetyExternalDependency[]
+  communicationDeliveries PublicSafetyCommunicationDelivery[]
+
+  @@index([jurisdictionId])
+  @@index([reporterIdentityId])
+  @@index([organizationId])
+  @@index([responsibleDepartmentId])
+  @@index([status])
+  @@map("public_safety_engagements")
+}
+
+model PublicSafetyServiceRequest {
+  id                  String                           @id @default(uuid()) @db.Uuid
+  engagementId        String                           @db.Uuid
+  requestReference    String                           @unique
+  serviceTemplateCode String
+  requestKind         PublicSafetyServiceRequestKind
+  status              PublicSafetyServiceRequestStatus @default(SUBMITTED)
+  submittedAt         DateTime?
+  createdAt           DateTime                         @default(now())
+  updatedAt           DateTime                         @updatedAt
+  engagement          PublicSafetyEngagement           @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  incidentReport      PublicSafetyIncidentReport?
+  recoveryApplication PublicSafetyRecoveryAssistanceApplication?
+
+  @@index([engagementId])
+  @@index([requestKind])
+  @@index([status])
+  @@map("public_safety_service_requests")
+}
+
+model PublicSafetyIncidentReport {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  engagementId             String                         @db.Uuid
+  serviceRequestId         String?                        @unique @db.Uuid
+  incidentReference        String                         @unique
+  verificationStatus       PublicSafetyVerificationStatus @default(UNVERIFIED)
+  reporterIdentityId       String?                        @db.Uuid
+  summaryLabel             String
+  locationDescription      String?
+  protectsReporterIdentity Boolean                        @default(true)
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  engagement               PublicSafetyEngagement         @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  serviceRequest           PublicSafetyServiceRequest?    @relation(fields: [serviceRequestId], references: [id])
+  reporterIdentity         Identity?                      @relation("PublicSafetyIncidentReporter", fields: [reporterIdentityId], references: [id])
+
+  @@index([engagementId])
+  @@index([verificationStatus])
+  @@map("public_safety_incident_reports")
+}
+
+model PublicSafetyRecoveryAssistanceApplication {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  engagementId         String                      @db.Uuid
+  serviceRequestId     String?                     @unique @db.Uuid
+  applicationReference String                      @unique
+  programCode          String
+  status               PublicSafetyServiceRequestStatus @default(SUBMITTED)
+  submittedAt          DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  engagement           PublicSafetyEngagement      @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  serviceRequest       PublicSafetyServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_recovery_assistance_applications")
+}
+
+model PublicSafetyEmergencyEvent {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  jurisdictionId          String                           @db.Uuid
+  eventReference          String                           @unique
+  title                   String
+  status                  PublicSafetyEmergencyEventStatus @default(INFORMATIONAL)
+  isOfficialDeclaration   Boolean                          @default(false)
+  publicSummary           String?
+  verifiedImpactSummary   String?
+  serviceInterruptionNote String?
+  createdAt               DateTime                         @default(now())
+  updatedAt               DateTime                         @updatedAt
+  jurisdiction            Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("public_safety_emergency_events")
+}
+
+model PublicSafetyOfficialNotice {
+  id                        String                           @id @default(uuid()) @db.Uuid
+  jurisdictionId            String                           @db.Uuid
+  noticeReference           String                           @unique
+  status                    PublicSafetyOfficialNoticeStatus @default(DRAFT)
+  draftContent              String
+  approvedContent           String?
+  publishedContent          String?
+  approvedByOfficeholderId  String?                          @db.Uuid
+  publishedByOfficeholderId String?                          @db.Uuid
+  approvedAt                DateTime?
+  publishedAt               DateTime?
+  createdAt                 DateTime                         @default(now())
+  updatedAt                 DateTime                         @updatedAt
+  jurisdiction              Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+  approvedByOfficeholder    Officeholder?                    @relation("PublicSafetyNoticeApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
+  publishedByOfficeholder   Officeholder?                    @relation("PublicSafetyNoticePublisherOfficeholder", fields: [publishedByOfficeholderId], references: [id])
+
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("public_safety_official_notices")
+}
+
+model PublicSafetyInspectionRequest {
+  id                  String                            @id @default(uuid()) @db.Uuid
+  engagementId        String                            @db.Uuid
+  inspectionReference String                            @unique
+  inspectionKind      String
+  status              PublicSafetyInspectionRequestStatus @default(REQUESTED)
+  facilityLabel       String?
+  scheduledAt         DateTime?
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @updatedAt
+  engagement          PublicSafetyEngagement            @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_inspection_requests")
+}
+
+model PublicSafetyExternalDependency {
+  id                         String                               @id @default(uuid()) @db.Uuid
+  engagementId               String                               @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String
+  status                     PublicSafetyExternalDependencyStatus @default(PENDING)
+  externalAuthorityReference String?
+  createdAt                  DateTime                             @default(now())
+  updatedAt                  DateTime                             @updatedAt
+  engagement                 PublicSafetyEngagement               @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_external_dependencies")
+}
+
+model PublicSafetyCommunicationDelivery {
+  id             String                                  @id @default(uuid()) @db.Uuid
+  engagementId   String                                  @db.Uuid
+  channel        String
+  templateCode   String?
+  status         PublicSafetyCommunicationDeliveryStatus @default(PENDING)
+  deliveredAt    DateTime?
+  createdAt      DateTime                                @default(now())
+  updatedAt      DateTime                                @updatedAt
+  engagement     PublicSafetyEngagement                  @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_communication_deliveries")
+}
+
+
+// --- Clinical trial registry & clinical research enrollment foundation ---
+
+enum ClinicalResearchDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_PARTICIPANT
+  PROTECTED_HEALTH
+}
+
+enum ClinicalTrialListingLifecycleStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED_FOR_LISTING
+  RECRUITING
+  ACTIVE_NOT_RECRUITING
+  SUSPENDED
+  TERMINATED
+  COMPLETED
+  ARCHIVED
+}
+
+enum ClinicalTrialRecruitmentStatus {
+  NOT_YET_RECRUITING
+  RECRUITING
+  ENROLLING_BY_INVITATION
+  ACTIVE_NOT_RECRUITING
+  COMPLETED
+  SUSPENDED
+  WITHDRAWN
+  UNKNOWN
+}
+
+enum PreliminaryTrialMatchOutcome {
+  POTENTIAL_MATCH
+  NOT_ENOUGH_INFORMATION
+  LIKELY_NOT_MATCH
+}
+
+enum ClinicalTrialEligibilityAssessmentOutcome {
+  INCOMPLETE
+  DETERMINED_MEETS_PROFESSIONAL_CRITERIA
+  DETERMINED_DOES_NOT_MEET
+  INCONCLUSIVE_REQUIRES_FOLLOWUP
+}
+
+enum ClinicalTrialScreeningReviewOutcome {
+  PENDING
+  PROCEED_TO_CONSENT
+  DECLINED_BY_PARTICIPANT
+  INELIGIBLE_BY_PROFESSIONAL_REVIEW
+  REQUIRES_ADDITIONAL_INFORMATION
+}
+
+enum ResearchEthicsApprovalStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  CONDITIONALLY_APPROVED
+  SUSPENDED
+  EXPIRED
+  WITHDRAWN
+  NOT_APPROVED
+}
+
+enum ClinicalRegulatoryApprovalStatus {
+  NOT_REQUIRED
+  PENDING
+  AUTHORIZED
+  CONDITIONALLY_AUTHORIZED
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum ClinicalTrialInterestStatus {
+  EXPRESSED
+  WITHDRAWN
+  CLOSED
+}
+
+enum ClinicalTrialScreeningStatus {
+  AUTHORIZED
+  IN_PROGRESS
+  PENDING_PROFESSIONAL_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum ClinicalTrialConsentSignatureStatus {
+  PENDING
+  SIGNED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum ClinicalTrialEnrollmentStatus {
+  PENDING
+  ENROLLED
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+  SUSPENDED
+}
+
+enum ClinicalTrialWithdrawalReasonCategory {
+  PARTICIPANT_REQUEST
+  INVESTIGATOR_DECISION
+  SAFETY
+  PROTOCOL_DEVIATION
+  LOST_TO_FOLLOWUP
+  OTHER_DOCUMENTED
+}
+
+enum ClinicalResearchActorPersona {
+  CITIZEN
+  PARTICIPANT
+  TRIAL_SPONSOR
+  SITE_COORDINATOR
+  INVESTIGATOR
+  ETHICS_COMMITTEE
+  REGULATORY_AUTHORITY
+  AUTHORIZED_PROFESSIONAL
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  SYSTEM
+}
+
+model ClinicalTrialPhaseReference {
+  id           String          @id @default(uuid()) @db.Uuid
+  code         String          @unique
+  label        String
+  description  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_phase_references")
+}
+
+model ClinicalTrialConditionReference {
+  id             String          @id @default(uuid()) @db.Uuid
+  code           String          @unique
+  label          String
+  categoryCode   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_condition_references")
+}
+
+model ClinicalTrialInterventionReference {
+  id             String          @id @default(uuid()) @db.Uuid
+  code           String          @unique
+  label          String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  clinicalTrials ClinicalTrial[]
+
+  @@map("clinical_trial_intervention_references")
+}
+
+model ClinicalTrialSponsor {
+  id                     String          @id @default(uuid()) @db.Uuid
+  sponsorReference       String          @unique
+  institutionId          String?         @db.Uuid
+  organizationIdentityId String?         @db.Uuid
+  displayName            String
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  institution            Institution?    @relation(fields: [institutionId], references: [id])
+  organizationIdentity   Identity?       @relation("ClinicalTrialSponsorOrganization", fields: [organizationIdentityId], references: [id])
+  clinicalTrials         ClinicalTrial[]
+
+  @@map("clinical_trial_sponsors")
+}
+
+model ClinicalTrial {
+  id                             String                            @id @default(uuid()) @db.Uuid
+  trialNumber                    String                            @unique
+  jurisdictionId                 String                            @db.Uuid
+  sponsorId                      String                            @db.Uuid
+  listingLifecycleStatus         ClinicalTrialListingLifecycleStatus @default(DRAFT)
+  recruitmentStatus              ClinicalTrialRecruitmentStatus    @default(NOT_YET_RECRUITING)
+  phaseReferenceId               String?                           @db.Uuid
+  conditionReferenceId           String?                           @db.Uuid
+  interventionReferenceId        String?                           @db.Uuid
+  minimumAgeYears                Int?
+  maximumAgeYears                Int?
+  locationSummary                String?
+  isPubliclyDiscoverable         Boolean                           @default(false)
+  listingIsNotRegulatoryApproval Boolean                           @default(true)
+  discoveryIsNotRecommendation   Boolean                           @default(true)
+  currentTrialVersionId          String?                           @unique @db.Uuid
+  currentProtocolVersionId       String?                           @unique @db.Uuid
+  createdAt                      DateTime                          @default(now())
+  updatedAt                      DateTime                          @updatedAt
+  jurisdiction                   Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  sponsor                        ClinicalTrialSponsor              @relation(fields: [sponsorId], references: [id])
+  phaseReference                 ClinicalTrialPhaseReference?      @relation(fields: [phaseReferenceId], references: [id])
+  conditionReference             ClinicalTrialConditionReference?  @relation(fields: [conditionReferenceId], references: [id])
+  interventionReference          ClinicalTrialInterventionReference? @relation(fields: [interventionReferenceId], references: [id])
+  currentTrialVersion            ClinicalTrialVersion?             @relation("ClinicalTrialCurrentVersion", fields: [currentTrialVersionId], references: [id])
+  currentProtocolVersion         ClinicalTrialProtocolVersion?     @relation("ClinicalTrialCurrentProtocolVersion", fields: [currentProtocolVersionId], references: [id])
+  trialVersions                  ClinicalTrialVersion[]            @relation("ClinicalTrialVersions")
+  protocols                      ClinicalTrialProtocol[]
+  sites                          ClinicalTrialSite[]
+  principalInvestigators         ClinicalTrialPrincipalInvestigator[]
+  ethicsApprovals                ResearchEthicsApproval[]
+  regulatoryApprovals            ClinicalRegulatoryApproval[]
+  externalRegistryReferences     ClinicalTrialExternalRegistryReference[]
+  eligibilityCriteria            ClinicalTrialEligibilityCriterion[]
+  interests                      ClinicalTrialInterest[]
+  screenings                     ClinicalTrialScreening[]
+  consents                       ClinicalTrialConsent[]
+  enrollments                    ClinicalTrialEnrollment[]
+
+  @@index([jurisdictionId])
+  @@index([recruitmentStatus])
+  @@index([listingLifecycleStatus])
+  @@map("clinical_trials")
+}
+
+model ClinicalTrialVersion {
+  id                      String          @id @default(uuid()) @db.Uuid
+  clinicalTrialId         String          @db.Uuid
+  versionNumber           Int
+  title                   String
+  publicSummary           String
+  broadEligibilitySummary String?
+  activatedAt             DateTime?
+  isImmutable             Boolean         @default(false)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  clinicalTrial           ClinicalTrial   @relation("ClinicalTrialVersions", fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  currentForTrial         ClinicalTrial?  @relation("ClinicalTrialCurrentVersion")
+
+  @@unique([clinicalTrialId, versionNumber])
+  @@map("clinical_trial_versions")
+}
+
+model ClinicalTrialProtocol {
+  id                 String                       @id @default(uuid()) @db.Uuid
+  clinicalTrialId    String                       @db.Uuid
+  protocolIdentifier String
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  clinicalTrial      ClinicalTrial                @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  versions           ClinicalTrialProtocolVersion[]
+
+  @@unique([clinicalTrialId, protocolIdentifier])
+  @@map("clinical_trial_protocols")
+}
+
+model ClinicalTrialProtocolVersion {
+  id               String                @id @default(uuid()) @db.Uuid
+  protocolId       String                @db.Uuid
+  versionNumber    Int
+  amendmentSummary String?
+  activatedAt      DateTime?
+  isActive         Boolean               @default(false)
+  isImmutable      Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  protocol         ClinicalTrialProtocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  currentForTrial  ClinicalTrial?        @relation("ClinicalTrialCurrentProtocolVersion")
+  enrollments      ClinicalTrialEnrollment[]
+
+  @@unique([protocolId, versionNumber])
+  @@map("clinical_trial_protocol_versions")
+}
+
+model ClinicalTrialSite {
+  id              String          @id @default(uuid()) @db.Uuid
+  clinicalTrialId String          @db.Uuid
+  siteReference   String
+  institutionId   String?         @db.Uuid
+  locationSummary String
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  clinicalTrial   ClinicalTrial   @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  institution     Institution?    @relation(fields: [institutionId], references: [id])
+  investigators   ClinicalTrialInvestigator[]
+  principalInvestigatorAssignments ClinicalTrialPrincipalInvestigator[]
+  enrollments     ClinicalTrialEnrollment[]
+
+  @@unique([clinicalTrialId, siteReference])
+  @@map("clinical_trial_sites")
+}
+
+model ClinicalTrialInvestigator {
+  id                     String            @id @default(uuid()) @db.Uuid
+  clinicalTrialSiteId    String            @db.Uuid
+  officeholderId         String?           @db.Uuid
+  professionalIdentityId String?           @db.Uuid
+  displayName            String
+  isActive               Boolean           @default(true)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  site                   ClinicalTrialSite @relation(fields: [clinicalTrialSiteId], references: [id], onDelete: Cascade)
+  officeholder           Officeholder?     @relation("ClinicalTrialInvestigatorOfficeholder", fields: [officeholderId], references: [id])
+  professionalIdentity   Identity?         @relation("ClinicalTrialInvestigatorIdentity", fields: [professionalIdentityId], references: [id])
+  principalInvestigatorAssignments ClinicalTrialPrincipalInvestigator[]
+
+  @@map("clinical_trial_investigators")
+}
+
+model ClinicalTrialPrincipalInvestigator {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  clinicalTrialId     String                   @db.Uuid
+  clinicalTrialSiteId String?                  @db.Uuid
+  investigatorId      String?                  @db.Uuid
+  officeholderId      String?                  @db.Uuid
+  displayName         String
+  effectiveFrom       DateTime                 @default(now())
+  effectiveTo         DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  clinicalTrial       ClinicalTrial            @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  site                ClinicalTrialSite?       @relation(fields: [clinicalTrialSiteId], references: [id])
+  investigator        ClinicalTrialInvestigator? @relation(fields: [investigatorId], references: [id])
+  officeholder        Officeholder?            @relation("ClinicalTrialPrincipalInvestigatorOfficeholder", fields: [officeholderId], references: [id])
+
+  @@map("clinical_trial_principal_investigators")
+}
+
+model ResearchEthicsApproval {
+  id                            String                       @id @default(uuid()) @db.Uuid
+  clinicalTrialId               String                       @db.Uuid
+  approvalReference             String                       @unique
+  status                        ResearchEthicsApprovalStatus @default(DRAFT)
+  currentVersionId              String?                      @unique @db.Uuid
+  blocksEnrollmentWhenInactive  Boolean                      @default(true)
+  sponsorSelfApprovalForbidden  Boolean                      @default(true)
+  ethicsIsNotRegulatoryApproval Boolean                      @default(true)
+  createdAt                     DateTime                     @default(now())
+  updatedAt                     DateTime                     @updatedAt
+  clinicalTrial                 ClinicalTrial                @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  currentVersion                ResearchEthicsApprovalVersion? @relation("ResearchEthicsApprovalCurrentVersion", fields: [currentVersionId], references: [id])
+  versions                      ResearchEthicsApprovalVersion[] @relation("ResearchEthicsApprovalVersions")
+
+  @@map("research_ethics_approvals")
+}
+
+model ResearchEthicsApprovalVersion {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  researchEthicsApprovalId String                       @db.Uuid
+  versionNumber            Int
+  committeeInstitutionId   String?                      @db.Uuid
+  approvedAt               DateTime?
+  expiresAt                DateTime?
+  documentReference        String?
+  recordedByOfficeholderId String?                      @db.Uuid
+  recordedByPersona        ClinicalResearchActorPersona
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  researchEthicsApproval   ResearchEthicsApproval       @relation("ResearchEthicsApprovalVersions", fields: [researchEthicsApprovalId], references: [id], onDelete: Cascade)
+  currentForApproval       ResearchEthicsApproval?      @relation("ResearchEthicsApprovalCurrentVersion")
+  committeeInstitution     Institution?                 @relation("ResearchEthicsCommitteeInstitution", fields: [committeeInstitutionId], references: [id])
+  recordedByOfficeholder   Officeholder?                @relation("ResearchEthicsApprovalRecorder", fields: [recordedByOfficeholderId], references: [id])
+
+  @@unique([researchEthicsApprovalId, versionNumber])
+  @@map("research_ethics_approval_versions")
+}
+
+model ClinicalRegulatoryApproval {
+  id                            String                         @id @default(uuid()) @db.Uuid
+  clinicalTrialId               String                         @db.Uuid
+  approvalReference             String                         @unique
+  status                        ClinicalRegulatoryApprovalStatus @default(PENDING)
+  regulatoryIsNotEthicsApproval Boolean                        @default(true)
+  blocksEnrollmentWhenInactive  Boolean                        @default(true)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  clinicalTrial                 ClinicalTrial                  @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  statusHistory                 ClinicalRegulatoryStatus[]
+
+  @@map("clinical_regulatory_approvals")
+}
+
+model ClinicalRegulatoryStatus {
+  id                           String                         @id @default(uuid()) @db.Uuid
+  clinicalRegulatoryApprovalId String                       @db.Uuid
+  fromStatus                   ClinicalRegulatoryApprovalStatus?
+  toStatus                     ClinicalRegulatoryApprovalStatus
+  changedAt                    DateTime                       @default(now())
+  actorPersona                 ClinicalResearchActorPersona
+  actorIdentityId              String?                        @db.Uuid
+  reasonSummary                String?
+  createdAt                    DateTime                       @default(now())
+  clinicalRegulatoryApproval   ClinicalRegulatoryApproval     @relation(fields: [clinicalRegulatoryApprovalId], references: [id], onDelete: Cascade)
+  actorIdentity                Identity?                      @relation("ClinicalRegulatoryStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@map("clinical_regulatory_statuses")
+}
+
+model ClinicalTrialExternalRegistryReference {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalTrialId String        @db.Uuid
+  registryCode    String
+  registryTrialId String
+  registryUrl     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clinicalTrial   ClinicalTrial @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_trial_external_registry_references")
+}
+
+model ClinicalResearchParticipantProfile {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  participantReference String                           @unique
+  subjectIdentityId    String                           @unique @db.Uuid
+  jurisdictionId       String?                          @db.Uuid
+  dataClassification   ClinicalResearchDataClassification @default(PROTECTED_PARTICIPANT)
+  dataCompartmentCode  String?
+  createdAt            DateTime                         @default(now())
+  updatedAt            DateTime                         @updatedAt
+  subjectIdentity      Identity                         @relation("ClinicalResearchParticipantSubject", fields: [subjectIdentityId], references: [id])
+  jurisdiction         Jurisdiction?                    @relation(fields: [jurisdictionId], references: [id])
+  interests            ClinicalTrialInterest[]
+  screenings           ClinicalTrialScreening[]
+  consentSignatures    ClinicalTrialConsentSignature[]
+  enrollments          ClinicalTrialEnrollment[]
+
+  @@map("clinical_research_participant_profiles")
+}
+
+model ClinicalTrialEligibilityCriterion {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalTrialId String        @db.Uuid
+  criterionCode   String
+  summary         String
+  isInclusion     Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clinicalTrial   ClinicalTrial @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicalTrialId, criterionCode])
+  @@map("clinical_trial_eligibility_criteria")
+}
+
+model ClinicalTrialInterest {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  clinicalTrialId       String                    @db.Uuid
+  participantProfileId  String                    @db.Uuid
+  status                ClinicalTrialInterestStatus @default(EXPRESSED)
+  interestIsNotEnrollment Boolean                 @default(true)
+  expressedAt           DateTime                  @default(now())
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  clinicalTrial         ClinicalTrial             @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  participantProfile    ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  screenings            ClinicalTrialScreening[]
+
+  @@index([participantProfileId])
+  @@map("clinical_trial_interests")
+}
+
+model ClinicalTrialScreening {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  clinicalTrialId            String                   @db.Uuid
+  participantProfileId       String                   @db.Uuid
+  interestId                 String?                  @db.Uuid
+  status                     ClinicalTrialScreeningStatus @default(AUTHORIZED)
+  patientAuthorizationRecordedAt DateTime             @default(now())
+  screeningDataReference     String?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  clinicalTrial              ClinicalTrial            @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  participantProfile         ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  interest                   ClinicalTrialInterest?   @relation(fields: [interestId], references: [id])
+  reviews                    ClinicalTrialScreeningReview[]
+  eligibilityAssessments     ClinicalTrialEligibilityAssessment[]
+
+  @@map("clinical_trial_screenings")
+}
+
+model ClinicalTrialScreeningReview {
+  id                             String                            @id @default(uuid()) @db.Uuid
+  screeningId                    String                            @db.Uuid
+  reviewerOfficeholderId         String?                           @db.Uuid
+  reviewerProfessionalIdentityId String?                           @db.Uuid
+  reviewerPersona                ClinicalResearchActorPersona
+  outcome                        ClinicalTrialScreeningReviewOutcome @default(PENDING)
+  reasonCategoryCode             String?
+  reviewedAt                     DateTime?
+  auditReference                 String?
+  createdAt                      DateTime                          @default(now())
+  updatedAt                      DateTime                          @updatedAt
+  screening                      ClinicalTrialScreening            @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+  reviewerOfficeholder           Officeholder?                     @relation("ClinicalTrialScreeningReviewerOfficeholder", fields: [reviewerOfficeholderId], references: [id])
+  reviewerProfessionalIdentity   Identity?                         @relation("ClinicalTrialScreeningReviewerIdentity", fields: [reviewerProfessionalIdentityId], references: [id])
+
+  @@map("clinical_trial_screening_reviews")
+}
+
+model ClinicalTrialEligibilityAssessment {
+  id                             String                                @id @default(uuid()) @db.Uuid
+  screeningId                    String                                @db.Uuid
+  assessorOfficeholderId         String?                               @db.Uuid
+  assessorProfessionalIdentityId String?                               @db.Uuid
+  assessorPersona                ClinicalResearchActorPersona
+  outcome                        ClinicalTrialEligibilityAssessmentOutcome @default(INCOMPLETE)
+  isProfessionalEligibilityDecision Boolean                            @default(true)
+  aiCannotFinalizeEligibility    Boolean                               @default(true)
+  assessedAt                     DateTime?
+  reasonCategoryCode             String?
+  createdAt                      DateTime                              @default(now())
+  updatedAt                      DateTime                              @updatedAt
+  screening                      ClinicalTrialScreening                @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+  assessorOfficeholder           Officeholder?                         @relation("ClinicalTrialEligibilityAssessorOfficeholder", fields: [assessorOfficeholderId], references: [id])
+  assessorProfessionalIdentity   Identity?                             @relation("ClinicalTrialEligibilityAssessorIdentity", fields: [assessorProfessionalIdentityId], references: [id])
+  evidence                       ClinicalTrialEligibilityEvidence[]
+  enrollments                    ClinicalTrialEnrollment[]
+
+  @@map("clinical_trial_eligibility_assessments")
+}
+
+model ClinicalTrialEligibilityEvidence {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  eligibilityAssessmentId String                           @db.Uuid
+  evidenceReference       String
+  summary                 String?
+  createdAt               DateTime                         @default(now())
+  eligibilityAssessment   ClinicalTrialEligibilityAssessment @relation(fields: [eligibilityAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_trial_eligibility_evidence")
+}
+
+model ClinicalTrialConsent {
+  id              String                      @id @default(uuid()) @db.Uuid
+  clinicalTrialId String                      @db.Uuid
+  consentCode     String
+  title           String
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  clinicalTrial   ClinicalTrial               @relation(fields: [clinicalTrialId], references: [id], onDelete: Cascade)
+  versions        ClinicalTrialConsentVersion[]
+
+  @@unique([clinicalTrialId, consentCode])
+  @@map("clinical_trial_consents")
+}
+
+model ClinicalTrialConsentVersion {
+  id               String                        @id @default(uuid()) @db.Uuid
+  consentId        String                        @db.Uuid
+  versionNumber    Int
+  contentReference String
+  activatedAt      DateTime?
+  isActive         Boolean                       @default(false)
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
+  consent          ClinicalTrialConsent          @relation(fields: [consentId], references: [id], onDelete: Cascade)
+  signatures       ClinicalTrialConsentSignature[]
+  enrollments      ClinicalTrialEnrollment[]
+
+  @@unique([consentId, versionNumber])
+  @@map("clinical_trial_consent_versions")
+}
+
+model ClinicalTrialConsentSignature {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  participantProfileId String                            @db.Uuid
+  consentVersionId     String                            @db.Uuid
+  status               ClinicalTrialConsentSignatureStatus @default(PENDING)
+  signedAt             DateTime?
+  consentIsNotEnrollment Boolean                         @default(true)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  participantProfile   ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id], onDelete: Cascade)
+  consentVersion       ClinicalTrialConsentVersion         @relation(fields: [consentVersionId], references: [id])
+
+  @@map("clinical_trial_consent_signatures")
+}
+
+model ClinicalTrialEnrollment {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  enrollmentReference      String                      @unique
+  clinicalTrialId          String                      @db.Uuid
+  clinicalTrialSiteId      String                      @db.Uuid
+  participantProfileId     String                      @db.Uuid
+  protocolVersionId        String                      @db.Uuid
+  consentVersionId         String                      @db.Uuid
+  eligibilityAssessmentId  String                      @db.Uuid
+  status                   ClinicalTrialEnrollmentStatus @default(PENDING)
+  enrolledAt               DateTime?
+  participationIsNotTreatment Boolean                  @default(true)
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+  clinicalTrial            ClinicalTrial               @relation(fields: [clinicalTrialId], references: [id])
+  clinicalTrialSite        ClinicalTrialSite           @relation(fields: [clinicalTrialSiteId], references: [id])
+  participantProfile       ClinicalResearchParticipantProfile @relation(fields: [participantProfileId], references: [id])
+  protocolVersion          ClinicalTrialProtocolVersion @relation(fields: [protocolVersionId], references: [id])
+  consentVersion           ClinicalTrialConsentVersion @relation(fields: [consentVersionId], references: [id])
+  eligibilityAssessment    ClinicalTrialEligibilityAssessment @relation(fields: [eligibilityAssessmentId], references: [id])
+  statusHistory            ClinicalTrialEnrollmentStatusHistory[]
+  withdrawal               ClinicalTrialWithdrawal?
+
+  @@index([participantProfileId])
+  @@index([clinicalTrialId])
+  @@map("clinical_trial_enrollments")
+}
+
+model ClinicalTrialEnrollmentStatusHistory {
+  id              String                        @id @default(uuid()) @db.Uuid
+  enrollmentId    String                        @db.Uuid
+  fromStatus      ClinicalTrialEnrollmentStatus?
+  toStatus        ClinicalTrialEnrollmentStatus
+  changedAt       DateTime                      @default(now())
+  actorPersona    ClinicalResearchActorPersona
+  actorIdentityId String?                       @db.Uuid
+  reasonSummary   String?
+  createdAt       DateTime                      @default(now())
+  enrollment      ClinicalTrialEnrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  actorIdentity   Identity?                     @relation("ClinicalTrialEnrollmentStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@map("clinical_trial_enrollment_status_histories")
+}
+
+model ClinicalTrialWithdrawal {
+  id                          String                               @id @default(uuid()) @db.Uuid
+  enrollmentId                String                               @unique @db.Uuid
+  reasonCategory              ClinicalTrialWithdrawalReasonCategory
+  reasonSummary               String
+  withdrawnAt                 DateTime                             @default(now())
+  recordedByPersona           ClinicalResearchActorPersona
+  recordedByIdentityId        String?                              @db.Uuid
+  preservesParticipationHistory Boolean                            @default(true)
+  createdAt                   DateTime                             @default(now())
+  enrollment                  ClinicalTrialEnrollment              @relation(fields: [enrollmentId], references: [id])
+  recordedByIdentity          Identity?                            @relation("ClinicalTrialWithdrawalRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@map("clinical_trial_withdrawals")
+}
+
 // ─── Healthcare: Medical Treatment Programs ───────────────────────────────────
 
 enum HealthcareDataClassification {
@@ -21422,7 +22990,7 @@ model PatientHealthcareProfile {
   treatmentReferrals            TreatmentReferral[]
   treatmentScreenings           TreatmentScreening[]
   treatmentEnrollments          TreatmentEnrollment[]
-  healthcareDataAccessPolicies  HealthcareDataAccessPolicy[] @relation("HealthcareDataAccessPatientProfile")
+  treatmentPatientDataAccessGrants  TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessPatientProfile")
 
   @@index([subjectIdentityId])
   @@index([jurisdictionId])
@@ -21848,7 +23416,7 @@ model PatientTreatmentStatusProjection {
   @@map("patient_treatment_status_projections")
 }
 
-model HealthcareDataAccessPolicy {
+model TreatmentPatientDataAccessGrant {
   id                         String                   @id @default(uuid()) @db.Uuid
   policyReference            String                   @unique
   patientHealthcareProfileId String                   @db.Uuid
@@ -21862,14 +23430,14 @@ model HealthcareDataAccessPolicy {
   isActive                   Boolean                  @default(true)
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
-  patientHealthcareProfile   PatientHealthcareProfile @relation("HealthcareDataAccessPatientProfile", fields: [patientHealthcareProfileId], references: [id], onDelete: Cascade)
-  patientSubjectIdentity     Identity                 @relation("HealthcareDataAccessPatientSubject", fields: [patientSubjectIdentityId], references: [id])
-  granteeProviderIdentity    Identity?                @relation("HealthcareDataAccessGrantee", fields: [granteeProviderIdentityId], references: [id])
-  granteeOrganization        Organization?            @relation("HealthcareDataAccessGranteeOrganization", fields: [granteeOrganizationId], references: [id])
+  patientHealthcareProfile   PatientHealthcareProfile @relation("TreatmentPatientDataAccessPatientProfile", fields: [patientHealthcareProfileId], references: [id], onDelete: Cascade)
+  patientSubjectIdentity     Identity                 @relation("TreatmentPatientDataAccessPatientSubject", fields: [patientSubjectIdentityId], references: [id])
+  granteeProviderIdentity    Identity?                @relation("TreatmentPatientDataAccessGrantee", fields: [granteeProviderIdentityId], references: [id])
+  granteeOrganization        Organization?            @relation("TreatmentPatientDataAccessGranteeOrganization", fields: [granteeOrganizationId], references: [id])
 
   @@index([patientHealthcareProfileId])
   @@index([patientSubjectIdentityId])
   @@index([granteeProviderIdentityId])
   @@index([granteeOrganizationId])
-  @@map("healthcare_data_access_policies")
+  @@map("treatment_patient_data_access_grants")
 }
