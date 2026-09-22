@@ -63,10 +63,48 @@ export const EXECUTABLE_CODE_PATTERNS = [
 
 export const SERVICE_PACK_MANIFEST_VALIDATION_STATUSES = [
   'DRAFT',
+  'DRAFT_IMPORTED',
   'VALIDATING',
   'INVALID',
   'VALIDATED',
   'PENDING_REVIEW',
 ] as const;
+
+export const PORTABLE_EXPORT_FORBIDDEN_KEY_FRAGMENTS = [
+  'password',
+  'secret',
+  'apiKey',
+  'api_key',
+  'privateKey',
+  'private_key',
+  'credential',
+  'accessToken',
+  'refreshToken',
+  'encryptionKey',
+  'citizen',
+  'caseData',
+  'caseRecord',
+  'evidenceContent',
+  'evidencePayload',
+  'paymentData',
+  'cardNumber',
+  'governmentDecision',
+  'issuedCredential',
+  'personalRecord',
+  'productionCredential',
+] as const;
+
+export const PORTABLE_EXPORT_DATA_SECTION_KEYS = [
+  'cases',
+  'citizens',
+  'applications',
+  'evidenceContents',
+  'decisions',
+  'payments',
+  'credentials',
+  'secrets',
+] as const;
+
+export const PORTABLE_SECRET_REFERENCE_PREFIX = 'REF:SECRET:';
 
 export const SERVICE_PACK_VERSION_ACCEPTANCE_STATUSES = ['ACCEPTED'] as const;

@@ -13,6 +13,7 @@ import { envValidationSchema } from './config/env.validation';
 import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
+import { CorporateRegistryModule } from './corporate-registry/corporate-registry.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
@@ -72,6 +73,7 @@ import { SystemModule } from './system/system.module';
     DecisionsModule,
     DecisionsIssuanceModule,
     ComplianceModule,
+    CorporateRegistryModule,
     RedressModule,
     IntelligenceModule,
     OperationalSupportModule,
