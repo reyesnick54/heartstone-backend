@@ -1,0 +1,45 @@
+export const IMMIGRATION_FOUNDATION_MODEL_NAMES = [
+  'ImmigrationProfile',
+  'TravelDocumentReference',
+  'ImmigrationStatusRecord',
+  'VisaApplicationProfile',
+  'ResidencyApplicationProfile',
+  'CitizenshipApplicationProfile',
+  'VisaPermissionRecord',
+  'ResidencyStatusRecord',
+  'ResidencyPermitRecord',
+  'CitizenshipStatusRecord',
+  'ImmigrationSponsorship',
+  'DependentRelationship',
+  'ImmigrationRequirementAssessment',
+  'ImmigrationInterview',
+  'BiometricRequirement',
+  'ImmigrationExternalCheck',
+  'ImmigrationStatusHistory',
+  'ImmigrationRestriction',
+  'ImmigrationCaseProjection',
+] as const;
+
+export const IMMIGRATION_FOUNDATION_ENUM_NAMES = [
+  'ImmigrationDataClassification',
+  'ImmigrationTravelDocumentType',
+  'TravelDocumentReferenceStatus',
+  'ImmigrationStatusCategory',
+  'ImmigrationApplicationProfileStatus',
+  'ImmigrationCredentialLifecycleStatus',
+  'ImmigrationRequirementAssessmentOutcome',
+  'ImmigrationInterviewStatus',
+  'BiometricRequirementStatus',
+  'ImmigrationExternalCheckType',
+  'ImmigrationExternalCheckRecordedBy',
+  'ImmigrationActorPersona',
+  'ImmigrationSponsorshipStatus',
+  'DependentRelationshipType',
+  'ImmigrationRestrictionType',
+] as const;
+
+export const FORBIDDEN_IMMIGRATION_DECISION_STATUS_CODES = [
+  'APPROVED',
+  'GRANTED',
+  'CITIZEN',
+] as const;
