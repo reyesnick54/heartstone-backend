@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
+import { EducationModule } from '../../education/education.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { LabourModule } from '../../labour/labour.module';
@@ -14,6 +15,7 @@ import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessDevelopmentController } from './business-development.controller';
+import { BusinessEducationController } from './business-education.controller';
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
@@ -25,6 +27,8 @@ import { BusinessApplicationsService } from './services/business-applications.se
 import { BusinessAppointmentsService } from './services/business-appointments.service';
 import { BusinessComplianceService } from './services/business-compliance.service';
 import { BusinessCorporateRegistryService } from './services/business-corporate-registry.service';
+import { BusinessEducationService } from './services/business-education.service';
+import { BusinessEducationAccessService } from './services/business-education-access.service';
 import { BusinessHomeService } from './services/business-home.service';
 import { BusinessLicensesService } from './services/business-licenses.service';
 import { BusinessMessagesService } from './services/business-messages.service';
@@ -46,6 +50,7 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     CorporateRegistryModule,
     RevenueModule,
     CustomsTradeModule,
+    EducationModule,
     PlanningConstructionModule,
     LabourModule,
     PropertyRegistryModule,
@@ -57,6 +62,7 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessCorporateRegistryController,
     BusinessRevenueController,
     BusinessTradeController,
+    BusinessEducationController,
     BusinessDevelopmentController,
     BusinessWorkforceController,
     BusinessPropertyController,
@@ -80,6 +86,8 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessRevenueService,
     BusinessTradeAccessService,
     BusinessTradeService,
+    BusinessEducationAccessService,
+    BusinessEducationService,
     BusinessWorkforceService,
     BusinessPropertyService,
     BusinessTransportationService,
