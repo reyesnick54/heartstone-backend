@@ -40,6 +40,7 @@ import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SystemModule } from './system/system.module';
+import { TransportationModule } from './transportation/transportation.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { SystemModule } from './system/system.module';
     ExperienceModule,
     ApplicationProcessingModule,
     ImmigrationModule,
+    TransportationModule,
     CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
