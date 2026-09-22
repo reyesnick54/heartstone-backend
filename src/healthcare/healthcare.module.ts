@@ -10,9 +10,10 @@ import { HealthcarePrivacySearchService } from './privacy/healthcare-privacy-sea
 import { HealthcareProfessionalLicensingService } from './professional/healthcare-professional-licensing.service';
 import { HealthcareRegistryBoundaryService } from './registry/healthcare-registry-boundary.service';
 import { ClinicalResearchModule } from './research/clinical-research.module';
+import { TreatmentModule } from './treatment/treatment.module';
 
 @Module({
-  imports: [DatabaseModule, ClinicalResearchModule],
+  imports: [DatabaseModule, ClinicalResearchModule, TreatmentModule],
   providers: [
     HealthcareBoundaryService,
     HealthcareRegistryBoundaryService,
@@ -33,6 +34,7 @@ import { ClinicalResearchModule } from './research/clinical-research.module';
     HealthcareBreakGlassService,
     HealthcarePrivacySearchService,
     ClinicalResearchModule,
+    TreatmentModule,
   ],
 })
 export class HealthcareModule {}
