@@ -38,6 +38,7 @@ import { DepartmentWorkloadService } from './services/department-workload.servic
   ],
   exports: [
     DepartmentAccessService,
+    DepartmentMetricsFreshnessService,
     DepartmentMeService,
     DepartmentHomeService,
     DepartmentWorkloadService,

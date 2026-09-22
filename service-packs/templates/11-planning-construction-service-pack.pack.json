@@ -1,0 +1,2632 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-PLANNING-CONSTRUCTION",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Planning, development, permitting, inspection, occupancy, and appeal services with jurisdiction-specific rules remaining template placeholders.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-planning-construction",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Planning, Development & Construction Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-ACK",
+          "templateCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Planning / Development Application — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-FORM",
+          "formName": "Planning / Development Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Planning / Development Application",
+      "serviceSlug": "planning-development-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-PLANNING-DEVELOPMENT-APPLICATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-ZONING-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-ZONING-LAND-USE-ACK",
+          "templateCode": "TEMPLATE-PC-ZONING-LAND-USE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-ZONING-LAND-USE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-ZONING-LAND-USE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-ZONING-DETERMINE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-ZONING-LAND-USE-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Zoning / Land-Use Determination — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-ZONING-LAND-USE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-ZONING-LAND-USE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-ZONING-LAND-USE-FORM",
+          "formName": "Zoning / Land-Use Determination form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-ZONING-LAND-USE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-ZONING-LAND-USE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-ZONING-LAND-USE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Zoning / Land-Use Determination",
+      "serviceSlug": "zoning-land-use",
+      "serviceType": "DETERMINATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-ZONING-LAND-USE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-ZONING-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-BUILDING-PERMIT-ACK",
+          "templateCode": "TEMPLATE-PC-BUILDING-PERMIT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-BUILDING-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-BUILDING-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-BUILDING-PERMIT-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Building Permit — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-BUILDING-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-BUILDING-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-BUILDING-PERMIT-FORM",
+          "formName": "Building Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-PERMIT-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-BUILDING-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-BUILDING-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-BUILDING-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Building Permit",
+      "serviceSlug": "building-permit",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-BUILDING-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-RENOVATION-PERMIT-ACK",
+          "templateCode": "TEMPLATE-PC-RENOVATION-PERMIT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-RENOVATION-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-RENOVATION-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-RENOVATION-PERMIT-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Renovation Permit — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-RENOVATION-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-RENOVATION-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-RENOVATION-PERMIT-FORM",
+          "formName": "Renovation Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-PERMIT-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-RENOVATION-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-RENOVATION-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-RENOVATION-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Renovation Permit",
+      "serviceSlug": "renovation-permit",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-RENOVATION-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-DEMOLITION-PERMIT-ACK",
+          "templateCode": "TEMPLATE-PC-DEMOLITION-PERMIT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-DEMOLITION-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-DEMOLITION-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-DEMOLITION-PERMIT-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Demolition Permit — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-DEMOLITION-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-DEMOLITION-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-DEMOLITION-PERMIT-FORM",
+          "formName": "Demolition Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-PERMIT-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-DEMOLITION-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-DEMOLITION-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-DEMOLITION-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Demolition Permit",
+      "serviceSlug": "demolition-permit",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-DEMOLITION-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-ACK",
+          "templateCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Infrastructure / Utility Works Permit — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-FORM",
+          "formName": "Infrastructure / Utility Works Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-PERMIT-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Infrastructure / Utility Works Permit",
+      "serviceSlug": "infrastructure-utility-permit",
+      "serviceType": "PERMIT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-INFRASTRUCTURE-UTILITY-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-EXTERNAL-REFERRAL",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "External authority referral",
+          "stageKey": "external-referral",
+          "stepType": "EXTERNAL_REFERRAL"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "PROFESSIONAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-ACK",
+          "templateCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Submit Professional Plans — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-FORM",
+          "formName": "Submit Professional Plans form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Submit Professional Plans",
+      "serviceSlug": "submit-professional-plans",
+      "serviceType": "SUBMISSION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-SUBMIT-PROFESSIONAL-PLANS-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROFESSIONAL-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "Professional document review",
+          "stageKey": "professional-review",
+          "stepType": "PROFESSIONAL_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-ACK",
+          "templateCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Request Construction Inspection — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-FORM",
+          "formName": "Request Construction Inspection form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Request Construction Inspection",
+      "serviceSlug": "request-construction-inspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-REQUEST-CONSTRUCTION-INSPECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "Construction inspection",
+          "stageKey": "inspection",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-ACK",
+          "templateCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Submit Corrective Action — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-FORM",
+          "formName": "Submit Corrective Action form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Submit Corrective Action",
+      "serviceSlug": "submit-corrective-action",
+      "serviceType": "COMPLIANCE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-SUBMIT-CORRECTIVE-ACTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-REQUEST-REINSPECTION-ACK",
+          "templateCode": "TEMPLATE-PC-REQUEST-REINSPECTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-REQUEST-REINSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-REQUEST-REINSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-REQUEST-REINSPECTION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Request Reinspection — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-REQUEST-REINSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-REQUEST-REINSPECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-REQUEST-REINSPECTION-FORM",
+          "formName": "Request Reinspection form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-REQUEST-REINSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-REQUEST-REINSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-REQUEST-REINSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Request Reinspection",
+      "serviceSlug": "request-reinspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-REQUEST-REINSPECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "INSPECT",
+          "authorityFunctionCode": "TEMPLATE-AUTH-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "label": "Construction inspection",
+          "stageKey": "inspection",
+          "stepType": "INTERNAL_COORDINATION"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-PERMIT-AMENDMENT-ACK",
+          "templateCode": "TEMPLATE-PC-PERMIT-AMENDMENT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-PERMIT-AMENDMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-PERMIT-AMENDMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-PERMIT-AMENDMENT-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Permit Amendment — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-PERMIT-AMENDMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-PERMIT-AMENDMENT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-PERMIT-AMENDMENT-FORM",
+          "formName": "Permit Amendment form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-PERMIT-AMENDMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-PERMIT-AMENDMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-PERMIT-AMENDMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Permit Amendment",
+      "serviceSlug": "permit-amendment",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-PERMIT-AMENDMENT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-PERMIT-EXTENSION-ACK",
+          "templateCode": "TEMPLATE-PC-PERMIT-EXTENSION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-PERMIT-EXTENSION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-PERMIT-EXTENSION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-PERMIT-EXTENSION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Permit Extension — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-PERMIT-EXTENSION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-PERMIT-EXTENSION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-PERMIT-EXTENSION-FORM",
+          "formName": "Permit Extension form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-PERMIT-EXTENSION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-PERMIT-EXTENSION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-PERMIT-EXTENSION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Permit Extension",
+      "serviceSlug": "permit-extension",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-PERMIT-EXTENSION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-ACK",
+          "templateCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-COMPLETION-SUBMISSION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Completion Submission — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-FORM",
+          "formName": "Completion Submission form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-COMPLETION-SUBMISSION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-COMPLETION-SUBMISSION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Completion Submission",
+      "serviceSlug": "completion-submission",
+      "serviceType": "SUBMISSION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-COMPLETION-SUBMISSION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-OCCUPANCY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-ACK",
+          "templateCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-OCCUPANCY-ISSUE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Occupancy / Completion Certificate — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-FORM",
+          "formName": "Occupancy / Completion Certificate form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-OCCUPANCY-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Occupancy / Completion Certificate",
+      "serviceSlug": "occupancy-completion-certificate",
+      "serviceType": "CERTIFICATE",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-OCCUPANCY-COMPLETION-CERTIFICATE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-OCCUPANCY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PLANNING-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PC-PLANNING-APPEAL-ACK",
+          "templateCode": "TEMPLATE-PC-PLANNING-APPEAL-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PC-PLANNING-APPEAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PC-PLANNING-APPEAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PLANNING-APPEAL-DECIDE",
+          "requiresSecondApproval": false,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PC-PLANNING-APPEAL-PAYMENT",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        }
+      ],
+      "description": "Planning Appeal — NON_PRODUCTION placeholder planning/construction service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-PC-PLANNING-APPEAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PC-PLANNING-APPEAL-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PC-PLANNING-APPEAL-FORM",
+          "formName": "Planning Appeal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "siteDescription",
+                  "fieldType": "TEXT",
+                  "label": "Site description",
+                  "required": false
+                }
+              ],
+              "label": "Site / property placeholder",
+              "sectionKey": "site"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PC-PLANNING-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-PC-PLANNING-APPEAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Planning appeal route",
+          "routeCode": "TEMPLATE-PC-PLANNING-APPEAL-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PC-PLANNING-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-PLANNING-CONSTRUCTION",
+      "serviceName": "Planning Appeal",
+      "serviceSlug": "planning-appeal",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-PC-PLANNING-APPEAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "authorityActionType": "PREPARE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Planning intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive review",
+          "stageKey": "substantive-review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PLANNING-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}
