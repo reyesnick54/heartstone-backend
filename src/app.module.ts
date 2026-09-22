@@ -69,6 +69,7 @@ import { SystemModule } from './system/system.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     CitizenExperienceModule,
+    CivilRegistryModule,
     RecordsModule,
     EvidenceRecordsModule,
     EvidenceModule,
