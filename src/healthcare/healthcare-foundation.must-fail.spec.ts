@@ -14,10 +14,7 @@ import { HealthcareBoundaryService } from './common/healthcare-boundary.service'
 import { HealthcareFoundationAccessPolicyService } from './common/healthcare-data-access-policy.service';
 import { HealthcareConsentService } from './consent/healthcare-consent.service';
 import { HealthcareConsentPolicyService } from './consent/healthcare-consent-policy.service';
-import {
-  HEALTHCARE_REASON_CODES,
-  PLATFORM_ADMIN_ROLE_MARKER,
-} from './healthcare.constants';
+import { HEALTHCARE_REASON_CODES, PLATFORM_ADMIN_ROLE_MARKER } from './healthcare.constants';
 import { HealthcareInteropGatewayService } from './integrations/healthcare-interop-gateway.service';
 import { ResearchDataGovernanceService } from './research/research-data-governance.service';
 import { ClinicalSafetyService } from './safety/clinical-safety.service';
@@ -88,9 +85,7 @@ describe('Healthcare must-fail gates', () => {
 
     it('platform admin cannot bypass healthcare access policy marker', () => {
       expect(() => {
-        boundary.assertPlatformAdminCannotBypassHealthcarePolicy(
-          PLATFORM_ADMIN_ROLE_MARKER,
-        );
+        boundary.assertPlatformAdminCannotBypassHealthcarePolicy(PLATFORM_ADMIN_ROLE_MARKER);
       }).toThrow(ForbiddenException);
     });
 

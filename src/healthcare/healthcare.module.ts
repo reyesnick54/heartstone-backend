@@ -25,7 +25,13 @@ import { ClinicalSafetyService } from './safety/clinical-safety.service';
 import { TreatmentModule } from './treatment/treatment.module';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, ActorContextModule, ClinicalResearchModule, TreatmentModule],
+  imports: [
+    DatabaseModule,
+    SessionsModule,
+    ActorContextModule,
+    ClinicalResearchModule,
+    TreatmentModule,
+  ],
   controllers: [HealthcareController],
   providers: [
     HealthcareBoundaryService,
