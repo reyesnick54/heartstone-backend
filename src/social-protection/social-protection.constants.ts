@@ -6,6 +6,23 @@ export const BENEFIT_AWARD_NUMBER_PREFIX = 'BNAD';
 export const EXTERNAL_ELIGIBILITY_DETERMINATION_PREFIX = 'EXEL';
 export const SOCIAL_PROTECTION_APPEAL_PREFIX = 'SPAP';
 
+export const SOCIAL_PROTECTION_BOUNDARY_DISCLAIMER =
+  'Citizen declarations and preliminary program matches record submitted or informational data only; they do not constitute legal entitlement or verified eligibility.';
+
+export const SOCIAL_PROTECTION_PRELIMINARY_MATCH_DISCLAIMER =
+  'Program suggestions are preliminary and informational unless an authorized officer has issued an official eligibility or award decision.';
+
+export const SOCIAL_PROTECTION_PAYMENT_BOUNDARY_DISCLAIMER =
+  'Benefit awards, authorized disbursements, and payment transactions remain separate records; payment status does not by itself determine eligibility.';
+
+export const SOCIAL_PROTECTION_EXPERIENCE_RULE_ENVIRONMENT = 'NON_PRODUCTION' as const;
+
+/** Category kinds excluded from generic citizen program discovery (sensitive programs). */
+export const GENERIC_SEARCH_EXCLUDED_BENEFIT_CATEGORY_KINDS = [
+  'VETERAN_SUPPORT',
+  'HEALTHCARE_SUPPORT',
+] as const;
+
 export const PLATFORM_ADMIN_SOCIAL_PROTECTION_ROLE_MARKER = 'PLATFORM_TECHNICAL_ADMIN';
 
 export const FORBIDDEN_AI_SOCIAL_PROTECTION_ACTIONS = [
