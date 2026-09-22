@@ -1,0 +1,679 @@
+// ─── Customs, Trade & Border Commerce Foundation ─────────────────────────────
+// Appended to schema.prisma — keep in sync via merge / migrate diff.
+
+enum CustomsDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_TRADE
+  PROTECTED_ENFORCEMENT
+}
+
+enum CustomsTraderAccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum CustomsRegistrationStatus {
+  DRAFT
+  SUBMITTED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum TradeRepresentationKind {
+  CUSTOMS_BROKER
+  CUSTOMS_AGENT
+  FREIGHT_FORWARDER
+  AUTHORIZED_COMPANY_REPRESENTATIVE
+}
+
+enum CustomsBrokerAuthorizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum CustomsDeclarationType {
+  IMPORT
+  EXPORT
+  TRANSIT
+  OTHER_CONFIGURED
+}
+
+enum CustomsDeclarationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ASSESSED
+  HELD
+  RELEASE_AUTHORIZED
+  CLOSED
+  WITHDRAWN
+}
+
+enum CustomsDeclarationVersionStatus {
+  DRAFT
+  SUBMITTED
+  LOCKED
+  SUPERSEDED
+}
+
+enum ShipmentReferenceStatus {
+  REGISTERED
+  IN_TRANSIT
+  ARRIVED
+  UNDER_CUSTOMS
+  RELEASED
+  CLOSED
+}
+
+enum CustomsClassificationReferenceKind {
+  CONFIGURED_NOMENCLATURE
+  AI_SUGGESTION
+  OFFICER_DETERMINATION
+}
+
+enum CustomsPermitReferenceStatus {
+  REQUIRED
+  APPLIED
+  ISSUED
+  DENIED
+  EXPIRED
+  SATISFIED
+  UNRESOLVED_MANDATORY
+}
+
+enum CustomsAssessmentStatus {
+  PROPOSED
+  ISSUED
+  AMENDED
+  CANCELLED
+}
+
+enum CustomsHoldStatus {
+  ACTIVE
+  GOVERNED_REMOVAL_PENDING
+  REMOVED
+  CONVERTED_TO_ENFORCEMENT_REFERENCE
+}
+
+enum CustomsInspectionLinkStatus {
+  LINKED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CustomsReleaseRecordStatus {
+  NOT_RELEASED
+  RELEASED
+  CONDITIONAL_RELEASE
+}
+
+enum CustomsAdjustmentKind {
+  CORRECTION
+  AMENDMENT
+  POST_RELEASE_ADJUSTMENT
+}
+
+enum CustomsRefundClaimStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DENIED
+  PAID
+  WITHDRAWN
+}
+
+enum CustomsActorPersona {
+  TRADER
+  BROKER
+  CUSTOMS_OFFICER
+  SENIOR_DECISION_OFFICER
+  TECHNICAL_ADMIN
+  PAYMENT_SYSTEM
+  AI_ASSISTANCE
+  EXTERNAL_LIAISON
+}
+
+enum CustomsExternalDependencyType {
+  PORT_AUTHORITY
+  AGRICULTURE
+  HEALTH
+  ENVIRONMENT
+  SECURITY_LAW_ENFORCEMENT
+  SANCTIONS_RESTRICTED_TRADE
+  TRANSPORT
+  EXTERNAL_CUSTOMS
+  OTHER_CONFIGURED
+}
+
+enum CustomsExternalDependencyRecordedBy {
+  OFFICER
+  INTEGRATION
+  EXTERNAL_LIAISON
+  SYSTEM
+}
+
+enum CustomsStatusSubjectKind {
+  TRADER_ACCOUNT
+  SHIPMENT
+  DECLARATION
+}
+
+enum CustomsValuationKind {
+  DECLARED
+  ASSESSED
+  ACCEPTED
+}
+
+model TraderAccount {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  accountNumber              String                     @unique
+  organizationId             String?                    @db.Uuid
+  primaryIdentityId          String?                    @db.Uuid
+  jurisdictionId             String?                    @db.Uuid
+  status                     CustomsTraderAccountStatus @default(PENDING)
+  masterAdministrativeFileId String?                    @db.Uuid
+  dataClassification         CustomsDataClassification  @default(PROTECTED_TRADE)
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  organization               Organization?              @relation(fields: [organizationId], references: [id])
+  primaryIdentity            Identity?                  @relation("TraderAccountPrimaryIdentity", fields: [primaryIdentityId], references: [id])
+  jurisdiction               Jurisdiction?              @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?  @relation(fields: [masterAdministrativeFileId], references: [id])
+  importerRegistration       ImporterRegistration?
+  exporterRegistration       ExporterRegistration?
+  brokerAuthorizations       CustomsBrokerAuthorization[]
+  declarations               CustomsDeclaration[]
+  shipmentReferences         ShipmentReference[]
+
+  @@index([organizationId])
+  @@index([primaryIdentityId])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("trader_accounts")
+}
+
+model ImporterRegistration {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  traderAccountId      String                    @unique @db.Uuid
+  registrationNumber   String                    @unique
+  status               CustomsRegistrationStatus @default(DRAFT)
+  registeredAt         DateTime?
+  jurisdictionId       String?                   @db.Uuid
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  traderAccount        TraderAccount             @relation(fields: [traderAccountId], references: [id], onDelete: Cascade)
+  jurisdiction         Jurisdiction?             @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([status])
+  @@map("importer_registrations")
+}
+
+model ExporterRegistration {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  traderAccountId      String                    @unique @db.Uuid
+  registrationNumber   String                    @unique
+  status               CustomsRegistrationStatus @default(DRAFT)
+  registeredAt         DateTime?
+  jurisdictionId       String?                   @db.Uuid
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  traderAccount        TraderAccount             @relation(fields: [traderAccountId], references: [id], onDelete: Cascade)
+  jurisdiction         Jurisdiction?             @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([status])
+  @@map("exporter_registrations")
+}
+
+model CustomsBrokerAuthorization {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  traderAccountId            String                           @db.Uuid
+  representativeAuthorityId  String                           @unique @db.Uuid
+  representationKind         TradeRepresentationKind
+  status                     CustomsBrokerAuthorizationStatus @default(PENDING)
+  doesNotInferFromMembership Boolean                          @default(true)
+  effectiveFrom              DateTime                         @default(now())
+  effectiveUntil             DateTime?
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  traderAccount              TraderAccount                    @relation(fields: [traderAccountId], references: [id], onDelete: Cascade)
+  representativeAuthority    RepresentativeAuthority          @relation(fields: [representativeAuthorityId], references: [id])
+
+  @@index([traderAccountId])
+  @@index([status])
+  @@map("customs_broker_authorizations")
+}
+
+model ShipmentReference {
+  id                               String                  @id @default(uuid()) @db.Uuid
+  shipmentReferenceNumber          String                  @unique
+  ownerOrganizationId              String                  @db.Uuid
+  traderAccountId                  String?                 @db.Uuid
+  carrierReferenceToken            String?
+  manifestReferenceToken           String?
+  portOrBorderEntryReference       String?
+  cargoArrivedAt                   DateTime?
+  cargoArrivalDoesNotImplyRelease  Boolean                 @default(true)
+  status                           ShipmentReferenceStatus @default(REGISTERED)
+  currentReleaseRecordId           String?                 @unique @db.Uuid
+  dataClassification               CustomsDataClassification @default(PROTECTED_TRADE)
+  createdAt                        DateTime                @default(now())
+  updatedAt                        DateTime                @updatedAt
+  ownerOrganization                Organization            @relation(fields: [ownerOrganizationId], references: [id])
+  traderAccount                    TraderAccount?          @relation(fields: [traderAccountId], references: [id])
+  currentReleaseRecord             CustomsReleaseRecord?   @relation("ShipmentCurrentRelease", fields: [currentReleaseRecordId], references: [id])
+  cargoManifestReferences          CargoManifestReference[]
+  borderEntryReferences            BorderEntryReference[]
+  declarations                     CustomsDeclaration[]
+  releaseRecords                   CustomsReleaseRecord[]  @relation("ShipmentReleaseRecords")
+  holds                            CustomsHold[]
+  inspections                      CustomsInspection[]
+  externalDependencies             CustomsExternalDependency[]
+  statusHistory                    CustomsStatusHistory[]  @relation("CustomsStatusHistoryShipment")
+
+  @@index([ownerOrganizationId])
+  @@index([traderAccountId])
+  @@index([status])
+  @@map("shipment_references")
+}
+
+model CargoManifestReference {
+  id                  String            @id @default(uuid()) @db.Uuid
+  shipmentReferenceId String            @db.Uuid
+  manifestReference   String
+  carrierReference    String?
+  receivedAt          DateTime?
+  externalSystemToken String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  shipmentReference   ShipmentReference @relation(fields: [shipmentReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentReferenceId])
+  @@map("cargo_manifest_references")
+}
+
+model BorderEntryReference {
+  id                         String            @id @default(uuid()) @db.Uuid
+  shipmentReferenceId        String            @db.Uuid
+  entryPointReference        String
+  entryModeCode              String?
+  scheduledOrActualEntryAt   DateTime?
+  externalPortAuthorityToken String?
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  shipmentReference          ShipmentReference @relation(fields: [shipmentReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentReferenceId])
+  @@map("border_entry_references")
+}
+
+model CustomsDeclaration {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  declarationNumber          String                   @unique
+  traderAccountId            String                   @db.Uuid
+  shipmentReferenceId        String?                  @db.Uuid
+  caseId                     String?                  @db.Uuid
+  applicationId              String?                  @db.Uuid
+  declarationType            CustomsDeclarationType
+  status                     CustomsDeclarationStatus @default(DRAFT)
+  currentVersionId           String?                  @unique @db.Uuid
+  doesNotReleaseCargo        Boolean                  @default(true)
+  submittedAt                DateTime?
+  dataClassification         CustomsDataClassification @default(PROTECTED_TRADE)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  traderAccount              TraderAccount            @relation(fields: [traderAccountId], references: [id])
+  shipmentReference          ShipmentReference?       @relation(fields: [shipmentReferenceId], references: [id])
+  case                       Case?                    @relation(fields: [caseId], references: [id])
+  application                Application?             @relation(fields: [applicationId], references: [id])
+  currentVersion             CustomsDeclarationVersion? @relation("CustomsDeclarationCurrentVersion", fields: [currentVersionId], references: [id])
+  versions                   CustomsDeclarationVersion[] @relation("CustomsDeclarationVersions")
+  assessments                CustomsAssessment[]
+  permitReferences           TradePermitReference[]
+  restrictedGoodsRequirements RestrictedGoodsRequirement[]
+  valuationRecords           CustomsValuationRecord[]
+  adjustments                CustomsAdjustment[]
+  refundClaims               CustomsRefundClaim[]
+  statusHistory              CustomsStatusHistory[]   @relation("CustomsStatusHistoryDeclaration")
+  externalDependencies       CustomsExternalDependency[]
+
+  @@index([traderAccountId])
+  @@index([shipmentReferenceId])
+  @@index([caseId])
+  @@index([status])
+  @@map("customs_declarations")
+}
+
+model CustomsDeclarationVersion {
+  id                   String                          @id @default(uuid()) @db.Uuid
+  customsDeclarationId String                          @db.Uuid
+  versionNumber        Int
+  status               CustomsDeclarationVersionStatus @default(DRAFT)
+  submissionPayload    Json                            @default("{}")
+  submittedAt          DateTime?
+  lockedAt             DateTime?
+  supersedesVersionId  String?                         @unique @db.Uuid
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  customsDeclaration   CustomsDeclaration              @relation("CustomsDeclarationVersions", fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+  currentForDeclaration CustomsDeclaration?            @relation("CustomsDeclarationCurrentVersion")
+  supersedesVersion    CustomsDeclarationVersion?      @relation("CustomsDeclarationVersionAmendment", fields: [supersedesVersionId], references: [id])
+  supersededByVersion  CustomsDeclarationVersion?      @relation("CustomsDeclarationVersionAmendment")
+  items                CustomsDeclarationItem[]
+
+  @@unique([customsDeclarationId, versionNumber])
+  @@index([customsDeclarationId])
+  @@map("customs_declaration_versions")
+}
+
+model CustomsDeclarationItem {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  customsDeclarationVersionId String                    @db.Uuid
+  lineNumber                  Int
+  description                 String
+  quantity                    String?
+  unitOfMeasureCode           String?
+  declaredValueCents          Int?
+  currency                    String                    @default("XCD")
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  customsDeclarationVersion   CustomsDeclarationVersion @relation(fields: [customsDeclarationVersionId], references: [id], onDelete: Cascade)
+  classificationReferences    CommodityClassificationReference[]
+  originDeclarations          OriginDeclaration[]
+
+  @@unique([customsDeclarationVersionId, lineNumber])
+  @@index([customsDeclarationVersionId])
+  @@map("customs_declaration_items")
+}
+
+model CommodityClassificationReference {
+  id                         String                             @id @default(uuid()) @db.Uuid
+  customsDeclarationItemId   String                             @db.Uuid
+  nomenclatureSystemCode     String
+  classificationCode         String
+  referenceKind              CustomsClassificationReferenceKind
+  isAuthoritative            Boolean                            @default(false)
+  aiSuggestionDoesNotAuthorize Boolean                          @default(true)
+  configurationVersionRef    String?
+  createdAt                  DateTime                           @default(now())
+  updatedAt                  DateTime                           @updatedAt
+  customsDeclarationItem     CustomsDeclarationItem             @relation(fields: [customsDeclarationItemId], references: [id], onDelete: Cascade)
+
+  @@index([customsDeclarationItemId])
+  @@index([nomenclatureSystemCode])
+  @@map("commodity_classification_references")
+}
+
+model OriginDeclaration {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  customsDeclarationItemId String                 @db.Uuid
+  countryOfOriginCode      String?
+  preferentialOriginClaim  Boolean                @default(false)
+  proofReferenceToken      String?
+  declaredAt               DateTime               @default(now())
+  isSelfDeclaration        Boolean                @default(true)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  customsDeclarationItem   CustomsDeclarationItem @relation(fields: [customsDeclarationItemId], references: [id], onDelete: Cascade)
+
+  @@index([customsDeclarationItemId])
+  @@map("origin_declarations")
+}
+
+model CustomsValuationRecord {
+  id                   String               @id @default(uuid()) @db.Uuid
+  customsDeclarationId String               @db.Uuid
+  valuationKind        CustomsValuationKind
+  amountCents          Int
+  currency             String               @default("XCD")
+  methodologyReference String?
+  recordedAt           DateTime             @default(now())
+  recordedByActorKind  CustomsActorPersona?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  customsDeclaration   CustomsDeclaration   @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+
+  @@index([customsDeclarationId, valuationKind])
+  @@map("customs_valuation_records")
+}
+
+model TradePermitReference {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  customsDeclarationId       String                     @db.Uuid
+  permitTypeCode             String
+  permitReferenceToken       String?
+  status                     CustomsPermitReferenceStatus @default(REQUIRED)
+  isMandatoryForRelease      Boolean                    @default(false)
+  blocksReleaseWhenUnresolved Boolean                   @default(true)
+  officialInstrumentId       String?                    @db.Uuid
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
+  customsDeclaration         CustomsDeclaration         @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+  officialInstrument         OfficialInstrument?        @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([customsDeclarationId])
+  @@index([status])
+  @@map("trade_permit_references")
+}
+
+model RestrictedGoodsRequirement {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  customsDeclarationId        String                     @db.Uuid
+  requirementCode             String
+  approvalReferenceToken      String?
+  status                      CustomsPermitReferenceStatus @default(REQUIRED)
+  blocksReleaseWhenUnresolved Boolean                    @default(true)
+  externalAuthorityId         String?                    @db.Uuid
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  customsDeclaration          CustomsDeclaration         @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+  externalAuthority           ExternalAuthority?         @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([customsDeclarationId])
+  @@map("restricted_goods_requirements")
+}
+
+model CustomsAssessment {
+  id                       String                @id @default(uuid()) @db.Uuid
+  customsDeclarationId     String                @db.Uuid
+  assessmentReference      String                @unique
+  status                   CustomsAssessmentStatus @default(PROPOSED)
+  issuedAt                 DateTime?
+  issuedByOfficeholderId   String?               @db.Uuid
+  taxAssessmentId          String?               @db.Uuid
+  paymentAllocationId      String?               @db.Uuid
+  riskScore                Float?
+  riskScoreIsNotViolation  Boolean               @default(true)
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  customsDeclaration       CustomsDeclaration    @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+  issuedByOfficeholder     Officeholder?         @relation("CustomsAssessmentIssuer", fields: [issuedByOfficeholderId], references: [id])
+  taxAssessment            TaxAssessment?        @relation(fields: [taxAssessmentId], references: [id])
+  paymentAllocation        PaymentAllocation?    @relation(fields: [paymentAllocationId], references: [id])
+  lines                    CustomsAssessmentLine[]
+
+  @@index([customsDeclarationId])
+  @@index([status])
+  @@map("customs_assessments")
+}
+
+model CustomsAssessmentLine {
+  id                  String            @id @default(uuid()) @db.Uuid
+  customsAssessmentId String            @db.Uuid
+  lineCode            String
+  description         String
+  amountCents         Int
+  currency            String            @default("XCD")
+  dutyTaxFeeKind      String?
+  sortOrder           Int               @default(0)
+  metadata            Json              @default("{}")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  customsAssessment   CustomsAssessment @relation(fields: [customsAssessmentId], references: [id], onDelete: Cascade)
+
+  @@index([customsAssessmentId])
+  @@map("customs_assessment_lines")
+}
+
+model CustomsHold {
+  id                    String            @id @default(uuid()) @db.Uuid
+  shipmentReferenceId   String            @db.Uuid
+  holdReference         String            @unique
+  status                CustomsHoldStatus @default(ACTIVE)
+  basisReference        String
+  blocksRelease         Boolean           @default(true)
+  placedAt              DateTime          @default(now())
+  removedAt             DateTime?
+  governedRemovalByOfficeholderId String?   @db.Uuid
+  removalDecisionReference        String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  shipmentReference     ShipmentReference @relation(fields: [shipmentReferenceId], references: [id], onDelete: Cascade)
+  governedRemovalBy     Officeholder?     @relation("CustomsHoldRemover", fields: [governedRemovalByOfficeholderId], references: [id])
+
+  @@index([shipmentReferenceId])
+  @@index([status])
+  @@map("customs_holds")
+}
+
+model CustomsInspection {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  shipmentReferenceId String                     @db.Uuid
+  inspectionRecordId String                      @unique @db.Uuid
+  linkStatus         CustomsInspectionLinkStatus @default(LINKED)
+  inspectionIsNotSeizure Boolean                 @default(true)
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+  shipmentReference  ShipmentReference           @relation(fields: [shipmentReferenceId], references: [id], onDelete: Cascade)
+  inspectionRecord   InspectionRecord            @relation(fields: [inspectionRecordId], references: [id])
+
+  @@index([shipmentReferenceId])
+  @@map("customs_inspections")
+}
+
+model CustomsReleaseDecisionReference {
+  id                   String             @id @default(uuid()) @db.Uuid
+  governmentDecisionId String             @unique @db.Uuid
+  decisionReference    String             @unique
+  releaseScopeCode     String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  governmentDecision   GovernmentDecision @relation(fields: [governmentDecisionId], references: [id])
+  releaseRecords       CustomsReleaseRecord[]
+
+  @@map("customs_release_decision_references")
+}
+
+model CustomsReleaseRecord {
+  id                              String                     @id @default(uuid()) @db.Uuid
+  shipmentReferenceId             String                     @db.Uuid
+  releaseReference                String                     @unique
+  status                          CustomsReleaseRecordStatus @default(NOT_RELEASED)
+  releaseDecisionReferenceId      String?                    @db.Uuid
+  authorizedByOfficeholderId      String?                    @db.Uuid
+  releasedAt                      DateTime?
+  paymentRecordedDoesNotRelease   Boolean                    @default(true)
+  createdAt                       DateTime                   @default(now())
+  updatedAt                       DateTime                   @updatedAt
+  shipmentReference               ShipmentReference          @relation("ShipmentReleaseRecords", fields: [shipmentReferenceId], references: [id], onDelete: Cascade)
+  currentForShipment              ShipmentReference?         @relation("ShipmentCurrentRelease")
+  releaseDecisionReference        CustomsReleaseDecisionReference? @relation(fields: [releaseDecisionReferenceId], references: [id])
+  authorizedByOfficeholder        Officeholder?              @relation("CustomsReleaseAuthorizer", fields: [authorizedByOfficeholderId], references: [id])
+
+  @@index([shipmentReferenceId])
+  @@index([status])
+  @@map("customs_release_records")
+}
+
+model CustomsAdjustment {
+  id                   String                @id @default(uuid()) @db.Uuid
+  customsDeclarationId String                @db.Uuid
+  adjustmentKind       CustomsAdjustmentKind
+  adjustmentReference  String                @unique
+  reasonSummary        String
+  appliedAt            DateTime              @default(now())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  customsDeclaration   CustomsDeclaration    @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+
+  @@index([customsDeclarationId])
+  @@map("customs_adjustments")
+}
+
+model CustomsRefundClaim {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  customsDeclarationId String                   @db.Uuid
+  claimReference       String                   @unique
+  status               CustomsRefundClaimStatus @default(SUBMITTED)
+  requestedAmountCents Int
+  currency             String                   @default("XCD")
+  taxRefundClaimId     String?                  @db.Uuid
+  submittedAt          DateTime                 @default(now())
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  customsDeclaration   CustomsDeclaration       @relation(fields: [customsDeclarationId], references: [id], onDelete: Cascade)
+  taxRefundClaim       TaxRefundClaim?          @relation(fields: [taxRefundClaimId], references: [id])
+
+  @@index([customsDeclarationId])
+  @@index([status])
+  @@map("customs_refund_claims")
+}
+
+model CustomsStatusHistory {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  subjectKind          CustomsStatusSubjectKind
+  traderAccountId      String?                  @db.Uuid
+  shipmentReferenceId  String?                  @db.Uuid
+  customsDeclarationId String?                  @db.Uuid
+  fromStatusCode       String?
+  toStatusCode         String
+  changedAt            DateTime                 @default(now())
+  actorIdentityId      String?                  @db.Uuid
+  actorPersona         CustomsActorPersona?
+  reasonSummary        String?
+  createdAt            DateTime                 @default(now())
+  traderAccount        TraderAccount?           @relation(fields: [traderAccountId], references: [id])
+  shipmentReference    ShipmentReference?       @relation("CustomsStatusHistoryShipment", fields: [shipmentReferenceId], references: [id])
+  customsDeclaration   CustomsDeclaration?      @relation("CustomsStatusHistoryDeclaration", fields: [customsDeclarationId], references: [id])
+  actorIdentity        Identity?                @relation("CustomsStatusHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([subjectKind])
+  @@index([customsDeclarationId])
+  @@index([shipmentReferenceId])
+  @@map("customs_status_history")
+}
+
+model CustomsExternalDependency {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  dependencyType             CustomsExternalDependencyType
+  externalAuthorityId        String?                           @db.Uuid
+  shipmentReferenceId        String?                           @db.Uuid
+  customsDeclarationId       String?                           @db.Uuid
+  isRequired                 Boolean                           @default(false)
+  blocksReleaseWhenRequired  Boolean                           @default(false)
+  isAuthenticated            Boolean                           @default(false)
+  authenticatedPayloadHash   String?
+  recordedBy                 CustomsExternalDependencyRecordedBy
+  recordedByIdentityId       String?                           @db.Uuid
+  resolutionStatusCode       String                            @default("PENDING")
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  externalAuthority          ExternalAuthority?                @relation(fields: [externalAuthorityId], references: [id])
+  shipmentReference          ShipmentReference?                @relation(fields: [shipmentReferenceId], references: [id])
+  customsDeclaration         CustomsDeclaration?               @relation(fields: [customsDeclarationId], references: [id])
+  recordedByIdentity         Identity?                         @relation("CustomsExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([externalAuthorityId])
+  @@index([shipmentReferenceId])
+  @@index([customsDeclarationId])
+  @@map("customs_external_dependencies")
+}
