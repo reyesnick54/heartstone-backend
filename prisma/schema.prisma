@@ -135,6 +135,9 @@ model Jurisdiction {
   householdRecords               HouseholdRecord[]
   educationStudentProfiles       EducationStudentProfile[]
   educationInstitutionRegistryRecords EducationInstitutionRegistryRecord[]
+  publicSafetyEngagements        PublicSafetyEngagement[]
+  publicSafetyEmergencyEvents    PublicSafetyEmergencyEvent[]
+  publicSafetyOfficialNotices    PublicSafetyOfficialNotice[]
 
 
   @@map("jurisdictions")
@@ -275,6 +278,7 @@ model Department {
   appointmentSlots              AppointmentSlot[]
   serviceAppointments           ServiceAppointment[]
   developmentProjects           DevelopmentProject[]
+  publicSafetyEngagements       PublicSafetyEngagement[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -373,6 +377,8 @@ model Officeholder {
   customsAssessmentsIssued         CustomsAssessment[]            @relation("CustomsAssessmentIssuer")
   customsHoldsRemoved              CustomsHold[]                  @relation("CustomsHoldRemover")
   customsReleasesAuthorized        CustomsReleaseRecord[]         @relation("CustomsReleaseAuthorizer")
+  publicSafetyNoticesApproved      PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticeApproverOfficeholder")
+  publicSafetyNoticesPublished     PublicSafetyOfficialNotice[]   @relation("PublicSafetyNoticePublisherOfficeholder")
 
   @@map("officeholders")
 }
@@ -879,6 +885,8 @@ model Identity {
   educationRecordCorrectionsAsApplicant      EducationRecordCorrection[]            @relation("EducationRecordCorrectionApplicant")
   educationExternalDependenciesRecorded      EducationExternalDependency[]          @relation("EducationExternalDependencyRecorder")
   educationRecordCorrectionHistoryEvents     EducationRecordCorrectionHistory[]     @relation("EducationRecordCorrectionHistoryActor")
+  publicSafetyEngagementsAsReporter        PublicSafetyEngagement[]               @relation("PublicSafetyEngagementReporter")
+  publicSafetyIncidentReportsAsReporter    PublicSafetyIncidentReport[]           @relation("PublicSafetyIncidentReporter")
 
 
   @@index([userAccountId])
@@ -946,6 +954,7 @@ model Organization {
   educationAccreditationRecords   EducationAccreditationRecord[]
   educationEnrollmentRecords      EducationEnrollmentRecord[]
   educationInstitutionInspectionReferences EducationInstitutionInspectionReference[]
+  publicSafetyEngagements         PublicSafetyEngagement[]
 
   @@index([status])
   @@map("organizations")
@@ -21908,4 +21917,254 @@ model EducationExternalDependency {
   @@index([caseId])
   @@index([studentProfileId])
   @@map("education_external_dependencies")
+}
+// ─── Public Safety & Emergency Government Service Pack ───────────────────────
+
+enum PublicSafetyEngagementStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum PublicSafetyVerificationStatus {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum PublicSafetyServiceRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  CLOSED
+}
+
+enum PublicSafetyServiceRequestKind {
+  SUBMIT_INCIDENT_REPORT
+  REQUEST_EMERGENCY_ASSISTANCE
+  DISASTER_IMPACT_REPORT
+  DISASTER_RELIEF_INTAKE
+  PUBLIC_SAFETY_PERMIT_APPLICATION
+  FIRE_SAFETY_INSPECTION_REQUEST
+  EMERGENCY_INSPECTION_REQUEST
+  EMERGENCY_DOCUMENT_REPLACEMENT
+  INFRASTRUCTURE_DISRUPTION_REPORT
+  EMERGENCY_SHELTER_ASSISTANCE_INFO
+  RECOVERY_ASSISTANCE_APPLICATION
+  PUBLIC_SAFETY_DECISION_REVIEW_APPEAL
+}
+
+enum PublicSafetyEmergencyEventStatus {
+  INFORMATIONAL
+  ACTIVE_MONITORING
+  RESPONSE_COORDINATION
+  RECOVERY
+  CLOSED
+}
+
+enum PublicSafetyOfficialNoticeStatus {
+  DRAFT
+  APPROVED
+  PUBLISHED
+  WITHDRAWN
+}
+
+enum PublicSafetyInspectionRequestStatus {
+  REQUESTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum PublicSafetyExternalDependencyStatus {
+  PENDING
+  REFERRED
+  SATISFIED
+  BLOCKED
+}
+
+enum PublicSafetyCommunicationDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model PublicSafetyEngagement {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  jurisdictionId          String                       @db.Uuid
+  engagementReference     String                       @unique
+  reporterIdentityId      String?                      @db.Uuid
+  organizationId          String?                      @db.Uuid
+  responsibleDepartmentId String?                      @db.Uuid
+  status                  PublicSafetyEngagementStatus @default(ACTIVE)
+  ruleEnvironment         String                       @default("NON_PRODUCTION")
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  jurisdiction            Jurisdiction                 @relation(fields: [jurisdictionId], references: [id])
+  reporterIdentity        Identity?                    @relation("PublicSafetyEngagementReporter", fields: [reporterIdentityId], references: [id])
+  organization            Organization?                @relation(fields: [organizationId], references: [id])
+  responsibleDepartment   Department?                  @relation(fields: [responsibleDepartmentId], references: [id])
+  serviceRequests         PublicSafetyServiceRequest[]
+  incidentReports         PublicSafetyIncidentReport[]
+  recoveryApplications    PublicSafetyRecoveryAssistanceApplication[]
+  inspectionRequests      PublicSafetyInspectionRequest[]
+  externalDependencies    PublicSafetyExternalDependency[]
+  communicationDeliveries PublicSafetyCommunicationDelivery[]
+
+  @@index([jurisdictionId])
+  @@index([reporterIdentityId])
+  @@index([organizationId])
+  @@index([responsibleDepartmentId])
+  @@index([status])
+  @@map("public_safety_engagements")
+}
+
+model PublicSafetyServiceRequest {
+  id                  String                           @id @default(uuid()) @db.Uuid
+  engagementId        String                           @db.Uuid
+  requestReference    String                           @unique
+  serviceTemplateCode String
+  requestKind         PublicSafetyServiceRequestKind
+  status              PublicSafetyServiceRequestStatus @default(SUBMITTED)
+  submittedAt         DateTime?
+  createdAt           DateTime                         @default(now())
+  updatedAt           DateTime                         @updatedAt
+  engagement          PublicSafetyEngagement           @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  incidentReport      PublicSafetyIncidentReport?
+  recoveryApplication PublicSafetyRecoveryAssistanceApplication?
+
+  @@index([engagementId])
+  @@index([requestKind])
+  @@index([status])
+  @@map("public_safety_service_requests")
+}
+
+model PublicSafetyIncidentReport {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  engagementId             String                         @db.Uuid
+  serviceRequestId         String?                        @unique @db.Uuid
+  incidentReference        String                         @unique
+  verificationStatus       PublicSafetyVerificationStatus @default(UNVERIFIED)
+  reporterIdentityId       String?                        @db.Uuid
+  summaryLabel             String
+  locationDescription      String?
+  protectsReporterIdentity Boolean                        @default(true)
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  engagement               PublicSafetyEngagement         @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  serviceRequest           PublicSafetyServiceRequest?    @relation(fields: [serviceRequestId], references: [id])
+  reporterIdentity         Identity?                      @relation("PublicSafetyIncidentReporter", fields: [reporterIdentityId], references: [id])
+
+  @@index([engagementId])
+  @@index([verificationStatus])
+  @@map("public_safety_incident_reports")
+}
+
+model PublicSafetyRecoveryAssistanceApplication {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  engagementId         String                      @db.Uuid
+  serviceRequestId     String?                     @unique @db.Uuid
+  applicationReference String                      @unique
+  programCode          String
+  status               PublicSafetyServiceRequestStatus @default(SUBMITTED)
+  submittedAt          DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  engagement           PublicSafetyEngagement      @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  serviceRequest       PublicSafetyServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_recovery_assistance_applications")
+}
+
+model PublicSafetyEmergencyEvent {
+  id                      String                           @id @default(uuid()) @db.Uuid
+  jurisdictionId          String                           @db.Uuid
+  eventReference          String                           @unique
+  title                   String
+  status                  PublicSafetyEmergencyEventStatus @default(INFORMATIONAL)
+  isOfficialDeclaration   Boolean                          @default(false)
+  publicSummary           String?
+  verifiedImpactSummary   String?
+  serviceInterruptionNote String?
+  createdAt               DateTime                         @default(now())
+  updatedAt               DateTime                         @updatedAt
+  jurisdiction            Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("public_safety_emergency_events")
+}
+
+model PublicSafetyOfficialNotice {
+  id                        String                           @id @default(uuid()) @db.Uuid
+  jurisdictionId            String                           @db.Uuid
+  noticeReference           String                           @unique
+  status                    PublicSafetyOfficialNoticeStatus @default(DRAFT)
+  draftContent              String
+  approvedContent           String?
+  publishedContent          String?
+  approvedByOfficeholderId  String?                          @db.Uuid
+  publishedByOfficeholderId String?                          @db.Uuid
+  approvedAt                DateTime?
+  publishedAt               DateTime?
+  createdAt                 DateTime                         @default(now())
+  updatedAt                 DateTime                         @updatedAt
+  jurisdiction              Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+  approvedByOfficeholder    Officeholder?                    @relation("PublicSafetyNoticeApproverOfficeholder", fields: [approvedByOfficeholderId], references: [id])
+  publishedByOfficeholder   Officeholder?                    @relation("PublicSafetyNoticePublisherOfficeholder", fields: [publishedByOfficeholderId], references: [id])
+
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("public_safety_official_notices")
+}
+
+model PublicSafetyInspectionRequest {
+  id                  String                            @id @default(uuid()) @db.Uuid
+  engagementId        String                            @db.Uuid
+  inspectionReference String                            @unique
+  inspectionKind      String
+  status              PublicSafetyInspectionRequestStatus @default(REQUESTED)
+  facilityLabel       String?
+  scheduledAt         DateTime?
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @updatedAt
+  engagement          PublicSafetyEngagement            @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_inspection_requests")
+}
+
+model PublicSafetyExternalDependency {
+  id                         String                               @id @default(uuid()) @db.Uuid
+  engagementId               String                               @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String
+  status                     PublicSafetyExternalDependencyStatus @default(PENDING)
+  externalAuthorityReference String?
+  createdAt                  DateTime                             @default(now())
+  updatedAt                  DateTime                             @updatedAt
+  engagement                 PublicSafetyEngagement               @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_external_dependencies")
+}
+
+model PublicSafetyCommunicationDelivery {
+  id             String                                  @id @default(uuid()) @db.Uuid
+  engagementId   String                                  @db.Uuid
+  channel        String
+  templateCode   String?
+  status         PublicSafetyCommunicationDeliveryStatus @default(PENDING)
+  deliveredAt    DateTime?
+  createdAt      DateTime                                @default(now())
+  updatedAt      DateTime                                @updatedAt
+  engagement     PublicSafetyEngagement                  @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([status])
+  @@map("public_safety_communication_deliveries")
 }

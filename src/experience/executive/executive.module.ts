@@ -19,6 +19,11 @@ import { ExecutiveIndicatorService } from './services/executive-indicator.servic
     ExecutiveIndicatorService,
     ExecutiveBriefingService,
   ],
-  exports: [ExecutiveContextService, ExecutiveIndicatorService, ExecutiveBriefingService],
+  exports: [
+    ExecutiveExperienceGuard,
+    ExecutiveContextService,
+    ExecutiveIndicatorService,
+    ExecutiveBriefingService,
+  ],
 })
 export class ExecutiveModule {}
