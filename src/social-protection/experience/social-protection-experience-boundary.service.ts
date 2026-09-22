@@ -1,0 +1,18 @@
+import { Injectable } from '@nestjs/common';
+
+import {
+  FORBIDDEN_AI_SOCIAL_PROTECTION_ACTIONS,
+  SOCIAL_PROTECTION_BOUNDARY_DISCLAIMER,
+  SOCIAL_PROTECTION_EXPERIENCE_RULE_ENVIRONMENT,
+  SOCIAL_PROTECTION_PAYMENT_BOUNDARY_DISCLAIMER,
+  SOCIAL_PROTECTION_PRELIMINARY_MATCH_DISCLAIMER,
+} from '../social-protection.constants';
+
+@Injectable()
+export class SocialProtectionExperienceBoundaryService {
+  readonly rulesDisclaimer = SOCIAL_PROTECTION_BOUNDARY_DISCLAIMER;
+  readonly preliminaryMatchDisclaimer = SOCIAL_PROTECTION_PRELIMINARY_MATCH_DISCLAIMER;
+  readonly paymentBoundaryDisclaimer = SOCIAL_PROTECTION_PAYMENT_BOUNDARY_DISCLAIMER;
+  readonly ruleEnvironment = SOCIAL_PROTECTION_EXPERIENCE_RULE_ENVIRONMENT;
+  readonly forbiddenAiActions = FORBIDDEN_AI_SOCIAL_PROTECTION_ACTIONS;
+}
