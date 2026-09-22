@@ -158,6 +158,8 @@ model Institution {
   appointmentSlots                 AppointmentSlot[]
   serviceAppointments              ServiceAppointment[]
   servicePacks                     ServicePack[]
+  servicePackReviewChainPolicies   ServicePackReviewChainPolicy[]
+  servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -300,6 +302,7 @@ model Officeholder {
   resumptionAuthorizations         ResumptionAuthorization[]      @relation("ResumptionAuthorizingOfficeholder")
   appointmentResources             AppointmentResource[]          @relation("AppointmentResourceOfficeholder")
   serviceAppointmentsAssigned      ServiceAppointment[]           @relation("ServiceAppointmentAssignedOfficeholder")
+  servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]  @relation("ServicePackAcceptanceOfficeholder")
 
   @@map("officeholders")
 }
@@ -321,6 +324,7 @@ model Appointment {
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions  ContinuityDecision[]
   resumptionAuthorizations ResumptionAuthorization[]
+  servicePackAcceptanceRecords ServicePackAcceptanceRecord[] @relation("ServicePackAcceptanceAppointment")
 
   @@index([officeId])
   @@index([officeholderId])
@@ -717,6 +721,16 @@ model Identity {
   servicePackVersionsAccepted              ServicePackVersion[]                   @relation("ServicePackVersionAccepter")
   servicePackImports                       ServicePackImport[]                    @relation("ServicePackImportActor")
   servicePackValidationResults             ServicePackValidationResult[]          @relation("ServicePackValidationActor")
+  servicePackReviewAssignments             ServicePackReviewAssignment[]          @relation("ServicePackReviewAssignee")
+  servicePackReviewAssignmentsCreated      ServicePackReviewAssignment[]          @relation("ServicePackReviewAssignmentCreator")
+  servicePackReviewFindingsReported        ServicePackReviewFinding[]             @relation("ServicePackReviewFindingReporter")
+  servicePackReviewFindingsAssigned        ServicePackReviewFinding[]             @relation("ServicePackReviewFindingResolver")
+  servicePackReviewComments                ServicePackReviewComment[]             @relation("ServicePackReviewCommentAuthor")
+  servicePackReviewSignoffs                ServicePackReviewSignoff[]             @relation("ServicePackReviewSignoffReviewer")
+  servicePackAcceptanceRecords             ServicePackAcceptanceRecord[]          @relation("ServicePackAcceptanceActor")
+  servicePackRejectionRecords              ServicePackRejectionRecord[]           @relation("ServicePackRejectionActor")
+  servicePackRevisionRequests              ServicePackRevisionRequest[]           @relation("ServicePackRevisionRequester")
+  servicePackGovernanceAuditEvents         ServicePackGovernanceAuditRecord[]     @relation("ServicePackGovernanceAuditActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1373,6 +1387,7 @@ model AuthorityEvaluationRecord {
   issuanceEvents                  IssuanceEvent[]
   complianceProjectionEvaluations ComplianceStatusProjection[]  @relation("ComplianceProjectionAuthority")
   complianceReviews               ComplianceReview[]            @relation("ComplianceReviewAuthorityEvaluation")
+  servicePackAcceptanceRecords    ServicePackAcceptanceRecord[] @relation("ServicePackAcceptanceAuthorityEvaluation")
   reviewAssignments               ReviewAssignment[]            @relation("ReviewAssignmentAuthority")
   reviewAuthorityAssessments      ReviewAuthorityAssessment[]
   reviewRecommendations           ReviewRecommendation[]        @relation("ReviewRecommendationAuthority")
@@ -13444,9 +13459,15 @@ model ServicePack {
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   institution    Institution          @relation(fields: [institutionId], references: [id])
-  jurisdiction   Jurisdiction?        @relation("ServicePackJurisdiction", fields: [jurisdictionId], references: [id])
-  versions       ServicePackVersion[]
-  imports        ServicePackImport[]
+  jurisdiction           Jurisdiction?                      @relation("ServicePackJurisdiction", fields: [jurisdictionId], references: [id])
+  versions               ServicePackVersion[]
+  imports                ServicePackImport[]
+  reviews                ServicePackReview[]
+  reviewChainPolicies    ServicePackReviewChainPolicy[]
+  acceptanceRecords      ServicePackAcceptanceRecord[]
+  rejectionRecords       ServicePackRejectionRecord[]
+  revisionRequests       ServicePackRevisionRequest[]
+  governanceAuditRecords ServicePackGovernanceAuditRecord[]
 
   @@index([institutionId])
   @@index([jurisdictionId])
@@ -13460,6 +13481,7 @@ model ServicePackVersion {
   status                   ServicePackVersionStatus          @default(COMPILED)
   manifestVersion          String                            @default("heartstone.service-pack/v1")
   manifestValidationStatus ServicePackManifestValidationStatus @default(DRAFT)
+  governanceLifecycleStatus ServicePackGovernanceLifecycleStatus @default(NOT_IN_GOVERNANCE)
   compilationFingerprint   String
   manifestChecksum         String?
   manifest                 Json
@@ -13476,11 +13498,17 @@ model ServicePackVersion {
   dependencies             ServicePackDependency[]
   validationResults        ServicePackValidationResult[]
   imports                  ServicePackImport[]
+  reviews                  ServicePackReview[]
+  acceptanceRecords        ServicePackAcceptanceRecord[]
+  rejectionRecords         ServicePackRejectionRecord[]
+  revisionRequests         ServicePackRevisionRequest[]
+  governanceAuditRecords   ServicePackGovernanceAuditRecord[]
 
   @@unique([servicePackId, version])
   @@index([servicePackId])
   @@index([status])
   @@index([manifestValidationStatus])
+  @@index([governanceLifecycleStatus])
   @@index([manifestChecksum])
   @@map("service_pack_versions")
 }
@@ -13681,4 +13709,359 @@ model ServicePackImport {
   @@index([servicePackVersionId])
   @@index([status])
   @@map("service_pack_imports")
+}
+
+// ─── Service Pack Governance & Institutional Acceptance ─────────────────────
+
+enum ServicePackGovernanceLifecycleStatus {
+  NOT_IN_GOVERNANCE
+  PENDING_REVIEW
+  IN_REVIEW
+  REVISION_REQUIRED
+  PENDING_ACCEPTANCE
+  INSTITUTIONALLY_ACCEPTED
+  REJECTED
+  WITHDRAWN
+  DEPLOYMENT_READY
+}
+
+enum ServicePackReviewType {
+  TECHNICAL_ARCHITECTURE
+  SERVICE_OWNER
+  DEPARTMENTAL
+  AUTHORITY_LEGAL_BASIS
+  CYBERSECURITY
+  PRIVACY_DATA_GOVERNANCE
+  INTEGRATION
+  OPERATIONAL_READINESS
+  EXECUTIVE_INSTITUTIONAL_ACCEPTANCE
+}
+
+enum ServicePackReviewStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServicePackReviewAssignmentStatus {
+  ASSIGNED
+  ACKNOWLEDGED
+  COMPLETED
+  DECLINED
+}
+
+enum ServicePackReviewFindingCode {
+  MISSING_AUTHORITY_BASIS
+  UNAUTHENTICATED_GOVERNING_SOURCE
+  WORKFLOW_CONTROL_GAP
+  PRIVACY_RISK
+  SECURITY_RISK
+  MISSING_REDRESS_ROUTE
+  MISSING_RETENTION_RULE
+  INTEGRATION_NOT_ACCEPTED
+  DATA_CLASSIFICATION_ISSUE
+  UNRESOLVED_EXTERNAL_DEPENDENCY
+  ACCESS_CONTROL_GAP
+  INVALID_DECISION_ACTOR
+  EVIDENCE_REQUIREMENT_GAP
+  OPERATIONAL_READINESS_GAP
+  OTHER
+}
+
+enum ServicePackReviewFindingSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  BLOCKING
+}
+
+enum ServicePackReviewFindingCategory {
+  AUTHORITY
+  SECURITY
+  PRIVACY
+  INTEGRATION
+  OPERATIONS
+  WORKFLOW
+  EVIDENCE
+  DATA
+  OTHER
+}
+
+enum ServicePackReviewFindingStatus {
+  OPEN
+  IN_REMEDIATION
+  RESOLVED
+  ACCEPTED_RISK
+  DISMISSED
+}
+
+enum ServicePackReviewSignoffOutcome {
+  CONCUR
+  NON_CONCUR
+  CONDITIONAL
+}
+
+enum ServicePackRevisionRequestStatus {
+  OPEN
+  ADDRESSED
+  SUPERSEDED
+}
+
+enum ServicePackGovernanceAuditEventType {
+  REVIEW_CREATED
+  REVIEW_STARTED
+  REVIEW_COMPLETED
+  ASSIGNMENT_CREATED
+  FINDING_RECORDED
+  FINDING_RESOLVED
+  COMMENT_ADDED
+  EVIDENCE_ATTACHED
+  SIGNOFF_RECORDED
+  REVISION_REQUESTED
+  SUBMITTED_FOR_ACCEPTANCE
+  INSTITUTIONALLY_ACCEPTED
+  REJECTED
+  WITHDRAWN
+  ACCEPTANCE_INVALIDATED
+  DEPLOYMENT_READY_MARKED
+}
+
+model ServicePackReviewChainPolicy {
+  id             String                       @id @default(uuid()) @db.Uuid
+  institutionId  String                       @db.Uuid
+  jurisdictionId String?                      @db.Uuid
+  servicePackId  String?                      @db.Uuid
+  name           String
+  isActive       Boolean                      @default(true)
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  institution    Institution                  @relation(fields: [institutionId], references: [id])
+  servicePack    ServicePack?                 @relation(fields: [servicePackId], references: [id])
+  steps          ServicePackReviewChainStep[]
+
+  @@index([institutionId])
+  @@index([servicePackId])
+  @@map("service_pack_review_chain_policies")
+}
+
+model ServicePackReviewChainStep {
+  id                         String                     @id @default(uuid()) @db.Uuid
+  policyId                   String                     @db.Uuid
+  sequenceOrder              Int
+  reviewType                 ServicePackReviewType
+  required                   Boolean                    @default(true)
+  requiresAuthorityEvaluation Boolean                   @default(false)
+  createdAt                  DateTime                   @default(now())
+  policy                     ServicePackReviewChainPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  reviews                    ServicePackReview[]
+
+  @@unique([policyId, sequenceOrder])
+  @@index([policyId])
+  @@map("service_pack_review_chain_steps")
+}
+
+model ServicePackReview {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  servicePackId        String                 @db.Uuid
+  servicePackVersionId String                 @db.Uuid
+  reviewType           ServicePackReviewType
+  status               ServicePackReviewStatus @default(DRAFT)
+  chainStepId          String?                @db.Uuid
+  openedAt             DateTime?
+  closedAt             DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  servicePack          ServicePack            @relation(fields: [servicePackId], references: [id])
+  servicePackVersion   ServicePackVersion     @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+  chainStep            ServicePackReviewChainStep? @relation(fields: [chainStepId], references: [id])
+  assignments          ServicePackReviewAssignment[]
+  findings             ServicePackReviewFinding[]
+  comments             ServicePackReviewComment[]
+  evidence             ServicePackReviewEvidence[]
+  signoffs             ServicePackReviewSignoff[]
+  revisionRequests     ServicePackRevisionRequest[]
+
+  @@index([servicePackId])
+  @@index([servicePackVersionId])
+  @@index([status])
+  @@index([reviewType])
+  @@map("service_pack_reviews")
+}
+
+model ServicePackReviewAssignment {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  reviewId              String                          @db.Uuid
+  assigneeIdentityId    String                          @db.Uuid
+  assignedByIdentityId  String                          @db.Uuid
+  officeId              String?                         @db.Uuid
+  status                ServicePackReviewAssignmentStatus @default(ASSIGNED)
+  assignedAt            DateTime                        @default(now())
+  completedAt           DateTime?
+  review                ServicePackReview               @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  assignee              Identity                        @relation("ServicePackReviewAssignee", fields: [assigneeIdentityId], references: [id])
+  assignedBy            Identity                        @relation("ServicePackReviewAssignmentCreator", fields: [assignedByIdentityId], references: [id])
+
+  @@index([reviewId])
+  @@index([assigneeIdentityId])
+  @@map("service_pack_review_assignments")
+}
+
+model ServicePackReviewFinding {
+  id                     String                         @id @default(uuid()) @db.Uuid
+  reviewId               String                         @db.Uuid
+  findingCode            ServicePackReviewFindingCode
+  severity               ServicePackReviewFindingSeverity
+  category               ServicePackReviewFindingCategory
+  description            String
+  affectedComponent      String?
+  status                 ServicePackReviewFindingStatus @default(OPEN)
+  resolverIdentityId     String?                        @db.Uuid
+  evidenceReference      String?
+  resolutionNotes        String?
+  reporterIdentityId     String                         @db.Uuid
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  resolvedAt             DateTime?
+  review                 ServicePackReview              @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter               Identity                       @relation("ServicePackReviewFindingReporter", fields: [reporterIdentityId], references: [id])
+  resolver               Identity?                      @relation("ServicePackReviewFindingResolver", fields: [resolverIdentityId], references: [id])
+  evidence               ServicePackReviewEvidence[]
+
+  @@index([reviewId])
+  @@index([status])
+  @@index([severity])
+  @@map("service_pack_review_findings")
+}
+
+model ServicePackReviewComment {
+  id               String            @id @default(uuid()) @db.Uuid
+  reviewId         String            @db.Uuid
+  authorIdentityId String            @db.Uuid
+  body             String
+  createdAt        DateTime          @default(now())
+  review           ServicePackReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  author           Identity          @relation("ServicePackReviewCommentAuthor", fields: [authorIdentityId], references: [id])
+
+  @@index([reviewId])
+  @@map("service_pack_review_comments")
+}
+
+model ServicePackReviewEvidence {
+  id               String                    @id @default(uuid()) @db.Uuid
+  reviewId         String                    @db.Uuid
+  findingId        String?                   @db.Uuid
+  recordReference  String?
+  metadata         Json                      @default("{}")
+  createdAt        DateTime                  @default(now())
+  review           ServicePackReview         @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  finding          ServicePackReviewFinding? @relation(fields: [findingId], references: [id])
+
+  @@index([reviewId])
+  @@index([findingId])
+  @@map("service_pack_review_evidence")
+}
+
+model ServicePackReviewSignoff {
+  id                 String                          @id @default(uuid()) @db.Uuid
+  reviewId           String                          @db.Uuid
+  reviewerIdentityId String                          @db.Uuid
+  outcome            ServicePackReviewSignoffOutcome
+  notes              String?
+  signedAt           DateTime                        @default(now())
+  review             ServicePackReview               @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewer           Identity                        @relation("ServicePackReviewSignoffReviewer", fields: [reviewerIdentityId], references: [id])
+
+  @@index([reviewId])
+  @@map("service_pack_review_signoffs")
+}
+
+model ServicePackAcceptanceRecord {
+  id                           String            @id @default(uuid()) @db.Uuid
+  servicePackId                String            @db.Uuid
+  servicePackVersionId         String            @db.Uuid
+  institutionId                String            @db.Uuid
+  acceptingIdentityId          String            @db.Uuid
+  officeholderId               String?           @db.Uuid
+  appointmentId                String?           @db.Uuid
+  authorityEvaluationRecordId  String?           @db.Uuid
+  acceptedScope                Json              @default("{}")
+  acceptanceConditions         Json              @default("[]")
+  unresolvedAcceptedRisks      Json              @default("[]")
+  versionFingerprint           String
+  isActive                     Boolean           @default(true)
+  acceptedAt                   DateTime          @default(now())
+  invalidatedAt                DateTime?
+  invalidationReason           String?
+  servicePack                  ServicePack       @relation(fields: [servicePackId], references: [id])
+  servicePackVersion           ServicePackVersion @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+  institution                  Institution       @relation(fields: [institutionId], references: [id])
+  acceptingActor               Identity          @relation("ServicePackAcceptanceActor", fields: [acceptingIdentityId], references: [id])
+  officeholder                 Officeholder?     @relation("ServicePackAcceptanceOfficeholder", fields: [officeholderId], references: [id])
+  appointment                  Appointment?      @relation("ServicePackAcceptanceAppointment", fields: [appointmentId], references: [id])
+  authorityEvaluationRecord    AuthorityEvaluationRecord? @relation("ServicePackAcceptanceAuthorityEvaluation", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([servicePackVersionId])
+  @@index([servicePackId])
+  @@index([institutionId])
+  @@index([isActive])
+  @@map("service_pack_acceptance_records")
+}
+
+model ServicePackRejectionRecord {
+  id                   String             @id @default(uuid()) @db.Uuid
+  servicePackId        String             @db.Uuid
+  servicePackVersionId String             @db.Uuid
+  rejectedByIdentityId String             @db.Uuid
+  reason               String
+  rejectedAt           DateTime           @default(now())
+  servicePack          ServicePack        @relation(fields: [servicePackId], references: [id])
+  servicePackVersion   ServicePackVersion @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+  rejectedBy           Identity           @relation("ServicePackRejectionActor", fields: [rejectedByIdentityId], references: [id])
+
+  @@index([servicePackVersionId])
+  @@index([servicePackId])
+  @@map("service_pack_rejection_records")
+}
+
+model ServicePackRevisionRequest {
+  id                   String                         @id @default(uuid()) @db.Uuid
+  servicePackId        String                         @db.Uuid
+  servicePackVersionId String                         @db.Uuid
+  reviewId             String                         @db.Uuid
+  requestedByIdentityId String                        @db.Uuid
+  summary              String
+  status               ServicePackRevisionRequestStatus @default(OPEN)
+  requestedAt          DateTime                       @default(now())
+  addressedAt          DateTime?
+  servicePack          ServicePack                    @relation(fields: [servicePackId], references: [id])
+  servicePackVersion   ServicePackVersion             @relation(fields: [servicePackVersionId], references: [id], onDelete: Cascade)
+  review               ServicePackReview              @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  requestedBy          Identity                       @relation("ServicePackRevisionRequester", fields: [requestedByIdentityId], references: [id])
+
+  @@index([servicePackVersionId])
+  @@index([reviewId])
+  @@map("service_pack_revision_requests")
+}
+
+model ServicePackGovernanceAuditRecord {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  servicePackId        String                            @db.Uuid
+  servicePackVersionId String?                           @db.Uuid
+  reviewId             String?                           @db.Uuid
+  eventType            ServicePackGovernanceAuditEventType
+  actorIdentityId      String                            @db.Uuid
+  metadata             Json                              @default("{}")
+  createdAt            DateTime                          @default(now())
+  servicePack          ServicePack                       @relation(fields: [servicePackId], references: [id])
+  servicePackVersion   ServicePackVersion?               @relation(fields: [servicePackVersionId], references: [id])
+  actor                Identity                          @relation("ServicePackGovernanceAuditActor", fields: [actorIdentityId], references: [id])
+
+  @@index([servicePackId])
+  @@index([servicePackVersionId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("service_pack_governance_audit_records")
 }

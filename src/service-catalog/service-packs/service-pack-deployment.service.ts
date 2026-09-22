@@ -14,6 +14,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ServicePackAcceptanceService } from '../../service-packs/governance/service-pack-acceptance.service';
 import { buildServicePackConfigurationFingerprintFromManifest } from './service-pack-configuration-fingerprint.util';
 import { SERVICE_PACK_DEPLOYMENT_REASON_CODES } from './service-pack-deployment.constants';
 import {
@@ -31,6 +32,7 @@ export class ServicePackDeploymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: ServicePackDeploymentAuditService,
+    private readonly governanceAcceptance: ServicePackAcceptanceService,
   ) {}
 
   async acceptServicePackVersion(
@@ -38,24 +40,17 @@ export class ServicePackDeploymentService {
   ): Promise<ServicePackVersionResult> {
     const version = await this.loadServicePackVersion(request.servicePackVersionId);
 
-    if (version.status !== ServicePackVersionStatus.COMPILED) {
-      throw new BadRequestException(SERVICE_PACK_DEPLOYMENT_REASON_CODES.VERSION_NOT_COMPILED);
+    if (version.status !== ServicePackVersionStatus.ACCEPTED) {
+      throw new BadRequestException(SERVICE_PACK_DEPLOYMENT_REASON_CODES.VERSION_NOT_ACCEPTED);
     }
 
-    const acceptedAt = new Date();
-    await this.prisma.servicePackVersion.update({
-      where: { id: version.id },
-      data: {
-        status: ServicePackVersionStatus.ACCEPTED,
-        acceptedAt,
-      },
-    });
+    await this.governanceAcceptance.assertActiveAcceptanceForDeployment(version.id);
 
     return {
       servicePackVersionId: version.id,
-      priorStatus: ServicePackVersionStatus.COMPILED,
+      priorStatus: ServicePackVersionStatus.ACCEPTED,
       newStatus: ServicePackVersionStatus.ACCEPTED,
-      message: 'Service pack version accepted for governed deployment',
+      message: 'Service pack version has active institutional acceptance for deployment staging',
     };
   }
 
@@ -67,6 +62,8 @@ export class ServicePackDeploymentService {
     if (version.status !== ServicePackVersionStatus.ACCEPTED) {
       throw new BadRequestException(SERVICE_PACK_DEPLOYMENT_REASON_CODES.VERSION_NOT_ACCEPTED);
     }
+
+    await this.governanceAcceptance.assertActiveAcceptanceForDeployment(version.id);
 
     const deployment = await this.prisma.$transaction(async (tx) => {
       const created = await tx.servicePackDeployment.create({
@@ -119,6 +116,8 @@ export class ServicePackDeploymentService {
     if (version.status !== ServicePackVersionStatus.ACCEPTED) {
       throw new BadRequestException(SERVICE_PACK_DEPLOYMENT_REASON_CODES.VERSION_NOT_ACCEPTED);
     }
+
+    await this.governanceAcceptance.assertActiveAcceptanceForDeployment(version.id);
 
     await this.assertNoSilentOverwrite(manifest);
 
