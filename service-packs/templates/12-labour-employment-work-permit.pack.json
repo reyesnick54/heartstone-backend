@@ -1,0 +1,2320 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-LABOUR",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Labour, employment and work permit family with jurisdiction-bound placeholder rules and separate immigration coordination.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-labour-employment-work-permit",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Labour, Employment & Work Permit Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-REGISTER-EMPLOYER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Register Employer — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-FORM",
+          "formName": "Register Employer form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-REGISTER-EMPLOYER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-REGISTER-EMPLOYER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Register Employer",
+      "serviceSlug": "register-employer",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-REGISTER-EMPLOYER-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-UPDATE-EMPLOYER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Update Employer Details — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-FORM",
+          "formName": "Update Employer Details form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-UPDATE-EMPLOYER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-UPDATE-EMPLOYER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Update Employer Details",
+      "serviceSlug": "update-employer-details",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-UPDATE-EMPLOYER-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "EMPLOYEE",
+        "CITIZEN"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-REGISTER-EMPLOYMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Register Employment Relationship — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-FORM",
+          "formName": "Register Employment Relationship form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-REGISTER-EMPLOYMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Register Employment Relationship",
+      "serviceSlug": "register-employment-relationship",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-REGISTER-EMPLOYMENT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "EMPLOYEE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Submit Employment Declaration — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-FORM",
+          "formName": "Submit Employment Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Submit Employment Declaration",
+      "serviceSlug": "submit-employment-declaration",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-EMPLOYMENT-DECLARATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "EMPLOYEE",
+        "CITIZEN"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-APPLY-WORK-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-IMMIGRATION-COORD",
+          "dependencyType": "EXTERNAL_AUTHORITY",
+          "description": "Immigration coordination dependency (status channels remain separate)",
+          "externalIntegrationCode": "TEMPLATE-IMM-COORD-API"
+        }
+      ],
+      "description": "Apply for Work Permit — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-FORM",
+          "formName": "Apply for Work Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-APPLY-WORK-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Apply for Work Permit",
+      "serviceSlug": "apply-work-permit",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-APPLY-WORK-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "EMPLOYEE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-RENEW-WORK-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Renew Work Permit — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-FORM",
+          "formName": "Renew Work Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-RENEW-WORK-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Renew Work Permit",
+      "serviceSlug": "renew-work-permit",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-RENEW-WORK-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "GOVERNMENT_ENTITY",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-AMEND-WORK-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Amend Work Permit — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-FORM",
+          "formName": "Amend Work Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-AMEND-WORK-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Amend Work Permit",
+      "serviceSlug": "amend-work-permit",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-AMEND-WORK-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "GOVERNMENT_ENTITY",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-ENFORCE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-TERMINATE-WORK-AUTH-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-ENFORCE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Terminate / Close Work Authorization — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-FORM",
+          "formName": "Terminate / Close Work Authorization form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-TERMINATE-WORK-AUTH-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Terminate / Close Work Authorization",
+      "serviceSlug": "terminate-work-authorization",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-TERMINATE-WORK-AUTH-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-ENFORCE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-IMMIGRATION-COORD",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-IMMIGRATION-COORD",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-IMMIGRATION-COORD",
+          "dependencyType": "EXTERNAL_AUTHORITY",
+          "description": "Immigration coordination dependency (status channels remain separate)",
+          "externalIntegrationCode": "TEMPLATE-IMM-COORD-API"
+        }
+      ],
+      "description": "Submit Foreign Worker Sponsorship — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-FORM",
+          "formName": "Submit Foreign Worker Sponsorship form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Submit Foreign Worker Sponsorship",
+      "serviceSlug": "foreign-worker-sponsorship",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-FOREIGN-WORKER-SPONSOR-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-IMMIGRATION-COORD",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-WORKFORCE-DECLARATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Submit Workforce Declaration — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-FORM",
+          "formName": "Submit Workforce Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-WORKFORCE-DECLARATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Submit Workforce Declaration",
+      "serviceSlug": "workforce-declaration",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-WORKFORCE-DECLARATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "EMPLOYEE",
+        "PROFESSIONAL"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-QUALIFICATION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-QUALIFICATION-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Professional Qualification Verification Request — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-FORM",
+          "formName": "Professional Qualification Verification Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Professional Qualification Verification Request",
+      "serviceSlug": "professional-qualification-verification",
+      "serviceType": "REQUEST",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-PROFESSIONAL-QUALIFICATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-QUALIFICATION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "GOVERNMENT_ENTITY",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INSPECT",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-INSPECT",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-INSPECTION-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Labour Inspection Request / Response — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-INSPECTION-FORM",
+          "formName": "Labour Inspection Request / Response form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-INSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Labour Inspection Request / Response",
+      "serviceSlug": "labour-inspection",
+      "serviceType": "INSPECTION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-INSPECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-INSPECT",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "EMPLOYEE",
+        "CITIZEN"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Employment Complaint — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-FORM",
+          "formName": "Employment Complaint form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Employment Complaint",
+      "serviceSlug": "employment-complaint",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-EMPLOYMENT-COMPLAINT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "EMPLOYEE",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Employment Dispute / Review — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-FORM",
+          "formName": "Employment Dispute / Review form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Employment Dispute / Review",
+      "serviceSlug": "employment-dispute-review",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-EMPLOYMENT-DISPUTE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-COMPLAINT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Workplace Compliance Submission — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-FORM",
+          "formName": "Workplace Compliance Submission form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Workplace Compliance Submission",
+      "serviceSlug": "workplace-compliance-submission",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-WORKPLACE-COMPLIANCE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "EMPLOYEE",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official labour determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-LAB-DECISION-APPEAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-LAB-DECISION-APPEAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-LAB-DECISION-APPEAL-CORPORATE-REGISTRY",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional corporate registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-CORP-REG-API"
+        }
+      ],
+      "description": "Labour Decision Appeal — NON_PRODUCTION jurisdiction-bound labour template.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-LAB-DECISION-APPEAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-LAB-DECISION-APPEAL-FORM",
+          "formName": "Labour Decision Appeal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-LABOUR-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-LAB-DECISION-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-LAB-DECISION-APPEAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-LAB-DECISION-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LABOUR-EMPLOYMENT",
+      "serviceName": "Labour Decision Appeal",
+      "serviceSlug": "labour-decision-appeal",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-LAB-DECISION-APPEAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Labour review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-LABOUR-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

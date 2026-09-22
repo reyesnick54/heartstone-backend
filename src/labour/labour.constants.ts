@@ -10,6 +10,11 @@ export const EMPLOYMENT_DECLARATION_PREFIX = 'EMDL';
 export const LABOUR_BOUNDARY_DISCLAIMER =
   'Employer declarations and employment contracts record submitted information only; they do not constitute government work authorization or verified labour facts.';
 
+export const LABOUR_IMMIGRATION_COORDINATION_DISCLAIMER =
+  'Labour work authorization and immigration status are coordinated through separate channels; immigration determination does not automatically create labour authorization and vice versa.';
+
+export const LABOUR_EXPERIENCE_RULE_ENVIRONMENT = 'NON_PRODUCTION' as const;
+
 export const FORBIDDEN_AI_LABOUR_ACTIONS = [
   'APPROVE_WORK_PERMIT',
   'ISSUE_WORK_PERMIT',
