@@ -20,7 +20,9 @@ export class ServicePackGovernanceBoundaryService {
   rejectClientGovernanceIdentityFields(payload: Record<string, unknown>): void {
     for (const field of FORBIDDEN_CLIENT_GOVERNANCE_FIELDS) {
       if (field in payload && payload[field] !== undefined) {
-        throw new ForbiddenException(SERVICE_PACK_GOVERNANCE_REASON_CODES.SPOOFED_ACCEPTING_IDENTITY);
+        throw new ForbiddenException(
+          SERVICE_PACK_GOVERNANCE_REASON_CODES.SPOOFED_ACCEPTING_IDENTITY,
+        );
       }
     }
   }
@@ -42,13 +44,17 @@ export class ServicePackGovernanceBoundaryService {
       targetOperationalActivation &&
       fromValidationStatus === ServicePackManifestValidationStatus.VALIDATED
     ) {
-      throw new BadRequestException(SERVICE_PACK_GOVERNANCE_REASON_CODES.VALIDATED_TO_ACTIVE_FORBIDDEN);
+      throw new BadRequestException(
+        SERVICE_PACK_GOVERNANCE_REASON_CODES.VALIDATED_TO_ACTIVE_FORBIDDEN,
+      );
     }
   }
 
   assertHumanInstitutionalAcceptanceActor(identityType: IdentityType): void {
     if (identityType === IdentityType.SERVICE) {
-      throw new ForbiddenException(SERVICE_PACK_GOVERNANCE_REASON_CODES.SERVICE_IDENTITY_CANNOT_ACCEPT);
+      throw new ForbiddenException(
+        SERVICE_PACK_GOVERNANCE_REASON_CODES.SERVICE_IDENTITY_CANNOT_ACCEPT,
+      );
     }
     if (identityType === IdentityType.ORGANIZATION) {
       throw new ForbiddenException(SERVICE_PACK_GOVERNANCE_REASON_CODES.AI_CANNOT_ACCEPT);
@@ -56,7 +62,10 @@ export class ServicePackGovernanceBoundaryService {
   }
 
   assertNoBlockingFindings(
-    findings: { severity: ServicePackReviewFindingSeverity; status: ServicePackReviewFindingStatus }[],
+    findings: {
+      severity: ServicePackReviewFindingSeverity;
+      status: ServicePackReviewFindingStatus;
+    }[],
   ): void {
     const blocking = findings.filter(
       (finding) =>

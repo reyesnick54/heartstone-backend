@@ -77,8 +77,12 @@ export class ServicePackAcceptanceService {
     const version = await this.loadVersion(servicePackId, dto.servicePackVersionId);
     this.boundary.assertVersionCompiledForGovernance(version.status);
 
-    if (version.governanceLifecycleStatus !== ServicePackGovernanceLifecycleStatus.PENDING_ACCEPTANCE) {
-      throw new BadRequestException(SERVICE_PACK_GOVERNANCE_REASON_CODES.VERSION_NOT_PENDING_ACCEPTANCE);
+    if (
+      version.governanceLifecycleStatus !== ServicePackGovernanceLifecycleStatus.PENDING_ACCEPTANCE
+    ) {
+      throw new BadRequestException(
+        SERVICE_PACK_GOVERNANCE_REASON_CODES.VERSION_NOT_PENDING_ACCEPTANCE,
+      );
     }
 
     await this.reviews.assertRequiredReviewsComplete(version.id);

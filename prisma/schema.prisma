@@ -94,6 +94,7 @@ model Jurisdiction {
   reconsiderationProceedings    ReconsiderationProceeding[]
   internalAdministrativeReviews InternalAdministrativeReview[]
   servicePackJurisdictionTargets ServicePack[]                 @relation("ServicePackJurisdiction")
+  servicePackJurisdictionBindings ServicePackJurisdictionBinding[]
 
   @@map("jurisdictions")
 }
@@ -731,6 +732,7 @@ model Identity {
   servicePackRejectionRecords              ServicePackRejectionRecord[]           @relation("ServicePackRejectionActor")
   servicePackRevisionRequests              ServicePackRevisionRequest[]           @relation("ServicePackRevisionRequester")
   servicePackGovernanceAuditEvents         ServicePackGovernanceAuditRecord[]     @relation("ServicePackGovernanceAuditActor")
+  servicePacksOwned                        ServicePack[]                          @relation("ServicePackResponsibleOwner")
 
   @@index([userAccountId])
   @@index([personId])
@@ -13406,6 +13408,16 @@ model ServiceAppointmentReminder {
 
 // ─── Service Pack Deployment Lifecycle ───────────────────────────────────────
 
+enum ServicePackExportRestriction {
+  TEMPLATE_PORTABLE
+  INSTITUTION_RESTRICTED
+}
+
+enum ServicePackJurisdictionBindingKind {
+  OPERATIONAL
+  TEMPLATE
+}
+
 enum ServicePackVersionStatus {
   COMPILED
   ACCEPTED
@@ -13450,28 +13462,59 @@ enum ServicePackDeploymentAuditEventType {
 }
 
 model ServicePack {
-  id             String               @id @default(uuid()) @db.Uuid
-  code           String               @unique
-  name           String
-  description    String?
-  institutionId  String               @db.Uuid
-  jurisdictionId String?              @db.Uuid
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  institution    Institution          @relation(fields: [institutionId], references: [id])
-  jurisdiction           Jurisdiction?                      @relation("ServicePackJurisdiction", fields: [jurisdictionId], references: [id])
-  versions               ServicePackVersion[]
-  imports                ServicePackImport[]
-  reviews                ServicePackReview[]
-  reviewChainPolicies    ServicePackReviewChainPolicy[]
-  acceptanceRecords      ServicePackAcceptanceRecord[]
-  rejectionRecords       ServicePackRejectionRecord[]
-  revisionRequests       ServicePackRevisionRequest[]
-  governanceAuditRecords ServicePackGovernanceAuditRecord[]
+  id                          String                       @id @default(uuid()) @db.Uuid
+  code                        String                       @unique
+  name                        String
+  description                 String?
+  institutionId               String                       @db.Uuid
+  jurisdictionId              String?                      @db.Uuid
+  departmentCode              String?
+  exportRestriction           ServicePackExportRestriction @default(INSTITUTION_RESTRICTED)
+  responsibleOwnerIdentityId  String?                      @db.Uuid
+  templateSourceServicePackId String?                      @db.Uuid
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  institution                 Institution                  @relation(fields: [institutionId], references: [id])
+  jurisdiction                Jurisdiction?                @relation("ServicePackJurisdiction", fields: [jurisdictionId], references: [id])
+  responsibleOwner            Identity?                    @relation("ServicePackResponsibleOwner", fields: [responsibleOwnerIdentityId], references: [id])
+  templateSource              ServicePack?                 @relation("ServicePackTemplateLineage", fields: [templateSourceServicePackId], references: [id])
+  templateClones              ServicePack[]                @relation("ServicePackTemplateLineage")
+  versions                    ServicePackVersion[]
+  imports                     ServicePackImport[]
+  jurisdictionBindings        ServicePackJurisdictionBinding[]
+  reviews                     ServicePackReview[]
+  reviewChainPolicies         ServicePackReviewChainPolicy[]
+  acceptanceRecords           ServicePackAcceptanceRecord[]
+  rejectionRecords            ServicePackRejectionRecord[]
+  revisionRequests            ServicePackRevisionRequest[]
+  governanceAuditRecords      ServicePackGovernanceAuditRecord[]
 
   @@index([institutionId])
   @@index([jurisdictionId])
+  @@index([responsibleOwnerIdentityId])
+  @@index([templateSourceServicePackId])
   @@map("service_packs")
+}
+
+model ServicePackJurisdictionBinding {
+  id                                    String                           @id @default(uuid()) @db.Uuid
+  servicePackId                         String                           @db.Uuid
+  jurisdictionId                        String                           @db.Uuid
+  bindingKind                           ServicePackJurisdictionBindingKind @default(OPERATIONAL)
+  authorityMappingsRevalidationRequired Boolean                          @default(true)
+  governingSourcesRevalidationRequired  Boolean                          @default(true)
+  institutionsRevalidationRequired      Boolean                          @default(true)
+  feesRevalidationRequired              Boolean                          @default(true)
+  eligibilityRevalidationRequired       Boolean                          @default(true)
+  integrationsRevalidationRequired      Boolean                          @default(true)
+  createdAt                             DateTime                         @default(now())
+  updatedAt                             DateTime                         @updatedAt
+  servicePack                           ServicePack                      @relation(fields: [servicePackId], references: [id], onDelete: Cascade)
+  jurisdiction                          Jurisdiction                     @relation(fields: [jurisdictionId], references: [id])
+
+  @@unique([servicePackId, jurisdictionId])
+  @@index([jurisdictionId])
+  @@map("service_pack_jurisdiction_bindings")
 }
 
 model ServicePackVersion {
@@ -13578,6 +13621,7 @@ model ServicePackDeploymentAuditRecord {
 
 enum ServicePackManifestValidationStatus {
   DRAFT
+  DRAFT_IMPORTED
   VALIDATING
   INVALID
   VALIDATED
@@ -13626,6 +13670,7 @@ enum ServicePackValidationOutcome {
 
 enum ServicePackImportStatus {
   RECEIVED
+  DRAFT_IMPORTED
   VALIDATING
   VALIDATED
   REJECTED

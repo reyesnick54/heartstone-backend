@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  type Prisma,
-  type ServicePackGovernanceAuditEventType,
-} from '@prisma/client';
+import { type Prisma, type ServicePackGovernanceAuditEventType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 
@@ -19,10 +16,7 @@ export interface RecordGovernanceAuditInput {
 export class ServicePackGovernanceAuditService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async record(
-    input: RecordGovernanceAuditInput,
-    tx?: Prisma.TransactionClient,
-  ): Promise<void> {
+  async record(input: RecordGovernanceAuditInput, tx?: Prisma.TransactionClient): Promise<void> {
     const client = tx ?? this.prisma;
     await client.servicePackGovernanceAuditRecord.create({
       data: {

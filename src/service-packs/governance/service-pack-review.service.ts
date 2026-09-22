@@ -40,11 +40,7 @@ export class ServicePackReviewService {
     });
   }
 
-  async createReview(
-    servicePackId: string,
-    actor: ActorContext,
-    dto: CreateServicePackReviewDto,
-  ) {
+  async createReview(servicePackId: string, actor: ActorContext, dto: CreateServicePackReviewDto) {
     this.boundary.rejectClientGovernanceIdentityFields(dto as unknown as Record<string, unknown>);
 
     const pack = await this.prisma.servicePack.findUnique({ where: { id: servicePackId } });
@@ -150,7 +146,9 @@ export class ServicePackReviewService {
     dto: AddReviewFindingDto,
   ) {
     this.boundary.rejectClientGovernanceIdentityFields(dto as unknown as Record<string, unknown>);
-    this.boundary.assertReviewerCommentDoesNotCreateAuthority(dto as unknown as Record<string, unknown>);
+    this.boundary.assertReviewerCommentDoesNotCreateAuthority(
+      dto as unknown as Record<string, unknown>,
+    );
 
     const review = await this.loadReviewForPack(servicePackId, reviewId);
 

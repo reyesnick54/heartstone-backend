@@ -7,10 +7,7 @@ import { PrismaService } from '../../database/prisma.service';
 export class ServicePackReviewChainService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async resolveRequiredSteps(input: {
-    institutionId: string;
-    servicePackId: string;
-  }): Promise<
+  async resolveRequiredSteps(input: { institutionId: string; servicePackId: string }): Promise<
     {
       sequenceOrder: number;
       reviewType: ServicePackReviewType;

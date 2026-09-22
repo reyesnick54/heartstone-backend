@@ -3,6 +3,7 @@ export const SERVICE_PACK_VALIDATION_MODEL_NAMES = [
   'ServicePackDependency',
   'ServicePackValidationResult',
   'ServicePackImport',
+  'ServicePackJurisdictionBinding',
 ] as const;
 
 export const SERVICE_PACK_VALIDATION_ENUM_NAMES = [
@@ -12,6 +13,8 @@ export const SERVICE_PACK_VALIDATION_ENUM_NAMES = [
   'ServicePackDependencyControlScope',
   'ServicePackValidationOutcome',
   'ServicePackImportStatus',
+  'ServicePackExportRestriction',
+  'ServicePackJurisdictionBindingKind',
 ] as const;
 
 export const FORBIDDEN_SERVICE_PACK_AUTHORITY_FIELDS = [

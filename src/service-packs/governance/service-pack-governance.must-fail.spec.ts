@@ -92,7 +92,9 @@ describe('Service pack governance must-fail gates', () => {
 
   it('withdrawn pack cannot activate', () => {
     expect(() => {
-      boundary.assertRejectedOrWithdrawnCannotDeploy(ServicePackGovernanceLifecycleStatus.WITHDRAWN);
+      boundary.assertRejectedOrWithdrawnCannotDeploy(
+        ServicePackGovernanceLifecycleStatus.WITHDRAWN,
+      );
     }).toThrow(SERVICE_PACK_GOVERNANCE_REASON_CODES.WITHDRAWN_CANNOT_ACTIVATE);
   });
 
@@ -127,15 +129,16 @@ describe('Service pack governance must-fail gates', () => {
   });
 
   it('rejects spoofed identity fields with forbidden exception type', () => {
-    expect(() => { boundary.rejectClientGovernanceIdentityFields({ identityId: 'x' }); }).toThrow(
-      ForbiddenException,
-    );
-    expect(() => { boundary.assertNoBlockingFindings([
+    expect(() => {
+      boundary.rejectClientGovernanceIdentityFields({ identityId: 'x' });
+    }).toThrow(ForbiddenException);
+    expect(() => {
+      boundary.assertNoBlockingFindings([
         {
           severity: ServicePackReviewFindingSeverity.BLOCKING,
           status: ServicePackReviewFindingStatus.OPEN,
         },
-      ]); },
-    ).toThrow(BadRequestException);
+      ]);
+    }).toThrow(BadRequestException);
   });
 });

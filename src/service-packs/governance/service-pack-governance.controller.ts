@@ -61,7 +61,9 @@ export class ServicePackGovernanceController {
     @Body() dto: AddReviewFindingDto,
   ) {
     this.boundary.rejectClientGovernanceIdentityFields(dto as unknown as Record<string, unknown>);
-    this.boundary.assertReviewerCommentDoesNotCreateAuthority(dto as unknown as Record<string, unknown>);
+    this.boundary.assertReviewerCommentDoesNotCreateAuthority(
+      dto as unknown as Record<string, unknown>,
+    );
     return this.reviews.addFinding(id, reviewId, actor, dto);
   }
 

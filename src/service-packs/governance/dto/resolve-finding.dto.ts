@@ -18,7 +18,8 @@ export class ResolveFindingDto {
   resolutionNotes?: string;
 
   @ApiPropertyOptional({
-    description: 'Authority review only: never authenticates governing source without authority evaluation',
+    description:
+      'Authority review only: never authenticates governing source without authority evaluation',
   })
   @IsOptional()
   @IsBoolean()
