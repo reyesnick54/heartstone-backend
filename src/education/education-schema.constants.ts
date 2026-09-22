@@ -1,0 +1,46 @@
+export const EDUCATION_FOUNDATION_MODEL_NAMES = [
+  'EducationStudentProfile',
+  'EducationGuardianRelationship',
+  'EducationInstitutionRegistryRecord',
+  'EducationInstitutionLicenseRecord',
+  'EducationAccreditationRecord',
+  'EducatorLicenseRecord',
+  'EducationEnrollmentRecord',
+  'EducationEnrollmentApplicationProfile',
+  'ScholarshipApplicationProfile',
+  'ScholarshipAwardRecord',
+  'EducationGrantApplicationProfile',
+  'EducationAcademicRecordReference',
+  'EducationCredentialReference',
+  'EducationRecordCorrection',
+  'EducationRecordCorrectionHistory',
+  'EducationInstitutionInspectionReference',
+  'EducationExternalDependency',
+] as const;
+
+export const EDUCATION_FOUNDATION_ENUM_NAMES = [
+  'EducationDataClassification',
+  'EducationActorPersona',
+  'EducationGuardianRelationshipStatus',
+  'EducationStudentProfileStatus',
+  'EducationInstitutionRegistrationStatus',
+  'EducationLicenseLifecycleStatus',
+  'EducationAccreditationStatus',
+  'EducationEnrollmentStatus',
+  'EducationExternalDependencyType',
+  'EducationExternalDependencyRecordedBy',
+  'EducationRecordCorrectionStatus',
+  'ScholarshipApplicationProfileStatus',
+  'ScholarshipAwardStatus',
+] as const;
+
+export const PUBLIC_EDUCATION_VERIFICATION_FORBIDDEN_RESPONSE_KEYS = [
+  'studentProfileId',
+  'subjectIdentityId',
+  'transcriptContent',
+  'gradeDetails',
+  'disciplinaryRecord',
+  'guardianIdentityId',
+  'dateOfBirth',
+  'enrollmentHistory',
+] as const;

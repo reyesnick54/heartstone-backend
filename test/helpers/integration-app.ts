@@ -5,6 +5,7 @@ import { type App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
+import { resetEducationData } from '../../src/database/education-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
 import { resetLabourData } from '../../src/database/labour-test-reset';
 import { resetPlanningConstructionData } from '../../src/database/planning-construction-test-reset';
@@ -187,6 +188,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetImmigrationData(prisma);
+  await resetEducationData(prisma);
   await resetCustomsTradeData(prisma);
   await resetPropertyRegistryData(prisma);
   await resetPlanningConstructionData(prisma);
