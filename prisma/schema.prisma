@@ -104,6 +104,7 @@ model Jurisdiction {
   civilIdentityRecords           CivilIdentityRecord[]
   vitalEvents                    VitalEvent[]
   civilRegistryEntries           CivilRegistryEntry[]
+  developmentProjects            DevelopmentProject[]
   transportationRegistryEntries  TransportationRegistryEntry[]
   driverProfiles                 DriverProfile[]
   vehicleRecords                 VehicleRecord[]
@@ -235,6 +236,7 @@ model Department {
   appointmentResources          AppointmentResource[]
   appointmentSlots              AppointmentSlot[]
   serviceAppointments           ServiceAppointment[]
+  developmentProjects           DevelopmentProject[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -326,6 +328,8 @@ model Officeholder {
   servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]  @relation("ServicePackAcceptanceOfficeholder")
   vitalEventsRegistered            VitalEvent[]                   @relation("VitalEventRegistrarOfficeholder")
   civilRegistryVerifications       CivilRegistryVerification[]    @relation("CivilRegistryVerifierOfficeholder")
+  developmentPermitsIssued         DevelopmentPermit[]              @relation("DevelopmentPermitIssuerOfficeholder")
+  developmentOccupancyCertificatesIssued DevelopmentOccupancyCertificate[] @relation("DevelopmentOccupancyIssuerOfficeholder")
 
   @@map("officeholders")
 }
@@ -779,6 +783,9 @@ model Identity {
   civilRegistryAuditEvents                 CivilRegistryAuditEvent[]              @relation("CivilRegistryAuditActor")
   civilRegistryVerificationsPerformed      CivilRegistryVerification[]            @relation("CivilRegistryVerifierIdentity")
   vitalEventRelationships                  CivilRecordRelationship[]              @relation("CivilRecordRelationshipIdentity")
+  developmentProjectsAsPrimaryApplicant    DevelopmentProject[]                 @relation("DevelopmentProjectPrimaryApplicant")
+  developmentProjectProfessionals          DevelopmentProjectProfessional[]       @relation("DevelopmentProjectProfessionalIdentity")
+  developmentAccessAudits                  DevelopmentAccessAudit[]               @relation("DevelopmentAccessAuditAccessor")
   driverProfilesAsSubject                  DriverProfile[]                        @relation("DriverProfileSubject")
   vehicleOwnershipRecords                  VehicleOwnershipRecord[]               @relation("VehicleOwnershipOwnerIdentity")
   transportOperatorRecordsAsOperator       TransportOperatorRecord[]              @relation("TransportOperatorIdentity")
@@ -833,6 +840,7 @@ model Organization {
   immigrationSponsorships         ImmigrationSponsorship[]
   corporateRegistryProfile        CorporateRegistryProfile?
   taxpayerAccounts                TaxpayerAccount[]
+  developmentProjects             DevelopmentProject[]
   vehicleOwnershipRecords         VehicleOwnershipRecord[]
   transportOperatorRecords        TransportOperatorRecord[]
   fleetRecords                    FleetRecord[]
@@ -4974,6 +4982,7 @@ model GovernmentDecision {
   civilRegistryEntries              CivilRegistryEntry[]              @relation("CivilRegistryEntryDecision")
   civilRecordAmendments             CivilRecordAmendment[]            @relation("CivilRecordAmendmentDecision")
   civilRegistryRestrictions         CivilRegistryRestriction[]        @relation("CivilRegistryRestrictionDecision")
+  developmentOccupancyCertificates  DevelopmentOccupancyCertificate[]
   driverLicenseRecords              DriverLicenseRecord[]
   driverQualifications              DriverQualification[]
   vehicleRegistrations              VehicleRegistration[]
@@ -17244,4 +17253,351 @@ model VitalEventEvidenceLink {
   @@unique([vitalEventId, evidenceRecordId])
   @@index([evidenceRecordId])
   @@map("vital_event_evidence_links")
+}
+
+enum DevelopmentProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum DevelopmentApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum DevelopmentPermitStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+  SUSPENDED
+  EXPIRED
+  AMENDED
+}
+
+enum DevelopmentInspectionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum DevelopmentInspectionOutcome {
+  PASS
+  FAIL
+  CONDITIONAL
+  CANCELLED
+}
+
+enum DevelopmentExternalDependencyStatus {
+  PENDING
+  REFERRED
+  RESOLVED
+  BLOCKED
+}
+
+enum DevelopmentCorrectiveActionStatus {
+  OPEN
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+enum DevelopmentFeeStatus {
+  OUTSTANDING
+  PAID
+  WAIVED
+  CANCELLED
+}
+
+enum DevelopmentOccupancyCertificateStatus {
+  REQUESTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+}
+
+enum DevelopmentPlanningAppealStatus {
+  FILED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum DevelopmentProfessionalRole {
+  ARCHITECT
+  ENGINEER
+  SURVEYOR
+  CONTRACTOR
+  OTHER
+}
+
+enum DevelopmentAccessActorKind {
+  APPLICANT
+  PROFESSIONAL
+  PLANNING_OFFICER
+  INSPECTOR
+  REPRESENTATIVE
+  PAYMENT_SYSTEM
+  AI_ASSISTANCE
+}
+
+model DevelopmentProject {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  jurisdictionId             String                   @db.Uuid
+  projectReference           String                   @unique
+  title                      String
+  status                     DevelopmentProjectStatus @default(ACTIVE)
+  primaryApplicantIdentityId String?                  @db.Uuid
+  organizationId             String?                  @db.Uuid
+  responsibleDepartmentId    String?                  @db.Uuid
+  ruleEnvironment            String                   @default("NON_PRODUCTION")
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  jurisdiction               Jurisdiction             @relation(fields: [jurisdictionId], references: [id])
+  primaryApplicant           Identity?                @relation("DevelopmentProjectPrimaryApplicant", fields: [primaryApplicantIdentityId], references: [id])
+  organization               Organization?            @relation(fields: [organizationId], references: [id])
+  responsibleDepartment      Department?              @relation(fields: [responsibleDepartmentId], references: [id])
+  site                       DevelopmentProjectSite?
+  applications               DevelopmentApplication[]
+  permits                    DevelopmentPermit[]
+  inspections                DevelopmentInspection[]
+  correctiveActions          DevelopmentCorrectiveAction[]
+  externalDependencies       DevelopmentExternalDependency[]
+  professionals              DevelopmentProjectProfessional[]
+  fees                       DevelopmentProjectFee[]
+  occupancyCertificates      DevelopmentOccupancyCertificate[]
+  appeals                    DevelopmentPlanningAppeal[]
+  accessAudits               DevelopmentAccessAudit[]
+
+  @@index([jurisdictionId])
+  @@index([primaryApplicantIdentityId])
+  @@index([organizationId])
+  @@index([responsibleDepartmentId])
+  @@index([status])
+  @@map("development_projects")
+}
+
+model DevelopmentProjectSite {
+  id                   String             @id @default(uuid()) @db.Uuid
+  developmentProjectId String             @unique @db.Uuid
+  siteLabel            String
+  addressLine          String?
+  parcelReference      String?
+  latitude             Float?
+  longitude            Float?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  developmentProject   DevelopmentProject @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@map("development_project_sites")
+}
+
+model DevelopmentApplication {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  developmentProjectId String                       @db.Uuid
+  applicationReference String                       @unique
+  serviceCode          String
+  serviceName          String
+  status               DevelopmentApplicationStatus @default(DRAFT)
+  submittedAt          DateTime?
+  caseId               String?                      @db.Uuid
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+  developmentProject   DevelopmentProject           @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_applications")
+}
+
+model DevelopmentPermit {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  developmentProjectId    String                  @db.Uuid
+  permitNumber            String                  @unique
+  permitType              String
+  status                  DevelopmentPermitStatus @default(DRAFT)
+  currentVersionId        String?                 @unique @db.Uuid
+  issuedByOfficeholderId  String?                 @db.Uuid
+  issuedAt                DateTime?
+  expiresAt               DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  developmentProject      DevelopmentProject      @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  issuedByOfficeholder    Officeholder?           @relation("DevelopmentPermitIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
+  versions                DevelopmentPermitVersion[]
+  currentVersion          DevelopmentPermitVersion? @relation("DevelopmentPermitCurrentVersion", fields: [currentVersionId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_permits")
+}
+
+model DevelopmentPermitVersion {
+  id                  String            @id @default(uuid()) @db.Uuid
+  developmentPermitId String            @db.Uuid
+  versionNumber       Int
+  isAmendment         Boolean           @default(false)
+  amendmentSummary    String?
+  payload             Json              @default("{}")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  developmentPermit   DevelopmentPermit @relation(fields: [developmentPermitId], references: [id], onDelete: Cascade)
+  currentForPermit    DevelopmentPermit? @relation("DevelopmentPermitCurrentVersion")
+
+  @@unique([developmentPermitId, versionNumber])
+  @@index([developmentPermitId])
+  @@map("development_permit_versions")
+}
+
+model DevelopmentInspection {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  developmentProjectId String                      @db.Uuid
+  inspectionReference  String                      @unique
+  inspectionType       String
+  status               DevelopmentInspectionStatus @default(SCHEDULED)
+  outcome              DevelopmentInspectionOutcome?
+  failureNotes         String?
+  outcomeLockedAt      DateTime?
+  scheduledAt          DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  developmentProject   DevelopmentProject          @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  correctiveActions    DevelopmentCorrectiveAction[]
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_inspections")
+}
+
+model DevelopmentCorrectiveAction {
+  id                     String                          @id @default(uuid()) @db.Uuid
+  developmentProjectId   String                          @db.Uuid
+  developmentInspectionId String?                        @db.Uuid
+  actionReference        String                          @unique
+  description            String
+  status                 DevelopmentCorrectiveActionStatus @default(OPEN)
+  submittedAt            DateTime?
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  developmentProject     DevelopmentProject              @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  developmentInspection  DevelopmentInspection?          @relation(fields: [developmentInspectionId], references: [id])
+
+  @@index([developmentProjectId])
+  @@map("development_corrective_actions")
+}
+
+model DevelopmentExternalDependency {
+  id                         String                              @id @default(uuid()) @db.Uuid
+  developmentProjectId       String                              @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String
+  status                     DevelopmentExternalDependencyStatus @default(PENDING)
+  blocksPermitDecision       Boolean                             @default(true)
+  externalAuthorityReference String?
+  resolvedAt                 DateTime?
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  developmentProject         DevelopmentProject                  @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_external_dependencies")
+}
+
+model DevelopmentProjectProfessional {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  developmentProjectId String                    @db.Uuid
+  identityId           String                    @db.Uuid
+  role                 DevelopmentProfessionalRole
+  registrationReference String?
+  effectiveFrom        DateTime                  @default(now())
+  effectiveUntil       DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  developmentProject   DevelopmentProject        @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  identity             Identity                  @relation("DevelopmentProjectProfessionalIdentity", fields: [identityId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([identityId])
+  @@map("development_project_professionals")
+}
+
+model DevelopmentProjectFee {
+  id                   String             @id @default(uuid()) @db.Uuid
+  developmentProjectId String             @db.Uuid
+  feeCode              String
+  label                String
+  amountCents          Int
+  currency             String             @default("XCD")
+  status               DevelopmentFeeStatus @default(OUTSTANDING)
+  paidAt               DateTime?
+  paymentTransactionId String?            @db.Uuid
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  developmentProject   DevelopmentProject @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_project_fees")
+}
+
+model DevelopmentOccupancyCertificate {
+  id                     String                              @id @default(uuid()) @db.Uuid
+  developmentProjectId   String                              @db.Uuid
+  certificateReference   String                              @unique
+  status                 DevelopmentOccupancyCertificateStatus @default(REQUESTED)
+  governmentDecisionId   String?                             @db.Uuid
+  issuedByOfficeholderId String?                             @db.Uuid
+  issuedAt               DateTime?
+  createdAt              DateTime                            @default(now())
+  updatedAt              DateTime                            @updatedAt
+  developmentProject     DevelopmentProject                  @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  governmentDecision     GovernmentDecision?                 @relation(fields: [governmentDecisionId], references: [id])
+  issuedByOfficeholder   Officeholder?                       @relation("DevelopmentOccupancyIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_occupancy_certificates")
+}
+
+model DevelopmentPlanningAppeal {
+  id                   String                          @id @default(uuid()) @db.Uuid
+  developmentProjectId String                          @db.Uuid
+  appealReference      String                          @unique
+  status               DevelopmentPlanningAppealStatus @default(FILED)
+  groundsSummary       String
+  filedAt              DateTime                        @default(now())
+  decidedAt            DateTime?
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  developmentProject   DevelopmentProject              @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_planning_appeals")
+}
+
+model DevelopmentAccessAudit {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  developmentProjectId String                   @db.Uuid
+  accessorIdentityId   String                   @db.Uuid
+  actorKind            DevelopmentAccessActorKind
+  endpoint             String
+  granted              Boolean
+  denialReason         String?
+  recordedAt           DateTime                 @default(now())
+  developmentProject   DevelopmentProject       @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  accessor             Identity                 @relation("DevelopmentAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([accessorIdentityId])
+  @@map("development_access_audits")
 }
