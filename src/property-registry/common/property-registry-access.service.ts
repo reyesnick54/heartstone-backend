@@ -1,98 +1,134 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PropertyRegistryAccessClassification } from '@prisma/client';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  PropertyAccessActorKind,
+  PropertyInterestKind,
+  PropertyInterestStatus,
+  RepresentativeAuthorityStatus,
+} from '@prisma/client';
 
-import { HIGHLY_PROTECTED_ACCESS_CLASSIFICATIONS } from '../property-registry.constants';
+import { PrismaService } from '../../database/prisma.service';
+import { PROPERTY_REASON_CODES } from '../property-registry.constants';
 
-export interface PropertyRegistryAccessContext {
-  actorIdentityId: string;
-  linkedSubjectIdentityId?: string | null;
-  isAuthorizedProfessional?: boolean;
-  isAuthorizedGovernmentActor?: boolean;
-  accessClassification: PropertyRegistryAccessClassification;
+export interface PropertyParcelAccessContext {
+  accessorIdentityId: string;
+  parcelId: string;
+  actorKind: PropertyAccessActorKind;
+  endpoint: string;
+  organizationId?: string;
+  representativeAuthorityId?: string;
 }
 
 @Injectable()
-export class PropertyRegistryClassificationAccessService {
-  resolveEffectiveClassification(input: {
-    entryClassification: PropertyRegistryAccessClassification;
-    restrictions: PropertyRegistryAccessClassification[];
-  }): PropertyRegistryAccessClassification {
-    const order: PropertyRegistryAccessClassification[] = [
-      PropertyRegistryAccessClassification.SEALED,
-      PropertyRegistryAccessClassification.GOVERNMENT_RESTRICTED,
-      PropertyRegistryAccessClassification.AUTHORIZED_PROFESSIONAL,
-      PropertyRegistryAccessClassification.SUBJECT_ACCESS,
-      PropertyRegistryAccessClassification.PUBLIC_REGISTRY,
-    ];
+export class PropertyRegistryAccessService {
+  constructor(private readonly prisma: PrismaService) {}
 
-    const candidates = [input.entryClassification, ...input.restrictions];
-    for (const level of order) {
-      if (candidates.includes(level)) {
-        return level;
-      }
+  async assertParcelAccess(context: PropertyParcelAccessContext): Promise<void> {
+    const parcel = await this.prisma.propertyParcel.findUnique({
+      where: { id: context.parcelId },
+    });
+    if (!parcel) {
+      throw new ForbiddenException(PROPERTY_REASON_CODES.CROSS_PARCEL_ACCESS_DENIED);
     }
 
-    return input.entryClassification;
+    let granted = false;
+    let reasonCode: string | undefined;
+
+    if (context.actorKind === PropertyAccessActorKind.REGISTRY_OFFICER) {
+      granted = true;
+    } else if (context.actorKind === PropertyAccessActorKind.OWNER) {
+      const [interest, entitlement] = await Promise.all([
+        this.prisma.propertyInterest.findFirst({
+          where: {
+            parcelId: context.parcelId,
+            identityId: context.accessorIdentityId,
+            status: PropertyInterestStatus.ACTIVE,
+          },
+        }),
+        this.prisma.propertyInterestEntitlement.findFirst({
+          where: {
+            parcelId: context.parcelId,
+            identityId: context.accessorIdentityId,
+          },
+        }),
+      ]);
+      granted = interest != null || entitlement != null;
+      if (!granted) {
+        reasonCode = PROPERTY_REASON_CODES.CROSS_PARCEL_ACCESS_DENIED;
+      }
+    } else if (context.actorKind === PropertyAccessActorKind.REPRESENTATIVE) {
+      if (!context.representativeAuthorityId || !context.organizationId) {
+        throw new ForbiddenException(PROPERTY_REASON_CODES.REPRESENTATIVE_SCOPE_REQUIRED);
+      }
+      const authority = await this.prisma.representativeAuthority.findUnique({
+        where: { id: context.representativeAuthorityId },
+      });
+      const now = new Date();
+      const authorityValid =
+        authority?.status === RepresentativeAuthorityStatus.ACTIVE &&
+        authority.identityId === context.accessorIdentityId &&
+        authority.organizationId === context.organizationId &&
+        authority.effectiveFrom <= now &&
+        (authority.effectiveUntil == null || authority.effectiveUntil > now);
+
+      if (!authorityValid) {
+        throw new ForbiddenException(PROPERTY_REASON_CODES.REPRESENTATIVE_SCOPE_REQUIRED);
+      }
+
+      const orgInterest = await this.prisma.propertyInterest.findFirst({
+        where: {
+          parcelId: context.parcelId,
+          organizationId: context.organizationId,
+          status: PropertyInterestStatus.ACTIVE,
+        },
+      });
+      granted = orgInterest != null;
+      if (!granted) {
+        reasonCode = PROPERTY_REASON_CODES.REPRESENTATIVE_SCOPE_REQUIRED;
+      }
+    } else {
+      granted = false;
+      reasonCode = PROPERTY_REASON_CODES.CROSS_PARCEL_ACCESS_DENIED;
+    }
+
+    await this.prisma.propertyAccessAudit.create({
+      data: {
+        accessorIdentityId: context.accessorIdentityId,
+        parcelId: context.parcelId,
+        actorKind: context.actorKind,
+        endpoint: context.endpoint,
+        granted,
+        reasonCode,
+      },
+    });
+
+    if (!granted) {
+      throw new ForbiddenException(reasonCode ?? PROPERTY_REASON_CODES.CROSS_PARCEL_ACCESS_DENIED);
+    }
   }
 
-  assertMayReadRegistryPayload(context: PropertyRegistryAccessContext): void {
-    const { accessClassification } = context;
-
-    if (HIGHLY_PROTECTED_ACCESS_CLASSIFICATIONS.includes(accessClassification)) {
-      if (context.isAuthorizedGovernmentActor) {
-        return;
-      }
-      throw new ForbiddenException(
-        'Restricted or sealed property registry information is not exposed to this actor',
-      );
-    }
-
-    if (accessClassification === PropertyRegistryAccessClassification.AUTHORIZED_PROFESSIONAL) {
-      if (!context.isAuthorizedProfessional && !context.isAuthorizedGovernmentActor) {
-        throw new ForbiddenException(
-          'Record requires authorized professional or government access',
-        );
-      }
-      return;
-    }
-
-    if (accessClassification === PropertyRegistryAccessClassification.SUBJECT_ACCESS) {
-      const isSubject =
-        context.linkedSubjectIdentityId != null &&
-        context.actorIdentityId === context.linkedSubjectIdentityId;
-
-      if (!isSubject && !context.isAuthorizedGovernmentActor) {
-        throw new ForbiddenException('Cross-subject property registry access is not permitted');
-      }
-    }
+  async listAuthorizedParcelIdsForIdentity(identityId: string): Promise<string[]> {
+    const [interests, entitlements] = await Promise.all([
+      this.prisma.propertyInterest.findMany({
+        where: { identityId, status: PropertyInterestStatus.ACTIVE },
+        select: { parcelId: true },
+      }),
+      this.prisma.propertyInterestEntitlement.findMany({
+        where: { identityId },
+        select: { parcelId: true },
+      }),
+    ]);
+    return [...new Set([...interests, ...entitlements].map((row) => row.parcelId))];
   }
 
-  assertPublicVerificationOnlyPayload(payload: Record<string, unknown>): Record<string, unknown> {
-    return {
-      entryReference: payload.entryReference,
-      verificationState: payload.verificationState,
-      registeredAt: payload.registeredAt,
-      titleReference: payload.titleReference,
-    };
-  }
-
-  maskOrThrow<T extends Record<string, unknown>>(
-    context: PropertyRegistryAccessContext,
-    payload: T,
-  ): T | Record<string, unknown> {
-    try {
-      this.assertMayReadRegistryPayload(context);
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw new NotFoundException('Property registry record not found');
-      }
-      throw error;
-    }
-
-    if (context.accessClassification === PropertyRegistryAccessClassification.PUBLIC_REGISTRY) {
-      return this.assertPublicVerificationOnlyPayload(payload);
-    }
-
-    return payload;
+  async listAuthorizedParcelIdsForOrganization(organizationId: string): Promise<string[]> {
+    const interests = await this.prisma.propertyInterest.findMany({
+      where: {
+        organizationId,
+        status: PropertyInterestStatus.ACTIVE,
+        interestKind: { in: [PropertyInterestKind.OWNER, PropertyInterestKind.LEASEHOLDER] },
+      },
+      select: { parcelId: true },
+    });
+    return interests.map((row) => row.parcelId);
   }
 }

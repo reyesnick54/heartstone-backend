@@ -1,109 +1,58 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  Prisma,
-  PropertyEncumbranceStatus,
-  PropertyEncumbranceType,
-  PropertyRegistryAuditEventType,
-  PropertyTransactionHistoryEventType,
-} from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PropertyEncumbranceKind, PropertyEncumbranceStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { PropertyRegistryAuditService } from '../audit/property-registry-audit.service';
-import { PropertyRegistryBoundaryService } from '../common/property-registry-boundary.service';
-import { buildPropertyReference } from '../common/property-registry-reference.util';
-import { PROPERTY_ENCUMBRANCE_REFERENCE_PREFIX } from '../property-registry.constants';
 
 @Injectable()
 export class PropertyEncumbranceService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly boundary: PropertyRegistryBoundaryService,
-    private readonly audit: PropertyRegistryAuditService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  assertDeleteBlocked(): void {
-    this.boundary.assertEncumbranceCannotBeSilentlyDeleted('delete');
-  }
-
-  async recordEncumbrance(input: {
-    titleRecordId: string;
-    encumbranceType: PropertyEncumbranceType;
-    summary?: string;
-    actorIdentityId: string;
+  async registerEncumbrance(input: {
+    parcelId: string;
+    encumbranceKind: PropertyEncumbranceKind;
+    holderSummary: string;
+    applicationId?: string;
   }) {
-    const encumbranceReference = buildPropertyReference(PROPERTY_ENCUMBRANCE_REFERENCE_PREFIX);
-
     const encumbrance = await this.prisma.propertyEncumbrance.create({
       data: {
-        encumbranceReference,
-        titleRecordId: input.titleRecordId,
-        encumbranceType: input.encumbranceType,
+        parcelId: input.parcelId,
+        encumbranceKind: input.encumbranceKind,
         status: PropertyEncumbranceStatus.ACTIVE,
-        summary: input.summary,
+        holderSummary: input.holderSummary,
+        applicationId: input.applicationId,
       },
     });
 
-    await this.prisma.propertyTransactionHistory.create({
+    await this.prisma.propertyEncumbranceHistory.create({
       data: {
-        titleRecordId: input.titleRecordId,
-        eventType: PropertyTransactionHistoryEventType.ENCUMBRANCE_REGISTRATION,
-        effectiveDate: new Date(),
-        eventSummary: {
-          encumbranceReference,
-          encumbranceType: input.encumbranceType,
-        } satisfies Prisma.InputJsonObject,
+        parcelId: input.parcelId,
+        encumbranceKind: input.encumbranceKind,
+        eventSummary: 'Encumbrance registered',
+        preserved: true,
       },
-    });
-
-    await this.audit.record({
-      eventType: PropertyRegistryAuditEventType.ENCUMBRANCE_RECORDED,
-      actorIdentityId: input.actorIdentityId,
-      metadata: { encumbranceReference },
     });
 
     return encumbrance;
   }
 
-  async releaseEncumbrance(input: {
-    encumbranceId: string;
-    releaseDecisionId: string;
-    actorIdentityId: string;
-  }) {
-    const encumbrance = await this.prisma.propertyEncumbrance.findUnique({
-      where: { id: input.encumbranceId },
-    });
-
-    if (!encumbrance) {
-      throw new BadRequestException('Encumbrance not found');
-    }
-
-    const updated = await this.prisma.propertyEncumbrance.update({
-      where: { id: encumbrance.id },
+  async releaseEncumbrance(encumbranceId: string) {
+    const encumbrance = await this.prisma.propertyEncumbrance.update({
+      where: { id: encumbranceId },
       data: {
         status: PropertyEncumbranceStatus.RELEASED,
-        effectiveTo: new Date(),
-        releaseDecisionId: input.releaseDecisionId,
+        releasedAt: new Date(),
       },
     });
 
-    await this.prisma.propertyTransactionHistory.create({
+    await this.prisma.propertyEncumbranceHistory.create({
       data: {
-        titleRecordId: encumbrance.titleRecordId,
-        eventType: PropertyTransactionHistoryEventType.ENCUMBRANCE_RELEASE,
-        effectiveDate: new Date(),
-        eventSummary: {
-          encumbranceReference: encumbrance.encumbranceReference,
-          releaseDecisionId: input.releaseDecisionId,
-        } satisfies Prisma.InputJsonObject,
+        parcelId: encumbrance.parcelId,
+        encumbranceKind: encumbrance.encumbranceKind,
+        eventSummary: 'Encumbrance released',
+        preserved: true,
       },
     });
 
-    await this.audit.record({
-      eventType: PropertyRegistryAuditEventType.ENCUMBRANCE_RELEASE_REQUESTED,
-      actorIdentityId: input.actorIdentityId,
-      metadata: { encumbranceId: encumbrance.id },
-    });
-
-    return updated;
+    return encumbrance;
   }
 }

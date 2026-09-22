@@ -1,18 +1,55 @@
-export const PROPERTY_REGISTRY_MODEL_NAMES = [
+export const PHASE_PROPERTY_REGISTRY_MODEL_NAMES = [
+  'PropertyRegistryConfiguration',
+  'PropertyParcel',
+  'PropertyInterest',
+  'PropertyOwnershipHistory',
+  'PropertyRegistryApplication',
+  'PropertyTransferDecision',
+  'PropertyEncumbrance',
+  'PropertyEncumbranceHistory',
+  'PropertySurveySubmission',
+  'PropertyRegistryCertificate',
+  'PropertyInterestEntitlement',
+  'PropertyAccessAudit',
+] as const;
+
+export const PHASE_PROPERTY_REGISTRY_ENUM_NAMES = [
+  'PropertyPublicVerificationMode',
+  'PropertyParcelStatus',
+  'PropertyInterestKind',
+  'PropertyInterestStatus',
+  'PropertyRegistryApplicationType',
+  'PropertyRegistryApplicationStatus',
+  'PropertyTransferDecisionOutcome',
+  'PropertyEncumbranceKind',
+  'PropertyEncumbranceStatus',
+  'PropertySurveySubmissionStatus',
+  'PropertyCertificateStatus',
+  'PropertyAccessActorKind',
+] as const;
+
+export const FORBIDDEN_PROPERTY_CLIENT_FIELDS = [
+  'registryVersion',
+  'internalParcelIdentifier',
+  'titleHolderIdentityId',
+  'encumbranceReleaseDecisionId',
+] as const;
+
+export const CADASTRE_PROPERTY_REGISTRY_MODEL_NAMES = [
   'LandParcel',
   'ParcelIdentifier',
   'ParcelGeometryReference',
   'ParcelAddress',
   'PropertyRecord',
-  'PropertyInterest',
-  'PropertyInterestHolder',
-  'PropertyInterestHistory',
+  'CadastrePropertyInterest',
+  'CadastrePropertyInterestHolder',
+  'CadastrePropertyInterestHistory',
   'TitleRecord',
   'TitleVersion',
   'TitleInstrumentReference',
   'PropertyTransfer',
   'TransferParty',
-  'PropertyEncumbrance',
+  'CadastrePropertyEncumbrance',
   'MortgageReference',
   'LienReference',
   'EasementReference',
@@ -31,14 +68,13 @@ export const PROPERTY_REGISTRY_MODEL_NAMES = [
   'PropertyRegistryAuditEvent',
 ] as const;
 
-export const PROPERTY_REGISTRY_ENUM_NAMES = [
+export const CADASTRE_PROPERTY_REGISTRY_ENUM_NAMES = [
   'PropertyRegistryAccessClassification',
   'PropertyTransferApplicationStatus',
   'TitleRecordStatus',
   'PropertyInterestType',
   'PropertyInterestHolderRole',
   'PropertyEncumbranceType',
-  'PropertyEncumbranceStatus',
   'PropertyValuationPurpose',
   'PropertyRegistryVerificationState',
   'PropertyRegistryCorrectionStatus',

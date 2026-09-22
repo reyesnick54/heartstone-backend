@@ -1,5 +1,49 @@
 import { PropertyRegistryAccessClassification } from '@prisma/client';
 
+export const PROPERTY_REGISTRY_RULE_ENVIRONMENT = 'NON_PRODUCTION' as const;
+
+export const PROPERTY_REGISTRY_BOUNDARY_DISCLAIMER =
+  'Property registry projections summarize authorized registry state. Applications and survey submissions do not by themselves alter title or parcel geometry. Official decisions are required for consequential registry changes.';
+
+export const PROPERTY_TRANSFER_BOUNDARY_DISCLAIMER =
+  'A transfer application is not a registry mutation. Title changes require an authorized transfer decision.';
+
+export const PROPERTY_PUBLIC_VERIFICATION_DISCLAIMER =
+  'Public verification exposes minimal facts only. Private identifiers, sealed records, and restricted encumbrance details are withheld.';
+
+export const PLATFORM_ADMIN_PROPERTY_ROLE_MARKER = 'PLATFORM_ADMIN';
+
+export const FORBIDDEN_AI_PROPERTY_ACTIONS = [
+  'REGISTER_TRANSFER',
+  'ISSUE_PROPERTY_CERTIFICATE',
+  'ALTER_TITLE',
+  'RELEASE_ENCUMBRANCE',
+] as const;
+
+export const PROPERTY_REASON_CODES = {
+  CROSS_PARCEL_ACCESS_DENIED: 'PROPERTY_CROSS_PARCEL_ACCESS_DENIED',
+  REPRESENTATIVE_SCOPE_REQUIRED: 'PROPERTY_REPRESENTATIVE_SCOPE_REQUIRED',
+  TRANSFER_APPLICATION_CANNOT_MUTATE_TITLE: 'PROPERTY_TRANSFER_APPLICATION_CANNOT_MUTATE_TITLE',
+  TRANSFER_DECISION_REQUIRED: 'PROPERTY_TRANSFER_DECISION_REQUIRED',
+  SURVEY_CANNOT_ALTER_PARCEL: 'PROPERTY_SURVEY_CANNOT_ALTER_PARCEL',
+  PLATFORM_ADMIN_CANNOT_ALTER_TITLE: 'PROPERTY_PLATFORM_ADMIN_CANNOT_ALTER_TITLE',
+  PUBLIC_VERIFICATION_DISABLED: 'PROPERTY_PUBLIC_VERIFICATION_DISABLED',
+  CERTIFICATE_REQUIRES_REGISTRY_VERSION: 'PROPERTY_CERTIFICATE_REQUIRES_REGISTRY_VERSION',
+} as const;
+
+export const PROPERTY_SERVICE_PACK_ID = 'template-land-property-registry' as const;
+
+export const PROPERTY_OFFICIAL_ACTION_CODES = [
+  'REVIEW_TITLE',
+  'VERIFY_EVIDENCE',
+  'VERIFY_SURVEY',
+  'REQUEST_ADDITIONAL_INFORMATION',
+  'REFER_EXTERNAL_AUTHORITY',
+  'PREPARE_TRANSFER_DECISION',
+  'REGISTER_TRANSFER_AFTER_DECISION',
+  'ISSUE_EXTRACT_OR_CERTIFICATE',
+] as const;
+
 export const PROPERTY_REGISTRY_API_TAG = 'property-registry';
 
 export const LAND_PARCEL_REFERENCE_PREFIX = 'LP';

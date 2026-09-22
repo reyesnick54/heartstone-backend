@@ -8,7 +8,7 @@ import {
 
 import { PrismaService } from '../../database/prisma.service';
 import { PropertyRegistryAuditService } from '../audit/property-registry-audit.service';
-import { PropertyRegistryBoundaryService } from '../common/property-registry-boundary.service';
+import { PropertyRegistryCadastreBoundaryService } from '../common/property-registry-cadastre-boundary.service';
 import { buildPropertyReference } from '../common/property-registry-reference.util';
 import { PROPERTY_TRANSFER_REFERENCE_PREFIX } from '../property-registry.constants';
 
@@ -31,7 +31,7 @@ export interface CreatePropertyTransferIntakeInput {
 export class PropertyTransferIntakeService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly boundary: PropertyRegistryBoundaryService,
+    private readonly boundary: PropertyRegistryCadastreBoundaryService,
     private readonly audit: PropertyRegistryAuditService,
   ) {}
 

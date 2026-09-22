@@ -9,10 +9,10 @@ import {
 
 import { PrismaService } from '../database/prisma.service';
 import { PropertyRegistryAuditService } from './audit/property-registry-audit.service';
-import { PropertyRegistryClassificationAccessService } from './common/property-registry-access.service';
-import { PropertyRegistryBoundaryService } from './common/property-registry-boundary.service';
+import { PropertyRegistryCadastreBoundaryService } from './common/property-registry-cadastre-boundary.service';
+import { PropertyRegistryClassificationAccessService } from './common/property-registry-classification-access.service';
 import { PropertyRegistryCorrectionService } from './corrections/property-registry-correction.service';
-import { PropertyEncumbranceService } from './encumbrances/property-encumbrance.service';
+import { CadastrePropertyEncumbranceService } from './encumbrances/cadastre-property-encumbrance.service';
 import { PropertyTransferIntakeService } from './intake/property-transfer-intake.service';
 import { PLATFORM_ADMIN_ROLE_MARKER } from './property-registry.constants';
 import { PropertyRegistryReadService } from './queries/property-registry-read.service';
@@ -21,14 +21,14 @@ import { PropertyTransferPaymentService } from './transfers/property-transfer-pa
 import { PropertyRegistryVerificationService } from './verification/property-registry-verification.service';
 
 describe('Property registry must-fail gates', () => {
-  describe('PropertyRegistryBoundaryService', () => {
-    let boundary: PropertyRegistryBoundaryService;
+  describe('PropertyRegistryCadastreBoundaryService', () => {
+    let boundary: PropertyRegistryCadastreBoundaryService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
-        providers: [PropertyRegistryBoundaryService],
+        providers: [PropertyRegistryCadastreBoundaryService],
       }).compile();
-      boundary = module.get(PropertyRegistryBoundaryService);
+      boundary = module.get(PropertyRegistryCadastreBoundaryService);
     });
 
     it('citizen cannot directly change title holder', () => {
@@ -131,7 +131,7 @@ describe('Property registry must-fail gates', () => {
       const module = await Test.createTestingModule({
         providers: [
           PropertyTransferIntakeService,
-          PropertyRegistryBoundaryService,
+          PropertyRegistryCadastreBoundaryService,
           PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
@@ -178,7 +178,7 @@ describe('Property registry must-fail gates', () => {
       const module = await Test.createTestingModule({
         providers: [
           PropertyTransferPaymentService,
-          PropertyRegistryBoundaryService,
+          PropertyRegistryCadastreBoundaryService,
           PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
@@ -221,7 +221,7 @@ describe('Property registry must-fail gates', () => {
       const module = await Test.createTestingModule({
         providers: [
           PropertyTitleRegistrationService,
-          PropertyRegistryBoundaryService,
+          PropertyRegistryCadastreBoundaryService,
           PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
@@ -360,20 +360,20 @@ describe('Property registry must-fail gates', () => {
     });
   });
 
-  describe('PropertyEncumbranceService', () => {
-    let service: PropertyEncumbranceService;
+  describe('CadastrePropertyEncumbranceService', () => {
+    let service: CadastrePropertyEncumbranceService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PropertyEncumbranceService,
-          PropertyRegistryBoundaryService,
+          CadastrePropertyEncumbranceService,
+          PropertyRegistryCadastreBoundaryService,
           PropertyRegistryAuditService,
           { provide: PrismaService, useValue: {} },
         ],
       }).compile();
 
-      service = module.get(PropertyEncumbranceService);
+      service = module.get(CadastrePropertyEncumbranceService);
     });
 
     it('blocks silent encumbrance deletion', () => {
@@ -398,7 +398,7 @@ describe('Property registry must-fail gates', () => {
       const module = await Test.createTestingModule({
         providers: [
           PropertyRegistryCorrectionService,
-          PropertyRegistryBoundaryService,
+          PropertyRegistryCadastreBoundaryService,
           PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],

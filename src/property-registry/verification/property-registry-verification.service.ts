@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PropertyRegistryAccessClassification } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { PropertyRegistryClassificationAccessService } from '../common/property-registry-access.service';
+import { PropertyRegistryClassificationAccessService } from '../common/property-registry-classification-access.service';
 
 @Injectable()
 export class PropertyRegistryVerificationService {

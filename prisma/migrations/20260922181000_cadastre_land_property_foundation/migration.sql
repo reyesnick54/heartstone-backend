@@ -17,9 +17,6 @@ CREATE TYPE "PropertyInterestHolderRole" AS ENUM ('OWNER', 'CO_OWNER', 'LESSEE',
 CREATE TYPE "PropertyEncumbranceType" AS ENUM ('MORTGAGE', 'LIEN', 'EASEMENT', 'CAVEAT', 'RESTRICTION', 'COURT_ORDER', 'GOVERNMENT_RESTRICTION', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "PropertyEncumbranceStatus" AS ENUM ('ACTIVE', 'RELEASED', 'SUPERSEDED');
-
--- CreateEnum
 CREATE TYPE "PropertyValuationPurpose" AS ENUM ('TAXATION', 'GOVERNMENT_ACQUISITION', 'MARKET_REFERENCE', 'OTHER');
 
 -- CreateEnum
@@ -150,7 +147,7 @@ CREATE TABLE "title_versions" (
 );
 
 -- CreateTable
-CREATE TABLE "property_interests" (
+CREATE TABLE "cadastre_property_interests" (
     "id" UUID NOT NULL,
     "titleRecordId" UUID NOT NULL,
     "interestType" "PropertyInterestType" NOT NULL,
@@ -164,13 +161,13 @@ CREATE TABLE "property_interests" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "property_interests_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cadastre_property_interests_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "property_interest_holders" (
+CREATE TABLE "cadastre_property_interest_holders" (
     "id" UUID NOT NULL,
-    "propertyInterestId" UUID NOT NULL,
+    "cadastrePropertyInterestId" UUID NOT NULL,
     "holderRole" "PropertyInterestHolderRole" NOT NULL,
     "personId" UUID,
     "organizationId" UUID,
@@ -181,13 +178,13 @@ CREATE TABLE "property_interest_holders" (
     "isCurrent" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "property_interest_holders_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cadastre_property_interest_holders_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "property_interest_history" (
+CREATE TABLE "cadastre_property_interest_history" (
     "id" UUID NOT NULL,
-    "propertyInterestId" UUID NOT NULL,
+    "cadastrePropertyInterestId" UUID NOT NULL,
     "fromTitleVersionId" UUID,
     "toTitleVersionId" UUID,
     "priorHolderId" UUID,
@@ -198,7 +195,7 @@ CREATE TABLE "property_interest_history" (
     "effectiveDate" TIMESTAMP(3) NOT NULL,
     "recordedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "property_interest_history_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cadastre_property_interest_history_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -252,7 +249,7 @@ CREATE TABLE "transfer_parties" (
 );
 
 -- CreateTable
-CREATE TABLE "property_encumbrances" (
+CREATE TABLE "cadastre_property_encumbrances" (
     "id" UUID NOT NULL,
     "encumbranceReference" TEXT NOT NULL,
     "titleRecordId" UUID NOT NULL,
@@ -267,47 +264,47 @@ CREATE TABLE "property_encumbrances" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "property_encumbrances_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cadastre_property_encumbrances_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "mortgage_references" (
-    "propertyEncumbranceId" UUID NOT NULL,
+    "cadastrePropertyEncumbranceId" UUID NOT NULL,
     "lenderReference" TEXT,
     "principalReference" TEXT,
     "additionalAttributes" JSONB NOT NULL DEFAULT '{}',
 
-    CONSTRAINT "mortgage_references_pkey" PRIMARY KEY ("propertyEncumbranceId")
+    CONSTRAINT "mortgage_references_pkey" PRIMARY KEY ("cadastrePropertyEncumbranceId")
 );
 
 -- CreateTable
 CREATE TABLE "lien_references" (
-    "propertyEncumbranceId" UUID NOT NULL,
+    "cadastrePropertyEncumbranceId" UUID NOT NULL,
     "lienHolderReference" TEXT,
     "amountReference" TEXT,
     "additionalAttributes" JSONB NOT NULL DEFAULT '{}',
 
-    CONSTRAINT "lien_references_pkey" PRIMARY KEY ("propertyEncumbranceId")
+    CONSTRAINT "lien_references_pkey" PRIMARY KEY ("cadastrePropertyEncumbranceId")
 );
 
 -- CreateTable
 CREATE TABLE "easement_references" (
-    "propertyEncumbranceId" UUID NOT NULL,
+    "cadastrePropertyEncumbranceId" UUID NOT NULL,
     "beneficiaryReference" TEXT,
     "burdenDescription" TEXT,
     "additionalAttributes" JSONB NOT NULL DEFAULT '{}',
 
-    CONSTRAINT "easement_references_pkey" PRIMARY KEY ("propertyEncumbranceId")
+    CONSTRAINT "easement_references_pkey" PRIMARY KEY ("cadastrePropertyEncumbranceId")
 );
 
 -- CreateTable
 CREATE TABLE "restriction_references" (
-    "propertyEncumbranceId" UUID NOT NULL,
+    "cadastrePropertyEncumbranceId" UUID NOT NULL,
     "restrictionSource" TEXT,
     "restrictionText" TEXT,
     "additionalAttributes" JSONB NOT NULL DEFAULT '{}',
 
-    CONSTRAINT "restriction_references_pkey" PRIMARY KEY ("propertyEncumbranceId")
+    CONSTRAINT "restriction_references_pkey" PRIMARY KEY ("cadastrePropertyEncumbranceId")
 );
 
 -- CreateTable
@@ -543,31 +540,31 @@ CREATE INDEX "title_versions_isCurrent_idx" ON "title_versions"("isCurrent");
 CREATE UNIQUE INDEX "title_versions_titleRecordId_versionNumber_key" ON "title_versions"("titleRecordId", "versionNumber");
 
 -- CreateIndex
-CREATE INDEX "property_interests_titleRecordId_idx" ON "property_interests"("titleRecordId");
+CREATE INDEX "cadastre_property_interests_titleRecordId_idx" ON "cadastre_property_interests"("titleRecordId");
 
 -- CreateIndex
-CREATE INDEX "property_interests_interestType_idx" ON "property_interests"("interestType");
+CREATE INDEX "cadastre_property_interests_interestType_idx" ON "cadastre_property_interests"("interestType");
 
 -- CreateIndex
-CREATE INDEX "property_interests_isCurrent_idx" ON "property_interests"("isCurrent");
+CREATE INDEX "cadastre_property_interests_isCurrent_idx" ON "cadastre_property_interests"("isCurrent");
 
 -- CreateIndex
-CREATE INDEX "property_interest_holders_propertyInterestId_idx" ON "property_interest_holders"("propertyInterestId");
+CREATE INDEX "cadastre_property_interest_holders_cadastrePropertyInterest_idx" ON "cadastre_property_interest_holders"("cadastrePropertyInterestId");
 
 -- CreateIndex
-CREATE INDEX "property_interest_holders_personId_idx" ON "property_interest_holders"("personId");
+CREATE INDEX "cadastre_property_interest_holders_personId_idx" ON "cadastre_property_interest_holders"("personId");
 
 -- CreateIndex
-CREATE INDEX "property_interest_holders_organizationId_idx" ON "property_interest_holders"("organizationId");
+CREATE INDEX "cadastre_property_interest_holders_organizationId_idx" ON "cadastre_property_interest_holders"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "property_interest_holders_identityId_idx" ON "property_interest_holders"("identityId");
+CREATE INDEX "cadastre_property_interest_holders_identityId_idx" ON "cadastre_property_interest_holders"("identityId");
 
 -- CreateIndex
-CREATE INDEX "property_interest_history_propertyInterestId_idx" ON "property_interest_history"("propertyInterestId");
+CREATE INDEX "cadastre_property_interest_history_cadastrePropertyInterest_idx" ON "cadastre_property_interest_history"("cadastrePropertyInterestId");
 
 -- CreateIndex
-CREATE INDEX "property_interest_history_propertyTransferId_idx" ON "property_interest_history"("propertyTransferId");
+CREATE INDEX "cadastre_property_interest_history_propertyTransferId_idx" ON "cadastre_property_interest_history"("propertyTransferId");
 
 -- CreateIndex
 CREATE INDEX "title_instrument_references_titleRecordId_idx" ON "title_instrument_references"("titleRecordId");
@@ -600,16 +597,16 @@ CREATE INDEX "transfer_parties_propertyTransferId_idx" ON "transfer_parties"("pr
 CREATE INDEX "transfer_parties_identityId_idx" ON "transfer_parties"("identityId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "property_encumbrances_encumbranceReference_key" ON "property_encumbrances"("encumbranceReference");
+CREATE UNIQUE INDEX "cadastre_property_encumbrances_encumbranceReference_key" ON "cadastre_property_encumbrances"("encumbranceReference");
 
 -- CreateIndex
-CREATE INDEX "property_encumbrances_titleRecordId_idx" ON "property_encumbrances"("titleRecordId");
+CREATE INDEX "cadastre_property_encumbrances_titleRecordId_idx" ON "cadastre_property_encumbrances"("titleRecordId");
 
 -- CreateIndex
-CREATE INDEX "property_encumbrances_encumbranceType_idx" ON "property_encumbrances"("encumbranceType");
+CREATE INDEX "cadastre_property_encumbrances_encumbranceType_idx" ON "cadastre_property_encumbrances"("encumbranceType");
 
 -- CreateIndex
-CREATE INDEX "property_encumbrances_status_idx" ON "property_encumbrances"("status");
+CREATE INDEX "cadastre_property_encumbrances_status_idx" ON "cadastre_property_encumbrances"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "survey_records_surveyReference_key" ON "survey_records"("surveyReference");
@@ -747,40 +744,40 @@ ALTER TABLE "title_versions" ADD CONSTRAINT "title_versions_registrarOfficeholde
 ALTER TABLE "title_versions" ADD CONSTRAINT "title_versions_registrarIdentityId_fkey" FOREIGN KEY ("registrarIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interests" ADD CONSTRAINT "property_interests_titleRecordId_fkey" FOREIGN KEY ("titleRecordId") REFERENCES "title_records"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interests" ADD CONSTRAINT "cadastre_property_interests_titleRecordId_fkey" FOREIGN KEY ("titleRecordId") REFERENCES "title_records"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_holders" ADD CONSTRAINT "property_interest_holders_propertyInterestId_fkey" FOREIGN KEY ("propertyInterestId") REFERENCES "property_interests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_holders" ADD CONSTRAINT "cadastre_property_interest_holders_cadastrePropertyInteres_fkey" FOREIGN KEY ("cadastrePropertyInterestId") REFERENCES "cadastre_property_interests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_holders" ADD CONSTRAINT "property_interest_holders_personId_fkey" FOREIGN KEY ("personId") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_holders" ADD CONSTRAINT "cadastre_property_interest_holders_personId_fkey" FOREIGN KEY ("personId") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_holders" ADD CONSTRAINT "property_interest_holders_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_holders" ADD CONSTRAINT "cadastre_property_interest_holders_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_holders" ADD CONSTRAINT "property_interest_holders_identityId_fkey" FOREIGN KEY ("identityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_holders" ADD CONSTRAINT "cadastre_property_interest_holders_identityId_fkey" FOREIGN KEY ("identityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_propertyInterestId_fkey" FOREIGN KEY ("propertyInterestId") REFERENCES "property_interests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_cadastrePropertyInteres_fkey" FOREIGN KEY ("cadastrePropertyInterestId") REFERENCES "cadastre_property_interests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_fromTitleVersionId_fkey" FOREIGN KEY ("fromTitleVersionId") REFERENCES "title_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_fromTitleVersionId_fkey" FOREIGN KEY ("fromTitleVersionId") REFERENCES "title_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_toTitleVersionId_fkey" FOREIGN KEY ("toTitleVersionId") REFERENCES "title_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_toTitleVersionId_fkey" FOREIGN KEY ("toTitleVersionId") REFERENCES "title_versions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_priorHolderId_fkey" FOREIGN KEY ("priorHolderId") REFERENCES "property_interest_holders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_priorHolderId_fkey" FOREIGN KEY ("priorHolderId") REFERENCES "cadastre_property_interest_holders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_newHolderId_fkey" FOREIGN KEY ("newHolderId") REFERENCES "property_interest_holders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_newHolderId_fkey" FOREIGN KEY ("newHolderId") REFERENCES "cadastre_property_interest_holders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_propertyTransferId_fkey" FOREIGN KEY ("propertyTransferId") REFERENCES "property_transfers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_propertyTransferId_fkey" FOREIGN KEY ("propertyTransferId") REFERENCES "property_transfers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_interest_history" ADD CONSTRAINT "property_interest_history_governingDecisionId_fkey" FOREIGN KEY ("governingDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_interest_history" ADD CONSTRAINT "cadastre_property_interest_history_governingDecisionId_fkey" FOREIGN KEY ("governingDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "title_instrument_references" ADD CONSTRAINT "title_instrument_references_titleRecordId_fkey" FOREIGN KEY ("titleRecordId") REFERENCES "title_records"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -834,22 +831,22 @@ ALTER TABLE "transfer_parties" ADD CONSTRAINT "transfer_parties_identityId_fkey"
 ALTER TABLE "transfer_parties" ADD CONSTRAINT "transfer_parties_representativeAuthorityId_fkey" FOREIGN KEY ("representativeAuthorityId") REFERENCES "representative_authorities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_encumbrances" ADD CONSTRAINT "property_encumbrances_titleRecordId_fkey" FOREIGN KEY ("titleRecordId") REFERENCES "title_records"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_encumbrances" ADD CONSTRAINT "cadastre_property_encumbrances_titleRecordId_fkey" FOREIGN KEY ("titleRecordId") REFERENCES "title_records"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_encumbrances" ADD CONSTRAINT "property_encumbrances_releaseDecisionId_fkey" FOREIGN KEY ("releaseDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cadastre_property_encumbrances" ADD CONSTRAINT "cadastre_property_encumbrances_releaseDecisionId_fkey" FOREIGN KEY ("releaseDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "mortgage_references" ADD CONSTRAINT "mortgage_references_propertyEncumbranceId_fkey" FOREIGN KEY ("propertyEncumbranceId") REFERENCES "property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "mortgage_references" ADD CONSTRAINT "mortgage_references_cadastrePropertyEncumbranceId_fkey" FOREIGN KEY ("cadastrePropertyEncumbranceId") REFERENCES "cadastre_property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "lien_references" ADD CONSTRAINT "lien_references_propertyEncumbranceId_fkey" FOREIGN KEY ("propertyEncumbranceId") REFERENCES "property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "lien_references" ADD CONSTRAINT "lien_references_cadastrePropertyEncumbranceId_fkey" FOREIGN KEY ("cadastrePropertyEncumbranceId") REFERENCES "cadastre_property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "easement_references" ADD CONSTRAINT "easement_references_propertyEncumbranceId_fkey" FOREIGN KEY ("propertyEncumbranceId") REFERENCES "property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "easement_references" ADD CONSTRAINT "easement_references_cadastrePropertyEncumbranceId_fkey" FOREIGN KEY ("cadastrePropertyEncumbranceId") REFERENCES "cadastre_property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "restriction_references" ADD CONSTRAINT "restriction_references_propertyEncumbranceId_fkey" FOREIGN KEY ("propertyEncumbranceId") REFERENCES "property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "restriction_references" ADD CONSTRAINT "restriction_references_cadastrePropertyEncumbranceId_fkey" FOREIGN KEY ("cadastrePropertyEncumbranceId") REFERENCES "cadastre_property_encumbrances"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "survey_records" ADD CONSTRAINT "survey_records_landParcelId_fkey" FOREIGN KEY ("landParcelId") REFERENCES "land_parcels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

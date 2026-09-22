@@ -87,6 +87,7 @@ import { TransportationModule } from './transportation/transportation.module';
     CorporateRegistryModule,
     RedressModule,
     RevenueModule,
+    PropertyRegistryModule,
     PlanningConstructionModule,
     IntelligenceModule,
     OperationalSupportModule,

@@ -4,6 +4,7 @@ import { CorporateRegistryModule } from '../../corporate-registry/corporate-regi
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
+import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { BusinessAccessService } from '../common/business-access.service';
@@ -11,6 +12,7 @@ import { BusinessAppointmentsController } from './business-appointments.controll
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessDevelopmentController } from './business-development.controller';
 import { BusinessExperienceController } from './business-experience.controller';
+import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
@@ -24,6 +26,7 @@ import { BusinessOrganizationDetailService } from './services/business-organizat
 import { BusinessOrganizationsService } from './services/business-organizations.service';
 import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
+import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
 
 @Module({
@@ -33,6 +36,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     CorporateRegistryModule,
     RevenueModule,
     PlanningConstructionModule,
+    PropertyRegistryModule,
   ],
   controllers: [
     BusinessExperienceController,
@@ -40,6 +44,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessCorporateRegistryController,
     BusinessRevenueController,
     BusinessDevelopmentController,
+    BusinessPropertyController,
   ],
   providers: [
     SessionAuthGuard,
@@ -57,6 +62,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessAppointmentsService,
     BusinessCorporateRegistryService,
     BusinessRevenueService,
+    BusinessPropertyService,
   ],
 })
 export class BusinessExperienceModule {}
