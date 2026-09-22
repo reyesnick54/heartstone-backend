@@ -41,7 +41,10 @@ export class PropertyTitleRegistrationService {
     actorIdentityId: string,
     input: RecordOfficialTitleRegistrationInput,
   ) {
-    this.boundary.assertAiCannotApproveTitleTransfer('RECORD_TITLE_TRANSFER', Boolean(input.isAiActor));
+    this.boundary.assertAiCannotApproveTitleTransfer(
+      'RECORD_TITLE_TRANSFER',
+      Boolean(input.isAiActor),
+    );
     this.boundary.assertPlatformAdminCannotMutateLegalOwnership({
       actorRoleMarker: input.actorRoleMarker,
       mutatesLegalOwnership: true,

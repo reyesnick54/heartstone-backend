@@ -153,7 +153,9 @@ describe('Property registry must-fail gates', () => {
       const [[createArgs]] = prisma.propertyTransfer.create.mock.calls as [
         [{ data: { applicationStatus: PropertyTransferApplicationStatus } }],
       ];
-      expect(createArgs.data.applicationStatus).toBe(PropertyTransferApplicationStatus.INTAKE_DRAFT);
+      expect(createArgs.data.applicationStatus).toBe(
+        PropertyTransferApplicationStatus.INTAKE_DRAFT,
+      );
     });
   });
 
@@ -375,7 +377,9 @@ describe('Property registry must-fail gates', () => {
     });
 
     it('blocks silent encumbrance deletion', () => {
-      expect(() => { service.assertDeleteBlocked(); }).toThrow(ForbiddenException);
+      expect(() => {
+        service.assertDeleteBlocked();
+      }).toThrow(ForbiddenException);
     });
   });
 
@@ -475,7 +479,12 @@ describe('Property registry must-fail gates', () => {
       const payload = await service.verifyPublic('code-1');
       expect(payload).not.toHaveProperty('restrictedPayload');
       expect(Object.keys(payload)).toEqual(
-        expect.arrayContaining(['entryReference', 'verificationState', 'registeredAt', 'titleReference']),
+        expect.arrayContaining([
+          'entryReference',
+          'verificationState',
+          'registeredAt',
+          'titleReference',
+        ]),
       );
     });
   });

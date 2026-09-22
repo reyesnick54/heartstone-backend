@@ -74,5 +74,4 @@ export class PropertyRegistryReadService {
       distinctConcepts: true,
     };
   }
-
 }

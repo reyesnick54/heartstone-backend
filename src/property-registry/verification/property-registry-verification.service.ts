@@ -40,7 +40,9 @@ export class PropertyRegistryVerificationService {
       registeredAt: entry.registeredAt,
       titleReference: entry.titleRecord.titleReference,
       accessClassification: effectiveClassification,
-      restrictedPayload: { withheld: effectiveClassification === PropertyRegistryAccessClassification.SEALED },
+      restrictedPayload: {
+        withheld: effectiveClassification === PropertyRegistryAccessClassification.SEALED,
+      },
     });
   }
 }

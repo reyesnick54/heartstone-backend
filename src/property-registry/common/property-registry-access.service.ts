@@ -49,7 +49,9 @@ export class PropertyRegistryClassificationAccessService {
 
     if (accessClassification === PropertyRegistryAccessClassification.AUTHORIZED_PROFESSIONAL) {
       if (!context.isAuthorizedProfessional && !context.isAuthorizedGovernmentActor) {
-        throw new ForbiddenException('Record requires authorized professional or government access');
+        throw new ForbiddenException(
+          'Record requires authorized professional or government access',
+        );
       }
       return;
     }

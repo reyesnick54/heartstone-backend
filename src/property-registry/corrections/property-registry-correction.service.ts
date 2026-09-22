@@ -107,7 +107,10 @@ export class PropertyRegistryCorrectionService {
     await this.audit.record({
       eventType: PropertyRegistryAuditEventType.TITLE_VERSION_RECORDED,
       actorIdentityId: input.actorIdentityId,
-      metadata: { correctionId: input.correctionId, preservedPriorVersion: input.previousTitleVersionId },
+      metadata: {
+        correctionId: input.correctionId,
+        preservedPriorVersion: input.previousTitleVersionId,
+      },
     });
 
     return result;

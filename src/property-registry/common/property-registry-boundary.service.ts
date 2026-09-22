@@ -66,7 +66,9 @@ export class PropertyRegistryBoundaryService {
 
   assertPaymentDoesNotChangeTitle(mutatesTitleOnPayment?: boolean): void {
     if (mutatesTitleOnPayment) {
-      throw new ForbiddenException('Recording a transfer fee payment must not change title ownership');
+      throw new ForbiddenException(
+        'Recording a transfer fee payment must not change title ownership',
+      );
     }
   }
 
@@ -122,7 +124,10 @@ export class PropertyRegistryBoundaryService {
   }
 
   assertAiCannotApproveTitleTransfer(action: string, isAiActor: boolean): void {
-    if (isAiActor && (FORBIDDEN_AI_PROPERTY_REGISTRY_ACTIONS as readonly string[]).includes(action)) {
+    if (
+      isAiActor &&
+      (FORBIDDEN_AI_PROPERTY_REGISTRY_ACTIONS as readonly string[]).includes(action)
+    ) {
       throw new ForbiddenException('AI assistance cannot approve or record title transfer');
     }
   }
