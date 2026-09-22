@@ -1,6 +1,7 @@
 export * from './calculate-service-pack-fingerprint';
 export * from './canonical-json.util';
 export * from './canonical-templates';
+export * from './corporate-registry-service-pack';
 export * from './diff-service-packs';
 export * from './format-compilation-report';
 export * from './generate-compilation-report';

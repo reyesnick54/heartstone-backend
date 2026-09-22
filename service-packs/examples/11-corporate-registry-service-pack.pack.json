@@ -1,0 +1,2970 @@
+{
+  "departmentCode": "TEMPLATE-CORPORATE-REGISTRY-DEPARTMENT",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "Jurisdiction-neutral NON_PRODUCTION corporate registry and business formation templates. TEMPLATE ONLY — not verified law or policy.",
+  "institutionCode": "TEMPLATE-CORPORATE-REGISTRY-INSTITUTION",
+  "packId": "corporate-registry-business-formation-pack",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Corporate Registry / Business Formation Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-RESERVE-NAME-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-RESERVE-NAME-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-NAME-RES-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-NAME-RES-QUEUE",
+          "label": "Reserve Business / Company Name queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-RESERVE-NAME-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Jurisdiction-neutral name reservation NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-NAME-RES-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-RESERVE-NAME-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-NAME-RES-FORM",
+          "formName": "Reserve Business / Company Name intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-NAME-RES-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Name reservation confirmation",
+          "outputCode": "TEMPLATE-CORP-NAME-RES-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-RESERVE-NAME-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-RESERVE-NAME",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Reserve Business / Company Name",
+      "serviceSlug": "template-corporate-reserve-name",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Reserve Business / Company Name SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-RESERVE-NAME-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-INCORPORATE-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-INCORPORATE-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-INC-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-INC-QUEUE",
+          "label": "Incorporate Company queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-INCORPORATE-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Company incorporation requiring registry decision NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-INC-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-INCORPORATE-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-INC-FORM",
+          "formName": "Incorporate Company intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-INC-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Certificate of incorporation",
+          "outputCode": "TEMPLATE-CORP-INC-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-INCORPORATE-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-INCORPORATE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Incorporate Company",
+      "serviceSlug": "template-corporate-incorporate",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Incorporate Company SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-INCORPORATE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-SOLE-TRADER-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-SOLE-TRADER-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-SOLE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-SOLE-QUEUE",
+          "label": "Register Sole Trader / Business queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-SOLE-TRADER-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Sole trader registration NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-SOLE-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-SOLE-TRADER-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-SOLE-FORM",
+          "formName": "Register Sole Trader / Business intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-SOLE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Sole trader registration record",
+          "outputCode": "TEMPLATE-CORP-SOLE-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-SOLE-TRADER-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-SOLE-TRADER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Register Sole Trader / Business",
+      "serviceSlug": "template-corporate-sole-trader",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Register Sole Trader / Business SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-SOLE-TRADER-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-FOREIGN-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-FOREIGN-QUEUE",
+          "label": "Register Foreign Company queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Foreign company registration NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-FOREIGN-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-FOREIGN-FORM",
+          "formName": "Register Foreign Company intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-FOREIGN-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Foreign company registration record",
+          "outputCode": "TEMPLATE-CORP-FOREIGN-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Register Foreign Company",
+      "serviceSlug": "template-corporate-foreign-company",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Register Foreign Company SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-FOREIGN-COMPANY-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-BRANCH-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-BRANCH-QUEUE",
+          "label": "Register Branch queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Branch registration NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-BRANCH-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-BRANCH-FORM",
+          "formName": "Register Branch intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-BRANCH-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Branch registration record",
+          "outputCode": "TEMPLATE-CORP-BRANCH-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Register Branch",
+      "serviceSlug": "template-corporate-register-branch",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Register Branch SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-REGISTER-BRANCH-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-OFFICE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-OFFICE-QUEUE",
+          "label": "Change Registered Office queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Registered office amendment NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-OFFICE-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-OFFICE-FORM",
+          "formName": "Change Registered Office intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-OFFICE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registered office amendment record",
+          "outputCode": "TEMPLATE-CORP-OFFICE-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Change Registered Office",
+      "serviceSlug": "template-corporate-change-registered-office",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Change Registered Office SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-CHANGE-REGISTERED-OFFICE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-DIRECTORS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-DIRECTORS-QUEUE",
+          "label": "Change Directors / Officers queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Director and officer amendment NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-DIRECTORS-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-DIRECTORS-FORM",
+          "formName": "Change Directors / Officers intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-DIRECTORS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Officer amendment record",
+          "outputCode": "TEMPLATE-CORP-DIRECTORS-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Change Directors / Officers",
+      "serviceSlug": "template-corporate-change-directors",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Change Directors / Officers SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-CHANGE-DIRECTORS-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-BO-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-BO-QUEUE",
+          "label": "Submit Beneficial Ownership Declaration queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Beneficial ownership declaration NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-BO-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-BO-FORM",
+          "formName": "Submit Beneficial Ownership Declaration intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-BO-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Beneficial ownership receipt",
+          "outputCode": "TEMPLATE-CORP-BO-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Submit Beneficial Ownership Declaration",
+      "serviceSlug": "template-corporate-beneficial-ownership",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Submit Beneficial Ownership Declaration SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-BENEFICIAL-OWNERSHIP-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-ANNUAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-ANNUAL-QUEUE",
+          "label": "Annual Corporate Filing queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Annual corporate return filing NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-ANNUAL-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-ANNUAL-FORM",
+          "formName": "Annual Corporate Filing intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-ANNUAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Annual filing acceptance",
+          "outputCode": "TEMPLATE-CORP-ANNUAL-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-ANNUAL-FILING",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Annual Corporate Filing",
+      "serviceSlug": "template-corporate-annual-filing",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Annual Corporate Filing SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-ANNUAL-FILING-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-CERT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-CERT-QUEUE",
+          "label": "Request Corporate Certificate queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Certificate issuance request NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-CERT-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-CERT-FORM",
+          "formName": "Request Corporate Certificate intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-CERT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Corporate certificate",
+          "outputCode": "TEMPLATE-CORP-CERT-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Request Corporate Certificate",
+      "serviceSlug": "template-corporate-certificate-request",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Request Corporate Certificate SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-CERTIFICATE-REQUEST-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-DISSOLUTION-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-DISSOLUTION-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-DISS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-DISS-QUEUE",
+          "label": "Company Dissolution queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-DISSOLUTION-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Company dissolution NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-DISS-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-DISSOLUTION-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-DISS-FORM",
+          "formName": "Company Dissolution intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-DISS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Dissolution record",
+          "outputCode": "TEMPLATE-CORP-DISS-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-DISSOLUTION-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-DISSOLUTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Company Dissolution",
+      "serviceSlug": "template-corporate-dissolution",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Company Dissolution SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-DISSOLUTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-RESTORATION-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-RESTORATION-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-REST-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-REST-QUEUE",
+          "label": "Company Restoration queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-RESTORATION-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Company restoration after dissolution NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-REST-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-RESTORATION-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-REST-FORM",
+          "formName": "Company Restoration intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-REST-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Restoration record",
+          "outputCode": "TEMPLATE-CORP-REST-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-RESTORATION-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-RESTORATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Company Restoration",
+      "serviceSlug": "template-corporate-restoration",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Company Restoration SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-RESTORATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-CORRECT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-CORRECT-QUEUE",
+          "label": "Corporate Record Correction queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Official corporate record correction NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-CORRECT-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-CORRECT-FORM",
+          "formName": "Corporate Record Correction intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-CORRECT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Corrected registry record",
+          "outputCode": "TEMPLATE-CORP-CORRECT-OUTPUT",
+          "outputType": "REGISTRATION_RECORD"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Corporate Record Correction",
+      "serviceSlug": "template-corporate-record-correction",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Corporate Record Correction SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-RECORD-CORRECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Registry decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 5,
+          "isIssuanceStage": true,
+          "label": "Registry issuance",
+          "stageKey": "issuance",
+          "stepType": "ISSUANCE_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Corporate registry intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "isConsequential": false,
+          "publicStageLabel": "Registry officer review",
+          "sequenceOrder": 2
+        },
+        {
+          "authorityActionType": "APPROVE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry decision",
+          "sequenceOrder": 3
+        },
+        {
+          "authorityActionType": "ISSUE",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Registry issuance",
+          "sequenceOrder": 4
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "functionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "isConsequential": false,
+          "publicStageLabel": "Registry verification",
+          "sequenceOrder": 5
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-STATUS",
+          "templateCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-STATUS-NOTICE",
+          "triggerStageKey": "substantive"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CORP-SEARCH-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CORP-SEARCH-QUEUE",
+          "label": "Corporate Registry Search / Verification queue depth",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "decisionStages": [],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-REGISTRY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Corporate registry reference lookup",
+          "externalIntegrationCode": "TEMPLATE-CORPORATE-REGISTRY-API"
+        }
+      ],
+      "description": "Registry search and verification NON_PRODUCTION corporate registry template.",
+      "evidenceRequirements": [
+        {
+          "description": "Template corporate registry evidence placeholder",
+          "evidenceCode": "TEMPLATE-CORP-SEARCH-EVIDENCE",
+          "label": "Supporting registry evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 150,
+          "currencyCode": "USD",
+          "feeCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-FEE",
+          "label": "Registry service fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CORP-SEARCH-FORM",
+          "formName": "Corporate Registry Search / Verification intake",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "proposedLegalName",
+                  "fieldType": "TEXT",
+                  "label": "Proposed legal name",
+                  "required": true
+                },
+                {
+                  "fieldKey": "entityType",
+                  "fieldType": "SELECT",
+                  "label": "Entity type",
+                  "required": true
+                }
+              ],
+              "label": "Entity details",
+              "sectionKey": "entity"
+            }
+          ],
+          "versionLabel": "1.0.0"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+        "issuanceStageKey": "issuance",
+        "outputCodes": [
+          "TEMPLATE-CORP-SEARCH-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry verification response",
+          "outputCode": "TEMPLATE-CORP-SEARCH-OUTPUT",
+          "outputType": "VERIFICATION_RESPONSE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "Template corporate registry review route",
+          "label": "Registry administrative review",
+          "routeCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-REVIEW",
+          "routeType": "ADMINISTRATIVE_REVIEW"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CORPORATE-REGISTRY",
+      "serviceName": "Corporate Registry Search / Verification",
+      "serviceSlug": "template-corporate-registry-search",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Corporate Registry Search / Verification SLA",
+          "ruleCode": "TEMPLATE-CORPORATE-REGISTRY-SEARCH-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-INTAKE",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CORPORATE-REGISTRY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isIssuanceStage": false,
+          "label": "Verification response",
+          "stageKey": "issuance",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        }
+      ]
+    }
+  ]
+}

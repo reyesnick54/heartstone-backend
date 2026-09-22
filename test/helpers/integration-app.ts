@@ -8,6 +8,7 @@ import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
+import { resetCorporateRegistryData } from './corporate-registry-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
@@ -33,6 +34,7 @@ export async function createIntegrationApp(): Promise<{
 }
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
+  await resetCorporateRegistryData(prisma);
   await prisma.platformAdministrativeAccessAudit.deleteMany();
   await prisma.platformAdministrativeAccessPolicy.deleteMany();
   await prisma.securityAuditEvent.deleteMany();
