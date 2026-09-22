@@ -1,3 +1,60 @@
+import { CivilRegistryAccessClassification } from '@prisma/client';
+
+export const CIVIL_REGISTRY_API_TAG = 'civil-registry';
+
+export const VITAL_EVENT_REFERENCE_PREFIX = 'VE';
+
+export const CIVIL_REGISTRY_ENTRY_REFERENCE_PREFIX = 'CRE';
+
+export const CIVIL_CORRECTION_REQUEST_REFERENCE_PREFIX = 'CCR';
+
+export const CERTIFICATE_EXTRACT_REFERENCE_PREFIX = 'VCE';
+
+export const PLATFORM_ADMIN_ROLE_MARKER = 'PLATFORM_ADMINISTRATIVE_ACCESS';
+
+export const TECHNICAL_ADMIN_ROLE_MARKER = 'TECHNICAL_ADMIN';
+
+export const FORBIDDEN_CLIENT_VITAL_EVENT_FIELDS = [
+  'registrationStatus',
+  'verificationState',
+  'registrationDate',
+  'registrarOfficeholderId',
+  'registrarIdentityId',
+] as const;
+
+export const FORBIDDEN_CLIENT_REGISTRY_ENTRY_FIELDS = [
+  'status',
+  'accessClassification',
+  'currentVersionNumber',
+  'registeredAt',
+  'governmentDecisionId',
+  'authorityEvaluationRecordId',
+] as const;
+
+export const OFFICIAL_VITAL_EVENT_STATUSES = ['REGISTERED_OFFICIAL'] as const;
+
+export const OFFICIAL_REGISTRY_ENTRY_STATUSES = ['OFFICIAL', 'AMENDED'] as const;
+
+export const FORBIDDEN_AI_CIVIL_REGISTRY_ACTIONS = [
+  'REGISTER_VITAL_EVENT',
+  'AMEND_REGISTRY_ENTRY',
+  'RECORD_OFFICIAL_ENTRY',
+  'ISSUE_CERTIFICATE_EXTRACT',
+] as const;
+
+export const HIGHLY_PROTECTED_ACCESS_CLASSIFICATIONS: CivilRegistryAccessClassification[] = [
+  CivilRegistryAccessClassification.RESTRICTED,
+  CivilRegistryAccessClassification.SEALED,
+];
+
+export const CIVIL_REGISTRY_ACCESS_CLASSIFICATIONS = [
+  'PUBLIC_VERIFICATION_ONLY',
+  'SUBJECT_ACCESS',
+  'AUTHORIZED_GOVERNMENT',
+  'RESTRICTED',
+  'SEALED',
+] as const;
+
 /** NON_PRODUCTION template pack identity for civil identity & vital records. */
 export const CIVIL_REGISTRY_SERVICE_PACK_ID = 'template-civil-identity-vital-records';
 
@@ -39,3 +96,14 @@ export const CIVIL_REGISTRY_DISCLAIMERS = {
   noDirectRecordDownload:
     'Civil records are not exposed through direct download bypasses; certificate requests must use governed GovernmentService applications.',
 } as const;
+
+export const VITAL_EVENT_TYPES = [
+  'BIRTH',
+  'DEATH',
+  'MARRIAGE',
+  'DIVORCE',
+  'LEGAL_NAME_CHANGE',
+  'CIVIL_STATUS_CORRECTION',
+  'ADOPTION_UPDATE',
+  'CIVIL_IDENTITY_REGISTRATION',
+] as const;

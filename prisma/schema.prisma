@@ -100,6 +100,10 @@ model Jurisdiction {
   taxPeriods                     TaxPeriod[]
   taxpayerAccounts               TaxpayerAccount[]
   taxCalculationRecords          TaxCalculationRecord[]
+  civilPersonRecords             CivilPersonRecord[]
+  civilIdentityRecords           CivilIdentityRecord[]
+  vitalEvents                    VitalEvent[]
+  civilRegistryEntries           CivilRegistryEntry[]
 
   @@map("jurisdictions")
 }
@@ -168,6 +172,10 @@ model Institution {
   civilRegistryCertificateVerifications CivilRegistryCertificateVerification[] @relation("CivilRegistryVerificationIssuer")
   servicePackReviewChainPolicies   ServicePackReviewChainPolicy[]
   servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]
+  civilPersonRecords             CivilPersonRecord[]
+  civilIdentityRecords           CivilIdentityRecord[]
+  vitalEvents                    VitalEvent[]
+  civilRegistryEntries           CivilRegistryEntry[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -311,6 +319,8 @@ model Officeholder {
   appointmentResources             AppointmentResource[]          @relation("AppointmentResourceOfficeholder")
   serviceAppointmentsAssigned      ServiceAppointment[]           @relation("ServiceAppointmentAssignedOfficeholder")
   servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]  @relation("ServicePackAcceptanceOfficeholder")
+  vitalEventsRegistered            VitalEvent[]                   @relation("VitalEventRegistrarOfficeholder")
+  civilRegistryVerifications       CivilRegistryVerification[]    @relation("CivilRegistryVerifierOfficeholder")
 
   @@map("officeholders")
 }
@@ -534,7 +544,8 @@ model Person {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   userAccount UserAccount?
-  identities  Identity[]
+  identities         Identity[]
+  civilPersonRecords CivilPersonRecord[]
 
   @@map("persons")
 }
@@ -757,6 +768,11 @@ model Identity {
   taxRefundClaimsRequested                 TaxRefundClaim[]                       @relation("TaxRefundClaimRequester")
   taxClearanceRequestsSubmitted            TaxClearanceCertificateRequest[]       @relation("TaxClearanceRequester")
   taxAccessAudits                          TaxAccessAudit[]                       @relation("TaxAccessAuditAccessor")
+  vitalEventsAsRegistrar                   VitalEvent[]                           @relation("VitalEventRegistrarIdentity")
+  civilRecordCorrectionRequests            CivilRecordCorrectionRequest[]         @relation("CivilCorrectionApplicant")
+  civilRegistryAuditEvents                 CivilRegistryAuditEvent[]              @relation("CivilRegistryAuditActor")
+  civilRegistryVerificationsPerformed      CivilRegistryVerification[]            @relation("CivilRegistryVerifierIdentity")
+  vitalEventRelationships                  CivilRecordRelationship[]              @relation("CivilRecordRelationshipIdentity")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1427,6 +1443,9 @@ model AuthorityEvaluationRecord {
   operationalRevalidations        OperationalRevalidation[]
   operationalSuspensions          OperationalSuspension[]
   capabilityRetirements           CapabilityRetirement[]
+  civilRegistryEntries            CivilRegistryEntry[]          @relation("CivilRegistryEntryAuthority")
+  civilRecordAmendments           CivilRecordAmendment[]        @relation("CivilRecordAmendmentAuthority")
+  civilRegistryVerifications      CivilRegistryVerification[]   @relation("CivilRegistryVerificationAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1638,6 +1657,7 @@ model GovernmentService {
   appointmentReasons          AppointmentReason[]
   appointmentSlots            AppointmentSlot[]
   serviceAppointments         ServiceAppointment[]
+  vitalEvents                 VitalEvent[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2353,6 +2373,7 @@ model Application {
   visaApplicationProfile     VisaApplicationProfile?
   residencyApplicationProfile ResidencyApplicationProfile?
   citizenshipApplicationProfile CitizenshipApplicationProfile?
+  vitalEvents                VitalEvent[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2474,6 +2495,9 @@ model Case {
   biometricRequirements             BiometricRequirement[]
   immigrationExternalChecks         ImmigrationExternalCheck[]
   immigrationCaseProjection         ImmigrationCaseProjection?
+  vitalEvents                       VitalEvent[]
+  civilRegistryEntries              CivilRegistryEntry[]
+  civilRecordCorrectionRequests     CivilRecordCorrectionRequest[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3227,6 +3251,7 @@ model DocumentRecord {
   auditEvents                      DocumentAuditEvent[]
   governmentCommunicationDocuments GovernmentCommunicationDocument[]
   custodyEvents                    EvidenceCustodyEvent[]
+  civilRegistrySourceReferences    CivilRegistrySourceReference[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -3495,6 +3520,7 @@ model EvidenceRecord {
   packetItems                     EvidencePacketItem[]
   packetExclusions                EvidencePacketItemExclusion[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
+  vitalEventEvidenceLinks         VitalEventEvidenceLink[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -4920,6 +4946,9 @@ model GovernmentDecision {
   residencyPermitRecords            ResidencyPermitRecord[]
   citizenshipStatusRecords          CitizenshipStatusRecord[]
   immigrationRestrictions           ImmigrationRestriction[]
+  civilRegistryEntries              CivilRegistryEntry[]              @relation("CivilRegistryEntryDecision")
+  civilRecordAmendments             CivilRecordAmendment[]            @relation("CivilRecordAmendmentDecision")
+  civilRegistryRestrictions         CivilRegistryRestriction[]        @relation("CivilRegistryRestrictionDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5397,6 +5426,7 @@ model OfficialInstrument {
   immigrationStatusRecords          ImmigrationStatusRecord[]
   visaPermissionRecords             VisaPermissionRecord[]
   residencyPermitRecords            ResidencyPermitRecord[]
+  civilRegistryCertificateExtracts  CivilRegistryCertificateExtract[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -5505,6 +5535,7 @@ model IssuanceEvent {
   issuerIdentity              Identity                    @relation("IssuanceEventIssuerIdentity", fields: [issuerIdentityId], references: [id])
   authorityEvaluationRecord   AuthorityEvaluationRecord   @relation(fields: [authorityEvaluationRecordId], references: [id])
   numberingReservation        InstrumentNumberReservation @relation(fields: [numberingReservationId], references: [id])
+  civilRegistryCertificateExtracts CivilRegistryCertificateExtract[]
 
   @@index([officialInstrumentId])
   @@index([governmentDecisionId])
@@ -13605,6 +13636,7 @@ model ServicePackVersion {
   rejectionRecords         ServicePackRejectionRecord[]
   revisionRequests         ServicePackRevisionRequest[]
   governanceAuditRecords   ServicePackGovernanceAuditRecord[]
+  governingVitalEvents     VitalEvent[]                    @relation("VitalEventGoverningServicePack")
 
   @@unique([servicePackId, version])
   @@index([servicePackId])
@@ -15984,4 +16016,495 @@ model TaxAccessAudit {
   @@index([accessorIdentityId])
   @@index([createdAt])
   @@map("tax_access_audits")
+}
+// ─── Civil Identity & Vital Records ──────────────────────────────────────────
+
+enum CivilRegistryAccessClassification {
+  PUBLIC_VERIFICATION_ONLY
+  SUBJECT_ACCESS
+  AUTHORIZED_GOVERNMENT
+  RESTRICTED
+  SEALED
+}
+
+enum VitalEventType {
+  BIRTH
+  DEATH
+  MARRIAGE
+  DIVORCE
+  LEGAL_NAME_CHANGE
+  CIVIL_STATUS_CORRECTION
+  ADOPTION_UPDATE
+  CIVIL_IDENTITY_REGISTRATION
+}
+
+enum VitalEventRegistrationStatus {
+  INTAKE_DRAFT
+  PENDING_REVIEW
+  PENDING_AUTHORITY
+  REGISTERED_OFFICIAL
+  REJECTED
+  SUPERSEDED
+}
+
+enum CivilRegistryEntryStatus {
+  OFFICIAL
+  AMENDED
+  SUPERSEDED
+  ANNULLED
+}
+
+enum CivilRegistryVerificationState {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  VERIFIED
+  DISPUTED
+  FAILED_VERIFICATION
+}
+
+enum CivilRecordRelationshipRole {
+  SUBJECT
+  PARENT
+  CHILD
+  SPOUSE
+  PARTNER
+  DECEASED
+  INFORMANT
+  WITNESS
+  GUARDIAN
+  ADOPTEE
+  ADOPTIVE_PARENT
+  OTHER
+}
+
+enum CivilRecordAmendmentBasis {
+  AUTHORITY_DECISION
+  CORRECTION_ORDER
+  COURT_ORDER
+  LEGISLATIVE_MANDATE
+  SERVICE_PACK_POLICY
+}
+
+enum CivilRecordCorrectionRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED_FOR_AMENDMENT
+  DENIED
+  WITHDRAWN
+}
+
+enum CivilRegistryAuditEventType {
+  INTAKE_CREATED
+  REGISTRATION_REQUESTED
+  REGISTRY_ENTRY_RECORDED
+  AMENDMENT_RECORDED
+  ACCESS_DENIED
+  ACCESS_GRANTED
+  RESTRICTION_APPLIED
+  VERIFICATION_UPDATED
+  CORRECTION_REQUEST_SUBMITTED
+  CORRECTION_REQUEST_DECIDED
+  DELETE_BLOCKED
+  CERTIFICATE_ISSUED
+}
+
+model CivilPersonRecord {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  jurisdictionId        String                            @db.Uuid
+  institutionId         String                            @db.Uuid
+  personId              String?                           @db.Uuid
+  displayLabel          String
+  primaryReference      String?
+  accessClassification  CivilRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  jurisdiction          Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution           Institution                       @relation(fields: [institutionId], references: [id])
+  person                Person?                           @relation(fields: [personId], references: [id])
+  identityRecords       CivilIdentityRecord[]
+  civilStatusRecords    CivilStatusRecord[]
+  subjectVitalEvents    VitalEvent[]                      @relation("VitalEventPrimarySubject")
+  relationshipsFrom     CivilRecordRelationship[]         @relation("CivilRelationshipFrom")
+  relationshipsTo       CivilRecordRelationship[]         @relation("CivilRelationshipTo")
+  registryEntries       CivilRegistryEntry[]
+  correctionRequests    CivilRecordCorrectionRequest[]    @relation("CivilCorrectionSubject")
+
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([personId])
+  @@index([accessClassification])
+  @@map("civil_person_records")
+}
+
+model CivilIdentityRecord {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  civilPersonRecordId  String                            @db.Uuid
+  jurisdictionId       String                            @db.Uuid
+  institutionId        String                            @db.Uuid
+  identityReferenceType String
+  identityReferenceValue String
+  registrationDate     DateTime?
+  status               String                            @default("REGISTERED")
+  accessClassification CivilRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  civilPersonRecord    CivilPersonRecord                 @relation(fields: [civilPersonRecordId], references: [id])
+  jurisdiction         Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+
+  @@index([civilPersonRecordId])
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([identityReferenceType, identityReferenceValue])
+  @@map("civil_identity_records")
+}
+
+model VitalEvent {
+  id                           String                            @id @default(uuid()) @db.Uuid
+  eventReference               String                            @unique
+  eventType                    VitalEventType
+  registrationStatus           VitalEventRegistrationStatus      @default(INTAKE_DRAFT)
+  jurisdictionId               String                            @db.Uuid
+  institutionId                String                            @db.Uuid
+  eventDate                    DateTime?
+  eventDatePrecision           String?
+  registrationDate             DateTime?
+  locationReference            String?
+  applicationId                String?                           @db.Uuid
+  caseId                       String?                           @db.Uuid
+  governmentServiceId          String?                           @db.Uuid
+  governingServicePackVersionId String?                          @db.Uuid
+  registrarOfficeholderId      String?                           @db.Uuid
+  registrarIdentityId          String?                           @db.Uuid
+  primarySubjectCivilPersonRecordId String?                      @db.Uuid
+  verificationState            CivilRegistryVerificationState    @default(UNVERIFIED)
+  accessClassification         CivilRegistryAccessClassification @default(SUBJECT_ACCESS)
+  provenanceSummary            Json                              @default("{}")
+  createdAt                    DateTime                          @default(now())
+  updatedAt                    DateTime                          @updatedAt
+  jurisdiction                 Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution                  Institution                       @relation(fields: [institutionId], references: [id])
+  application                  Application?                      @relation(fields: [applicationId], references: [id])
+  case                         Case?                             @relation(fields: [caseId], references: [id])
+  governmentService            GovernmentService?                @relation(fields: [governmentServiceId], references: [id])
+  governingServicePackVersion  ServicePackVersion?               @relation("VitalEventGoverningServicePack", fields: [governingServicePackVersionId], references: [id])
+  registrarOfficeholder        Officeholder?                     @relation("VitalEventRegistrarOfficeholder", fields: [registrarOfficeholderId], references: [id])
+  registrarIdentity            Identity?                         @relation("VitalEventRegistrarIdentity", fields: [registrarIdentityId], references: [id])
+  primarySubject               CivilPersonRecord?                @relation("VitalEventPrimarySubject", fields: [primarySubjectCivilPersonRecordId], references: [id])
+  birthEvent                   BirthEvent?
+  deathEvent                   DeathEvent?
+  marriageEvent                MarriageEvent?
+  divorceEvent                 DivorceEvent?
+  civilStatusRecords           CivilStatusRecord[]
+  relationships                CivilRecordRelationship[]
+  evidenceLinks                VitalEventEvidenceLink[]
+  sourceReferences             CivilRegistrySourceReference[]
+  verifications                CivilRegistryVerification[]
+  registryEntry                CivilRegistryEntry?
+  auditEvents                  CivilRegistryAuditEvent[]
+
+  @@index([eventType])
+  @@index([registrationStatus])
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([caseId])
+  @@index([applicationId])
+  @@index([primarySubjectCivilPersonRecordId])
+  @@map("vital_events")
+}
+
+model BirthEvent {
+  vitalEventId            String     @id @db.Uuid
+  placeOfBirthReference   String?
+  birthOrder              Int?
+  additionalAttributes    Json       @default("{}")
+  vitalEvent              VitalEvent @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+
+  @@map("birth_events")
+}
+
+model DeathEvent {
+  vitalEventId            String     @id @db.Uuid
+  placeOfDeathReference   String?
+  mannerReference         String?
+  additionalAttributes    Json       @default("{}")
+  vitalEvent              VitalEvent @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+
+  @@map("death_events")
+}
+
+model MarriageEvent {
+  vitalEventId            String     @id @db.Uuid
+  marriageFormReference   String?
+  additionalAttributes    Json       @default("{}")
+  vitalEvent              VitalEvent @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+
+  @@map("marriage_events")
+}
+
+model DivorceEvent {
+  vitalEventId            String     @id @db.Uuid
+  dissolutionReference    String?
+  additionalAttributes    Json       @default("{}")
+  vitalEvent              VitalEvent @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+
+  @@map("divorce_events")
+}
+
+model CivilStatusRecord {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  civilPersonRecordId  String                            @db.Uuid
+  vitalEventId         String?                           @db.Uuid
+  statusType           String
+  statusValue          String
+  effectiveDate        DateTime
+  accessClassification CivilRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  civilPersonRecord    CivilPersonRecord                 @relation(fields: [civilPersonRecordId], references: [id])
+  vitalEvent           VitalEvent?                       @relation(fields: [vitalEventId], references: [id])
+
+  @@index([civilPersonRecordId])
+  @@index([vitalEventId])
+  @@index([statusType])
+  @@map("civil_status_records")
+}
+
+model CivilRegistryEntry {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  entryReference              String                            @unique
+  vitalEventId                String?                           @unique @db.Uuid
+  civilPersonRecordId         String?                           @db.Uuid
+  jurisdictionId              String                            @db.Uuid
+  institutionId               String                            @db.Uuid
+  caseId                      String                            @db.Uuid
+  governmentDecisionId        String                            @db.Uuid
+  authorityEvaluationRecordId String                            @db.Uuid
+  status                      CivilRegistryEntryStatus          @default(OFFICIAL)
+  currentVersionNumber        Int                               @default(1)
+  accessClassification        CivilRegistryAccessClassification @default(SUBJECT_ACCESS)
+  registeredAt                DateTime                          @default(now())
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  vitalEvent                  VitalEvent?                       @relation(fields: [vitalEventId], references: [id])
+  civilPersonRecord           CivilPersonRecord?                @relation(fields: [civilPersonRecordId], references: [id])
+  jurisdiction                Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution                 Institution                       @relation(fields: [institutionId], references: [id])
+  case                        Case                              @relation(fields: [caseId], references: [id])
+  governmentDecision          GovernmentDecision                @relation("CivilRegistryEntryDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord         @relation("CivilRegistryEntryAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  versions                    CivilRegistryVersion[]
+  amendments                  CivilRecordAmendment[]
+  restrictions                CivilRegistryRestriction[]
+  verifications               CivilRegistryVerification[]
+  sourceReferences            CivilRegistrySourceReference[]
+  certificateExtracts         CivilRegistryCertificateExtract[]
+  auditEvents                 CivilRegistryAuditEvent[]
+  correctionRequests          CivilRecordCorrectionRequest[]
+
+  @@index([civilPersonRecordId])
+  @@index([caseId])
+  @@index([status])
+  @@index([accessClassification])
+  @@index([governmentDecisionId])
+  @@map("civil_registry_entries")
+}
+
+model CivilRegistryVersion {
+  id                   String             @id @default(uuid()) @db.Uuid
+  civilRegistryEntryId String             @db.Uuid
+  versionNumber        Int
+  effectiveFrom        DateTime
+  supersededAt         DateTime?
+  payloadSnapshot      Json
+  integrityHash        String?
+  isCurrent            Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  civilRegistryEntry   CivilRegistryEntry @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Restrict)
+  creatingAmendment    CivilRecordAmendment? @relation("AmendmentNewVersion")
+  previousAmendments   CivilRecordAmendment[] @relation("AmendmentPreviousVersion")
+  certificateExtracts  CivilRegistryCertificateExtract[]
+
+  @@unique([civilRegistryEntryId, versionNumber])
+  @@index([civilRegistryEntryId])
+  @@index([isCurrent])
+  @@map("civil_registry_versions")
+}
+
+model CivilRecordAmendment {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  civilRegistryEntryId        String                    @db.Uuid
+  basis                       CivilRecordAmendmentBasis
+  governmentDecisionId        String                    @db.Uuid
+  authorityEvaluationRecordId String                    @db.Uuid
+  previousVersionId           String                    @db.Uuid
+  newVersionId                String                    @unique @db.Uuid
+  fieldPath                   String
+  previousValue               Json
+  newValue                    Json
+  effectiveDate               DateTime
+  recordedAt                  DateTime                  @default(now())
+  civilRegistryEntry          CivilRegistryEntry        @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Restrict)
+  governmentDecision          GovernmentDecision        @relation("CivilRecordAmendmentDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord @relation("CivilRecordAmendmentAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  previousVersion             CivilRegistryVersion      @relation("AmendmentPreviousVersion", fields: [previousVersionId], references: [id])
+  newVersion                  CivilRegistryVersion      @relation("AmendmentNewVersion", fields: [newVersionId], references: [id])
+
+  @@index([civilRegistryEntryId])
+  @@index([governmentDecisionId])
+  @@map("civil_record_amendments")
+}
+
+model CivilRecordCorrectionRequest {
+  id                      String                             @id @default(uuid()) @db.Uuid
+  requestReference        String                             @unique
+  applicantIdentityId     String                             @db.Uuid
+  subjectCivilPersonRecordId String                          @db.Uuid
+  civilRegistryEntryId    String?                            @db.Uuid
+  caseId                  String?                            @db.Uuid
+  status                  CivilRecordCorrectionRequestStatus @default(DRAFT)
+  requestedChanges        Json                               @default("{}")
+  submittedAt             DateTime?
+  decidedAt               DateTime?
+  createdAt               DateTime                           @default(now())
+  updatedAt               DateTime                           @updatedAt
+  applicantIdentity       Identity                           @relation("CivilCorrectionApplicant", fields: [applicantIdentityId], references: [id])
+  subjectCivilPersonRecord CivilPersonRecord                 @relation("CivilCorrectionSubject", fields: [subjectCivilPersonRecordId], references: [id])
+  civilRegistryEntry      CivilRegistryEntry?                @relation(fields: [civilRegistryEntryId], references: [id])
+  case                    Case?                              @relation(fields: [caseId], references: [id])
+
+  @@index([applicantIdentityId])
+  @@index([subjectCivilPersonRecordId])
+  @@index([status])
+  @@map("civil_record_correction_requests")
+}
+
+model CivilRecordRelationship {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  vitalEventId            String                      @db.Uuid
+  fromCivilPersonRecordId String                      @db.Uuid
+  toCivilPersonRecordId   String?                     @db.Uuid
+  relatedIdentityId       String?                     @db.Uuid
+  role                    CivilRecordRelationshipRole
+  createdAt               DateTime                    @default(now())
+  vitalEvent              VitalEvent                  @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+  fromCivilPersonRecord   CivilPersonRecord           @relation("CivilRelationshipFrom", fields: [fromCivilPersonRecordId], references: [id])
+  toCivilPersonRecord     CivilPersonRecord?          @relation("CivilRelationshipTo", fields: [toCivilPersonRecordId], references: [id])
+  relatedIdentity         Identity?                   @relation("CivilRecordRelationshipIdentity", fields: [relatedIdentityId], references: [id])
+
+  @@index([vitalEventId])
+  @@index([fromCivilPersonRecordId])
+  @@index([toCivilPersonRecordId])
+  @@map("civil_record_relationships")
+}
+
+model CivilRegistrySourceReference {
+  id                         String              @id @default(uuid()) @db.Uuid
+  vitalEventId               String?             @db.Uuid
+  civilRegistryEntryId       String?             @db.Uuid
+  sourceType                 String
+  sourceReference            String
+  governingAuthorityReference String?
+  documentRecordId           String?             @db.Uuid
+  createdAt                  DateTime            @default(now())
+  vitalEvent                 VitalEvent?         @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+  civilRegistryEntry         CivilRegistryEntry? @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Cascade)
+  documentRecord             DocumentRecord?     @relation(fields: [documentRecordId], references: [id])
+
+  @@index([vitalEventId])
+  @@index([civilRegistryEntryId])
+  @@index([documentRecordId])
+  @@map("civil_registry_source_references")
+}
+
+model CivilRegistryVerification {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  vitalEventId                String?                        @db.Uuid
+  civilRegistryEntryId        String?                        @db.Uuid
+  verificationState           CivilRegistryVerificationState
+  methodReference             String
+  verifiedAt                  DateTime?
+  verifiedByOfficeholderId    String?                        @db.Uuid
+  verifiedByIdentityId        String?                        @db.Uuid
+  authorityEvaluationRecordId String?                        @db.Uuid
+  createdAt                   DateTime                       @default(now())
+  vitalEvent                  VitalEvent?                    @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+  civilRegistryEntry          CivilRegistryEntry?            @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Cascade)
+  verifiedByOfficeholder      Officeholder?                  @relation("CivilRegistryVerifierOfficeholder", fields: [verifiedByOfficeholderId], references: [id])
+  verifiedByIdentity          Identity?                      @relation("CivilRegistryVerifierIdentity", fields: [verifiedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?     @relation("CivilRegistryVerificationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([vitalEventId])
+  @@index([civilRegistryEntryId])
+  @@index([verificationState])
+  @@map("civil_registry_verifications")
+}
+
+model CivilRegistryRestriction {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  civilRegistryEntryId String                            @db.Uuid
+  restrictionType      String
+  accessClassification CivilRegistryAccessClassification
+  effectiveFrom        DateTime
+  effectiveTo          DateTime?
+  authorityDecisionId  String?                           @db.Uuid
+  createdAt            DateTime                          @default(now())
+  civilRegistryEntry   CivilRegistryEntry                @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Cascade)
+  authorityDecision    GovernmentDecision?               @relation("CivilRegistryRestrictionDecision", fields: [authorityDecisionId], references: [id])
+
+  @@index([civilRegistryEntryId])
+  @@index([accessClassification])
+  @@map("civil_registry_restrictions")
+}
+
+model CivilRegistryAuditEvent {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  vitalEventId         String?                     @db.Uuid
+  civilRegistryEntryId String?                     @db.Uuid
+  eventType            CivilRegistryAuditEventType
+  actorIdentityId      String?                     @db.Uuid
+  metadata             Json                        @default("{}")
+  recordedAt           DateTime                    @default(now())
+  vitalEvent           VitalEvent?                 @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+  civilRegistryEntry   CivilRegistryEntry?         @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Cascade)
+  actor                Identity?                   @relation("CivilRegistryAuditActor", fields: [actorIdentityId], references: [id])
+
+  @@index([vitalEventId])
+  @@index([civilRegistryEntryId])
+  @@index([eventType])
+  @@map("civil_registry_audit_events")
+}
+
+model CivilRegistryCertificateExtract {
+  id                     String               @id @default(uuid()) @db.Uuid
+  extractReference       String               @unique
+  civilRegistryEntryId   String               @db.Uuid
+  civilRegistryVersionId String               @db.Uuid
+  officialInstrumentId   String?              @db.Uuid
+  issuanceEventId        String?              @db.Uuid
+  issuedAt               DateTime             @default(now())
+  civilRegistryEntry     CivilRegistryEntry   @relation(fields: [civilRegistryEntryId], references: [id], onDelete: Restrict)
+  civilRegistryVersion   CivilRegistryVersion @relation(fields: [civilRegistryVersionId], references: [id], onDelete: Restrict)
+  officialInstrument     OfficialInstrument?  @relation(fields: [officialInstrumentId], references: [id])
+  issuanceEvent          IssuanceEvent?       @relation(fields: [issuanceEventId], references: [id])
+
+  @@index([civilRegistryEntryId])
+  @@index([civilRegistryVersionId])
+  @@index([officialInstrumentId])
+  @@map("civil_registry_certificate_extracts")
+}
+
+model VitalEventEvidenceLink {
+  id              String         @id @default(uuid()) @db.Uuid
+  vitalEventId    String         @db.Uuid
+  evidenceRecordId String        @db.Uuid
+  linkRole        String         @default("SUPPORTING")
+  createdAt       DateTime       @default(now())
+  vitalEvent      VitalEvent     @relation(fields: [vitalEventId], references: [id], onDelete: Cascade)
+  evidenceRecord  EvidenceRecord @relation(fields: [evidenceRecordId], references: [id], onDelete: Restrict)
+
+  @@unique([vitalEventId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("vital_event_evidence_links")
 }

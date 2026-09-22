@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   AuthorityActionType,
@@ -11,21 +11,73 @@ import { ConsequentialActionGuard } from '../authority/consequential-action/cons
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
-import { CivilRegistryCertificateService } from './certificates/civil-registry-certificate.service';
-import { CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES } from './civil-registry.constants';
-import { CivilRegistryRegistrationService } from './registration/civil-registry-registration.service';
-
-const CIVIL_REGISTRY_API_TAG = 'civil-registry';
+import { CivilRegistryVitalRecordCertificateService } from './certificates/civil-registry-vital-record-certificate.service';
+import {
+  CIVIL_REGISTRY_API_TAG,
+  CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES,
+} from './civil-registry.constants';
+import { CivilRecordCorrectionService } from './corrections/civil-record-correction.service';
+import { CreateVitalEventIntakeDto } from './dto/create-vital-event-intake.dto';
+import { SubmitCorrectionRequestDto } from './dto/submit-correction-request.dto';
+import { VitalEventIntakeService } from './intake/vital-event-intake.service';
+import { CivilRegistryReadService } from './queries/civil-registry-read.service';
+import { CivilRegistryVitalRecordRegistrationService } from './registration/civil-registry-vital-record-registration.service';
 
 @ApiTags(CIVIL_REGISTRY_API_TAG)
-@ApiBearerAuth()
 @Controller('civil-registry')
 @UseGuards(SessionAuthGuard)
+@ApiBearerAuth()
 export class CivilRegistryController {
   constructor(
-    private readonly registrationService: CivilRegistryRegistrationService,
-    private readonly certificateService: CivilRegistryCertificateService,
+    private readonly intake: VitalEventIntakeService,
+    private readonly corrections: CivilRecordCorrectionService,
+    private readonly reads: CivilRegistryReadService,
+    private readonly vitalRecordRegistration: CivilRegistryVitalRecordRegistrationService,
+    private readonly vitalRecordCertificates: CivilRegistryVitalRecordCertificateService,
   ) {}
+
+  @Post('vital-events/intake')
+  @ApiOperation({
+    summary:
+      'Initiate vital event intake (non-official; opens or supports application/case workflow)',
+  })
+  async createIntake(
+    @CurrentSession() session: SessionContextDto,
+    @Body() dto: CreateVitalEventIntakeDto,
+  ) {
+    return this.intake.createIntake(session.identityId, {
+      eventType: dto.eventType,
+      jurisdictionId: dto.jurisdictionId,
+      institutionId: dto.institutionId,
+      applicationId: dto.applicationId,
+      caseId: dto.caseId,
+      governmentServiceId: dto.governmentServiceId,
+      governingServicePackVersionId: dto.governingServicePackVersionId,
+      eventDate: dto.eventDate ? new Date(dto.eventDate) : undefined,
+      locationReference: dto.locationReference,
+      primarySubjectCivilPersonRecordId: dto.primarySubjectCivilPersonRecordId,
+    });
+  }
+
+  @Post('correction-requests')
+  @ApiOperation({
+    summary: 'Submit a civil record correction request (not an approval or amendment)',
+  })
+  async submitCorrection(
+    @CurrentSession() session: SessionContextDto,
+    @Body() dto: SubmitCorrectionRequestDto,
+  ) {
+    return this.corrections.submitRequest(session.identityId, dto);
+  }
+
+  @Get('entries/:entryId')
+  @ApiOperation({ summary: 'Read civil registry entry subject to access classification policy' })
+  async getEntry(
+    @CurrentSession() session: SessionContextDto,
+    @Param('entryId', ParseUUIDPipe) entryId: string,
+  ) {
+    return this.reads.getEntryForActor(session.identityId, entryId);
+  }
 
   @Post('submissions')
   @ApiOperation({
@@ -42,7 +94,7 @@ export class CivilRegistryController {
       summaryLabel?: string;
     },
   ) {
-    return this.registrationService.createEventSubmission(body);
+    return this.vitalRecordRegistration.createEventSubmission(body);
   }
 
   @Post('records/:id/register')
@@ -61,7 +113,7 @@ export class CivilRegistryController {
       recordStatePayload: Record<string, unknown>;
     },
   ) {
-    return this.registrationService.registerOfficialEvent({
+    return this.vitalRecordRegistration.registerOfficialEvent({
       vitalRecordId,
       officialIdentityId: session.identityId,
       summaryLabel: body.summaryLabel,
@@ -86,7 +138,7 @@ export class CivilRegistryController {
       correctedStatePayload: Record<string, unknown>;
     },
   ) {
-    return this.registrationService.approveCorrection({
+    return this.vitalRecordRegistration.approveCorrection({
       vitalRecordId,
       officialIdentityId: session.identityId,
       amendmentReason: body.amendmentReason,
@@ -109,7 +161,7 @@ export class CivilRegistryController {
       issuanceCaseId?: string;
     },
   ) {
-    return this.certificateService.requestCertificate({
+    return this.vitalRecordCertificates.requestCertificate({
       identityId: session.identityId,
       ...body,
     });
@@ -127,7 +179,7 @@ export class CivilRegistryController {
     @CurrentSession() session: SessionContextDto,
     @Body() body: { issuerInstitutionId: string; officialInstrumentId?: string },
   ) {
-    return this.certificateService.issueCertificate({
+    return this.vitalRecordCertificates.issueCertificate({
       certificateId,
       officialIdentityId: session.identityId,
       issuerInstitutionId: body.issuerInstitutionId,

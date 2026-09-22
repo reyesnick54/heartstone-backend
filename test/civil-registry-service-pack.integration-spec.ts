@@ -12,12 +12,12 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { CivilRegistryCertificateService } from '../src/civil-registry/certificates/civil-registry-certificate.service';
+import { CivilRegistryVitalRecordCertificateService } from '../src/civil-registry/certificates/civil-registry-vital-record-certificate.service';
 import {
   CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES,
   CIVIL_REGISTRY_SERVICE_PACK_ID,
 } from '../src/civil-registry/civil-registry.constants';
-import { CivilRegistryRegistrationService } from '../src/civil-registry/registration/civil-registry-registration.service';
+import { CivilRegistryVitalRecordRegistrationService } from '../src/civil-registry/registration/civil-registry-vital-record-registration.service';
 import { CivilRegistryVerificationService } from '../src/civil-registry/verification/civil-registry-verification.service';
 import { type PrismaService } from '../src/database/prisma.service';
 import { CIVIL_REGISTRY_SERVICE_PACK_MANIFEST } from '../src/service-catalog/service-packs/civil-registry-service-pack.manifest';
@@ -128,7 +128,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
       where: { id: fixture.caseId },
       select: { applicationId: true },
     });
-    const registration = app.get(CivilRegistryRegistrationService);
+    const registration = app.get(CivilRegistryVitalRecordRegistrationService);
     const created = await registration.createEventSubmission({
       caseId: fixture.caseId,
       applicationId: caseRecord.applicationId,
@@ -184,7 +184,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
   });
 
   it('correction request preserves original record version', async () => {
-    const registration = app.get(CivilRegistryRegistrationService);
+    const registration = app.get(CivilRegistryVitalRecordRegistrationService);
     const record = await prisma.civilRegistryVitalRecord.findFirstOrThrow({
       where: { registrationCaseId: fixture.caseId },
     });
@@ -215,7 +215,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
   });
 
   it('citizen cannot self-issue certificate', () => {
-    const certificates = app.get(CivilRegistryCertificateService);
+    const certificates = app.get(CivilRegistryVitalRecordCertificateService);
     expect(() => {
       certificates.assertCitizenCannotIssueCertificate();
     }).toThrow(/cannot self-issue/i);
@@ -226,7 +226,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
       where: { registrationCaseId: fixture.caseId },
     });
 
-    const certificateService = app.get(CivilRegistryCertificateService);
+    const certificateService = app.get(CivilRegistryVitalRecordCertificateService);
     const pending = await certificateService.requestCertificate({
       identityId: entitledCitizenId,
       vitalRecordId: record.id,
@@ -246,7 +246,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
       include: { currentVersion: true },
     });
 
-    const certificateService = app.get(CivilRegistryCertificateService);
+    const certificateService = app.get(CivilRegistryVitalRecordCertificateService);
     if (!record.currentVersionId) {
       throw new Error('Expected versioned registry state for certificate traceability test');
     }
