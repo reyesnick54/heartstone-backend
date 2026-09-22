@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
+import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { RevenueModule } from '../../revenue/revenue.module';
@@ -10,6 +11,7 @@ import { BusinessAppointmentsController } from './business-appointments.controll
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
+import { BusinessTradeController } from './business-trade.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
 import { BusinessAppointmentsService } from './services/business-appointments.service';
@@ -23,14 +25,22 @@ import { BusinessOrganizationsService } from './services/business-organizations.
 import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
+import { BusinessTradeService } from './services/business-trade.service';
 
 @Module({
-  imports: [SessionsModule, SchedulingModule, CorporateRegistryModule, RevenueModule],
+  imports: [
+    SessionsModule,
+    SchedulingModule,
+    CorporateRegistryModule,
+    RevenueModule,
+    CustomsTradeModule,
+  ],
   controllers: [
     BusinessExperienceController,
     BusinessAppointmentsController,
     BusinessCorporateRegistryController,
     BusinessRevenueController,
+    BusinessTradeController,
   ],
   providers: [
     SessionAuthGuard,
@@ -48,6 +58,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessAppointmentsService,
     BusinessCorporateRegistryService,
     BusinessRevenueService,
+    BusinessTradeService,
   ],
 })
 export class BusinessExperienceModule {}

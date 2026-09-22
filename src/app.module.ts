@@ -14,6 +14,7 @@ import identityConfig from './config/identity.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { CorporateRegistryModule } from './corporate-registry/corporate-registry.module';
+import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
@@ -78,6 +79,7 @@ import { SystemModule } from './system/system.module';
     DecisionsIssuanceModule,
     ComplianceModule,
     CorporateRegistryModule,
+    CustomsTradeModule,
     RedressModule,
     RevenueModule,
     IntelligenceModule,

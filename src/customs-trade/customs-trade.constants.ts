@@ -1,0 +1,52 @@
+export const CUSTOMS_TRADE_API_TAG = 'customs-trade';
+
+export const CUSTOMS_TRADE_RULE_ENVIRONMENT = 'NON_PRODUCTION' as const;
+
+export const CUSTOMS_BOUNDARY_DISCLAIMER =
+  'Customs declarations are trader submissions and do not by themselves authorize cargo release.';
+
+export const CUSTOMS_PAYMENT_BOUNDARY_DISCLAIMER =
+  'Recording a customs assessment payment does not release cargo or substitute for official release authorization.';
+
+export const CUSTOMS_AI_BOUNDARY_DISCLAIMER =
+  'Analytics and AI recommendations are advisory only and cannot execute cargo release.';
+
+export const FORBIDDEN_AI_CUSTOMS_ACTIONS = [
+  'EXECUTE_CARGO_RELEASE',
+  'ISSUE_CUSTOMS_ASSESSMENT',
+  'CLEAR_CUSTOMS_HOLD',
+] as const;
+
+export const CUSTOMS_RELEASE_REQUIRED_CONDITION_KEYS = [
+  'reviewsComplete',
+  'officialReleaseAuthority',
+  'holdsCleared',
+  'permitsSatisfied',
+  'paymentConditionsSatisfied',
+  'externalDependenciesSatisfied',
+  'documentDeficienciesResolved',
+] as const;
+
+export type CustomsReleaseConditionKey = (typeof CUSTOMS_RELEASE_REQUIRED_CONDITION_KEYS)[number];
+
+export const CUSTOMS_REASON_CODES = {
+  CROSS_ORGANIZATION_ACCESS_DENIED: 'CUSTOMS_CROSS_ORGANIZATION_ACCESS_DENIED',
+  CROSS_SHIPMENT_ACCESS_DENIED: 'CUSTOMS_CROSS_SHIPMENT_ACCESS_DENIED',
+  BROKER_SCOPE_REQUIRED: 'CUSTOMS_BROKER_SCOPE_REQUIRED',
+  REPRESENTATIVE_AUTHORITY_REQUIRED: 'CUSTOMS_REPRESENTATIVE_AUTHORITY_REQUIRED',
+  SUBMITTED_DECLARATION_IMMUTABLE: 'CUSTOMS_SUBMITTED_DECLARATION_IMMUTABLE',
+  DECLARATION_DOES_NOT_RELEASE: 'CUSTOMS_DECLARATION_DOES_NOT_RELEASE',
+  PAYMENT_DOES_NOT_RELEASE: 'CUSTOMS_PAYMENT_DOES_NOT_RELEASE',
+  ACTIVE_HOLD_BLOCKS_RELEASE: 'CUSTOMS_ACTIVE_HOLD_BLOCKS_RELEASE',
+  UNRESOLVED_PERMIT_BLOCKS_RELEASE: 'CUSTOMS_UNRESOLVED_PERMIT_BLOCKS_RELEASE',
+  AI_CANNOT_RELEASE: 'CUSTOMS_AI_CANNOT_RELEASE',
+  OFFICIAL_WITHOUT_AUTHORITY: 'CUSTOMS_OFFICIAL_WITHOUT_RELEASE_AUTHORITY',
+  RELEASE_CONDITIONS_NOT_MET: 'CUSTOMS_RELEASE_CONDITIONS_NOT_MET',
+  RELEASE_REEVALUATION_REQUIRED: 'CUSTOMS_RELEASE_REEVALUATION_REQUIRED',
+  PUBLIC_CONFIDENTIAL_FIELD_FORBIDDEN: 'CUSTOMS_PUBLIC_CONFIDENTIAL_FIELD_FORBIDDEN',
+} as const;
+
+export const CUSTOMS_TRADE_SERVICE_PACK_ID = 'template-customs-trade-administration';
+
+export const CUSTOMS_DASHBOARD_METRIC_DISCLAIMER =
+  'Operational customs metrics are informational and do not authorize release or compliance outcomes.';
