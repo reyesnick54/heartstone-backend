@@ -23,7 +23,7 @@ import { type PrismaService } from '../src/database/prisma.service';
 import { CIVIL_REGISTRY_SERVICE_PACK_MANIFEST } from '../src/service-catalog/service-packs/civil-registry-service-pack.manifest';
 import { validateServicePackManifest } from '../src/service-catalog/service-packs/validate-service-pack';
 import { provisionAuthenticatedIdentity } from './helpers/identity-provisioning.fixture';
-import { createIntegrationApp } from './helpers/integration-app';
+import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { type Phase8FixtureContext, seedPhase8Fixture } from './helpers/phase-8-test-fixtures';
 
 describe('Civil Identity & Vital Records service pack (integration)', () => {
@@ -41,6 +41,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
     const boot = await createIntegrationApp();
     app = boot.app;
     prisma = boot.prisma;
+    await resetAllTestData(prisma);
     fixture = await seedPhase8Fixture(app, prisma);
 
     const templateIssueFunctionCode = CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES.CERTIFICATE_ISSUE;
