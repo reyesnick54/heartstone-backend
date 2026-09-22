@@ -30,6 +30,7 @@ import { IntelligenceModule } from './intelligence/intelligence.module';
 import { LabourModule } from './labour/labour.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
+import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
@@ -40,6 +41,7 @@ import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SystemModule } from './system/system.module';
+import { TransportationModule } from './transportation/transportation.module';
 
 @Module({
   imports: [
@@ -70,6 +72,7 @@ import { SystemModule } from './system/system.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     LabourModule,
+    TransportationModule,
     CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
@@ -82,6 +85,7 @@ import { SystemModule } from './system/system.module';
     CorporateRegistryModule,
     RedressModule,
     RevenueModule,
+    PlanningConstructionModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,

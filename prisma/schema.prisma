@@ -108,6 +108,12 @@ model Jurisdiction {
   workerProfileReferences        WorkerProfileReference[]
   occupationClassificationReferences OccupationClassificationReference[]
   workplaceRequirementReferences WorkplaceRequirementReference[]
+  developmentProjects            DevelopmentProject[]
+  transportationRegistryEntries  TransportationRegistryEntry[]
+  driverProfiles                 DriverProfile[]
+  vehicleRecords                 VehicleRecord[]
+  transportOperatorRecords       TransportOperatorRecord[]
+  fleetRecords                   FleetRecord[]
 
   @@map("jurisdictions")
 }
@@ -235,6 +241,7 @@ model Department {
   appointmentResources          AppointmentResource[]
   appointmentSlots              AppointmentSlot[]
   serviceAppointments           ServiceAppointment[]
+  developmentProjects           DevelopmentProject[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -326,6 +333,8 @@ model Officeholder {
   servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]  @relation("ServicePackAcceptanceOfficeholder")
   vitalEventsRegistered            VitalEvent[]                   @relation("VitalEventRegistrarOfficeholder")
   civilRegistryVerifications       CivilRegistryVerification[]    @relation("CivilRegistryVerifierOfficeholder")
+  developmentPermitsIssued         DevelopmentPermit[]              @relation("DevelopmentPermitIssuerOfficeholder")
+  developmentOccupancyCertificatesIssued DevelopmentOccupancyCertificate[] @relation("DevelopmentOccupancyIssuerOfficeholder")
 
   @@map("officeholders")
 }
@@ -402,6 +411,7 @@ model ExternalAuthority {
   externalReviewReferrals          ExternalReviewReferral[]
   immigrationExternalChecks        ImmigrationExternalCheck[]
   labourExternalDependencies       LabourExternalDependency[]
+  driverMedicalRequirementReferences DriverMedicalRequirementReference[]
 
   @@map("external_authorities")
 }
@@ -783,6 +793,13 @@ model Identity {
   employmentRelationshipHistoryEvents      EmploymentRelationshipHistory[]        @relation("EmploymentRelationshipHistoryActor")
   workPermitStatusHistoryEvents            WorkPermitStatusHistory[]              @relation("WorkPermitStatusHistoryActor")
   labourExternalDependenciesRecorded       LabourExternalDependency[]             @relation("LabourExternalDependencyRecorder")
+  developmentProjectsAsPrimaryApplicant    DevelopmentProject[]                 @relation("DevelopmentProjectPrimaryApplicant")
+  developmentProjectProfessionals          DevelopmentProjectProfessional[]       @relation("DevelopmentProjectProfessionalIdentity")
+  developmentAccessAudits                  DevelopmentAccessAudit[]               @relation("DevelopmentAccessAuditAccessor")
+  driverProfilesAsSubject                  DriverProfile[]                        @relation("DriverProfileSubject")
+  vehicleOwnershipRecords                  VehicleOwnershipRecord[]               @relation("VehicleOwnershipOwnerIdentity")
+  transportOperatorRecordsAsOperator       TransportOperatorRecord[]              @relation("TransportOperatorIdentity")
+  transportationStatusHistoryEvents        TransportationStatusHistory[]          @relation("TransportationStatusHistoryActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -834,6 +851,10 @@ model Organization {
   corporateRegistryProfile        CorporateRegistryProfile?
   taxpayerAccounts                TaxpayerAccount[]
   employerRegistryRecords         EmployerRegistryRecord[]
+  developmentProjects             DevelopmentProject[]
+  vehicleOwnershipRecords         VehicleOwnershipRecord[]
+  transportOperatorRecords        TransportOperatorRecord[]
+  fleetRecords                    FleetRecord[]
 
   @@index([status])
   @@map("organizations")
@@ -2386,6 +2407,7 @@ model Application {
   citizenshipApplicationProfile CitizenshipApplicationProfile?
   vitalEvents                VitalEvent[]
   workPermitApplicationProfile WorkPermitApplicationProfile?
+  driverLicenseApplicationProfile DriverLicenseApplicationProfile?
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2517,6 +2539,11 @@ model Case {
   employmentComplaints              EmploymentComplaint[]
   employmentDisputes                EmploymentDispute[]
   labourExternalDependencies        LabourExternalDependency[]
+  driverLicenseApplicationProfile   DriverLicenseApplicationProfile?
+  driverTestRecords                 DriverTestRecord[]
+  driverMedicalRequirementReferences DriverMedicalRequirementReference[]
+  vehicleInspections                VehicleInspection[]
+  vehicleTransfers                  VehicleTransfer[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3120,6 +3147,10 @@ model MasterAdministrativeFile {
   immigrationProfiles                  ImmigrationProfile[]
   employerRegistryRecords              EmployerRegistryRecord[]
   workerProfileReferences              WorkerProfileReference[]
+  transportationRegistryEntries        TransportationRegistryEntry[]
+  driverProfiles                       DriverProfile[]
+  vehicleRecords                       VehicleRecord[]
+  transportOperatorRecords             TransportOperatorRecord[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -3873,6 +3904,7 @@ model ProfessionalReviewRecord {
   professionalIdentity    Identity                     @relation("ProfessionalReviewIdentity", fields: [professionalIdentityId], references: [id])
   evidenceReviewed        ProfessionalReviewEvidence[]
   packetItems             EvidencePacketItem[]
+  driverMedicalRequirementReferences DriverMedicalRequirementReference[]
 
   @@index([caseId])
   @@index([professionalIdentityId])
@@ -3915,6 +3947,7 @@ model InspectionRecord {
   evidenceItems             InspectionEvidenceItem[]
   packetItems               EvidencePacketItem[]
   labourInspectionReferences LabourInspectionReference[]
+  vehicleInspection         VehicleInspection?
 
   @@index([caseId])
   @@index([status])
@@ -4975,6 +5008,18 @@ model GovernmentDecision {
   workPermitRecords                 WorkPermitRecord[]
   workPermitStatusHistory           WorkPermitStatusHistory[]
   labourMarketDeterminationReferences LabourMarketDeterminationReference[]
+  developmentOccupancyCertificates  DevelopmentOccupancyCertificate[]
+  driverLicenseRecords              DriverLicenseRecord[]
+  driverQualifications              DriverQualification[]
+  vehicleRegistrations              VehicleRegistration[]
+  vehicleOwnershipRecords           VehicleOwnershipRecord[]
+  vehicleRoadworthinessRecords      VehicleRoadworthinessRecord[]
+  vehicleTransfers                  VehicleTransfer[]
+  vehicleRestrictions               VehicleRestriction[]
+  vehicleComplianceRecords          VehicleComplianceRecord[]
+  commercialVehiclePermits          CommercialVehiclePermit[]
+  transportOperatorLicenses         TransportOperatorLicense[]
+  transportPermits                  TransportPermit[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5454,6 +5499,11 @@ model OfficialInstrument {
   residencyPermitRecords            ResidencyPermitRecord[]
   civilRegistryCertificateExtracts  CivilRegistryCertificateExtract[]
   workPermitRecords                 WorkPermitRecord[]
+  driverLicenseRecords              DriverLicenseRecord[]
+  vehicleRegistrations              VehicleRegistration[]
+  commercialVehiclePermits          CommercialVehiclePermit[]
+  transportOperatorLicenses         TransportOperatorLicense[]
+  transportPermits                  TransportPermit[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -6076,6 +6126,7 @@ model ComplianceMatter {
   continuingObligations      ContinuingObligation[]
   complianceSubmissions      ComplianceSubmission[]
   labourComplianceMatterReferences LabourComplianceMatterReference[]
+  vehicleComplianceRecords   VehicleComplianceRecord[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -13395,6 +13446,7 @@ model ServiceAppointment {
   reminders                    ServiceAppointmentReminder[]
   immigrationInterview         ImmigrationInterview?
   biometricRequirement         BiometricRequirement?
+  driverTestRecord             DriverTestRecord?
 
   @@index([status])
   @@index([institutionId])
@@ -14974,6 +15026,700 @@ model ImmigrationCaseProjection {
   case                     Case     @relation(fields: [caseId], references: [id])
 
   @@map("immigration_case_projections")
+}
+
+// ─── Vehicle, Driver & Transportation Registry ─────────────────────────────
+
+enum TransportationDataClassification {
+  PUBLIC_VERIFICATION
+  STANDARD_TRANSPORT
+  PROTECTED_DRIVER
+  PROTECTED_MEDICAL_REFERENCE
+  RESTRICTED_ENFORCEMENT
+}
+
+enum TransportationRegistryLifecycleStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  REVOKED
+  TRANSFERRED
+  RETIRED
+  PENDING
+}
+
+enum TransportationApplicationProfileStatus {
+  LINKED
+  WITHDRAWN
+  CLOSED
+}
+
+enum DriverLicenseLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  EFFECTIVE
+  EXPIRED
+  SUSPENDED
+  REVOKED
+  SUPERSEDED
+}
+
+enum VehicleIdentifierType {
+  VIN_CHASSIS
+  REGISTRATION_NUMBER
+  LICENSE_PLATE
+  ENGINE_REFERENCE
+  EXTERNAL_REGISTRY_REFERENCE
+  OTHER_CONFIGURED
+}
+
+enum VehicleIdentifierStatus {
+  ACTIVE
+  SUPERSEDED
+  RETIRED
+}
+
+enum VehicleOwnershipPartyType {
+  IDENTITY
+  ORGANIZATION
+}
+
+enum VehicleOwnershipRecordStatus {
+  CURRENT
+  SUPERSEDED
+  TRANSFERRED_OUT
+}
+
+enum TransportationActorPersona {
+  DRIVER
+  VEHICLE_OWNER
+  FLEET_MANAGER
+  TRANSPORT_OPERATOR
+  AUTHORIZED_REPRESENTATIVE
+  TRANSPORTATION_OFFICER
+  SENIOR_DECISION_OFFICER
+  EXTERNAL_PROFESSIONAL_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum DriverTestRecordOutcome {
+  PASSED
+  FAILED
+  INCOMPLETE
+  CANCELLED
+  WAIVED_CONFIGURED
+}
+
+enum TransportationProfessionalDeterminationStatus {
+  PENDING
+  SATISFIED
+  UNSATISFIED
+  WAIVED_CONFIGURED
+}
+
+enum FleetVehicleLinkStatus {
+  ACTIVE
+  REMOVED
+  SUSPENDED
+}
+
+enum TransportPermitLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  EFFECTIVE
+  EXPIRED
+  SUSPENDED
+  REVOKED
+  SUPERSEDED
+}
+
+enum TransportationRegistryEntryKind {
+  DRIVER
+  VEHICLE
+  TRANSPORT_OPERATOR
+  FLEET
+}
+
+enum TransportationRegistrySubjectStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+model TransportationRegistryEntry {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  registryNumber                String                            @unique
+  entryKind                     TransportationRegistryEntryKind
+  jurisdictionId                String?                           @db.Uuid
+  subjectStatus                 TransportationRegistrySubjectStatus @default(ACTIVE)
+  driverProfileId               String?                           @unique @db.Uuid
+  vehicleRecordId               String?                           @unique @db.Uuid
+  transportOperatorRecordId     String?                           @unique @db.Uuid
+  fleetRecordId                 String?                           @unique @db.Uuid
+  masterAdministrativeFileId    String?                           @db.Uuid
+  dataClassification            TransportationDataClassification  @default(STANDARD_TRANSPORT)
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  jurisdiction                  Jurisdiction?                     @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?           @relation(fields: [masterAdministrativeFileId], references: [id])
+  driverProfile                 DriverProfile?                      @relation(fields: [driverProfileId], references: [id])
+  vehicleRecord                 VehicleRecord?                      @relation(fields: [vehicleRecordId], references: [id])
+  transportOperatorRecord       TransportOperatorRecord?            @relation(fields: [transportOperatorRecordId], references: [id])
+  fleetRecord                   FleetRecord?                        @relation(fields: [fleetRecordId], references: [id])
+  statusHistory                 TransportationStatusHistory[]
+
+  @@index([entryKind, subjectStatus])
+  @@index([jurisdictionId])
+  @@map("transportation_registry_entries")
+}
+
+model DriverProfile {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  profileNumber                 String                      @unique
+  subjectIdentityId             String                      @db.Uuid
+  jurisdictionId                String?                     @db.Uuid
+  masterAdministrativeFileId    String?                     @db.Uuid
+  recordsClassificationReference String?
+  dataClassification            TransportationDataClassification @default(PROTECTED_DRIVER)
+  currentDriverLicenseRecordId  String?                     @unique @db.Uuid
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  subjectIdentity               Identity                    @relation("DriverProfileSubject", fields: [subjectIdentityId], references: [id])
+  jurisdiction                  Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?   @relation(fields: [masterAdministrativeFileId], references: [id])
+  currentDriverLicenseRecord    DriverLicenseRecord?        @relation("DriverProfileCurrentLicense", fields: [currentDriverLicenseRecordId], references: [id])
+  registryEntry                 TransportationRegistryEntry?
+  driverLicenseApplicationProfiles DriverLicenseApplicationProfile[]
+  driverLicenseRecords          DriverLicenseRecord[]       @relation("DriverProfileLicenses")
+  driverQualifications          DriverQualification[]
+  driverTestRecords             DriverTestRecord[]
+  driverMedicalRequirementReferences DriverMedicalRequirementReference[]
+  statusHistory                 TransportationStatusHistory[] @relation("TransportationStatusDriverProfile")
+
+  @@index([subjectIdentityId])
+  @@index([jurisdictionId])
+  @@map("driver_profiles")
+}
+
+model DriverLicenseApplicationProfile {
+  id                         String                              @id @default(uuid()) @db.Uuid
+  profileNumber              String                              @unique
+  driverProfileId            String                              @db.Uuid
+  caseId                     String                              @unique @db.Uuid
+  applicationId              String                              @unique @db.Uuid
+  licenseProgramCode         String?
+  status                     TransportationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotIssueDriverLicense  Boolean                             @default(true)
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  driverProfile              DriverProfile                       @relation(fields: [driverProfileId], references: [id])
+  case                       Case                                @relation(fields: [caseId], references: [id])
+  application                Application                         @relation(fields: [applicationId], references: [id])
+  driverLicenseRecords       DriverLicenseRecord[]
+
+  @@index([driverProfileId])
+  @@map("driver_license_application_profiles")
+}
+
+model DriverLicenseRecord {
+  id                              String                       @id @default(uuid()) @db.Uuid
+  licenseNumber                   String                       @unique
+  driverProfileId                 String                       @db.Uuid
+  driverLicenseApplicationProfileId String?                    @db.Uuid
+  officialInstrumentId            String?                      @db.Uuid
+  governmentDecisionId            String?                      @db.Uuid
+  licenseClassCode                String?
+  validFrom                       DateTime?
+  validUntil                      DateTime?
+  lifecycleStatus                 DriverLicenseLifecycleStatus @default(NOT_ISSUED)
+  renewalOfLicenseId              String?                      @unique @db.Uuid
+  requiresGovernmentDecision      Boolean                      @default(true)
+  dataClassification              TransportationDataClassification @default(PROTECTED_DRIVER)
+  createdAt                       DateTime                     @default(now())
+  updatedAt                       DateTime                     @updatedAt
+  driverProfile                   DriverProfile                @relation("DriverProfileLicenses", fields: [driverProfileId], references: [id])
+  currentForDriverProfile         DriverProfile?               @relation("DriverProfileCurrentLicense")
+  driverLicenseApplicationProfile DriverLicenseApplicationProfile? @relation(fields: [driverLicenseApplicationProfileId], references: [id])
+  officialInstrument              OfficialInstrument?          @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision              GovernmentDecision?          @relation(fields: [governmentDecisionId], references: [id])
+  renewalOfLicense                DriverLicenseRecord?         @relation("DriverLicenseRenewal", fields: [renewalOfLicenseId], references: [id])
+  renewedByLicense                DriverLicenseRecord?         @relation("DriverLicenseRenewal")
+  licenseClasses                  DriverLicenseClass[]
+  licenseEndorsements             DriverLicenseEndorsement[]
+  statusHistory                   TransportationStatusHistory[] @relation("TransportationStatusDriverLicense")
+
+  @@index([driverProfileId, lifecycleStatus])
+  @@index([validUntil])
+  @@map("driver_license_records")
+}
+
+model DriverLicenseClass {
+  id                  String            @id @default(uuid()) @db.Uuid
+  driverLicenseRecordId String          @db.Uuid
+  classCode           String
+  effectiveFrom       DateTime          @default(now())
+  effectiveUntil      DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  driverLicenseRecord DriverLicenseRecord @relation(fields: [driverLicenseRecordId], references: [id], onDelete: Cascade)
+
+  @@index([driverLicenseRecordId])
+  @@map("driver_license_classes")
+}
+
+model DriverLicenseEndorsement {
+  id                  String            @id @default(uuid()) @db.Uuid
+  driverLicenseRecordId String          @db.Uuid
+  endorsementCode     String
+  effectiveFrom       DateTime          @default(now())
+  effectiveUntil      DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  driverLicenseRecord DriverLicenseRecord @relation(fields: [driverLicenseRecordId], references: [id], onDelete: Cascade)
+
+  @@index([driverLicenseRecordId])
+  @@map("driver_license_endorsements")
+}
+
+model DriverQualification {
+  id                String            @id @default(uuid()) @db.Uuid
+  driverProfileId   String            @db.Uuid
+  qualificationCode String
+  acquiredAt        DateTime?
+  expiresAt         DateTime?
+  isDecisionDerived Boolean           @default(false)
+  governmentDecisionId String?        @db.Uuid
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  driverProfile     DriverProfile     @relation(fields: [driverProfileId], references: [id], onDelete: Cascade)
+  governmentDecision GovernmentDecision? @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([driverProfileId])
+  @@map("driver_qualifications")
+}
+
+model DriverTestRecord {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  testReference         String                  @unique
+  driverProfileId       String                  @db.Uuid
+  caseId                String?                 @db.Uuid
+  serviceAppointmentId  String?                 @unique @db.Uuid
+  testTypeCode          String?
+  outcome               DriverTestRecordOutcome @default(INCOMPLETE)
+  testedAt              DateTime?
+  doesNotIssueLicense   Boolean                 @default(true)
+  isLicenseIssuance     Boolean                 @default(false)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  driverProfile         DriverProfile           @relation(fields: [driverProfileId], references: [id], onDelete: Cascade)
+  case                  Case?                   @relation(fields: [caseId], references: [id])
+  serviceAppointment    ServiceAppointment?     @relation(fields: [serviceAppointmentId], references: [id])
+
+  @@index([driverProfileId])
+  @@index([caseId])
+  @@map("driver_test_records")
+}
+
+model DriverMedicalRequirementReference {
+  id                              String                                    @id @default(uuid()) @db.Uuid
+  referenceNumber                 String                                    @unique
+  driverProfileId                 String                                    @db.Uuid
+  caseId                          String?                                   @db.Uuid
+  professionalReviewRecordId      String?                                   @db.Uuid
+  externalAuthorityId             String?                                   @db.Uuid
+  determinationReferenceToken     String
+  determinationStatus             TransportationProfessionalDeterminationStatus @default(PENDING)
+  satisfiedAt                     DateTime?
+  storesDiagnosis                 Boolean                                   @default(false)
+  determinationSummaryCode        String?
+  dataClassification              TransportationDataClassification          @default(PROTECTED_MEDICAL_REFERENCE)
+  createdAt                       DateTime                                  @default(now())
+  updatedAt                       DateTime                                  @updatedAt
+  driverProfile                   DriverProfile                             @relation(fields: [driverProfileId], references: [id], onDelete: Cascade)
+  case                            Case?                                     @relation(fields: [caseId], references: [id])
+  professionalReviewRecord        ProfessionalReviewRecord?                 @relation(fields: [professionalReviewRecordId], references: [id])
+  externalAuthority               ExternalAuthority?                        @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([driverProfileId])
+  @@index([caseId])
+  @@map("driver_medical_requirement_references")
+}
+
+model VehicleRecord {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  vehicleReferenceNumber        String                      @unique
+  jurisdictionId                String?                     @db.Uuid
+  masterAdministrativeFileId    String?                     @db.Uuid
+  vehicleCategoryCode           String?
+  dataClassification            TransportationDataClassification @default(STANDARD_TRANSPORT)
+  currentRegistrationId         String?                     @unique @db.Uuid
+  currentOwnershipRecordId      String?                     @unique @db.Uuid
+  publicVerificationToken       String?                     @unique
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  jurisdiction                  Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?   @relation(fields: [masterAdministrativeFileId], references: [id])
+  currentRegistration           VehicleRegistration?        @relation("VehicleRecordCurrentRegistration", fields: [currentRegistrationId], references: [id])
+  currentOwnershipRecord        VehicleOwnershipRecord?     @relation("VehicleRecordCurrentOwnership", fields: [currentOwnershipRecordId], references: [id])
+  registryEntry                 TransportationRegistryEntry?
+  identifiers                   VehicleIdentifier[]
+  registrations                 VehicleRegistration[]       @relation("VehicleRecordRegistrations")
+  ownershipRecords              VehicleOwnershipRecord[]    @relation("VehicleRecordOwnershipRecords")
+  ownershipHistory              VehicleOwnershipHistory[]
+  inspections                   VehicleInspection[]
+  roadworthinessRecords         VehicleRoadworthinessRecord[]
+  transfers                     VehicleTransfer[]
+  restrictions                  VehicleRestriction[]
+  complianceRecords             VehicleComplianceRecord[]
+  commercialVehiclePermits      CommercialVehiclePermit[]
+  fleetVehicles                 FleetVehicle[]
+  statusHistory                 TransportationStatusHistory[] @relation("TransportationStatusVehicleRecord")
+
+  @@index([jurisdictionId])
+  @@map("vehicle_records")
+}
+
+model VehicleIdentifier {
+  id                String                  @id @default(uuid()) @db.Uuid
+  vehicleRecordId   String                  @db.Uuid
+  identifierType    VehicleIdentifierType
+  identifierValue   String
+  issuingJurisdictionCode String?
+  status            VehicleIdentifierStatus @default(ACTIVE)
+  effectiveFrom     DateTime                @default(now())
+  effectiveUntil    DateTime?
+  supersededAt      DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  vehicleRecord     VehicleRecord           @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleRecordId, identifierType, status])
+  @@index([identifierType, identifierValue])
+  @@map("vehicle_identifiers")
+}
+
+model VehicleRegistration {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  registrationNumber    String                            @unique
+  vehicleRecordId       String                            @db.Uuid
+  governmentDecisionId  String?                           @db.Uuid
+  officialInstrumentId  String?                           @db.Uuid
+  registeredFrom        DateTime                          @default(now())
+  registeredUntil       DateTime?
+  isCurrent             Boolean                           @default(true)
+  supersededAt          DateTime?
+  lifecycleStatus       TransportationRegistryLifecycleStatus @default(ACTIVE)
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  vehicleRecord         VehicleRecord                     @relation("VehicleRecordRegistrations", fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  currentForVehicleRecord VehicleRecord?                  @relation("VehicleRecordCurrentRegistration")
+  governmentDecision    GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument    OfficialInstrument?               @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([vehicleRecordId, isCurrent])
+  @@map("vehicle_registrations")
+}
+
+model VehicleOwnershipRecord {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  vehicleRecordId       String                       @db.Uuid
+  ownerPartyType        VehicleOwnershipPartyType
+  ownerIdentityId       String?                      @db.Uuid
+  ownerOrganizationId   String?                      @db.Uuid
+  ownershipRoleCode     String?
+  effectiveFrom         DateTime                     @default(now())
+  effectiveUntil        DateTime?
+  isCurrent             Boolean                      @default(true)
+  status                VehicleOwnershipRecordStatus @default(CURRENT)
+  supersededAt          DateTime?
+  governmentDecisionId  String?                      @db.Uuid
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  vehicleRecord         VehicleRecord                @relation("VehicleRecordOwnershipRecords", fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  currentForVehicleRecord VehicleRecord?             @relation("VehicleRecordCurrentOwnership")
+  ownerIdentity         Identity?                    @relation("VehicleOwnershipOwnerIdentity", fields: [ownerIdentityId], references: [id])
+  ownerOrganization     Organization?                @relation(fields: [ownerOrganizationId], references: [id])
+  governmentDecision    GovernmentDecision?          @relation(fields: [governmentDecisionId], references: [id])
+  historyFrom           VehicleOwnershipHistory[]    @relation("VehicleOwnershipHistoryFrom")
+  historyTo             VehicleOwnershipHistory[]    @relation("VehicleOwnershipHistoryTo")
+  transfersOut          VehicleTransfer[]            @relation("VehicleTransferFromOwnership")
+  transfersIn           VehicleTransfer[]            @relation("VehicleTransferToOwnership")
+
+  @@index([vehicleRecordId, isCurrent])
+  @@index([ownerIdentityId])
+  @@index([ownerOrganizationId])
+  @@map("vehicle_ownership_records")
+}
+
+model VehicleOwnershipHistory {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  vehicleRecordId          String                  @db.Uuid
+  fromOwnershipRecordId    String?                 @db.Uuid
+  toOwnershipRecordId      String                  @db.Uuid
+  vehicleTransferId        String?                 @db.Uuid
+  recordedAt               DateTime                @default(now())
+  reasonCode               String?
+  metadata                 Json                    @default("{}")
+  vehicleRecord            VehicleRecord           @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  fromOwnershipRecord      VehicleOwnershipRecord? @relation("VehicleOwnershipHistoryFrom", fields: [fromOwnershipRecordId], references: [id])
+  toOwnershipRecord        VehicleOwnershipRecord  @relation("VehicleOwnershipHistoryTo", fields: [toOwnershipRecordId], references: [id])
+  vehicleTransfer          VehicleTransfer?        @relation(fields: [vehicleTransferId], references: [id])
+
+  @@index([vehicleRecordId, recordedAt])
+  @@map("vehicle_ownership_history")
+}
+
+model VehicleInspection {
+  id                                  String            @id @default(uuid()) @db.Uuid
+  vehicleRecordId                     String            @db.Uuid
+  inspectionRecordId                  String            @unique @db.Uuid
+  caseId                              String?           @db.Uuid
+  inspectionTypeCode                  String?
+  resultSummaryCode                   String?
+  inspectionResultDoesNotRevokeRegistration Boolean     @default(true)
+  isRegistrationDecision              Boolean           @default(false)
+  completedAt                         DateTime?
+  createdAt                           DateTime          @default(now())
+  updatedAt                           DateTime          @updatedAt
+  vehicleRecord                       VehicleRecord     @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  inspectionRecord                    InspectionRecord  @relation(fields: [inspectionRecordId], references: [id])
+  case                                Case?             @relation(fields: [caseId], references: [id])
+
+  @@index([vehicleRecordId])
+  @@map("vehicle_inspections")
+}
+
+model VehicleRoadworthinessRecord {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  vehicleRecordId       String                            @db.Uuid
+  assessmentCode        String
+  effectiveFrom         DateTime                          @default(now())
+  effectiveUntil        DateTime?
+  lifecycleStatus       TransportationRegistryLifecycleStatus @default(ACTIVE)
+  governmentDecisionId  String?                           @db.Uuid
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  vehicleRecord         VehicleRecord                     @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  governmentDecision    GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([vehicleRecordId, lifecycleStatus])
+  @@map("vehicle_roadworthiness_records")
+}
+
+model VehicleTransfer {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  transferReference        String                  @unique
+  vehicleRecordId          String                  @db.Uuid
+  caseId                   String?                 @db.Uuid
+  fromOwnershipRecordId    String                  @db.Uuid
+  toOwnershipRecordId      String                  @db.Uuid
+  governmentDecisionId     String?                 @db.Uuid
+  transferredAt            DateTime                @default(now())
+  preservesPriorOwnershipHistory Boolean           @default(true)
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  vehicleRecord            VehicleRecord           @relation(fields: [vehicleRecordId], references: [id])
+  case                     Case?                   @relation(fields: [caseId], references: [id])
+  fromOwnershipRecord      VehicleOwnershipRecord  @relation("VehicleTransferFromOwnership", fields: [fromOwnershipRecordId], references: [id])
+  toOwnershipRecord        VehicleOwnershipRecord  @relation("VehicleTransferToOwnership", fields: [toOwnershipRecordId], references: [id])
+  governmentDecision       GovernmentDecision?     @relation(fields: [governmentDecisionId], references: [id])
+  ownershipHistory         VehicleOwnershipHistory[]
+
+  @@index([vehicleRecordId, transferredAt])
+  @@map("vehicle_transfers")
+}
+
+model VehicleRestriction {
+  id                 String            @id @default(uuid()) @db.Uuid
+  vehicleRecordId    String            @db.Uuid
+  restrictionCode    String
+  description        String?
+  effectiveFrom      DateTime          @default(now())
+  effectiveUntil     DateTime?
+  sourceDecisionId   String?           @db.Uuid
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  vehicleRecord      VehicleRecord     @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  sourceDecision     GovernmentDecision? @relation(fields: [sourceDecisionId], references: [id])
+
+  @@index([vehicleRecordId])
+  @@map("vehicle_restrictions")
+}
+
+model VehicleComplianceRecord {
+  id                   String            @id @default(uuid()) @db.Uuid
+  vehicleRecordId      String            @db.Uuid
+  complianceMatterId   String?           @db.Uuid
+  complianceStatusCode String
+  assessedAt           DateTime          @default(now())
+  isAuthoritativeDecision Boolean        @default(false)
+  governmentDecisionId String?           @db.Uuid
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  vehicleRecord        VehicleRecord     @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  complianceMatter     ComplianceMatter? @relation(fields: [complianceMatterId], references: [id])
+  governmentDecision   GovernmentDecision? @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([vehicleRecordId])
+  @@map("vehicle_compliance_records")
+}
+
+model CommercialVehiclePermit {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  permitNumber          String                       @unique
+  vehicleRecordId       String                       @db.Uuid
+  permitCategoryCode    String?
+  validFrom             DateTime?
+  validUntil            DateTime?
+  lifecycleStatus       TransportPermitLifecycleStatus @default(NOT_ISSUED)
+  governmentDecisionId  String?                      @db.Uuid
+  officialInstrumentId  String?                      @db.Uuid
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  vehicleRecord         VehicleRecord                @relation(fields: [vehicleRecordId], references: [id], onDelete: Cascade)
+  governmentDecision    GovernmentDecision?          @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument    OfficialInstrument?          @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([vehicleRecordId, lifecycleStatus])
+  @@map("commercial_vehicle_permits")
+}
+
+model TransportOperatorRecord {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  operatorReferenceNumber    String                      @unique
+  operatorCategoryCode       String?
+  operatorIdentityId         String?                     @db.Uuid
+  operatorOrganizationId   String?                     @db.Uuid
+  jurisdictionId             String?                     @db.Uuid
+  masterAdministrativeFileId String?                     @db.Uuid
+  dataClassification         TransportationDataClassification @default(STANDARD_TRANSPORT)
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  operatorIdentity           Identity?                   @relation("TransportOperatorIdentity", fields: [operatorIdentityId], references: [id])
+  operatorOrganization       Organization?               @relation(fields: [operatorOrganizationId], references: [id])
+  jurisdiction               Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?   @relation(fields: [masterAdministrativeFileId], references: [id])
+  registryEntry              TransportationRegistryEntry?
+  operatorLicenses           TransportOperatorLicense[]
+  transportPermits           TransportPermit[]
+  fleets                     FleetRecord[]
+  statusHistory              TransportationStatusHistory[] @relation("TransportationStatusTransportOperator")
+
+  @@index([operatorIdentityId])
+  @@index([operatorOrganizationId])
+  @@map("transport_operator_records")
+}
+
+model TransportOperatorLicense {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  licenseNumber            String                       @unique
+  transportOperatorRecordId String                      @db.Uuid
+  licenseCategoryCode      String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  lifecycleStatus          TransportPermitLifecycleStatus @default(NOT_ISSUED)
+  governmentDecisionId     String?                      @db.Uuid
+  officialInstrumentId     String?                      @db.Uuid
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  transportOperatorRecord  TransportOperatorRecord      @relation(fields: [transportOperatorRecordId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?          @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument       OfficialInstrument?          @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([transportOperatorRecordId, lifecycleStatus])
+  @@map("transport_operator_licenses")
+}
+
+model FleetRecord {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  fleetReferenceNumber       String                      @unique
+  organizationId             String                      @db.Uuid
+  transportOperatorRecordId  String?                     @db.Uuid
+  jurisdictionId             String?                     @db.Uuid
+  fleetCategoryCode          String?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  organization               Organization                @relation(fields: [organizationId], references: [id])
+  transportOperatorRecord    TransportOperatorRecord?    @relation(fields: [transportOperatorRecordId], references: [id])
+  jurisdiction               Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  registryEntry              TransportationRegistryEntry?
+  fleetVehicles              FleetVehicle[]
+  statusHistory              TransportationStatusHistory[] @relation("TransportationStatusFleetRecord")
+
+  @@index([organizationId])
+  @@map("fleet_records")
+}
+
+model FleetVehicle {
+  id                String                 @id @default(uuid()) @db.Uuid
+  fleetRecordId     String                 @db.Uuid
+  vehicleRecordId   String                 @db.Uuid
+  linkStatus        FleetVehicleLinkStatus @default(ACTIVE)
+  linkedAt          DateTime               @default(now())
+  removedAt         DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  fleetRecord       FleetRecord            @relation(fields: [fleetRecordId], references: [id], onDelete: Cascade)
+  vehicleRecord     VehicleRecord          @relation(fields: [vehicleRecordId], references: [id])
+
+  @@unique([fleetRecordId, vehicleRecordId])
+  @@index([vehicleRecordId])
+  @@map("fleet_vehicles")
+}
+
+model TransportPermit {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  permitNumber             String                       @unique
+  transportOperatorRecordId String                      @db.Uuid
+  permitCategoryCode       String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  lifecycleStatus          TransportPermitLifecycleStatus @default(NOT_ISSUED)
+  governmentDecisionId     String?                      @db.Uuid
+  officialInstrumentId     String?                      @db.Uuid
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  transportOperatorRecord  TransportOperatorRecord      @relation(fields: [transportOperatorRecordId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?          @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument       OfficialInstrument?          @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([transportOperatorRecordId, lifecycleStatus])
+  @@map("transport_permits")
+}
+
+model TransportationStatusHistory {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  transportationRegistryEntryId String?                        @db.Uuid
+  driverProfileId            String?                           @db.Uuid
+  driverLicenseRecordId      String?                           @db.Uuid
+  vehicleRecordId            String?                           @db.Uuid
+  transportOperatorRecordId  String?                           @db.Uuid
+  fleetRecordId              String?                           @db.Uuid
+  fromLifecycleStatus        TransportationRegistryLifecycleStatus?
+  toLifecycleStatus          TransportationRegistryLifecycleStatus
+  statusCode                 String?
+  changedAt                  DateTime                          @default(now())
+  actorIdentityId            String?                           @db.Uuid
+  actorPersona               TransportationActorPersona
+  reason                     String?
+  metadata                   Json                              @default("{}")
+  transportationRegistryEntry TransportationRegistryEntry?     @relation(fields: [transportationRegistryEntryId], references: [id])
+  driverProfile              DriverProfile?                    @relation("TransportationStatusDriverProfile", fields: [driverProfileId], references: [id])
+  driverLicenseRecord        DriverLicenseRecord?              @relation("TransportationStatusDriverLicense", fields: [driverLicenseRecordId], references: [id])
+  vehicleRecord              VehicleRecord?                    @relation("TransportationStatusVehicleRecord", fields: [vehicleRecordId], references: [id])
+  transportOperatorRecord    TransportOperatorRecord?          @relation("TransportationStatusTransportOperator", fields: [transportOperatorRecordId], references: [id])
+  fleetRecord                FleetRecord?                      @relation("TransportationStatusFleetRecord", fields: [fleetRecordId], references: [id])
+  actorIdentity              Identity?                         @relation("TransportationStatusHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([driverProfileId, changedAt])
+  @@index([vehicleRecordId, changedAt])
+  @@index([driverLicenseRecordId, changedAt])
+  @@map("transportation_status_history")
 }
 
 // ─── Corporate Registry / Business Formation ─────────────────────────────────
@@ -17132,4 +17878,351 @@ model LabourExternalDependency {
   @@index([workerProfileReferenceId])
   @@index([externalAuthorityId])
   @@map("labour_external_dependencies")
+}
+
+enum DevelopmentProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum DevelopmentApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum DevelopmentPermitStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+  SUSPENDED
+  EXPIRED
+  AMENDED
+}
+
+enum DevelopmentInspectionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum DevelopmentInspectionOutcome {
+  PASS
+  FAIL
+  CONDITIONAL
+  CANCELLED
+}
+
+enum DevelopmentExternalDependencyStatus {
+  PENDING
+  REFERRED
+  RESOLVED
+  BLOCKED
+}
+
+enum DevelopmentCorrectiveActionStatus {
+  OPEN
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+enum DevelopmentFeeStatus {
+  OUTSTANDING
+  PAID
+  WAIVED
+  CANCELLED
+}
+
+enum DevelopmentOccupancyCertificateStatus {
+  REQUESTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+}
+
+enum DevelopmentPlanningAppealStatus {
+  FILED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum DevelopmentProfessionalRole {
+  ARCHITECT
+  ENGINEER
+  SURVEYOR
+  CONTRACTOR
+  OTHER
+}
+
+enum DevelopmentAccessActorKind {
+  APPLICANT
+  PROFESSIONAL
+  PLANNING_OFFICER
+  INSPECTOR
+  REPRESENTATIVE
+  PAYMENT_SYSTEM
+  AI_ASSISTANCE
+}
+
+model DevelopmentProject {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  jurisdictionId             String                   @db.Uuid
+  projectReference           String                   @unique
+  title                      String
+  status                     DevelopmentProjectStatus @default(ACTIVE)
+  primaryApplicantIdentityId String?                  @db.Uuid
+  organizationId             String?                  @db.Uuid
+  responsibleDepartmentId    String?                  @db.Uuid
+  ruleEnvironment            String                   @default("NON_PRODUCTION")
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  jurisdiction               Jurisdiction             @relation(fields: [jurisdictionId], references: [id])
+  primaryApplicant           Identity?                @relation("DevelopmentProjectPrimaryApplicant", fields: [primaryApplicantIdentityId], references: [id])
+  organization               Organization?            @relation(fields: [organizationId], references: [id])
+  responsibleDepartment      Department?              @relation(fields: [responsibleDepartmentId], references: [id])
+  site                       DevelopmentProjectSite?
+  applications               DevelopmentApplication[]
+  permits                    DevelopmentPermit[]
+  inspections                DevelopmentInspection[]
+  correctiveActions          DevelopmentCorrectiveAction[]
+  externalDependencies       DevelopmentExternalDependency[]
+  professionals              DevelopmentProjectProfessional[]
+  fees                       DevelopmentProjectFee[]
+  occupancyCertificates      DevelopmentOccupancyCertificate[]
+  appeals                    DevelopmentPlanningAppeal[]
+  accessAudits               DevelopmentAccessAudit[]
+
+  @@index([jurisdictionId])
+  @@index([primaryApplicantIdentityId])
+  @@index([organizationId])
+  @@index([responsibleDepartmentId])
+  @@index([status])
+  @@map("development_projects")
+}
+
+model DevelopmentProjectSite {
+  id                   String             @id @default(uuid()) @db.Uuid
+  developmentProjectId String             @unique @db.Uuid
+  siteLabel            String
+  addressLine          String?
+  parcelReference      String?
+  latitude             Float?
+  longitude            Float?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  developmentProject   DevelopmentProject @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@map("development_project_sites")
+}
+
+model DevelopmentApplication {
+  id                   String                       @id @default(uuid()) @db.Uuid
+  developmentProjectId String                       @db.Uuid
+  applicationReference String                       @unique
+  serviceCode          String
+  serviceName          String
+  status               DevelopmentApplicationStatus @default(DRAFT)
+  submittedAt          DateTime?
+  caseId               String?                      @db.Uuid
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+  developmentProject   DevelopmentProject           @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_applications")
+}
+
+model DevelopmentPermit {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  developmentProjectId    String                  @db.Uuid
+  permitNumber            String                  @unique
+  permitType              String
+  status                  DevelopmentPermitStatus @default(DRAFT)
+  currentVersionId        String?                 @unique @db.Uuid
+  issuedByOfficeholderId  String?                 @db.Uuid
+  issuedAt                DateTime?
+  expiresAt               DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  developmentProject      DevelopmentProject      @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  issuedByOfficeholder    Officeholder?           @relation("DevelopmentPermitIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
+  versions                DevelopmentPermitVersion[]
+  currentVersion          DevelopmentPermitVersion? @relation("DevelopmentPermitCurrentVersion", fields: [currentVersionId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_permits")
+}
+
+model DevelopmentPermitVersion {
+  id                  String            @id @default(uuid()) @db.Uuid
+  developmentPermitId String            @db.Uuid
+  versionNumber       Int
+  isAmendment         Boolean           @default(false)
+  amendmentSummary    String?
+  payload             Json              @default("{}")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  developmentPermit   DevelopmentPermit @relation(fields: [developmentPermitId], references: [id], onDelete: Cascade)
+  currentForPermit    DevelopmentPermit? @relation("DevelopmentPermitCurrentVersion")
+
+  @@unique([developmentPermitId, versionNumber])
+  @@index([developmentPermitId])
+  @@map("development_permit_versions")
+}
+
+model DevelopmentInspection {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  developmentProjectId String                      @db.Uuid
+  inspectionReference  String                      @unique
+  inspectionType       String
+  status               DevelopmentInspectionStatus @default(SCHEDULED)
+  outcome              DevelopmentInspectionOutcome?
+  failureNotes         String?
+  outcomeLockedAt      DateTime?
+  scheduledAt          DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  developmentProject   DevelopmentProject          @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  correctiveActions    DevelopmentCorrectiveAction[]
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_inspections")
+}
+
+model DevelopmentCorrectiveAction {
+  id                     String                          @id @default(uuid()) @db.Uuid
+  developmentProjectId   String                          @db.Uuid
+  developmentInspectionId String?                        @db.Uuid
+  actionReference        String                          @unique
+  description            String
+  status                 DevelopmentCorrectiveActionStatus @default(OPEN)
+  submittedAt            DateTime?
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  developmentProject     DevelopmentProject              @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  developmentInspection  DevelopmentInspection?          @relation(fields: [developmentInspectionId], references: [id])
+
+  @@index([developmentProjectId])
+  @@map("development_corrective_actions")
+}
+
+model DevelopmentExternalDependency {
+  id                         String                              @id @default(uuid()) @db.Uuid
+  developmentProjectId       String                              @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String
+  status                     DevelopmentExternalDependencyStatus @default(PENDING)
+  blocksPermitDecision       Boolean                             @default(true)
+  externalAuthorityReference String?
+  resolvedAt                 DateTime?
+  createdAt                  DateTime                            @default(now())
+  updatedAt                  DateTime                            @updatedAt
+  developmentProject         DevelopmentProject                  @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_external_dependencies")
+}
+
+model DevelopmentProjectProfessional {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  developmentProjectId String                    @db.Uuid
+  identityId           String                    @db.Uuid
+  role                 DevelopmentProfessionalRole
+  registrationReference String?
+  effectiveFrom        DateTime                  @default(now())
+  effectiveUntil       DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  developmentProject   DevelopmentProject        @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  identity             Identity                  @relation("DevelopmentProjectProfessionalIdentity", fields: [identityId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([identityId])
+  @@map("development_project_professionals")
+}
+
+model DevelopmentProjectFee {
+  id                   String             @id @default(uuid()) @db.Uuid
+  developmentProjectId String             @db.Uuid
+  feeCode              String
+  label                String
+  amountCents          Int
+  currency             String             @default("XCD")
+  status               DevelopmentFeeStatus @default(OUTSTANDING)
+  paidAt               DateTime?
+  paymentTransactionId String?            @db.Uuid
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  developmentProject   DevelopmentProject @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_project_fees")
+}
+
+model DevelopmentOccupancyCertificate {
+  id                     String                              @id @default(uuid()) @db.Uuid
+  developmentProjectId   String                              @db.Uuid
+  certificateReference   String                              @unique
+  status                 DevelopmentOccupancyCertificateStatus @default(REQUESTED)
+  governmentDecisionId   String?                             @db.Uuid
+  issuedByOfficeholderId String?                             @db.Uuid
+  issuedAt               DateTime?
+  createdAt              DateTime                            @default(now())
+  updatedAt              DateTime                            @updatedAt
+  developmentProject     DevelopmentProject                  @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  governmentDecision     GovernmentDecision?                 @relation(fields: [governmentDecisionId], references: [id])
+  issuedByOfficeholder   Officeholder?                       @relation("DevelopmentOccupancyIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_occupancy_certificates")
+}
+
+model DevelopmentPlanningAppeal {
+  id                   String                          @id @default(uuid()) @db.Uuid
+  developmentProjectId String                          @db.Uuid
+  appealReference      String                          @unique
+  status               DevelopmentPlanningAppealStatus @default(FILED)
+  groundsSummary       String
+  filedAt              DateTime                        @default(now())
+  decidedAt            DateTime?
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  developmentProject   DevelopmentProject              @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+
+  @@index([developmentProjectId])
+  @@index([status])
+  @@map("development_planning_appeals")
+}
+
+model DevelopmentAccessAudit {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  developmentProjectId String                   @db.Uuid
+  accessorIdentityId   String                   @db.Uuid
+  actorKind            DevelopmentAccessActorKind
+  endpoint             String
+  granted              Boolean
+  denialReason         String?
+  recordedAt           DateTime                 @default(now())
+  developmentProject   DevelopmentProject       @relation(fields: [developmentProjectId], references: [id], onDelete: Cascade)
+  accessor             Identity                 @relation("DevelopmentAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([developmentProjectId])
+  @@index([accessorIdentityId])
+  @@map("development_access_audits")
 }
