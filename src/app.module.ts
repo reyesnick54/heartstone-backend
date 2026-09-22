@@ -24,6 +24,7 @@ import { EvidenceRecordsModule } from './evidence-records/evidence-records.modul
 import { ExperienceModule } from './experience/experience.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
+import { HealthcareModule } from './healthcare/healthcare.module';
 import { IdentityModule } from './identity/identity.module';
 import { ImmigrationModule } from './immigration/immigration.module';
 import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
@@ -35,6 +36,7 @@ import { OperationalSupportModule } from './operational-support/operational-supp
 import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { PropertyRegistryModule } from './property-registry/property-registry.module';
+import { PublicSafetyModule } from './public-safety/public-safety.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -63,6 +65,7 @@ import { TransportationModule } from './transportation/transportation.module';
     DatabaseModule,
     RedisModule,
     HealthModule,
+    HealthcareModule,
     SystemModule,
     GovernmentModule,
     IdentityModule,
@@ -95,6 +98,7 @@ import { TransportationModule } from './transportation/transportation.module';
     RevenueModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
+    PublicSafetyModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,
