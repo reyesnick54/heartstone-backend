@@ -40,7 +40,7 @@ describe('Civil registry schema guard', () => {
   }
 
   it('links civil person records optionally to platform Person without merging domains', () => {
-    expect(schema).toContain('personId              String?');
+    expect(schema).toMatch(/personId\s+String\?\s+@db\.Uuid/);
     expect(schema).toContain('civilPersonRecords CivilPersonRecord[]');
   });
 

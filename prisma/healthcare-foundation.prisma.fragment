@@ -1,0 +1,876 @@
+// Healthcare & Regulated Science foundation — append to schema.prisma
+
+enum HealthcareConsentType {
+  TREATMENT
+  RESEARCH
+  DATA_SHARING
+  GUARDIAN
+  ADMINISTRATIVE
+}
+
+enum HealthcareConsentRecordStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum HealthcareAccessBasisKind {
+  PATIENT_CONSENT
+  LEGAL_AUTHORITY
+  ADMINISTRATIVE
+  TREATMENT_RELATIONSHIP
+  EMERGENCY
+  RESEARCH_APPROVAL
+  PUBLIC_HEALTH
+}
+
+enum HealthcareDataClassification {
+  GENERAL
+  SENSITIVE
+  MENTAL_HEALTH
+  GENETIC
+  REPRODUCTIVE
+  SUBSTANCE_USE
+  HIV
+  SEALED
+}
+
+enum HealthcareActorPersona {
+  PATIENT
+  CLINICIAN
+  RESEARCHER
+  REGULATOR
+  INTEGRATION_SYSTEM
+  AI_ASSISTANCE
+  PLATFORM_ADMIN
+  EXTERNAL_PROVIDER
+}
+
+enum HealthDataRecordStatus {
+  REGISTERED
+  VERIFIED
+  DISPUTED
+  SUPERSEDED
+  UNDER_LEGAL_HOLD
+}
+
+enum ResearchDatasetStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  EXPIRED
+  REVOKED
+  ARCHIVED
+}
+
+enum ResearchDataAccessGrantStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ResearchPseudonymizationState {
+  IDENTIFIED
+  PSEUDONYMIZED
+  DE_IDENTIFIED
+  NOT_CLAIMED_ANONYMOUS
+}
+
+enum AdverseEventReportStatus {
+  REPORTED
+  UNDER_REVIEW
+  VERIFIED_OCCURRENCE
+  CLOSED
+}
+
+enum AdverseEventCausalityStatus {
+  NOT_ASSESSED
+  UNRELATED
+  POSSIBLE
+  PROBABLE
+  CONFIRMED
+}
+
+enum ClinicalSafetyRecordStatus {
+  OPEN
+  UNDER_REVIEW
+  ESCALATED
+  CLOSED
+  SUPERSEDED
+}
+
+enum HealthcareRegulatedEntityKind {
+  FACILITY
+  PROFESSIONAL
+  CLINICAL_TRIAL_SITE
+  LABORATORY
+  RESEARCH_PROGRAM
+  TREATMENT_PROGRAM
+}
+
+enum HealthcareIntegrationStandardKind {
+  HL7_FHIR
+  LABORATORY
+  HOSPITAL_EHR
+  PHARMACY
+  IMAGING
+  RESEARCH
+  PAYER
+  GOVERNMENT_REGISTRY
+  OTHER
+}
+
+enum HealthcareIntegrationExchangeStatus {
+  INITIATED
+  SUCCEEDED
+  FAILED
+  RECONCILING
+  DISCREPANCY_OPEN
+}
+
+model HealthcarePatientReference {
+  id                 String   @id @default(uuid()) @db.Uuid
+  patientReference   String   @unique
+  patientIdentityId  String   @db.Uuid
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  patientIdentity    Identity @relation("HealthcarePatientSubject", fields: [patientIdentityId], references: [id])
+
+  consents              HealthcareConsent[]
+  consentGrants         HealthcareConsentGrant[]
+  dataRecordReferences  HealthDataRecordReference[]
+  researchConsents      HealthcareResearchConsent[]
+  adverseEventReports   AdverseEventReport[]
+  guardianConsentWards  HealthcareGuardianConsentReference[] @relation("HealthcareGuardianWard")
+
+  @@index([patientIdentityId])
+  @@map("healthcare_patient_references")
+}
+
+model HealthcareConsentPurposeDefinition {
+  id           String   @id @default(uuid()) @db.Uuid
+  purposeCode  String   @unique
+  displayName  String
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consentVersions HealthcareConsentVersion[]
+  consentGrants   HealthcareConsentGrant[]
+  sharingAuths    HealthcareDataSharingAuthorization[]
+
+  @@map("healthcare_consent_purpose_definitions")
+}
+
+model HealthcareConsentVersion {
+  id              String   @id @default(uuid()) @db.Uuid
+  versionCode     String   @unique
+  purposeId       String   @db.Uuid
+  legalTextRef    String?
+  effectiveFrom   DateTime
+  effectiveUntil  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  purpose         HealthcareConsentPurposeDefinition @relation(fields: [purposeId], references: [id])
+
+  consents HealthcareConsent[]
+
+  @@index([purposeId])
+  @@map("healthcare_consent_versions")
+}
+
+model HealthcareConsent {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  consentReference           String                        @unique
+  patientReferenceId         String                        @db.Uuid
+  consentType                HealthcareConsentType
+  consentVersionId           String                        @db.Uuid
+  status                     HealthcareConsentRecordStatus @default(DRAFT)
+  effectiveFrom              DateTime?
+  expiresAt                  DateTime?
+  signatureReference         String?
+  acknowledgmentReference    String?
+  provenanceSummary          Json                          @default("{}")
+  accessBasisKind            HealthcareAccessBasisKind     @default(PATIENT_CONSENT)
+  representsPatientConsent   Boolean                       @default(true)
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
+  patientReference           HealthcarePatientReference    @relation(fields: [patientReferenceId], references: [id])
+  consentVersion             HealthcareConsentVersion      @relation(fields: [consentVersionId], references: [id])
+
+  scopes      HealthcareConsentScope[]
+  grants      HealthcareConsentGrant[]
+  withdrawals HealthcareConsentWithdrawal[]
+  sharingAuthorizations HealthcareDataSharingAuthorization[]
+
+  @@index([patientReferenceId])
+  @@index([status])
+  @@map("healthcare_consents")
+}
+
+model HealthcareConsentScope {
+  id              String   @id @default(uuid()) @db.Uuid
+  consentId       String   @db.Uuid
+  dataCategories  Json     @default("[]")
+  recipientCodes  Json     @default("[]")
+  createdAt       DateTime @default(now())
+  consent         HealthcareConsent @relation(fields: [consentId], references: [id], onDelete: Cascade)
+
+  @@index([consentId])
+  @@map("healthcare_consent_scopes")
+}
+
+model HealthcareConsentGrant {
+  id                 String                        @id @default(uuid()) @db.Uuid
+  grantReference     String                        @unique
+  consentId          String                        @db.Uuid
+  patientReferenceId String                        @db.Uuid
+  purposeId          String                        @db.Uuid
+  grantedAt          DateTime                      @default(now())
+  expiresAt          DateTime?
+  revokedAt          DateTime?
+  isActive           Boolean                       @default(true)
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  consent            HealthcareConsent             @relation(fields: [consentId], references: [id])
+  patientReference   HealthcarePatientReference    @relation(fields: [patientReferenceId], references: [id])
+  purpose            HealthcareConsentPurposeDefinition @relation(fields: [purposeId], references: [id])
+  withdrawal         HealthcareConsentWithdrawal?
+
+  @@index([consentId])
+  @@index([patientReferenceId])
+  @@index([purposeId])
+  @@map("healthcare_consent_grants")
+}
+
+model HealthcareConsentWithdrawal {
+  id              String   @id @default(uuid()) @db.Uuid
+  consentGrantId  String   @unique @db.Uuid
+  withdrawnAt     DateTime @default(now())
+  reasonSummary   String?
+  preservesHistory Boolean @default(true)
+  actorIdentityId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  consentGrant    HealthcareConsentGrant @relation(fields: [consentGrantId], references: [id])
+  actorIdentity   Identity? @relation("HealthcareConsentWithdrawalActor", fields: [actorIdentityId], references: [id])
+
+  @@map("healthcare_consent_withdrawals")
+}
+
+model HealthcareDataSharingAuthorization {
+  id                 String   @id @default(uuid()) @db.Uuid
+  authorizationRef   String   @unique
+  consentId          String?  @db.Uuid
+  purposeId          String   @db.Uuid
+  recipientOrgId     String?  @db.Uuid
+  recipientCode      String?
+  effectiveFrom      DateTime
+  expiresAt          DateTime?
+  accessBasisKind    HealthcareAccessBasisKind @default(PATIENT_CONSENT)
+  createdAt          DateTime @default(now())
+  consent            HealthcareConsent? @relation(fields: [consentId], references: [id])
+  purpose            HealthcareConsentPurposeDefinition @relation(fields: [purposeId], references: [id])
+  recipientOrg       Organization? @relation("HealthcareSharingRecipientOrg", fields: [recipientOrgId], references: [id])
+
+  @@index([purposeId])
+  @@index([consentId])
+  @@map("healthcare_data_sharing_authorizations")
+}
+
+model HealthcareResearchConsent {
+  id                 String   @id @default(uuid()) @db.Uuid
+  researchConsentRef String   @unique
+  patientReferenceId String   @db.Uuid
+  protocolReference  String
+  ethicsApprovalRef  String?
+  consentId          String?  @db.Uuid
+  effectiveFrom      DateTime
+  expiresAt          DateTime?
+  createdAt          DateTime @default(now())
+  patientReference   HealthcarePatientReference @relation(fields: [patientReferenceId], references: [id])
+
+  @@index([patientReferenceId])
+  @@map("healthcare_research_consents")
+}
+
+model HealthcareGuardianConsentReference {
+  id                    String   @id @default(uuid()) @db.Uuid
+  guardianConsentRef    String   @unique
+  wardPatientReferenceId String  @db.Uuid
+  guardianIdentityId    String   @db.Uuid
+  consentId             String?  @db.Uuid
+  legalBasisReference   String?
+  createdAt             DateTime @default(now())
+  wardPatientReference  HealthcarePatientReference @relation("HealthcareGuardianWard", fields: [wardPatientReferenceId], references: [id])
+  guardianIdentity      Identity @relation("HealthcareGuardianIdentity", fields: [guardianIdentityId], references: [id])
+
+  @@index([guardianIdentityId])
+  @@index([wardPatientReferenceId])
+  @@map("healthcare_guardian_consent_references")
+}
+
+model HealthDataSource {
+  id           String   @id @default(uuid()) @db.Uuid
+  sourceCode   String   @unique
+  displayName  String
+  sourceKind   String
+  createdAt    DateTime @default(now())
+  records      HealthDataRecordReference[]
+
+  @@map("health_data_sources")
+}
+
+model HealthDataCustodian {
+  id              String   @id @default(uuid()) @db.Uuid
+  custodianCode   String   @unique
+  organizationId  String?  @db.Uuid
+  institutionId   String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  organization    Organization? @relation("HealthDataCustodianOrganization", fields: [organizationId], references: [id])
+  records         HealthDataRecordReference[]
+
+  @@map("health_data_custodians")
+}
+
+model HealthDataRecordReference {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  recordReference         String                     @unique
+  patientReferenceId      String                     @db.Uuid
+  dataCategoryCode        String
+  sourceId                String                     @db.Uuid
+  custodianId             String?                    @db.Uuid
+  originatingProviderCode String?
+  externalRecordReference String?
+  storageLocationRef      String?
+  classification          HealthcareDataClassification @default(GENERAL)
+  status                  HealthDataRecordStatus     @default(REGISTERED)
+  consentPurposeCode      String?
+  retentionMetadata       Json                       @default("{}")
+  legalHold               Boolean                    @default(false)
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  patientReference        HealthcarePatientReference @relation(fields: [patientReferenceId], references: [id])
+  source                  HealthDataSource           @relation(fields: [sourceId], references: [id])
+  custodian               HealthDataCustodian?       @relation(fields: [custodianId], references: [id])
+
+  provenanceRecords   HealthDataProvenance[]
+  versionReferences   HealthDataVersionReference[]
+  accessRecords       HealthDataAccessRecord[]
+  disclosureRecords   HealthDataDisclosureRecord[]
+  correctionRequests  HealthDataCorrectionRequest[]
+  datasetMemberships  ResearchDatasetRecordLink[]
+
+  @@index([patientReferenceId])
+  @@index([classification])
+  @@map("health_data_record_references")
+}
+
+model HealthDataProvenance {
+  id                String   @id @default(uuid()) @db.Uuid
+  recordReferenceId String   @db.Uuid
+  provenanceKind    String
+  sourceSummary     Json     @default("{}")
+  verifiedAt        DateTime?
+  createdAt         DateTime @default(now())
+  recordReference   HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([recordReferenceId])
+  @@map("health_data_provenance")
+}
+
+model HealthDataVersionReference {
+  id                String   @id @default(uuid()) @db.Uuid
+  recordReferenceId String   @db.Uuid
+  versionToken      String
+  externalVersionRef String?
+  effectiveAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  recordReference   HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([recordReferenceId])
+  @@map("health_data_version_references")
+}
+
+model HealthDataAccessRecord {
+  id                 String   @id @default(uuid()) @db.Uuid
+  recordReferenceId  String   @db.Uuid
+  accessorIdentityId String?  @db.Uuid
+  actorPersona       HealthcareActorPersona
+  purposeCode        String
+  accessBasisKind    HealthcareAccessBasisKind
+  granted            Boolean
+  reasonCode         String?
+  recordedAt         DateTime @default(now())
+  recordReference    HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id], onDelete: Cascade)
+  accessorIdentity   Identity? @relation("HealthDataAccessRecordAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([recordReferenceId])
+  @@index([accessorIdentityId])
+  @@map("health_data_access_records")
+}
+
+model HealthDataDisclosureRecord {
+  id                 String   @id @default(uuid()) @db.Uuid
+  recordReferenceId  String   @db.Uuid
+  recipientCode      String
+  purposeCode        String
+  disclosedAt        DateTime @default(now())
+  actorIdentityId    String?  @db.Uuid
+  recordReference    HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id], onDelete: Cascade)
+  actorIdentity      Identity? @relation("HealthDataDisclosureActor", fields: [actorIdentityId], references: [id])
+
+  @@index([recordReferenceId])
+  @@map("health_data_disclosure_records")
+}
+
+model HealthDataCorrectionRequest {
+  id                String   @id @default(uuid()) @db.Uuid
+  recordReferenceId String   @db.Uuid
+  requestReference  String   @unique
+  status            String   @default("SUBMITTED")
+  requestSummary    String?
+  submittedAt       DateTime @default(now())
+  recordReference   HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id], onDelete: Cascade)
+
+  @@index([recordReferenceId])
+  @@map("health_data_correction_requests")
+}
+
+model ResearchDataPurpose {
+  id          String   @id @default(uuid()) @db.Uuid
+  purposeCode String   @unique
+  displayName String
+  createdAt   DateTime @default(now())
+  datasets    ResearchDataset[]
+
+  @@map("research_data_purposes")
+}
+
+model ResearchDataset {
+  id                    String                @id @default(uuid()) @db.Uuid
+  datasetReference      String                @unique
+  purposeId             String                @db.Uuid
+  status                ResearchDatasetStatus @default(DRAFT)
+  ethicsApprovalRef     String?
+  protocolReference     String?
+  pseudonymizationState ResearchPseudonymizationState @default(PSEUDONYMIZED)
+  claimsAnonymous       Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  purpose               ResearchDataPurpose   @relation(fields: [purposeId], references: [id])
+
+  versions      ResearchDatasetVersion[]
+  useRequests   ResearchDataUseRequest[]
+  accessGrants  ResearchDataAccessGrant[]
+  disclosures   ResearchDataDisclosure[]
+  pseudonymizationRecords ResearchDataPseudonymizationRecord[]
+
+  @@index([purposeId])
+  @@map("research_datasets")
+}
+
+model ResearchDatasetVersion {
+  id               String   @id @default(uuid()) @db.Uuid
+  datasetId        String   @db.Uuid
+  versionNumber    Int
+  minimumNecessarySummary String?
+  createdAt        DateTime @default(now())
+  dataset          ResearchDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  recordLinks      ResearchDatasetRecordLink[]
+
+  @@unique([datasetId, versionNumber])
+  @@map("research_dataset_versions")
+}
+
+model ResearchDatasetRecordLink {
+  id                String   @id @default(uuid()) @db.Uuid
+  datasetVersionId  String   @db.Uuid
+  recordReferenceId String   @db.Uuid
+  createdAt         DateTime @default(now())
+  datasetVersion    ResearchDatasetVersion @relation(fields: [datasetVersionId], references: [id], onDelete: Cascade)
+  recordReference   HealthDataRecordReference @relation(fields: [recordReferenceId], references: [id])
+
+  @@unique([datasetVersionId, recordReferenceId])
+  @@map("research_dataset_record_links")
+}
+
+model ResearchDataUseRequest {
+  id                 String   @id @default(uuid()) @db.Uuid
+  requestReference   String   @unique
+  datasetId          String   @db.Uuid
+  requesterIdentityId String  @db.Uuid
+  purposeSummary     String
+  status             String   @default("SUBMITTED")
+  submittedAt        DateTime @default(now())
+  dataset            ResearchDataset @relation(fields: [datasetId], references: [id])
+  requesterIdentity  Identity @relation("ResearchDataUseRequester", fields: [requesterIdentityId], references: [id])
+  approvals          ResearchDataUseApproval[]
+
+  @@index([datasetId])
+  @@map("research_data_use_requests")
+}
+
+model ResearchDataUseApproval {
+  id               String   @id @default(uuid()) @db.Uuid
+  useRequestId     String   @db.Uuid
+  approvalReference String  @unique
+  approvedAt       DateTime @default(now())
+  expiresAt        DateTime
+  approverIdentityId String? @db.Uuid
+  useRequest       ResearchDataUseRequest @relation(fields: [useRequestId], references: [id], onDelete: Cascade)
+  accessGrants     ResearchDataAccessGrant[]
+
+  @@index([useRequestId])
+  @@map("research_data_use_approvals")
+}
+
+model ResearchDataAccessGrant {
+  id                 String                        @id @default(uuid()) @db.Uuid
+  grantReference     String                        @unique
+  datasetId          String                        @db.Uuid
+  approvalId         String                        @db.Uuid
+  researcherIdentityId String                      @db.Uuid
+  status             ResearchDataAccessGrantStatus @default(PENDING)
+  grantedAt          DateTime?
+  expiresAt          DateTime
+  revokedAt          DateTime?
+  createdAt          DateTime                      @default(now())
+  dataset            ResearchDataset               @relation(fields: [datasetId], references: [id])
+  approval           ResearchDataUseApproval         @relation(fields: [approvalId], references: [id])
+  researcherIdentity Identity                      @relation("ResearchDataAccessGrantResearcher", fields: [researcherIdentityId], references: [id])
+
+  @@index([datasetId])
+  @@index([researcherIdentityId])
+  @@map("research_data_access_grants")
+}
+
+model ResearchDataDisclosure {
+  id              String   @id @default(uuid()) @db.Uuid
+  datasetId       String   @db.Uuid
+  disclosureRef   String   @unique
+  recipientCode   String
+  disclosedAt     DateTime @default(now())
+  dataset         ResearchDataset @relation(fields: [datasetId], references: [id])
+
+  @@index([datasetId])
+  @@map("research_data_disclosures")
+}
+
+model ResearchDataPseudonymizationRecord {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  datasetId             String                        @db.Uuid
+  state                 ResearchPseudonymizationState
+  provenanceSummary     Json                          @default("{}")
+  directIdentifiersRemoved Boolean                    @default(false)
+  recordedAt            DateTime                      @default(now())
+  dataset               ResearchDataset               @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId])
+  @@map("research_data_pseudonymization_records")
+}
+
+model AdverseEventReport {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  reportReference         String                   @unique
+  patientReferenceId      String?                  @db.Uuid
+  reportedAt              DateTime                 @default(now())
+  status                  AdverseEventReportStatus @default(REPORTED)
+  severityCode            String?
+  seriousnessCode         String?
+  expectednessCode        String?
+  narrativeSummary        String?
+  causalityEstablished    Boolean                  @default(false)
+  causalityAssessmentStatus AdverseEventCausalityStatus @default(NOT_ASSESSED)
+  aiAssistedTriageOnly    Boolean                  @default(true)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  patientReference        HealthcarePatientReference? @relation(fields: [patientReferenceId], references: [id])
+
+  adverseEvent     AdverseEvent?
+  seriousExtension SeriousAdverseEvent?
+  assessments      AdverseEventAssessment[]
+  regulatoryReports AdverseEventReportSubmission[]
+
+  @@index([patientReferenceId])
+  @@map("adverse_event_reports")
+}
+
+model AdverseEvent {
+  id                String   @id @default(uuid()) @db.Uuid
+  adverseEventRef   String   @unique
+  reportId          String   @unique @db.Uuid
+  verifiedOccurrence Boolean @default(false)
+  createdAt         DateTime @default(now())
+  report            AdverseEventReport @relation(fields: [reportId], references: [id])
+
+  @@map("adverse_events")
+}
+
+model SeriousAdverseEvent {
+  id              String   @id @default(uuid()) @db.Uuid
+  reportId        String   @unique @db.Uuid
+  isSerious       Boolean  @default(true)
+  seriousnessCriteria Json @default("[]")
+  createdAt       DateTime @default(now())
+  report          AdverseEventReport @relation(fields: [reportId], references: [id])
+
+  @@map("serious_adverse_events")
+}
+
+model AdverseEventAssessment {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  reportId              String                      @db.Uuid
+  assessorIdentityId    String?                     @db.Uuid
+  causalityStatus       AdverseEventCausalityStatus
+  assessmentSummary     String?
+  assessedAt            DateTime                    @default(now())
+  assessorIsAi          Boolean                     @default(false)
+  report                AdverseEventReport          @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  assessorIdentity      Identity?                   @relation("AdverseEventAssessor", fields: [assessorIdentityId], references: [id])
+
+  @@index([reportId])
+  @@map("adverse_event_assessments")
+}
+
+model AdverseEventReportSubmission {
+  id                 String   @id @default(uuid()) @db.Uuid
+  reportId           String   @db.Uuid
+  authorityCode      String
+  submissionStatus   String   @default("PENDING")
+  submittedAt        DateTime?
+  report             AdverseEventReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@map("adverse_event_report_submissions")
+}
+
+model ProtocolDeviation {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  deviationReference String                   @unique
+  protocolReference  String
+  status             ClinicalSafetyRecordStatus @default(OPEN)
+  summary            String?
+  reportedAt         DateTime                 @default(now())
+  violationRefs      ProtocolViolationReference[]
+
+  @@map("protocol_deviations")
+}
+
+model ProtocolViolationReference {
+  id            String   @id @default(uuid()) @db.Uuid
+  deviationId   String   @db.Uuid
+  violationCode String
+  createdAt     DateTime @default(now())
+  deviation     ProtocolDeviation @relation(fields: [deviationId], references: [id], onDelete: Cascade)
+
+  @@index([deviationId])
+  @@map("protocol_violation_references")
+}
+
+model SafetySignal {
+  id              String                   @id @default(uuid()) @db.Uuid
+  signalReference String                   @unique
+  status          ClinicalSafetyRecordStatus @default(OPEN)
+  signalSummary   String?
+  detectedAt      DateTime                 @default(now())
+  reviews         SafetyReview[]
+
+  @@map("safety_signals")
+}
+
+model SafetyReview {
+  id               String   @id @default(uuid()) @db.Uuid
+  safetySignalId   String?  @db.Uuid
+  reviewReference  String   @unique
+  reviewerIdentityId String? @db.Uuid
+  reviewSummary    String?
+  reviewedAt       DateTime @default(now())
+  safetySignal     SafetySignal? @relation(fields: [safetySignalId], references: [id])
+  reviewerIdentity Identity? @relation("SafetyReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  escalations      SafetyEscalation[]
+
+  @@map("safety_reviews")
+}
+
+model SafetyEscalation {
+  id              String   @id @default(uuid()) @db.Uuid
+  safetyReviewId  String   @db.Uuid
+  escalationRef   String   @unique
+  escalatedAt     DateTime @default(now())
+  safetyReview    SafetyReview @relation(fields: [safetyReviewId], references: [id], onDelete: Cascade)
+  correctiveActions ClinicalCorrectiveAction[]
+  preventiveActions ClinicalPreventiveAction[]
+
+  @@index([safetyReviewId])
+  @@map("safety_escalations")
+}
+
+model ClinicalCorrectiveAction {
+  id               String   @id @default(uuid()) @db.Uuid
+  escalationId     String   @db.Uuid
+  actionReference    String   @unique
+  status             ClinicalSafetyRecordStatus @default(OPEN)
+  actionSummary      String?
+  createdAt          DateTime @default(now())
+  escalation         SafetyEscalation @relation(fields: [escalationId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_corrective_actions")
+}
+
+model ClinicalPreventiveAction {
+  id               String   @id @default(uuid()) @db.Uuid
+  escalationId     String   @db.Uuid
+  actionReference  String   @unique
+  status           ClinicalSafetyRecordStatus @default(OPEN)
+  actionSummary    String?
+  createdAt        DateTime @default(now())
+  escalation       SafetyEscalation @relation(fields: [escalationId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_preventive_actions")
+}
+
+model HealthcareRegulatedEntityReference {
+  id              String                        @id @default(uuid()) @db.Uuid
+  entityReference String                        @unique
+  entityKind      HealthcareRegulatedEntityKind
+  organizationId  String?                       @db.Uuid
+  identityId      String?                       @db.Uuid
+  externalRef     String?
+  createdAt       DateTime                      @default(now())
+  organization    Organization?                 @relation("HealthcareRegulatedEntityOrganization", fields: [organizationId], references: [id])
+  identity        Identity?                     @relation("HealthcareRegulatedEntityIdentity", fields: [identityId], references: [id])
+
+  inspectionLinks HealthcareInspectionReference[]
+  complianceLinks HealthcareComplianceMatterReference[]
+  licenseIssues   HealthcareLicenseIssueReference[]
+  submissions     HealthcareRegulatorySubmissionReference[]
+
+  @@map("healthcare_regulated_entity_references")
+}
+
+model HealthcareInspectionReference {
+  id                 String   @id @default(uuid()) @db.Uuid
+  regulatedEntityId  String   @db.Uuid
+  inspectionRecordId String   @unique @db.Uuid
+  createdAt          DateTime @default(now())
+  regulatedEntity    HealthcareRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id])
+  inspectionRecord   InspectionRecord @relation(fields: [inspectionRecordId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("healthcare_inspection_references")
+}
+
+model HealthcareComplianceMatterReference {
+  id                String   @id @default(uuid()) @db.Uuid
+  regulatedEntityId String   @db.Uuid
+  complianceMatterId String  @db.Uuid
+  linkageRole       String   @default("SUBJECT")
+  createdAt         DateTime @default(now())
+  regulatedEntity   HealthcareRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id])
+  complianceMatter  ComplianceMatter @relation(fields: [complianceMatterId], references: [id])
+
+  @@index([complianceMatterId])
+  @@map("healthcare_compliance_matter_references")
+}
+
+model HealthcareLicenseIssueReference {
+  id                String   @id @default(uuid()) @db.Uuid
+  regulatedEntityId String   @db.Uuid
+  licenseReference  String   @unique
+  issueSummary      String?
+  issuedAt          DateTime @default(now())
+  regulatedEntity   HealthcareRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("healthcare_license_issue_references")
+}
+
+model HealthcareRegulatorySubmissionReference {
+  id                 String   @id @default(uuid()) @db.Uuid
+  regulatedEntityId  String   @db.Uuid
+  submissionReference String  @unique
+  authorityCode      String
+  status             String   @default("SUBMITTED")
+  submittedAt        DateTime @default(now())
+  regulatedEntity    HealthcareRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("healthcare_regulatory_submission_references")
+}
+
+model HealthcareIntegrationAdapterDeclaration {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  adapterCode           String                          @unique
+  integrationVersionId  String                          @db.Uuid
+  standardKind          HealthcareIntegrationStandardKind
+  declaredCapability    Json                            @default("{}")
+  declaredVersion       String
+  mappingLayerRef       String?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  integrationVersion    IntegrationVersion              @relation(fields: [integrationVersionId], references: [id])
+
+  identifierMappings HealthcareExternalIdentifierMapping[]
+  exchangeRecords    HealthcareIntegrationExchangeRecord[]
+
+  @@index([integrationVersionId])
+  @@map("healthcare_integration_adapter_declarations")
+}
+
+model HealthcareExternalIdentifierMapping {
+  id              String   @id @default(uuid()) @db.Uuid
+  adapterId       String   @db.Uuid
+  localEntityKind String
+  localEntityId   String   @db.Uuid
+  externalSystem  String
+  externalId      String
+  createdAt       DateTime @default(now())
+  adapter         HealthcareIntegrationAdapterDeclaration @relation(fields: [adapterId], references: [id], onDelete: Cascade)
+
+  @@unique([adapterId, localEntityKind, localEntityId])
+  @@index([externalSystem, externalId])
+  @@map("healthcare_external_identifier_mappings")
+}
+
+model HealthcareIntegrationExchangeRecord {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  adapterId             String                            @db.Uuid
+  exchangeReference     String                            @unique
+  direction             String
+  status                HealthcareIntegrationExchangeStatus @default(INITIATED)
+  inboundProvenance     Json                              @default("{}")
+  outboundPurposeCode   String?
+  consentPurposeCode    String?
+  failureSummary        String?
+  succeeded             Boolean                           @default(false)
+  sourceDiscrepancyId   String?                           @db.Uuid
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  adapter               HealthcareIntegrationAdapterDeclaration @relation(fields: [adapterId], references: [id])
+  sourceDiscrepancy     SourceDiscrepancy?                @relation(fields: [sourceDiscrepancyId], references: [id])
+
+  @@index([adapterId])
+  @@map("healthcare_integration_exchange_records")
+}
+
+model HealthcareDataAccessAudit {
+  id                 String                     @id @default(uuid()) @db.Uuid
+  accessorIdentityId String?                    @db.Uuid
+  patientReferenceId String?                    @db.Uuid
+  actorPersona       HealthcareActorPersona
+  endpoint           String
+  purposeCode        String
+  classification     HealthcareDataClassification?
+  granted            Boolean
+  reasonCode         String?
+  recordedAt         DateTime                   @default(now())
+  accessorIdentity   Identity?                  @relation("HealthcareDataAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([patientReferenceId])
+  @@map("healthcare_data_access_audits")
+}
