@@ -47,6 +47,8 @@ export class ResourceOwnershipResolver {
         return this.resolveOfficialInstrument(resourceId);
       case ScopedResourceType.COMPLIANCE_MATTER:
         return this.resolveComplianceMatter(resourceId);
+      case ScopedResourceType.CORPORATE_REGISTRY_PROFILE:
+        return this.resolveCorporateRegistryProfile(resourceId);
       case ScopedResourceType.REDRESS_MATTER:
         return this.resolveRedressMatter(resourceId);
       case ScopedResourceType.DASHBOARD:
@@ -409,6 +411,27 @@ export class ResourceOwnershipResolver {
     }
 
     return { found: true, ownership };
+  }
+
+  private async resolveCorporateRegistryProfile(resourceId: string): Promise<OwnershipResolution> {
+    const profile = await this.prisma.corporateRegistryProfile.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        organizationId: true,
+      },
+    });
+
+    if (!profile) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    return {
+      found: true,
+      ownership: {
+        organizationId: profile.organizationId,
+      },
+    };
   }
 
   private async resolveRedressMatter(resourceId: string): Promise<OwnershipResolution> {

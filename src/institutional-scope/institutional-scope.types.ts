@@ -16,6 +16,7 @@ export enum ScopedResourceType {
   EVIDENCE_RECORD = 'evidence_record',
   OFFICIAL_INSTRUMENT = 'official_instrument',
   COMPLIANCE_MATTER = 'compliance_matter',
+  CORPORATE_REGISTRY_PROFILE = 'corporate_registry_profile',
   REDRESS_MATTER = 'redress_matter',
   DASHBOARD = 'dashboard',
   STRATEGIC_PROJECT = 'strategic_project',
