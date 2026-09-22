@@ -22,3 +22,54 @@ export async function resetHealthcareTreatmentData(prisma: PrismaService): Promi
   await prisma.treatmentProgram.deleteMany();
   await prisma.patientHealthcareProfile.deleteMany();
 }
+
+export async function resetHealthcareFoundationData(prisma: PrismaService): Promise<void> {
+  await prisma.healthcareIntegrationExchangeRecord.deleteMany();
+  await prisma.healthcareExternalIdentifierMapping.deleteMany();
+  await prisma.healthcareIntegrationAdapterDeclaration.deleteMany();
+  await prisma.healthcareRegulatorySubmissionReference.deleteMany();
+  await prisma.healthcareLicenseIssueReference.deleteMany();
+  await prisma.healthcareComplianceMatterReference.deleteMany();
+  await prisma.healthcareInspectionReference.deleteMany();
+  await prisma.healthcareRegulatedEntityReference.deleteMany();
+  await prisma.clinicalPreventiveAction.deleteMany();
+  await prisma.clinicalCorrectiveAction.deleteMany();
+  await prisma.safetyEscalation.deleteMany();
+  await prisma.safetyReview.deleteMany();
+  await prisma.safetySignal.deleteMany();
+  await prisma.protocolViolationReference.deleteMany();
+  await prisma.protocolDeviation.deleteMany();
+  await prisma.adverseEventReportSubmission.deleteMany();
+  await prisma.adverseEventAssessment.deleteMany();
+  await prisma.seriousAdverseEvent.deleteMany();
+  await prisma.adverseEvent.deleteMany();
+  await prisma.adverseEventReport.deleteMany();
+  await prisma.researchDataPseudonymizationRecord.deleteMany();
+  await prisma.researchDataDisclosure.deleteMany();
+  await prisma.researchDataAccessGrant.deleteMany();
+  await prisma.researchDataUseApproval.deleteMany();
+  await prisma.researchDataUseRequest.deleteMany();
+  await prisma.researchDatasetRecordLink.deleteMany();
+  await prisma.researchDatasetVersion.deleteMany();
+  await prisma.researchDataset.deleteMany();
+  await prisma.researchDataPurpose.deleteMany();
+  await prisma.healthDataCorrectionRequest.deleteMany();
+  await prisma.healthDataDisclosureRecord.deleteMany();
+  await prisma.healthDataAccessRecord.deleteMany();
+  await prisma.healthDataVersionReference.deleteMany();
+  await prisma.healthDataProvenance.deleteMany();
+  await prisma.healthDataRecordReference.deleteMany();
+  await prisma.healthDataCustodian.deleteMany();
+  await prisma.healthDataSource.deleteMany();
+  await prisma.healthcareGuardianConsentReference.deleteMany();
+  await prisma.healthcareResearchConsent.deleteMany();
+  await prisma.healthcareDataSharingAuthorization.deleteMany();
+  await prisma.healthcareConsentWithdrawal.deleteMany();
+  await prisma.healthcareConsentGrant.deleteMany();
+  await prisma.healthcareConsentScope.deleteMany();
+  await prisma.healthcareConsent.deleteMany();
+  await prisma.healthcareConsentVersion.deleteMany();
+  await prisma.healthcareConsentPurposeDefinition.deleteMany();
+  await prisma.healthcareDataAccessAudit.deleteMany();
+  await prisma.healthcarePatientReference.deleteMany();
+}

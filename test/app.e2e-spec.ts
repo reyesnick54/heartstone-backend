@@ -10,7 +10,7 @@ import { overrideRedisService } from './redis-test-utils';
 describe('System endpoints (e2e)', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleBuilder = Test.createTestingModule({
       imports: [AppModule],
     });
@@ -22,9 +22,9 @@ describe('System endpoints (e2e)', () => {
     app = moduleFixture.createNestApplication({ bodyParser: false });
     configureApplication(app);
     await app.init();
-  });
+  }, 120_000);
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 

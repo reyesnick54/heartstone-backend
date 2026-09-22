@@ -34,8 +34,8 @@ describe('Phase 13D production readiness schema', () => {
 
   it('defaults backup recoverability to UNVERIFIED', () => {
     const block = /model BackupDefinition \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
-    expect(block).toContain(
-      'recoverabilityStatus          BackupRecoverabilityStatus @default(UNVERIFIED)',
+    expect(block).toMatch(
+      /recoverabilityStatus\s+BackupRecoverabilityStatus\s+@default\(UNVERIFIED\)/,
     );
   });
 
@@ -47,8 +47,8 @@ describe('Phase 13D production readiness schema', () => {
 
   it('preserves manual original in reconciliation records', () => {
     const block = /model ManualDigitalReconciliation \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
-    expect(block).toContain('manualOriginalPreserved         Boolean');
-    expect(block).toContain('manualRecordReference           String');
+    expect(block).toMatch(/manualOriginalPreserved\s+Boolean/);
+    expect(block).toMatch(/manualRecordReference\s+String/);
   });
 
   it('supports TBD configuration confirmation status', () => {
