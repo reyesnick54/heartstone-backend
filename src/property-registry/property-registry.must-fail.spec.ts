@@ -1,273 +1,491 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
-  PropertyAccessActorKind,
-  PropertyEncumbranceKind,
-  PropertyPublicVerificationMode,
-  PropertyTransferDecisionOutcome,
+  AuthorityEvaluationOutcome,
+  PropertyRegistryAccessClassification,
+  PropertyRegistryCorrectionStatus,
+  PropertyTransferApplicationStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
-import { PropertyCertificateService } from './certificates/property-certificate.service';
-import { PropertyRegistryAccessService } from './common/property-registry-access.service';
-import { PropertyRegistryBoundaryService } from './common/property-registry-boundary.service';
-import { PropertyRegistryConfigurationService } from './configuration/property-registry-configuration.service';
-import { PropertyEncumbranceService } from './encumbrances/property-encumbrance.service';
-import { PropertySurveyService } from './surveys/property-survey.service';
-import { PropertyTransferService } from './transfers/property-transfer.service';
-import { PublicPropertyRegistryVerificationService } from './verification/public-property-registry-verification.service';
+import { PropertyRegistryAuditService } from './audit/property-registry-audit.service';
+import { PropertyRegistryCadastreBoundaryService } from './common/property-registry-cadastre-boundary.service';
+import { PropertyRegistryClassificationAccessService } from './common/property-registry-classification-access.service';
+import { PropertyRegistryCorrectionService } from './corrections/property-registry-correction.service';
+import { CadastrePropertyEncumbranceService } from './encumbrances/cadastre-property-encumbrance.service';
+import { PropertyTransferIntakeService } from './intake/property-transfer-intake.service';
+import { PLATFORM_ADMIN_ROLE_MARKER } from './property-registry.constants';
+import { PropertyRegistryReadService } from './queries/property-registry-read.service';
+import { PropertyTitleRegistrationService } from './registration/property-title-registration.service';
+import { PropertyTransferPaymentService } from './transfers/property-transfer-payment.service';
+import { PropertyRegistryVerificationService } from './verification/property-registry-verification.service';
 
 describe('Property registry must-fail gates', () => {
-  describe('PropertyRegistryBoundaryService', () => {
-    let boundary: PropertyRegistryBoundaryService;
+  describe('PropertyRegistryCadastreBoundaryService', () => {
+    let boundary: PropertyRegistryCadastreBoundaryService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
-        providers: [PropertyRegistryBoundaryService],
+        providers: [PropertyRegistryCadastreBoundaryService],
       }).compile();
-      boundary = module.get(PropertyRegistryBoundaryService);
+      boundary = module.get(PropertyRegistryCadastreBoundaryService);
     });
 
-    it('blocks transfer application title mutation flag', () => {
+    it('citizen cannot directly change title holder', () => {
       expect(() => {
-        boundary.assertApplicationCannotMutateTitle(true);
+        boundary.assertCitizenCannotDirectlyChangeTitleHolder({ mutatesTitleHolder: true });
       }).toThrow(ForbiddenException);
     });
 
-    it('requires transfer decision before registry change', () => {
+    it('transfer application does not itself change ownership', () => {
       expect(() => {
-        boundary.assertTransferDecisionRequired(false);
+        boundary.assertTransferApplicationDoesNotMutateTitle(
+          PropertyTransferApplicationStatus.REGISTERED_OFFICIAL,
+        );
       }).toThrow(ForbiddenException);
     });
 
-    it('blocks survey submission that alters parcel geometry', () => {
+    it('payment of transfer fee does not change title', () => {
       expect(() => {
-        boundary.assertSurveyDoesNotAlterParcel(true);
-      }).toThrow(BadRequestException);
-    });
-
-    it('blocks platform admin title mutation', () => {
-      expect(() => {
-        boundary.assertPlatformAdminCannotAlterTitle('PLATFORM_ADMIN');
+        boundary.assertPaymentDoesNotChangeTitle(true);
       }).toThrow(ForbiddenException);
     });
 
-    it('minimizes public verification payload', () => {
-      const payload = boundary.sanitizePublicVerificationPayload({
-        parcelReference: 'PARCEL-1',
-        status: 'REGISTERED',
-        administrativeAddressSummary: 'District A',
-        internalParcelIdentifier: 'SECRET-ID',
-        sealedDataReference: 'SEALED',
+    it('encumbrance cannot be silently deleted', () => {
+      expect(() => {
+        boundary.assertEncumbranceCannotBeSilentlyDeleted('delete');
+      }).toThrow(ForbiddenException);
+    });
+
+    it('unauthorized representative cannot transfer property', () => {
+      expect(() => {
+        boundary.assertUnauthorizedRepresentativeCannotTransfer(false);
+      }).toThrow(ForbiddenException);
+    });
+
+    it('technical admin cannot mutate legal ownership', () => {
+      expect(() => {
+        boundary.assertPlatformAdminCannotMutateLegalOwnership({
+          actorRoleMarker: PLATFORM_ADMIN_ROLE_MARKER,
+          mutatesLegalOwnership: true,
+        });
+      }).toThrow(ForbiddenException);
+    });
+
+    it('AI cannot approve title transfer', () => {
+      expect(() => {
+        boundary.assertAiCannotApproveTitleTransfer('APPROVE_TRANSFER', true);
+      }).toThrow(ForbiddenException);
+    });
+
+    it('rejects client-forged title holder fields', () => {
+      expect(() => {
+        boundary.rejectClientForgedTitleHolderFields({ isCurrent: true });
+      }).toThrow(ForbiddenException);
+    });
+  });
+
+  describe('PropertyRegistryClassificationAccessService', () => {
+    let access: PropertyRegistryClassificationAccessService;
+
+    beforeEach(async () => {
+      const module = await Test.createTestingModule({
+        providers: [PropertyRegistryClassificationAccessService],
+      }).compile();
+      access = module.get(PropertyRegistryClassificationAccessService);
+    });
+
+    it('restricted property information not exposed', () => {
+      expect(() => {
+        access.assertMayReadRegistryPayload({
+          actorIdentityId: 'citizen-1',
+          accessClassification: PropertyRegistryAccessClassification.SEALED,
+        });
+      }).toThrow(ForbiddenException);
+    });
+
+    it('public verification exposes only permitted registry information', () => {
+      const payload = access.assertPublicVerificationOnlyPayload({
+        entryReference: 'PRE-1',
+        verificationState: 'VERIFIED',
+        registeredAt: new Date(),
+        titleReference: 'TR-1',
+        titlePayload: { secret: true },
       });
-      expect(payload).not.toHaveProperty('internalParcelIdentifier');
-      expect(payload).not.toHaveProperty('sealedDataReference');
-      expect(Object.keys(payload)).toEqual([
-        'parcelReference',
-        'status',
-        'locationSummary',
-        'verificationTimestamp',
-      ]);
+
+      expect(payload).not.toHaveProperty('titlePayload');
+      expect(payload).toHaveProperty('entryReference');
     });
   });
 
-  describe('PropertyRegistryAccessService', () => {
+  describe('PropertyTransferIntakeService', () => {
     const prisma = {
-      propertyParcel: { findUnique: jest.fn() },
-      propertyInterest: { findFirst: jest.fn() },
-      propertyInterestEntitlement: { findFirst: jest.fn() },
-      representativeAuthority: { findUnique: jest.fn() },
-      propertyAccessAudit: { create: jest.fn().mockResolvedValue({}) },
+      propertyTransfer: { create: jest.fn().mockResolvedValue({ id: 'pt-1' }) },
+      propertyTransactionHistory: { create: jest.fn() },
+      propertyRegistryAuditEvent: { create: jest.fn() },
     };
 
-    let access: PropertyRegistryAccessService;
-
-    beforeEach(async () => {
-      const module = await Test.createTestingModule({
-        providers: [PropertyRegistryAccessService, { provide: PrismaService, useValue: prisma }],
-      }).compile();
-      access = module.get(PropertyRegistryAccessService);
-      jest.clearAllMocks();
-    });
-
-    it('denies citizen access to unrelated parcel', async () => {
-      prisma.propertyParcel.findUnique.mockResolvedValue({ id: 'parcel-1' });
-      prisma.propertyInterest.findFirst.mockResolvedValue(null);
-      prisma.propertyInterestEntitlement.findFirst.mockResolvedValue(null);
-
-      await expect(
-        access.assertParcelAccess({
-          accessorIdentityId: 'citizen-1',
-          parcelId: 'parcel-1',
-          actorKind: PropertyAccessActorKind.OWNER,
-          endpoint: 'test',
-        }),
-      ).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('PropertyTransferService', () => {
-    const tx = {
-      propertyInterest: { findFirst: jest.fn(), update: jest.fn(), create: jest.fn() },
-      propertyOwnershipHistory: { create: jest.fn() },
-      propertyParcel: { update: jest.fn() },
-      propertyInterestEntitlement: { upsert: jest.fn() },
-    };
-    const prisma = {
-      propertyRegistryApplication: {
-        create: jest.fn(),
-        findUnique: jest.fn(),
-      },
-      propertyInterest: tx.propertyInterest,
-      propertyOwnershipHistory: tx.propertyOwnershipHistory,
-      propertyParcel: tx.propertyParcel,
-      propertyInterestEntitlement: tx.propertyInterestEntitlement,
-      $transaction: jest.fn(async (callback: (client: typeof tx) => Promise<unknown>) =>
-        callback(tx),
-      ),
-    };
-
-    let transfers: PropertyTransferService;
+    let service: PropertyTransferIntakeService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PropertyTransferService,
-          PropertyRegistryBoundaryService,
+          PropertyTransferIntakeService,
+          PropertyRegistryCadastreBoundaryService,
+          PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();
-      transfers = module.get(PropertyTransferService);
+
+      service = module.get(PropertyTransferIntakeService);
       jest.clearAllMocks();
     });
 
-    it('creates transfer application without mutating title', async () => {
-      prisma.propertyRegistryApplication.create.mockResolvedValue({
-        id: 'app-1',
-        mayMutateTitle: false,
-      });
-      const created = await transfers.submitTransferApplication({
-        parcelId: 'parcel-1',
-        applicantIdentityId: 'citizen-1',
-      });
-      expect(created.mayMutateTitle).toBe(false);
-    });
-
-    it('blocks registry transfer without approved decision', async () => {
-      prisma.propertyRegistryApplication.findUnique.mockResolvedValue({
-        id: 'app-1',
-        applicationType: 'TRANSFER',
-        parcelId: 'parcel-1',
-        parcel: { id: 'parcel-1', registryVersion: 1 },
-        transferDecision: { outcome: PropertyTransferDecisionOutcome.DENIED, id: 'dec-1' },
+    it('creates intake in INTAKE_DRAFT without mutating title', async () => {
+      await service.createIntake('applicant-1', {
+        landParcelId: 'lp-1',
+        propertyRecordId: 'pr-1',
+        jurisdictionId: 'j-1',
+        institutionId: 'i-1',
       });
 
-      await expect(
-        transfers.registerTransferAfterDecision({
-          applicationId: 'app-1',
-          newOwnerIdentityId: 'citizen-2',
-          decidedByIdentityId: 'officer-1',
-        }),
-      ).rejects.toThrow(ForbiddenException);
+      expect(prisma.propertyTransfer.create).toHaveBeenCalled();
+      const [[createArgs]] = prisma.propertyTransfer.create.mock.calls as [
+        [{ data: { applicationStatus: PropertyTransferApplicationStatus } }],
+      ];
+      expect(createArgs.data.applicationStatus).toBe(
+        PropertyTransferApplicationStatus.INTAKE_DRAFT,
+      );
     });
   });
 
-  describe('PropertySurveyService', () => {
+  describe('PropertyTransferPaymentService', () => {
     const prisma = {
-      propertyParcel: {
-        findUniqueOrThrow: jest.fn().mockResolvedValue({ id: 'p1', registryVersion: 2 }),
+      propertyTransfer: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'pt-1',
+          titleRecordId: 'tr-1',
+        }),
+        update: jest.fn().mockResolvedValue({ id: 'pt-1' }),
       },
-      propertyRegistryApplication: { create: jest.fn().mockResolvedValue({ id: 'app-sv' }) },
-      propertySurveySubmission: {
-        create: jest.fn().mockResolvedValue({ altersParcelGeometry: false }),
-      },
+      propertyTransactionHistory: { create: jest.fn() },
+      propertyRegistryAuditEvent: { create: jest.fn() },
     };
 
-    it('records survey without altering parcel geometry flag', async () => {
+    let service: PropertyTransferPaymentService;
+
+    beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PropertySurveyService,
-          PropertyRegistryBoundaryService,
+          PropertyTransferPaymentService,
+          PropertyRegistryCadastreBoundaryService,
+          PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();
-      const surveys = module.get(PropertySurveyService);
-      const submission = await surveys.submitSurveyPlan({
-        parcelId: 'p1',
-        applicantIdentityId: 'citizen-1',
-      });
-      expect(submission.altersParcelGeometry).toBe(false);
-    });
-  });
 
-  describe('PropertyEncumbranceService', () => {
-    it('preserves encumbrance history on release', async () => {
-      const prisma = {
-        propertyEncumbrance: {
-          update: jest.fn().mockResolvedValue({
-            id: 'enc-1',
-            parcelId: 'parcel-1',
-            encumbranceKind: PropertyEncumbranceKind.MORTGAGE,
+      service = module.get(PropertyTransferPaymentService);
+      jest.clearAllMocks();
+    });
+
+    it('records fee without title mutation flag in history', async () => {
+      await service.recordTransferFeePayment({
+        propertyTransferId: 'pt-1',
+        paymentTransactionId: 'pay-1',
+        actorIdentityId: 'payer-1',
+      });
+
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment -- jest matcher composition */
+      expect(prisma.propertyTransactionHistory.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            eventSummary: expect.objectContaining({ mutatesTitle: false }),
           }),
-        },
-        propertyEncumbranceHistory: { create: jest.fn() },
-      };
-      const module = await Test.createTestingModule({
-        providers: [PropertyEncumbranceService, { provide: PrismaService, useValue: prisma }],
-      }).compile();
-      const encumbrances = module.get(PropertyEncumbranceService);
-      await encumbrances.releaseEncumbrance('enc-1');
-      expect(prisma.propertyEncumbranceHistory.create).toHaveBeenCalled();
+        }),
+      );
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
   });
 
-  describe('PropertyCertificateService', () => {
-    it('issued certificate references registry version', async () => {
-      const prisma = {
-        propertyParcel: {
-          findUniqueOrThrow: jest
-            .fn()
-            .mockResolvedValue({ id: 'p1', registryVersion: 4, parcelReference: 'PR-1' }),
-        },
-        propertyRegistryCertificate: {
-          create: jest
-            .fn()
-            .mockImplementation(({ data }: { data: { registryVersionNumber: number } }) => data),
-        },
-      };
+  describe('PropertyTitleRegistrationService', () => {
+    const prisma = {
+      authorityEvaluationRecord: { findUnique: jest.fn() },
+      propertyTransfer: { findUnique: jest.fn() },
+      propertyRegistryAuditEvent: { create: jest.fn() },
+      $transaction: jest.fn(),
+    };
+
+    let service: PropertyTitleRegistrationService;
+
+    beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PropertyCertificateService,
-          PropertyRegistryBoundaryService,
+          PropertyTitleRegistrationService,
+          PropertyRegistryCadastreBoundaryService,
+          PropertyRegistryAuditService,
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();
-      const certificates = module.get(PropertyCertificateService);
-      const issued = await certificates.issueCertificate({
-        parcelId: 'p1',
-        issuedByIdentityId: 'officer-1',
+
+      service = module.get(PropertyTitleRegistrationService);
+      jest.clearAllMocks();
+      prisma.authorityEvaluationRecord.findUnique.mockResolvedValue({
+        outcome: AuthorityEvaluationOutcome.ALLOW,
       });
-      expect(issued.registryVersionNumber).toBe(4);
+    });
+
+    it('blocks AI from recording title registration', async () => {
+      prisma.propertyTransfer.findUnique.mockResolvedValue({
+        id: 'pt-1',
+        titleRecordId: 'tr-1',
+        registryEntry: null,
+        titleRecord: { id: 'tr-1', currentVersionNumber: 1 },
+      });
+
+      await expect(
+        service.recordOfficialTitleRegistration('official-1', {
+          propertyTransferId: 'pt-1',
+          caseId: 'case-1',
+          jurisdictionId: 'j-1',
+          institutionId: 'i-1',
+          governmentDecisionId: 'dec-1',
+          authorityEvaluationRecordId: 'auth-1',
+          registrarOfficeholderId: 'oh-1',
+          registrarIdentityId: 'official-1',
+          titlePayloadSnapshot: {},
+          isAiActor: true,
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('prior title history preserved via supersession transaction path', async () => {
+      prisma.propertyTransfer.findUnique.mockResolvedValue({
+        id: 'pt-1',
+        transferReference: 'PT-1',
+        propertyRecordId: 'pr-1',
+        titleRecordId: 'tr-1',
+        registryEntry: null,
+        titleRecord: { id: 'tr-1', currentVersionNumber: 1, registeredAt: new Date() },
+      });
+
+      prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) =>
+        callback({
+          titleVersion: {
+            findFirst: jest.fn().mockResolvedValue({ id: 'tv-1' }),
+            update: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'tv-2' }),
+          },
+          propertyRegistryEntry: {
+            create: jest.fn().mockResolvedValue({ id: 'entry-1' }),
+          },
+          titleRecord: { update: jest.fn() },
+          propertyTransfer: { update: jest.fn() },
+          propertyTransactionHistory: { create: jest.fn() },
+        }),
+      );
+
+      const result = await service.recordOfficialTitleRegistration('official-1', {
+        propertyTransferId: 'pt-1',
+        caseId: 'case-1',
+        jurisdictionId: 'j-1',
+        institutionId: 'i-1',
+        governmentDecisionId: 'dec-1',
+        authorityEvaluationRecordId: 'auth-1',
+        registrarOfficeholderId: 'oh-1',
+        registrarIdentityId: 'official-1',
+        titlePayloadSnapshot: { holder: 'B' },
+      });
+
+      expect(result.priorVersion?.id).toBe('tv-1');
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
 
-  describe('PublicPropertyRegistryVerificationService', () => {
-    it('rejects public lookup when disabled', async () => {
-      const configurationService = {
-        getDefaultConfiguration: jest.fn().mockResolvedValue({
-          publicVerificationMode: PropertyPublicVerificationMode.DISABLED,
-        }),
-      };
+  describe('PropertyRegistryReadService', () => {
+    const prisma = {
+      propertyRegistryEntry: { findUnique: jest.fn() },
+      landParcel: { findUnique: jest.fn() },
+      titleRecord: { findUnique: jest.fn() },
+    };
+
+    let service: PropertyRegistryReadService;
+
+    beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PublicPropertyRegistryVerificationService,
-          PropertyRegistryBoundaryService,
-          { provide: PropertyRegistryConfigurationService, useValue: configurationService },
-          { provide: PrismaService, useValue: { propertyParcel: { findFirst: jest.fn() } } },
+          PropertyRegistryReadService,
+          PropertyRegistryClassificationAccessService,
+          { provide: PrismaService, useValue: prisma },
         ],
       }).compile();
-      const verification = module.get(PublicPropertyRegistryVerificationService);
-      await expect(verification.verify('PARCEL-1')).rejects.toThrow(ForbiddenException);
+
+      service = module.get(PropertyRegistryReadService);
+      jest.clearAllMocks();
+    });
+
+    it('parcel and title are distinct concepts', async () => {
+      prisma.landParcel.findUnique.mockResolvedValue({ id: 'lp-1', parcelReference: 'LP-1' });
+      prisma.titleRecord.findUnique.mockResolvedValue({
+        id: 'tr-1',
+        titleReference: 'TR-1',
+        landParcelId: 'lp-1',
+        landParcel: { parcelReference: 'LP-1' },
+      });
+
+      const result = await service.assertParcelDistinctFromTitle('lp-1', 'tr-1');
+      expect(result.distinctConcepts).toBe(true);
+      expect(result.parcelReference).not.toBe(result.titleReference);
+    });
+
+    it('masks sealed entries as not found for unauthorized readers', async () => {
+      prisma.propertyRegistryEntry.findUnique.mockResolvedValue({
+        id: 'entry-1',
+        entryReference: 'PRE-1',
+        registeredAt: new Date(),
+        accessClassification: PropertyRegistryAccessClassification.SEALED,
+        propertyRecordId: 'pr-1',
+        titleRecordId: 'tr-1',
+        restrictions: [],
+        verifications: [],
+        titleRecord: {
+          titleReference: 'TR-1',
+          landParcel: { parcelReference: 'LP-1' },
+          versions: [{ payloadSnapshot: { owner: 'secret' } }],
+        },
+      });
+
+      await expect(service.getEntryForActor('citizen-1', 'entry-1')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('CadastrePropertyEncumbranceService', () => {
+    let service: CadastrePropertyEncumbranceService;
+
+    beforeEach(async () => {
+      const module = await Test.createTestingModule({
+        providers: [
+          CadastrePropertyEncumbranceService,
+          PropertyRegistryCadastreBoundaryService,
+          PropertyRegistryAuditService,
+          { provide: PrismaService, useValue: {} },
+        ],
+      }).compile();
+
+      service = module.get(CadastrePropertyEncumbranceService);
+    });
+
+    it('blocks silent encumbrance deletion', () => {
+      expect(() => {
+        service.assertDeleteBlocked();
+      }).toThrow(ForbiddenException);
+    });
+  });
+
+  describe('PropertyRegistryCorrectionService', () => {
+    const prisma = {
+      propertyRegistryCorrection: {
+        create: jest.fn().mockResolvedValue({ id: 'corr-1' }),
+      },
+      propertyRegistryAuditEvent: { create: jest.fn() },
+      $transaction: jest.fn(),
+    };
+
+    let service: PropertyRegistryCorrectionService;
+
+    beforeEach(async () => {
+      const module = await Test.createTestingModule({
+        providers: [
+          PropertyRegistryCorrectionService,
+          PropertyRegistryCadastreBoundaryService,
+          PropertyRegistryAuditService,
+          { provide: PrismaService, useValue: prisma },
+        ],
+      }).compile();
+
+      service = module.get(PropertyRegistryCorrectionService);
+      jest.clearAllMocks();
+    });
+
+    it('title correction preserves previous state', async () => {
+      prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) =>
+        callback({
+          titleVersion: {
+            update: jest.fn(),
+          },
+          propertyRegistryCorrection: {
+            update: jest.fn().mockResolvedValue({ id: 'corr-1' }),
+          },
+          propertyTransactionHistory: { create: jest.fn() },
+        }),
+      );
+
+      await service.recordApprovedCorrection({
+        correctionId: 'corr-1',
+        previousTitleVersionId: 'tv-1',
+        newTitleVersionId: 'tv-2',
+        titleRecordId: 'tr-1',
+        governmentDecisionId: 'dec-1',
+        authorityEvaluationRecordId: 'auth-1',
+        actorIdentityId: 'official-1',
+      });
+
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('rejects client self-approval of correction request', async () => {
+      await expect(
+        service.submitRequest('applicant-1', {
+          propertyRegistryEntryId: 'entry-1',
+          requestedChanges: { field: 'holder' },
+          clientStatus: PropertyRegistryCorrectionStatus.APPROVED_FOR_CORRECTION,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('PropertyRegistryVerificationService', () => {
+    const prisma = {
+      propertyRegistryVerification: { findUnique: jest.fn() },
+    };
+
+    let service: PropertyRegistryVerificationService;
+
+    beforeEach(async () => {
+      const module = await Test.createTestingModule({
+        providers: [
+          PropertyRegistryVerificationService,
+          PropertyRegistryClassificationAccessService,
+          { provide: PrismaService, useValue: prisma },
+        ],
+      }).compile();
+
+      service = module.get(PropertyRegistryVerificationService);
+    });
+
+    it('public verification exposes only permitted registry information', async () => {
+      prisma.propertyRegistryVerification.findUnique.mockResolvedValue({
+        verificationState: 'VERIFIED',
+        propertyRegistryEntry: {
+          entryReference: 'PRE-1',
+          registeredAt: new Date(),
+          accessClassification: PropertyRegistryAccessClassification.SEALED,
+          restrictions: [],
+          titleRecord: { titleReference: 'TR-1' },
+        },
+      });
+
+      const payload = await service.verifyPublic('code-1');
+      expect(payload).not.toHaveProperty('restrictedPayload');
+      expect(Object.keys(payload)).toEqual(
+        expect.arrayContaining([
+          'entryReference',
+          'verificationState',
+          'registeredAt',
+          'titleReference',
+        ]),
+      );
     });
   });
 });

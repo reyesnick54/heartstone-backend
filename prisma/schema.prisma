@@ -116,6 +116,12 @@ model Jurisdiction {
   vehicleRecords                 VehicleRecord[]
   transportOperatorRecords       TransportOperatorRecord[]
   fleetRecords                   FleetRecord[]
+  landParcels                    LandParcel[]
+  propertyRecords                PropertyRecord[]
+  titleRecords                   TitleRecord[]
+  propertyTransfers              PropertyTransfer[]
+  propertyRegistryEntries        PropertyRegistryEntry[]
+  surveyRecords                  SurveyRecord[]
   traderAccounts                 TraderAccount[]
   importerRegistrations          ImporterRegistration[]
   exporterRegistrations          ExporterRegistration[]
@@ -192,6 +198,12 @@ model Institution {
   vitalEvents                    VitalEvent[]
   civilRegistryEntries           CivilRegistryEntry[]
   employerRegistryRecords        EmployerRegistryRecord[]
+  landParcels                    LandParcel[]
+  propertyRecords                PropertyRecord[]
+  titleRecords                   TitleRecord[]
+  propertyTransfers              PropertyTransfer[]
+  propertyRegistryEntries        PropertyRegistryEntry[]
+  surveyRecords                  SurveyRecord[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -340,6 +352,8 @@ model Officeholder {
   civilRegistryVerifications       CivilRegistryVerification[]    @relation("CivilRegistryVerifierOfficeholder")
   developmentPermitsIssued         DevelopmentPermit[]              @relation("DevelopmentPermitIssuerOfficeholder")
   developmentOccupancyCertificatesIssued DevelopmentOccupancyCertificate[] @relation("DevelopmentOccupancyIssuerOfficeholder")
+  titleVersionsRegistered          TitleVersion[]                 @relation("TitleVersionRegistrarOfficeholder")
+  propertyRegistryVerifications    PropertyRegistryVerification[] @relation("PropertyRegistryVerifierOfficeholder")
   customsAssessmentsIssued         CustomsAssessment[]            @relation("CustomsAssessmentIssuer")
   customsHoldsRemoved              CustomsHold[]                  @relation("CustomsHoldRemover")
   customsReleasesAuthorized        CustomsReleaseRecord[]         @relation("CustomsReleaseAuthorizer")
@@ -572,6 +586,8 @@ model Person {
   userAccount UserAccount?
   identities         Identity[]
   civilPersonRecords CivilPersonRecord[]
+  cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
+  transferParties         TransferParty[]
 
   @@map("persons")
 }
@@ -816,6 +832,12 @@ model Identity {
   vehicleOwnershipRecords                  VehicleOwnershipRecord[]               @relation("VehicleOwnershipOwnerIdentity")
   transportOperatorRecordsAsOperator       TransportOperatorRecord[]              @relation("TransportOperatorIdentity")
   transportationStatusHistoryEvents        TransportationStatusHistory[]          @relation("TransportationStatusHistoryActor")
+  cadastrePropertyInterestHolders          CadastrePropertyInterestHolder[]       @relation("CadastrePropertyInterestHolderIdentity")
+  transferParties                          TransferParty[]                        @relation("TransferPartyIdentity")
+  titleVersionsRegistered                  TitleVersion[]                         @relation("TitleVersionRegistrarIdentity")
+  propertyRegistryCorrections              PropertyRegistryCorrection[]           @relation("PropertyRegistryCorrectionApplicant")
+  propertyRegistryAuditEvents              PropertyRegistryAuditEvent[]           @relation("PropertyRegistryAuditActor")
+  propertyRegistryVerificationsPerformed   PropertyRegistryVerification[]         @relation("PropertyRegistryVerifierIdentity")
   traderAccountsAsPrimary                  TraderAccount[]                        @relation("TraderAccountPrimaryIdentity")
   customsStatusHistoryEvents               CustomsStatusHistory[]                 @relation("CustomsStatusHistoryActor")
   customsExternalDependenciesRecorded      CustomsExternalDependency[]            @relation("CustomsExternalDependencyRecorder")
@@ -875,6 +897,8 @@ model Organization {
   vehicleOwnershipRecords         VehicleOwnershipRecord[]
   transportOperatorRecords        TransportOperatorRecord[]
   fleetRecords                    FleetRecord[]
+  cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
+  transferParties                 TransferParty[]
   traderAccounts                  TraderAccount[]
   shipmentReferences              ShipmentReference[]
 
@@ -915,6 +939,7 @@ model RepresentativeAuthority {
   identity              Identity                      @relation(fields: [identityId], references: [id])
   applications          Application[]
   complianceSubmissions ComplianceSubmission[]
+  transferParties       TransferParty[]
   customsBrokerAuthorization CustomsBrokerAuthorization?
 
   @@index([organizationId])
@@ -1501,6 +1526,10 @@ model AuthorityEvaluationRecord {
   civilRegistryEntries            CivilRegistryEntry[]          @relation("CivilRegistryEntryAuthority")
   civilRecordAmendments           CivilRecordAmendment[]        @relation("CivilRecordAmendmentAuthority")
   civilRegistryVerifications      CivilRegistryVerification[]   @relation("CivilRegistryVerificationAuthority")
+  propertyRegistryEntries         PropertyRegistryEntry[]       @relation("PropertyRegistryEntryAuthority")
+  propertyRegistryCorrections       PropertyRegistryCorrection[]  @relation("PropertyRegistryCorrectionAuthority")
+  propertyRegistryVerifications   PropertyRegistryVerification[] @relation("PropertyRegistryVerificationAuthority")
+  titleVersions                   TitleVersion[]                @relation("TitleVersionAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1713,6 +1742,7 @@ model GovernmentService {
   appointmentSlots            AppointmentSlot[]
   serviceAppointments         ServiceAppointment[]
   vitalEvents                 VitalEvent[]
+  propertyTransfers           PropertyTransfer[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2431,6 +2461,7 @@ model Application {
   vitalEvents                VitalEvent[]
   workPermitApplicationProfile WorkPermitApplicationProfile?
   driverLicenseApplicationProfile DriverLicenseApplicationProfile?
+  propertyTransfers          PropertyTransfer[]
   customsDeclarations        CustomsDeclaration[]
 
   @@unique([applicantIdentityId, idempotencyKey])
@@ -2568,6 +2599,8 @@ model Case {
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
   vehicleInspections                VehicleInspection[]
   vehicleTransfers                  VehicleTransfer[]
+  propertyTransfers                 PropertyTransfer[]
+  propertyRegistryEntries           PropertyRegistryEntry[]
   customsDeclarations               CustomsDeclaration[]
 
   @@index([status])
@@ -3331,6 +3364,7 @@ model DocumentRecord {
   custodyEvents                    EvidenceCustodyEvent[]
   civilRegistrySourceReferences    CivilRegistrySourceReference[]
   employmentContractReferences     EmploymentContractReference[]
+  surveyPlanReferences             SurveyPlanReference[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -3600,6 +3634,7 @@ model EvidenceRecord {
   packetExclusions                EvidencePacketItemExclusion[]
   obligationEvidenceLinks         ObligationEvidenceLink[]
   vitalEventEvidenceLinks         VitalEventEvidenceLink[]
+  propertyTransferEvidenceLinks   PropertyTransferEvidenceLink[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5047,6 +5082,12 @@ model GovernmentDecision {
   commercialVehiclePermits          CommercialVehiclePermit[]
   transportOperatorLicenses         TransportOperatorLicense[]
   transportPermits                  TransportPermit[]
+  propertyRegistryEntries           PropertyRegistryEntry[]         @relation("PropertyRegistryEntryDecision")
+  propertyRegistryCorrections       PropertyRegistryCorrection[]    @relation("PropertyRegistryCorrectionDecision")
+  propertyRegistryRestrictions      PropertyRegistryRestriction[]   @relation("PropertyRegistryRestrictionDecision")
+  cadastrePropertyEncumbranceReleases CadastrePropertyEncumbrance[] @relation("CadastrePropertyEncumbranceReleaseDecision")
+  cadastrePropertyInterestHistory   CadastrePropertyInterestHistory[] @relation("CadastrePropertyInterestHistoryDecision")
+  titleVersions                     TitleVersion[]                  @relation("TitleVersionDecision")
   customsReleaseDecisionReference   CustomsReleaseDecisionReference?
 
   @@index([caseId])
@@ -5532,6 +5573,7 @@ model OfficialInstrument {
   commercialVehiclePermits          CommercialVehiclePermit[]
   transportOperatorLicenses         TransportOperatorLicense[]
   transportPermits                  TransportPermit[]
+  titleInstrumentReferences         TitleInstrumentReference[]
   tradePermitReferences             TradePermitReference[]
 
   @@index([caseId])
@@ -8314,6 +8356,7 @@ model PaymentTransaction {
   financialDisputes              FinancialDispute[]
   events                         PaymentTransactionEvent[]
   taxPaymentAllocations          TaxPaymentAllocation[]
+  propertyTransferFeePayments    PropertyTransfer[]       @relation("PropertyTransferFeePayment")
 
   @@unique([paymentProviderConfigurationId, providerTransactionReference])
   @@index([paymentIntentId])
@@ -13749,6 +13792,7 @@ model ServicePackVersion {
   revisionRequests         ServicePackRevisionRequest[]
   governanceAuditRecords   ServicePackGovernanceAuditRecord[]
   governingVitalEvents     VitalEvent[]                    @relation("VitalEventGoverningServicePack")
+  governingPropertyTransfers PropertyTransfer[]            @relation("PropertyTransferGoverningServicePack")
 
   @@unique([servicePackId, version])
   @@index([servicePackId])
@@ -16312,6 +16356,7 @@ model TaxpayerAccount {
   clearanceRequests     TaxClearanceCertificateRequest[]
   withholdingRecords    TaxWithholdingRecord[]
   accessAudits          TaxAccessAudit[]
+  propertyTaxReferences PropertyTaxReference[]
 
   @@index([jurisdictionId])
   @@index([primaryIdentityId])
@@ -18583,6 +18628,727 @@ model DevelopmentAccessAudit {
   @@index([developmentProjectId])
   @@index([accessorIdentityId])
   @@map("development_access_audits")
+}
+
+// Land, Property & Cadastre foundation
+
+enum PropertyRegistryAccessClassification {
+  PUBLIC_REGISTRY
+  SUBJECT_ACCESS
+  AUTHORIZED_PROFESSIONAL
+  GOVERNMENT_RESTRICTED
+  SEALED
+}
+
+enum PropertyTransferApplicationStatus {
+  INTAKE_DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  PENDING_AUTHORITY
+  REGISTERED_OFFICIAL
+  REJECTED
+  WITHDRAWN
+}
+
+enum TitleRecordStatus {
+  ACTIVE
+  SUPERSEDED
+  CORRECTED
+  CANCELLED
+}
+
+enum PropertyInterestType {
+  OWNERSHIP
+  LEASEHOLD
+  EASEMENT_BENEFIT
+  MORTGAGE_INTEREST
+  OTHER
+}
+
+enum PropertyInterestHolderRole {
+  OWNER
+  CO_OWNER
+  LESSEE
+  MORTGAGEE
+  BENEFICIARY
+  REPRESENTATIVE
+  OTHER
+}
+
+enum PropertyEncumbranceType {
+  MORTGAGE
+  LIEN
+  EASEMENT
+  CAVEAT
+  RESTRICTION
+  COURT_ORDER
+  GOVERNMENT_RESTRICTION
+  OTHER
+}
+
+
+enum PropertyValuationPurpose {
+  TAXATION
+  GOVERNMENT_ACQUISITION
+  MARKET_REFERENCE
+  OTHER
+}
+
+enum PropertyRegistryVerificationState {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  VERIFIED
+  DISPUTED
+}
+
+enum PropertyRegistryCorrectionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED_FOR_CORRECTION
+  DENIED
+  WITHDRAWN
+}
+
+enum PropertyRegistryAuditEventType {
+  PARCEL_RECORDED
+  TRANSFER_INTAKE_CREATED
+  TRANSFER_FEE_RECORDED
+  TITLE_REGISTRATION_REQUESTED
+  TITLE_VERSION_RECORDED
+  ENCUMBRANCE_RECORDED
+  ENCUMBRANCE_RELEASE_REQUESTED
+  ENCUMBRANCE_DELETE_BLOCKED
+  CORRECTION_SUBMITTED
+  ACCESS_DENIED
+  VERIFICATION_UPDATED
+  DELETE_BLOCKED
+}
+
+enum TransferPartyRole {
+  TRANSFEROR
+  TRANSFEREE
+  REPRESENTATIVE
+  WITNESS
+  OTHER
+}
+
+enum PropertyTransactionHistoryEventType {
+  TRANSFER_APPLICATION
+  FEE_PAYMENT
+  TITLE_REGISTRATION
+  ENCUMBRANCE_REGISTRATION
+  ENCUMBRANCE_RELEASE
+  CORRECTION
+  VERIFICATION
+}
+
+model LandParcel {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  parcelReference      String                            @unique
+  jurisdictionId       String                            @db.Uuid
+  institutionId        String                            @db.Uuid
+  description          String?
+  accessClassification PropertyRegistryAccessClassification @default(PUBLIC_REGISTRY)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  jurisdiction         Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+  identifiers          ParcelIdentifier[]
+  geometryReferences   ParcelGeometryReference[]
+  addresses            ParcelAddress[]
+  propertyRecords      PropertyRecord[]
+  titleRecords         TitleRecord[]
+  surveyRecords        SurveyRecord[]
+  propertyTransfers    PropertyTransfer[]
+
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([accessClassification])
+  @@map("land_parcels")
+}
+
+model ParcelIdentifier {
+  id              String     @id @default(uuid()) @db.Uuid
+  landParcelId    String     @db.Uuid
+  identifierType  String
+  identifierValue String
+  isPrimary       Boolean    @default(false)
+  effectiveFrom   DateTime?
+  effectiveTo     DateTime?
+  createdAt       DateTime   @default(now())
+  landParcel      LandParcel @relation(fields: [landParcelId], references: [id], onDelete: Cascade)
+
+  @@index([landParcelId])
+  @@index([identifierType, identifierValue])
+  @@map("parcel_identifiers")
+}
+
+model ParcelGeometryReference {
+  id                     String     @id @default(uuid()) @db.Uuid
+  landParcelId           String     @db.Uuid
+  geometryReference      String?
+  mapLayerReference      String?
+  surveyReference        String?
+  coordinateSystem       String?
+  authoritativeSource    String?
+  externalParcelReference String?
+  provenanceSummary      Json       @default("{}")
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  landParcel             LandParcel @relation(fields: [landParcelId], references: [id], onDelete: Cascade)
+
+  @@index([landParcelId])
+  @@map("parcel_geometry_references")
+}
+
+model ParcelAddress {
+  id              String     @id @default(uuid()) @db.Uuid
+  landParcelId    String     @db.Uuid
+  addressType     String     @default("SITE")
+  addressLines    Json       @default("{}")
+  localityReference String?
+  isPrimary       Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  landParcel      LandParcel @relation(fields: [landParcelId], references: [id], onDelete: Cascade)
+
+  @@index([landParcelId])
+  @@map("parcel_addresses")
+}
+
+model PropertyRecord {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  propertyReference    String                            @unique
+  landParcelId         String                            @db.Uuid
+  jurisdictionId       String                            @db.Uuid
+  institutionId        String                            @db.Uuid
+  administrativeStatus String                            @default("ACTIVE")
+  accessClassification PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  landParcel           LandParcel                        @relation(fields: [landParcelId], references: [id])
+  jurisdiction         Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+  titleRecords         TitleRecord[]
+  valuationRecords     PropertyValuationRecord[]
+  taxReferences        PropertyTaxReference[]
+  registryEntries      PropertyRegistryEntry[]
+  propertyTransfers    PropertyTransfer[]
+
+  @@index([landParcelId])
+  @@index([jurisdictionId])
+  @@index([accessClassification])
+  @@map("property_records")
+}
+
+model TitleRecord {
+  id                   String                            @id @default(uuid()) @db.Uuid
+  titleReference       String                            @unique
+  propertyRecordId     String                            @db.Uuid
+  landParcelId         String                            @db.Uuid
+  jurisdictionId       String                            @db.Uuid
+  institutionId        String                            @db.Uuid
+  status               TitleRecordStatus                 @default(ACTIVE)
+  currentVersionNumber Int                               @default(0)
+  accessClassification PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  registeredAt         DateTime?
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  propertyRecord       PropertyRecord                    @relation(fields: [propertyRecordId], references: [id])
+  landParcel           LandParcel                        @relation(fields: [landParcelId], references: [id])
+  jurisdiction         Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution                       @relation(fields: [institutionId], references: [id])
+  versions             TitleVersion[]
+  interests            CadastrePropertyInterest[]
+  encumbrances         CadastrePropertyEncumbrance[]
+  instrumentReferences TitleInstrumentReference[]
+  registryEntries      PropertyRegistryEntry[]
+  propertyTransfers    PropertyTransfer[]
+  transactionHistory   PropertyTransactionHistory[]
+
+  @@index([propertyRecordId])
+  @@index([landParcelId])
+  @@index([status])
+  @@map("title_records")
+}
+
+model TitleVersion {
+  id                          String       @id @default(uuid()) @db.Uuid
+  titleRecordId               String       @db.Uuid
+  versionNumber               Int
+  effectiveFrom               DateTime
+  registrationDate            DateTime?
+  supersededAt                DateTime?
+  payloadSnapshot             Json
+  integrityHash               String?
+  isCurrent                   Boolean      @default(true)
+  governingDecisionId         String?      @db.Uuid
+  authorityEvaluationRecordId String?      @db.Uuid
+  registrarOfficeholderId     String?      @db.Uuid
+  registrarIdentityId         String?      @db.Uuid
+  transferBasisSummary        Json         @default("{}")
+  createdAt                   DateTime     @default(now())
+  titleRecord                 TitleRecord  @relation(fields: [titleRecordId], references: [id], onDelete: Restrict)
+  governingDecision           GovernmentDecision? @relation("TitleVersionDecision", fields: [governingDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("TitleVersionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  registrarOfficeholder       Officeholder? @relation("TitleVersionRegistrarOfficeholder", fields: [registrarOfficeholderId], references: [id])
+  registrarIdentity           Identity?    @relation("TitleVersionRegistrarIdentity", fields: [registrarIdentityId], references: [id])
+  supersedingCorrections      PropertyRegistryCorrection[] @relation("CorrectionNewTitleVersion")
+  priorCorrections            PropertyRegistryCorrection[] @relation("CorrectionPreviousTitleVersion")
+  interestHistoryFrom         CadastrePropertyInterestHistory[] @relation("InterestHistoryFromVersion")
+  interestHistoryTo           CadastrePropertyInterestHistory[] @relation("InterestHistoryToVersion")
+
+  @@unique([titleRecordId, versionNumber])
+  @@index([titleRecordId])
+  @@index([isCurrent])
+  @@map("title_versions")
+}
+
+model CadastrePropertyInterest {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  titleRecordId        String                 @db.Uuid
+  interestType         PropertyInterestType
+  interestReference    String?
+  shareNumerator       Int?
+  shareDenominator     Int?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  isCurrent            Boolean                @default(true)
+  accessClassification PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  titleRecord          TitleRecord            @relation(fields: [titleRecordId], references: [id], onDelete: Restrict)
+  holders              CadastrePropertyInterestHolder[]
+  history              CadastrePropertyInterestHistory[]
+
+  @@index([titleRecordId])
+  @@index([interestType])
+  @@index([isCurrent])
+  @@map("cadastre_property_interests")
+}
+
+model CadastrePropertyInterestHolder {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  cadastrePropertyInterestId   String                     @db.Uuid
+  holderRole           PropertyInterestHolderRole
+  personId             String?                    @db.Uuid
+  organizationId       String?                    @db.Uuid
+  identityId           String?                    @db.Uuid
+  displayLabel         String
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  isCurrent            Boolean                    @default(true)
+  createdAt            DateTime                   @default(now())
+  propertyInterest     CadastrePropertyInterest           @relation(fields: [cadastrePropertyInterestId], references: [id], onDelete: Restrict)
+  person               Person?                    @relation(fields: [personId], references: [id])
+  organization         Organization?              @relation(fields: [organizationId], references: [id])
+  identity             Identity?                  @relation("CadastrePropertyInterestHolderIdentity", fields: [identityId], references: [id])
+  historyAsPrior       CadastrePropertyInterestHistory[]  @relation("InterestHistoryPriorHolder")
+  historyAsNew         CadastrePropertyInterestHistory[]  @relation("InterestHistoryNewHolder")
+
+  @@index([cadastrePropertyInterestId])
+  @@index([personId])
+  @@index([organizationId])
+  @@index([identityId])
+  @@map("cadastre_property_interest_holders")
+}
+
+model CadastrePropertyInterestHistory {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  cadastrePropertyInterestId      String                  @db.Uuid
+  fromTitleVersionId      String?                 @db.Uuid
+  toTitleVersionId        String?                 @db.Uuid
+  priorHolderId           String?                 @db.Uuid
+  newHolderId             String?                 @db.Uuid
+  propertyTransferId      String?                 @db.Uuid
+  governingDecisionId     String?                 @db.Uuid
+  changeSummary           Json                    @default("{}")
+  effectiveDate           DateTime
+  recordedAt              DateTime                @default(now())
+  propertyInterest        CadastrePropertyInterest        @relation(fields: [cadastrePropertyInterestId], references: [id], onDelete: Restrict)
+  fromTitleVersion        TitleVersion?           @relation("InterestHistoryFromVersion", fields: [fromTitleVersionId], references: [id])
+  toTitleVersion          TitleVersion?           @relation("InterestHistoryToVersion", fields: [toTitleVersionId], references: [id])
+  priorHolder             CadastrePropertyInterestHolder? @relation("InterestHistoryPriorHolder", fields: [priorHolderId], references: [id])
+  newHolder               CadastrePropertyInterestHolder? @relation("InterestHistoryNewHolder", fields: [newHolderId], references: [id])
+  propertyTransfer        PropertyTransfer?       @relation(fields: [propertyTransferId], references: [id])
+  governingDecision       GovernmentDecision?     @relation("CadastrePropertyInterestHistoryDecision", fields: [governingDecisionId], references: [id])
+
+  @@index([cadastrePropertyInterestId])
+  @@index([propertyTransferId])
+  @@map("cadastre_property_interest_history")
+}
+
+model TitleInstrumentReference {
+  id                   String             @id @default(uuid()) @db.Uuid
+  titleRecordId        String             @db.Uuid
+  officialInstrumentId String?            @db.Uuid
+  instrumentRole       String             @default("SUPPORTING")
+  referenceSummary     String?
+  createdAt            DateTime           @default(now())
+  titleRecord          TitleRecord        @relation(fields: [titleRecordId], references: [id], onDelete: Cascade)
+  officialInstrument   OfficialInstrument? @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([titleRecordId])
+  @@index([officialInstrumentId])
+  @@map("title_instrument_references")
+}
+
+model PropertyTransfer {
+  id                              String                            @id @default(uuid()) @db.Uuid
+  transferReference               String                            @unique
+  applicationStatus               PropertyTransferApplicationStatus @default(INTAKE_DRAFT)
+  landParcelId                    String                            @db.Uuid
+  propertyRecordId                String                            @db.Uuid
+  titleRecordId                   String?                           @db.Uuid
+  jurisdictionId                  String                            @db.Uuid
+  institutionId                   String                            @db.Uuid
+  applicationId                   String?                           @db.Uuid
+  caseId                          String?                           @db.Uuid
+  governmentServiceId             String?                           @db.Uuid
+  governingServicePackVersionId   String?                           @db.Uuid
+  transferFeePaymentTransactionId String?                           @db.Uuid
+  transferBasisSummary            Json                              @default("{}")
+  accessClassification            PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  createdAt                       DateTime                          @default(now())
+  updatedAt                       DateTime                          @updatedAt
+  landParcel                      LandParcel                        @relation(fields: [landParcelId], references: [id])
+  propertyRecord                  PropertyRecord                    @relation(fields: [propertyRecordId], references: [id])
+  titleRecord                     TitleRecord?                      @relation(fields: [titleRecordId], references: [id])
+  jurisdiction                    Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution                     Institution                       @relation(fields: [institutionId], references: [id])
+  application                     Application?                      @relation(fields: [applicationId], references: [id])
+  case                            Case?                             @relation(fields: [caseId], references: [id])
+  governmentService               GovernmentService?                @relation(fields: [governmentServiceId], references: [id])
+  governingServicePackVersion     ServicePackVersion?               @relation("PropertyTransferGoverningServicePack", fields: [governingServicePackVersionId], references: [id])
+  transferFeePaymentTransaction   PaymentTransaction?               @relation("PropertyTransferFeePayment", fields: [transferFeePaymentTransactionId], references: [id])
+  parties                         TransferParty[]
+  evidenceLinks                   PropertyTransferEvidenceLink[]
+  registryEntry                   PropertyRegistryEntry?
+  interestHistory                 CadastrePropertyInterestHistory[]
+  transactionHistory              PropertyTransactionHistory[]
+  auditEvents                     PropertyRegistryAuditEvent[]
+
+  @@index([applicationStatus])
+  @@index([landParcelId])
+  @@index([propertyRecordId])
+  @@index([caseId])
+  @@index([applicationId])
+  @@map("property_transfers")
+}
+
+model TransferParty {
+  id                          String            @id @default(uuid()) @db.Uuid
+  propertyTransferId          String            @db.Uuid
+  partyRole                   TransferPartyRole
+  personId                    String?           @db.Uuid
+  organizationId              String?           @db.Uuid
+  identityId                  String?           @db.Uuid
+  representativeAuthorityId   String?           @db.Uuid
+  displayLabel                String
+  createdAt                   DateTime          @default(now())
+  propertyTransfer            PropertyTransfer  @relation(fields: [propertyTransferId], references: [id], onDelete: Cascade)
+  person                      Person?           @relation(fields: [personId], references: [id])
+  organization                Organization?     @relation(fields: [organizationId], references: [id])
+  identity                    Identity?         @relation("TransferPartyIdentity", fields: [identityId], references: [id])
+  representativeAuthority     RepresentativeAuthority? @relation(fields: [representativeAuthorityId], references: [id])
+
+  @@index([propertyTransferId])
+  @@index([identityId])
+  @@map("transfer_parties")
+}
+
+model CadastrePropertyEncumbrance {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  encumbranceReference        String                    @unique
+  titleRecordId               String                    @db.Uuid
+  encumbranceType             PropertyEncumbranceType
+  status                      PropertyEncumbranceStatus @default(ACTIVE)
+  effectiveFrom               DateTime?
+  effectiveTo                 DateTime?
+  releaseDecisionId           String?                   @db.Uuid
+  accessClassification        PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  summary                     String?
+  provenanceSummary             Json                      @default("{}")
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  titleRecord                 TitleRecord               @relation(fields: [titleRecordId], references: [id], onDelete: Restrict)
+  releaseDecision             GovernmentDecision?       @relation("CadastrePropertyEncumbranceReleaseDecision", fields: [releaseDecisionId], references: [id])
+  mortgageReference           MortgageReference?
+  lienReference               LienReference?
+  easementReference           EasementReference?
+  restrictionReference        RestrictionReference?
+
+  @@index([titleRecordId])
+  @@index([encumbranceType])
+  @@index([status])
+  @@map("cadastre_property_encumbrances")
+}
+
+model MortgageReference {
+  cadastrePropertyEncumbranceId String              @id @db.Uuid
+  lenderReference       String?
+  principalReference    String?
+  additionalAttributes  Json                @default("{}")
+  propertyEncumbrance   CadastrePropertyEncumbrance @relation(fields: [cadastrePropertyEncumbranceId], references: [id], onDelete: Cascade)
+
+  @@map("mortgage_references")
+}
+
+model LienReference {
+  cadastrePropertyEncumbranceId String              @id @db.Uuid
+  lienHolderReference   String?
+  amountReference       String?
+  additionalAttributes  Json                @default("{}")
+  propertyEncumbrance   CadastrePropertyEncumbrance @relation(fields: [cadastrePropertyEncumbranceId], references: [id], onDelete: Cascade)
+
+  @@map("lien_references")
+}
+
+model EasementReference {
+  cadastrePropertyEncumbranceId String              @id @db.Uuid
+  beneficiaryReference  String?
+  burdenDescription     String?
+  additionalAttributes  Json                @default("{}")
+  propertyEncumbrance   CadastrePropertyEncumbrance @relation(fields: [cadastrePropertyEncumbranceId], references: [id], onDelete: Cascade)
+
+  @@map("easement_references")
+}
+
+model RestrictionReference {
+  cadastrePropertyEncumbranceId String              @id @db.Uuid
+  restrictionSource     String?
+  restrictionText       String?
+  additionalAttributes  Json                @default("{}")
+  propertyEncumbrance   CadastrePropertyEncumbrance @relation(fields: [cadastrePropertyEncumbranceId], references: [id], onDelete: Cascade)
+
+  @@map("restriction_references")
+}
+
+model SurveyRecord {
+  id                   String                         @id @default(uuid()) @db.Uuid
+  surveyReference      String                         @unique
+  landParcelId         String                         @db.Uuid
+  jurisdictionId       String                         @db.Uuid
+  institutionId        String                         @db.Uuid
+  surveyDate           DateTime?
+  verificationState    PropertyRegistryVerificationState @default(UNVERIFIED)
+  provenanceSummary    Json                           @default("{}")
+  createdAt            DateTime                       @default(now())
+  updatedAt            DateTime                       @updatedAt
+  landParcel           LandParcel                     @relation(fields: [landParcelId], references: [id])
+  jurisdiction         Jurisdiction                   @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution                    @relation(fields: [institutionId], references: [id])
+  planReferences       SurveyPlanReference[]
+  surveyorCertifications SurveyorCertificationReference[]
+
+  @@index([landParcelId])
+  @@map("survey_records")
+}
+
+model SurveyPlanReference {
+  id              String       @id @default(uuid()) @db.Uuid
+  surveyRecordId  String       @db.Uuid
+  planReference   String
+  documentRecordId String?     @db.Uuid
+  createdAt       DateTime     @default(now())
+  surveyRecord    SurveyRecord @relation(fields: [surveyRecordId], references: [id], onDelete: Cascade)
+  documentRecord  DocumentRecord? @relation(fields: [documentRecordId], references: [id])
+
+  @@index([surveyRecordId])
+  @@map("survey_plan_references")
+}
+
+model SurveyorCertificationReference {
+  id                    String       @id @default(uuid()) @db.Uuid
+  surveyRecordId        String       @db.Uuid
+  surveyorReference     String
+  certificationReference String?
+  certifiedAt           DateTime?
+  createdAt             DateTime     @default(now())
+  surveyRecord          SurveyRecord @relation(fields: [surveyRecordId], references: [id], onDelete: Cascade)
+
+  @@index([surveyRecordId])
+  @@map("surveyor_certification_references")
+}
+
+model PropertyValuationRecord {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  propertyRecordId     String                   @db.Uuid
+  valuationPurpose     PropertyValuationPurpose
+  valuationReference   String?
+  amountReference      String?
+  currencyCode         String?
+  effectiveDate        DateTime
+  accessClassification PropertyRegistryAccessClassification @default(GOVERNMENT_RESTRICTED)
+  provenanceSummary    Json                     @default("{}")
+  createdAt            DateTime                 @default(now())
+  propertyRecord       PropertyRecord           @relation(fields: [propertyRecordId], references: [id], onDelete: Restrict)
+
+  @@index([propertyRecordId])
+  @@index([valuationPurpose])
+  @@map("property_valuation_records")
+}
+
+model PropertyTaxReference {
+  id                   String         @id @default(uuid()) @db.Uuid
+  propertyRecordId     String         @db.Uuid
+  taxpayerAccountId    String?        @db.Uuid
+  taxPeriodReference   String?
+  externalTaxReference String?
+  createdAt            DateTime       @default(now())
+  propertyRecord       PropertyRecord @relation(fields: [propertyRecordId], references: [id], onDelete: Restrict)
+  taxpayerAccount      TaxpayerAccount? @relation(fields: [taxpayerAccountId], references: [id])
+
+  @@index([propertyRecordId])
+  @@index([taxpayerAccountId])
+  @@map("property_tax_references")
+}
+
+model PropertyRegistryEntry {
+  id                          String                            @id @default(uuid()) @db.Uuid
+  entryReference              String                            @unique
+  propertyRecordId            String                            @db.Uuid
+  titleRecordId               String                            @db.Uuid
+  propertyTransferId          String?                           @unique @db.Uuid
+  jurisdictionId              String                            @db.Uuid
+  institutionId               String                            @db.Uuid
+  caseId                      String                            @db.Uuid
+  governmentDecisionId        String                            @db.Uuid
+  authorityEvaluationRecordId String                            @db.Uuid
+  status                      String                            @default("OFFICIAL")
+  accessClassification        PropertyRegistryAccessClassification @default(SUBJECT_ACCESS)
+  registeredAt                DateTime                          @default(now())
+  createdAt                   DateTime                          @default(now())
+  updatedAt                   DateTime                          @updatedAt
+  propertyRecord              PropertyRecord                    @relation(fields: [propertyRecordId], references: [id])
+  titleRecord                 TitleRecord                       @relation(fields: [titleRecordId], references: [id])
+  propertyTransfer            PropertyTransfer?                 @relation(fields: [propertyTransferId], references: [id])
+  jurisdiction                Jurisdiction                      @relation(fields: [jurisdictionId], references: [id])
+  institution                 Institution                       @relation(fields: [institutionId], references: [id])
+  case                        Case                              @relation(fields: [caseId], references: [id])
+  governmentDecision          GovernmentDecision                @relation("PropertyRegistryEntryDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord         @relation("PropertyRegistryEntryAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  corrections                 PropertyRegistryCorrection[]
+  verifications               PropertyRegistryVerification[]
+  restrictions                PropertyRegistryRestriction[]
+  auditEvents                 PropertyRegistryAuditEvent[]
+
+  @@index([propertyRecordId])
+  @@index([titleRecordId])
+  @@index([caseId])
+  @@map("property_registry_entries")
+}
+
+model PropertyRegistryCorrection {
+  id                          String                           @id @default(uuid()) @db.Uuid
+  correctionReference         String                           @unique
+  propertyRegistryEntryId     String                           @db.Uuid
+  status                      PropertyRegistryCorrectionStatus @default(DRAFT)
+  applicantIdentityId         String                           @db.Uuid
+  governmentDecisionId        String?                          @db.Uuid
+  authorityEvaluationRecordId String?                          @db.Uuid
+  previousTitleVersionId      String?                          @db.Uuid
+  newTitleVersionId           String?                          @unique @db.Uuid
+  requestedChanges            Json                             @default("{}")
+  submittedAt                 DateTime?
+  decidedAt                   DateTime?
+  createdAt                   DateTime                         @default(now())
+  updatedAt                   DateTime                         @updatedAt
+  propertyRegistryEntry       PropertyRegistryEntry            @relation(fields: [propertyRegistryEntryId], references: [id], onDelete: Restrict)
+  applicantIdentity           Identity                         @relation("PropertyRegistryCorrectionApplicant", fields: [applicantIdentityId], references: [id])
+  governmentDecision          GovernmentDecision?              @relation("PropertyRegistryCorrectionDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?       @relation("PropertyRegistryCorrectionAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  previousTitleVersion        TitleVersion?                    @relation("CorrectionPreviousTitleVersion", fields: [previousTitleVersionId], references: [id])
+  newTitleVersion             TitleVersion?                    @relation("CorrectionNewTitleVersion", fields: [newTitleVersionId], references: [id])
+
+  @@index([propertyRegistryEntryId])
+  @@index([status])
+  @@map("property_registry_corrections")
+}
+
+model PropertyRegistryVerification {
+  id                          String                         @id @default(uuid()) @db.Uuid
+  propertyRegistryEntryId     String                         @db.Uuid
+  verificationState           PropertyRegistryVerificationState
+  methodReference             String
+  verifiedAt                  DateTime?
+  verifiedByOfficeholderId    String?                        @db.Uuid
+  verifiedByIdentityId        String?                        @db.Uuid
+  authorityEvaluationRecordId String?                        @db.Uuid
+  publicVerificationCode      String?                        @unique
+  createdAt                   DateTime                       @default(now())
+  propertyRegistryEntry       PropertyRegistryEntry          @relation(fields: [propertyRegistryEntryId], references: [id], onDelete: Cascade)
+  verifiedByOfficeholder      Officeholder?                  @relation("PropertyRegistryVerifierOfficeholder", fields: [verifiedByOfficeholderId], references: [id])
+  verifiedByIdentity          Identity?                      @relation("PropertyRegistryVerifierIdentity", fields: [verifiedByIdentityId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord?     @relation("PropertyRegistryVerificationAuthority", fields: [authorityEvaluationRecordId], references: [id])
+
+  @@index([propertyRegistryEntryId])
+  @@index([verificationState])
+  @@map("property_registry_verifications")
+}
+
+model PropertyRegistryRestriction {
+  id                      String                            @id @default(uuid()) @db.Uuid
+  propertyRegistryEntryId String                            @db.Uuid
+  restrictionType         String
+  accessClassification    PropertyRegistryAccessClassification
+  effectiveFrom           DateTime
+  effectiveTo             DateTime?
+  authorityDecisionId     String?                           @db.Uuid
+  createdAt               DateTime                          @default(now())
+  propertyRegistryEntry   PropertyRegistryEntry             @relation(fields: [propertyRegistryEntryId], references: [id], onDelete: Cascade)
+  authorityDecision       GovernmentDecision?               @relation("PropertyRegistryRestrictionDecision", fields: [authorityDecisionId], references: [id])
+
+  @@index([propertyRegistryEntryId])
+  @@map("property_registry_restrictions")
+}
+
+model PropertyTransactionHistory {
+  id                String                              @id @default(uuid()) @db.Uuid
+  titleRecordId     String                              @db.Uuid
+  propertyTransferId String?                            @db.Uuid
+  eventType         PropertyTransactionHistoryEventType
+  eventSummary      Json                                @default("{}")
+  effectiveDate     DateTime
+  recordedAt        DateTime                            @default(now())
+  titleRecord       TitleRecord                         @relation(fields: [titleRecordId], references: [id], onDelete: Restrict)
+  propertyTransfer  PropertyTransfer?                   @relation(fields: [propertyTransferId], references: [id])
+
+  @@index([titleRecordId])
+  @@index([eventType])
+  @@map("property_transaction_history")
+}
+
+model PropertyTransferEvidenceLink {
+  id                 String           @id @default(uuid()) @db.Uuid
+  propertyTransferId String           @db.Uuid
+  evidenceRecordId   String           @db.Uuid
+  linkRole           String           @default("SUPPORTING")
+  createdAt          DateTime         @default(now())
+  propertyTransfer   PropertyTransfer @relation(fields: [propertyTransferId], references: [id], onDelete: Cascade)
+  evidenceRecord     EvidenceRecord   @relation(fields: [evidenceRecordId], references: [id], onDelete: Restrict)
+
+  @@unique([propertyTransferId, evidenceRecordId])
+  @@index([evidenceRecordId])
+  @@map("property_transfer_evidence_links")
+}
+
+model PropertyRegistryAuditEvent {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  propertyRegistryEntryId String?                        @db.Uuid
+  propertyTransferId      String?                        @db.Uuid
+  eventType               PropertyRegistryAuditEventType
+  actorIdentityId         String?                        @db.Uuid
+  metadata                Json                           @default("{}")
+  recordedAt              DateTime                       @default(now())
+  propertyRegistryEntry   PropertyRegistryEntry?         @relation(fields: [propertyRegistryEntryId], references: [id], onDelete: Cascade)
+  propertyTransfer        PropertyTransfer?              @relation(fields: [propertyTransferId], references: [id], onDelete: Cascade)
+  actor                   Identity?                      @relation("PropertyRegistryAuditActor", fields: [actorIdentityId], references: [id])
+
+  @@index([propertyRegistryEntryId])
+  @@index([propertyTransferId])
+  @@index([eventType])
+  @@map("property_registry_audit_events")
 }
 
 enum CustomsDataClassification {

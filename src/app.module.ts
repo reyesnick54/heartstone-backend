@@ -69,6 +69,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ServiceCatalogModule,
     SchedulingModule,
     CivilRegistryModule,
+    PropertyRegistryModule,
     ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,
