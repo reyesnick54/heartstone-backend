@@ -12,6 +12,7 @@ import { resetPlanningConstructionData } from '../../src/database/planning-const
 import { PrismaService } from '../../src/database/prisma.service';
 import { resetPropertyRegistryData } from '../../src/database/property-test-reset';
 import { resetRevenueData } from '../../src/database/revenue-test-reset';
+import { resetSocialProtectionData } from '../../src/database/social-protection-test-reset';
 import { resetTransportationData } from '../../src/database/transportation-test-reset';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
@@ -200,5 +201,6 @@ export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);
   await resetLabourData(prisma);
+  await resetSocialProtectionData(prisma);
   await resetIdentityData(prisma);
 }

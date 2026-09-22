@@ -1,8 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { ExternalDeterminationStatus, SocialProtectionActorPersona } from '@prisma/client';
+import { BenefitCategoryKind } from '@prisma/client';
 
 import {
   FORBIDDEN_AI_SOCIAL_PROTECTION_ACTIONS,
+  GENERIC_SEARCH_EXCLUDED_BENEFIT_CATEGORY_KINDS,
   PLATFORM_ADMIN_SOCIAL_PROTECTION_ROLE_MARKER,
   type RepresentativeBenefitScope,
 } from '../social-protection.constants';
@@ -195,5 +197,12 @@ export class SocialProtectionBoundaryService {
         );
       }
     }
+  }
+
+  filterSensitiveProgramsFromGenericSearch<
+    T extends { benefitCategory?: { categoryKind: BenefitCategoryKind } | null },
+  >(programs: T[]): T[] {
+    const excluded = new Set<string>(GENERIC_SEARCH_EXCLUDED_BENEFIT_CATEGORY_KINDS);
+    return programs.filter((program) => !excluded.has(program.benefitCategory?.categoryKind ?? ''));
   }
 }
