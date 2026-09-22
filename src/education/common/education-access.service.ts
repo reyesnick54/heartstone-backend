@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { GuardianEducationRelationshipStatus } from '@prisma/client';
+import { GuardianEducationRelationshipStatus, MembershipStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { EDUCATION_REASON_CODES, type EducationGuardianAccessScope } from '../education.constants';
@@ -71,5 +71,55 @@ export class EducationAccessService {
 
     const scopes = relationship.authorizedAccessScopes as EducationGuardianAccessScope;
     this.boundary.assertGuardianScope(scopes, context.requestedScope);
+  }
+
+  async resolveGuardianAuthorizedStudentProfileIds(guardianIdentityId: string): Promise<string[]> {
+    const now = new Date();
+    const links = await this.prisma.guardianEducationRelationship.findMany({
+      where: {
+        guardianIdentityId,
+        status: GuardianEducationRelationshipStatus.ACTIVE,
+        effectiveFrom: { lte: now },
+        OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
+      },
+      select: { studentEducationProfileId: true, authorizedAccessScopes: true },
+    });
+
+    return links
+      .filter((link) => {
+        const scope = link.authorizedAccessScopes as EducationGuardianAccessScope;
+        return (
+          scope.viewEnrollmentSummary === true ||
+          scope.viewTranscriptSummary === true ||
+          scope.viewSupportPrograms === true
+        );
+      })
+      .map((link) => link.studentEducationProfileId);
+  }
+
+  async assertOrganizationEducationAccess(
+    identityId: string,
+    organizationId: string,
+  ): Promise<void> {
+    const now = new Date();
+    const membership = await this.prisma.organizationMembership.findFirst({
+      where: {
+        identityId,
+        organizationId,
+        status: MembershipStatus.ACTIVE,
+        effectiveFrom: { lte: now },
+        OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
+      },
+    });
+    if (!membership) {
+      throw new ForbiddenException(EDUCATION_REASON_CODES.ORGANIZATION_MEMBERSHIP_REQUIRED);
+    }
+
+    const institution = await this.prisma.educationInstitution.findFirst({
+      where: { organizationId },
+    });
+    if (!institution) {
+      throw new ForbiddenException(EDUCATION_REASON_CODES.INSTITUTION_PROFILE_REQUIRED);
+    }
   }
 }
