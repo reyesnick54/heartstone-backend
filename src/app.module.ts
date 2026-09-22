@@ -34,6 +34,7 @@ import { OperationalSupportModule } from './operational-support/operational-supp
 import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { PropertyRegistryModule } from './property-registry/property-registry.module';
+import { PublicSafetyModule } from './public-safety/public-safety.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -91,6 +92,7 @@ import { TransportationModule } from './transportation/transportation.module';
     RevenueModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
+    PublicSafetyModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,
