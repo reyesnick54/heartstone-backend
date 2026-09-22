@@ -1,8 +1,54 @@
+-- Reconcile NON_PRODUCTION education government foundation (#161) to registry foundation.
+-- Fresh environments apply 20260922193000 first; this migration replaces those artifacts.
+
+DROP TABLE IF EXISTS "education_record_correction_history" CASCADE;
+DROP TABLE IF EXISTS "education_record_corrections" CASCADE;
+DROP TABLE IF EXISTS "education_institution_inspection_references" CASCADE;
+DROP TABLE IF EXISTS "education_external_dependencies" CASCADE;
+DROP TABLE IF EXISTS "education_credential_references" CASCADE;
+DROP TABLE IF EXISTS "education_academic_record_references" CASCADE;
+DROP TABLE IF EXISTS "scholarship_award_records" CASCADE;
+DROP TABLE IF EXISTS "scholarship_application_profiles" CASCADE;
+DROP TABLE IF EXISTS "education_enrollment_application_profiles" CASCADE;
+DROP TABLE IF EXISTS "education_enrollment_records" CASCADE;
+DROP TABLE IF EXISTS "education_grant_application_profiles" CASCADE;
+DROP TABLE IF EXISTS "educator_license_records" CASCADE;
+DROP TABLE IF EXISTS "education_accreditation_records" CASCADE;
+DROP TABLE IF EXISTS "education_institution_license_records" CASCADE;
+DROP TABLE IF EXISTS "education_guardian_relationships" CASCADE;
+DROP TABLE IF EXISTS "education_institution_registry_records" CASCADE;
+DROP TABLE IF EXISTS "education_student_profiles" CASCADE;
+
+DROP TYPE IF EXISTS "EducationDataClassification" CASCADE;
+DROP TYPE IF EXISTS "EducationActorPersona" CASCADE;
+DROP TYPE IF EXISTS "EducationGuardianRelationshipStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationStudentProfileStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationInstitutionRegistrationStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationLicenseLifecycleStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationAccreditationStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationEnrollmentStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationExternalDependencyType" CASCADE;
+DROP TYPE IF EXISTS "EducationExternalDependencyRecordedBy" CASCADE;
+DROP TYPE IF EXISTS "EducationRecordCorrectionStatus" CASCADE;
+DROP TYPE IF EXISTS "ScholarshipApplicationProfileStatus" CASCADE;
+DROP TYPE IF EXISTS "ScholarshipAwardStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationEnrollmentApplicationProfileStatus" CASCADE;
+DROP TYPE IF EXISTS "EducationGrantApplicationProfileStatus" CASCADE;
+
+-- CreateEnum
+CREATE TYPE "EducationDataClassification" AS ENUM ('STUDENT_ACCESS', 'GUARDIAN_AUTHORIZED', 'INSTITUTION_ACCESS', 'GOVERNMENT_AUTHORIZED', 'RESTRICTED', 'PUBLIC_VERIFICATION_ONLY');
+
+-- CreateEnum
+CREATE TYPE "EducationActorPersona" AS ENUM ('STUDENT', 'GUARDIAN', 'AUTHORIZED_REPRESENTATIVE', 'ADULT_STUDENT', 'EDUCATOR', 'INSTITUTION_ADMIN', 'EDUCATION_OFFICER', 'SENIOR_DECISION_OFFICER', 'COMPLIANCE_OFFICER', 'TECHNICAL_ADMIN', 'AI_ASSISTANCE', 'PAYMENT_SYSTEM', 'SYSTEM');
+
 -- CreateEnum
 CREATE TYPE "EducationInstitutionKind" AS ENUM ('PUBLIC_INSTITUTION', 'PRIVATE_INSTITUTION', 'UNIVERSITY', 'VOCATIONAL_INSTITUTION', 'TRAINING_PROVIDER', 'OTHER_CONFIGURED');
 
 -- CreateEnum
 CREATE TYPE "EducationInstitutionOperationalStatus" AS ENUM ('DRAFT', 'REGISTERED', 'LICENSED', 'ACCREDITED', 'SUSPENDED', 'WITHDRAWN', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "EducationInstitutionRegistrationStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'REGISTERED', 'REJECTED', 'WITHDRAWN');
 
 -- CreateEnum
 CREATE TYPE "EducationInstitutionLicenseStatus" AS ENUM ('NOT_ISSUED', 'PENDING', 'ISSUED', 'EFFECTIVE', 'EXPIRED', 'REVOKED', 'SUSPENDED');
@@ -35,293 +81,16 @@ CREATE TYPE "AcademicRecordVerificationStatus" AS ENUM ('UNVERIFIED', 'INSTITUTI
 CREATE TYPE "AcademicCredentialLifecycleStatus" AS ENUM ('DRAFT', 'PENDING_ISSUANCE', 'ISSUED', 'EFFECTIVE', 'REVOKED', 'SUPERSEDED');
 
 -- CreateEnum
+CREATE TYPE "ScholarshipApplicationProfileStatus" AS ENUM ('LINKED', 'ACTIVE', 'WITHDRAWN', 'CLOSED');
+
+-- CreateEnum
 CREATE TYPE "EducatorLicenseRecordStatus" AS ENUM ('NOT_ISSUED', 'PENDING', 'ISSUED', 'EFFECTIVE', 'EXPIRED', 'REVOKED', 'SUSPENDED');
 
--- AlterEnum
-BEGIN;
-CREATE TYPE "EducationDataClassification_new" AS ENUM ('STUDENT_ACCESS', 'GUARDIAN_AUTHORIZED', 'INSTITUTION_ACCESS', 'GOVERNMENT_AUTHORIZED', 'RESTRICTED', 'PUBLIC_VERIFICATION_ONLY');
-ALTER TABLE "education_student_profiles" ALTER COLUMN "dataClassification" DROP DEFAULT;
-ALTER TABLE "education_institution_registry_records" ALTER COLUMN "dataClassification" DROP DEFAULT;
-ALTER TABLE "education_institutions" ALTER COLUMN "dataClassification" TYPE "EducationDataClassification_new" USING ("dataClassification"::text::"EducationDataClassification_new");
-ALTER TABLE "student_education_profiles" ALTER COLUMN "dataClassification" TYPE "EducationDataClassification_new" USING ("dataClassification"::text::"EducationDataClassification_new");
-ALTER TABLE "academic_records" ALTER COLUMN "dataClassification" TYPE "EducationDataClassification_new" USING ("dataClassification"::text::"EducationDataClassification_new");
-ALTER TABLE "academic_credentials" ALTER COLUMN "dataClassification" TYPE "EducationDataClassification_new" USING ("dataClassification"::text::"EducationDataClassification_new");
-ALTER TABLE "educator_profile_references" ALTER COLUMN "dataClassification" TYPE "EducationDataClassification_new" USING ("dataClassification"::text::"EducationDataClassification_new");
-ALTER TYPE "EducationDataClassification" RENAME TO "EducationDataClassification_old";
-ALTER TYPE "EducationDataClassification_new" RENAME TO "EducationDataClassification";
-DROP TYPE "EducationDataClassification_old";
-COMMIT;
-
--- AlterEnum
-BEGIN;
-CREATE TYPE "EducationActorPersona_new" AS ENUM ('STUDENT', 'GUARDIAN', 'AUTHORIZED_REPRESENTATIVE', 'ADULT_STUDENT', 'EDUCATOR', 'INSTITUTION_ADMIN', 'EDUCATION_OFFICER', 'SENIOR_DECISION_OFFICER', 'COMPLIANCE_OFFICER', 'TECHNICAL_ADMIN', 'AI_ASSISTANCE', 'PAYMENT_SYSTEM', 'SYSTEM');
-ALTER TABLE "education_institution_status_history" ALTER COLUMN "actorPersona" TYPE "EducationActorPersona_new" USING ("actorPersona"::text::"EducationActorPersona_new");
-ALTER TABLE "enrollment_history" ALTER COLUMN "actorPersona" TYPE "EducationActorPersona_new" USING ("actorPersona"::text::"EducationActorPersona_new");
-ALTER TABLE "transcript_record_correction_history" ALTER COLUMN "actorPersona" TYPE "EducationActorPersona_new" USING ("actorPersona"::text::"EducationActorPersona_new");
-ALTER TYPE "EducationActorPersona" RENAME TO "EducationActorPersona_old";
-ALTER TYPE "EducationActorPersona_new" RENAME TO "EducationActorPersona";
-DROP TYPE "EducationActorPersona_old";
-COMMIT;
-
--- AlterEnum
-BEGIN;
-CREATE TYPE "EducationInstitutionRegistrationStatus_new" AS ENUM ('DRAFT', 'SUBMITTED', 'REGISTERED', 'REJECTED', 'WITHDRAWN');
-ALTER TABLE "education_institution_registry_records" ALTER COLUMN "registrationStatus" DROP DEFAULT;
-ALTER TABLE "education_institution_registrations" ALTER COLUMN "status" TYPE "EducationInstitutionRegistrationStatus_new" USING ("status"::text::"EducationInstitutionRegistrationStatus_new");
-ALTER TYPE "EducationInstitutionRegistrationStatus" RENAME TO "EducationInstitutionRegistrationStatus_old";
-ALTER TYPE "EducationInstitutionRegistrationStatus_new" RENAME TO "EducationInstitutionRegistrationStatus";
-DROP TYPE "EducationInstitutionRegistrationStatus_old";
-COMMIT;
-
--- AlterEnum
-BEGIN;
-CREATE TYPE "EducationExternalDependencyType_new" AS ENUM ('CIVIL_IDENTITY', 'IMMIGRATION_STATUS', 'PROFESSIONAL_REGULATOR', 'ACCREDITATION_BODY', 'BACKGROUND_CHECK', 'HEALTH_SCREENING', 'OTHER_AUTHORIZED');
-ALTER TABLE "education_external_dependencies" ALTER COLUMN "dependencyType" TYPE "EducationExternalDependencyType_new" USING ("dependencyType"::text::"EducationExternalDependencyType_new");
-ALTER TYPE "EducationExternalDependencyType" RENAME TO "EducationExternalDependencyType_old";
-ALTER TYPE "EducationExternalDependencyType_new" RENAME TO "EducationExternalDependencyType";
-DROP TYPE "EducationExternalDependencyType_old";
-COMMIT;
-
--- AlterEnum
-BEGIN;
-CREATE TYPE "EducationExternalDependencyRecordedBy_new" AS ENUM ('EDUCATION_OFFICER', 'INTEGRATION_SYSTEM', 'EXTERNAL_AUTHORITY_LIAISON', 'SYSTEM');
-ALTER TABLE "education_external_dependencies" ALTER COLUMN "recordedBy" TYPE "EducationExternalDependencyRecordedBy_new" USING ("recordedBy"::text::"EducationExternalDependencyRecordedBy_new");
-ALTER TYPE "EducationExternalDependencyRecordedBy" RENAME TO "EducationExternalDependencyRecordedBy_old";
-ALTER TYPE "EducationExternalDependencyRecordedBy_new" RENAME TO "EducationExternalDependencyRecordedBy";
-DROP TYPE "EducationExternalDependencyRecordedBy_old";
-COMMIT;
-
--- DropForeignKey
-ALTER TABLE "education_student_profiles" DROP CONSTRAINT "education_student_profiles_subjectIdentityId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_student_profiles" DROP CONSTRAINT "education_student_profiles_jurisdictionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_guardian_relationships" DROP CONSTRAINT "education_guardian_relationships_guardianIdentityId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_guardian_relationships" DROP CONSTRAINT "education_guardian_relationships_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_registry_records" DROP CONSTRAINT "education_institution_registry_records_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_registry_records" DROP CONSTRAINT "education_institution_registry_records_jurisdictionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_license_records" DROP CONSTRAINT "education_institution_license_records_institutionRegistryR_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_license_records" DROP CONSTRAINT "education_institution_license_records_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_license_records" DROP CONSTRAINT "education_institution_license_records_governmentDecisionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_accreditation_records" DROP CONSTRAINT "education_accreditation_records_institutionRegistryRecordI_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_accreditation_records" DROP CONSTRAINT "education_accreditation_records_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_accreditation_records" DROP CONSTRAINT "education_accreditation_records_governmentDecisionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "educator_license_records" DROP CONSTRAINT "educator_license_records_subjectIdentityId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_records" DROP CONSTRAINT "education_enrollment_records_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_records" DROP CONSTRAINT "education_enrollment_records_institutionOrganizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_records" DROP CONSTRAINT "education_enrollment_records_institutionRegistryRecordId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_application_profiles" DROP CONSTRAINT "education_enrollment_application_profiles_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_application_profiles" DROP CONSTRAINT "education_enrollment_application_profiles_caseId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_enrollment_application_profiles" DROP CONSTRAINT "education_enrollment_application_profiles_applicationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "scholarship_application_profiles" DROP CONSTRAINT "scholarship_application_profiles_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "scholarship_award_records" DROP CONSTRAINT "scholarship_award_records_scholarshipApplicationProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "scholarship_award_records" DROP CONSTRAINT "scholarship_award_records_governmentDecisionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_grant_application_profiles" DROP CONSTRAINT "education_grant_application_profiles_caseId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_grant_application_profiles" DROP CONSTRAINT "education_grant_application_profiles_applicationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_academic_record_references" DROP CONSTRAINT "education_academic_record_references_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_credential_references" DROP CONSTRAINT "education_credential_references_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_record_corrections" DROP CONSTRAINT "education_record_corrections_studentProfileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_record_corrections" DROP CONSTRAINT "education_record_corrections_applicantIdentityId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_record_corrections" DROP CONSTRAINT "education_record_corrections_governmentDecisionId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_record_correction_history" DROP CONSTRAINT "education_record_correction_history_educationRecordCorrect_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_record_correction_history" DROP CONSTRAINT "education_record_correction_history_actorIdentityId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_inspection_references" DROP CONSTRAINT "education_institution_inspection_references_inspectionReco_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_inspection_references" DROP CONSTRAINT "education_institution_inspection_references_institutionReg_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_institution_inspection_references" DROP CONSTRAINT "education_institution_inspection_references_organizationId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_external_dependencies" DROP CONSTRAINT "education_external_dependencies_caseId_fkey";
-
--- DropForeignKey
-ALTER TABLE "education_external_dependencies" DROP CONSTRAINT "education_external_dependencies_studentProfileId_fkey";
-
--- DropIndex
-DROP INDEX "educator_license_records_licenseNumber_key";
-
--- DropIndex
-DROP INDEX "educator_license_records_publicVerificationToken_key";
-
--- DropIndex
-DROP INDEX "educator_license_records_subjectIdentityId_idx";
-
--- DropIndex
-DROP INDEX "scholarship_application_profiles_studentProfileId_idx";
-
--- DropIndex
-DROP INDEX "education_external_dependencies_dependencyReference_key";
-
--- DropIndex
-DROP INDEX "education_external_dependencies_caseId_idx";
-
--- DropIndex
-DROP INDEX "education_external_dependencies_studentProfileId_idx";
-
--- AlterTable
-ALTER TABLE "educator_license_records" DROP COLUMN "licenseNumber",
-DROP COLUMN "lifecycleStatus",
-DROP COLUMN "publicVerificationToken",
-DROP COLUMN "subjectIdentityId",
-DROP COLUMN "validFrom",
-DROP COLUMN "validUntil",
-ADD COLUMN     "educatorProfileReferenceId" UUID NOT NULL,
-ADD COLUMN     "effectiveFrom" TIMESTAMP(3),
-ADD COLUMN     "effectiveUntil" TIMESTAMP(3),
-ADD COLUMN     "issuedAt" TIMESTAMP(3),
-ADD COLUMN     "licenseReference" TEXT NOT NULL,
-ADD COLUMN     "licenseTypeCode" TEXT,
-ADD COLUMN     "officialInstrumentId" UUID,
-ADD COLUMN     "status" "EducatorLicenseRecordStatus" NOT NULL DEFAULT 'NOT_ISSUED';
-
--- AlterTable
-ALTER TABLE "scholarship_application_profiles" DROP COLUMN "recommendationOnly",
-DROP COLUMN "studentProfileId",
-ADD COLUMN     "aiRecommendationIsNotDecision" BOOLEAN NOT NULL DEFAULT true,
-ADD COLUMN     "scholarshipProgramReferenceId" UUID NOT NULL,
-ADD COLUMN     "studentEducationProfileId" UUID NOT NULL;
-
--- AlterTable
-ALTER TABLE "education_external_dependencies" DROP COLUMN "blocksDecisionWhenRequired",
-DROP COLUMN "caseId",
-DROP COLUMN "dependencyReference",
-DROP COLUMN "integrationGatewayRouteCode",
-DROP COLUMN "studentProfileId",
-ADD COLUMN     "authenticatedPayloadHash" TEXT,
-ADD COLUMN     "educationInstitutionId" UUID,
-ADD COLUMN     "isAuthenticated" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "studentEducationProfileId" UUID;
-
--- DropTable
-DROP TABLE "education_student_profiles";
-
--- DropTable
-DROP TABLE "education_guardian_relationships";
-
--- DropTable
-DROP TABLE "education_institution_registry_records";
-
--- DropTable
-DROP TABLE "education_institution_license_records";
-
--- DropTable
-DROP TABLE "education_accreditation_records";
-
--- DropTable
-DROP TABLE "education_enrollment_records";
-
--- DropTable
-DROP TABLE "education_enrollment_application_profiles";
-
--- DropTable
-DROP TABLE "scholarship_award_records";
-
--- DropTable
-DROP TABLE "education_grant_application_profiles";
-
--- DropTable
-DROP TABLE "education_academic_record_references";
-
--- DropTable
-DROP TABLE "education_credential_references";
-
--- DropTable
-DROP TABLE "education_record_corrections";
-
--- DropTable
-DROP TABLE "education_record_correction_history";
-
--- DropTable
-DROP TABLE "education_institution_inspection_references";
-
--- DropEnum
-DROP TYPE "EducationGuardianRelationshipStatus";
-
--- DropEnum
-DROP TYPE "EducationStudentProfileStatus";
-
--- DropEnum
-DROP TYPE "EducationLicenseLifecycleStatus";
-
--- DropEnum
-DROP TYPE "EducationAccreditationStatus";
-
--- DropEnum
-DROP TYPE "EducationEnrollmentStatus";
-
--- DropEnum
-DROP TYPE "EducationRecordCorrectionStatus";
-
--- DropEnum
-DROP TYPE "ScholarshipAwardStatus";
-
--- DropEnum
-DROP TYPE "EducationEnrollmentApplicationProfileStatus";
-
--- DropEnum
-DROP TYPE "EducationGrantApplicationProfileStatus";
+-- CreateEnum
+CREATE TYPE "EducationExternalDependencyType" AS ENUM ('CIVIL_IDENTITY', 'IMMIGRATION_STATUS', 'PROFESSIONAL_REGULATOR', 'ACCREDITATION_BODY', 'BACKGROUND_CHECK', 'HEALTH_SCREENING', 'OTHER_AUTHORIZED');
+
+-- CreateEnum
+CREATE TYPE "EducationExternalDependencyRecordedBy" AS ENUM ('EDUCATION_OFFICER', 'INTEGRATION_SYSTEM', 'EXTERNAL_AUTHORITY_LIAISON', 'SYSTEM');
 
 -- CreateTable
 CREATE TABLE "education_configurations" (
@@ -668,6 +437,23 @@ CREATE TABLE "scholarship_program_references" (
 );
 
 -- CreateTable
+CREATE TABLE "scholarship_application_profiles" (
+    "id" UUID NOT NULL,
+    "profileNumber" TEXT NOT NULL,
+    "studentEducationProfileId" UUID NOT NULL,
+    "scholarshipProgramReferenceId" UUID NOT NULL,
+    "caseId" UUID NOT NULL,
+    "applicationId" UUID NOT NULL,
+    "status" "ScholarshipApplicationProfileStatus" NOT NULL DEFAULT 'LINKED',
+    "doesNotCreateAward" BOOLEAN NOT NULL DEFAULT true,
+    "aiRecommendationIsNotDecision" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "scholarship_application_profiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "education_grant_references" (
     "id" UUID NOT NULL,
     "grantCode" TEXT NOT NULL,
@@ -706,6 +492,24 @@ CREATE TABLE "educator_profile_references" (
 );
 
 -- CreateTable
+CREATE TABLE "educator_license_records" (
+    "id" UUID NOT NULL,
+    "educatorProfileReferenceId" UUID NOT NULL,
+    "licenseReference" TEXT NOT NULL,
+    "status" "EducatorLicenseRecordStatus" NOT NULL DEFAULT 'NOT_ISSUED',
+    "governmentDecisionId" UUID,
+    "officialInstrumentId" UUID,
+    "licenseTypeCode" TEXT,
+    "effectiveFrom" TIMESTAMP(3),
+    "effectiveUntil" TIMESTAMP(3),
+    "issuedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "educator_license_records_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "professional_education_qualification_references" (
     "id" UUID NOT NULL,
     "educatorProfileReferenceId" UUID NOT NULL,
@@ -740,6 +544,25 @@ CREATE TABLE "education_compliance_references" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "education_compliance_references_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "education_external_dependencies" (
+    "id" UUID NOT NULL,
+    "dependencyType" "EducationExternalDependencyType" NOT NULL,
+    "educationInstitutionId" UUID,
+    "studentEducationProfileId" UUID,
+    "externalAuthorityId" UUID,
+    "isRequired" BOOLEAN NOT NULL DEFAULT false,
+    "isAuthenticated" BOOLEAN NOT NULL DEFAULT false,
+    "authenticatedPayloadHash" TEXT,
+    "recordedBy" "EducationExternalDependencyRecordedBy" NOT NULL,
+    "recordedByIdentityId" UUID,
+    "resolutionStatusCode" TEXT NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "education_external_dependencies_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -905,6 +728,21 @@ CREATE INDEX "scholarship_program_references_programCode_idx" ON "scholarship_pr
 CREATE INDEX "scholarship_program_references_jurisdictionId_idx" ON "scholarship_program_references"("jurisdictionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "scholarship_application_profiles_profileNumber_key" ON "scholarship_application_profiles"("profileNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "scholarship_application_profiles_caseId_key" ON "scholarship_application_profiles"("caseId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "scholarship_application_profiles_applicationId_key" ON "scholarship_application_profiles"("applicationId");
+
+-- CreateIndex
+CREATE INDEX "scholarship_application_profiles_studentEducationProfileId_idx" ON "scholarship_application_profiles"("studentEducationProfileId");
+
+-- CreateIndex
+CREATE INDEX "scholarship_application_profiles_scholarshipProgramReferenc_idx" ON "scholarship_application_profiles"("scholarshipProgramReferenceId");
+
+-- CreateIndex
 CREATE INDEX "education_grant_references_grantCode_idx" ON "education_grant_references"("grantCode");
 
 -- CreateIndex
@@ -926,6 +764,15 @@ CREATE INDEX "educator_profile_references_educatorIdentityId_idx" ON "educator_p
 CREATE INDEX "educator_profile_references_educationInstitutionId_idx" ON "educator_profile_references"("educationInstitutionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "educator_license_records_licenseReference_key" ON "educator_license_records"("licenseReference");
+
+-- CreateIndex
+CREATE INDEX "educator_license_records_educatorProfileReferenceId_idx" ON "educator_license_records"("educatorProfileReferenceId");
+
+-- CreateIndex
+CREATE INDEX "educator_license_records_status_idx" ON "educator_license_records"("status");
+
+-- CreateIndex
 CREATE INDEX "professional_education_qualification_references_educatorPro_idx" ON "professional_education_qualification_references"("educatorProfileReferenceId");
 
 -- CreateIndex
@@ -939,21 +786,6 @@ CREATE UNIQUE INDEX "education_compliance_references_complianceMatterId_key" ON 
 
 -- CreateIndex
 CREATE INDEX "education_compliance_references_educationInstitutionId_idx" ON "education_compliance_references"("educationInstitutionId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "educator_license_records_licenseReference_key" ON "educator_license_records"("licenseReference");
-
--- CreateIndex
-CREATE INDEX "educator_license_records_educatorProfileReferenceId_idx" ON "educator_license_records"("educatorProfileReferenceId");
-
--- CreateIndex
-CREATE INDEX "educator_license_records_status_idx" ON "educator_license_records"("status");
-
--- CreateIndex
-CREATE INDEX "scholarship_application_profiles_studentEducationProfileId_idx" ON "scholarship_application_profiles"("studentEducationProfileId");
-
--- CreateIndex
-CREATE INDEX "scholarship_application_profiles_scholarshipProgramReferenc_idx" ON "scholarship_application_profiles"("scholarshipProgramReferenceId");
 
 -- CreateIndex
 CREATE INDEX "education_external_dependencies_educationInstitutionId_idx" ON "education_external_dependencies"("educationInstitutionId");
@@ -1118,6 +950,12 @@ ALTER TABLE "scholarship_application_profiles" ADD CONSTRAINT "scholarship_appli
 ALTER TABLE "scholarship_application_profiles" ADD CONSTRAINT "scholarship_application_profiles_scholarshipProgramReferen_fkey" FOREIGN KEY ("scholarshipProgramReferenceId") REFERENCES "scholarship_program_references"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "scholarship_application_profiles" ADD CONSTRAINT "scholarship_application_profiles_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "cases"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "scholarship_application_profiles" ADD CONSTRAINT "scholarship_application_profiles_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "applications"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "education_grant_references" ADD CONSTRAINT "education_grant_references_jurisdictionId_fkey" FOREIGN KEY ("jurisdictionId") REFERENCES "jurisdictions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1134,6 +972,9 @@ ALTER TABLE "educator_profile_references" ADD CONSTRAINT "educator_profile_refer
 
 -- AddForeignKey
 ALTER TABLE "educator_license_records" ADD CONSTRAINT "educator_license_records_educatorProfileReferenceId_fkey" FOREIGN KEY ("educatorProfileReferenceId") REFERENCES "educator_profile_references"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "educator_license_records" ADD CONSTRAINT "educator_license_records_governmentDecisionId_fkey" FOREIGN KEY ("governmentDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "educator_license_records" ADD CONSTRAINT "educator_license_records_officialInstrumentId_fkey" FOREIGN KEY ("officialInstrumentId") REFERENCES "official_instruments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1161,3 +1002,9 @@ ALTER TABLE "education_external_dependencies" ADD CONSTRAINT "education_external
 
 -- AddForeignKey
 ALTER TABLE "education_external_dependencies" ADD CONSTRAINT "education_external_dependencies_studentEducationProfileId_fkey" FOREIGN KEY ("studentEducationProfileId") REFERENCES "student_education_profiles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "education_external_dependencies" ADD CONSTRAINT "education_external_dependencies_externalAuthorityId_fkey" FOREIGN KEY ("externalAuthorityId") REFERENCES "external_authorities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "education_external_dependencies" ADD CONSTRAINT "education_external_dependencies_recordedByIdentityId_fkey" FOREIGN KEY ("recordedByIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
