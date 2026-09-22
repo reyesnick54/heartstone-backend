@@ -1,0 +1,52 @@
+export const TAXPAYER_ACCOUNT_NUMBER_PREFIX = 'TAXACCT';
+export const TAX_RETURN_REFERENCE_PREFIX = 'TXRTN';
+export const TAX_ASSESSMENT_REFERENCE_PREFIX = 'TXASM';
+export const TAX_REFUND_CLAIM_PREFIX = 'TXRFND';
+export const TAX_CLEARANCE_REQUEST_PREFIX = 'TXCLR';
+
+export const REVENUE_BOUNDARY_DISCLAIMER =
+  'Tax return filing records self-declaration only; it is not a verified government fact and does not constitute a tax assessment.';
+
+export const REVENUE_PAYMENT_BOUNDARY_DISCLAIMER =
+  'Payment settlement records financial receipt only; it does not create tax compliance clearance or alter assessed liability.';
+
+export const REVENUE_REFUND_BOUNDARY_DISCLAIMER =
+  'Refund request records taxpayer ask only; authorization and disbursement require separate authoritative decisions.';
+
+export const REVENUE_AUDIT_BOUNDARY_DISCLAIMER =
+  'Audit or review matter records inquiry scope only; it does not by itself prove a tax violation.';
+
+export const FORBIDDEN_AI_TAX_ACTIONS = [
+  'ISSUE_TAX_ASSESSMENT',
+  'AUTHORIZE_REFUND',
+  'ISSUE_CLEARANCE_CERTIFICATE',
+  'ALTER_TAX_LIABILITY',
+  'FINALIZE_COMPLIANCE_CLEARANCE',
+] as const;
+
+export const PLATFORM_ADMIN_TAX_ROLE_MARKER = 'PLATFORM_TECHNICAL_ADMIN';
+
+export const REVENUE_REASON_CODES = {
+  CROSS_TAXPAYER_ACCESS_DENIED: 'CROSS_TAXPAYER_ACCESS_DENIED',
+  REPRESENTATIVE_AUTHORITY_REQUIRED: 'REPRESENTATIVE_AUTHORITY_REQUIRED',
+  SUBMITTED_RETURN_IMMUTABLE: 'SUBMITTED_RETURN_IMMUTABLE',
+  AI_CANNOT_ISSUE_ASSESSMENT: 'AI_CANNOT_ISSUE_ASSESSMENT',
+  CLIENT_ASSESSMENT_FIELDS_FORBIDDEN: 'CLIENT_ASSESSMENT_FIELDS_FORBIDDEN',
+  PAYMENT_DOES_NOT_CLEAR: 'PAYMENT_DOES_NOT_CLEAR',
+  REFUND_REQUEST_NOT_DISBURSEMENT: 'REFUND_REQUEST_NOT_DISBURSEMENT',
+  PLATFORM_ADMIN_LIABILITY_FORBIDDEN: 'PLATFORM_ADMIN_LIABILITY_FORBIDDEN',
+  CLEARANCE_CONDITIONS_NOT_MET: 'CLEARANCE_CONDITIONS_NOT_MET',
+  RETURN_NOT_ASSESSMENT: 'RETURN_NOT_ASSESSMENT',
+  ASSESSMENT_NOT_PAYMENT: 'ASSESSMENT_NOT_PAYMENT',
+  AI_ESTIMATE_NOT_ASSESSMENT: 'AI_ESTIMATE_NOT_ASSESSMENT',
+  AUDIT_NOT_VIOLATION: 'AUDIT_NOT_VIOLATION',
+} as const;
+
+export const TAX_CLEARANCE_REQUIRED_CONDITION_KEYS = [
+  'filingCurrent',
+  'noOutstandingBalance',
+  'noOpenAuditBlock',
+  'authorizedOfficerApproval',
+] as const;
+
+export type TaxClearanceConditionKey = (typeof TAX_CLEARANCE_REQUIRED_CONDITION_KEYS)[number];

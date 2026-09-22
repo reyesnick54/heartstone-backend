@@ -1,3 +1,4 @@
+import { resetImmigrationData } from './immigration-test-reset';
 import { type PrismaService } from './prisma.service';
 
 export async function resetCivilRegistryData(prisma: PrismaService): Promise<void> {
@@ -13,6 +14,7 @@ export async function resetCivilRegistryData(prisma: PrismaService): Promise<voi
 
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
   await resetCivilRegistryData(prisma);
+  await resetImmigrationData(prisma);
   await prisma.instrumentLifecycleDecisionLink.deleteMany();
   await prisma.instrumentLifecycleEvent.deleteMany();
   await prisma.decisionReviewReference.deleteMany();

@@ -94,7 +94,12 @@ model Jurisdiction {
   reconsiderationProceedings    ReconsiderationProceeding[]
   internalAdministrativeReviews InternalAdministrativeReview[]
   servicePackJurisdictionTargets ServicePack[]                 @relation("ServicePackJurisdiction")
+  immigrationProfiles            ImmigrationProfile[]
   servicePackJurisdictionBindings ServicePackJurisdictionBinding[]
+  taxTypeDefinitions             TaxTypeDefinition[]
+  taxPeriods                     TaxPeriod[]
+  taxpayerAccounts               TaxpayerAccount[]
+  taxCalculationRecords          TaxCalculationRecord[]
 
   @@map("jurisdictions")
 }
@@ -376,6 +381,7 @@ model ExternalAuthority {
   documentVersionsReceived         DocumentVersion[]
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
   externalReviewReferrals          ExternalReviewReferral[]
+  immigrationExternalChecks        ImmigrationExternalCheck[]
 
   @@map("external_authorities")
 }
@@ -724,7 +730,19 @@ model Identity {
   civilRegistryEntitlements                CivilRegistryRecordEntitlement[]       @relation("CivilRegistryEntitlementIdentity")
   civilRegistryVersionsRegistered          CivilRegistryVitalRecordVersion[]      @relation("CivilRegistryVersionRegistrar")
   civilRegistryCertificatesIssued          CivilRegistryCertificate[]             @relation("CivilRegistryCertificateIssuer")
+  immigrationProfilesAsSubject             ImmigrationProfile[]                   @relation("ImmigrationProfileSubject")
+  immigrationSponsorshipsAsSponsor         ImmigrationSponsorship[]               @relation("ImmigrationSponsorshipSponsor")
+  immigrationRequirementAssessments        ImmigrationRequirementAssessment[]     @relation("ImmigrationRequirementAssessor")
+  immigrationExternalChecksRecorded        ImmigrationExternalCheck[]             @relation("ImmigrationExternalCheckRecorder")
+  immigrationStatusHistoryEvents           ImmigrationStatusHistory[]             @relation("ImmigrationStatusHistoryActor")
   servicePacksOwned                        ServicePack[]                          @relation("ServicePackResponsibleOwner")
+  taxTypeDefinitionVersionsApproved        TaxTypeDefinitionVersion[]             @relation("TaxTypeDefinitionVersionApprover")
+  taxpayerAccountsAsPrimary                TaxpayerAccount[]                      @relation("TaxpayerAccountPrimaryIdentity")
+  taxReturnVersionsSubmitted               TaxReturnVersion[]                     @relation("TaxReturnVersionSubmitter")
+  taxCalculationRecordsAuthored            TaxCalculationRecord[]                 @relation("TaxCalculationRecordActor")
+  taxRefundClaimsRequested                 TaxRefundClaim[]                       @relation("TaxRefundClaimRequester")
+  taxClearanceRequestsSubmitted            TaxClearanceCertificateRequest[]       @relation("TaxClearanceRequester")
+  taxAccessAudits                          TaxAccessAudit[]                       @relation("TaxAccessAuditAccessor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -772,7 +790,9 @@ model Organization {
   complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
   appointmentParticipants       AppointmentParticipant[]
   serviceAppointments             ServiceAppointment[]
+  immigrationSponsorships         ImmigrationSponsorship[]
   corporateRegistryProfile        CorporateRegistryProfile?
+  taxpayerAccounts                TaxpayerAccount[]
 
   @@index([status])
   @@map("organizations")
@@ -2315,6 +2335,9 @@ model Application {
   feeAssessments             FeeAssessment[]
   serviceAppointments        ServiceAppointment[]
   civilRegistryEventSubmissions CivilRegistryEventSubmission[]
+  visaApplicationProfile     VisaApplicationProfile?
+  residencyApplicationProfile ResidencyApplicationProfile?
+  citizenshipApplicationProfile CitizenshipApplicationProfile?
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2426,6 +2449,16 @@ model Case {
   serviceAppointments               ServiceAppointment[]
   civilRegistryRegistration         CivilRegistryVitalRecord?         @relation("CivilRegistryRegistrationCase")
   civilRegistryEventSubmission      CivilRegistryEventSubmission?
+  visaApplicationProfile            VisaApplicationProfile?
+  residencyApplicationProfile       ResidencyApplicationProfile?
+  citizenshipApplicationProfile     CitizenshipApplicationProfile?
+  immigrationSponsorships           ImmigrationSponsorship[]
+  dependentRelationships            DependentRelationship[]
+  immigrationRequirementAssessments ImmigrationRequirementAssessment[]
+  immigrationInterviews             ImmigrationInterview[]
+  biometricRequirements             BiometricRequirement[]
+  immigrationExternalChecks         ImmigrationExternalCheck[]
+  immigrationCaseProjection         ImmigrationCaseProjection?
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3026,6 +3059,7 @@ model MasterAdministrativeFile {
   communicationMessages                CommunicationMessage[]
   communicationMafIndexEntries         CommunicationMafIndexEntry[]
   integrationRequests                  IntegrationRequest[]
+  immigrationProfiles                  ImmigrationProfile[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -4865,6 +4899,12 @@ model GovernmentDecision {
   redressMattersChallenged          RedressMatter[]                   @relation("RedressChallengedDecision")
   externalReviewReferralsChallenged ExternalReviewReferral[]          @relation("ExternalReviewChallengedDecision")
   redressDecisionsSuperseding       RedressDecision[]                 @relation("RedressSupersededDecision")
+  immigrationStatusRecords          ImmigrationStatusRecord[]
+  visaPermissionRecords             VisaPermissionRecord[]
+  residencyStatusRecords            ResidencyStatusRecord[]
+  residencyPermitRecords            ResidencyPermitRecord[]
+  citizenshipStatusRecords          CitizenshipStatusRecord[]
+  immigrationRestrictions           ImmigrationRestriction[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5339,6 +5379,9 @@ model OfficialInstrument {
   complianceMatters                 ComplianceMatter[]
   complianceStatusProjections       ComplianceStatusProjection[]
   civilRegistryCertificate          CivilRegistryCertificate?
+  immigrationStatusRecords          ImmigrationStatusRecord[]
+  visaPermissionRecords             VisaPermissionRecord[]
+  residencyPermitRecords            ResidencyPermitRecord[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -8003,6 +8046,7 @@ model Invoice {
   paymentIntents             PaymentIntent[]
   arrearsRecords             ArrearsRecord[]
   financialDisputes          FinancialDispute[]
+  taxLiabilities             TaxLiability[]
 
   @@index([feeAssessmentId])
   @@index([caseId])
@@ -8113,6 +8157,7 @@ model PaymentTransaction {
   reconciliationItems            ReconciliationItem[]
   financialDisputes              FinancialDispute[]
   events                         PaymentTransactionEvent[]
+  taxPaymentAllocations          TaxPaymentAllocation[]
 
   @@unique([paymentProviderConfigurationId, providerTransactionReference])
   @@index([paymentIntentId])
@@ -8131,6 +8176,7 @@ model PaymentAllocation {
   updatedAt            DateTime           @updatedAt
   paymentTransaction   PaymentTransaction @relation(fields: [paymentTransactionId], references: [id], onDelete: Cascade)
   invoiceLine          InvoiceLine?       @relation(fields: [invoiceLineId], references: [id])
+  taxPaymentAllocations TaxPaymentAllocation[]
 
   @@index([paymentTransactionId])
   @@index([invoiceLineId])
@@ -13271,6 +13317,8 @@ model ServiceAppointment {
   outcomeReferences            AppointmentOutcomeReference[]
   auditEvents                  ServiceAppointmentAuditEvent[]
   reminders                    ServiceAppointmentReminder[]
+  immigrationInterview         ImmigrationInterview?
+  biometricRequirement         BiometricRequirement?
 
   @@index([status])
   @@index([institutionId])
@@ -13926,6 +13974,559 @@ model CivilRegistryCertificateVerification {
   @@map("civil_registry_certificate_verifications")
 }
 
+// ─── Immigration, Visa, Residency & Citizenship Foundation ────────────────
+
+
+enum ImmigrationDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_IMMIGRATION
+  PROTECTED_BIOMETRIC
+  PROTECTED_SECURITY
+}
+
+enum ImmigrationTravelDocumentType {
+  PASSPORT
+  EMERGENCY_TRAVEL_DOCUMENT
+  NATIONAL_ID_TRAVEL
+  REFUGEE_TRAVEL_DOCUMENT
+  OTHER_AUTHORIZED
+}
+
+enum TravelDocumentReferenceStatus {
+  REFERENCED
+  VALIDATION_PENDING
+  VALIDATED
+  VALIDATION_FAILED
+  EXPIRED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum ImmigrationStatusCategory {
+  OVERALL
+  ENTRY
+  VISA
+  RESIDENCY
+  CITIZENSHIP
+}
+
+enum ImmigrationApplicationProfileStatus {
+  LINKED
+  ACTIVE
+  WITHDRAWN
+  CLOSED
+}
+
+enum ImmigrationCredentialLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  EXPIRED
+  REVOKED
+  SUSPENDED
+  SUPERSEDED
+  SURRENDERED
+}
+
+enum ImmigrationRequirementAssessmentOutcome {
+  INCOMPLETE
+  INFORMATION_ONLY
+  ELIGIBILITY_GUIDANCE
+  REQUIRES_EXTERNAL_DETERMINATION
+  REQUIRES_DECISION
+}
+
+enum ImmigrationInterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum BiometricRequirementStatus {
+  REQUIRED
+  SCHEDULED
+  CAPTURED
+  VERIFIED
+  WAIVED_BY_AUTHORIZED_ACTION
+  FAILED
+}
+
+enum ImmigrationExternalCheckType {
+  BORDER_AUTHORITY
+  LAW_ENFORCEMENT
+  SECURITY_SCREENING
+  HEALTH_SCREENING
+  LABOUR_AUTHORITY
+  CIVIL_REGISTRY
+  DIPLOMATIC_CONSULAR
+  TRAVEL_DOCUMENT_VALIDATION
+}
+
+enum ImmigrationExternalCheckRecordedBy {
+  EXTERNAL_AUTHORITY_LIAISON
+  INTEGRATION_SYSTEM
+  IMMIGRATION_OFFICER
+  SYSTEM
+}
+
+enum ImmigrationActorPersona {
+  APPLICANT
+  SPONSOR
+  DEPENDENT
+  AUTHORIZED_REPRESENTATIVE
+  IMMIGRATION_OFFICER
+  SENIOR_DECISION_OFFICER
+  EXTERNAL_AUTHORITY_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum ImmigrationSponsorshipStatus {
+  PROPOSED
+  ACTIVE
+  LIMITED
+  WITHDRAWN
+  CLOSED
+}
+
+enum DependentRelationshipType {
+  SPOUSE
+  CHILD
+  PARENT
+  OTHER_AUTHORIZED
+}
+
+enum ImmigrationRestrictionType {
+  TRAVEL
+  EMPLOYMENT
+  RESIDENCY_CONDITION
+  REPORTING
+  OTHER_AUTHORIZED
+}
+
+model ImmigrationProfile {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  profileNumber                 String                      @unique
+  subjectIdentityId             String                      @db.Uuid
+  jurisdictionId                String?                     @db.Uuid
+  masterAdministrativeFileId    String?                     @db.Uuid
+  recordsClassificationReference String?
+  dataClassification            ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  dataCompartmentCode           String?
+  currentStatusRecordId         String?                     @unique @db.Uuid
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  subjectIdentity               Identity                    @relation("ImmigrationProfileSubject", fields: [subjectIdentityId], references: [id])
+  jurisdiction                  Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?   @relation(fields: [masterAdministrativeFileId], references: [id])
+  currentStatusRecord           ImmigrationStatusRecord?    @relation("ImmigrationProfileCurrentStatus", fields: [currentStatusRecordId], references: [id])
+  statusRecords                 ImmigrationStatusRecord[]   @relation("ImmigrationProfileStatusRecords")
+  travelDocuments               TravelDocumentReference[]
+  visaApplicationProfiles       VisaApplicationProfile[]
+  residencyApplicationProfiles  ResidencyApplicationProfile[]
+  citizenshipApplicationProfiles CitizenshipApplicationProfile[]
+  visaPermissions               VisaPermissionRecord[]
+  residencyStatusRecords        ResidencyStatusRecord[]
+  residencyPermits              ResidencyPermitRecord[]
+  citizenshipStatusRecords      CitizenshipStatusRecord[]
+  sponsorshipsAsSponsored       ImmigrationSponsorship[]    @relation("ImmigrationSponsored")
+  primaryDependentLinks         DependentRelationship[]     @relation("DependentPrimary")
+  dependentOfLinks              DependentRelationship[]     @relation("DependentMember")
+  statusHistory                 ImmigrationStatusHistory[]
+  restrictions                  ImmigrationRestriction[]
+  biometricRequirements         BiometricRequirement[]
+  externalChecks                ImmigrationExternalCheck[]
+
+  @@index([subjectIdentityId])
+  @@index([jurisdictionId])
+  @@index([masterAdministrativeFileId])
+  @@map("immigration_profiles")
+}
+
+model TravelDocumentReference {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  immigrationProfileId       String                        @db.Uuid
+  documentType               ImmigrationTravelDocumentType
+  documentReferenceToken     String
+  issuingCountryCode         String?
+  externalValidationReference String?
+  validatedAt                DateTime?
+  expiresAt                  DateTime?
+  status                     TravelDocumentReferenceStatus @default(REFERENCED)
+  dataClassification         ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
+  immigrationProfile         ImmigrationProfile            @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+
+  @@index([immigrationProfileId])
+  @@index([status])
+  @@map("travel_document_references")
+}
+
+model ImmigrationStatusRecord {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  immigrationProfileId String                    @db.Uuid
+  statusCategory       ImmigrationStatusCategory
+  statusCode           String
+  effectiveFrom        DateTime                  @default(now())
+  effectiveUntil       DateTime?
+  isCurrent            Boolean                   @default(true)
+  supersededAt         DateTime?
+  governmentDecisionId String?                   @db.Uuid
+  officialInstrumentId String?                   @db.Uuid
+  dataClassification   ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  immigrationProfile   ImmigrationProfile        @relation("ImmigrationProfileStatusRecords", fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  currentForProfile    ImmigrationProfile?       @relation("ImmigrationProfileCurrentStatus")
+  governmentDecision   GovernmentDecision?       @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument   OfficialInstrument?       @relation(fields: [officialInstrumentId], references: [id])
+  historyFrom          ImmigrationStatusHistory[] @relation("ImmigrationStatusHistoryFrom")
+  historyTo            ImmigrationStatusHistory[] @relation("ImmigrationStatusHistoryTo")
+
+  @@index([immigrationProfileId, statusCategory, isCurrent])
+  @@index([governmentDecisionId])
+  @@index([officialInstrumentId])
+  @@map("immigration_status_records")
+}
+
+model VisaApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  serviceCategoryCode        String?
+  intendedPurposeCode        String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotIssueVisa           Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+  visaPermissions            VisaPermissionRecord[]
+
+  @@index([immigrationProfileId])
+  @@map("visa_application_profiles")
+}
+
+model ResidencyApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  residencyProgramCode       String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotCreateResidency     Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("residency_application_profiles")
+}
+
+model CitizenshipApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  programCode                String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotGrantCitizenship    Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("citizenship_application_profiles")
+}
+
+model VisaPermissionRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  permissionNumber         String                             @unique
+  immigrationProfileId     String                             @db.Uuid
+  visaApplicationProfileId String?                            @db.Uuid
+  officialInstrumentId     String?                            @db.Uuid
+  governmentDecisionId     String?                            @db.Uuid
+  permissionTypeCode       String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  lifecycleStatus          ImmigrationCredentialLifecycleStatus @default(NOT_ISSUED)
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id])
+  visaApplicationProfile   VisaApplicationProfile?            @relation(fields: [visaApplicationProfileId], references: [id])
+  officialInstrument       OfficialInstrument?                @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@index([lifecycleStatus])
+  @@index([validUntil])
+  @@map("visa_permission_records")
+}
+
+model ResidencyStatusRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                             @db.Uuid
+  statusCode               String
+  effectiveFrom            DateTime                           @default(now())
+  effectiveUntil           DateTime?
+  isCurrent                Boolean                            @default(true)
+  supersededAt             DateTime?
+  governmentDecisionId     String?                            @db.Uuid
+  workLinkPolicyReference  String?
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+  residencyPermits         ResidencyPermitRecord[]
+
+  @@index([immigrationProfileId, isCurrent])
+  @@map("residency_status_records")
+}
+
+model ResidencyPermitRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  permitNumber             String                             @unique
+  immigrationProfileId     String                             @db.Uuid
+  residencyStatusRecordId  String?                            @db.Uuid
+  officialInstrumentId     String?                            @db.Uuid
+  governmentDecisionId     String?                            @db.Uuid
+  permitTypeCode           String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  renewalOfPermitId        String?                            @unique @db.Uuid
+  lifecycleStatus          ImmigrationCredentialLifecycleStatus @default(NOT_ISSUED)
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id])
+  residencyStatusRecord    ResidencyStatusRecord?             @relation(fields: [residencyStatusRecordId], references: [id])
+  officialInstrument       OfficialInstrument?                @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+  renewalOfPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal", fields: [renewalOfPermitId], references: [id])
+  renewedByPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal")
+
+  @@index([immigrationProfileId])
+  @@index([lifecycleStatus])
+  @@index([validUntil])
+  @@map("residency_permit_records")
+}
+
+model CitizenshipStatusRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                             @db.Uuid
+  statusCode               String
+  effectiveFrom            DateTime                           @default(now())
+  effectiveUntil           DateTime?
+  isCurrent                Boolean                            @default(true)
+  isNaturalized            Boolean?
+  supersededAt             DateTime?
+  governmentDecisionId     String?                            @db.Uuid
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_SECURITY)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([immigrationProfileId, isCurrent])
+  @@map("citizenship_status_records")
+}
+
+model ImmigrationSponsorship {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  sponsorshipNumber        String                       @unique
+  sponsorIdentityId        String?                      @db.Uuid
+  sponsorOrganizationId    String?                      @db.Uuid
+  sponsoredProfileId       String                       @db.Uuid
+  caseId                   String?                      @db.Uuid
+  sponsorshipTypeCode      String?
+  authorizedScope          Json                         @default("{}")
+  status                   ImmigrationSponsorshipStatus @default(PROPOSED)
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  sponsorIdentity          Identity?                    @relation("ImmigrationSponsorshipSponsor", fields: [sponsorIdentityId], references: [id])
+  sponsorOrganization      Organization?                @relation(fields: [sponsorOrganizationId], references: [id])
+  sponsoredProfile         ImmigrationProfile           @relation("ImmigrationSponsored", fields: [sponsoredProfileId], references: [id])
+  case                     Case?                        @relation(fields: [caseId], references: [id])
+
+  @@index([sponsoredProfileId])
+  @@index([sponsorIdentityId])
+  @@index([caseId])
+  @@map("immigration_sponsorships")
+}
+
+model DependentRelationship {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  primaryProfileId         String                    @db.Uuid
+  dependentProfileId       String                    @db.Uuid
+  caseId                   String?                   @db.Uuid
+  relationshipType         DependentRelationshipType
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  primaryProfile           ImmigrationProfile        @relation("DependentPrimary", fields: [primaryProfileId], references: [id])
+  dependentProfile         ImmigrationProfile        @relation("DependentMember", fields: [dependentProfileId], references: [id])
+  case                     Case?                     @relation(fields: [caseId], references: [id])
+
+  @@unique([primaryProfileId, dependentProfileId, relationshipType])
+  @@index([caseId])
+  @@map("dependent_relationships")
+}
+
+model ImmigrationRequirementAssessment {
+  id                       String                                @id @default(uuid()) @db.Uuid
+  assessmentNumber         String                                @unique
+  caseId                   String                                @db.Uuid
+  assessmentTypeCode       String
+  outcome                  ImmigrationRequirementAssessmentOutcome
+  isImmigrationDecision    Boolean                               @default(false)
+  summary                  String?
+  assessedAt               DateTime                              @default(now())
+  assessedByIdentityId     String?                               @db.Uuid
+  createdAt                DateTime                              @default(now())
+  updatedAt                DateTime                              @updatedAt
+  case                     Case                                  @relation(fields: [caseId], references: [id])
+  assessedBy               Identity?                             @relation("ImmigrationRequirementAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@index([caseId])
+  @@map("immigration_requirement_assessments")
+}
+
+model ImmigrationInterview {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  caseId                   String                   @db.Uuid
+  serviceAppointmentId     String?                  @unique @db.Uuid
+  interviewTypeCode        String?
+  status                   ImmigrationInterviewStatus @default(SCHEDULED)
+  outcomeReference         String?
+  isDecision               Boolean                  @default(false)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  case                     Case                     @relation(fields: [caseId], references: [id])
+  serviceAppointment       ServiceAppointment?      @relation(fields: [serviceAppointmentId], references: [id])
+
+  @@index([caseId])
+  @@map("immigration_interviews")
+}
+
+model BiometricRequirement {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                     @db.Uuid
+  caseId                   String?                    @db.Uuid
+  serviceAppointmentId     String?                    @unique @db.Uuid
+  status                   BiometricRequirementStatus @default(REQUIRED)
+  capturedAt               DateTime?
+  dataClassification       ImmigrationDataClassification @default(PROTECTED_BIOMETRIC)
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  immigrationProfile       ImmigrationProfile         @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  case                     Case?                      @relation(fields: [caseId], references: [id])
+  serviceAppointment       ServiceAppointment?        @relation(fields: [serviceAppointmentId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@index([caseId])
+  @@map("biometric_requirements")
+}
+
+model ImmigrationExternalCheck {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  checkReference             String                           @unique
+  caseId                     String                           @db.Uuid
+  immigrationProfileId       String?                          @db.Uuid
+  externalAuthorityId        String                           @db.Uuid
+  checkType                  ImmigrationExternalCheckType
+  determinationStatus        ExternalDeterminationStatus      @default(PENDING)
+  isRequired                 Boolean                          @default(true)
+  blocksDecisionWhenRequired Boolean                          @default(true)
+  isAuthenticated            Boolean                          @default(false)
+  authenticatedPayloadHash   String?
+  recordedBy                 ImmigrationExternalCheckRecordedBy
+  recordedByIdentityId       String?                          @db.Uuid
+  receivedAt                 DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  case                       Case                             @relation(fields: [caseId], references: [id])
+  immigrationProfile         ImmigrationProfile?              @relation(fields: [immigrationProfileId], references: [id])
+  externalAuthority          ExternalAuthority                @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity         Identity?                        @relation("ImmigrationExternalCheckRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([caseId])
+  @@index([immigrationProfileId])
+  @@index([externalAuthorityId])
+  @@index([determinationStatus])
+  @@map("immigration_external_checks")
+}
+
+model ImmigrationStatusHistory {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                  @db.Uuid
+  fromStatusRecordId       String?                 @db.Uuid
+  toStatusRecordId         String                  @db.Uuid
+  changedAt                DateTime                @default(now())
+  actorIdentityId          String?                 @db.Uuid
+  actorPersona             ImmigrationActorPersona
+  reason                   String?
+  metadata                 Json                    @default("{}")
+  immigrationProfile       ImmigrationProfile      @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  fromStatusRecord         ImmigrationStatusRecord? @relation("ImmigrationStatusHistoryFrom", fields: [fromStatusRecordId], references: [id])
+  toStatusRecord           ImmigrationStatusRecord @relation("ImmigrationStatusHistoryTo", fields: [toStatusRecordId], references: [id])
+  actorIdentity            Identity?               @relation("ImmigrationStatusHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([immigrationProfileId, changedAt])
+  @@map("immigration_status_history")
+}
+
+model ImmigrationRestriction {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                   @db.Uuid
+  restrictionType          ImmigrationRestrictionType
+  description              String?
+  effectiveFrom            DateTime                 @default(now())
+  effectiveUntil           DateTime?
+  sourceDecisionId         String?                  @db.Uuid
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  immigrationProfile       ImmigrationProfile       @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  sourceDecision           GovernmentDecision?      @relation(fields: [sourceDecisionId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("immigration_restrictions")
+}
+
+model ImmigrationCaseProjection {
+  id                       String   @id @default(uuid()) @db.Uuid
+  caseId                   String   @unique @db.Uuid
+  projectedStatusLabel     String
+  disclaimer               String   @default("Non-authoritative operational projection; not an immigration decision or status.")
+  lastDerivedAt            DateTime @default(now())
+  metadata                 Json     @default("{}")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  case                     Case     @relation(fields: [caseId], references: [id])
+
+  @@map("immigration_case_projections")
+}
+
 // ─── Corporate Registry / Business Formation ─────────────────────────────────
 
 enum CorporateEntityType {
@@ -14222,4 +14823,782 @@ model CorporateRegistryPaymentEvent {
 
   @@index([profileId])
   @@map("corporate_registry_payment_events")
+}
+// ─── Revenue & Tax Administration Foundation ───────────────────────────────
+
+enum TaxpayerAccountKind {
+  INDIVIDUAL
+  BUSINESS
+  OTHER_REGISTERED
+}
+
+enum TaxpayerRegistrationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  REGISTERED
+  REJECTED
+  SUSPENDED
+  CLOSED
+}
+
+enum TaxpayerIdentifierKind {
+  PRIMARY_TIN
+  SECONDARY_TIN
+  VAT
+  EMPLOYER
+  CUSTOM
+  OTHER
+}
+
+enum TaxTypeDefinitionStatus {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+enum TaxPeriodStatus {
+  SCHEDULED
+  OPEN
+  CLOSED
+  EXTENDED
+  ARCHIVED
+}
+
+enum TaxObligationStatus {
+  ACTIVE
+  SUSPENDED
+  FULFILLED
+  CLOSED
+}
+
+enum TaxReturnStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  AMENDED
+  SUPERSEDED
+}
+
+enum TaxDeclarationStatus {
+  RECEIVED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum TaxAssessmentStatus {
+  PROPOSED
+  ISSUED
+  AMENDED
+  SUPERSEDED
+  CANCELLED
+}
+
+enum TaxLiabilityStatus {
+  OPEN
+  PARTIALLY_SATISFIED
+  SATISFIED
+  WRITTEN_OFF
+  DISPUTED
+}
+
+enum TaxCreditStatus {
+  AVAILABLE
+  APPLIED
+  EXPIRED
+  REVERSED
+}
+
+enum TaxAccountBalanceKind {
+  PERIOD_END
+  AD_HOC
+  POST_ASSESSMENT
+  POST_PAYMENT
+}
+
+enum TaxRefundClaimStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED_FOR_PROCESSING
+  DENIED
+  WITHDRAWN
+}
+
+enum TaxRefundDecisionOutcome {
+  AUTHORIZED
+  DENIED
+  PARTIAL
+}
+
+enum TaxArrearStatus {
+  OPEN
+  IN_PLAN
+  RESOLVED
+  WRITTEN_OFF
+}
+
+enum TaxPaymentPlanStatus {
+  PROPOSED
+  ACTIVE
+  DEFAULTED
+  COMPLETED
+  CANCELLED
+}
+
+enum TaxComplianceStatusCode {
+  UNKNOWN
+  FILING_CURRENT
+  FILING_OVERDUE
+  BALANCE_OUTSTANDING
+  CLEARANCE_BLOCKED
+  UNDER_AUDIT
+  NOT_APPLICABLE
+}
+
+enum TaxAuditMatterStatus {
+  OPEN
+  INFORMATION_REQUEST
+  FIELD_REVIEW
+  CLOSED_NO_FINDING
+  REFERRED
+  CLOSED
+}
+
+enum TaxObjectionStatus {
+  FILED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum TaxDisputeStatus {
+  OPEN
+  MEDIATION
+  DECIDED
+  WITHDRAWN
+  CLOSED
+}
+
+enum TaxClearanceCertificateRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+  EXPIRED
+}
+
+enum TaxWithholdingRecordStatus {
+  REPORTED
+  ACCEPTED
+  CORRECTED
+  SUPERSEDED
+}
+
+enum TaxAccessActorKind {
+  TAXPAYER
+  REPRESENTATIVE
+  REVENUE_OFFICER
+  AUDIT_REVIEWER
+  PLATFORM_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+}
+
+enum TaxCalculationSourceKind {
+  CONFIG_ENGINE
+  REVENUE_OFFICER
+  AI_ASSISTANCE
+}
+
+model TaxTypeDefinition {
+  id              String                  @id @default(uuid()) @db.Uuid
+  jurisdictionId  String                  @db.Uuid
+  code            String
+  name            String
+  description     String?
+  status          TaxTypeDefinitionStatus @default(DRAFT)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  jurisdiction    Jurisdiction            @relation(fields: [jurisdictionId], references: [id])
+  versions        TaxTypeDefinitionVersion[]
+  periods         TaxPeriod[]
+  obligations     TaxObligation[]
+  returns         TaxReturn[]
+  assessments     TaxAssessment[]
+  withholdingRecords TaxWithholdingRecord[]
+
+  @@unique([jurisdictionId, code])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("tax_type_definitions")
+}
+
+model TaxTypeDefinitionVersion {
+  id                    String              @id @default(uuid()) @db.Uuid
+  taxTypeDefinitionId   String              @db.Uuid
+  versionNumber         Int
+  ruleConfiguration     Json                @default("{}")
+  methodologyReference  String
+  effectiveFrom         DateTime
+  effectiveUntil        DateTime?
+  approvedByIdentityId  String?             @db.Uuid
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  taxTypeDefinition     TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id], onDelete: Cascade)
+  approvedBy            Identity?           @relation("TaxTypeDefinitionVersionApprover", fields: [approvedByIdentityId], references: [id])
+  calculationRecords    TaxCalculationRecord[]
+
+  @@unique([taxTypeDefinitionId, versionNumber])
+  @@index([taxTypeDefinitionId])
+  @@map("tax_type_definition_versions")
+}
+
+model TaxpayerAccount {
+  id                    String               @id @default(uuid()) @db.Uuid
+  jurisdictionId        String               @db.Uuid
+  accountNumber         String               @unique
+  accountKind           TaxpayerAccountKind
+  primaryIdentityId     String?              @db.Uuid
+  organizationId        String?              @db.Uuid
+  displayName           String
+  isActive              Boolean              @default(true)
+  registeredAt          DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  jurisdiction          Jurisdiction         @relation(fields: [jurisdictionId], references: [id])
+  primaryIdentity       Identity?            @relation("TaxpayerAccountPrimaryIdentity", fields: [primaryIdentityId], references: [id])
+  organization          Organization?        @relation(fields: [organizationId], references: [id])
+  registrations         TaxpayerRegistration[]
+  identifiers           TaxpayerIdentifier[]
+  obligations           TaxObligation[]
+  returns               TaxReturn[]
+  assessments           TaxAssessment[]
+  liabilities           TaxLiability[]
+  credits               TaxCredit[]
+  balanceSnapshots      TaxAccountBalance[]
+  refundClaims          TaxRefundClaim[]
+  arrears               TaxArrear[]
+  paymentPlans          TaxPaymentPlan[]
+  complianceStatuses    TaxComplianceStatus[]
+  auditMatters          TaxAuditMatter[]
+  objections            TaxObjection[]
+  disputes              TaxDispute[]
+  clearanceRequests     TaxClearanceCertificateRequest[]
+  withholdingRecords    TaxWithholdingRecord[]
+  accessAudits          TaxAccessAudit[]
+
+  @@index([jurisdictionId])
+  @@index([primaryIdentityId])
+  @@index([organizationId])
+  @@map("taxpayer_accounts")
+}
+
+model TaxpayerRegistration {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String                     @db.Uuid
+  registrationReference String                     @unique
+  status                TaxpayerRegistrationStatus @default(DRAFT)
+  submittedAt           DateTime?
+  decidedAt             DateTime?
+  registrationPayload   Json                       @default("{}")
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  taxpayerAccount       TaxpayerAccount            @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("taxpayer_registrations")
+}
+
+model TaxpayerIdentifier {
+  id                String                 @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                 @db.Uuid
+  identifierKind    TaxpayerIdentifierKind
+  identifierValue   String
+  isPrimary         Boolean                @default(false)
+  effectiveFrom     DateTime               @default(now())
+  effectiveUntil    DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  taxpayerAccount   TaxpayerAccount        @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([taxpayerAccountId, identifierKind, identifierValue])
+  @@index([taxpayerAccountId])
+  @@index([identifierValue])
+  @@map("taxpayer_identifiers")
+}
+
+model TaxPeriod {
+  id                  String           @id @default(uuid()) @db.Uuid
+  jurisdictionId      String           @db.Uuid
+  taxTypeDefinitionId String           @db.Uuid
+  periodCode          String
+  periodStart         DateTime
+  periodEnd           DateTime
+  filingDeadline      DateTime?
+  status              TaxPeriodStatus  @default(SCHEDULED)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  jurisdiction        Jurisdiction     @relation(fields: [jurisdictionId], references: [id])
+  taxTypeDefinition   TaxTypeDefinition @relation(fields: [taxTypeDefinitionId], references: [id])
+  obligations         TaxObligation[]
+  returns             TaxReturn[]
+  assessments         TaxAssessment[]
+  balanceSnapshots    TaxAccountBalance[]
+  calculationRecords  TaxCalculationRecord[]
+
+  @@unique([jurisdictionId, taxTypeDefinitionId, periodCode])
+  @@index([jurisdictionId])
+  @@index([taxTypeDefinitionId])
+  @@index([status])
+  @@map("tax_periods")
+}
+
+model TaxObligation {
+  id                  String              @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String              @db.Uuid
+  taxTypeDefinitionId String              @db.Uuid
+  taxPeriodId         String?             @db.Uuid
+  obligationCode      String
+  description         String
+  status              TaxObligationStatus @default(ACTIVE)
+  dueDate             DateTime?
+  configuration       Json                @default("{}")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  taxpayerAccount     TaxpayerAccount     @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition   TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod           TaxPeriod?          @relation(fields: [taxPeriodId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([status])
+  @@map("tax_obligations")
+}
+
+model TaxReturn {
+  id                  String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String          @db.Uuid
+  taxTypeDefinitionId String          @db.Uuid
+  taxPeriodId         String          @db.Uuid
+  returnReference     String          @unique
+  status              TaxReturnStatus @default(DRAFT)
+  currentVersionId    String?         @unique @db.Uuid
+  submittedAt         DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  taxpayerAccount     TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition   TaxTypeDefinition @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod           TaxPeriod       @relation(fields: [taxPeriodId], references: [id])
+  versions            TaxReturnVersion[]
+  currentVersion      TaxReturnVersion? @relation("TaxReturnCurrentVersion", fields: [currentVersionId], references: [id])
+  declarations        TaxDeclaration[]
+  assessments         TaxAssessment[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([status])
+  @@map("tax_returns")
+}
+
+model TaxReturnVersion {
+  id                 String    @id @default(uuid()) @db.Uuid
+  taxReturnId        String    @db.Uuid
+  versionNumber      Int
+  isAmendment        Boolean   @default(false)
+  declarationData    Json      @default("{}")
+  payloadHash        String
+  submittedByIdentityId String? @db.Uuid
+  submittedAt        DateTime?
+  lockedAt           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  taxReturn          TaxReturn @relation(fields: [taxReturnId], references: [id], onDelete: Cascade)
+  submittedBy        Identity? @relation("TaxReturnVersionSubmitter", fields: [submittedByIdentityId], references: [id])
+  currentForReturn   TaxReturn? @relation("TaxReturnCurrentVersion")
+  declarations       TaxDeclaration[]
+
+  @@unique([taxReturnId, versionNumber])
+  @@index([taxReturnId])
+  @@map("tax_return_versions")
+}
+
+model TaxDeclaration {
+  id                   String               @id @default(uuid()) @db.Uuid
+  taxReturnId          String               @db.Uuid
+  taxReturnVersionId   String               @db.Uuid
+  declarationReference String               @unique
+  status               TaxDeclarationStatus @default(RECEIVED)
+  declaredAt           DateTime             @default(now())
+  isSelfDeclaration    Boolean              @default(true)
+  declarationPayload   Json                 @default("{}")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  taxReturn            TaxReturn            @relation(fields: [taxReturnId], references: [id], onDelete: Cascade)
+  taxReturnVersion     TaxReturnVersion     @relation(fields: [taxReturnVersionId], references: [id], onDelete: Cascade)
+
+  @@index([taxReturnId])
+  @@index([taxReturnVersionId])
+  @@map("tax_declarations")
+}
+
+model TaxAssessment {
+  id                       String              @id @default(uuid()) @db.Uuid
+  taxpayerAccountId        String              @db.Uuid
+  taxTypeDefinitionId      String              @db.Uuid
+  taxPeriodId              String              @db.Uuid
+  taxReturnId              String?             @db.Uuid
+  assessmentReference      String              @unique
+  status                   TaxAssessmentStatus @default(PROPOSED)
+  supersedesAssessmentId   String?             @unique @db.Uuid
+  issuedByOfficeholderId   String?             @db.Uuid
+  issuedAt                 DateTime?
+  calculationRecordId      String?             @db.Uuid
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  taxpayerAccount          TaxpayerAccount     @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition        TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod                TaxPeriod           @relation(fields: [taxPeriodId], references: [id])
+  taxReturn                TaxReturn?          @relation(fields: [taxReturnId], references: [id])
+  calculationRecord        TaxCalculationRecord? @relation(fields: [calculationRecordId], references: [id])
+  supersedesAssessment     TaxAssessment?      @relation("TaxAssessmentAmendment", fields: [supersedesAssessmentId], references: [id])
+  supersededByAssessment   TaxAssessment?      @relation("TaxAssessmentAmendment")
+  lines                    TaxAssessmentLine[]
+  liabilities              TaxLiability[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([taxReturnId])
+  @@index([status])
+  @@map("tax_assessments")
+}
+
+model TaxAssessmentLine {
+  id              String        @id @default(uuid()) @db.Uuid
+  taxAssessmentId String        @db.Uuid
+  lineCode        String
+  description     String
+  amountCents     Int
+  currency        String        @default("XCD")
+  sortOrder       Int           @default(0)
+  metadata        Json          @default("{}")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  taxAssessment   TaxAssessment @relation(fields: [taxAssessmentId], references: [id], onDelete: Cascade)
+
+  @@index([taxAssessmentId])
+  @@map("tax_assessment_lines")
+}
+
+model TaxCalculationRecord {
+  id                           String                   @id @default(uuid()) @db.Uuid
+  jurisdictionId               String                   @db.Uuid
+  taxPeriodId                  String                   @db.Uuid
+  taxTypeDefinitionVersionId   String                   @db.Uuid
+  ruleConfigurationVersion     Int
+  inputs                       Json                     @default("{}")
+  result                       Json                     @default("{}")
+  methodologyReference         String
+  calculatedAt                 DateTime                 @default(now())
+  calculatedByActorKind        TaxCalculationSourceKind
+  calculatedByIdentityId       String?                  @db.Uuid
+  createdAt                    DateTime                 @default(now())
+  jurisdiction                 Jurisdiction             @relation(fields: [jurisdictionId], references: [id])
+  taxPeriod                    TaxPeriod                @relation(fields: [taxPeriodId], references: [id])
+  taxTypeDefinitionVersion     TaxTypeDefinitionVersion @relation(fields: [taxTypeDefinitionVersionId], references: [id])
+  calculatedBy                 Identity?                @relation("TaxCalculationRecordActor", fields: [calculatedByIdentityId], references: [id])
+  assessments                  TaxAssessment[]
+
+  @@index([jurisdictionId])
+  @@index([taxPeriodId])
+  @@index([taxTypeDefinitionVersionId])
+  @@map("tax_calculation_records")
+}
+
+model TaxLiability {
+  id                String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String             @db.Uuid
+  taxAssessmentId   String?            @db.Uuid
+  invoiceId         String?            @db.Uuid
+  liabilityReference String            @unique
+  status            TaxLiabilityStatus @default(OPEN)
+  principalCents    Int
+  currency          String             @default("XCD")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  taxpayerAccount   TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxAssessment     TaxAssessment?     @relation(fields: [taxAssessmentId], references: [id])
+  invoice           Invoice?           @relation(fields: [invoiceId], references: [id])
+  paymentAllocations TaxPaymentAllocation[]
+  credits           TaxCredit[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxAssessmentId])
+  @@index([invoiceId])
+  @@index([status])
+  @@map("tax_liabilities")
+}
+
+model TaxCredit {
+  id                String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String          @db.Uuid
+  taxLiabilityId    String?         @db.Uuid
+  creditReference   String          @unique
+  status            TaxCreditStatus @default(AVAILABLE)
+  amountCents       Int
+  currency          String          @default("XCD")
+  reason            String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  taxpayerAccount   TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxLiability      TaxLiability?   @relation(fields: [taxLiabilityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxLiabilityId])
+  @@index([status])
+  @@map("tax_credits")
+}
+
+model TaxAccountBalance {
+  id                String                @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                @db.Uuid
+  taxPeriodId       String?               @db.Uuid
+  balanceKind       TaxAccountBalanceKind
+  balanceCents      Int
+  currency          String                @default("XCD")
+  asOf              DateTime              @default(now())
+  breakdown         Json                  @default("{}")
+  createdAt         DateTime              @default(now())
+  taxpayerAccount   TaxpayerAccount       @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxPeriod         TaxPeriod?            @relation(fields: [taxPeriodId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxPeriodId])
+  @@index([asOf])
+  @@map("tax_account_balances")
+}
+
+model TaxPaymentAllocation {
+  id                   String              @id @default(uuid()) @db.Uuid
+  taxLiabilityId       String              @db.Uuid
+  paymentTransactionId String              @db.Uuid
+  paymentAllocationId  String?             @db.Uuid
+  allocatedAmountCents Int
+  allocatedAt          DateTime            @default(now())
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  taxLiability         TaxLiability        @relation(fields: [taxLiabilityId], references: [id], onDelete: Cascade)
+  paymentTransaction   PaymentTransaction  @relation(fields: [paymentTransactionId], references: [id])
+  paymentAllocation    PaymentAllocation?  @relation(fields: [paymentAllocationId], references: [id])
+
+  @@index([taxLiabilityId])
+  @@index([paymentTransactionId])
+  @@index([paymentAllocationId])
+  @@map("tax_payment_allocations")
+}
+
+model TaxRefundClaim {
+  id                    String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String               @db.Uuid
+  claimReference        String               @unique
+  status                TaxRefundClaimStatus @default(REQUESTED)
+  requestedAmountCents  Int
+  currency              String               @default("XCD")
+  requestedByIdentityId String               @db.Uuid
+  requestedAt           DateTime             @default(now())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  taxpayerAccount       TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  requestedBy           Identity             @relation("TaxRefundClaimRequester", fields: [requestedByIdentityId], references: [id])
+  decisions             TaxRefundDecision[]
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_refund_claims")
+}
+
+model TaxRefundDecision {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  taxRefundClaimId         String                   @db.Uuid
+  decisionReference        String                   @unique
+  outcome                  TaxRefundDecisionOutcome
+  authorizedAmountCents    Int?
+  currency                 String                   @default("XCD")
+  decidedByOfficeholderId  String?                  @db.Uuid
+  financialRefundRequestId String?                  @db.Uuid
+  decidedAt                DateTime                 @default(now())
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  taxRefundClaim           TaxRefundClaim           @relation(fields: [taxRefundClaimId], references: [id], onDelete: Cascade)
+
+  @@index([taxRefundClaimId])
+  @@map("tax_refund_decisions")
+}
+
+model TaxArrear {
+  id                String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String          @db.Uuid
+  arrearReference   String          @unique
+  status            TaxArrearStatus @default(OPEN)
+  outstandingCents  Int
+  currency          String          @default("XCD")
+  asOf              DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  taxpayerAccount   TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_arrears")
+}
+
+model TaxPaymentPlan {
+  id                String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String               @db.Uuid
+  planReference     String               @unique
+  status            TaxPaymentPlanStatus @default(PROPOSED)
+  schedule          Json                 @default("[]")
+  authorizedByOfficeholderId String?     @db.Uuid
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  taxpayerAccount   TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_payment_plans")
+}
+
+model TaxComplianceStatus {
+  id                String                  @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                  @db.Uuid
+  statusCode        TaxComplianceStatusCode @default(UNKNOWN)
+  effectiveFrom     DateTime                @default(now())
+  effectiveUntil    DateTime?
+  basis             Json                    @default("{}")
+  isClearanceEligible Boolean               @default(false)
+  recordedAt        DateTime                @default(now())
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  taxpayerAccount   TaxpayerAccount         @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([statusCode])
+  @@map("tax_compliance_statuses")
+}
+
+model TaxAuditMatter {
+  id                String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String               @db.Uuid
+  matterReference   String               @unique
+  status            TaxAuditMatterStatus @default(OPEN)
+  riskScore         Int?
+  openedAt          DateTime             @default(now())
+  closedAt          DateTime?
+  notes             String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  taxpayerAccount   TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_audit_matters")
+}
+
+model TaxObjection {
+  id                String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String             @db.Uuid
+  objectionReference String            @unique
+  status            TaxObjectionStatus @default(FILED)
+  relatedAssessmentId String?          @db.Uuid
+  filedAt           DateTime           @default(now())
+  decidedAt         DateTime?
+  grounds           String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  taxpayerAccount   TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_objections")
+}
+
+model TaxDispute {
+  id                String           @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String           @db.Uuid
+  disputeReference  String           @unique
+  status            TaxDisputeStatus @default(OPEN)
+  openedAt          DateTime         @default(now())
+  closedAt          DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  taxpayerAccount   TaxpayerAccount  @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_disputes")
+}
+
+model TaxClearanceCertificateRequest {
+  id                    String                               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String                               @db.Uuid
+  requestReference      String                               @unique
+  status                TaxClearanceCertificateRequestStatus @default(REQUESTED)
+  requestedByIdentityId String                               @db.Uuid
+  requestedAt           DateTime                             @default(now())
+  issuedAt              DateTime?
+  expiresAt             DateTime?
+  authoritativeConditionsMet Json                            @default("{}")
+  createdAt             DateTime                             @default(now())
+  updatedAt             DateTime                             @updatedAt
+  taxpayerAccount       TaxpayerAccount                      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  requestedBy           Identity                             @relation("TaxClearanceRequester", fields: [requestedByIdentityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_clearance_certificate_requests")
+}
+
+model TaxWithholdingRecord {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String                     @db.Uuid
+  taxTypeDefinitionId String                     @db.Uuid
+  recordReference     String                     @unique
+  status              TaxWithholdingRecordStatus @default(REPORTED)
+  reportingPeriodStart DateTime
+  reportingPeriodEnd   DateTime
+  reportedAmountCents  Int
+  currency             String                    @default("XCD")
+  employerConfiguration Json                    @default("{}")
+  reportedAt           DateTime                  @default(now())
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  taxpayerAccount      TaxpayerAccount           @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition    TaxTypeDefinition         @relation(fields: [taxTypeDefinitionId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([status])
+  @@map("tax_withholding_records")
+}
+
+model TaxAccessAudit {
+  id                 String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId  String             @db.Uuid
+  accessorIdentityId String             @db.Uuid
+  actorKind          TaxAccessActorKind
+  endpoint           String
+  accessGranted      Boolean
+  denialReason       String?
+  createdAt          DateTime           @default(now())
+  taxpayerAccount    TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  accessor           Identity           @relation("TaxAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([accessorIdentityId])
+  @@index([createdAt])
+  @@map("tax_access_audits")
 }

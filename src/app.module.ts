@@ -23,6 +23,7 @@ import { ExperienceModule } from './experience/experience.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
+import { ImmigrationModule } from './immigration/immigration.module';
 import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
@@ -32,6 +33,7 @@ import { ProductionReadinessModule } from './production-readiness/production-rea
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
+import { RevenueModule } from './revenue/revenue.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
@@ -65,6 +67,7 @@ import { SystemModule } from './system/system.module';
     ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,
+    ImmigrationModule,
     CitizenExperienceModule,
     RecordsModule,
     EvidenceRecordsModule,
@@ -75,6 +78,7 @@ import { SystemModule } from './system/system.module';
     ComplianceModule,
     CorporateRegistryModule,
     RedressModule,
+    RevenueModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,
