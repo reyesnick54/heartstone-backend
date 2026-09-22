@@ -20,6 +20,7 @@ import {
 import { PrismaService } from '../../../database/prisma.service';
 import { OfficialWorkspaceResponseDto } from '../dto/official-workspace-response.dto';
 import { type ResolvedOfficialContext } from '../types/official-context.types';
+import { OfficialCivilRegistryProjectionService } from './official-civil-registry-projection.service';
 import { OfficialScopeService } from './official-scope.service';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class OfficialWorkspaceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly scopeService: OfficialScopeService,
+    private readonly civilRegistryProjection: OfficialCivilRegistryProjectionService,
   ) {}
 
   async buildWorkspace(context: ResolvedOfficialContext): Promise<OfficialWorkspaceResponseDto> {
@@ -208,6 +210,8 @@ export class OfficialWorkspaceService {
       },
     });
 
+    const civilRegistry = await this.civilRegistryProjection.buildProjection(context);
+
     const intelligenceAlerts = await this.prisma.intelligenceMonitoringAlert.findMany({
       where: {
         responsibleRecipientIdentityId: context.identityId,
@@ -272,6 +276,7 @@ export class OfficialWorkspaceService {
         status: alert.status,
       })),
       upcomingAppointments,
+      civilRegistry,
       assignmentDoesNotImplyAuthority: true,
     };
   }

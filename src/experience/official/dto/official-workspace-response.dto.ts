@@ -45,6 +45,52 @@ class WorkspaceSlaRiskDto {
   targetAt!: string | null;
 }
 
+class OfficialCivilRegistryQueueDto {
+  @ApiProperty()
+  count!: number;
+
+  @ApiProperty({ type: [String] })
+  submissionIds?: string[];
+
+  @ApiProperty({ type: [String] })
+  caseIds?: string[];
+
+  @ApiProperty({ type: [String] })
+  recordIds?: string[];
+
+  @ApiProperty({ type: [String] })
+  certificateIds?: string[];
+}
+
+class OfficialCivilRegistryWorkspaceDto {
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  pendingRegistrations!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  evidenceDeficiencies!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  correctionRequests!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  decisionReadyRegistrations!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  certificateIssuanceQueue!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  recordAmendmentRequests!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  slaRisks!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty({ type: OfficialCivilRegistryQueueDto })
+  restrictedOrSealedWarnings!: OfficialCivilRegistryQueueDto;
+
+  @ApiProperty()
+  templateDisclaimer!: string;
+}
+
 class WorkspaceAlertSummaryDto {
   @ApiProperty({ format: 'uuid' })
   alertId!: string;
@@ -104,6 +150,9 @@ export class OfficialWorkspaceResponseDto {
 
   @ApiProperty()
   upcomingAppointments!: number;
+
+  @ApiProperty({ type: OfficialCivilRegistryWorkspaceDto })
+  civilRegistry!: OfficialCivilRegistryWorkspaceDto;
 
   @ApiProperty()
   assignmentDoesNotImplyAuthority!: true;
