@@ -4,23 +4,22 @@ import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { OfficialModule } from '../experience/official/official.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
-import { EducationAccreditationService } from './applications/education-accreditation.service';
-import { EducationEnrollmentApplicationService } from './applications/education-enrollment-application.service';
-import { ScholarshipApplicationService } from './applications/scholarship-application.service';
-import { ScholarshipAwardService } from './applications/scholarship-award.service';
+import { AcademicCredentialService } from './academic/academic-credential.service';
+import { TranscriptRecordService } from './academic/transcript-record.service';
+import { EducationAdmissionApplicationProfileService } from './admissions/education-admission-application-profile.service';
 import { EducationAccessService } from './common/education-access.service';
 import { EducationBoundaryService } from './common/education-boundary.service';
-import { EducationRecordCorrectionService } from './corrections/education-record-correction.service';
 import { EducationController } from './education.controller';
+import { EnrollmentRecordService } from './enrollment/enrollment-record.service';
 import { CitizenEducationController } from './experience/citizen-education.controller';
 import { EducationExperienceBoundaryService } from './experience/education-experience-boundary.service';
 import { OfficialEducationController } from './experience/official-education.controller';
 import { CitizenEducationProjectionService } from './experience/services/citizen-education-projection.service';
 import { EducationScopeService } from './experience/services/education-scope.service';
 import { OfficialEducationProjectionService } from './experience/services/official-education-projection.service';
-import { EducationExternalDependencyService } from './external/education-external-dependency.service';
-import { EducationInstitutionRegistryService } from './profiles/education-institution-registry.service';
-import { EducationStudentProfileService } from './profiles/education-student-profile.service';
+import { EducationInstitutionService } from './institutions/education-institution.service';
+import { ScholarshipApplicationProfileService } from './scholarships/scholarship-application-profile.service';
+import { StudentEducationProfileService } from './students/student-education-profile.service';
 import { PublicEducationVerificationController } from './verification/public-education-verification.controller';
 import { PublicEducationVerificationService } from './verification/public-education-verification.service';
 
@@ -39,14 +38,13 @@ import { PublicEducationVerificationService } from './verification/public-educat
     EducationScopeService,
     CitizenEducationProjectionService,
     OfficialEducationProjectionService,
-    EducationStudentProfileService,
-    EducationInstitutionRegistryService,
-    EducationEnrollmentApplicationService,
-    ScholarshipApplicationService,
-    ScholarshipAwardService,
-    EducationAccreditationService,
-    EducationRecordCorrectionService,
-    EducationExternalDependencyService,
+    EducationInstitutionService,
+    StudentEducationProfileService,
+    EducationAdmissionApplicationProfileService,
+    ScholarshipApplicationProfileService,
+    EnrollmentRecordService,
+    TranscriptRecordService,
+    AcademicCredentialService,
     PublicEducationVerificationService,
   ],
   exports: [
@@ -54,14 +52,13 @@ import { PublicEducationVerificationService } from './verification/public-educat
     EducationAccessService,
     EducationExperienceBoundaryService,
     EducationScopeService,
-    EducationStudentProfileService,
-    EducationInstitutionRegistryService,
-    EducationEnrollmentApplicationService,
-    ScholarshipApplicationService,
-    ScholarshipAwardService,
-    EducationAccreditationService,
-    EducationRecordCorrectionService,
-    EducationExternalDependencyService,
+    EducationInstitutionService,
+    StudentEducationProfileService,
+    EducationAdmissionApplicationProfileService,
+    ScholarshipApplicationProfileService,
+    EnrollmentRecordService,
+    TranscriptRecordService,
+    AcademicCredentialService,
     PublicEducationVerificationService,
   ],
 })

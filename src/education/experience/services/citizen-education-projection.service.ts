@@ -15,8 +15,8 @@ export class CitizenEducationProjectionService {
 
   async getHome(identityId: string) {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
-    const enrollments = await this.prisma.educationEnrollmentRecord.count({
-      where: { studentProfileId: { in: studentProfileIds } },
+    const enrollments = await this.prisma.enrollmentRecord.count({
+      where: { studentEducationProfileId: { in: studentProfileIds } },
     });
 
     return {
@@ -30,9 +30,13 @@ export class CitizenEducationProjectionService {
 
   async listEnrollments(identityId: string) {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
-    const enrollments = await this.prisma.educationEnrollmentRecord.findMany({
-      where: { studentProfileId: { in: studentProfileIds } },
-      include: { institutionOrganization: { select: { code: true, name: true } } },
+    const enrollments = await this.prisma.enrollmentRecord.findMany({
+      where: { studentEducationProfileId: { in: studentProfileIds } },
+      include: {
+        educationInstitution: {
+          include: { organization: { select: { code: true, name: true } } },
+        },
+      },
       take: 50,
     });
 
@@ -40,81 +44,69 @@ export class CitizenEducationProjectionService {
       this.boundary.sanitizeCitizenPayload({
         enrollmentReference: enrollment.enrollmentReference,
         status: enrollment.status,
-        institutionCode: enrollment.institutionOrganization.code,
-        institutionName: enrollment.institutionOrganization.name,
+        institutionCode: enrollment.educationInstitution.organization.code,
+        institutionName: enrollment.educationInstitution.organization.name,
       }),
     );
   }
 
   async listCredentials(identityId: string) {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
-    const credentials = await this.prisma.educationCredentialReference.findMany({
-      where: { studentProfileId: { in: studentProfileIds } },
+    const credentials = await this.prisma.academicCredential.findMany({
+      where: { studentEducationProfileId: { in: studentProfileIds } },
       take: 50,
     });
 
     return credentials.map((credential) =>
       this.boundary.sanitizeCitizenPayload({
         credentialReference: credential.credentialReference,
-        credentialTypeCode: credential.credentialTypeCode,
-        isGovernmentRecognized: credential.isGovernmentRecognized,
+        lifecycleStatus: credential.lifecycleStatus,
       }),
     );
   }
 
   async listApplications(identityId: string) {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
-    const [enrollmentApps, scholarshipApps] = await Promise.all([
-      this.prisma.educationEnrollmentApplicationProfile.findMany({
-        where: { studentProfileId: { in: studentProfileIds } },
+    const [admissionApps, scholarshipApps] = await Promise.all([
+      this.prisma.educationAdmissionApplicationProfile.findMany({
+        where: { studentEducationProfileId: { in: studentProfileIds } },
         take: 50,
       }),
       this.prisma.scholarshipApplicationProfile.findMany({
-        where: { studentProfileId: { in: studentProfileIds } },
+        where: { studentEducationProfileId: { in: studentProfileIds } },
         take: 50,
       }),
     ]);
 
     return {
-      enrollmentApplications: enrollmentApps.map((app) => ({
+      enrollmentApplications: admissionApps.map((app) => ({
         profileNumber: app.profileNumber,
         status: app.status,
-        doesNotGrantEnrollment: app.doesNotGrantEnrollment,
+        doesNotCreateEnrollment: app.doesNotCreateEnrollment,
       })),
       scholarshipApplications: scholarshipApps.map((app) => ({
         profileNumber: app.profileNumber,
         status: app.status,
         doesNotCreateAward: app.doesNotCreateAward,
-        recommendationOnly: app.recommendationOnly,
+        aiRecommendationIsNotDecision: app.aiRecommendationIsNotDecision,
       })),
     };
   }
 
   async listSupport(identityId: string) {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
-    const grants = await this.prisma.educationGrantApplicationProfile.findMany({
-      where: {
-        case: { applicantIdentityId: identityId },
-      },
-      take: 25,
-    });
-
     const scholarships = await this.prisma.scholarshipApplicationProfile.findMany({
-      where: { studentProfileId: { in: studentProfileIds } },
-      include: { awardRecord: true },
+      where: { studentEducationProfileId: { in: studentProfileIds } },
       take: 25,
     });
 
     return {
       scholarshipApplications: scholarships.map((item) => ({
         profileNumber: item.profileNumber,
-        awardStatus: item.awardRecord?.status ?? 'NOT_AWARDED',
-        recommendationOnly: item.recommendationOnly,
+        doesNotCreateAward: item.doesNotCreateAward,
+        aiRecommendationIsNotDecision: item.aiRecommendationIsNotDecision,
       })),
-      grantApplications: grants.map((grant) => ({
-        profileNumber: grant.profileNumber,
-        doesNotGrantFunds: grant.doesNotGrantFunds,
-      })),
+      grantApplications: [],
     };
   }
 

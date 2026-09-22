@@ -80,6 +80,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     LabourModule,
+    EducationModule,
     SocialProtectionModule,
     EducationModule,
     TransportationModule,

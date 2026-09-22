@@ -133,16 +133,21 @@ model Jurisdiction {
   benefitPrograms                     BenefitProgram[]
   benefitApplicantProfiles            BenefitApplicantProfile[]
   householdRecords                    HouseholdRecord[]
-  educationStudentProfiles            EducationStudentProfile[]
-  educationInstitutionRegistryRecords EducationInstitutionRegistryRecord[]
+  educationConfiguration              EducationConfiguration?
+  educationInstitutions               EducationInstitution[]
+  studentEducationProfiles            StudentEducationProfile[]
+  qualificationReferences             QualificationReference[]
+  scholarshipProgramReferences        ScholarshipProgramReference[]
+  educationGrantReferences            EducationGrantReference[]
+  studentSupportProgramReferences     StudentSupportProgramReference[]
+  educatorProfileReferences           EducatorProfileReference[]
   clinicalTrials                      ClinicalTrial[]
   clinicalResearchParticipantProfiles ClinicalResearchParticipantProfile[]
   publicSafetyEngagements             PublicSafetyEngagement[]
   publicSafetyEmergencyEvents         PublicSafetyEmergencyEvent[]
   publicSafetyOfficialNotices         PublicSafetyOfficialNotice[]
-
-  patientHealthcareProfiles PatientHealthcareProfile[]
-  treatmentPrograms         TreatmentProgram[]
+  patientHealthcareProfiles           PatientHealthcareProfile[]
+  treatmentPrograms                   TreatmentProgram[]
 
   @@map("jurisdictions")
 }
@@ -471,9 +476,9 @@ model ExternalAuthority {
   labourExternalDependencies         LabourExternalDependency[]
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
   customsExternalDependencies        CustomsExternalDependency[]
+  educationExternalDependencies      EducationExternalDependency[]
   restrictedGoodsRequirements        RestrictedGoodsRequirement[]
   externalEligibilityDeterminations  ExternalEligibilityDeterminationReference[]
-  educationExternalDependencies      EducationExternalDependency[]
 
   treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
 
@@ -906,12 +911,13 @@ model Identity {
   socialProtectionHouseholdMembers                  HouseholdMember[]                           @relation("SocialProtectionHouseholdMember")
   externalEligibilityDeterminationsRecorded         ExternalEligibilityDeterminationReference[] @relation("ExternalEligibilityDeterminationRecorder")
   benefitStatusHistoryEvents                        BenefitStatusHistory[]                      @relation("BenefitStatusHistoryActor")
-  educationStudentProfilesAsSubject                 EducationStudentProfile[]                   @relation("EducationStudentProfileSubject")
-  educationGuardianRelationshipsAsGuardian          EducationGuardianRelationship[]             @relation("EducationGuardian")
-  educatorLicenseRecords                            EducatorLicenseRecord[]                     @relation("EducatorLicenseSubject")
-  educationRecordCorrectionsAsApplicant             EducationRecordCorrection[]                 @relation("EducationRecordCorrectionApplicant")
+  educationStudentProfiles                          StudentEducationProfile[]                   @relation("EducationStudentProfile")
+  educationGuardianRelationships                    GuardianEducationRelationship[]             @relation("EducationGuardianIdentity")
+  educationEducatorProfiles                         EducatorProfileReference[]                  @relation("EducationEducatorProfile")
+  educationInstitutionStatusHistoryEvents           EducationInstitutionStatusHistory[]         @relation("EducationInstitutionStatusHistoryActor")
+  enrollmentHistoryEvents                           EnrollmentHistory[]                         @relation("EnrollmentHistoryActor")
+  transcriptCorrectionEvents                        TranscriptRecordCorrectionHistory[]         @relation("TranscriptCorrectionActor")
   educationExternalDependenciesRecorded             EducationExternalDependency[]               @relation("EducationExternalDependencyRecorder")
-  educationRecordCorrectionHistoryEvents            EducationRecordCorrectionHistory[]          @relation("EducationRecordCorrectionHistoryActor")
   publicSafetyEngagementsAsReporter                 PublicSafetyEngagement[]                    @relation("PublicSafetyEngagementReporter")
   publicSafetyIncidentReportsAsReporter             PublicSafetyIncidentReport[]                @relation("PublicSafetyIncidentReporter")
   clinicalResearchParticipantProfiles               ClinicalResearchParticipantProfile[]        @relation("ClinicalResearchParticipantSubject")
@@ -966,47 +972,43 @@ model Credential {
 }
 
 model Organization {
-  id                                       String                                    @id @default(uuid()) @db.Uuid
-  code                                     String                                    @unique
-  name                                     String
-  description                              String?
-  status                                   OrganizationStatus                        @default(PENDING)
-  createdAt                                DateTime                                  @default(now())
-  updatedAt                                DateTime                                  @updatedAt
-  identities                               Identity[]
-  memberships                              OrganizationMembership[]
-  representativeAuthorities                RepresentativeAuthority[]
-  applications                             Application[]
-  documentRecords                          DocumentRecord[]
-  officialInstrumentsAsHolder              OfficialInstrument[]                      @relation("OfficialInstrumentHolderOrganization")
-  instrumentDeliveriesAsRecipient          InstrumentDelivery[]                      @relation("InstrumentDeliveryRecipientOrganization")
-  instrumentReceiptsAsRecipient            InstrumentReceiptAcknowledgment[]         @relation("InstrumentReceiptRecipientOrganization")
-  complianceMattersAsHolder                ComplianceMatter[]                        @relation("ComplianceMatterHolderOrganization")
-  appointmentParticipants                  AppointmentParticipant[]
-  serviceAppointments                      ServiceAppointment[]
-  immigrationSponsorships                  ImmigrationSponsorship[]
-  corporateRegistryProfile                 CorporateRegistryProfile?
-  taxpayerAccounts                         TaxpayerAccount[]
-  propertyInterests                        PropertyInterest[]                        @relation("PropertyInterestOrganization")
-  employerRegistryRecords                  EmployerRegistryRecord[]
-  developmentProjects                      DevelopmentProject[]
-  vehicleOwnershipRecords                  VehicleOwnershipRecord[]
-  transportOperatorRecords                 TransportOperatorRecord[]
-  fleetRecords                             FleetRecord[]
-  cadastrePropertyInterestHolders          CadastrePropertyInterestHolder[]
-  transferParties                          TransferParty[]
-  traderAccounts                           TraderAccount[]
-  shipmentReferences                       ShipmentReference[]
-  healthcareDataSharingRecipients          HealthcareDataSharingAuthorization[]      @relation("HealthcareSharingRecipientOrg")
-  healthDataCustodians                     HealthDataCustodian[]                     @relation("HealthDataCustodianOrganization")
-  healthcareRegulatedEntities              HealthcareRegulatedEntityReference[]      @relation("HealthcareRegulatedEntityOrganization")
-  healthcareOrganizationProfiles           HealthcareOrganization[]                  @relation("HealthcareOrganizationPlatformOrg")
-  educationInstitutionRegistryRecords      EducationInstitutionRegistryRecord[]
-  educationInstitutionLicenseRecords       EducationInstitutionLicenseRecord[]
-  educationAccreditationRecords            EducationAccreditationRecord[]
-  educationEnrollmentRecords               EducationEnrollmentRecord[]
-  educationInstitutionInspectionReferences EducationInstitutionInspectionReference[]
-  publicSafetyEngagements                  PublicSafetyEngagement[]
+  id                              String                               @id @default(uuid()) @db.Uuid
+  code                            String                               @unique
+  name                            String
+  description                     String?
+  status                          OrganizationStatus                   @default(PENDING)
+  createdAt                       DateTime                             @default(now())
+  updatedAt                       DateTime                             @updatedAt
+  identities                      Identity[]
+  memberships                     OrganizationMembership[]
+  representativeAuthorities       RepresentativeAuthority[]
+  applications                    Application[]
+  documentRecords                 DocumentRecord[]
+  officialInstrumentsAsHolder     OfficialInstrument[]                 @relation("OfficialInstrumentHolderOrganization")
+  instrumentDeliveriesAsRecipient InstrumentDelivery[]                 @relation("InstrumentDeliveryRecipientOrganization")
+  instrumentReceiptsAsRecipient   InstrumentReceiptAcknowledgment[]    @relation("InstrumentReceiptRecipientOrganization")
+  complianceMattersAsHolder       ComplianceMatter[]                   @relation("ComplianceMatterHolderOrganization")
+  appointmentParticipants         AppointmentParticipant[]
+  serviceAppointments             ServiceAppointment[]
+  immigrationSponsorships         ImmigrationSponsorship[]
+  corporateRegistryProfile        CorporateRegistryProfile?
+  taxpayerAccounts                TaxpayerAccount[]
+  propertyInterests               PropertyInterest[]                   @relation("PropertyInterestOrganization")
+  employerRegistryRecords         EmployerRegistryRecord[]
+  educationInstitutions           EducationInstitution[]
+  developmentProjects             DevelopmentProject[]
+  vehicleOwnershipRecords         VehicleOwnershipRecord[]
+  transportOperatorRecords        TransportOperatorRecord[]
+  fleetRecords                    FleetRecord[]
+  cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
+  transferParties                 TransferParty[]
+  traderAccounts                  TraderAccount[]
+  shipmentReferences              ShipmentReference[]
+  healthcareDataSharingRecipients HealthcareDataSharingAuthorization[] @relation("HealthcareSharingRecipientOrg")
+  healthDataCustodians            HealthDataCustodian[]                @relation("HealthDataCustodianOrganization")
+  healthcareRegulatedEntities     HealthcareRegulatedEntityReference[] @relation("HealthcareRegulatedEntityOrganization")
+  healthcareOrganizationProfiles  HealthcareOrganization[]             @relation("HealthcareOrganizationPlatformOrg")
+  publicSafetyEngagements         PublicSafetyEngagement[]
 
   treatmentProgramProviders        TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
@@ -2545,49 +2547,49 @@ enum CaseMilestoneType {
 }
 
 model Application {
-  id                                     String                                  @id @default(uuid()) @db.Uuid
-  applicationNumber                      String?                                 @unique
-  applicantIdentityId                    String                                  @db.Uuid
-  organizationId                         String?                                 @db.Uuid
-  representativeAuthorityId              String?                                 @db.Uuid
-  governmentServiceId                    String                                  @db.Uuid
-  governmentServiceVersionId             String                                  @db.Uuid
-  formDefinitionId                       String                                  @db.Uuid
-  formVersionId                          String                                  @db.Uuid
-  configurationFingerprint               String
-  applicantCategory                      ApplicantCategory
-  status                                 ApplicationStatus                       @default(DRAFT)
-  draftAnswers                           Json                                    @default("{}")
-  idempotencyKey                         String?
-  createdAt                              DateTime                                @default(now())
-  updatedAt                              DateTime                                @updatedAt
-  applicantIdentity                      Identity                                @relation(fields: [applicantIdentityId], references: [id])
-  organization                           Organization?                           @relation(fields: [organizationId], references: [id])
-  representativeAuthority                RepresentativeAuthority?                @relation(fields: [representativeAuthorityId], references: [id])
-  governmentService                      GovernmentService                       @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion               GovernmentServiceVersion                @relation(fields: [governmentServiceVersionId], references: [id])
-  formDefinition                         FormDefinition                          @relation(fields: [formDefinitionId], references: [id])
-  formVersion                            FormVersion                             @relation(fields: [formVersionId], references: [id])
-  submissions                            ApplicationSubmission[]
-  case                                   Case?
-  masterAdministrativeFile               MasterAdministrativeFile?
-  feeAssessments                         FeeAssessment[]
-  serviceAppointments                    ServiceAppointment[]
-  civilRegistryEventSubmissions          CivilRegistryEventSubmission[]
-  visaApplicationProfile                 VisaApplicationProfile?
-  residencyApplicationProfile            ResidencyApplicationProfile?
-  citizenshipApplicationProfile          CitizenshipApplicationProfile?
-  vitalEvents                            VitalEvent[]
-  workPermitApplicationProfile           WorkPermitApplicationProfile?
-  driverLicenseApplicationProfile        DriverLicenseApplicationProfile?
-  propertyTransfers                      PropertyTransfer[]
-  customsDeclarations                    CustomsDeclaration[]
-  healthcareProfessionalLicenses         HealthcareProfessionalLicense[]
-  healthcareFacilityLicenses             HealthcareFacilityLicense[]
-  benefitApplicationProfile              BenefitApplicationProfile?
-  educationEnrollmentApplicationProfiles EducationEnrollmentApplicationProfile[]
-  scholarshipApplicationProfiles         ScholarshipApplicationProfile[]
-  educationGrantApplicationProfiles      EducationGrantApplicationProfile[]
+  id                                   String                                @id @default(uuid()) @db.Uuid
+  applicationNumber                    String?                               @unique
+  applicantIdentityId                  String                                @db.Uuid
+  organizationId                       String?                               @db.Uuid
+  representativeAuthorityId            String?                               @db.Uuid
+  governmentServiceId                  String                                @db.Uuid
+  governmentServiceVersionId           String                                @db.Uuid
+  formDefinitionId                     String                                @db.Uuid
+  formVersionId                        String                                @db.Uuid
+  configurationFingerprint             String
+  applicantCategory                    ApplicantCategory
+  status                               ApplicationStatus                     @default(DRAFT)
+  draftAnswers                         Json                                  @default("{}")
+  idempotencyKey                       String?
+  createdAt                            DateTime                              @default(now())
+  updatedAt                            DateTime                              @updatedAt
+  applicantIdentity                    Identity                              @relation(fields: [applicantIdentityId], references: [id])
+  organization                         Organization?                         @relation(fields: [organizationId], references: [id])
+  representativeAuthority              RepresentativeAuthority?              @relation(fields: [representativeAuthorityId], references: [id])
+  governmentService                    GovernmentService                     @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion             GovernmentServiceVersion              @relation(fields: [governmentServiceVersionId], references: [id])
+  formDefinition                       FormDefinition                        @relation(fields: [formDefinitionId], references: [id])
+  formVersion                          FormVersion                           @relation(fields: [formVersionId], references: [id])
+  submissions                          ApplicationSubmission[]
+  case                                 Case?
+  masterAdministrativeFile             MasterAdministrativeFile?
+  feeAssessments                       FeeAssessment[]
+  serviceAppointments                  ServiceAppointment[]
+  civilRegistryEventSubmissions        CivilRegistryEventSubmission[]
+  visaApplicationProfile               VisaApplicationProfile?
+  residencyApplicationProfile          ResidencyApplicationProfile?
+  citizenshipApplicationProfile        CitizenshipApplicationProfile?
+  vitalEvents                          VitalEvent[]
+  workPermitApplicationProfile         WorkPermitApplicationProfile?
+  driverLicenseApplicationProfile      DriverLicenseApplicationProfile?
+  propertyTransfers                    PropertyTransfer[]
+  customsDeclarations                  CustomsDeclaration[]
+  healthcareProfessionalLicenses       HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses           HealthcareFacilityLicense[]
+  benefitApplicationProfile            BenefitApplicationProfile?
+  educationInstitutionRegistrations    EducationInstitutionRegistration[]
+  educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
+  scholarshipApplicationProfile        ScholarshipApplicationProfile?
 
   treatmentApplicationProfile TreatmentApplication?
 
@@ -2629,117 +2631,116 @@ model ApplicationSubmission {
 }
 
 model Case {
-  id                                     String                                      @id @default(uuid()) @db.Uuid
-  caseNumber                             String                                      @unique
-  applicationId                          String                                      @unique @db.Uuid
-  applicantIdentityId                    String                                      @db.Uuid
-  governmentServiceId                    String                                      @db.Uuid
-  governmentServiceVersionId             String                                      @db.Uuid
-  responsibleInstitutionId               String                                      @db.Uuid
-  responsibleDepartmentId                String                                      @db.Uuid
-  workflowVersionId                      String                                      @db.Uuid
-  configurationFingerprint               String
-  status                                 CaseStatus                                  @default(RECEIVED)
-  legalStatus                            CaseLegalStatus                             @default(NONE)
-  legalStatusLabel                       String?
-  priority                               CasePriority                                @default(NORMAL)
-  version                                Int                                         @default(1)
-  openedAt                               DateTime                                    @default(now())
-  closedAt                               DateTime?
-  currentCaseManagerOfficeholderId       String?                                     @db.Uuid
-  masterAdministrativeFileReference      String?
-  documentRegisterReference              String?
-  evidencePacketReference                String?
-  recordsClassificationReference         String?
-  retentionLegalHoldReference            String?
-  createdAt                              DateTime                                    @default(now())
-  updatedAt                              DateTime                                    @updatedAt
-  application                            Application                                 @relation(fields: [applicationId], references: [id])
-  applicantIdentity                      Identity                                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
-  governmentService                      GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
-  governmentServiceVersion               GovernmentServiceVersion                    @relation(fields: [governmentServiceVersionId], references: [id])
-  responsibleInstitution                 Institution                                 @relation(fields: [responsibleInstitutionId], references: [id])
-  responsibleDepartment                  Department                                  @relation(fields: [responsibleDepartmentId], references: [id])
-  workflowVersion                        WorkflowVersion                             @relation(fields: [workflowVersionId], references: [id])
-  currentCaseManagerOfficeholder         Officeholder?                               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
-  statusHistory                          CaseStatusHistory[]
-  workflowInstance                       CaseWorkflowInstance?
-  assignments                            CaseAssignment[]
-  referrals                              CaseReferral[]
-  slaClocks                              CaseSlaClock[]
-  escalations                            CaseEscalation[]
-  issues                                 CaseIssue[]
-  events                                 CaseEvent[]
-  communications                         CaseCommunication[]
-  milestones                             CaseMilestone[]
-  publicStatusProjection                 CasePublicStatusProjection?
-  masterAdministrativeFile               MasterAdministrativeFile?
-  evidenceRecords                        EvidenceRecord[]
-  departmentalReviews                    DepartmentalReviewRecord[]
-  governmentCommunications               GovernmentCommunicationRecord[]
-  professionalReviews                    ProfessionalReviewRecord[]
-  inspectionRecords                      InspectionRecord[]
-  evidencePackets                        EvidencePacket[]
-  decisionReadinessAssessments           DecisionReadinessAssessment[]
-  governmentDecisions                    GovernmentDecision[]
-  decisionPreparationRecords             DecisionPreparationRecord[]
-  officialInstruments                    OfficialInstrument[]
-  issuanceReadinessAssessments           IssuanceReadinessAssessment[]
-  complianceMatters                      ComplianceMatter[]
-  complianceStatusProjections            ComplianceStatusProjection[]
-  reconsiderationProceedings             ReconsiderationProceeding[]
-  internalAdministrativeReviews          InternalAdministrativeReview[]
-  redressMatters                         RedressMatter[]
-  externalReviewReferrals                ExternalReviewReferral[]
-  feeAssessments                         FeeAssessment[]
-  invoices                               Invoice[]
-  communicationMessages                  CommunicationMessage[]
-  integrationRequests                    IntegrationRequest[]
-  dashboardIndicatorProjections          DashboardIndicatorProjection[]
-  strategicProjectProfiles               StrategicProjectProfile[]
-  analysisRequests                       AnalysisRequest[]
-  serviceAppointments                    ServiceAppointment[]
-  civilRegistryRegistration              CivilRegistryVitalRecord?                   @relation("CivilRegistryRegistrationCase")
-  civilRegistryEventSubmission           CivilRegistryEventSubmission?
-  visaApplicationProfile                 VisaApplicationProfile?
-  residencyApplicationProfile            ResidencyApplicationProfile?
-  citizenshipApplicationProfile          CitizenshipApplicationProfile?
-  immigrationSponsorships                ImmigrationSponsorship[]
-  dependentRelationships                 DependentRelationship[]
-  immigrationRequirementAssessments      ImmigrationRequirementAssessment[]
-  immigrationInterviews                  ImmigrationInterview[]
-  biometricRequirements                  BiometricRequirement[]
-  immigrationExternalChecks              ImmigrationExternalCheck[]
-  immigrationCaseProjection              ImmigrationCaseProjection?
-  vitalEvents                            VitalEvent[]
-  civilRegistryEntries                   CivilRegistryEntry[]
-  civilRecordCorrectionRequests          CivilRecordCorrectionRequest[]
-  workPermitApplicationProfile           WorkPermitApplicationProfile?
-  employmentDeclarations                 EmploymentDeclaration[]
-  employmentSponsorships                 EmploymentSponsorship[]
-  labourMarketDeterminationReferences    LabourMarketDeterminationReference[]
-  employmentComplaints                   EmploymentComplaint[]
-  employmentDisputes                     EmploymentDispute[]
-  labourExternalDependencies             LabourExternalDependency[]
-  driverLicenseApplicationProfile        DriverLicenseApplicationProfile?
-  driverTestRecords                      DriverTestRecord[]
-  driverMedicalRequirementReferences     DriverMedicalRequirementReference[]
-  vehicleInspections                     VehicleInspection[]
-  vehicleTransfers                       VehicleTransfer[]
-  propertyTransfers                      PropertyTransfer[]
-  propertyRegistryEntries                PropertyRegistryEntry[]
-  customsDeclarations                    CustomsDeclaration[]
-  healthcareRegistryEntries              HealthcareRegistryEntry[]
-  healthcareProfessionalLicenses         HealthcareProfessionalLicense[]
-  healthcareFacilityLicenses             HealthcareFacilityLicense[]
-  benefitApplicationProfile              BenefitApplicationProfile?
-  externalEligibilityDeterminations      ExternalEligibilityDeterminationReference[]
-  benefitReviews                         BenefitReview[]
-  socialSupportCaseReferences            SocialSupportCaseReference[]
-  educationEnrollmentApplicationProfiles EducationEnrollmentApplicationProfile[]
-  scholarshipApplicationProfiles         ScholarshipApplicationProfile[]
-  educationGrantApplicationProfiles      EducationGrantApplicationProfile[]
-  educationExternalDependencies          EducationExternalDependency[]
+  id                                   String                                      @id @default(uuid()) @db.Uuid
+  caseNumber                           String                                      @unique
+  applicationId                        String                                      @unique @db.Uuid
+  applicantIdentityId                  String                                      @db.Uuid
+  governmentServiceId                  String                                      @db.Uuid
+  governmentServiceVersionId           String                                      @db.Uuid
+  responsibleInstitutionId             String                                      @db.Uuid
+  responsibleDepartmentId              String                                      @db.Uuid
+  workflowVersionId                    String                                      @db.Uuid
+  configurationFingerprint             String
+  status                               CaseStatus                                  @default(RECEIVED)
+  legalStatus                          CaseLegalStatus                             @default(NONE)
+  legalStatusLabel                     String?
+  priority                             CasePriority                                @default(NORMAL)
+  version                              Int                                         @default(1)
+  openedAt                             DateTime                                    @default(now())
+  closedAt                             DateTime?
+  currentCaseManagerOfficeholderId     String?                                     @db.Uuid
+  masterAdministrativeFileReference    String?
+  documentRegisterReference            String?
+  evidencePacketReference              String?
+  recordsClassificationReference       String?
+  retentionLegalHoldReference          String?
+  createdAt                            DateTime                                    @default(now())
+  updatedAt                            DateTime                                    @updatedAt
+  application                          Application                                 @relation(fields: [applicationId], references: [id])
+  applicantIdentity                    Identity                                    @relation("CaseApplicant", fields: [applicantIdentityId], references: [id])
+  governmentService                    GovernmentService                           @relation(fields: [governmentServiceId], references: [id])
+  governmentServiceVersion             GovernmentServiceVersion                    @relation(fields: [governmentServiceVersionId], references: [id])
+  responsibleInstitution               Institution                                 @relation(fields: [responsibleInstitutionId], references: [id])
+  responsibleDepartment                Department                                  @relation(fields: [responsibleDepartmentId], references: [id])
+  workflowVersion                      WorkflowVersion                             @relation(fields: [workflowVersionId], references: [id])
+  currentCaseManagerOfficeholder       Officeholder?                               @relation("CaseManager", fields: [currentCaseManagerOfficeholderId], references: [id])
+  statusHistory                        CaseStatusHistory[]
+  workflowInstance                     CaseWorkflowInstance?
+  assignments                          CaseAssignment[]
+  referrals                            CaseReferral[]
+  slaClocks                            CaseSlaClock[]
+  escalations                          CaseEscalation[]
+  issues                               CaseIssue[]
+  events                               CaseEvent[]
+  communications                       CaseCommunication[]
+  milestones                           CaseMilestone[]
+  publicStatusProjection               CasePublicStatusProjection?
+  masterAdministrativeFile             MasterAdministrativeFile?
+  evidenceRecords                      EvidenceRecord[]
+  departmentalReviews                  DepartmentalReviewRecord[]
+  governmentCommunications             GovernmentCommunicationRecord[]
+  professionalReviews                  ProfessionalReviewRecord[]
+  inspectionRecords                    InspectionRecord[]
+  evidencePackets                      EvidencePacket[]
+  decisionReadinessAssessments         DecisionReadinessAssessment[]
+  governmentDecisions                  GovernmentDecision[]
+  decisionPreparationRecords           DecisionPreparationRecord[]
+  officialInstruments                  OfficialInstrument[]
+  issuanceReadinessAssessments         IssuanceReadinessAssessment[]
+  complianceMatters                    ComplianceMatter[]
+  complianceStatusProjections          ComplianceStatusProjection[]
+  reconsiderationProceedings           ReconsiderationProceeding[]
+  internalAdministrativeReviews        InternalAdministrativeReview[]
+  redressMatters                       RedressMatter[]
+  externalReviewReferrals              ExternalReviewReferral[]
+  feeAssessments                       FeeAssessment[]
+  invoices                             Invoice[]
+  communicationMessages                CommunicationMessage[]
+  integrationRequests                  IntegrationRequest[]
+  dashboardIndicatorProjections        DashboardIndicatorProjection[]
+  strategicProjectProfiles             StrategicProjectProfile[]
+  analysisRequests                     AnalysisRequest[]
+  serviceAppointments                  ServiceAppointment[]
+  civilRegistryRegistration            CivilRegistryVitalRecord?                   @relation("CivilRegistryRegistrationCase")
+  civilRegistryEventSubmission         CivilRegistryEventSubmission?
+  visaApplicationProfile               VisaApplicationProfile?
+  residencyApplicationProfile          ResidencyApplicationProfile?
+  citizenshipApplicationProfile        CitizenshipApplicationProfile?
+  immigrationSponsorships              ImmigrationSponsorship[]
+  dependentRelationships               DependentRelationship[]
+  immigrationRequirementAssessments    ImmigrationRequirementAssessment[]
+  immigrationInterviews                ImmigrationInterview[]
+  biometricRequirements                BiometricRequirement[]
+  immigrationExternalChecks            ImmigrationExternalCheck[]
+  immigrationCaseProjection            ImmigrationCaseProjection?
+  vitalEvents                          VitalEvent[]
+  civilRegistryEntries                 CivilRegistryEntry[]
+  civilRecordCorrectionRequests        CivilRecordCorrectionRequest[]
+  workPermitApplicationProfile         WorkPermitApplicationProfile?
+  employmentDeclarations               EmploymentDeclaration[]
+  employmentSponsorships               EmploymentSponsorship[]
+  labourMarketDeterminationReferences  LabourMarketDeterminationReference[]
+  employmentComplaints                 EmploymentComplaint[]
+  employmentDisputes                   EmploymentDispute[]
+  labourExternalDependencies           LabourExternalDependency[]
+  driverLicenseApplicationProfile      DriverLicenseApplicationProfile?
+  driverTestRecords                    DriverTestRecord[]
+  driverMedicalRequirementReferences   DriverMedicalRequirementReference[]
+  vehicleInspections                   VehicleInspection[]
+  vehicleTransfers                     VehicleTransfer[]
+  propertyTransfers                    PropertyTransfer[]
+  propertyRegistryEntries              PropertyRegistryEntry[]
+  customsDeclarations                  CustomsDeclaration[]
+  healthcareRegistryEntries            HealthcareRegistryEntry[]
+  healthcareProfessionalLicenses       HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses           HealthcareFacilityLicense[]
+  benefitApplicationProfile            BenefitApplicationProfile?
+  externalEligibilityDeterminations    ExternalEligibilityDeterminationReference[]
+  benefitReviews                       BenefitReview[]
+  socialSupportCaseReferences          SocialSupportCaseReference[]
+  educationInstitutionRegistrations    EducationInstitutionRegistration[]
+  educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
+  scholarshipApplicationProfile        ScholarshipApplicationProfile?
 
   treatmentApplicationProfile TreatmentApplication?
   treatmentReferrals          TreatmentReferral[]
@@ -3354,6 +3355,8 @@ model MasterAdministrativeFile {
   transportOperatorRecords             TransportOperatorRecord[]
   traderAccounts                       TraderAccount[]
   benefitApplicantProfiles             BenefitApplicantProfile[]
+  educationInstitutions                EducationInstitution[]
+  studentEducationProfiles             StudentEducationProfile[]
 
   patientHealthcareProfiles PatientHealthcareProfile[]
 
@@ -3511,6 +3514,7 @@ model DocumentRecord {
   civilRegistrySourceReferences    CivilRegistrySourceReference[]
   employmentContractReferences     EmploymentContractReference[]
   surveyPlanReferences             SurveyPlanReference[]
+  educationCertificateRecords      CertificateRecord[]
 
   @@index([owningInstitutionId])
   @@index([owningOrganizationId])
@@ -3783,6 +3787,8 @@ model EvidenceRecord {
   propertyTransferEvidenceLinks   PropertyTransferEvidenceLink[]
   eligibilityEvidenceReferences   EligibilityEvidenceReference[]
   householdRelationships          HouseholdRelationship[]
+  educationCertificateRecords     CertificateRecord[]
+  academicCredentials             AcademicCredential[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -4135,31 +4141,31 @@ model ProfessionalReviewEvidence {
 }
 
 model InspectionRecord {
-  id                                       String                                    @id @default(uuid()) @db.Uuid
-  caseId                                   String                                    @db.Uuid
-  inspectionType                           InspectionType
-  functionAuthorityRecordId                String?                                   @db.Uuid
-  locationSite                             String?
-  inspectionDate                           DateTime
-  scope                                    String
-  method                                   String?
-  conditionsObserved                       String?
-  findings                                 String?
-  limitations                              String?
-  followUpRequired                         Boolean                                   @default(false)
-  status                                   InspectionStatus                          @default(SCHEDULED)
-  createdAt                                DateTime                                  @default(now())
-  updatedAt                                DateTime                                  @updatedAt
-  case                                     Case                                      @relation(fields: [caseId], references: [id])
-  functionAuthorityRecord                  FunctionAuthorityRecord?                  @relation(fields: [functionAuthorityRecordId], references: [id])
-  inspectors                               InspectionInspector[]
-  evidenceItems                            InspectionEvidenceItem[]
-  packetItems                              EvidencePacketItem[]
-  labourInspectionReferences               LabourInspectionReference[]
-  vehicleInspection                        VehicleInspection?
-  customsInspection                        CustomsInspection?
-  educationInstitutionInspectionReferences EducationInstitutionInspectionReference[]
-  healthcareInspectionReference            HealthcareInspectionReference?
+  id                            String                         @id @default(uuid()) @db.Uuid
+  caseId                        String                         @db.Uuid
+  inspectionType                InspectionType
+  functionAuthorityRecordId     String?                        @db.Uuid
+  locationSite                  String?
+  inspectionDate                DateTime
+  scope                         String
+  method                        String?
+  conditionsObserved            String?
+  findings                      String?
+  limitations                   String?
+  followUpRequired              Boolean                        @default(false)
+  status                        InspectionStatus               @default(SCHEDULED)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  case                          Case                           @relation(fields: [caseId], references: [id])
+  functionAuthorityRecord       FunctionAuthorityRecord?       @relation(fields: [functionAuthorityRecordId], references: [id])
+  inspectors                    InspectionInspector[]
+  evidenceItems                 InspectionEvidenceItem[]
+  packetItems                   EvidencePacketItem[]
+  labourInspectionReferences    LabourInspectionReference[]
+  educationInspectionReferences EducationInspectionReference[]
+  vehicleInspection             VehicleInspection?
+  customsInspection             CustomsInspection?
+  healthcareInspectionReference HealthcareInspectionReference?
 
   @@index([caseId])
   @@index([status])
@@ -5249,11 +5255,10 @@ model GovernmentDecision {
   benefitTerminations                 BenefitTermination[]                 @relation("BenefitTerminationDecision")
   benefitStatusHistory                BenefitStatusHistory[]               @relation("BenefitStatusHistoryDecision")
   socialProtectionAppealsChallenged   SocialProtectionAppealReference[]    @relation("SocialProtectionAppealChallengedDecision")
-  educationInstitutionLicenseRecords  EducationInstitutionLicenseRecord[]
-  educationAccreditationRecords       EducationAccreditationRecord[]
+  educationInstitutionLicenses        EducationInstitutionLicense[]
+  educationInstitutionAccreditations  EducationInstitutionAccreditation[]
+  academicCredentials                 AcademicCredential[]
   educatorLicenseRecords              EducatorLicenseRecord[]
-  scholarshipAwardRecords             ScholarshipAwardRecord[]
-  educationRecordCorrections          EducationRecordCorrection[]          @relation("EducationRecordCorrectionDecision")
   treatmentProgramAuthorizations      TreatmentProgramAuthorization[]
 
   @@index([caseId])
@@ -5741,6 +5746,9 @@ model OfficialInstrument {
   transportPermits                  TransportPermit[]
   titleInstrumentReferences         TitleInstrumentReference[]
   tradePermitReferences             TradePermitReference[]
+  educationInstitutionLicenses      EducationInstitutionLicense[]
+  academicCredentials               AcademicCredential[]
+  educatorLicenseRecords            EducatorLicenseRecord[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -6365,6 +6373,7 @@ model ComplianceMatter {
   continuingObligations                ContinuingObligation[]
   complianceSubmissions                ComplianceSubmission[]
   labourComplianceMatterReferences     LabourComplianceMatterReference[]
+  educationComplianceReference         EducationComplianceReference?
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
 
@@ -21547,52 +21556,63 @@ model SocialProtectionAppealReference {
   @@map("social_protection_appeal_references")
 }
 
-// ─── Education Government vertical (jurisdiction-neutral foundation) ───────────
+// ─── Education, Student & Educational Institution Foundation ─────────────────
 
 enum EducationDataClassification {
-  PUBLIC
-  OFFICIAL
-  PROTECTED_EDUCATION
-  PROTECTED_STUDENT
+  STUDENT_ACCESS
+  GUARDIAN_AUTHORIZED
+  INSTITUTION_ACCESS
+  GOVERNMENT_AUTHORIZED
+  RESTRICTED
+  PUBLIC_VERIFICATION_ONLY
 }
 
 enum EducationActorPersona {
   STUDENT
   GUARDIAN
-  INSTITUTION_REPRESENTATIVE
-  OFFICIAL
-  AI_ASSISTANCE
+  AUTHORIZED_REPRESENTATIVE
+  ADULT_STUDENT
+  EDUCATOR
+  INSTITUTION_ADMIN
+  EDUCATION_OFFICER
+  SENIOR_DECISION_OFFICER
+  COMPLIANCE_OFFICER
   TECHNICAL_ADMIN
+  AI_ASSISTANCE
   PAYMENT_SYSTEM
-  PLATFORM_ADMINISTRATOR
+  SYSTEM
 }
 
-enum EducationGuardianRelationshipStatus {
-  PROPOSED
-  ACTIVE
-  LIMITED
-  ENDED
-  REVOKED
+enum EducationInstitutionKind {
+  PUBLIC_INSTITUTION
+  PRIVATE_INSTITUTION
+  UNIVERSITY
+  VOCATIONAL_INSTITUTION
+  TRAINING_PROVIDER
+  OTHER_CONFIGURED
 }
 
-enum EducationStudentProfileStatus {
+enum EducationInstitutionOperationalStatus {
+  DRAFT
   REGISTERED
-  ACTIVE
-  INACTIVE
+  LICENSED
+  ACCREDITED
+  SUSPENDED
+  WITHDRAWN
   CLOSED
 }
 
 enum EducationInstitutionRegistrationStatus {
-  NOT_REGISTERED
-  REGISTRATION_PENDING
+  DRAFT
+  SUBMITTED
   REGISTERED
-  SUSPENDED
-  CLOSED
+  REJECTED
+  WITHDRAWN
 }
 
-enum EducationLicenseLifecycleStatus {
+enum EducationInstitutionLicenseStatus {
   NOT_ISSUED
-  APPLICATION_PENDING
+  PENDING
   ISSUED
   EFFECTIVE
   EXPIRED
@@ -21600,43 +21620,76 @@ enum EducationLicenseLifecycleStatus {
   SUSPENDED
 }
 
-enum EducationAccreditationStatus {
+enum EducationInstitutionAccreditationStatus {
   NOT_ACCREDITED
-  APPLICATION_PENDING
+  PENDING
   ACCREDITED
   PROVISIONAL
-  SUSPENDED
+  WITHDRAWN
   REVOKED
 }
 
-enum EducationEnrollmentStatus {
+enum GuardianEducationRelationshipKind {
+  LEGAL_GUARDIAN
+  PARENT
+  AUTHORIZED_REPRESENTATIVE
+  ADULT_STUDENT_SELF
+}
+
+enum GuardianEducationRelationshipStatus {
   PROPOSED
   ACTIVE
-  TRANSFER_PENDING
-  COMPLETED
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum StudentInstitutionRelationshipStatus {
+  PROPOSED
+  ACTIVE
+  ON_LEAVE
   WITHDRAWN
+  CLOSED
 }
 
-enum EducationExternalDependencyType {
-  SCHOOL_REFERENCE
-  UNIVERSITY_REFERENCE
-  EXAMINATION_BODY
-  EDUCATION_REGISTRY
-  STUDENT_INFORMATION_SYSTEM
+enum EducationAdmissionApplicationProfileStatus {
+  LINKED
+  ACTIVE
+  WITHDRAWN
+  CLOSED
 }
 
-enum EducationExternalDependencyRecordedBy {
-  OFFICIAL
-  SYSTEM
-  INTEGRATION_GATEWAY
+enum EnrollmentRecordStatus {
+  PROPOSED
+  ACTIVE
+  ON_LEAVE
+  WITHDRAWN
+  COMPLETED
+  CLOSED
 }
 
-enum EducationRecordCorrectionStatus {
+enum EducationProgramStatus {
   DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  RESOLVED
-  REJECTED
+  ACTIVE
+  RETIRED
+  ARCHIVED
+}
+
+enum AcademicRecordVerificationStatus {
+  UNVERIFIED
+  INSTITUTION_ATTESTED
+  GOVERNMENT_VERIFIED
+  DISPUTED
+  SUPERSEDED
+}
+
+enum AcademicCredentialLifecycleStatus {
+  DRAFT
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  REVOKED
+  SUPERSEDED
 }
 
 enum ScholarshipApplicationProfileStatus {
@@ -21646,348 +21699,633 @@ enum ScholarshipApplicationProfileStatus {
   CLOSED
 }
 
-enum ScholarshipAwardStatus {
-  NOT_AWARDED
-  PENDING_DECISION
-  AWARDED
-  DECLINED
+enum EducatorLicenseRecordStatus {
+  NOT_ISSUED
+  PENDING
+  ISSUED
+  EFFECTIVE
+  EXPIRED
   REVOKED
+  SUSPENDED
 }
 
-enum EducationEnrollmentApplicationProfileStatus {
-  LINKED
-  ACTIVE
-  WITHDRAWN
-  CLOSED
+enum EducationExternalDependencyType {
+  CIVIL_IDENTITY
+  IMMIGRATION_STATUS
+  PROFESSIONAL_REGULATOR
+  ACCREDITATION_BODY
+  BACKGROUND_CHECK
+  HEALTH_SCREENING
+  OTHER_AUTHORIZED
 }
 
-enum EducationGrantApplicationProfileStatus {
-  LINKED
-  ACTIVE
-  WITHDRAWN
-  CLOSED
+enum EducationExternalDependencyRecordedBy {
+  EDUCATION_OFFICER
+  INTEGRATION_SYSTEM
+  EXTERNAL_AUTHORITY_LIAISON
+  SYSTEM
 }
 
-model EducationStudentProfile {
-  id                             String                                  @id @default(uuid()) @db.Uuid
-  profileNumber                  String                                  @unique
-  subjectIdentityId              String                                  @db.Uuid
-  jurisdictionId                 String?                                 @db.Uuid
-  status                         EducationStudentProfileStatus           @default(REGISTERED)
-  dataClassification             EducationDataClassification             @default(PROTECTED_STUDENT)
-  createdAt                      DateTime                                @default(now())
-  updatedAt                      DateTime                                @updatedAt
-  subjectIdentity                Identity                                @relation("EducationStudentProfileSubject", fields: [subjectIdentityId], references: [id])
-  jurisdiction                   Jurisdiction?                           @relation(fields: [jurisdictionId], references: [id])
-  guardianRelationships          EducationGuardianRelationship[]
-  enrollmentRecords              EducationEnrollmentRecord[]
-  enrollmentApplicationProfiles  EducationEnrollmentApplicationProfile[]
-  scholarshipApplicationProfiles ScholarshipApplicationProfile[]
-  academicRecordReferences       EducationAcademicRecordReference[]
-  recordCorrections              EducationRecordCorrection[]
-  credentialReferences           EducationCredentialReference[]
-  externalDependencies           EducationExternalDependency[]
+model EducationConfiguration {
+  id                            String       @id @default(uuid()) @db.Uuid
+  jurisdictionId                String       @unique @db.Uuid
+  guardianAccessPolicyReference String?
+  studentSelfAccessMinAgeYears  Int?
+  publicVerificationModeCode    String       @default("MINIMAL")
+  createdAt                     DateTime     @default(now())
+  updatedAt                     DateTime     @updatedAt
+  jurisdiction                  Jurisdiction @relation(fields: [jurisdictionId], references: [id])
 
-  @@index([subjectIdentityId])
+  @@map("education_configurations")
+}
+
+model EducationInstitution {
+  id                         String                                @id @default(uuid()) @db.Uuid
+  institutionReferenceNumber String                                @unique
+  organizationId             String                                @db.Uuid
+  jurisdictionId             String?                               @db.Uuid
+  institutionKind            EducationInstitutionKind
+  operationalStatus          EducationInstitutionOperationalStatus @default(DRAFT)
+  doesNotSelfAccredit        Boolean                               @default(true)
+  dataClassification         EducationDataClassification           @default(INSTITUTION_ACCESS)
+  masterAdministrativeFileId String?                               @db.Uuid
+  createdAt                  DateTime                              @default(now())
+  updatedAt                  DateTime                              @updatedAt
+  organization               Organization                          @relation(fields: [organizationId], references: [id])
+  jurisdiction               Jurisdiction?                         @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?             @relation(fields: [masterAdministrativeFileId], references: [id])
+  registrations              EducationInstitutionRegistration[]
+  licenses                   EducationInstitutionLicense[]
+  accreditations             EducationInstitutionAccreditation[]
+  statusHistory              EducationInstitutionStatusHistory[]
+  programs                   EducationProgram[]
+  studentRelationships       StudentInstitutionRelationship[]
+  enrollmentRecords          EnrollmentRecord[]
+  educatorProfiles           EducatorProfileReference[]
+  inspectionReferences       EducationInspectionReference[]
+  complianceReferences       EducationComplianceReference[]
+  externalDependencies       EducationExternalDependency[]
+  academicRecords            AcademicRecord[]
+
+  @@index([organizationId])
   @@index([jurisdictionId])
-  @@map("education_student_profiles")
+  @@index([operationalStatus])
+  @@map("education_institutions")
 }
 
-model EducationGuardianRelationship {
-  id                 String                              @id @default(uuid()) @db.Uuid
-  guardianIdentityId String                              @db.Uuid
-  studentProfileId   String                              @db.Uuid
-  relationshipType   DependentRelationshipType
-  status             EducationGuardianRelationshipStatus @default(PROPOSED)
-  authorizedScope    Json                                @default("{}")
-  effectiveFrom      DateTime                            @default(now())
-  effectiveUntil     DateTime?
-  createdAt          DateTime                            @default(now())
-  updatedAt          DateTime                            @updatedAt
-  guardianIdentity   Identity                            @relation("EducationGuardian", fields: [guardianIdentityId], references: [id])
-  studentProfile     EducationStudentProfile             @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+model EducationInstitutionRegistration {
+  id                          String                                 @id @default(uuid()) @db.Uuid
+  educationInstitutionId      String                                 @db.Uuid
+  registrationReference       String                                 @unique
+  status                      EducationInstitutionRegistrationStatus @default(DRAFT)
+  registrationDoesNotAccredit Boolean                                @default(true)
+  registeredAt                DateTime?
+  applicationId               String?                                @db.Uuid
+  caseId                      String?                                @db.Uuid
+  createdAt                   DateTime                               @default(now())
+  updatedAt                   DateTime                               @updatedAt
+  educationInstitution        EducationInstitution                   @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  application                 Application?                           @relation(fields: [applicationId], references: [id])
+  case                        Case?                                  @relation(fields: [caseId], references: [id])
 
-  @@unique([guardianIdentityId, studentProfileId, relationshipType])
-  @@index([studentProfileId, status])
-  @@map("education_guardian_relationships")
-}
-
-model EducationInstitutionRegistryRecord {
-  id                   String                                    @id @default(uuid()) @db.Uuid
-  registryNumber       String                                    @unique
-  organizationId       String                                    @db.Uuid
-  jurisdictionId       String?                                   @db.Uuid
-  registrationStatus   EducationInstitutionRegistrationStatus    @default(NOT_REGISTERED)
-  doesNotSelfAccredit  Boolean                                   @default(true)
-  dataClassification   EducationDataClassification               @default(PROTECTED_EDUCATION)
-  createdAt            DateTime                                  @default(now())
-  updatedAt            DateTime                                  @updatedAt
-  organization         Organization                              @relation(fields: [organizationId], references: [id])
-  jurisdiction         Jurisdiction?                             @relation(fields: [jurisdictionId], references: [id])
-  licenseRecords       EducationInstitutionLicenseRecord[]
-  accreditationRecords EducationAccreditationRecord[]
-  enrollmentRecords    EducationEnrollmentRecord[]
-  inspectionReferences EducationInstitutionInspectionReference[]
-
-  @@index([organizationId])
-  @@map("education_institution_registry_records")
-}
-
-model EducationInstitutionLicenseRecord {
-  id                          String                             @id @default(uuid()) @db.Uuid
-  licenseNumber               String                             @unique
-  institutionRegistryRecordId String                             @db.Uuid
-  organizationId              String                             @db.Uuid
-  lifecycleStatus             EducationLicenseLifecycleStatus    @default(NOT_ISSUED)
-  governmentDecisionId        String?                            @db.Uuid
-  validFrom                   DateTime?
-  validUntil                  DateTime?
-  publicVerificationToken     String?                            @unique
-  createdAt                   DateTime                           @default(now())
-  updatedAt                   DateTime                           @updatedAt
-  institutionRegistryRecord   EducationInstitutionRegistryRecord @relation(fields: [institutionRegistryRecordId], references: [id])
-  organization                Organization                       @relation(fields: [organizationId], references: [id])
-  governmentDecision          GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
-
-  @@index([organizationId])
-  @@index([lifecycleStatus])
-  @@map("education_institution_license_records")
-}
-
-model EducationAccreditationRecord {
-  id                          String                             @id @default(uuid()) @db.Uuid
-  accreditationNumber         String                             @unique
-  institutionRegistryRecordId String                             @db.Uuid
-  organizationId              String                             @db.Uuid
-  status                      EducationAccreditationStatus       @default(NOT_ACCREDITED)
-  governmentDecisionId        String?                            @db.Uuid
-  grantedByOrganizationId     String?                            @db.Uuid
-  publicVerificationToken     String?                            @unique
-  createdAt                   DateTime                           @default(now())
-  updatedAt                   DateTime                           @updatedAt
-  institutionRegistryRecord   EducationInstitutionRegistryRecord @relation(fields: [institutionRegistryRecordId], references: [id])
-  organization                Organization                       @relation(fields: [organizationId], references: [id])
-  governmentDecision          GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
-
-  @@index([organizationId])
+  @@index([educationInstitutionId])
   @@index([status])
-  @@map("education_accreditation_records")
+  @@map("education_institution_registrations")
 }
 
-model EducatorLicenseRecord {
-  id                      String                          @id @default(uuid()) @db.Uuid
-  licenseNumber           String                          @unique
-  subjectIdentityId       String                          @db.Uuid
-  lifecycleStatus         EducationLicenseLifecycleStatus @default(NOT_ISSUED)
-  governmentDecisionId    String?                         @db.Uuid
-  publicVerificationToken String?                         @unique
-  validFrom               DateTime?
-  validUntil              DateTime?
-  createdAt               DateTime                        @default(now())
-  updatedAt               DateTime                        @updatedAt
-  subjectIdentity         Identity                        @relation("EducatorLicenseSubject", fields: [subjectIdentityId], references: [id])
-  governmentDecision      GovernmentDecision?             @relation(fields: [governmentDecisionId], references: [id])
+model EducationInstitutionLicense {
+  id                     String                            @id @default(uuid()) @db.Uuid
+  educationInstitutionId String                            @db.Uuid
+  licenseReference       String                            @unique
+  status                 EducationInstitutionLicenseStatus @default(NOT_ISSUED)
+  governmentDecisionId   String?                           @db.Uuid
+  officialInstrumentId   String?                           @db.Uuid
+  licenseTypeCode        String?
+  effectiveFrom          DateTime?
+  effectiveUntil         DateTime?
+  issuedAt               DateTime?
+  createdAt              DateTime                          @default(now())
+  updatedAt              DateTime                          @updatedAt
+  educationInstitution   EducationInstitution              @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  governmentDecision     GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument     OfficialInstrument?               @relation(fields: [officialInstrumentId], references: [id])
 
-  @@index([subjectIdentityId])
-  @@map("educator_license_records")
+  @@index([educationInstitutionId])
+  @@index([status])
+  @@map("education_institution_licenses")
 }
 
-model EducationEnrollmentRecord {
-  id                          String                              @id @default(uuid()) @db.Uuid
-  enrollmentReference         String                              @unique
-  studentProfileId            String                              @db.Uuid
-  institutionOrganizationId   String                              @db.Uuid
-  institutionRegistryRecordId String?                             @db.Uuid
-  status                      EducationEnrollmentStatus           @default(PROPOSED)
-  effectiveFrom               DateTime?
-  effectiveUntil              DateTime?
-  createdAt                   DateTime                            @default(now())
-  updatedAt                   DateTime                            @updatedAt
-  studentProfile              EducationStudentProfile             @relation(fields: [studentProfileId], references: [id])
-  institutionOrganization     Organization                        @relation(fields: [institutionOrganizationId], references: [id])
-  institutionRegistryRecord   EducationInstitutionRegistryRecord? @relation(fields: [institutionRegistryRecordId], references: [id])
+model EducationInstitutionAccreditation {
+  id                            String                                  @id @default(uuid()) @db.Uuid
+  educationInstitutionId        String                                  @db.Uuid
+  accreditationReference        String                                  @unique
+  status                        EducationInstitutionAccreditationStatus @default(NOT_ACCREDITED)
+  accreditingAuthorityReference String?
+  governmentDecisionId          String?                                 @db.Uuid
+  grantedAt                     DateTime?
+  effectiveUntil                DateTime?
+  institutionSelfDeclared       Boolean                                 @default(false)
+  createdAt                     DateTime                                @default(now())
+  updatedAt                     DateTime                                @updatedAt
+  educationInstitution          EducationInstitution                    @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  governmentDecision            GovernmentDecision?                     @relation(fields: [governmentDecisionId], references: [id])
 
-  @@index([studentProfileId])
-  @@index([institutionOrganizationId])
-  @@map("education_enrollment_records")
+  @@index([educationInstitutionId])
+  @@index([status])
+  @@map("education_institution_accreditations")
 }
 
-model EducationEnrollmentApplicationProfile {
-  id                       String                                      @id @default(uuid()) @db.Uuid
-  profileNumber            String                                      @unique
-  studentProfileId         String                                      @db.Uuid
-  caseId                   String                                      @unique @db.Uuid
-  applicationId            String                                      @unique @db.Uuid
-  status                   EducationEnrollmentApplicationProfileStatus @default(LINKED)
-  doesNotGrantEnrollment   Boolean                                     @default(true)
-  submissionAcknowledgedAt DateTime?
-  createdAt                DateTime                                    @default(now())
-  updatedAt                DateTime                                    @updatedAt
-  studentProfile           EducationStudentProfile                     @relation(fields: [studentProfileId], references: [id])
-  case                     Case                                        @relation(fields: [caseId], references: [id])
-  application              Application                                 @relation(fields: [applicationId], references: [id])
+model EducationInstitutionStatusHistory {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  educationInstitutionId String                 @db.Uuid
+  fromStatusCode         String?
+  toStatusCode           String
+  changedAt              DateTime               @default(now())
+  actorIdentityId        String?                @db.Uuid
+  actorPersona           EducationActorPersona?
+  reasonSummary          String?
+  createdAt              DateTime               @default(now())
+  educationInstitution   EducationInstitution   @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  actorIdentity          Identity?              @relation("EducationInstitutionStatusHistoryActor", fields: [actorIdentityId], references: [id])
 
-  @@index([studentProfileId])
-  @@map("education_enrollment_application_profiles")
+  @@index([educationInstitutionId])
+  @@map("education_institution_status_history")
+}
+
+model StudentEducationProfile {
+  id                             String                                 @id @default(uuid()) @db.Uuid
+  profileReferenceNumber         String                                 @unique
+  studentIdentityId              String                                 @db.Uuid
+  jurisdictionId                 String?                                @db.Uuid
+  masterAdministrativeFileId     String?                                @db.Uuid
+  dataClassification             EducationDataClassification            @default(STUDENT_ACCESS)
+  studentAccountIsNotEnrollment  Boolean                                @default(true)
+  createdAt                      DateTime                               @default(now())
+  updatedAt                      DateTime                               @updatedAt
+  studentIdentity                Identity                               @relation("EducationStudentProfile", fields: [studentIdentityId], references: [id])
+  jurisdiction                   Jurisdiction?                          @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile       MasterAdministrativeFile?              @relation(fields: [masterAdministrativeFileId], references: [id])
+  guardianRelationships          GuardianEducationRelationship[]
+  institutionRelationships       StudentInstitutionRelationship[]
+  enrollmentRecords              EnrollmentRecord[]
+  admissionApplicationProfiles   EducationAdmissionApplicationProfile[]
+  academicRecords                AcademicRecord[]
+  academicCredentials            AcademicCredential[]
+  scholarshipApplicationProfiles ScholarshipApplicationProfile[]
+  externalDependencies           EducationExternalDependency[]
+  complianceReferences           EducationComplianceReference[]
+
+  @@index([studentIdentityId])
+  @@index([jurisdictionId])
+  @@map("student_education_profiles")
+}
+
+model GuardianEducationRelationship {
+  id                           String                              @id @default(uuid()) @db.Uuid
+  studentEducationProfileId    String                              @db.Uuid
+  guardianIdentityId           String                              @db.Uuid
+  relationshipKind             GuardianEducationRelationshipKind
+  status                       GuardianEducationRelationshipStatus @default(PROPOSED)
+  authorizedAccessScopes       Json                                @default("{}")
+  policyReference              String?
+  effectiveFrom                DateTime                            @default(now())
+  effectiveUntil               DateTime?
+  parentDoesNotImplyFullAccess Boolean                             @default(true)
+  createdAt                    DateTime                            @default(now())
+  updatedAt                    DateTime                            @updatedAt
+  studentEducationProfile      StudentEducationProfile             @relation(fields: [studentEducationProfileId], references: [id], onDelete: Cascade)
+  guardianIdentity             Identity                            @relation("EducationGuardianIdentity", fields: [guardianIdentityId], references: [id])
+
+  @@index([studentEducationProfileId])
+  @@index([guardianIdentityId])
+  @@index([status])
+  @@map("guardian_education_relationships")
+}
+
+model StudentInstitutionRelationship {
+  id                        String                               @id @default(uuid()) @db.Uuid
+  studentEducationProfileId String                               @db.Uuid
+  educationInstitutionId    String                               @db.Uuid
+  relationshipReference     String                               @unique
+  status                    StudentInstitutionRelationshipStatus @default(PROPOSED)
+  startDate                 DateTime?
+  endDate                   DateTime?
+  createdAt                 DateTime                             @default(now())
+  updatedAt                 DateTime                             @updatedAt
+  studentEducationProfile   StudentEducationProfile              @relation(fields: [studentEducationProfileId], references: [id], onDelete: Cascade)
+  educationInstitution      EducationInstitution                 @relation(fields: [educationInstitutionId], references: [id])
+
+  @@index([studentEducationProfileId])
+  @@index([educationInstitutionId])
+  @@map("student_institution_relationships")
+}
+
+model EducationAdmissionApplicationProfile {
+  id                            String                                     @id @default(uuid()) @db.Uuid
+  profileNumber                 String                                     @unique
+  studentEducationProfileId     String                                     @db.Uuid
+  caseId                        String                                     @unique @db.Uuid
+  applicationId                 String                                     @unique @db.Uuid
+  status                        EducationAdmissionApplicationProfileStatus @default(LINKED)
+  doesNotCreateEnrollment       Boolean                                    @default(true)
+  doesNotGrantAdmission         Boolean                                    @default(true)
+  paymentDoesNotCreateAdmission Boolean                                    @default(true)
+  createdAt                     DateTime                                   @default(now())
+  updatedAt                     DateTime                                   @updatedAt
+  studentEducationProfile       StudentEducationProfile                    @relation(fields: [studentEducationProfileId], references: [id])
+  case                          Case                                       @relation(fields: [caseId], references: [id])
+  application                   Application                                @relation(fields: [applicationId], references: [id])
+  enrollmentRecords             EnrollmentRecord[]
+
+  @@index([studentEducationProfileId])
+  @@map("education_admission_application_profiles")
+}
+
+model EnrollmentRecord {
+  id                                     String                                @id @default(uuid()) @db.Uuid
+  enrollmentReference                    String                                @unique
+  studentEducationProfileId              String                                @db.Uuid
+  educationInstitutionId                 String                                @db.Uuid
+  educationProgramVersionId              String?                               @db.Uuid
+  educationAdmissionApplicationProfileId String?                               @db.Uuid
+  status                                 EnrollmentRecordStatus                @default(PROPOSED)
+  enrollmentPeriodStart                  DateTime?
+  enrollmentPeriodEnd                    DateTime?
+  admissionIsNotEnrollment               Boolean                               @default(true)
+  createdAt                              DateTime                              @default(now())
+  updatedAt                              DateTime                              @updatedAt
+  studentEducationProfile                StudentEducationProfile               @relation(fields: [studentEducationProfileId], references: [id])
+  educationInstitution                   EducationInstitution                  @relation(fields: [educationInstitutionId], references: [id])
+  educationProgramVersion                EducationProgramVersion?              @relation(fields: [educationProgramVersionId], references: [id])
+  educationAdmissionApplicationProfile   EducationAdmissionApplicationProfile? @relation(fields: [educationAdmissionApplicationProfileId], references: [id])
+  history                                EnrollmentHistory[]
+  academicRecords                        AcademicRecord[]
+
+  @@index([studentEducationProfileId])
+  @@index([educationInstitutionId])
+  @@index([status])
+  @@map("enrollment_records")
+}
+
+model EnrollmentHistory {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  enrollmentRecordId String                 @db.Uuid
+  fromStatusCode     String?
+  toStatusCode       String
+  changedAt          DateTime               @default(now())
+  actorIdentityId    String?                @db.Uuid
+  actorPersona       EducationActorPersona?
+  reasonSummary      String?
+  createdAt          DateTime               @default(now())
+  enrollmentRecord   EnrollmentRecord       @relation(fields: [enrollmentRecordId], references: [id], onDelete: Cascade)
+  actorIdentity      Identity?              @relation("EnrollmentHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([enrollmentRecordId])
+  @@map("enrollment_history")
+}
+
+model EducationProgram {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  educationInstitutionId String                    @db.Uuid
+  programCode            String
+  programTitle           String
+  status                 EducationProgramStatus    @default(DRAFT)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  educationInstitution   EducationInstitution      @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  versions               EducationProgramVersion[]
+
+  @@unique([educationInstitutionId, programCode])
+  @@index([educationInstitutionId])
+  @@map("education_programs")
+}
+
+model EducationProgramVersion {
+  id                  String             @id @default(uuid()) @db.Uuid
+  educationProgramId  String             @db.Uuid
+  versionNumber       Int
+  effectiveFrom       DateTime           @default(now())
+  effectiveUntil      DateTime?
+  curriculumReference String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  educationProgram    EducationProgram   @relation(fields: [educationProgramId], references: [id], onDelete: Cascade)
+  enrollmentRecords   EnrollmentRecord[]
+  academicRecords     AcademicRecord[]
+  courseReferences    CourseReference[]
+
+  @@unique([educationProgramId, versionNumber])
+  @@index([educationProgramId])
+  @@map("education_program_versions")
+}
+
+model CourseReference {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  educationProgramVersionId String                  @db.Uuid
+  courseCode                String
+  courseTitle               String
+  schemeReference           String?
+  createdAt                 DateTime                @default(now())
+  educationProgramVersion   EducationProgramVersion @relation(fields: [educationProgramVersionId], references: [id], onDelete: Cascade)
+
+  @@index([educationProgramVersionId])
+  @@map("course_references")
+}
+
+model QualificationReference {
+  id                 String           @id @default(uuid()) @db.Uuid
+  qualificationCode  String
+  qualificationLabel String
+  schemeReference    String?
+  jurisdictionId     String?          @db.Uuid
+  createdAt          DateTime         @default(now())
+  jurisdiction       Jurisdiction?    @relation(fields: [jurisdictionId], references: [id])
+  academicRecords    AcademicRecord[]
+
+  @@index([qualificationCode])
+  @@index([jurisdictionId])
+  @@map("qualification_references")
+}
+
+model AcademicRecord {
+  id                                    String                           @id @default(uuid()) @db.Uuid
+  recordReference                       String                           @unique
+  studentEducationProfileId             String                           @db.Uuid
+  enrollmentRecordId                    String?                          @db.Uuid
+  educationInstitutionId                String?                          @db.Uuid
+  educationInstitution                  EducationInstitution?            @relation(fields: [educationInstitutionId], references: [id])
+  educationProgramVersionId             String?                          @db.Uuid
+  qualificationReferenceId              String?                          @db.Uuid
+  periodStart                           DateTime?
+  periodEnd                             DateTime?
+  sourceReference                       String?
+  issuingAuthorityReference             String?
+  verificationStatus                    AcademicRecordVerificationStatus @default(UNVERIFIED)
+  schoolResultIsNotGovernmentCredential Boolean                          @default(true)
+  dataClassification                    EducationDataClassification      @default(RESTRICTED)
+  currentVersionNumber                  Int                              @default(1)
+  createdAt                             DateTime                         @default(now())
+  updatedAt                             DateTime                         @updatedAt
+  studentEducationProfile               StudentEducationProfile          @relation(fields: [studentEducationProfileId], references: [id])
+  enrollmentRecord                      EnrollmentRecord?                @relation(fields: [enrollmentRecordId], references: [id])
+  educationProgramVersion               EducationProgramVersion?         @relation(fields: [educationProgramVersionId], references: [id])
+  qualificationReference                QualificationReference?          @relation(fields: [qualificationReferenceId], references: [id])
+  transcriptRecords                     TranscriptRecord[]
+  certificateRecords                    CertificateRecord[]
+
+  @@index([studentEducationProfileId])
+  @@index([verificationStatus])
+  @@map("academic_records")
+}
+
+model TranscriptRecord {
+  id                  String                              @id @default(uuid()) @db.Uuid
+  academicRecordId    String                              @db.Uuid
+  transcriptReference String                              @unique
+  versionNumber       Int
+  isCurrentVersion    Boolean                             @default(true)
+  contentReference    String?
+  verificationStatus  AcademicRecordVerificationStatus    @default(UNVERIFIED)
+  provenanceSummary   String?
+  supersededAt        DateTime?
+  createdAt           DateTime                            @default(now())
+  updatedAt           DateTime                            @updatedAt
+  academicRecord      AcademicRecord                      @relation(fields: [academicRecordId], references: [id], onDelete: Cascade)
+  correctionHistory   TranscriptRecordCorrectionHistory[]
+
+  @@unique([academicRecordId, versionNumber])
+  @@index([academicRecordId])
+  @@map("transcript_records")
+}
+
+model TranscriptRecordCorrectionHistory {
+  id                    String                 @id @default(uuid()) @db.Uuid
+  transcriptRecordId    String                 @db.Uuid
+  priorVersionNumber    Int
+  correctionReason      String
+  correctedAt           DateTime               @default(now())
+  actorIdentityId       String?                @db.Uuid
+  actorPersona          EducationActorPersona?
+  priorContentReference String?
+  createdAt             DateTime               @default(now())
+  transcriptRecord      TranscriptRecord       @relation(fields: [transcriptRecordId], references: [id], onDelete: Cascade)
+  actorIdentity         Identity?              @relation("TranscriptCorrectionActor", fields: [actorIdentityId], references: [id])
+
+  @@index([transcriptRecordId])
+  @@map("transcript_record_correction_history")
+}
+
+model CertificateRecord {
+  id                   String                           @id @default(uuid()) @db.Uuid
+  academicRecordId     String                           @db.Uuid
+  certificateReference String                           @unique
+  verificationStatus   AcademicRecordVerificationStatus @default(UNVERIFIED)
+  documentRecordId     String?                          @db.Uuid
+  evidenceRecordId     String?                          @db.Uuid
+  createdAt            DateTime                         @default(now())
+  updatedAt            DateTime                         @updatedAt
+  academicRecord       AcademicRecord                   @relation(fields: [academicRecordId], references: [id], onDelete: Cascade)
+  documentRecord       DocumentRecord?                  @relation(fields: [documentRecordId], references: [id])
+  evidenceRecord       EvidenceRecord?                  @relation(fields: [evidenceRecordId], references: [id])
+
+  @@index([academicRecordId])
+  @@map("certificate_records")
+}
+
+model AcademicCredential {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  credentialReference           String                            @unique
+  studentEducationProfileId     String                            @db.Uuid
+  lifecycleStatus               AcademicCredentialLifecycleStatus @default(DRAFT)
+  governmentDecisionId          String?                           @db.Uuid
+  officialInstrumentId          String?                           @db.Uuid
+  evidenceRecordId              String?                           @db.Uuid
+  academicRecordIsNotCredential Boolean                           @default(true)
+  dataClassification            EducationDataClassification       @default(GOVERNMENT_AUTHORIZED)
+  issuedAt                      DateTime?
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  studentEducationProfile       StudentEducationProfile           @relation(fields: [studentEducationProfileId], references: [id])
+  governmentDecision            GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument            OfficialInstrument?               @relation(fields: [officialInstrumentId], references: [id])
+  evidenceRecord                EvidenceRecord?                   @relation(fields: [evidenceRecordId], references: [id])
+
+  @@index([studentEducationProfileId])
+  @@index([lifecycleStatus])
+  @@map("academic_credentials")
+}
+
+model ScholarshipProgramReference {
+  id                 String                          @id @default(uuid()) @db.Uuid
+  programCode        String
+  programTitle       String
+  jurisdictionId     String?                         @db.Uuid
+  governingSourceRef String?
+  createdAt          DateTime                        @default(now())
+  jurisdiction       Jurisdiction?                   @relation(fields: [jurisdictionId], references: [id])
+  applications       ScholarshipApplicationProfile[]
+
+  @@index([programCode])
+  @@index([jurisdictionId])
+  @@map("scholarship_program_references")
 }
 
 model ScholarshipApplicationProfile {
-  id                 String                              @id @default(uuid()) @db.Uuid
-  profileNumber      String                              @unique
-  studentProfileId   String                              @db.Uuid
-  caseId             String                              @unique @db.Uuid
-  applicationId      String                              @unique @db.Uuid
-  status             ScholarshipApplicationProfileStatus @default(LINKED)
-  doesNotCreateAward Boolean                             @default(true)
-  recommendationOnly Boolean                             @default(true)
-  createdAt          DateTime                            @default(now())
-  updatedAt          DateTime                            @updatedAt
-  studentProfile     EducationStudentProfile             @relation(fields: [studentProfileId], references: [id])
-  case               Case                                @relation(fields: [caseId], references: [id])
-  application        Application                         @relation(fields: [applicationId], references: [id])
-  awardRecord        ScholarshipAwardRecord?
+  id                            String                              @id @default(uuid()) @db.Uuid
+  profileNumber                 String                              @unique
+  studentEducationProfileId     String                              @db.Uuid
+  scholarshipProgramReferenceId String                              @db.Uuid
+  caseId                        String                              @unique @db.Uuid
+  applicationId                 String                              @unique @db.Uuid
+  status                        ScholarshipApplicationProfileStatus @default(LINKED)
+  doesNotCreateAward            Boolean                             @default(true)
+  aiRecommendationIsNotDecision Boolean                             @default(true)
+  createdAt                     DateTime                            @default(now())
+  updatedAt                     DateTime                            @updatedAt
+  studentEducationProfile       StudentEducationProfile             @relation(fields: [studentEducationProfileId], references: [id])
+  scholarshipProgramReference   ScholarshipProgramReference         @relation(fields: [scholarshipProgramReferenceId], references: [id])
+  case                          Case                                @relation(fields: [caseId], references: [id])
+  application                   Application                         @relation(fields: [applicationId], references: [id])
 
-  @@index([studentProfileId])
+  @@index([studentEducationProfileId])
+  @@index([scholarshipProgramReferenceId])
   @@map("scholarship_application_profiles")
 }
 
-model ScholarshipAwardRecord {
-  id                              String                        @id @default(uuid()) @db.Uuid
-  awardReference                  String                        @unique
-  scholarshipApplicationProfileId String                        @unique @db.Uuid
-  status                          ScholarshipAwardStatus        @default(NOT_AWARDED)
-  requiresDecisionWorkflow        Boolean                       @default(true)
-  governmentDecisionId            String?                       @db.Uuid
-  awardedAt                       DateTime?
-  createdAt                       DateTime                      @default(now())
-  updatedAt                       DateTime                      @updatedAt
-  scholarshipApplicationProfile   ScholarshipApplicationProfile @relation(fields: [scholarshipApplicationProfileId], references: [id])
-  governmentDecision              GovernmentDecision?           @relation(fields: [governmentDecisionId], references: [id])
+model EducationGrantReference {
+  id                 String        @id @default(uuid()) @db.Uuid
+  grantCode          String
+  grantTitle         String
+  jurisdictionId     String?       @db.Uuid
+  governingSourceRef String?
+  createdAt          DateTime      @default(now())
+  jurisdiction       Jurisdiction? @relation(fields: [jurisdictionId], references: [id])
 
+  @@index([grantCode])
+  @@index([jurisdictionId])
+  @@map("education_grant_references")
+}
+
+model StudentSupportProgramReference {
+  id                 String        @id @default(uuid()) @db.Uuid
+  programCode        String
+  programTitle       String
+  jurisdictionId     String?       @db.Uuid
+  governingSourceRef String?
+  createdAt          DateTime      @default(now())
+  jurisdiction       Jurisdiction? @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([programCode])
+  @@index([jurisdictionId])
+  @@map("student_support_program_references")
+}
+
+model EducatorProfileReference {
+  id                         String                                        @id @default(uuid()) @db.Uuid
+  educatorReferenceNumber    String                                        @unique
+  educatorIdentityId         String                                        @db.Uuid
+  educationInstitutionId     String?                                       @db.Uuid
+  jurisdictionId             String?                                       @db.Uuid
+  dataClassification         EducationDataClassification                   @default(INSTITUTION_ACCESS)
+  createdAt                  DateTime                                      @default(now())
+  updatedAt                  DateTime                                      @updatedAt
+  educatorIdentity           Identity                                      @relation("EducationEducatorProfile", fields: [educatorIdentityId], references: [id])
+  educationInstitution       EducationInstitution?                         @relation(fields: [educationInstitutionId], references: [id])
+  jurisdiction               Jurisdiction?                                 @relation(fields: [jurisdictionId], references: [id])
+  licenseRecords             EducatorLicenseRecord[]
+  professionalQualifications ProfessionalEducationQualificationReference[]
+
+  @@index([educatorIdentityId])
+  @@index([educationInstitutionId])
+  @@map("educator_profile_references")
+}
+
+model EducatorLicenseRecord {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  educatorProfileReferenceId String                      @db.Uuid
+  licenseReference           String                      @unique
+  status                     EducatorLicenseRecordStatus @default(NOT_ISSUED)
+  governmentDecisionId       String?                     @db.Uuid
+  officialInstrumentId       String?                     @db.Uuid
+  licenseTypeCode            String?
+  effectiveFrom              DateTime?
+  effectiveUntil             DateTime?
+  issuedAt                   DateTime?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  educatorProfileReference   EducatorProfileReference    @relation(fields: [educatorProfileReferenceId], references: [id], onDelete: Cascade)
+  governmentDecision         GovernmentDecision?         @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument         OfficialInstrument?         @relation(fields: [officialInstrumentId], references: [id])
+
+  @@index([educatorProfileReferenceId])
   @@index([status])
-  @@map("scholarship_award_records")
+  @@map("educator_license_records")
 }
 
-model EducationGrantApplicationProfile {
-  id                String                                 @id @default(uuid()) @db.Uuid
-  profileNumber     String                                 @unique
-  caseId            String                                 @unique @db.Uuid
-  applicationId     String                                 @unique @db.Uuid
-  organizationId    String?                                @db.Uuid
-  status            EducationGrantApplicationProfileStatus @default(LINKED)
-  doesNotGrantFunds Boolean                                @default(true)
-  createdAt         DateTime                               @default(now())
-  updatedAt         DateTime                               @updatedAt
-  case              Case                                   @relation(fields: [caseId], references: [id])
-  application       Application                            @relation(fields: [applicationId], references: [id])
+model ProfessionalEducationQualificationReference {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  educatorProfileReferenceId String                           @db.Uuid
+  qualificationCode          String
+  qualificationLabel         String
+  schemeReference            String?
+  verificationStatus         AcademicRecordVerificationStatus @default(UNVERIFIED)
+  createdAt                  DateTime                         @default(now())
+  educatorProfileReference   EducatorProfileReference         @relation(fields: [educatorProfileReferenceId], references: [id], onDelete: Cascade)
 
-  @@map("education_grant_application_profiles")
+  @@index([educatorProfileReferenceId])
+  @@map("professional_education_qualification_references")
 }
 
-model EducationAcademicRecordReference {
-  id                        String                  @id @default(uuid()) @db.Uuid
-  referenceToken            String                  @unique
-  studentProfileId          String                  @db.Uuid
-  institutionOrganizationId String?                 @db.Uuid
-  summaryLabel              String?
-  isOfficialTranscript      Boolean                 @default(false)
-  createdAt                 DateTime                @default(now())
-  studentProfile            EducationStudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+model EducationInspectionReference {
+  id                        String               @id @default(uuid()) @db.Uuid
+  educationInstitutionId    String               @db.Uuid
+  inspectionRecordId        String               @unique @db.Uuid
+  isFinalComplianceDecision Boolean              @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  educationInstitution      EducationInstitution @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  inspectionRecord          InspectionRecord     @relation(fields: [inspectionRecordId], references: [id])
 
-  @@index([studentProfileId])
-  @@map("education_academic_record_references")
+  @@index([educationInstitutionId])
+  @@map("education_inspection_references")
 }
 
-model EducationCredentialReference {
-  id                      String                  @id @default(uuid()) @db.Uuid
-  credentialReference     String                  @unique
-  studentProfileId        String                  @db.Uuid
-  credentialTypeCode      String
-  publicVerificationToken String?                 @unique
-  isGovernmentRecognized  Boolean                 @default(false)
-  governmentDecisionId    String?                 @db.Uuid
-  createdAt               DateTime                @default(now())
-  studentProfile          EducationStudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+model EducationComplianceReference {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  educationInstitutionId    String                   @db.Uuid
+  complianceMatterId        String                   @unique @db.Uuid
+  studentEducationProfileId String?                  @db.Uuid
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  educationInstitution      EducationInstitution     @relation(fields: [educationInstitutionId], references: [id], onDelete: Cascade)
+  complianceMatter          ComplianceMatter         @relation(fields: [complianceMatterId], references: [id])
+  studentEducationProfile   StudentEducationProfile? @relation(fields: [studentEducationProfileId], references: [id])
 
-  @@index([studentProfileId])
-  @@map("education_credential_references")
-}
-
-model EducationRecordCorrection {
-  id                   String                             @id @default(uuid()) @db.Uuid
-  correctionReference  String                             @unique
-  studentProfileId     String                             @db.Uuid
-  applicantIdentityId  String                             @db.Uuid
-  caseId               String?                            @db.Uuid
-  status               EducationRecordCorrectionStatus    @default(DRAFT)
-  correctionSummary    String?
-  governmentDecisionId String?                            @db.Uuid
-  createdAt            DateTime                           @default(now())
-  updatedAt            DateTime                           @updatedAt
-  studentProfile       EducationStudentProfile            @relation(fields: [studentProfileId], references: [id])
-  applicantIdentity    Identity                           @relation("EducationRecordCorrectionApplicant", fields: [applicantIdentityId], references: [id])
-  governmentDecision   GovernmentDecision?                @relation("EducationRecordCorrectionDecision", fields: [governmentDecisionId], references: [id])
-  history              EducationRecordCorrectionHistory[]
-
-  @@index([studentProfileId])
-  @@map("education_record_corrections")
-}
-
-model EducationRecordCorrectionHistory {
-  id                          String                           @id @default(uuid()) @db.Uuid
-  educationRecordCorrectionId String                           @db.Uuid
-  fromStatus                  EducationRecordCorrectionStatus?
-  toStatus                    EducationRecordCorrectionStatus
-  changedFieldSummary         String?
-  actorIdentityId             String?                          @db.Uuid
-  actorPersona                EducationActorPersona
-  recordedAt                  DateTime                         @default(now())
-  educationRecordCorrection   EducationRecordCorrection        @relation(fields: [educationRecordCorrectionId], references: [id], onDelete: Cascade)
-  actorIdentity               Identity?                        @relation("EducationRecordCorrectionHistoryActor", fields: [actorIdentityId], references: [id])
-
-  @@index([educationRecordCorrectionId])
-  @@map("education_record_correction_history")
-}
-
-model EducationInstitutionInspectionReference {
-  id                          String                              @id @default(uuid()) @db.Uuid
-  inspectionRecordId          String                              @db.Uuid
-  institutionRegistryRecordId String?                             @db.Uuid
-  organizationId              String                              @db.Uuid
-  findingSummary              String?
-  isFinalComplianceDecision   Boolean                             @default(false)
-  createdAt                   DateTime                            @default(now())
-  inspectionRecord            InspectionRecord                    @relation(fields: [inspectionRecordId], references: [id])
-  institutionRegistryRecord   EducationInstitutionRegistryRecord? @relation(fields: [institutionRegistryRecordId], references: [id])
-  organization                Organization                        @relation(fields: [organizationId], references: [id])
-
-  @@index([inspectionRecordId])
-  @@index([organizationId])
-  @@map("education_institution_inspection_references")
+  @@index([educationInstitutionId])
+  @@map("education_compliance_references")
 }
 
 model EducationExternalDependency {
-  id                          String                                @id @default(uuid()) @db.Uuid
-  dependencyReference         String                                @unique
-  caseId                      String?                               @db.Uuid
-  studentProfileId            String?                               @db.Uuid
-  externalAuthorityId         String?                               @db.Uuid
-  dependencyType              EducationExternalDependencyType
-  integrationGatewayRouteCode String?
-  resolutionStatusCode        String                                @default("PENDING")
-  isRequired                  Boolean                               @default(false)
-  blocksDecisionWhenRequired  Boolean                               @default(false)
-  recordedBy                  EducationExternalDependencyRecordedBy
-  recordedByIdentityId        String?                               @db.Uuid
-  createdAt                   DateTime                              @default(now())
-  updatedAt                   DateTime                              @updatedAt
-  case                        Case?                                 @relation(fields: [caseId], references: [id])
-  studentProfile              EducationStudentProfile?              @relation(fields: [studentProfileId], references: [id])
-  externalAuthority           ExternalAuthority?                    @relation(fields: [externalAuthorityId], references: [id])
-  recordedByIdentity          Identity?                             @relation("EducationExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+  id                        String                                @id @default(uuid()) @db.Uuid
+  dependencyType            EducationExternalDependencyType
+  educationInstitutionId    String?                               @db.Uuid
+  studentEducationProfileId String?                               @db.Uuid
+  externalAuthorityId       String?                               @db.Uuid
+  isRequired                Boolean                               @default(false)
+  isAuthenticated           Boolean                               @default(false)
+  authenticatedPayloadHash  String?
+  recordedBy                EducationExternalDependencyRecordedBy
+  recordedByIdentityId      String?                               @db.Uuid
+  resolutionStatusCode      String                                @default("PENDING")
+  createdAt                 DateTime                              @default(now())
+  updatedAt                 DateTime                              @updatedAt
+  educationInstitution      EducationInstitution?                 @relation(fields: [educationInstitutionId], references: [id])
+  studentEducationProfile   StudentEducationProfile?              @relation(fields: [studentEducationProfileId], references: [id])
+  externalAuthority         ExternalAuthority?                    @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity        Identity?                             @relation("EducationExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
 
-  @@index([caseId])
-  @@index([studentProfileId])
+  @@index([educationInstitutionId])
+  @@index([studentEducationProfileId])
   @@map("education_external_dependencies")
 }
 

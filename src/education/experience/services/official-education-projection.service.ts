@@ -1,16 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CaseSlaClockStatus,
-  CaseStatus,
-  EducationAccreditationStatus,
-  EducationEnrollmentApplicationProfileStatus,
-  EducationInstitutionRegistrationStatus,
-  EducationRecordCorrectionStatus,
-  ScholarshipApplicationProfileStatus,
-} from '@prisma/client';
+import { CaseSlaClockStatus, CaseStatus } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
 import { type ResolvedOfficialContext } from '../../../experience/official/types/official-context.types';
+import { EDUCATION_SERVICE_PACK_ID } from '../../education.constants';
 import { EducationExperienceBoundaryService } from '../education-experience-boundary.service';
 import { EducationScopeService } from './education-scope.service';
 
@@ -30,41 +23,25 @@ export class OfficialEducationProjectionService {
     const caseWhere = this.scope.buildOfficialCaseWhere(context.scope.departmentIds);
 
     const [
-      studentEnrollmentMatters,
+      admissionApplications,
       institutionRegistrations,
-      institutionLicensing,
-      accreditation,
-      educatorLicensing,
-      scholarships,
-      grants,
-      inspectionMatters,
-      recordCorrections,
+      institutionLicenses,
+      accreditations,
+      educatorLicenses,
+      scholarshipApplications,
+      inspectionReferences,
+      transcriptCorrections,
       appeals,
       slaRisk,
     ] = await Promise.all([
-      this.prisma.educationEnrollmentApplicationProfile.count({
-        where: { case: caseWhere, status: EducationEnrollmentApplicationProfileStatus.ACTIVE },
-      }),
-      this.prisma.educationInstitutionRegistryRecord.count({
-        where: { registrationStatus: EducationInstitutionRegistrationStatus.REGISTRATION_PENDING },
-      }),
-      this.prisma.educationInstitutionLicenseRecord.count({
-        where: { lifecycleStatus: 'APPLICATION_PENDING' },
-      }),
-      this.prisma.educationAccreditationRecord.count({
-        where: { status: EducationAccreditationStatus.APPLICATION_PENDING },
-      }),
-      this.prisma.educatorLicenseRecord.count({
-        where: { lifecycleStatus: 'APPLICATION_PENDING' },
-      }),
-      this.prisma.scholarshipApplicationProfile.count({
-        where: { case: caseWhere, status: ScholarshipApplicationProfileStatus.ACTIVE },
-      }),
-      this.prisma.educationGrantApplicationProfile.count({ where: { case: caseWhere } }),
-      this.prisma.educationInstitutionInspectionReference.count(),
-      this.prisma.educationRecordCorrection.count({
-        where: { status: EducationRecordCorrectionStatus.UNDER_REVIEW },
-      }),
+      this.prisma.educationAdmissionApplicationProfile.count({ where: { case: caseWhere } }),
+      this.prisma.educationInstitutionRegistration.count({ where: { case: caseWhere } }),
+      this.prisma.educationInstitutionLicense.count(),
+      this.prisma.educationInstitutionAccreditation.count(),
+      this.prisma.educatorLicenseRecord.count(),
+      this.prisma.scholarshipApplicationProfile.count({ where: { case: caseWhere } }),
+      this.prisma.educationInspectionReference.count(),
+      this.prisma.transcriptRecordCorrectionHistory.count(),
       this.prisma.redressMatter.count({
         where: { case: caseWhere, closedAt: null },
       }),
@@ -79,18 +56,18 @@ export class OfficialEducationProjectionService {
     return {
       generatedAt: new Date().toISOString(),
       ruleEnvironment: this.boundary.ruleEnvironment,
+      servicePackId: EDUCATION_SERVICE_PACK_ID,
       disclaimer: this.boundary.disclaimer,
       aiDisclaimer: this.boundary.aiDisclaimer,
       queues: {
-        studentEnrollmentMatters,
+        admissionApplications,
         institutionRegistrations,
-        institutionLicensing,
-        accreditation,
-        educatorLicensing,
-        scholarships,
-        grants,
-        inspectionMatters,
-        recordCorrections,
+        institutionLicenses,
+        accreditations,
+        educatorLicenses,
+        scholarshipApplications,
+        inspectionReferences,
+        transcriptCorrections,
         appeals,
         slaRisk,
       },
