@@ -42,6 +42,7 @@ import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
+import { SocialProtectionModule } from './social-protection/social-protection.module';
 import { SystemModule } from './system/system.module';
 import { TransportationModule } from './transportation/transportation.module';
 
@@ -75,6 +76,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     LabourModule,
+    SocialProtectionModule,
     TransportationModule,
     CitizenExperienceModule,
     CivilRegistryModule,
