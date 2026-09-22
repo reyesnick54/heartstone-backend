@@ -24,6 +24,7 @@ import { EvidenceRecordsModule } from './evidence-records/evidence-records.modul
 import { ExperienceModule } from './experience/experience.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
+import { HealthcareModule } from './healthcare/healthcare.module';
 import { IdentityModule } from './identity/identity.module';
 import { ImmigrationModule } from './immigration/immigration.module';
 import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
@@ -63,6 +64,7 @@ import { TransportationModule } from './transportation/transportation.module';
     DatabaseModule,
     RedisModule,
     HealthModule,
+    HealthcareModule,
     SystemModule,
     GovernmentModule,
     IdentityModule,
