@@ -1,15 +1,22 @@
 import { type INestApplication } from '@nestjs/common';
 import {
+  AuthorityActionType,
+  AuthorityClassification,
   CivilRegistryCertificateStatus,
   CivilRegistryCertificateType,
   CivilRegistryEventType,
   CivilRegistryRecordStatus,
+  ControlledFunctionClass,
+  FunctionAuthorityLifecycleStatus,
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { CivilRegistryCertificateService } from '../src/civil-registry/certificates/civil-registry-certificate.service';
-import { CIVIL_REGISTRY_SERVICE_PACK_ID } from '../src/civil-registry/civil-registry.constants';
+import {
+  CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES,
+  CIVIL_REGISTRY_SERVICE_PACK_ID,
+} from '../src/civil-registry/civil-registry.constants';
 import { CivilRegistryRegistrationService } from '../src/civil-registry/registration/civil-registry-registration.service';
 import { CivilRegistryVerificationService } from '../src/civil-registry/verification/civil-registry-verification.service';
 import { type PrismaService } from '../src/database/prisma.service';
@@ -35,6 +42,48 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
     app = boot.app;
     prisma = boot.prisma;
     fixture = await seedPhase8Fixture(app, prisma);
+
+    const templateIssueFunctionCode = CIVIL_REGISTRY_AUTHORITY_FUNCTION_CODES.CERTIFICATE_ISSUE;
+    const baseFunction = await prisma.functionAuthorityRecord.findUniqueOrThrow({
+      where: { id: fixture.functionAuthorityRecordId },
+      include: { governingSources: true },
+    });
+    const governingSourceId = baseFunction.governingSources[0]?.governingSourceId;
+    if (!governingSourceId) {
+      throw new Error('Expected governing source on Phase 8 function authority record');
+    }
+
+    await prisma.functionAuthorityRecord.upsert({
+      where: { code: templateIssueFunctionCode },
+      create: {
+        code: templateIssueFunctionCode,
+        name: 'Template civil certificate issuance',
+        classification: AuthorityClassification.ABSEZ_OWNED,
+        functionClass: ControlledFunctionClass.REGISTRATION,
+        lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
+        institutionId: fixture.institutionId,
+        officeId: fixture.officeId,
+        activatedAt: new Date('2020-01-01'),
+        requiresAppointment: true,
+        governingSources: {
+          create: { governingSourceId, isPrimary: true },
+        },
+        actionRights: {
+          create: [
+            {
+              action: AuthorityActionType.ISSUE,
+              permitted: true,
+              requiresHumanActor: true,
+            },
+          ],
+        },
+      },
+      update: {
+        lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
+        institutionId: fixture.institutionId,
+        officeId: fixture.officeId,
+      },
+    });
 
     const entitled = await provisionAuthenticatedIdentity(app, prisma, {
       loginIdentifier: 'civil-entitled@example.test',

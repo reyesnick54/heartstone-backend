@@ -1,6 +1,18 @@
 import { type PrismaService } from './prisma.service';
 
+export async function resetCivilRegistryData(prisma: PrismaService): Promise<void> {
+  await prisma.civilRegistryCertificateVerification.deleteMany();
+  await prisma.civilRegistryCertificate.updateMany({ data: { officialInstrumentId: null } });
+  await prisma.civilRegistryCertificate.deleteMany();
+  await prisma.civilRegistryRecordEntitlement.deleteMany();
+  await prisma.civilRegistryEventSubmission.deleteMany();
+  await prisma.civilRegistryVitalRecord.updateMany({ data: { currentVersionId: null } });
+  await prisma.civilRegistryVitalRecordVersion.deleteMany();
+  await prisma.civilRegistryVitalRecord.deleteMany();
+}
+
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
+  await resetCivilRegistryData(prisma);
   await prisma.instrumentLifecycleDecisionLink.deleteMany();
   await prisma.instrumentLifecycleEvent.deleteMany();
   await prisma.decisionReviewReference.deleteMany();
