@@ -1,0 +1,1598 @@
+{
+  "schemaVersion": "1.0.0",
+  "packLabel": "NON_PRODUCTION",
+  "packId": "template-civil-identity-vital-records",
+  "packVersion": "1.0.0",
+  "packName": "Civil Identity & Vital Records Service Pack (Template)",
+  "description": "NON_PRODUCTION template service pack for civil identity and vital records vertical. All legal requirements, forms, evidence rules, fees, SLAs, and authority mappings are placeholders unless backed by verified governing sources.",
+  "institutionCode": "TEMPLATE-CIVIL-REGISTRY",
+  "departmentCode": "TEMPLATE-CIVIL-REGISTRY-DEPARTMENT",
+  "deploymentIntent": {
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT",
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true
+  },
+  "services": [
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit birth registration",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "publicStageLabel": "Register birth officially",
+          "authorityActionType": "VERIFY",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BIRTH-REG-FORM",
+          "formName": "Birth registration intake",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "child",
+              "label": "Child details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "childGivenNames",
+                  "label": "Given names",
+                  "fieldType": "TEXT",
+                  "required": true
+                },
+                {
+                  "fieldKey": "dateOfBirth",
+                  "label": "Date of birth",
+                  "fieldType": "DATE",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [
+        {
+          "evidenceCode": "TEMPLATE-CIVIL-ID-EVIDENCE",
+          "label": "Identity evidence placeholder",
+          "description": "Template identity evidence — not verified policy",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "evidenceCode": "TEMPLATE-BIRTH-MEDICAL-NOTICE",
+          "label": "Medical notice placeholder",
+          "description": "Template medical notification evidence",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "register",
+          "label": "Official registration decision",
+          "displayOrder": 3,
+          "stepType": "SUBSTANTIVE_REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "authorityActionType": "VERIFY",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-BIRTH-REGISTRATION-RECORD",
+          "label": "Birth registration record (official)",
+          "outputType": "REGISTRATION",
+          "deliveryChannel": "SECURE_REGISTRY"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "register",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "register",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+        "outputCodes": [
+          "TEMPLATE-BIRTH-REGISTRATION-RECORD"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-BIRTH-PENDING",
+          "label": "Pending birth registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REGISTER-BIRTH",
+      "serviceSlug": "template-register-birth",
+      "serviceName": "Register Birth (Template)",
+      "serviceType": "REGISTRATION",
+      "description": "NON_PRODUCTION template birth registration service."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Request certificate",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "publicStageLabel": "Issue birth certificate",
+          "authorityActionType": "ISSUE",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Certificate request intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Evidence completeness",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "issue",
+          "label": "Authoritative extract issuance",
+          "displayOrder": 3,
+          "stepType": "ISSUANCE_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "authorityActionType": "ISSUE",
+          "isIssuanceStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT",
+          "label": "Birth certificate extract",
+          "outputType": "CERTIFICATE",
+          "deliveryChannel": "PORTAL"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "issue",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "issue",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+        "outputCodes": [
+          "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REQUEST-BIRTH-CERTIFICATE",
+      "serviceSlug": "template-request-birth-certificate",
+      "serviceName": "Request Birth Certificate (Template)",
+      "serviceType": "CERTIFICATE_REQUEST",
+      "description": "NON_PRODUCTION template birth certificate request — initiates governed issuance."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit death registration",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "publicStageLabel": "Register death officially",
+          "authorityActionType": "VERIFY",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "register",
+          "label": "Official registration decision",
+          "displayOrder": 3,
+          "stepType": "SUBSTANTIVE_REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "authorityActionType": "VERIFY",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-DEATH-REGISTRATION-RECORD",
+          "label": "Death registration record",
+          "outputType": "REGISTRATION",
+          "deliveryChannel": "SECURE_REGISTRY"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "register",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "register",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+        "outputCodes": [
+          "TEMPLATE-DEATH-REGISTRATION-RECORD"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REGISTER-DEATH",
+      "serviceSlug": "template-register-death",
+      "serviceName": "Register Death (Template)",
+      "serviceType": "REGISTRATION",
+      "description": "NON_PRODUCTION template death registration service."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Request certificate",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "publicStageLabel": "Issue death certificate",
+          "authorityActionType": "ISSUE",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Certificate request intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Evidence completeness",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "issue",
+          "label": "Authoritative extract issuance",
+          "displayOrder": 3,
+          "stepType": "ISSUANCE_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "authorityActionType": "ISSUE",
+          "isIssuanceStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT",
+          "label": "Death certificate extract",
+          "outputType": "CERTIFICATE",
+          "deliveryChannel": "PORTAL"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "issue",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "issue",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+        "outputCodes": [
+          "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REQUEST-DEATH-CERTIFICATE",
+      "serviceSlug": "template-request-death-certificate",
+      "serviceName": "Request Death Certificate (Template)",
+      "serviceType": "CERTIFICATE_REQUEST",
+      "description": "NON_PRODUCTION death certificate request service."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit marriage registration",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "publicStageLabel": "Register marriage officially",
+          "authorityActionType": "VERIFY",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "register",
+          "label": "Official registration decision",
+          "displayOrder": 3,
+          "stepType": "SUBSTANTIVE_REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "authorityActionType": "VERIFY",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-MARRIAGE-REGISTRATION-RECORD",
+          "label": "Marriage registration record",
+          "outputType": "REGISTRATION",
+          "deliveryChannel": "SECURE_REGISTRY"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "register",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "register",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+        "outputCodes": [
+          "TEMPLATE-MARRIAGE-REGISTRATION-RECORD"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REGISTER-MARRIAGE",
+      "serviceSlug": "template-register-marriage",
+      "serviceName": "Register Marriage (Template)",
+      "serviceType": "REGISTRATION",
+      "description": "NON_PRODUCTION marriage registration template."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Request certificate",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "publicStageLabel": "Issue marriage certificate",
+          "authorityActionType": "ISSUE",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Certificate request intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Evidence completeness",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "issue",
+          "label": "Authoritative extract issuance",
+          "displayOrder": 3,
+          "stepType": "ISSUANCE_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "authorityActionType": "ISSUE",
+          "isIssuanceStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT",
+          "label": "Marriage certificate extract",
+          "outputType": "CERTIFICATE",
+          "deliveryChannel": "PORTAL"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "issue",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "issue",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-CERTIFICATE-ISSUE",
+        "outputCodes": [
+          "TEMPLATE-CIVIL-CERTIFICATE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REQUEST-MARRIAGE-CERTIFICATE",
+      "serviceSlug": "template-request-marriage-certificate",
+      "serviceName": "Request Marriage Certificate (Template)",
+      "serviceType": "CERTIFICATE_REQUEST",
+      "description": "NON_PRODUCTION marriage certificate request."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit civil status change",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "publicStageLabel": "Register civil status change",
+          "authorityActionType": "VERIFY",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "register",
+          "label": "Official registration decision",
+          "displayOrder": 3,
+          "stepType": "SUBSTANTIVE_REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "authorityActionType": "VERIFY",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-CIVIL-STATUS-CHANGE-RECORD",
+          "label": "Civil status change record",
+          "outputType": "REGISTRATION",
+          "deliveryChannel": "SECURE_REGISTRY"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "register",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+          "requiresSecondApproval": true
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "register",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-REGISTER",
+        "outputCodes": [
+          "TEMPLATE-CIVIL-STATUS-CHANGE-RECORD"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REGISTER-DIVORCE",
+      "serviceSlug": "template-register-divorce-civil-status-change",
+      "serviceName": "Register Divorce / Civil Status Change (Template)",
+      "serviceType": "REGISTRATION",
+      "description": "NON_PRODUCTION divorce or civil status change registration."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit name change application",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-RECORD-AMEND",
+          "publicStageLabel": "Amend civil identity record",
+          "authorityActionType": "APPROVE",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "amend",
+          "label": "Name change decision",
+          "displayOrder": 3,
+          "stepType": "DECISION_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-RECORD-AMEND",
+          "authorityActionType": "APPROVE",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-NAME-CHANGE-NOTICE",
+          "label": "Name change notice",
+          "outputType": "NOTICE",
+          "deliveryChannel": "PORTAL"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "amend",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-RECORD-AMEND",
+          "requiresSecondApproval": true
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "amend",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-RECORD-AMEND",
+        "outputCodes": [
+          "TEMPLATE-NAME-CHANGE-NOTICE"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-LEGAL-NAME-CHANGE",
+      "serviceSlug": "template-legal-name-change-application",
+      "serviceName": "Legal Name Change Application (Template)",
+      "serviceType": "APPLICATION",
+      "description": "NON_PRODUCTION legal name change application template."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "publicStageLabel": "Submit correction request",
+          "authorityActionType": "PREPARE",
+          "sequenceOrder": 1,
+          "isConsequential": false
+        },
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-CORRECTION-APPROVE",
+          "publicStageLabel": "Approve record correction",
+          "authorityActionType": "APPROVE",
+          "sequenceOrder": 2,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "intake",
+          "label": "Intake",
+          "displayOrder": 1,
+          "stepType": "INTAKE",
+          "consequenceLevel": "INFORMATIONAL"
+        },
+        {
+          "stageKey": "completeness",
+          "label": "Completeness review",
+          "displayOrder": 2,
+          "stepType": "COMPLETENESS_REVIEW",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-EVENT-INTAKE",
+          "authorityActionType": "PREPARE"
+        },
+        {
+          "stageKey": "correction",
+          "label": "Correction approval",
+          "displayOrder": 3,
+          "stepType": "DECISION_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-CORRECTION-APPROVE",
+          "authorityActionType": "APPROVE",
+          "isDecisionStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-CORRECTION-NOTICE",
+          "label": "Correction decision notice",
+          "outputType": "NOTICE",
+          "deliveryChannel": "PORTAL"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-IDENTITY-INTEGRATION",
+          "dependencyType": "IDENTITY_PROVIDER",
+          "description": "NON_PRODUCTION identity verification integration placeholder",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-PROVIDER"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "correction",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-CORRECTION-APPROVE",
+          "requiresSecondApproval": true
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "correction",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-CORRECTION-APPROVE",
+        "outputCodes": [
+          "TEMPLATE-CORRECTION-NOTICE"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-CORRECTION-QUEUE",
+          "label": "Correction requests pending",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CIVIL-RECORD-CORRECTION",
+      "serviceSlug": "template-civil-record-correction",
+      "serviceName": "Civil Record Correction (Template)",
+      "serviceType": "CORRECTION",
+      "description": "NON_PRODUCTION civil record correction request preserving original record versions."
+    },
+    {
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CIVIL-REGISTRY",
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "GOVERNMENT_ENTITY"
+      ],
+      "authorityFunctions": [
+        {
+          "functionCode": "TEMPLATE-AUTH-CIVIL-VERIFICATION-ATTEST",
+          "publicStageLabel": "Attest verification response",
+          "authorityActionType": "ISSUE",
+          "sequenceOrder": 1,
+          "isConsequential": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CIVIL-GENERIC-FORM",
+          "formName": "Civil registry intake (placeholder)",
+          "versionLabel": "1.0.0",
+          "sections": [
+            {
+              "sectionKey": "applicant",
+              "label": "Applicant details (placeholder)",
+              "fields": [
+                {
+                  "fieldKey": "applicantReference",
+                  "label": "Applicant reference",
+                  "fieldType": "TEXT",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "evidenceRequirements": [],
+      "workflowStages": [
+        {
+          "stageKey": "verify",
+          "label": "Verification attestation",
+          "displayOrder": 1,
+          "stepType": "ISSUANCE_GATE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CIVIL-VERIFICATION-ATTEST",
+          "authorityActionType": "ISSUE",
+          "isIssuanceStage": true
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "deficiencyNoticeTemplateCode": "TEMPLATE-CIVIL-DEFICIENCY-NOTICE",
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CIVIL-ID-EVIDENCE"
+        ]
+      },
+      "slaRules": [
+        {
+          "ruleCode": "TEMPLATE-CIVIL-SLA",
+          "label": "Template civil registry SLA placeholder",
+          "targetDays": 15,
+          "clockStartsAtStageKey": "intake"
+        }
+      ],
+      "fees": [
+        {
+          "feeCode": "TEMPLATE-CIVIL-FEE",
+          "label": "Template civil registry fee placeholder",
+          "amount": 0,
+          "currencyCode": "XXX",
+          "waivable": true
+        }
+      ],
+      "outputs": [
+        {
+          "outputCode": "TEMPLATE-VERIFICATION-ATTESTATION",
+          "label": "Verification attestation token",
+          "outputType": "VERIFICATION",
+          "deliveryChannel": "PUBLIC_LOOKUP"
+        }
+      ],
+      "communications": [
+        {
+          "communicationCode": "TEMPLATE-CIVIL-ACK",
+          "triggerStageKey": "intake",
+          "channel": "EMAIL",
+          "templateCode": "TEMPLATE-ACKNOWLEDGMENT"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CIVIL-QR-TOKEN-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION QR / reference token architecture placeholder",
+          "externalIntegrationCode": "TEMPLATE-QR-TOKEN-SERVICE"
+        }
+      ],
+      "decisionStages": [
+        {
+          "stageKey": "verify",
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CIVIL-VERIFICATION-ATTEST",
+          "requiresSecondApproval": false
+        }
+      ],
+      "issuance": {
+        "issuanceStageKey": "verify",
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CIVIL-VERIFICATION-ATTEST",
+        "outputCodes": [
+          "TEMPLATE-VERIFICATION-ATTESTATION"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "redress": [
+        {
+          "routeCode": "TEMPLATE-CIVIL-REDRESS",
+          "label": "Template administrative review",
+          "routeType": "ADMINISTRATIVE_REVIEW",
+          "description": "NON_PRODUCTION redress route placeholder"
+        }
+      ],
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CIVIL-PENDING-REG",
+          "label": "Pending vital event registrations",
+          "metricType": "QUEUE_DEPTH"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CIVIL-REGISTRY-VERIFICATION",
+      "serviceSlug": "template-civil-registry-verification-service",
+      "serviceName": "Civil Registry Verification Service (Template)",
+      "serviceType": "VERIFICATION",
+      "description": "NON_PRODUCTION controlled verification for issued civil certificates without exposing underlying record contents."
+    }
+  ]
+}

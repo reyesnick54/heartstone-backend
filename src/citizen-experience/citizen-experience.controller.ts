@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { CitizenCivilRegistryProjectionService } from './civil-registry/citizen-civil-registry-projection.service';
 import { CitizenExperienceBoundaryService } from './common/citizen-experience-boundary.service';
 import { CitizenCredentialsProjectionService } from './credentials/citizen-credentials-projection.service';
 import { CitizenDocumentsProjectionService } from './documents/citizen-documents-projection.service';
@@ -32,6 +33,7 @@ export class CitizenExperienceController {
     private readonly payments: CitizenPaymentsProjectionService,
     private readonly messages: CitizenMessagesProjectionService,
     private readonly renewals: CitizenRenewalsProjectionService,
+    private readonly civilRegistry: CitizenCivilRegistryProjectionService,
   ) {}
 
   @Get('boundary')
@@ -134,5 +136,42 @@ export class CitizenExperienceController {
   @ApiResponse({ status: 200, type: [CitizenRenewalQueueItemDto] })
   listRenewals(@CurrentSession() session: SessionContextDto) {
     return this.renewals.listRenewals(session.identityId);
+  }
+
+  @Get('civil-status')
+  @ApiOperation({ summary: 'Citizen civil status projection (entitlement-scoped)' })
+  getCivilStatus(@CurrentSession() session: SessionContextDto) {
+    return this.civilRegistry.getCivilStatus(session.identityId);
+  }
+
+  @Get('vital-records')
+  @ApiOperation({ summary: 'List entitled vital records (projection)' })
+  listVitalRecords(@CurrentSession() session: SessionContextDto) {
+    return this.civilRegistry.listVitalRecords(session.identityId);
+  }
+
+  @Get('vital-records/:id')
+  @ApiOperation({ summary: 'Get entitled vital record detail (projection)' })
+  getVitalRecord(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.civilRegistry.getVitalRecord(session.identityId, id);
+  }
+
+  @Get('certificates')
+  @ApiOperation({ summary: 'List civil certificates for entitled records' })
+  listCivilCertificates(@CurrentSession() session: SessionContextDto) {
+    return this.civilRegistry.listCertificates(session.identityId);
+  }
+
+  @Get('civil-registry/actions')
+  @ApiOperation({
+    summary: 'Discover governed civil registry GovernmentService actions',
+    description:
+      'Surfaces template service slugs for certificate requests and registrations — no direct record download bypass.',
+  })
+  listCivilRegistryActions() {
+    return this.civilRegistry.listCivilRegistryActions();
   }
 }

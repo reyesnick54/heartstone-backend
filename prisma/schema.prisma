@@ -164,6 +164,8 @@ model Institution {
   appointmentSlots                 AppointmentSlot[]
   serviceAppointments              ServiceAppointment[]
   servicePacks                     ServicePack[]
+  civilRegistryVitalRecords        CivilRegistryVitalRecord[]
+  civilRegistryCertificateVerifications CivilRegistryCertificateVerification[] @relation("CivilRegistryVerificationIssuer")
   servicePackReviewChainPolicies   ServicePackReviewChainPolicy[]
   servicePackAcceptanceRecords     ServicePackAcceptanceRecord[]
 
@@ -728,6 +730,10 @@ model Identity {
   servicePackVersionsAccepted              ServicePackVersion[]                   @relation("ServicePackVersionAccepter")
   servicePackImports                       ServicePackImport[]                    @relation("ServicePackImportActor")
   servicePackValidationResults             ServicePackValidationResult[]          @relation("ServicePackValidationActor")
+  civilRegistrySubjects                    CivilRegistryVitalRecord[]             @relation("CivilRegistrySubject")
+  civilRegistryEntitlements                CivilRegistryRecordEntitlement[]       @relation("CivilRegistryEntitlementIdentity")
+  civilRegistryVersionsRegistered          CivilRegistryVitalRecordVersion[]      @relation("CivilRegistryVersionRegistrar")
+  civilRegistryCertificatesIssued          CivilRegistryCertificate[]             @relation("CivilRegistryCertificateIssuer")
   servicePackReviewAssignments             ServicePackReviewAssignment[]          @relation("ServicePackReviewAssignee")
   servicePackReviewAssignmentsCreated      ServicePackReviewAssignment[]          @relation("ServicePackReviewAssignmentCreator")
   servicePackReviewFindingsReported        ServicePackReviewFinding[]             @relation("ServicePackReviewFindingReporter")
@@ -2343,6 +2349,7 @@ model Application {
   masterAdministrativeFile   MasterAdministrativeFile?
   feeAssessments             FeeAssessment[]
   serviceAppointments        ServiceAppointment[]
+  civilRegistryEventSubmissions CivilRegistryEventSubmission[]
   visaApplicationProfile     VisaApplicationProfile?
   residencyApplicationProfile ResidencyApplicationProfile?
   citizenshipApplicationProfile CitizenshipApplicationProfile?
@@ -2455,6 +2462,8 @@ model Case {
   strategicProjectProfiles          StrategicProjectProfile[]
   analysisRequests                  AnalysisRequest[]
   serviceAppointments               ServiceAppointment[]
+  civilRegistryRegistration         CivilRegistryVitalRecord?         @relation("CivilRegistryRegistrationCase")
+  civilRegistryEventSubmission      CivilRegistryEventSubmission?
   visaApplicationProfile            VisaApplicationProfile?
   residencyApplicationProfile       ResidencyApplicationProfile?
   citizenshipApplicationProfile     CitizenshipApplicationProfile?
@@ -5384,6 +5393,7 @@ model OfficialInstrument {
   externalReviewReferralsChallenged ExternalReviewReferral[]          @relation("ExternalReviewChallengedInstrument")
   complianceMatters                 ComplianceMatter[]
   complianceStatusProjections       ComplianceStatusProjection[]
+  civilRegistryCertificate          CivilRegistryCertificate?
   immigrationStatusRecords          ImmigrationStatusRecord[]
   visaPermissionRecords             VisaPermissionRecord[]
   residencyPermitRecords            ResidencyPermitRecord[]
@@ -13805,6 +13815,193 @@ model ServicePackImport {
   @@map("service_pack_imports")
 }
 
+// ─── Civil Identity & Vital Records (NON_PRODUCTION template domain) ─────────
+
+enum CivilRegistryEventType {
+  BIRTH
+  DEATH
+  MARRIAGE
+  DIVORCE
+  CIVIL_STATUS_CHANGE
+  LEGAL_NAME_CHANGE
+}
+
+enum CivilRegistryRecordStatus {
+  SUBMISSION_PENDING
+  OFFICIAL
+  CORRECTED
+  SEALED
+  RESTRICTED
+}
+
+enum CivilRegistrySubmissionStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  DECISION_PENDING
+  REGISTERED
+  REJECTED
+}
+
+enum CivilRegistryCertificateType {
+  BIRTH_CERTIFICATE
+  DEATH_CERTIFICATE
+  MARRIAGE_CERTIFICATE
+  DIVORCE_CERTIFICATE
+  CIVIL_EXTRACT
+  VERIFICATION_ATTESTATION
+}
+
+enum CivilRegistryCertificateStatus {
+  PENDING_ISSUANCE
+  ISSUED
+  REVOKED
+  SUPERSEDED
+}
+
+enum CivilRegistryVerificationValidity {
+  VALID
+  REVOKED
+  SUPERSEDED
+  UNKNOWN
+}
+
+enum CivilRegistryEntitlementKind {
+  SUBJECT
+  PARENT
+  SPOUSE
+  AUTHORIZED_APPLICANT
+  LEGAL_REPRESENTATIVE
+}
+
+model CivilRegistryVitalRecord {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  recordNumber         String                    @unique
+  eventType            CivilRegistryEventType
+  status               CivilRegistryRecordStatus @default(SUBMISSION_PENDING)
+  institutionId        String                    @db.Uuid
+  subjectIdentityId    String?                   @db.Uuid
+  registrationCaseId   String?                   @unique @db.Uuid
+  servicePackReference String?
+  isSealed             Boolean                   @default(false)
+  isRestricted         Boolean                   @default(false)
+  currentVersionId     String?                   @unique @db.Uuid
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  institution          Institution               @relation(fields: [institutionId], references: [id])
+  subjectIdentity      Identity?                 @relation("CivilRegistrySubject", fields: [subjectIdentityId], references: [id])
+  registrationCase     Case?                     @relation("CivilRegistryRegistrationCase", fields: [registrationCaseId], references: [id])
+  currentVersion       CivilRegistryVitalRecordVersion? @relation("CivilRegistryCurrentVersion", fields: [currentVersionId], references: [id])
+  versions             CivilRegistryVitalRecordVersion[] @relation("CivilRegistryRecordVersions")
+  entitlements         CivilRegistryRecordEntitlement[]
+  submissions          CivilRegistryEventSubmission[]
+  certificates         CivilRegistryCertificate[]
+
+  @@index([institutionId])
+  @@index([subjectIdentityId])
+  @@index([status])
+  @@map("civil_registry_vital_records")
+}
+
+model CivilRegistryVitalRecordVersion {
+  id                             String                         @id @default(uuid()) @db.Uuid
+  vitalRecordId                  String                         @db.Uuid
+  versionNumber                  Int
+  recordStateHash                String
+  summaryLabel                   String?
+  effectiveFrom                  DateTime                       @default(now())
+  supersedesVersionId            String?                        @unique @db.Uuid
+  amendmentReason                String?
+  isOriginal                     Boolean                        @default(false)
+  registeredByOfficialIdentityId String?                        @db.Uuid
+  createdAt                      DateTime                       @default(now())
+  vitalRecord                    CivilRegistryVitalRecord       @relation("CivilRegistryRecordVersions", fields: [vitalRecordId], references: [id], onDelete: Cascade)
+  currentForRecord               CivilRegistryVitalRecord?      @relation("CivilRegistryCurrentVersion")
+  supersedes                     CivilRegistryVitalRecordVersion? @relation("CivilRegistryVersionSupersession", fields: [supersedesVersionId], references: [id])
+  supersededBy                   CivilRegistryVitalRecordVersion? @relation("CivilRegistryVersionSupersession")
+  registeredByOfficial           Identity?                      @relation("CivilRegistryVersionRegistrar", fields: [registeredByOfficialIdentityId], references: [id])
+  certificates                   CivilRegistryCertificate[]
+
+  @@unique([vitalRecordId, versionNumber])
+  @@index([vitalRecordId])
+  @@map("civil_registry_vital_record_versions")
+}
+
+model CivilRegistryEventSubmission {
+  id            String                        @id @default(uuid()) @db.Uuid
+  caseId        String                        @unique @db.Uuid
+  applicationId String                        @db.Uuid
+  vitalRecordId String?                       @db.Uuid
+  eventType     CivilRegistryEventType
+  status        CivilRegistrySubmissionStatus @default(SUBMITTED)
+  createdAt     DateTime                      @default(now())
+  updatedAt     DateTime                      @updatedAt
+  case          Case                          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  application   Application                   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  vitalRecord   CivilRegistryVitalRecord?     @relation(fields: [vitalRecordId], references: [id])
+
+  @@index([applicationId])
+  @@index([vitalRecordId])
+  @@map("civil_registry_event_submissions")
+}
+
+model CivilRegistryRecordEntitlement {
+  id              String                       @id @default(uuid()) @db.Uuid
+  vitalRecordId   String                       @db.Uuid
+  identityId      String                       @db.Uuid
+  entitlementKind CivilRegistryEntitlementKind
+  createdAt       DateTime                     @default(now())
+  vitalRecord     CivilRegistryVitalRecord     @relation(fields: [vitalRecordId], references: [id], onDelete: Cascade)
+  identity        Identity                     @relation("CivilRegistryEntitlementIdentity", fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([vitalRecordId, identityId, entitlementKind])
+  @@index([identityId])
+  @@map("civil_registry_record_entitlements")
+}
+
+model CivilRegistryCertificate {
+  id                         String                         @id @default(uuid()) @db.Uuid
+  vitalRecordId              String                         @db.Uuid
+  registryVersionId          String                         @db.Uuid
+  officialInstrumentId       String?                        @unique @db.Uuid
+  certificateType            CivilRegistryCertificateType
+  status                     CivilRegistryCertificateStatus @default(PENDING_ISSUANCE)
+  issuedAt                   DateTime?
+  issuedByOfficialIdentityId String?                        @db.Uuid
+  issuanceCaseId             String?                        @db.Uuid
+  requestApplicationId       String?                        @db.Uuid
+  createdAt                  DateTime                       @default(now())
+  updatedAt                  DateTime                       @updatedAt
+  vitalRecord                CivilRegistryVitalRecord       @relation(fields: [vitalRecordId], references: [id], onDelete: Cascade)
+  registryVersion            CivilRegistryVitalRecordVersion @relation(fields: [registryVersionId], references: [id])
+  officialInstrument         OfficialInstrument?            @relation(fields: [officialInstrumentId], references: [id])
+  issuedByOfficial           Identity?                      @relation("CivilRegistryCertificateIssuer", fields: [issuedByOfficialIdentityId], references: [id])
+  verificationRecords        CivilRegistryCertificateVerification[]
+
+  @@index([vitalRecordId])
+  @@index([registryVersionId])
+  @@index([status])
+  @@map("civil_registry_certificates")
+}
+
+model CivilRegistryCertificateVerification {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  certificateId         String                            @db.Uuid
+  verificationReference String                            @unique
+  verificationCode      String                            @unique
+  documentHash          String
+  qrTokenReference      String?
+  issuerInstitutionId   String                            @db.Uuid
+  validityStatus        CivilRegistryVerificationValidity @default(VALID)
+  publicStatusLabel     String
+  createdAt             DateTime                          @default(now())
+  certificate           CivilRegistryCertificate          @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  issuerInstitution     Institution                       @relation("CivilRegistryVerificationIssuer", fields: [issuerInstitutionId], references: [id])
+
+  @@index([certificateId])
+  @@index([issuerInstitutionId])
+  @@map("civil_registry_certificate_verifications")
+}
+
 // ─── Service Pack Governance & Institutional Acceptance ─────────────────────
 
 enum ServicePackGovernanceLifecycleStatus {
@@ -14159,6 +14356,7 @@ model ServicePackGovernanceAuditRecord {
   @@index([createdAt])
   @@map("service_pack_governance_audit_records")
 }
+
 // ─── Immigration, Visa, Residency & Citizenship Foundation ────────────────
 
 
