@@ -30,6 +30,7 @@ import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
+import { PropertyRegistryModule } from './property-registry/property-registry.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -80,6 +81,7 @@ import { SystemModule } from './system/system.module';
     CorporateRegistryModule,
     RedressModule,
     RevenueModule,
+    PropertyRegistryModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,

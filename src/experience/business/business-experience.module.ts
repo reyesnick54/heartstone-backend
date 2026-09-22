@@ -3,12 +3,14 @@ import { Module } from '@nestjs/common';
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessExperienceController } from './business-experience.controller';
+import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
@@ -25,12 +27,13 @@ import { BusinessProjectsService } from './services/business-projects.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
 
 @Module({
-  imports: [SessionsModule, SchedulingModule, CorporateRegistryModule, RevenueModule],
+  imports: [SessionsModule, SchedulingModule, CorporateRegistryModule, RevenueModule, PropertyRegistryModule],
   controllers: [
     BusinessExperienceController,
     BusinessAppointmentsController,
     BusinessCorporateRegistryController,
     BusinessRevenueController,
+    BusinessPropertyController,
   ],
   providers: [
     SessionAuthGuard,
