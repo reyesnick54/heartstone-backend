@@ -30,6 +30,7 @@ import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
+import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
@@ -84,6 +85,7 @@ import { TransportationModule } from './transportation/transportation.module';
     CustomsTradeModule,
     RedressModule,
     RevenueModule,
+    PlanningConstructionModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,

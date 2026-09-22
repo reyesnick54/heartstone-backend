@@ -4,11 +4,13 @@ import { CorporateRegistryModule } from '../../corporate-registry/corporate-regi
 import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
+import { BusinessDevelopmentController } from './business-development.controller';
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
 import { BusinessTradeController } from './business-trade.controller';
@@ -34,6 +36,7 @@ import { BusinessTradeService } from './services/business-trade.service';
     CorporateRegistryModule,
     RevenueModule,
     CustomsTradeModule,
+    PlanningConstructionModule,
   ],
   controllers: [
     BusinessExperienceController,
@@ -41,6 +44,7 @@ import { BusinessTradeService } from './services/business-trade.service';
     BusinessCorporateRegistryController,
     BusinessRevenueController,
     BusinessTradeController,
+    BusinessDevelopmentController,
   ],
   providers: [
     SessionAuthGuard,

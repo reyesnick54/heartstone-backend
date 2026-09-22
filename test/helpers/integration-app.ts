@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
+import { resetPlanningConstructionData } from '../../src/database/planning-construction-test-reset';
 import { PrismaService } from '../../src/database/prisma.service';
 import { resetRevenueData } from '../../src/database/revenue-test-reset';
 import { overrideRedisService } from '../redis-test-utils';
@@ -183,6 +184,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetImmigrationData(prisma);
   await resetCustomsTradeData(prisma);
+  await resetPlanningConstructionData(prisma);
   await resetRevenueData(prisma);
   await resetSchedulingData(prisma);
   await resetProductionReadinessData(prisma);
