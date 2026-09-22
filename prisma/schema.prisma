@@ -96,6 +96,10 @@ model Jurisdiction {
   servicePackJurisdictionTargets ServicePack[]                 @relation("ServicePackJurisdiction")
   immigrationProfiles            ImmigrationProfile[]
   servicePackJurisdictionBindings ServicePackJurisdictionBinding[]
+  taxTypeDefinitions             TaxTypeDefinition[]
+  taxPeriods                     TaxPeriod[]
+  taxpayerAccounts               TaxpayerAccount[]
+  taxCalculationRecords          TaxCalculationRecord[]
 
   @@map("jurisdictions")
 }
@@ -726,6 +730,13 @@ model Identity {
   immigrationExternalChecksRecorded        ImmigrationExternalCheck[]             @relation("ImmigrationExternalCheckRecorder")
   immigrationStatusHistoryEvents           ImmigrationStatusHistory[]             @relation("ImmigrationStatusHistoryActor")
   servicePacksOwned                        ServicePack[]                          @relation("ServicePackResponsibleOwner")
+  taxTypeDefinitionVersionsApproved        TaxTypeDefinitionVersion[]             @relation("TaxTypeDefinitionVersionApprover")
+  taxpayerAccountsAsPrimary                TaxpayerAccount[]                      @relation("TaxpayerAccountPrimaryIdentity")
+  taxReturnVersionsSubmitted               TaxReturnVersion[]                     @relation("TaxReturnVersionSubmitter")
+  taxCalculationRecordsAuthored            TaxCalculationRecord[]                 @relation("TaxCalculationRecordActor")
+  taxRefundClaimsRequested                 TaxRefundClaim[]                       @relation("TaxRefundClaimRequester")
+  taxClearanceRequestsSubmitted            TaxClearanceCertificateRequest[]       @relation("TaxClearanceRequester")
+  taxAccessAudits                          TaxAccessAudit[]                       @relation("TaxAccessAuditAccessor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -775,6 +786,7 @@ model Organization {
   serviceAppointments             ServiceAppointment[]
   immigrationSponsorships         ImmigrationSponsorship[]
   corporateRegistryProfile        CorporateRegistryProfile?
+  taxpayerAccounts                TaxpayerAccount[]
 
   @@index([status])
   @@map("organizations")
@@ -8024,6 +8036,7 @@ model Invoice {
   paymentIntents             PaymentIntent[]
   arrearsRecords             ArrearsRecord[]
   financialDisputes          FinancialDispute[]
+  taxLiabilities             TaxLiability[]
 
   @@index([feeAssessmentId])
   @@index([caseId])
@@ -8134,6 +8147,7 @@ model PaymentTransaction {
   reconciliationItems            ReconciliationItem[]
   financialDisputes              FinancialDispute[]
   events                         PaymentTransactionEvent[]
+  taxPaymentAllocations          TaxPaymentAllocation[]
 
   @@unique([paymentProviderConfigurationId, providerTransactionReference])
   @@index([paymentIntentId])
@@ -8152,6 +8166,7 @@ model PaymentAllocation {
   updatedAt            DateTime           @updatedAt
   paymentTransaction   PaymentTransaction @relation(fields: [paymentTransactionId], references: [id], onDelete: Cascade)
   invoiceLine          InvoiceLine?       @relation(fields: [invoiceLineId], references: [id])
+  taxPaymentAllocations TaxPaymentAllocation[]
 
   @@index([paymentTransactionId])
   @@index([invoiceLineId])
@@ -14611,4 +14626,782 @@ model CorporateRegistryPaymentEvent {
 
   @@index([profileId])
   @@map("corporate_registry_payment_events")
+}
+// ─── Revenue & Tax Administration Foundation ───────────────────────────────
+
+enum TaxpayerAccountKind {
+  INDIVIDUAL
+  BUSINESS
+  OTHER_REGISTERED
+}
+
+enum TaxpayerRegistrationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  REGISTERED
+  REJECTED
+  SUSPENDED
+  CLOSED
+}
+
+enum TaxpayerIdentifierKind {
+  PRIMARY_TIN
+  SECONDARY_TIN
+  VAT
+  EMPLOYER
+  CUSTOM
+  OTHER
+}
+
+enum TaxTypeDefinitionStatus {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+enum TaxPeriodStatus {
+  SCHEDULED
+  OPEN
+  CLOSED
+  EXTENDED
+  ARCHIVED
+}
+
+enum TaxObligationStatus {
+  ACTIVE
+  SUSPENDED
+  FULFILLED
+  CLOSED
+}
+
+enum TaxReturnStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  AMENDED
+  SUPERSEDED
+}
+
+enum TaxDeclarationStatus {
+  RECEIVED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum TaxAssessmentStatus {
+  PROPOSED
+  ISSUED
+  AMENDED
+  SUPERSEDED
+  CANCELLED
+}
+
+enum TaxLiabilityStatus {
+  OPEN
+  PARTIALLY_SATISFIED
+  SATISFIED
+  WRITTEN_OFF
+  DISPUTED
+}
+
+enum TaxCreditStatus {
+  AVAILABLE
+  APPLIED
+  EXPIRED
+  REVERSED
+}
+
+enum TaxAccountBalanceKind {
+  PERIOD_END
+  AD_HOC
+  POST_ASSESSMENT
+  POST_PAYMENT
+}
+
+enum TaxRefundClaimStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED_FOR_PROCESSING
+  DENIED
+  WITHDRAWN
+}
+
+enum TaxRefundDecisionOutcome {
+  AUTHORIZED
+  DENIED
+  PARTIAL
+}
+
+enum TaxArrearStatus {
+  OPEN
+  IN_PLAN
+  RESOLVED
+  WRITTEN_OFF
+}
+
+enum TaxPaymentPlanStatus {
+  PROPOSED
+  ACTIVE
+  DEFAULTED
+  COMPLETED
+  CANCELLED
+}
+
+enum TaxComplianceStatusCode {
+  UNKNOWN
+  FILING_CURRENT
+  FILING_OVERDUE
+  BALANCE_OUTSTANDING
+  CLEARANCE_BLOCKED
+  UNDER_AUDIT
+  NOT_APPLICABLE
+}
+
+enum TaxAuditMatterStatus {
+  OPEN
+  INFORMATION_REQUEST
+  FIELD_REVIEW
+  CLOSED_NO_FINDING
+  REFERRED
+  CLOSED
+}
+
+enum TaxObjectionStatus {
+  FILED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum TaxDisputeStatus {
+  OPEN
+  MEDIATION
+  DECIDED
+  WITHDRAWN
+  CLOSED
+}
+
+enum TaxClearanceCertificateRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  ISSUED
+  DENIED
+  EXPIRED
+}
+
+enum TaxWithholdingRecordStatus {
+  REPORTED
+  ACCEPTED
+  CORRECTED
+  SUPERSEDED
+}
+
+enum TaxAccessActorKind {
+  TAXPAYER
+  REPRESENTATIVE
+  REVENUE_OFFICER
+  AUDIT_REVIEWER
+  PLATFORM_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+}
+
+enum TaxCalculationSourceKind {
+  CONFIG_ENGINE
+  REVENUE_OFFICER
+  AI_ASSISTANCE
+}
+
+model TaxTypeDefinition {
+  id              String                  @id @default(uuid()) @db.Uuid
+  jurisdictionId  String                  @db.Uuid
+  code            String
+  name            String
+  description     String?
+  status          TaxTypeDefinitionStatus @default(DRAFT)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  jurisdiction    Jurisdiction            @relation(fields: [jurisdictionId], references: [id])
+  versions        TaxTypeDefinitionVersion[]
+  periods         TaxPeriod[]
+  obligations     TaxObligation[]
+  returns         TaxReturn[]
+  assessments     TaxAssessment[]
+  withholdingRecords TaxWithholdingRecord[]
+
+  @@unique([jurisdictionId, code])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("tax_type_definitions")
+}
+
+model TaxTypeDefinitionVersion {
+  id                    String              @id @default(uuid()) @db.Uuid
+  taxTypeDefinitionId   String              @db.Uuid
+  versionNumber         Int
+  ruleConfiguration     Json                @default("{}")
+  methodologyReference  String
+  effectiveFrom         DateTime
+  effectiveUntil        DateTime?
+  approvedByIdentityId  String?             @db.Uuid
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  taxTypeDefinition     TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id], onDelete: Cascade)
+  approvedBy            Identity?           @relation("TaxTypeDefinitionVersionApprover", fields: [approvedByIdentityId], references: [id])
+  calculationRecords    TaxCalculationRecord[]
+
+  @@unique([taxTypeDefinitionId, versionNumber])
+  @@index([taxTypeDefinitionId])
+  @@map("tax_type_definition_versions")
+}
+
+model TaxpayerAccount {
+  id                    String               @id @default(uuid()) @db.Uuid
+  jurisdictionId        String               @db.Uuid
+  accountNumber         String               @unique
+  accountKind           TaxpayerAccountKind
+  primaryIdentityId     String?              @db.Uuid
+  organizationId        String?              @db.Uuid
+  displayName           String
+  isActive              Boolean              @default(true)
+  registeredAt          DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  jurisdiction          Jurisdiction         @relation(fields: [jurisdictionId], references: [id])
+  primaryIdentity       Identity?            @relation("TaxpayerAccountPrimaryIdentity", fields: [primaryIdentityId], references: [id])
+  organization          Organization?        @relation(fields: [organizationId], references: [id])
+  registrations         TaxpayerRegistration[]
+  identifiers           TaxpayerIdentifier[]
+  obligations           TaxObligation[]
+  returns               TaxReturn[]
+  assessments           TaxAssessment[]
+  liabilities           TaxLiability[]
+  credits               TaxCredit[]
+  balanceSnapshots      TaxAccountBalance[]
+  refundClaims          TaxRefundClaim[]
+  arrears               TaxArrear[]
+  paymentPlans          TaxPaymentPlan[]
+  complianceStatuses    TaxComplianceStatus[]
+  auditMatters          TaxAuditMatter[]
+  objections            TaxObjection[]
+  disputes              TaxDispute[]
+  clearanceRequests     TaxClearanceCertificateRequest[]
+  withholdingRecords    TaxWithholdingRecord[]
+  accessAudits          TaxAccessAudit[]
+
+  @@index([jurisdictionId])
+  @@index([primaryIdentityId])
+  @@index([organizationId])
+  @@map("taxpayer_accounts")
+}
+
+model TaxpayerRegistration {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String                     @db.Uuid
+  registrationReference String                     @unique
+  status                TaxpayerRegistrationStatus @default(DRAFT)
+  submittedAt           DateTime?
+  decidedAt             DateTime?
+  registrationPayload   Json                       @default("{}")
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  taxpayerAccount       TaxpayerAccount            @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("taxpayer_registrations")
+}
+
+model TaxpayerIdentifier {
+  id                String                 @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                 @db.Uuid
+  identifierKind    TaxpayerIdentifierKind
+  identifierValue   String
+  isPrimary         Boolean                @default(false)
+  effectiveFrom     DateTime               @default(now())
+  effectiveUntil    DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  taxpayerAccount   TaxpayerAccount        @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([taxpayerAccountId, identifierKind, identifierValue])
+  @@index([taxpayerAccountId])
+  @@index([identifierValue])
+  @@map("taxpayer_identifiers")
+}
+
+model TaxPeriod {
+  id                  String           @id @default(uuid()) @db.Uuid
+  jurisdictionId      String           @db.Uuid
+  taxTypeDefinitionId String           @db.Uuid
+  periodCode          String
+  periodStart         DateTime
+  periodEnd           DateTime
+  filingDeadline      DateTime?
+  status              TaxPeriodStatus  @default(SCHEDULED)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  jurisdiction        Jurisdiction     @relation(fields: [jurisdictionId], references: [id])
+  taxTypeDefinition   TaxTypeDefinition @relation(fields: [taxTypeDefinitionId], references: [id])
+  obligations         TaxObligation[]
+  returns             TaxReturn[]
+  assessments         TaxAssessment[]
+  balanceSnapshots    TaxAccountBalance[]
+  calculationRecords  TaxCalculationRecord[]
+
+  @@unique([jurisdictionId, taxTypeDefinitionId, periodCode])
+  @@index([jurisdictionId])
+  @@index([taxTypeDefinitionId])
+  @@index([status])
+  @@map("tax_periods")
+}
+
+model TaxObligation {
+  id                  String              @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String              @db.Uuid
+  taxTypeDefinitionId String              @db.Uuid
+  taxPeriodId         String?             @db.Uuid
+  obligationCode      String
+  description         String
+  status              TaxObligationStatus @default(ACTIVE)
+  dueDate             DateTime?
+  configuration       Json                @default("{}")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  taxpayerAccount     TaxpayerAccount     @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition   TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod           TaxPeriod?          @relation(fields: [taxPeriodId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([status])
+  @@map("tax_obligations")
+}
+
+model TaxReturn {
+  id                  String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String          @db.Uuid
+  taxTypeDefinitionId String          @db.Uuid
+  taxPeriodId         String          @db.Uuid
+  returnReference     String          @unique
+  status              TaxReturnStatus @default(DRAFT)
+  currentVersionId    String?         @unique @db.Uuid
+  submittedAt         DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  taxpayerAccount     TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition   TaxTypeDefinition @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod           TaxPeriod       @relation(fields: [taxPeriodId], references: [id])
+  versions            TaxReturnVersion[]
+  currentVersion      TaxReturnVersion? @relation("TaxReturnCurrentVersion", fields: [currentVersionId], references: [id])
+  declarations        TaxDeclaration[]
+  assessments         TaxAssessment[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([status])
+  @@map("tax_returns")
+}
+
+model TaxReturnVersion {
+  id                 String    @id @default(uuid()) @db.Uuid
+  taxReturnId        String    @db.Uuid
+  versionNumber      Int
+  isAmendment        Boolean   @default(false)
+  declarationData    Json      @default("{}")
+  payloadHash        String
+  submittedByIdentityId String? @db.Uuid
+  submittedAt        DateTime?
+  lockedAt           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  taxReturn          TaxReturn @relation(fields: [taxReturnId], references: [id], onDelete: Cascade)
+  submittedBy        Identity? @relation("TaxReturnVersionSubmitter", fields: [submittedByIdentityId], references: [id])
+  currentForReturn   TaxReturn? @relation("TaxReturnCurrentVersion")
+  declarations       TaxDeclaration[]
+
+  @@unique([taxReturnId, versionNumber])
+  @@index([taxReturnId])
+  @@map("tax_return_versions")
+}
+
+model TaxDeclaration {
+  id                   String               @id @default(uuid()) @db.Uuid
+  taxReturnId          String               @db.Uuid
+  taxReturnVersionId   String               @db.Uuid
+  declarationReference String               @unique
+  status               TaxDeclarationStatus @default(RECEIVED)
+  declaredAt           DateTime             @default(now())
+  isSelfDeclaration    Boolean              @default(true)
+  declarationPayload   Json                 @default("{}")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  taxReturn            TaxReturn            @relation(fields: [taxReturnId], references: [id], onDelete: Cascade)
+  taxReturnVersion     TaxReturnVersion     @relation(fields: [taxReturnVersionId], references: [id], onDelete: Cascade)
+
+  @@index([taxReturnId])
+  @@index([taxReturnVersionId])
+  @@map("tax_declarations")
+}
+
+model TaxAssessment {
+  id                       String              @id @default(uuid()) @db.Uuid
+  taxpayerAccountId        String              @db.Uuid
+  taxTypeDefinitionId      String              @db.Uuid
+  taxPeriodId              String              @db.Uuid
+  taxReturnId              String?             @db.Uuid
+  assessmentReference      String              @unique
+  status                   TaxAssessmentStatus @default(PROPOSED)
+  supersedesAssessmentId   String?             @unique @db.Uuid
+  issuedByOfficeholderId   String?             @db.Uuid
+  issuedAt                 DateTime?
+  calculationRecordId      String?             @db.Uuid
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  taxpayerAccount          TaxpayerAccount     @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition        TaxTypeDefinition   @relation(fields: [taxTypeDefinitionId], references: [id])
+  taxPeriod                TaxPeriod           @relation(fields: [taxPeriodId], references: [id])
+  taxReturn                TaxReturn?          @relation(fields: [taxReturnId], references: [id])
+  calculationRecord        TaxCalculationRecord? @relation(fields: [calculationRecordId], references: [id])
+  supersedesAssessment     TaxAssessment?      @relation("TaxAssessmentAmendment", fields: [supersedesAssessmentId], references: [id])
+  supersededByAssessment   TaxAssessment?      @relation("TaxAssessmentAmendment")
+  lines                    TaxAssessmentLine[]
+  liabilities              TaxLiability[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([taxPeriodId])
+  @@index([taxReturnId])
+  @@index([status])
+  @@map("tax_assessments")
+}
+
+model TaxAssessmentLine {
+  id              String        @id @default(uuid()) @db.Uuid
+  taxAssessmentId String        @db.Uuid
+  lineCode        String
+  description     String
+  amountCents     Int
+  currency        String        @default("XCD")
+  sortOrder       Int           @default(0)
+  metadata        Json          @default("{}")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  taxAssessment   TaxAssessment @relation(fields: [taxAssessmentId], references: [id], onDelete: Cascade)
+
+  @@index([taxAssessmentId])
+  @@map("tax_assessment_lines")
+}
+
+model TaxCalculationRecord {
+  id                           String                   @id @default(uuid()) @db.Uuid
+  jurisdictionId               String                   @db.Uuid
+  taxPeriodId                  String                   @db.Uuid
+  taxTypeDefinitionVersionId   String                   @db.Uuid
+  ruleConfigurationVersion     Int
+  inputs                       Json                     @default("{}")
+  result                       Json                     @default("{}")
+  methodologyReference         String
+  calculatedAt                 DateTime                 @default(now())
+  calculatedByActorKind        TaxCalculationSourceKind
+  calculatedByIdentityId       String?                  @db.Uuid
+  createdAt                    DateTime                 @default(now())
+  jurisdiction                 Jurisdiction             @relation(fields: [jurisdictionId], references: [id])
+  taxPeriod                    TaxPeriod                @relation(fields: [taxPeriodId], references: [id])
+  taxTypeDefinitionVersion     TaxTypeDefinitionVersion @relation(fields: [taxTypeDefinitionVersionId], references: [id])
+  calculatedBy                 Identity?                @relation("TaxCalculationRecordActor", fields: [calculatedByIdentityId], references: [id])
+  assessments                  TaxAssessment[]
+
+  @@index([jurisdictionId])
+  @@index([taxPeriodId])
+  @@index([taxTypeDefinitionVersionId])
+  @@map("tax_calculation_records")
+}
+
+model TaxLiability {
+  id                String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String             @db.Uuid
+  taxAssessmentId   String?            @db.Uuid
+  invoiceId         String?            @db.Uuid
+  liabilityReference String            @unique
+  status            TaxLiabilityStatus @default(OPEN)
+  principalCents    Int
+  currency          String             @default("XCD")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  taxpayerAccount   TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxAssessment     TaxAssessment?     @relation(fields: [taxAssessmentId], references: [id])
+  invoice           Invoice?           @relation(fields: [invoiceId], references: [id])
+  paymentAllocations TaxPaymentAllocation[]
+  credits           TaxCredit[]
+
+  @@index([taxpayerAccountId])
+  @@index([taxAssessmentId])
+  @@index([invoiceId])
+  @@index([status])
+  @@map("tax_liabilities")
+}
+
+model TaxCredit {
+  id                String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String          @db.Uuid
+  taxLiabilityId    String?         @db.Uuid
+  creditReference   String          @unique
+  status            TaxCreditStatus @default(AVAILABLE)
+  amountCents       Int
+  currency          String          @default("XCD")
+  reason            String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  taxpayerAccount   TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxLiability      TaxLiability?   @relation(fields: [taxLiabilityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxLiabilityId])
+  @@index([status])
+  @@map("tax_credits")
+}
+
+model TaxAccountBalance {
+  id                String                @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                @db.Uuid
+  taxPeriodId       String?               @db.Uuid
+  balanceKind       TaxAccountBalanceKind
+  balanceCents      Int
+  currency          String                @default("XCD")
+  asOf              DateTime              @default(now())
+  breakdown         Json                  @default("{}")
+  createdAt         DateTime              @default(now())
+  taxpayerAccount   TaxpayerAccount       @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxPeriod         TaxPeriod?            @relation(fields: [taxPeriodId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxPeriodId])
+  @@index([asOf])
+  @@map("tax_account_balances")
+}
+
+model TaxPaymentAllocation {
+  id                   String              @id @default(uuid()) @db.Uuid
+  taxLiabilityId       String              @db.Uuid
+  paymentTransactionId String              @db.Uuid
+  paymentAllocationId  String?             @db.Uuid
+  allocatedAmountCents Int
+  allocatedAt          DateTime            @default(now())
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  taxLiability         TaxLiability        @relation(fields: [taxLiabilityId], references: [id], onDelete: Cascade)
+  paymentTransaction   PaymentTransaction  @relation(fields: [paymentTransactionId], references: [id])
+  paymentAllocation    PaymentAllocation?  @relation(fields: [paymentAllocationId], references: [id])
+
+  @@index([taxLiabilityId])
+  @@index([paymentTransactionId])
+  @@index([paymentAllocationId])
+  @@map("tax_payment_allocations")
+}
+
+model TaxRefundClaim {
+  id                    String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String               @db.Uuid
+  claimReference        String               @unique
+  status                TaxRefundClaimStatus @default(REQUESTED)
+  requestedAmountCents  Int
+  currency              String               @default("XCD")
+  requestedByIdentityId String               @db.Uuid
+  requestedAt           DateTime             @default(now())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  taxpayerAccount       TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  requestedBy           Identity             @relation("TaxRefundClaimRequester", fields: [requestedByIdentityId], references: [id])
+  decisions             TaxRefundDecision[]
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_refund_claims")
+}
+
+model TaxRefundDecision {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  taxRefundClaimId         String                   @db.Uuid
+  decisionReference        String                   @unique
+  outcome                  TaxRefundDecisionOutcome
+  authorizedAmountCents    Int?
+  currency                 String                   @default("XCD")
+  decidedByOfficeholderId  String?                  @db.Uuid
+  financialRefundRequestId String?                  @db.Uuid
+  decidedAt                DateTime                 @default(now())
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  taxRefundClaim           TaxRefundClaim           @relation(fields: [taxRefundClaimId], references: [id], onDelete: Cascade)
+
+  @@index([taxRefundClaimId])
+  @@map("tax_refund_decisions")
+}
+
+model TaxArrear {
+  id                String          @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String          @db.Uuid
+  arrearReference   String          @unique
+  status            TaxArrearStatus @default(OPEN)
+  outstandingCents  Int
+  currency          String          @default("XCD")
+  asOf              DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  taxpayerAccount   TaxpayerAccount @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_arrears")
+}
+
+model TaxPaymentPlan {
+  id                String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String               @db.Uuid
+  planReference     String               @unique
+  status            TaxPaymentPlanStatus @default(PROPOSED)
+  schedule          Json                 @default("[]")
+  authorizedByOfficeholderId String?     @db.Uuid
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  taxpayerAccount   TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_payment_plans")
+}
+
+model TaxComplianceStatus {
+  id                String                  @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String                  @db.Uuid
+  statusCode        TaxComplianceStatusCode @default(UNKNOWN)
+  effectiveFrom     DateTime                @default(now())
+  effectiveUntil    DateTime?
+  basis             Json                    @default("{}")
+  isClearanceEligible Boolean               @default(false)
+  recordedAt        DateTime                @default(now())
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  taxpayerAccount   TaxpayerAccount         @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([statusCode])
+  @@map("tax_compliance_statuses")
+}
+
+model TaxAuditMatter {
+  id                String               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String               @db.Uuid
+  matterReference   String               @unique
+  status            TaxAuditMatterStatus @default(OPEN)
+  riskScore         Int?
+  openedAt          DateTime             @default(now())
+  closedAt          DateTime?
+  notes             String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  taxpayerAccount   TaxpayerAccount      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_audit_matters")
+}
+
+model TaxObjection {
+  id                String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String             @db.Uuid
+  objectionReference String            @unique
+  status            TaxObjectionStatus @default(FILED)
+  relatedAssessmentId String?          @db.Uuid
+  filedAt           DateTime           @default(now())
+  decidedAt         DateTime?
+  grounds           String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  taxpayerAccount   TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_objections")
+}
+
+model TaxDispute {
+  id                String           @id @default(uuid()) @db.Uuid
+  taxpayerAccountId String           @db.Uuid
+  disputeReference  String           @unique
+  status            TaxDisputeStatus @default(OPEN)
+  openedAt          DateTime         @default(now())
+  closedAt          DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  taxpayerAccount   TaxpayerAccount  @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_disputes")
+}
+
+model TaxClearanceCertificateRequest {
+  id                    String                               @id @default(uuid()) @db.Uuid
+  taxpayerAccountId     String                               @db.Uuid
+  requestReference      String                               @unique
+  status                TaxClearanceCertificateRequestStatus @default(REQUESTED)
+  requestedByIdentityId String                               @db.Uuid
+  requestedAt           DateTime                             @default(now())
+  issuedAt              DateTime?
+  expiresAt             DateTime?
+  authoritativeConditionsMet Json                            @default("{}")
+  createdAt             DateTime                             @default(now())
+  updatedAt             DateTime                             @updatedAt
+  taxpayerAccount       TaxpayerAccount                      @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  requestedBy           Identity                             @relation("TaxClearanceRequester", fields: [requestedByIdentityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([status])
+  @@map("tax_clearance_certificate_requests")
+}
+
+model TaxWithholdingRecord {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  taxpayerAccountId   String                     @db.Uuid
+  taxTypeDefinitionId String                     @db.Uuid
+  recordReference     String                     @unique
+  status              TaxWithholdingRecordStatus @default(REPORTED)
+  reportingPeriodStart DateTime
+  reportingPeriodEnd   DateTime
+  reportedAmountCents  Int
+  currency             String                    @default("XCD")
+  employerConfiguration Json                    @default("{}")
+  reportedAt           DateTime                  @default(now())
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  taxpayerAccount      TaxpayerAccount           @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  taxTypeDefinition    TaxTypeDefinition         @relation(fields: [taxTypeDefinitionId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([taxTypeDefinitionId])
+  @@index([status])
+  @@map("tax_withholding_records")
+}
+
+model TaxAccessAudit {
+  id                 String             @id @default(uuid()) @db.Uuid
+  taxpayerAccountId  String             @db.Uuid
+  accessorIdentityId String             @db.Uuid
+  actorKind          TaxAccessActorKind
+  endpoint           String
+  accessGranted      Boolean
+  denialReason       String?
+  createdAt          DateTime           @default(now())
+  taxpayerAccount    TaxpayerAccount    @relation(fields: [taxpayerAccountId], references: [id], onDelete: Cascade)
+  accessor           Identity           @relation("TaxAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([taxpayerAccountId])
+  @@index([accessorIdentityId])
+  @@index([createdAt])
+  @@map("tax_access_audits")
 }

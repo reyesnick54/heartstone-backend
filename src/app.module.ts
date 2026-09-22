@@ -32,6 +32,7 @@ import { ProductionReadinessModule } from './production-readiness/production-rea
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
+import { RevenueModule } from './revenue/revenue.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
@@ -75,6 +76,7 @@ import { SystemModule } from './system/system.module';
     ComplianceModule,
     CorporateRegistryModule,
     RedressModule,
+    RevenueModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,
