@@ -125,6 +125,10 @@ model Jurisdiction {
   traderAccounts                 TraderAccount[]
   importerRegistrations          ImporterRegistration[]
   exporterRegistrations          ExporterRegistration[]
+  healthcareOrganizations        HealthcareOrganization[]
+  patientHealthIdentities        PatientHealthIdentity[]
+  healthcareRegistryEntries      HealthcareRegistryEntry[]
+  healthcareJurisdictionPrivacyHooks HealthcareJurisdictionPrivacyHook[]
 
   @@map("jurisdictions")
 }
@@ -204,6 +208,9 @@ model Institution {
   propertyTransfers              PropertyTransfer[]
   propertyRegistryEntries        PropertyRegistryEntry[]
   surveyRecords                  SurveyRecord[]
+  healthcareOrganizations        HealthcareOrganization[]
+  healthcareRegistryEntries      HealthcareRegistryEntry[]
+  healthcareDataAccessPolicies   HealthcareDataAccessPolicy[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -588,6 +595,8 @@ model Person {
   civilPersonRecords CivilPersonRecord[]
   cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
   transferParties         TransferParty[]
+  patientHealthIdentities PatientHealthIdentity[]
+  healthcareProfessionals HealthcareProfessional[]
 
   @@map("persons")
 }
@@ -841,6 +850,14 @@ model Identity {
   traderAccountsAsPrimary                  TraderAccount[]                        @relation("TraderAccountPrimaryIdentity")
   customsStatusHistoryEvents               CustomsStatusHistory[]                 @relation("CustomsStatusHistoryActor")
   customsExternalDependenciesRecorded      CustomsExternalDependency[]            @relation("CustomsExternalDependencyRecorder")
+  patientHealthIdentitiesLinked            PatientHealthIdentity[]                @relation("PatientHealthIdentityPlatformIdentity")
+  healthcareProfessionalsLinked            HealthcareProfessional[]               @relation("HealthcareProfessionalPlatformIdentity")
+  healthcareProfessionalStatusChanges      HealthcareProfessionalStatusHistory[]  @relation("HealthcareProfessionalStatusActor")
+  patientHealthcareRelationships           PatientHealthcareRelationship[]        @relation("PatientRelationshipPlatformIdentity")
+  healthcareDataAccessConsentsGranted      HealthcareDataAccessConsent[]          @relation("HealthcareConsentPlatformIdentity")
+  healthcareRegistryVerificationsPerformed HealthcareRegistryVerification[]       @relation("HealthcareRegistryVerifierIdentity")
+  healthcareBreakGlassSessions             HealthcareBreakGlassAccessSession[]    @relation("HealthcareBreakGlassActor")
+  healthcareAccessAuditEvents              HealthcareAccessAuditEvent[]           @relation("HealthcareAccessAuditActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -901,6 +918,7 @@ model Organization {
   transferParties                 TransferParty[]
   traderAccounts                  TraderAccount[]
   shipmentReferences              ShipmentReference[]
+  healthcareOrganizationProfiles  HealthcareOrganization[]             @relation("HealthcareOrganizationPlatformOrg")
 
   @@index([status])
   @@map("organizations")
@@ -1530,6 +1548,9 @@ model AuthorityEvaluationRecord {
   propertyRegistryCorrections       PropertyRegistryCorrection[]  @relation("PropertyRegistryCorrectionAuthority")
   propertyRegistryVerifications   PropertyRegistryVerification[] @relation("PropertyRegistryVerificationAuthority")
   titleVersions                   TitleVersion[]                @relation("TitleVersionAuthority")
+  healthcareRegistryEntries       HealthcareRegistryEntry[]     @relation("HealthcareRegistryEntryAuthority")
+  healthcareProfessionalLicenses  HealthcareProfessionalLicense[] @relation("HealthcareProfessionalLicenseAuthority")
+  healthcareFacilityLicenses      HealthcareFacilityLicense[]   @relation("HealthcareFacilityLicenseAuthority")
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1743,6 +1764,8 @@ model GovernmentService {
   serviceAppointments         ServiceAppointment[]
   vitalEvents                 VitalEvent[]
   propertyTransfers           PropertyTransfer[]
+  healthcareProfessionalLicenses HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses  HealthcareFacilityLicense[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2463,6 +2486,8 @@ model Application {
   driverLicenseApplicationProfile DriverLicenseApplicationProfile?
   propertyTransfers          PropertyTransfer[]
   customsDeclarations        CustomsDeclaration[]
+  healthcareProfessionalLicenses HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses HealthcareFacilityLicense[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2602,6 +2627,9 @@ model Case {
   propertyTransfers                 PropertyTransfer[]
   propertyRegistryEntries           PropertyRegistryEntry[]
   customsDeclarations               CustomsDeclaration[]
+  healthcareRegistryEntries         HealthcareRegistryEntry[]
+  healthcareProfessionalLicenses    HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses        HealthcareFacilityLicense[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -5089,6 +5117,9 @@ model GovernmentDecision {
   cadastrePropertyInterestHistory   CadastrePropertyInterestHistory[] @relation("CadastrePropertyInterestHistoryDecision")
   titleVersions                     TitleVersion[]                  @relation("TitleVersionDecision")
   customsReleaseDecisionReference   CustomsReleaseDecisionReference?
+  healthcareRegistryEntries         HealthcareRegistryEntry[]         @relation("HealthcareRegistryEntryDecision")
+  healthcareProfessionalLicenses    HealthcareProfessionalLicense[]   @relation("HealthcareProfessionalLicenseDecision")
+  healthcareFacilityLicenses      HealthcareFacilityLicense[]       @relation("HealthcareFacilityLicenseDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5684,6 +5715,8 @@ model IssuanceEvent {
   authorityEvaluationRecord   AuthorityEvaluationRecord   @relation(fields: [authorityEvaluationRecordId], references: [id])
   numberingReservation        InstrumentNumberReservation @relation(fields: [numberingReservationId], references: [id])
   civilRegistryCertificateExtracts CivilRegistryCertificateExtract[]
+  healthcareProfessionalLicenses   HealthcareProfessionalLicense[]
+  healthcareFacilityLicenses       HealthcareFacilityLicense[]
 
   @@index([officialInstrumentId])
   @@index([governmentDecisionId])
@@ -20027,4 +20060,613 @@ model CustomsExternalDependency {
   @@index([shipmentReferenceId])
   @@index([customsDeclarationId])
   @@map("customs_external_dependencies")
+}
+// ─── Healthcare & Regulated Science domain (append to schema.prisma) ─────────
+
+enum HealthcareDataCategory {
+  GENERAL_HEALTH
+  CLINICAL
+  MEDICATION
+  LABORATORY
+  IMAGING
+  GENETIC
+  REPRODUCTIVE
+  MENTAL_HEALTH
+  SUBSTANCE_USE
+  RESEARCH
+  HIGHLY_RESTRICTED
+}
+
+enum HealthcareDataAccessPurpose {
+  PATIENT_SELF
+  GUARDIAN_OR_LEGAL_REPRESENTATIVE
+  TREATING_PROVIDER
+  CARE_TEAM
+  CLINICAL_RESEARCH
+  REGULATORY_OVERSIGHT
+  EMERGENCY_BREAK_GLASS
+  EXPLICIT_PURPOSE_BOUND
+  OTHER_CONFIGURED
+}
+
+enum HealthcareOrganizationStatus {
+  DRAFT
+  REGISTERED
+  SUSPENDED
+  CLOSED
+}
+
+enum HealthcareProfessionalRecordStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum HealthcareLicenseStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum HealthcareRegistryEntryStatus {
+  DRAFT
+  OFFICIAL
+  SUPERSEDED
+}
+
+enum HealthcareRegistryVerificationState {
+  UNVERIFIED
+  VERIFIED
+  FAILED
+  REVOKED
+}
+
+enum HealthcareRegulatoryStatusKind {
+  COMPLIANT
+  CONDITIONAL
+  NON_COMPLIANT
+  UNDER_REVIEW
+  SUSPENDED
+  OTHER_CONFIGURED
+}
+
+enum HealthcarePatientRelationshipKind {
+  SELF
+  GUARDIAN
+  LEGAL_REPRESENTATIVE
+  TREATING_PROVIDER
+  CARE_TEAM_MEMBER
+  CLINICAL_RESEARCH_CONTACT
+  REGULATORY_CONTACT
+  OTHER_CONFIGURED
+}
+
+enum HealthcareBreakGlassSessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  PENDING_POST_ACCESS_REVIEW
+  REVIEWED
+}
+
+enum HealthcareAccessAuditEventType {
+  SENSITIVE_READ
+  SEARCH
+  BREAK_GLASS_ACTIVATED
+  BREAK_GLASS_READ
+  POLICY_DENIED
+}
+
+enum HealthcareAccessDecision {
+  ALLOW
+  DENY
+}
+
+enum HealthcareAccreditationSubjectKind {
+  ORGANIZATION
+  FACILITY
+}
+
+enum HealthcareRegistrySubjectKind {
+  PATIENT
+  PROFESSIONAL
+  ORGANIZATION
+  FACILITY
+}
+
+model HealthcareJurisdictionPrivacyHook {
+  id                         String       @id @default(uuid()) @db.Uuid
+  jurisdictionId             String       @db.Uuid
+  configurationKey           String
+  externalPolicyPackReference String
+  description                String?
+  configurationMetadata      Json         @default("{}")
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+  jurisdiction               Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+  accessPolicies             HealthcareDataAccessPolicy[]
+
+  @@unique([jurisdictionId, configurationKey])
+  @@index([jurisdictionId])
+  @@map("healthcare_jurisdiction_privacy_hooks")
+}
+
+model HealthcareOrganization {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  organizationReference   String                       @unique
+  jurisdictionId          String                       @db.Uuid
+  institutionId           String?                      @db.Uuid
+  platformOrganizationId  String?                      @db.Uuid
+  registeredName          String
+  status                  HealthcareOrganizationStatus @default(DRAFT)
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  jurisdiction            Jurisdiction                 @relation(fields: [jurisdictionId], references: [id])
+  institution             Institution?                 @relation(fields: [institutionId], references: [id])
+  platformOrganization    Organization?                @relation("HealthcareOrganizationPlatformOrg", fields: [platformOrganizationId], references: [id])
+  facilities              HealthcareFacility[]
+  serviceLocations        HealthcareServiceLocation[]
+  accreditations          HealthcareAccreditation[]    @relation("HealthcareAccreditationOrganization")
+  regulatoryStatuses      HealthcareRegulatoryStatus[] @relation("HealthcareRegulatoryStatusOrganization")
+  registryEntries         HealthcareRegistryEntry[]    @relation("HealthcareRegistryEntryOrganization")
+  patientRelationships    PatientHealthcareRelationship[]
+
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([platformOrganizationId])
+  @@index([status])
+  @@map("healthcare_organizations")
+}
+
+model HealthcareFacilityType {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  facilities HealthcareFacility[]
+
+  @@map("healthcare_facility_types")
+}
+
+model HealthcareFacility {
+  id                      String                       @id @default(uuid()) @db.Uuid
+  facilityReference       String                       @unique
+  healthcareOrganizationId String                      @db.Uuid
+  facilityTypeId          String                       @db.Uuid
+  displayName             String
+  operationalStatus       HealthcareOrganizationStatus @default(DRAFT)
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  healthcareOrganization  HealthcareOrganization       @relation(fields: [healthcareOrganizationId], references: [id], onDelete: Restrict)
+  facilityType            HealthcareFacilityType       @relation(fields: [facilityTypeId], references: [id])
+  serviceLocations        HealthcareServiceLocation[]
+  accreditations          HealthcareAccreditation[]    @relation("HealthcareAccreditationFacility")
+  regulatoryStatuses      HealthcareRegulatoryStatus[] @relation("HealthcareRegulatoryStatusFacility")
+  facilityLicenses        HealthcareFacilityLicense[]
+  registryEntries         HealthcareRegistryEntry[]    @relation("HealthcareRegistryEntryFacility")
+
+  @@index([healthcareOrganizationId])
+  @@index([facilityTypeId])
+  @@map("healthcare_facilities")
+}
+
+model HealthcareServiceLocation {
+  id                       String                @id @default(uuid()) @db.Uuid
+  locationReference        String                @unique
+  healthcareOrganizationId String                @db.Uuid
+  healthcareFacilityId     String?               @db.Uuid
+  label                    String
+  isVirtual                Boolean               @default(false)
+  addressSummary           String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  healthcareOrganization   HealthcareOrganization @relation(fields: [healthcareOrganizationId], references: [id], onDelete: Restrict)
+  healthcareFacility       HealthcareFacility?   @relation(fields: [healthcareFacilityId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@map("healthcare_service_locations")
+}
+
+model HealthcareProfessionalType {
+  id            String                  @id @default(uuid()) @db.Uuid
+  code          String                  @unique
+  label         String
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  professionals HealthcareProfessional[]
+
+  @@map("healthcare_professional_types")
+}
+
+model HealthcareProfessional {
+  id                      String                             @id @default(uuid()) @db.Uuid
+  professionalReference   String                             @unique
+  professionalTypeId      String                             @db.Uuid
+  linkedPlatformIdentityId String?                           @db.Uuid
+  personId                String?                            @db.Uuid
+  recordStatus            HealthcareProfessionalRecordStatus @default(DRAFT)
+  createdAt               DateTime                           @default(now())
+  updatedAt               DateTime                           @updatedAt
+  professionalType        HealthcareProfessionalType         @relation(fields: [professionalTypeId], references: [id])
+  linkedPlatformIdentity  Identity?                          @relation("HealthcareProfessionalPlatformIdentity", fields: [linkedPlatformIdentityId], references: [id])
+  person                  Person?                            @relation(fields: [personId], references: [id])
+  licenses                HealthcareProfessionalLicense[]
+  specialties             HealthcareProfessionalSpecialty[]
+  credentialReferences    HealthcareProfessionalCredentialReference[]
+  statusHistory           HealthcareProfessionalStatusHistory[]
+  regulatoryStatuses      HealthcareRegulatoryStatus[]       @relation("HealthcareRegulatoryStatusProfessional")
+  registryEntries         HealthcareRegistryEntry[]          @relation("HealthcareRegistryEntryProfessional")
+  patientRelationships    PatientHealthcareRelationship[]    @relation("PatientRelationshipProfessional")
+  consentsGranted         HealthcareDataAccessConsent[]      @relation("HealthcareConsentProfessional")
+
+  @@index([professionalTypeId])
+  @@index([linkedPlatformIdentityId])
+  @@index([personId])
+  @@index([recordStatus])
+  @@map("healthcare_professionals")
+}
+
+model HealthcareProfessionalLicense {
+  id                          String                @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId    String                @db.Uuid
+  licenseReference            String                @unique
+  licenseTypeCode             String
+  status                      HealthcareLicenseStatus @default(PENDING)
+  issuedAt                    DateTime?
+  expiresAt                   DateTime?
+  applicationId               String?               @db.Uuid
+  caseId                      String?               @db.Uuid
+  governmentServiceId         String?               @db.Uuid
+  governmentDecisionId        String?               @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  issuanceEventId             String?               @db.Uuid
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  healthcareProfessional      HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Restrict)
+  application                 Application?          @relation(fields: [applicationId], references: [id])
+  case                        Case?                 @relation(fields: [caseId], references: [id])
+  governmentService           GovernmentService?    @relation(fields: [governmentServiceId], references: [id])
+  governmentDecision          GovernmentDecision?   @relation("HealthcareProfessionalLicenseDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("HealthcareProfessionalLicenseAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  issuanceEvent               IssuanceEvent?        @relation(fields: [issuanceEventId], references: [id])
+
+  @@index([healthcareProfessionalId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("healthcare_professional_licenses")
+}
+
+model HealthcareProfessionalSpecialty {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String                 @db.Uuid
+  specialtyCode          String
+  effectiveFrom          DateTime               @default(now())
+  effectiveTo            DateTime?
+  createdAt              DateTime               @default(now())
+  healthcareProfessional HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_specialties")
+}
+
+model HealthcareProfessionalCredentialReference {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String               @db.Uuid
+  credentialKind         String
+  externalReference      String
+  recordedAt             DateTime               @default(now())
+  healthcareProfessional HealthcareProfessional @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_credential_references")
+}
+
+model HealthcareProfessionalStatusHistory {
+  id                     String                             @id @default(uuid()) @db.Uuid
+  healthcareProfessionalId String                           @db.Uuid
+  fromStatus             HealthcareProfessionalRecordStatus?
+  toStatus               HealthcareProfessionalRecordStatus
+  changedAt              DateTime                           @default(now())
+  actorIdentityId        String?                            @db.Uuid
+  reasonSummary          String?
+  healthcareProfessional HealthcareProfessional             @relation(fields: [healthcareProfessionalId], references: [id], onDelete: Cascade)
+  actorIdentity          Identity?                          @relation("HealthcareProfessionalStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_professional_status_history")
+}
+
+model HealthcareAccreditation {
+  id                       String                           @id @default(uuid()) @db.Uuid
+  subjectKind              HealthcareAccreditationSubjectKind
+  healthcareOrganizationId String?                          @db.Uuid
+  healthcareFacilityId     String?                          @db.Uuid
+  accreditationBodyReference String
+  statusCode               String
+  effectiveFrom            DateTime
+  effectiveTo              DateTime?
+  createdAt                DateTime                         @default(now())
+  healthcareOrganization   HealthcareOrganization?          @relation("HealthcareAccreditationOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility       HealthcareFacility?              @relation("HealthcareAccreditationFacility", fields: [healthcareFacilityId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@map("healthcare_accreditations")
+}
+
+model HealthcareFacilityLicense {
+  id                          String                @id @default(uuid()) @db.Uuid
+  healthcareFacilityId        String                @db.Uuid
+  licenseReference            String                @unique
+  licenseTypeCode             String
+  status                      HealthcareLicenseStatus @default(PENDING)
+  issuedAt                    DateTime?
+  expiresAt                   DateTime?
+  applicationId               String?               @db.Uuid
+  caseId                      String?               @db.Uuid
+  governmentServiceId         String?               @db.Uuid
+  governmentDecisionId        String?               @db.Uuid
+  authorityEvaluationRecordId String?               @db.Uuid
+  issuanceEventId             String?               @db.Uuid
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  healthcareFacility          HealthcareFacility    @relation(fields: [healthcareFacilityId], references: [id], onDelete: Restrict)
+  application                 Application?          @relation(fields: [applicationId], references: [id])
+  case                        Case?                 @relation(fields: [caseId], references: [id])
+  governmentService           GovernmentService?    @relation(fields: [governmentServiceId], references: [id])
+  governmentDecision          GovernmentDecision?   @relation("HealthcareFacilityLicenseDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation("HealthcareFacilityLicenseAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  issuanceEvent               IssuanceEvent?        @relation(fields: [issuanceEventId], references: [id])
+
+  @@index([healthcareFacilityId])
+  @@index([status])
+  @@map("healthcare_facility_licenses")
+}
+
+model HealthcareRegulatoryStatus {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  statusKind               HealthcareRegulatoryStatusKind
+  healthcareOrganizationId String?                      @db.Uuid
+  healthcareFacilityId     String?                      @db.Uuid
+  healthcareProfessionalId String?                      @db.Uuid
+  regulatoryAuthorityReference String
+  effectiveFrom            DateTime
+  effectiveTo              DateTime?
+  createdAt                DateTime                     @default(now())
+  healthcareOrganization   HealthcareOrganization?      @relation("HealthcareRegulatoryStatusOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility       HealthcareFacility?          @relation("HealthcareRegulatoryStatusFacility", fields: [healthcareFacilityId], references: [id])
+  healthcareProfessional   HealthcareProfessional?      @relation("HealthcareRegulatoryStatusProfessional", fields: [healthcareProfessionalId], references: [id])
+
+  @@index([healthcareOrganizationId])
+  @@index([healthcareFacilityId])
+  @@index([healthcareProfessionalId])
+  @@map("healthcare_regulatory_statuses")
+}
+
+model PatientHealthIdentity {
+  id                       String                        @id @default(uuid()) @db.Uuid
+  patientReference         String                        @unique
+  jurisdictionId           String                        @db.Uuid
+  linkedPlatformIdentityId String?                       @db.Uuid
+  personId                 String?                       @db.Uuid
+  isActive                 Boolean                       @default(true)
+  createdAt                DateTime                      @default(now())
+  updatedAt                DateTime                      @updatedAt
+  jurisdiction             Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  linkedPlatformIdentity   Identity?                     @relation("PatientHealthIdentityPlatformIdentity", fields: [linkedPlatformIdentityId], references: [id])
+  person                   Person?                       @relation(fields: [personId], references: [id])
+  relationships            PatientHealthcareRelationship[]
+  identifierReferences     HealthcareIdentifierReference[]
+  registryEntries          HealthcareRegistryEntry[]     @relation("HealthcareRegistryEntryPatient")
+  consents                 HealthcareDataAccessConsent[]
+  breakGlassSessions       HealthcareBreakGlassAccessSession[]
+  accessAuditEvents        HealthcareAccessAuditEvent[]
+
+  @@index([jurisdictionId])
+  @@index([linkedPlatformIdentityId])
+  @@index([personId])
+  @@map("patient_health_identities")
+}
+
+model PatientHealthcareRelationship {
+  id                       String                            @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId  String                            @db.Uuid
+  relationshipKind         HealthcarePatientRelationshipKind
+  relatedPlatformIdentityId String?                          @db.Uuid
+  healthcareProfessionalId String?                           @db.Uuid
+  healthcareOrganizationId String?                           @db.Uuid
+  effectiveFrom            DateTime                          @default(now())
+  effectiveTo              DateTime?
+  purposeScope             Json                              @default("{}")
+  createdAt                DateTime                          @default(now())
+  patientHealthIdentity    PatientHealthIdentity             @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+  relatedPlatformIdentity  Identity?                         @relation("PatientRelationshipPlatformIdentity", fields: [relatedPlatformIdentityId], references: [id])
+  healthcareProfessional   HealthcareProfessional?           @relation("PatientRelationshipProfessional", fields: [healthcareProfessionalId], references: [id])
+  healthcareOrganization   HealthcareOrganization?           @relation(fields: [healthcareOrganizationId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@index([relatedPlatformIdentityId])
+  @@index([healthcareProfessionalId])
+  @@index([healthcareOrganizationId])
+  @@map("patient_healthcare_relationships")
+}
+
+model HealthcareIdentifierReference {
+  id                      String              @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId String              @db.Uuid
+  identifierSystem        String
+  identifierValue         String
+  isPrimary               Boolean             @default(false)
+  createdAt               DateTime            @default(now())
+  patientHealthIdentity   PatientHealthIdentity @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+
+  @@unique([identifierSystem, identifierValue])
+  @@index([patientHealthIdentityId])
+  @@map("healthcare_identifier_references")
+}
+
+model HealthcareRegistryEntry {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  entryReference              String                        @unique
+  subjectKind                 HealthcareRegistrySubjectKind
+  patientHealthIdentityId     String?                       @db.Uuid
+  healthcareProfessionalId    String?                       @db.Uuid
+  healthcareOrganizationId    String?                       @db.Uuid
+  healthcareFacilityId        String?                       @db.Uuid
+  jurisdictionId              String                        @db.Uuid
+  institutionId               String                        @db.Uuid
+  caseId                      String                        @db.Uuid
+  governmentDecisionId        String                        @db.Uuid
+  authorityEvaluationRecordId String                        @db.Uuid
+  status                      HealthcareRegistryEntryStatus @default(DRAFT)
+  registeredAt                DateTime?
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  patientHealthIdentity       PatientHealthIdentity?        @relation("HealthcareRegistryEntryPatient", fields: [patientHealthIdentityId], references: [id])
+  healthcareProfessional      HealthcareProfessional?       @relation("HealthcareRegistryEntryProfessional", fields: [healthcareProfessionalId], references: [id])
+  healthcareOrganization      HealthcareOrganization?       @relation("HealthcareRegistryEntryOrganization", fields: [healthcareOrganizationId], references: [id])
+  healthcareFacility          HealthcareFacility?           @relation("HealthcareRegistryEntryFacility", fields: [healthcareFacilityId], references: [id])
+  jurisdiction                Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  institution                 Institution                   @relation(fields: [institutionId], references: [id])
+  case                        Case                          @relation(fields: [caseId], references: [id])
+  governmentDecision          GovernmentDecision            @relation("HealthcareRegistryEntryDecision", fields: [governmentDecisionId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord     @relation("HealthcareRegistryEntryAuthority", fields: [authorityEvaluationRecordId], references: [id])
+  verifications               HealthcareRegistryVerification[]
+  statusHistory               HealthcareRegistryStatusHistory[]
+
+  @@index([patientHealthIdentityId])
+  @@index([healthcareProfessionalId])
+  @@index([healthcareOrganizationId])
+  @@index([caseId])
+  @@index([status])
+  @@map("healthcare_registry_entries")
+}
+
+model HealthcareRegistryVerification {
+  id                      String                            @id @default(uuid()) @db.Uuid
+  healthcareRegistryEntryId String                          @db.Uuid
+  verificationState       HealthcareRegistryVerificationState
+  methodReference         String
+  verifiedAt              DateTime?
+  verifiedByIdentityId    String?                           @db.Uuid
+  createdAt               DateTime                          @default(now())
+  healthcareRegistryEntry HealthcareRegistryEntry           @relation(fields: [healthcareRegistryEntryId], references: [id], onDelete: Cascade)
+  verifiedByIdentity      Identity?                         @relation("HealthcareRegistryVerifierIdentity", fields: [verifiedByIdentityId], references: [id])
+
+  @@index([healthcareRegistryEntryId])
+  @@map("healthcare_registry_verifications")
+}
+
+model HealthcareRegistryStatusHistory {
+  id                      String                        @id @default(uuid()) @db.Uuid
+  healthcareRegistryEntryId String                      @db.Uuid
+  fromStatus              HealthcareRegistryEntryStatus?
+  toStatus                HealthcareRegistryEntryStatus
+  changedAt               DateTime                      @default(now())
+  reasonSummary           String?
+  healthcareRegistryEntry HealthcareRegistryEntry       @relation(fields: [healthcareRegistryEntryId], references: [id], onDelete: Cascade)
+
+  @@index([healthcareRegistryEntryId])
+  @@map("healthcare_registry_status_history")
+}
+
+model HealthcareDataAccessPolicy {
+  id                              String                      @id @default(uuid()) @db.Uuid
+  policyKey                       String                      @unique
+  jurisdictionPrivacyHookId       String?                     @db.Uuid
+  institutionId                   String?                     @db.Uuid
+  accessPurpose                   HealthcareDataAccessPurpose
+  allowedDataCategories           HealthcareDataCategory[]
+  allowedRelationshipKinds        HealthcarePatientRelationshipKind[]
+  requiresExplicitConsent         Boolean                     @default(false)
+  requiresActiveProfessionalLicense Boolean                   @default(false)
+  requiresTreatingRelationship    Boolean                     @default(false)
+  requiresInstitutionMembership   Boolean                     @default(false)
+  legalOrRegulatoryBasisReference String?
+  priority                        Int                         @default(100)
+  effectiveFrom                   DateTime                    @default(now())
+  effectiveTo                     DateTime?
+  createdAt                       DateTime                    @default(now())
+  updatedAt                       DateTime                    @updatedAt
+  jurisdictionPrivacyHook         HealthcareJurisdictionPrivacyHook? @relation(fields: [jurisdictionPrivacyHookId], references: [id])
+  institution                     Institution?                @relation(fields: [institutionId], references: [id])
+  accessAuditEvents               HealthcareAccessAuditEvent[]
+
+  @@index([accessPurpose])
+  @@index([institutionId])
+  @@map("healthcare_data_access_policies")
+}
+
+model HealthcareDataAccessConsent {
+  id                       String                      @id @default(uuid()) @db.Uuid
+  patientHealthIdentityId  String                      @db.Uuid
+  grantedToPlatformIdentityId String?                  @db.Uuid
+  grantedToProfessionalId  String?                     @db.Uuid
+  purpose                  HealthcareDataAccessPurpose
+  dataCategories           HealthcareDataCategory[]
+  legalBasisReference      String?
+  effectiveFrom            DateTime                    @default(now())
+  effectiveTo              DateTime?
+  revokedAt                DateTime?
+  createdAt                DateTime                    @default(now())
+  patientHealthIdentity    PatientHealthIdentity       @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Cascade)
+  grantedToPlatformIdentity Identity?                  @relation("HealthcareConsentPlatformIdentity", fields: [grantedToPlatformIdentityId], references: [id])
+  grantedToProfessional    HealthcareProfessional?     @relation("HealthcareConsentProfessional", fields: [grantedToProfessionalId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@map("healthcare_data_access_consents")
+}
+
+model HealthcareBreakGlassAccessSession {
+  id                      String                          @id @default(uuid()) @db.Uuid
+  sessionReference        String                          @unique
+  actorIdentityId         String                          @db.Uuid
+  patientHealthIdentityId String                          @db.Uuid
+  resourceScope           Json                            @default("{}")
+  reasonSummary           String
+  policyBasisReference    String
+  expiresAt               DateTime
+  status                  HealthcareBreakGlassSessionStatus @default(ACTIVE)
+  requiresPostAccessReview Boolean                        @default(true)
+  activatedAt             DateTime                        @default(now())
+  revokedAt               DateTime?
+  reviewedAt              DateTime?
+  actorIdentity           Identity                        @relation("HealthcareBreakGlassActor", fields: [actorIdentityId], references: [id])
+  patientHealthIdentity   PatientHealthIdentity           @relation(fields: [patientHealthIdentityId], references: [id], onDelete: Restrict)
+  accessAuditEvents       HealthcareAccessAuditEvent[]
+
+  @@index([actorIdentityId])
+  @@index([patientHealthIdentityId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("healthcare_break_glass_access_sessions")
+}
+
+model HealthcareAccessAuditEvent {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  eventType               HealthcareAccessAuditEventType
+  decision                HealthcareAccessDecision
+  actorIdentityId         String?                        @db.Uuid
+  patientHealthIdentityId String?                        @db.Uuid
+  dataCategory            HealthcareDataCategory?
+  accessPurpose           HealthcareDataAccessPurpose?
+  policyId                String?                        @db.Uuid
+  breakGlassSessionId     String?                        @db.Uuid
+  metadata                Json                           @default("{}")
+  recordedAt              DateTime                       @default(now())
+  actorIdentity           Identity?                      @relation("HealthcareAccessAuditActor", fields: [actorIdentityId], references: [id])
+  patientHealthIdentity   PatientHealthIdentity?         @relation(fields: [patientHealthIdentityId], references: [id])
+  policy                  HealthcareDataAccessPolicy?    @relation(fields: [policyId], references: [id])
+  breakGlassSession       HealthcareBreakGlassAccessSession? @relation(fields: [breakGlassSessionId], references: [id])
+
+  @@index([patientHealthIdentityId])
+  @@index([actorIdentityId])
+  @@index([eventType])
+  @@index([recordedAt])
+  @@map("healthcare_access_audit_events")
 }
