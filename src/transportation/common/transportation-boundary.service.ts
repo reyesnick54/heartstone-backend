@@ -49,10 +49,7 @@ export class TransportationBoundaryService {
     inspectionResultDoesNotRevokeRegistration: boolean;
     registrationRevokedWithoutDecision: boolean;
   }): void {
-    if (
-      !input.inspectionResultDoesNotRevokeRegistration &&
-      input.registrationRevokedWithoutDecision
-    ) {
+    if (input.registrationRevokedWithoutDecision) {
       throw new BadRequestException(
         'Failed inspection cannot silently revoke registration; a governed decision or configured workflow is required',
       );
