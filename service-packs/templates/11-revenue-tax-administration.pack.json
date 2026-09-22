@@ -1,0 +1,2409 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-REVENUE",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Revenue & Tax Administration family with placeholder rules, rates, forms, deadlines, exemptions, and thresholds.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-revenue-tax-administration",
+  "packLabel": "TEMPLATE_ONLY",
+  "packName": "Revenue & Tax Administration Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-REMINDER",
+          "templateCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-REGISTER-INDIVIDUAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Register Individual Taxpayer — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-FORM",
+          "formName": "Register Individual Taxpayer form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-REGISTER-INDIVIDUAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Register Individual Taxpayer",
+      "serviceSlug": "template-rev-register-individual",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-REGISTER-INDIVIDUAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-REGISTER-BUSINESS-REMINDER",
+          "templateCode": "TEMPLATE-REV-REGISTER-BUSINESS-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-REGISTER-BUSINESS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-REGISTER-BUSINESS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-REGISTER-BUSINESS-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-REGISTER-BUSINESS-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Register Business Taxpayer — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-REGISTER-BUSINESS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-REGISTER-BUSINESS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-REGISTER-BUSINESS-FORM",
+          "formName": "Register Business Taxpayer form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-REGISTER-BUSINESS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-REGISTER-BUSINESS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-REGISTER-BUSINESS-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-REGISTER-BUSINESS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Register Business Taxpayer",
+      "serviceSlug": "template-rev-register-business",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-REGISTER-BUSINESS-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-UPDATE-TAXPAYER-REMINDER",
+          "templateCode": "TEMPLATE-REV-UPDATE-TAXPAYER-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-UPDATE-TAXPAYER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-UPDATE-TAXPAYER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-UPDATE-TAXPAYER-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-UPDATE-TAXPAYER-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Update Taxpayer Details — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-UPDATE-TAXPAYER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-UPDATE-TAXPAYER-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-UPDATE-TAXPAYER-FORM",
+          "formName": "Update Taxpayer Details form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-UPDATE-TAXPAYER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-UPDATE-TAXPAYER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-UPDATE-TAXPAYER-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-UPDATE-TAXPAYER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Update Taxpayer Details",
+      "serviceSlug": "template-rev-update-taxpayer",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-UPDATE-TAXPAYER-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-FILE-RETURN-REMINDER",
+          "templateCode": "TEMPLATE-REV-FILE-RETURN-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-FILE-RETURN-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-FILE-RETURN-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-FILE-RETURN-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-FILE-RETURN-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "File Tax Return / Declaration — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-FILE-RETURN-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-FILE-RETURN-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-FILE-RETURN-FORM",
+          "formName": "File Tax Return / Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-FILE-RETURN-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-FILE-RETURN-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-FILE-RETURN-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-FILE-RETURN",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "File Tax Return / Declaration",
+      "serviceSlug": "template-rev-file-return",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-FILE-RETURN-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-AMEND-RETURN-REMINDER",
+          "templateCode": "TEMPLATE-REV-AMEND-RETURN-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-AMEND-RETURN-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-AMEND-RETURN-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-AMEND-RETURN-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-AMEND-RETURN-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Amend Filed Return — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-AMEND-RETURN-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-AMEND-RETURN-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-AMEND-RETURN-FORM",
+          "formName": "Amend Filed Return form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-AMEND-RETURN-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-AMEND-RETURN-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-AMEND-RETURN-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-AMEND-RETURN",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Amend Filed Return",
+      "serviceSlug": "template-rev-amend-return",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-AMEND-RETURN-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-ASSESSMENT-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-VIEW-ASSESSMENT-REMINDER",
+          "templateCode": "TEMPLATE-REV-VIEW-ASSESSMENT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-VIEW-ASSESSMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-VIEW-ASSESSMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-ASSESSMENT-ISSUE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-VIEW-ASSESSMENT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-VIEW-ASSESSMENT-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "View Assessment — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-VIEW-ASSESSMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-VIEW-ASSESSMENT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-VIEW-ASSESSMENT-FORM",
+          "formName": "View Assessment form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-VIEW-ASSESSMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-VIEW-ASSESSMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-VIEW-ASSESSMENT-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-VIEW-ASSESSMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "View Assessment",
+      "serviceSlug": "template-rev-view-assessment",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-VIEW-ASSESSMENT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-ASSESSMENT-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-PAY-LIABILITY-REMINDER",
+          "templateCode": "TEMPLATE-REV-PAY-LIABILITY-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-PAY-LIABILITY-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-PAY-LIABILITY-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-PAY-LIABILITY-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-PAY-LIABILITY-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Pay Tax Liability — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-PAY-LIABILITY-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-PAY-LIABILITY-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-PAY-LIABILITY-FORM",
+          "formName": "Pay Tax Liability form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-PAY-LIABILITY-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-PAY-LIABILITY-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-PAY-LIABILITY-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-PAY-LIABILITY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Pay Tax Liability",
+      "serviceSlug": "template-rev-pay-liability",
+      "serviceType": "PAYMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-PAY-LIABILITY-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-REFUND-AUTHORIZE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-REQUEST-REFUND-REMINDER",
+          "templateCode": "TEMPLATE-REV-REQUEST-REFUND-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-REQUEST-REFUND-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-REQUEST-REFUND-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-REFUND-AUTHORIZE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-REQUEST-REFUND-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-REQUEST-REFUND-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Request Refund — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-REQUEST-REFUND-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-REQUEST-REFUND-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-REQUEST-REFUND-FORM",
+          "formName": "Request Refund form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-REQUEST-REFUND-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-REQUEST-REFUND-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-REQUEST-REFUND-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-REQUEST-REFUND",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Request Refund",
+      "serviceSlug": "template-rev-request-refund",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-REQUEST-REFUND-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-REFUND-AUTHORIZE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-PAYMENT-PLAN-APPROVE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-PAYMENT-PLAN-REMINDER",
+          "templateCode": "TEMPLATE-REV-PAYMENT-PLAN-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-PAYMENT-PLAN-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-PAYMENT-PLAN-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-PAYMENT-PLAN-APPROVE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-PAYMENT-PLAN-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-PAYMENT-PLAN-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Request Payment Plan — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-PAYMENT-PLAN-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-PAYMENT-PLAN-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-PAYMENT-PLAN-FORM",
+          "formName": "Request Payment Plan form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-PAYMENT-PLAN-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-PAYMENT-PLAN-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-PAYMENT-PLAN-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-PAYMENT-PLAN",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Request Payment Plan",
+      "serviceSlug": "template-rev-payment-plan",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-PAYMENT-PLAN-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-PAYMENT-PLAN-APPROVE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-OBJECTION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-TAX-OBJECTION-REMINDER",
+          "templateCode": "TEMPLATE-REV-TAX-OBJECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-TAX-OBJECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-TAX-OBJECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-OBJECTION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-TAX-OBJECTION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-TAX-OBJECTION-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Submit Tax Objection / Review — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-TAX-OBJECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-TAX-OBJECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-TAX-OBJECTION-FORM",
+          "formName": "Submit Tax Objection / Review form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-TAX-OBJECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-TAX-OBJECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-TAX-OBJECTION-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-TAX-OBJECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Submit Tax Objection / Review",
+      "serviceSlug": "template-rev-tax-objection",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-TAX-OBJECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-OBJECTION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-CLEARANCE-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-CLEARANCE-CERT-REMINDER",
+          "templateCode": "TEMPLATE-REV-CLEARANCE-CERT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-CLEARANCE-CERT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-CLEARANCE-CERT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-CLEARANCE-ISSUE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-CLEARANCE-CERT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-CLEARANCE-CERT-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Request Tax Compliance / Clearance Certificate — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-CLEARANCE-CERT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-CLEARANCE-CERT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-CLEARANCE-CERT-FORM",
+          "formName": "Request Tax Compliance / Clearance Certificate form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-CLEARANCE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-CLEARANCE-CERT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-CLEARANCE-CERT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-CLEARANCE-CERT-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-CLEARANCE-CERT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Request Tax Compliance / Clearance Certificate",
+      "serviceSlug": "template-rev-clearance-cert",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-CLEARANCE-CERT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-CLEARANCE-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-WITHHOLDING-REMINDER",
+          "templateCode": "TEMPLATE-REV-WITHHOLDING-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-WITHHOLDING-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-WITHHOLDING-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-WITHHOLDING-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-WITHHOLDING-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Employer Withholding Submission — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-WITHHOLDING-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-WITHHOLDING-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-WITHHOLDING-FORM",
+          "formName": "Employer Withholding Submission form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-WITHHOLDING-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-WITHHOLDING-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-WITHHOLDING-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-WITHHOLDING",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Employer Withholding Submission",
+      "serviceSlug": "template-rev-withholding",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-WITHHOLDING-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-STATEMENT-REMINDER",
+          "templateCode": "TEMPLATE-REV-STATEMENT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-STATEMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-STATEMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-STATEMENT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-STATEMENT-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Tax Account Statement Request — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-STATEMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-STATEMENT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-STATEMENT-FORM",
+          "formName": "Tax Account Statement Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-STATEMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-STATEMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-STATEMENT-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-STATEMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Tax Account Statement Request",
+      "serviceSlug": "template-rev-statement",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-STATEMENT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-REV-RECORD-CORRECTION-REMINDER",
+          "templateCode": "TEMPLATE-REV-RECORD-CORRECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-REV-RECORD-CORRECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-REV-RECORD-CORRECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-REV-RECORD-CORRECTION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-REV-RECORD-CORRECTION-ACCOUNTING-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external accounting/registry integration",
+          "externalIntegrationCode": "TEMPLATE-REV-ACCOUNTING-API"
+        }
+      ],
+      "description": "Tax Record Correction — NON_PRODUCTION placeholder tax service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-REV-RECORD-CORRECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-REV-RECORD-CORRECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-REV-RECORD-CORRECTION-FORM",
+          "formName": "Tax Record Correction form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-REV-RECORD-CORRECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-REV-RECORD-CORRECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION objection route",
+          "label": "Tax objection / review",
+          "routeCode": "TEMPLATE-REV-RECORD-CORRECTION-OBJECTION",
+          "routeType": "OBJECTION"
+        }
+      ],
+      "serviceCode": "TEMPLATE-REV-RECORD-CORRECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-REVENUE-TAX",
+      "serviceName": "Tax Record Correction",
+      "serviceSlug": "template-rev-record-correction",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-REV-RECORD-CORRECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-RETURN-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Revenue review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-REVENUE-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}
