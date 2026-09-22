@@ -51,6 +51,7 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
   ],
   exports: [
     AuthorityEvaluationService,
+    AuthorityDependencyEvaluator,
     AuthorityDependenciesService,
     FunctionAuthorityRecordsService,
     GoverningSourcesService,
