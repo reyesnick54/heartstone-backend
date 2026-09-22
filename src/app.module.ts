@@ -18,6 +18,7 @@ import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { ExperienceModule } from './experience/experience.module';
@@ -76,6 +77,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     LabourModule,
+    EducationModule,
     SocialProtectionModule,
     TransportationModule,
     CitizenExperienceModule,
