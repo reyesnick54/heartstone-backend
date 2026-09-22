@@ -1,0 +1,2493 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-TRANSPORTATION",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Transportation family with jurisdiction-neutral placeholder rules for licensing, registration, inspection, operators, fleet, and appeals.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-transportation-government",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Transportation Government Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Apply for Driver License — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-FORM",
+          "formName": "Apply for Driver License form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Apply for Driver License",
+      "serviceSlug": "template-trans-apply-driver-license",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-APPLY-DRIVER-LICENSE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Renew Driver License — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-FORM",
+          "formName": "Renew Driver License form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Renew Driver License",
+      "serviceSlug": "template-trans-renew-driver-license",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-RENEW-DRIVER-LICENSE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-ADD-LICENSE-CLASS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Add Driver License Class / Endorsement — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-FORM",
+          "formName": "Add Driver License Class / Endorsement form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-ADD-LICENSE-CLASS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Add Driver License Class / Endorsement",
+      "serviceSlug": "template-trans-add-license-class",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-ADD-LICENSE-CLASS-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Replace Lost/Damaged Driver License — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-FORM",
+          "formName": "Replace Lost/Damaged Driver License form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Replace Lost/Damaged Driver License",
+      "serviceSlug": "template-trans-replace-driver-license",
+      "serviceType": "REPLACEMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-REPLACE-DRIVER-LICENSE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Schedule Driver Test — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-FORM",
+          "formName": "Schedule Driver Test form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Schedule Driver Test",
+      "serviceSlug": "template-trans-schedule-driver-test",
+      "serviceType": "SCHEDULING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-SCHEDULE-DRIVER-TEST-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-REGISTER-VEHICLE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Register Vehicle — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-FORM",
+          "formName": "Register Vehicle form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-REGISTER-VEHICLE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-REGISTER-VEHICLE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Register Vehicle",
+      "serviceSlug": "template-trans-register-vehicle",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-REGISTER-VEHICLE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-RENEW-VEHICLE-REG-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Renew Vehicle Registration — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-FORM",
+          "formName": "Renew Vehicle Registration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-RENEW-VEHICLE-REG-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": true
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Renew Vehicle Registration",
+      "serviceSlug": "template-trans-renew-vehicle-registration",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-RENEW-VEHICLE-REG-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-TRANSFER-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-TRANSFER-VEHICLE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-TRANSFER-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Transfer Vehicle Ownership — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-FORM",
+          "formName": "Transfer Vehicle Ownership form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-TRANSFER-VEHICLE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Transfer Vehicle Ownership",
+      "serviceSlug": "template-trans-transfer-vehicle-ownership",
+      "serviceType": "TRANSFER",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-TRANSFER-VEHICLE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-TRANSFER-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "RESIDENT",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INSPECTION-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-SCHEDULE-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-INSPECTION-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Schedule Vehicle Inspection — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-FORM",
+          "formName": "Schedule Vehicle Inspection form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-SCHEDULE-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Schedule Vehicle Inspection",
+      "serviceSlug": "template-trans-schedule-vehicle-inspection",
+      "serviceType": "SCHEDULING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-SCHEDULE-INSPECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-INSPECTION-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Register Commercial Vehicle — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-FORM",
+          "formName": "Register Commercial Vehicle form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Register Commercial Vehicle",
+      "serviceSlug": "template-trans-register-commercial-vehicle",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-REGISTER-COMMERCIAL-VEHICLE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REGISTRATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-COMMERCIAL-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Apply for Commercial Transport Permit — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-FORM",
+          "formName": "Apply for Commercial Transport Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-COMMERCIAL-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Apply for Commercial Transport Permit",
+      "serviceSlug": "template-trans-commercial-transport-permit",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-COMMERCIAL-PERMIT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-REGISTER-OPERATOR-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Register Transport Operator — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-FORM",
+          "formName": "Register Transport Operator form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-REGISTER-OPERATOR-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-REGISTER-OPERATOR",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Register Transport Operator",
+      "serviceSlug": "template-trans-register-transport-operator",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-REGISTER-OPERATOR-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-MANAGE-FLEET-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-MANAGE-FLEET-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-MANAGE-FLEET-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-MANAGE-FLEET-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-MANAGE-FLEET-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Manage Fleet Registration — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-MANAGE-FLEET-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-MANAGE-FLEET-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-MANAGE-FLEET-FORM",
+          "formName": "Manage Fleet Registration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-MANAGE-FLEET-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-MANAGE-FLEET-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-MANAGE-FLEET-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-MANAGE-FLEET",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Manage Fleet Registration",
+      "serviceSlug": "template-trans-manage-fleet-registration",
+      "serviceType": "ADMINISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-MANAGE-FLEET-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-OPERATOR-LICENSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-REGISTRY-EXTRACT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Request Vehicle Registry Extract — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-FORM",
+          "formName": "Request Vehicle Registry Extract form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-REGISTRY-EXTRACT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Request Vehicle Registry Extract",
+      "serviceSlug": "template-trans-vehicle-registry-extract",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-REGISTRY-EXTRACT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "INDIVIDUAL",
+        "CITIZEN",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-TRANSPORT-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-TRANS-APPEAL-REMINDER",
+          "templateCode": "TEMPLATE-TRANS-APPEAL-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-TRANS-APPEAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-TRANS-APPEAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-TRANSPORT-APPEAL-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-TRANS-APPEAL-SCHEDULING",
+          "dependencyType": "INTEGRATION",
+          "description": "Uses ServiceAppointment when scheduling is configured"
+        }
+      ],
+      "description": "Appeal Transportation Decision — NON_PRODUCTION placeholder transportation service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-TRANS-APPEAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-TRANS-APPEAL-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-TRANS-APPEAL-FORM",
+          "formName": "Appeal Transportation Decision form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-TRANSPORT-LICENSE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-TRANS-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-TRANS-APPEAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Transportation appeal",
+          "routeCode": "TEMPLATE-TRANS-APPEAL-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-TRANS-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-TRANSPORTATION",
+      "serviceName": "Appeal Transportation Decision",
+      "serviceSlug": "template-trans-appeal-transportation-decision",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-TRANS-APPEAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Transportation review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-TRANSPORT-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

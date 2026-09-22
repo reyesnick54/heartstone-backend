@@ -7,6 +7,7 @@ import { PlanningConstructionModule } from '../../planning-construction/planning
 import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
+import { TransportationModule } from '../../transportation/transportation.module';
 import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
@@ -14,6 +15,7 @@ import { BusinessDevelopmentController } from './business-development.controller
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
+import { BusinessTransportationController } from './business-transportation.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
 import { BusinessAppointmentsService } from './services/business-appointments.service';
@@ -28,6 +30,7 @@ import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
 import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
+import { BusinessTransportationService } from './services/business-transportation.service';
 
 @Module({
   imports: [
@@ -37,6 +40,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     RevenueModule,
     PlanningConstructionModule,
     PropertyRegistryModule,
+    TransportationModule,
   ],
   controllers: [
     BusinessExperienceController,
@@ -45,6 +49,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessRevenueController,
     BusinessDevelopmentController,
     BusinessPropertyController,
+    BusinessTransportationController,
   ],
   providers: [
     SessionAuthGuard,
@@ -63,6 +68,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessCorporateRegistryService,
     BusinessRevenueService,
     BusinessPropertyService,
+    BusinessTransportationService,
   ],
 })
 export class BusinessExperienceModule {}
