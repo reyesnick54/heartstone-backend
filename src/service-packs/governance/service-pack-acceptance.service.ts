@@ -4,7 +4,6 @@ import {
   ServicePackGovernanceAuditEventType,
   ServicePackGovernanceLifecycleStatus,
   ServicePackManifestValidationStatus,
-  ServicePackReviewStatus,
   ServicePackVersionStatus,
 } from '@prisma/client';
 
