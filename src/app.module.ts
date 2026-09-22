@@ -27,6 +27,7 @@ import { ImmigrationModule } from './immigration/immigration.module';
 import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
+import { LabourModule } from './labour/labour.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
@@ -68,6 +69,7 @@ import { SystemModule } from './system/system.module';
     ExperienceModule,
     ApplicationProcessingModule,
     ImmigrationModule,
+    LabourModule,
     CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
