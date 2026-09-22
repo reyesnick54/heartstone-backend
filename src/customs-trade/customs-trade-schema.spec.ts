@@ -24,8 +24,7 @@ describe('Customs trade foundation schema', () => {
   }
 
   it('links broker authorization to RepresentativeAuthority', () => {
-    const block =
-      /model CustomsBrokerAuthorization \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    const block = /model CustomsBrokerAuthorization \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(block).toContain('representativeAuthorityId');
     expect(block).toContain('doesNotInferFromMembership');
   });
@@ -41,8 +40,7 @@ describe('Customs trade foundation schema', () => {
   });
 
   it('supports external commodity nomenclature without hard-coded tariff', () => {
-    const block =
-      /model CommodityClassificationReference \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
+    const block = /model CommodityClassificationReference \{[\s\S]*?\n\}/m.exec(schema)?.[0] ?? '';
     expect(block).toContain('nomenclatureSystemCode');
     expect(block).toContain('aiSuggestionDoesNotAuthorize');
     expect(schema).toContain('AI_SUGGESTION');

@@ -34,7 +34,9 @@ export class CustomsTradeBoundaryService {
   rejectClientForgedAssessmentFields(payload: Record<string, unknown>): void {
     for (const field of FORBIDDEN_CUSTOMS_ASSESSMENT_CLIENT_FIELDS) {
       if (field in payload && payload[field] !== undefined) {
-        throw new ForbiddenException(`${CUSTOMS_REASON_CODES.CLIENT_ASSESSMENT_FORBIDDEN}: ${field}`);
+        throw new ForbiddenException(
+          `${CUSTOMS_REASON_CODES.CLIENT_ASSESSMENT_FORBIDDEN}: ${field}`,
+        );
       }
     }
   }
@@ -89,7 +91,10 @@ export class CustomsTradeBoundaryService {
     }
   }
 
-  assertRiskScoreIsNotViolation(riskScoreIsNotViolation: boolean, treatingAsViolation: boolean): void {
+  assertRiskScoreIsNotViolation(
+    riskScoreIsNotViolation: boolean,
+    treatingAsViolation: boolean,
+  ): void {
     if (treatingAsViolation && riskScoreIsNotViolation) {
       throw new BadRequestException(CUSTOMS_REASON_CODES.RISK_NOT_VIOLATION);
     }
@@ -108,10 +113,7 @@ export class CustomsTradeBoundaryService {
     kind: CustomsClassificationReferenceKind,
     isAuthoritative: boolean,
   ): void {
-    if (
-      kind === CustomsClassificationReferenceKind.AI_SUGGESTION &&
-      isAuthoritative
-    ) {
+    if (kind === CustomsClassificationReferenceKind.AI_SUGGESTION && isAuthoritative) {
       throw new ForbiddenException(CUSTOMS_REASON_CODES.AI_CANNOT_RELEASE);
     }
   }
@@ -146,7 +148,10 @@ export class CustomsTradeBoundaryService {
     }
   }
 
-  assertCrossCompanyAccessBlocked(requesterOrganizationId: string, ownerOrganizationId: string): void {
+  assertCrossCompanyAccessBlocked(
+    requesterOrganizationId: string,
+    ownerOrganizationId: string,
+  ): void {
     if (requesterOrganizationId !== ownerOrganizationId) {
       throw new ForbiddenException(CUSTOMS_REASON_CODES.CROSS_COMPANY_DENIED);
     }

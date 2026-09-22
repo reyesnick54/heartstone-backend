@@ -18,7 +18,12 @@ export class CustomsAssessmentService {
   async issueAssessment(input: {
     customsDeclarationId: string;
     issuedByOfficeholderId: string;
-    lines: { lineCode: string; description: string; amountCents: number; dutyTaxFeeKind?: string }[];
+    lines: {
+      lineCode: string;
+      description: string;
+      amountCents: number;
+      dutyTaxFeeKind?: string;
+    }[];
     riskScore?: number;
     taxAssessmentId?: string;
   }) {

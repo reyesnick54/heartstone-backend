@@ -31,82 +31,90 @@ describe('Customs trade must-fail gates', () => {
     });
 
     it('declaration submission does not release cargo', () => {
-      expect(() => { boundary.assertDeclarationSubmissionDoesNotReleaseCargo(false); }).toThrow(
-        BadRequestException,
-      );
+      expect(() => {
+        boundary.assertDeclarationSubmissionDoesNotReleaseCargo(false);
+      }).toThrow(BadRequestException);
     });
 
     it('payment does not itself release cargo', () => {
-      expect(() => { boundary.assertPaymentDoesNotReleaseCargo(CustomsActorPersona.PAYMENT_SYSTEM); },
-      ).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertPaymentDoesNotReleaseCargo(CustomsActorPersona.PAYMENT_SYSTEM);
+      }).toThrow(ForbiddenException);
     });
 
     it('client cannot forge customs assessment', () => {
-      expect(() => { boundary.rejectClientForgedAssessmentFields({ status: 'ISSUED' }); },
-      ).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.rejectClientForgedAssessmentFields({ status: 'ISSUED' });
+      }).toThrow(ForbiddenException);
     });
 
     it('declared value and assessed value remain distinct', () => {
-      expect(() => { boundary.assertDeclaredAndAssessedValuesDistinct(
+      expect(() => {
+        boundary.assertDeclaredAndAssessedValuesDistinct(
           { valuationKind: CustomsValuationKind.ASSESSED },
           { valuationKind: CustomsValuationKind.ASSESSED },
-        ); },
-      ).toThrow(BadRequestException);
+        );
+      }).toThrow(BadRequestException);
     });
 
     it('risk score does not become violation', () => {
-      expect(() => { boundary.assertRiskScoreIsNotViolation(true, true); }).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertRiskScoreIsNotViolation(true, true);
+      }).toThrow(BadRequestException);
     });
 
     it('AI cannot authorize release', () => {
-      expect(() => { boundary.assertAiCannotAuthorizeRelease(
+      expect(() => {
+        boundary.assertAiCannotAuthorizeRelease(
           'AUTHORIZE_RELEASE',
           CustomsActorPersona.AI_ASSISTANCE,
-        ); },
-      ).toThrow(ForbiddenException);
+        );
+      }).toThrow(ForbiddenException);
     });
 
     it('unresolved mandatory permit blocks release', () => {
-      expect(() => { boundary.assertMandatoryPermitsResolved([
+      expect(() => {
+        boundary.assertMandatoryPermitsResolved([
           {
             isMandatoryForRelease: true,
             blocksReleaseWhenUnresolved: true,
             status: CustomsPermitReferenceStatus.UNRESOLVED_MANDATORY,
           },
-        ]); },
-      ).toThrow(BadRequestException);
+        ]);
+      }).toThrow(BadRequestException);
     });
 
     it('hold cannot be removed by ordinary client update', () => {
-      expect(() => { boundary.rejectClientForgedHoldRemovalFields({ status: 'REMOVED' }); }).toThrow(
-        ForbiddenException,
-      );
+      expect(() => {
+        boundary.rejectClientForgedHoldRemovalFields({ status: 'REMOVED' });
+      }).toThrow(ForbiddenException);
     });
 
     it('technical admin cannot release shipment', () => {
-      expect(() => { boundary.assertTechnicalAdminCannotReleaseShipment(
-          CustomsActorPersona.TECHNICAL_ADMIN,
-        ); },
-      ).toThrow(ForbiddenException);
-      expect(() => { boundary.assertTechnicalAdminCannotReleaseShipment(
+      expect(() => {
+        boundary.assertTechnicalAdminCannotReleaseShipment(CustomsActorPersona.TECHNICAL_ADMIN);
+      }).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertTechnicalAdminCannotReleaseShipment(
           CustomsActorPersona.CUSTOMS_OFFICER,
           PLATFORM_ADMIN_CUSTOMS_ROLE_MARKER,
-        ); },
-      ).toThrow(ForbiddenException);
+        );
+      }).toThrow(ForbiddenException);
     });
 
     it('cross-company shipment access denied', () => {
-      expect(() => { boundary.assertCrossCompanyAccessBlocked('org-a', 'org-b'); }).toThrow(
-        ForbiddenException,
-      );
+      expect(() => {
+        boundary.assertCrossCompanyAccessBlocked('org-a', 'org-b');
+      }).toThrow(ForbiddenException);
     });
 
     it('AI classification suggestion is not authoritative', () => {
-      expect(() => { boundary.assertAiClassificationNotAuthoritative(
+      expect(() => {
+        boundary.assertAiClassificationNotAuthoritative(
           CustomsClassificationReferenceKind.AI_SUGGESTION,
           true,
-        ); },
-      ).toThrow(ForbiddenException);
+        );
+      }).toThrow(ForbiddenException);
     });
   });
 
@@ -161,9 +169,9 @@ describe('Customs trade must-fail gates', () => {
         ownerOrganizationId: 'org-owner',
       });
 
-      await expect(
-        access.assertShipmentOrganizationAccess('org-other', 'ship-1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(access.assertShipmentOrganizationAccess('org-other', 'ship-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -262,8 +270,9 @@ describe('Customs trade must-fail gates', () => {
     });
 
     it('payment does not itself release cargo', () => {
-      expect(() => { release.assertPaymentEventDoesNotRelease(CustomsActorPersona.PAYMENT_SYSTEM); },
-      ).toThrow(ForbiddenException);
+      expect(() => {
+        release.assertPaymentEventDoesNotRelease(CustomsActorPersona.PAYMENT_SYSTEM);
+      }).toThrow(ForbiddenException);
     });
   });
 
@@ -282,8 +291,9 @@ describe('Customs trade must-fail gates', () => {
     });
 
     it('client cannot forge customs assessment', () => {
-      expect(() => { assessment.rejectClientForgedAssessment({ assessmentReference: 'forged' }); },
-      ).toThrow(ForbiddenException);
+      expect(() => {
+        assessment.rejectClientForgedAssessment({ assessmentReference: 'forged' });
+      }).toThrow(ForbiddenException);
     });
   });
 
@@ -295,16 +305,19 @@ describe('Customs trade must-fail gates', () => {
         providers: [
           CustomsHoldService,
           CustomsTradeBoundaryService,
-          { provide: PrismaService, useValue: { customsHold: { create: jest.fn(), update: jest.fn() } } },
+          {
+            provide: PrismaService,
+            useValue: { customsHold: { create: jest.fn(), update: jest.fn() } },
+          },
         ],
       }).compile();
       holds = module.get(CustomsHoldService);
     });
 
     it('hold cannot be removed by ordinary client update', () => {
-      expect(() => { holds.rejectOrdinaryClientHoldUpdate({ removedAt: new Date().toISOString() }); }).toThrow(
-        ForbiddenException,
-      );
+      expect(() => {
+        holds.rejectOrdinaryClientHoldUpdate({ removedAt: new Date().toISOString() });
+      }).toThrow(ForbiddenException);
     });
   });
 });

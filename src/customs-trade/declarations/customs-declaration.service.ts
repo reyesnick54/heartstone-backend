@@ -66,7 +66,9 @@ export class CustomsDeclarationService {
       return { declaration, version };
     });
 
-    this.boundary.assertDeclarationSubmissionDoesNotReleaseCargo(result.declaration.doesNotReleaseCargo);
+    this.boundary.assertDeclarationSubmissionDoesNotReleaseCargo(
+      result.declaration.doesNotReleaseCargo,
+    );
 
     return {
       declaration: result.declaration,

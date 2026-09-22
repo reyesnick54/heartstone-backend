@@ -17,7 +17,9 @@ export class CustomsReleaseService {
     private readonly boundary: CustomsTradeBoundaryService,
   ) {}
 
-  async evaluateReleaseReadiness(shipmentReferenceId: string): Promise<{ mayRelease: boolean; reasons: string[] }> {
+  async evaluateReleaseReadiness(
+    shipmentReferenceId: string,
+  ): Promise<{ mayRelease: boolean; reasons: string[] }> {
     const reasons: string[] = [];
 
     const activeHolds = await this.prisma.customsHold.count({
