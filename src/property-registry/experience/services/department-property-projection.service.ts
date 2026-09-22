@@ -11,7 +11,10 @@ export class DepartmentPropertyProjectionService {
     private readonly boundary: PropertyExperienceBoundaryService,
   ) {}
 
-  async buildDepartmentPropertyDashboard(actor: ActorContext, departmentId: string): Promise<{
+  async buildDepartmentPropertyDashboard(
+    actor: ActorContext,
+    departmentId: string,
+  ): Promise<{
     generatedAt: string;
     ruleEnvironment: string;
     disclaimer: string;

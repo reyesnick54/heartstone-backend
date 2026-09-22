@@ -20,9 +20,12 @@ describe('Land & Property Registry service pack', () => {
     expect(PROPERTY_LAND_REGISTRY_TEMPLATE.description).toMatch(/NON_PRODUCTION/);
   });
 
-  it.each(PROPERTY_LAND_REGISTRY_SERVICES)('marks service $serviceCode as NON_PRODUCTION', (service) => {
-    expect(service.description).toMatch(/NON_PRODUCTION/);
-  });
+  it.each(PROPERTY_LAND_REGISTRY_SERVICES)(
+    'marks service $serviceCode as NON_PRODUCTION',
+    (service) => {
+      expect(service.description).toMatch(/NON_PRODUCTION/);
+    },
+  );
 
   it('formats deterministically for template export', () => {
     const first = formatServicePackManifest(PROPERTY_LAND_REGISTRY_TEMPLATE);

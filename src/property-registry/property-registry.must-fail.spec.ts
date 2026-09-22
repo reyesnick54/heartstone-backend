@@ -29,21 +29,27 @@ describe('Property registry must-fail gates', () => {
     });
 
     it('blocks transfer application title mutation flag', () => {
-      expect(() => { boundary.assertApplicationCannotMutateTitle(true); }).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertApplicationCannotMutateTitle(true);
+      }).toThrow(ForbiddenException);
     });
 
     it('requires transfer decision before registry change', () => {
-      expect(() => { boundary.assertTransferDecisionRequired(false); }).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertTransferDecisionRequired(false);
+      }).toThrow(ForbiddenException);
     });
 
     it('blocks survey submission that alters parcel geometry', () => {
-      expect(() => { boundary.assertSurveyDoesNotAlterParcel(true); }).toThrow(BadRequestException);
+      expect(() => {
+        boundary.assertSurveyDoesNotAlterParcel(true);
+      }).toThrow(BadRequestException);
     });
 
     it('blocks platform admin title mutation', () => {
-      expect(() => { boundary.assertPlatformAdminCannotAlterTitle('PLATFORM_ADMIN'); }).toThrow(
-        ForbiddenException,
-      );
+      expect(() => {
+        boundary.assertPlatformAdminCannotAlterTitle('PLATFORM_ADMIN');
+      }).toThrow(ForbiddenException);
     });
 
     it('minimizes public verification payload', () => {
@@ -136,7 +142,10 @@ describe('Property registry must-fail gates', () => {
     });
 
     it('creates transfer application without mutating title', async () => {
-      prisma.propertyRegistryApplication.create.mockResolvedValue({ id: 'app-1', mayMutateTitle: false });
+      prisma.propertyRegistryApplication.create.mockResolvedValue({
+        id: 'app-1',
+        mayMutateTitle: false,
+      });
       const created = await transfers.submitTransferApplication({
         parcelId: 'parcel-1',
         applicantIdentityId: 'citizen-1',
@@ -165,7 +174,9 @@ describe('Property registry must-fail gates', () => {
 
   describe('PropertySurveyService', () => {
     const prisma = {
-      propertyParcel: { findUniqueOrThrow: jest.fn().mockResolvedValue({ id: 'p1', registryVersion: 2 }) },
+      propertyParcel: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue({ id: 'p1', registryVersion: 2 }),
+      },
       propertyRegistryApplication: { create: jest.fn().mockResolvedValue({ id: 'app-sv' }) },
       propertySurveySubmission: {
         create: jest.fn().mockResolvedValue({ altersParcelGeometry: false }),
@@ -213,9 +224,15 @@ describe('Property registry must-fail gates', () => {
   describe('PropertyCertificateService', () => {
     it('issued certificate references registry version', async () => {
       const prisma = {
-        propertyParcel: { findUniqueOrThrow: jest.fn().mockResolvedValue({ id: 'p1', registryVersion: 4, parcelReference: 'PR-1' }) },
+        propertyParcel: {
+          findUniqueOrThrow: jest
+            .fn()
+            .mockResolvedValue({ id: 'p1', registryVersion: 4, parcelReference: 'PR-1' }),
+        },
         propertyRegistryCertificate: {
-          create: jest.fn().mockImplementation(({ data }: { data: { registryVersionNumber: number } }) => data),
+          create: jest
+            .fn()
+            .mockImplementation(({ data }: { data: { registryVersionNumber: number } }) => data),
         },
       };
       const module = await Test.createTestingModule({

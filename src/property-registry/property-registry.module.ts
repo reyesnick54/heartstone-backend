@@ -12,7 +12,6 @@ import { CitizenPropertyController } from './experience/citizen-property.control
 import { DepartmentPropertyController } from './experience/department-property.controller';
 import { OfficialPropertyController } from './experience/official-property.controller';
 import { PropertyExperienceBoundaryService } from './experience/property-experience-boundary.service';
-import { BusinessPropertyProjectionService } from './experience/services/business-property-projection.service';
 import { CitizenPropertyProjectionService } from './experience/services/citizen-property-projection.service';
 import { DepartmentPropertyProjectionService } from './experience/services/department-property-projection.service';
 import { OfficialPropertyProjectionService } from './experience/services/official-property-projection.service';
@@ -38,7 +37,6 @@ import { PropertyRegistryOfficialWorkspaceService } from './workspace/property-r
     PropertyExperienceBoundaryService,
     PropertyScopeService,
     CitizenPropertyProjectionService,
-    BusinessPropertyProjectionService,
     OfficialPropertyProjectionService,
     DepartmentPropertyProjectionService,
     PropertyTransferService,
@@ -55,7 +53,6 @@ import { PropertyRegistryOfficialWorkspaceService } from './workspace/property-r
     PropertyExperienceBoundaryService,
     PropertyScopeService,
     CitizenPropertyProjectionService,
-    BusinessPropertyProjectionService,
     OfficialPropertyProjectionService,
     DepartmentPropertyProjectionService,
     PropertyTransferService,

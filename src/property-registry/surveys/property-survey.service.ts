@@ -15,10 +15,7 @@ export class PropertySurveyService {
     private readonly boundary: PropertyRegistryBoundaryService,
   ) {}
 
-  async submitSurveyPlan(input: {
-    parcelId: string;
-    applicantIdentityId: string;
-  }) {
+  async submitSurveyPlan(input: { parcelId: string; applicantIdentityId: string }) {
     const parcel = await this.prisma.propertyParcel.findUniqueOrThrow({
       where: { id: input.parcelId },
     });

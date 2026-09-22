@@ -24,10 +24,17 @@ import { BusinessOrganizationDetailService } from './services/business-organizat
 import { BusinessOrganizationsService } from './services/business-organizations.service';
 import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
+import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
 
 @Module({
-  imports: [SessionsModule, SchedulingModule, CorporateRegistryModule, RevenueModule, PropertyRegistryModule],
+  imports: [
+    SessionsModule,
+    SchedulingModule,
+    CorporateRegistryModule,
+    RevenueModule,
+    PropertyRegistryModule,
+  ],
   controllers: [
     BusinessExperienceController,
     BusinessAppointmentsController,
@@ -51,6 +58,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessAppointmentsService,
     BusinessCorporateRegistryService,
     BusinessRevenueService,
+    BusinessPropertyService,
   ],
 })
 export class BusinessExperienceModule {}

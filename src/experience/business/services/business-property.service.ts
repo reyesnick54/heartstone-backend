@@ -7,12 +7,12 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
-import { BusinessAccessService } from '../../../experience/common/business-access.service';
-import { PropertyExperienceBoundaryService } from '../property-experience-boundary.service';
-import { PropertyScopeService } from './property-scope.service';
+import { PropertyExperienceBoundaryService } from '../../../property-registry/experience/property-experience-boundary.service';
+import { PropertyScopeService } from '../../../property-registry/experience/services/property-scope.service';
+import { BusinessAccessService } from '../../common/business-access.service';
 
 @Injectable()
-export class BusinessPropertyProjectionService {
+export class BusinessPropertyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly access: BusinessAccessService,
@@ -22,8 +22,7 @@ export class BusinessPropertyProjectionService {
 
   private async requireOrganizationParcels(identityId: string, organizationId: string) {
     await this.access.assertOrganizationAccess(organizationId, identityId);
-    const parcelIds = await this.scope.listOrganizationParcelIds(organizationId);
-    return parcelIds;
+    return this.scope.listOrganizationParcelIds(organizationId);
   }
 
   async getHome(identityId: string, organizationId: string) {

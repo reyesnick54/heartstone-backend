@@ -4,17 +4,19 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { BusinessPropertyProjectionService } from '../../property-registry/experience/services/business-property-projection.service';
+import { BusinessPropertyService } from './services/business-property.service';
 
 @ApiTags('business-experience')
 @Controller('experience/business/organizations/:organizationId/property')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
 export class BusinessPropertyController {
-  constructor(private readonly propertyService: BusinessPropertyProjectionService) {}
+  constructor(private readonly propertyService: BusinessPropertyService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Business property registry home for authorized organization interests' })
+  @ApiOperation({
+    summary: 'Business property registry home for authorized organization interests',
+  })
   getHome(
     @CurrentSession() session: SessionContextDto,
     @Param('organizationId', ParseUUIDPipe) organizationId: string,

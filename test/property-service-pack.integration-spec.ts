@@ -50,7 +50,12 @@ describe('Land & Property Registry service pack and experience (integration)', (
     });
 
     const jurisdiction = await prisma.jurisdiction.create({
-      data: { code: 'JUR-PROP', name: 'Property Test Jurisdiction', type: 'NATIONAL', status: 'ACTIVE' },
+      data: {
+        code: 'JUR-PROP',
+        name: 'Property Test Jurisdiction',
+        type: 'NATIONAL',
+        status: 'ACTIVE',
+      },
     });
 
     const parcel = await prisma.propertyParcel.create({
@@ -104,7 +109,12 @@ describe('Land & Property Registry service pack and experience (integration)', (
     });
 
     const jurisdiction = await prisma.jurisdiction.create({
-      data: { code: 'JUR-PROP-TR', name: 'Property Transfer Jurisdiction', type: 'NATIONAL', status: 'ACTIVE' },
+      data: {
+        code: 'JUR-PROP-TR',
+        name: 'Property Transfer Jurisdiction',
+        type: 'NATIONAL',
+        status: 'ACTIVE',
+      },
     });
 
     const parcel = await prisma.propertyParcel.create({
@@ -141,8 +151,12 @@ describe('Land & Property Registry service pack and experience (integration)', (
       decidedByIdentityId: officer.identityId,
     });
 
-    const historyCount = await prisma.propertyOwnershipHistory.count({ where: { parcelId: parcel.id } });
-    const updatedParcel = await prisma.propertyParcel.findUniqueOrThrow({ where: { id: parcel.id } });
+    const historyCount = await prisma.propertyOwnershipHistory.count({
+      where: { parcelId: parcel.id },
+    });
+    const updatedParcel = await prisma.propertyParcel.findUniqueOrThrow({
+      where: { id: parcel.id },
+    });
     expect(historyCount).toBeGreaterThan(0);
     expect(updatedParcel.registryVersion).toBe(2);
   });

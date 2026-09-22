@@ -6,7 +6,10 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { PROPERTY_OFFICIAL_ACTION_CODES, PROPERTY_REGISTRY_BOUNDARY_DISCLAIMER } from '../property-registry.constants';
+import {
+  PROPERTY_OFFICIAL_ACTION_CODES,
+  PROPERTY_REGISTRY_BOUNDARY_DISCLAIMER,
+} from '../property-registry.constants';
 
 @Injectable()
 export class PropertyRegistryOfficialWorkspaceService {

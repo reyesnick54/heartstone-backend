@@ -12,10 +12,7 @@ export class PropertyCertificateService {
     private readonly boundary: PropertyRegistryBoundaryService,
   ) {}
 
-  async issueCertificate(input: {
-    parcelId: string;
-    issuedByIdentityId: string;
-  }) {
+  async issueCertificate(input: { parcelId: string; issuedByIdentityId: string }) {
     const parcel = await this.prisma.propertyParcel.findUniqueOrThrow({
       where: { id: input.parcelId },
     });

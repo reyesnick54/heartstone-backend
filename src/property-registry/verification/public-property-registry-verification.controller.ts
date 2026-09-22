@@ -11,7 +11,9 @@ export class PublicPropertyRegistryVerificationController {
 
   @Public()
   @Get('verify/:reference')
-  @ApiOperation({ summary: 'Controlled public property registry lookup when enabled by jurisdiction' })
+  @ApiOperation({
+    summary: 'Controlled public property registry lookup when enabled by jurisdiction',
+  })
   @ApiOkResponse({ description: 'Minimal public verification facts' })
   verify(@Param('reference') reference: string) {
     return this.verificationService.verify(reference);
