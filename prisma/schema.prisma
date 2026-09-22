@@ -104,6 +104,8 @@ model Jurisdiction {
   civilIdentityRecords           CivilIdentityRecord[]
   vitalEvents                    VitalEvent[]
   civilRegistryEntries           CivilRegistryEntry[]
+  propertyRegistryConfiguration  PropertyRegistryConfiguration?
+  propertyParcels                PropertyParcel[]
   employerRegistryRecords        EmployerRegistryRecord[]
   workerProfileReferences        WorkerProfileReference[]
   occupationClassificationReferences OccupationClassificationReference[]
@@ -789,6 +791,12 @@ model Identity {
   civilRegistryAuditEvents                 CivilRegistryAuditEvent[]              @relation("CivilRegistryAuditActor")
   civilRegistryVerificationsPerformed      CivilRegistryVerification[]            @relation("CivilRegistryVerifierIdentity")
   vitalEventRelationships                  CivilRecordRelationship[]              @relation("CivilRecordRelationshipIdentity")
+  propertyInterests                        PropertyInterest[]                     @relation("PropertyInterestIdentity")
+  propertyInterestEntitlements             PropertyInterestEntitlement[]          @relation("PropertyInterestEntitlementIdentity")
+  propertyRegistryApplicationsSubmitted    PropertyRegistryApplication[]          @relation("PropertyApplicationApplicant")
+  propertyTransferDecisions                PropertyTransferDecision[]             @relation("PropertyTransferDecider")
+  propertyRegistryCertificatesIssued       PropertyRegistryCertificate[]          @relation("PropertyCertificateIssuer")
+  propertyAccessAudits                     PropertyAccessAudit[]                  @relation("PropertyAccessAuditAccessor")
   labourWorkerProfiles                     WorkerProfileReference[]               @relation("LabourWorkerProfile")
   employmentRelationshipHistoryEvents      EmploymentRelationshipHistory[]        @relation("EmploymentRelationshipHistoryActor")
   workPermitStatusHistoryEvents            WorkPermitStatusHistory[]              @relation("WorkPermitStatusHistoryActor")
@@ -850,6 +858,7 @@ model Organization {
   immigrationSponsorships         ImmigrationSponsorship[]
   corporateRegistryProfile        CorporateRegistryProfile?
   taxpayerAccounts                TaxpayerAccount[]
+  propertyInterests               PropertyInterest[]                     @relation("PropertyInterestOrganization")
   employerRegistryRecords         EmployerRegistryRecord[]
   developmentProjects             DevelopmentProject[]
   vehicleOwnershipRecords         VehicleOwnershipRecord[]
@@ -17878,6 +17887,332 @@ model LabourExternalDependency {
   @@index([workerProfileReferenceId])
   @@index([externalAuthorityId])
   @@map("labour_external_dependencies")
+}
+
+// ─── Land & Property Registry Foundation ─────────────────────────────────────
+
+enum PropertyPublicVerificationMode {
+  DISABLED
+  MINIMAL_FACTS
+}
+
+enum PropertyParcelStatus {
+  DRAFT
+  REGISTERED
+  PENDING_SUBDIVISION
+  PENDING_CONSOLIDATION
+  SUPERSEDED
+  SEALED
+}
+
+enum PropertyInterestKind {
+  OWNER
+  LEASEHOLDER
+  MORTGAGEE
+  EASEMENT_HOLDER
+  OTHER
+}
+
+enum PropertyInterestStatus {
+  ACTIVE
+  PENDING
+  RELEASED
+  SUPERSEDED
+}
+
+enum PropertyRegistryApplicationType {
+  SEARCH
+  EXTRACT_REQUEST
+  TRANSFER
+  NEW_PARCEL
+  SUBDIVISION
+  CONSOLIDATION
+  ENCUMBRANCE
+  ENCUMBRANCE_RELEASE
+  EASEMENT
+  SURVEY
+  CORRECTION
+  ADDRESS_CHANGE
+  VALUATION
+  APPEAL
+}
+
+enum PropertyRegistryApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  PENDING_DECISION
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum PropertyTransferDecisionOutcome {
+  APPROVED
+  DENIED
+  DEFERRED
+}
+
+enum PropertyEncumbranceKind {
+  MORTGAGE
+  LIEN
+  EASEMENT
+  RESTRICTION
+  OTHER
+}
+
+enum PropertyEncumbranceStatus {
+  ACTIVE
+  RELEASED
+  SUPERSEDED
+}
+
+enum PropertySurveySubmissionStatus {
+  RECEIVED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum PropertyCertificateStatus {
+  DRAFT
+  PENDING_ISSUANCE
+  ISSUED
+  REVOKED
+}
+
+enum PropertyAccessActorKind {
+  OWNER
+  REPRESENTATIVE
+  REGISTRY_OFFICER
+  PLATFORM_ADMIN
+  AI_ASSISTANCE
+  PUBLIC
+}
+
+model PropertyRegistryConfiguration {
+  id                       String                         @id @default(uuid()) @db.Uuid
+  jurisdictionId           String                         @unique @db.Uuid
+  configurationKey         String                         @unique
+  ruleEnvironment          String                         @default("NON_PRODUCTION")
+  publicVerificationMode   PropertyPublicVerificationMode @default(DISABLED)
+  parcelIdentifierScheme   Json
+  jurisdictionBoundRules   Json
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+  jurisdiction             Jurisdiction                   @relation(fields: [jurisdictionId], references: [id])
+
+  @@map("property_registry_configurations")
+}
+
+model PropertyParcel {
+  id                           String                    @id @default(uuid()) @db.Uuid
+  jurisdictionId               String                    @db.Uuid
+  parcelReference              String                    @unique
+  internalParcelIdentifier     String?
+  registryVersion              Int                       @default(1)
+  status                       PropertyParcelStatus      @default(DRAFT)
+  administrativeAddressSummary String?
+  publicVerificationReference  String?                   @unique
+  sealedDataReference          String?
+  createdAt                    DateTime                  @default(now())
+  updatedAt                    DateTime                  @updatedAt
+  jurisdiction                 Jurisdiction              @relation(fields: [jurisdictionId], references: [id])
+  interests                    PropertyInterest[]
+  ownershipHistory             PropertyOwnershipHistory[]
+  applications                 PropertyRegistryApplication[]
+  encumbrances                 PropertyEncumbrance[]
+  encumbranceHistory           PropertyEncumbranceHistory[]
+  surveySubmissions            PropertySurveySubmission[]
+  certificates                 PropertyRegistryCertificate[]
+  entitlements                 PropertyInterestEntitlement[]
+
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("property_parcels")
+}
+
+model PropertyInterest {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  parcelId               String                 @db.Uuid
+  interestKind           PropertyInterestKind
+  status                 PropertyInterestStatus @default(PENDING)
+  identityId             String?                @db.Uuid
+  organizationId         String?                @db.Uuid
+  shareNumerator         Int?
+  shareDenominator       Int?
+  effectiveFrom          DateTime?
+  effectiveUntil         DateTime?
+  supersededByInterestId String?                @db.Uuid
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  parcel                 PropertyParcel         @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  identity               Identity?              @relation("PropertyInterestIdentity", fields: [identityId], references: [id])
+  organization           Organization?          @relation("PropertyInterestOrganization", fields: [organizationId], references: [id])
+  supersededBy           PropertyInterest?      @relation("PropertyInterestSupersession", fields: [supersededByInterestId], references: [id])
+  supersedes             PropertyInterest[]     @relation("PropertyInterestSupersession")
+  ownershipHistoryFrom   PropertyOwnershipHistory[] @relation("PropertyOwnershipFromInterest")
+  ownershipHistoryTo     PropertyOwnershipHistory[] @relation("PropertyOwnershipToInterest")
+
+  @@index([parcelId])
+  @@index([identityId])
+  @@index([organizationId])
+  @@index([status])
+  @@map("property_interests")
+}
+
+model PropertyOwnershipHistory {
+  id                String           @id @default(uuid()) @db.Uuid
+  parcelId          String           @db.Uuid
+  fromInterestId    String?          @db.Uuid
+  toInterestId      String?          @db.Uuid
+  eventSummary      String
+  registryVersion   Int
+  preserved         Boolean          @default(true)
+  recordedAt        DateTime         @default(now())
+  transferDecisionId String?         @db.Uuid
+  parcel            PropertyParcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  fromInterest      PropertyInterest? @relation("PropertyOwnershipFromInterest", fields: [fromInterestId], references: [id])
+  toInterest        PropertyInterest? @relation("PropertyOwnershipToInterest", fields: [toInterestId], references: [id])
+  transferDecision  PropertyTransferDecision? @relation(fields: [transferDecisionId], references: [id])
+
+  @@index([parcelId])
+  @@map("property_ownership_history")
+}
+
+model PropertyRegistryApplication {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  parcelId              String?                         @db.Uuid
+  applicationType       PropertyRegistryApplicationType
+  status                PropertyRegistryApplicationStatus @default(DRAFT)
+  applicantIdentityId   String                          @db.Uuid
+  organizationId        String?                         @db.Uuid
+  applicationReference  String                          @unique
+  mayMutateTitle        Boolean                         @default(false)
+  submittedAt           DateTime?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  parcel                PropertyParcel?                 @relation(fields: [parcelId], references: [id])
+  applicant             Identity                        @relation("PropertyApplicationApplicant", fields: [applicantIdentityId], references: [id])
+  transferDecision      PropertyTransferDecision?
+  surveySubmission      PropertySurveySubmission?
+
+  @@index([parcelId])
+  @@index([applicationType])
+  @@index([status])
+  @@index([applicantIdentityId])
+  @@map("property_registry_applications")
+}
+
+model PropertyTransferDecision {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  applicationId         String                          @unique @db.Uuid
+  outcome               PropertyTransferDecisionOutcome
+  decidedByIdentityId   String?                         @db.Uuid
+  decidedAt             DateTime                        @default(now())
+  rationale             String?
+  createdAt             DateTime                        @default(now())
+  application           PropertyRegistryApplication     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  decider               Identity?                       @relation("PropertyTransferDecider", fields: [decidedByIdentityId], references: [id])
+  ownershipHistory      PropertyOwnershipHistory[]
+
+  @@index([outcome])
+  @@map("property_transfer_decisions")
+}
+
+model PropertyEncumbrance {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  parcelId           String                  @db.Uuid
+  encumbranceKind    PropertyEncumbranceKind
+  status             PropertyEncumbranceStatus @default(ACTIVE)
+  holderSummary      String
+  disclosureLevel    String                  @default("AUTHORIZED")
+  registeredAt       DateTime                @default(now())
+  releasedAt         DateTime?
+  applicationId      String?                 @db.Uuid
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  parcel             PropertyParcel          @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId])
+  @@index([status])
+  @@map("property_encumbrances")
+}
+
+model PropertyEncumbranceHistory {
+  id              String           @id @default(uuid()) @db.Uuid
+  parcelId        String           @db.Uuid
+  encumbranceKind PropertyEncumbranceKind
+  eventSummary    String
+  preserved       Boolean          @default(true)
+  recordedAt      DateTime         @default(now())
+  parcel          PropertyParcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId])
+  @@map("property_encumbrance_history")
+}
+
+model PropertySurveySubmission {
+  id                         String                         @id @default(uuid()) @db.Uuid
+  parcelId                   String                         @db.Uuid
+  applicationId              String                         @unique @db.Uuid
+  status                     PropertySurveySubmissionStatus @default(RECEIVED)
+  altersParcelGeometry       Boolean                        @default(false)
+  registryVersionAtSubmission Int
+  submittedAt                DateTime                       @default(now())
+  parcel                     PropertyParcel                 @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  application                PropertyRegistryApplication    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId])
+  @@map("property_survey_submissions")
+}
+
+model PropertyRegistryCertificate {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  parcelId              String                  @db.Uuid
+  certificateReference  String                  @unique
+  status                PropertyCertificateStatus @default(DRAFT)
+  registryVersionNumber Int
+  issuedAt              DateTime?
+  issuedByIdentityId    String?                 @db.Uuid
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  parcel                PropertyParcel          @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  issuer                Identity?               @relation("PropertyCertificateIssuer", fields: [issuedByIdentityId], references: [id])
+
+  @@index([parcelId])
+  @@index([status])
+  @@map("property_registry_certificates")
+}
+
+model PropertyInterestEntitlement {
+  id              String         @id @default(uuid()) @db.Uuid
+  parcelId        String         @db.Uuid
+  identityId      String         @db.Uuid
+  entitlementKind PropertyInterestKind
+  createdAt       DateTime       @default(now())
+  parcel          PropertyParcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  identity        Identity       @relation("PropertyInterestEntitlementIdentity", fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([parcelId, identityId, entitlementKind])
+  @@index([identityId])
+  @@map("property_interest_entitlements")
+}
+
+model PropertyAccessAudit {
+  id                 String                @id @default(uuid()) @db.Uuid
+  accessorIdentityId String?               @db.Uuid
+  parcelId           String?               @db.Uuid
+  actorKind          PropertyAccessActorKind
+  endpoint           String
+  granted            Boolean
+  reasonCode         String?
+  recordedAt         DateTime              @default(now())
+  accessor           Identity?             @relation("PropertyAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([parcelId])
+  @@map("property_access_audits")
 }
 
 enum DevelopmentProjectStatus {
