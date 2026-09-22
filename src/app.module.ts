@@ -29,6 +29,7 @@ import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
+import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { PropertyRegistryModule } from './property-registry/property-registry.module';
 import { RecordsModule } from './records/records.module';
@@ -40,6 +41,7 @@ import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SystemModule } from './system/system.module';
+import { TransportationModule } from './transportation/transportation.module';
 
 @Module({
   imports: [
@@ -69,6 +71,7 @@ import { SystemModule } from './system/system.module';
     ExperienceModule,
     ApplicationProcessingModule,
     ImmigrationModule,
+    TransportationModule,
     CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
@@ -82,6 +85,7 @@ import { SystemModule } from './system/system.module';
     RedressModule,
     RevenueModule,
     PropertyRegistryModule,
+    PlanningConstructionModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,

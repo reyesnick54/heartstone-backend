@@ -3,12 +3,14 @@ import { Module } from '@nestjs/common';
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
 import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
+import { BusinessDevelopmentController } from './business-development.controller';
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
@@ -33,6 +35,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     SchedulingModule,
     CorporateRegistryModule,
     RevenueModule,
+    PlanningConstructionModule,
     PropertyRegistryModule,
   ],
   controllers: [
@@ -40,6 +43,7 @@ import { BusinessRevenueService } from './services/business-revenue.service';
     BusinessAppointmentsController,
     BusinessCorporateRegistryController,
     BusinessRevenueController,
+    BusinessDevelopmentController,
     BusinessPropertyController,
   ],
   providers: [
