@@ -1,0 +1,3097 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-LAND-REGISTRY",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Land & Property Registry family with jurisdiction-bound parcel identifiers, forms, evidence, surveyor and title verification dependencies, workflows, fees, tax/transfer hooks, decision functions, issuance, communications, SLAs, redress, and dashboard indicators.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-land-property-registry",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Land & Property Registry Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-SEARCH-ACK",
+          "templateCode": "TEMPLATE-PROP-SEARCH-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-SEARCH-IDENTITY",
+          "TEMPLATE-PROP-SEARCH-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-SEARCH-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-SEARCH-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Search Property Registry — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-SEARCH-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-SEARCH-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-SEARCH-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-SEARCH-FORM",
+          "formName": "Search Property Registry form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-SEARCH-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-SEARCH-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-SEARCH-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-SEARCH",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Search Property Registry",
+      "serviceSlug": "template-prop-search",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-SEARCH-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-EXTRACT-ACK",
+          "templateCode": "TEMPLATE-PROP-EXTRACT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-EXTRACT-IDENTITY",
+          "TEMPLATE-PROP-EXTRACT-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-EXTRACT-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-EXTRACT-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Request Title / Property Extract — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-EXTRACT-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-EXTRACT-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-EXTRACT-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-EXTRACT-FORM",
+          "formName": "Request Title / Property Extract form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-EXTRACT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-EXTRACT-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-EXTRACT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-EXTRACT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Request Title / Property Extract",
+      "serviceSlug": "template-prop-extract",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-EXTRACT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-TRANSFER-ACK",
+          "templateCode": "TEMPLATE-PROP-TRANSFER-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-TRANSFER-IDENTITY",
+          "TEMPLATE-PROP-TRANSFER-PARCEL-REF",
+          "TEMPLATE-PROP-TRANSFER-TITLE-CHAIN"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-TRANSFER-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-TRANSFER-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Register Property Transfer — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-TRANSFER-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-TRANSFER-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION title verification evidence",
+          "evidenceCode": "TEMPLATE-PROP-TRANSFER-TITLE-CHAIN",
+          "label": "Title chain evidence",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-TRANSFER-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-TRANSFER-FORM",
+          "formName": "Register Property Transfer form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-TRANSFER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-TRANSFER-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-TRANSFER-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-TRANSFER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Register Property Transfer",
+      "serviceSlug": "template-prop-transfer",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-TRANSFER-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "GOVERNMENT_ENTITY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-NEW-PARCEL-ACK",
+          "templateCode": "TEMPLATE-PROP-NEW-PARCEL-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-NEW-PARCEL-IDENTITY",
+          "TEMPLATE-PROP-NEW-PARCEL-PARCEL-REF",
+          "TEMPLATE-PROP-NEW-PARCEL-SURVEYOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-NEW-PARCEL-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-NEW-PARCEL-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Register New Parcel — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-NEW-PARCEL-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-NEW-PARCEL-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION surveyor professional dependency",
+          "evidenceCode": "TEMPLATE-PROP-NEW-PARCEL-SURVEYOR",
+          "label": "Licensed surveyor attestation",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-NEW-PARCEL-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-NEW-PARCEL-FORM",
+          "formName": "Register New Parcel form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-NEW-PARCEL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-NEW-PARCEL-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-NEW-PARCEL-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-NEW-PARCEL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Register New Parcel",
+      "serviceSlug": "template-prop-new-parcel",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-NEW-PARCEL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-SUBDIVISION-ACK",
+          "templateCode": "TEMPLATE-PROP-SUBDIVISION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-SUBDIVISION-IDENTITY",
+          "TEMPLATE-PROP-SUBDIVISION-PARCEL-REF",
+          "TEMPLATE-PROP-SUBDIVISION-SURVEYOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-SUBDIVISION-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-SUBDIVISION-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Parcel Subdivision Application — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-SUBDIVISION-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-SUBDIVISION-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION surveyor professional dependency",
+          "evidenceCode": "TEMPLATE-PROP-SUBDIVISION-SURVEYOR",
+          "label": "Licensed surveyor attestation",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-SUBDIVISION-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-SUBDIVISION-FORM",
+          "formName": "Parcel Subdivision Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-SUBDIVISION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-SUBDIVISION-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-SUBDIVISION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-SUBDIVISION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Parcel Subdivision Application",
+      "serviceSlug": "template-prop-subdivision",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-SUBDIVISION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-CONSOLIDATION-ACK",
+          "templateCode": "TEMPLATE-PROP-CONSOLIDATION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-CONSOLIDATION-IDENTITY",
+          "TEMPLATE-PROP-CONSOLIDATION-PARCEL-REF",
+          "TEMPLATE-PROP-CONSOLIDATION-SURVEYOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-CONSOLIDATION-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-CONSOLIDATION-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Parcel Consolidation Application — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-CONSOLIDATION-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-CONSOLIDATION-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION surveyor professional dependency",
+          "evidenceCode": "TEMPLATE-PROP-CONSOLIDATION-SURVEYOR",
+          "label": "Licensed surveyor attestation",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-CONSOLIDATION-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-CONSOLIDATION-FORM",
+          "formName": "Parcel Consolidation Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-CONSOLIDATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-CONSOLIDATION-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-CONSOLIDATION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-CONSOLIDATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Parcel Consolidation Application",
+      "serviceSlug": "template-prop-consolidation",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-CONSOLIDATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TRANSFER-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-ENCUMBRANCE-ACK",
+          "templateCode": "TEMPLATE-PROP-ENCUMBRANCE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-ENCUMBRANCE-IDENTITY",
+          "TEMPLATE-PROP-ENCUMBRANCE-PARCEL-REF",
+          "TEMPLATE-PROP-ENCUMBRANCE-TITLE-CHAIN"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-ENCUMBRANCE-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-ENCUMBRANCE-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Register Mortgage / Encumbrance — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-ENCUMBRANCE-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-ENCUMBRANCE-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION title verification evidence",
+          "evidenceCode": "TEMPLATE-PROP-ENCUMBRANCE-TITLE-CHAIN",
+          "label": "Title chain evidence",
+          "required": true,
+          "verificationCategory": "ISSUER"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-ENCUMBRANCE-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-ENCUMBRANCE-FORM",
+          "formName": "Register Mortgage / Encumbrance form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-ENCUMBRANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-ENCUMBRANCE-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-ENCUMBRANCE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-ENCUMBRANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Register Mortgage / Encumbrance",
+      "serviceSlug": "template-prop-encumbrance",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-ENCUMBRANCE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-ACK",
+          "templateCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-IDENTITY",
+          "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Release Encumbrance — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-FORM",
+          "formName": "Release Encumbrance form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Release Encumbrance",
+      "serviceSlug": "template-prop-encumbrance-release",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-ENCUMBRANCE-RELEASE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-EASEMENT-ACK",
+          "templateCode": "TEMPLATE-PROP-EASEMENT-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-EASEMENT-IDENTITY",
+          "TEMPLATE-PROP-EASEMENT-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-EASEMENT-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-EASEMENT-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Register Easement / Restriction — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-EASEMENT-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-EASEMENT-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-EASEMENT-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-EASEMENT-FORM",
+          "formName": "Register Easement / Restriction form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-EASEMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-EASEMENT-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-EASEMENT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-EASEMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Register Easement / Restriction",
+      "serviceSlug": "template-prop-easement",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-EASEMENT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-ENCUMBRANCE-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "PROFESSIONAL"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-SURVEY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-SURVEY-ACK",
+          "templateCode": "TEMPLATE-PROP-SURVEY-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-SURVEY-IDENTITY",
+          "TEMPLATE-PROP-SURVEY-PARCEL-REF",
+          "TEMPLATE-PROP-SURVEY-SURVEYOR"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-SURVEY-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-SURVEY-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-SURVEY-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Submit Survey Plan — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-SURVEY-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-SURVEY-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        },
+        {
+          "description": "NON_PRODUCTION surveyor professional dependency",
+          "evidenceCode": "TEMPLATE-PROP-SURVEY-SURVEYOR",
+          "label": "Licensed surveyor attestation",
+          "required": true,
+          "verificationCategory": "PROFESSIONAL"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-SURVEY-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-SURVEY-FORM",
+          "formName": "Submit Survey Plan form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-SURVEY-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-SURVEY-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-SURVEY-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-SURVEY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Submit Survey Plan",
+      "serviceSlug": "template-prop-survey",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-SURVEY-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-SURVEY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-CORRECTION-ACK",
+          "templateCode": "TEMPLATE-PROP-CORRECTION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-CORRECTION-IDENTITY",
+          "TEMPLATE-PROP-CORRECTION-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-CORRECTION-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-CORRECTION-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Property Record Correction — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-CORRECTION-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-CORRECTION-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-CORRECTION-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-CORRECTION-FORM",
+          "formName": "Property Record Correction form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-CORRECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-CORRECTION-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-CORRECTION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-CORRECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Property Record Correction",
+      "serviceSlug": "template-prop-correction",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-CORRECTION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-ADDRESS-CHANGE-ACK",
+          "templateCode": "TEMPLATE-PROP-ADDRESS-CHANGE-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-ADDRESS-CHANGE-IDENTITY",
+          "TEMPLATE-PROP-ADDRESS-CHANGE-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-ADDRESS-CHANGE-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-ADDRESS-CHANGE-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Change Property Address / Administrative Details — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-ADDRESS-CHANGE-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-ADDRESS-CHANGE-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-ADDRESS-CHANGE-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-ADDRESS-CHANGE-FORM",
+          "formName": "Change Property Address / Administrative Details form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-ADDRESS-CHANGE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-ADDRESS-CHANGE-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-ADDRESS-CHANGE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-ADDRESS-CHANGE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Change Property Address / Administrative Details",
+      "serviceSlug": "template-prop-address-change",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-ADDRESS-CHANGE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY",
+        "GOVERNMENT_ENTITY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-VALUATION-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-VALUATION-ACK",
+          "templateCode": "TEMPLATE-PROP-VALUATION-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-VALUATION-IDENTITY",
+          "TEMPLATE-PROP-VALUATION-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-VALUATION-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-VALUATION-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-VALUATION-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Request Property Valuation — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-VALUATION-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-VALUATION-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-VALUATION-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-VALUATION-FORM",
+          "formName": "Request Property Valuation form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-VALUATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-VALUATION-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-VALUATION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-VALUATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Request Property Valuation",
+      "serviceSlug": "template-prop-valuation",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-VALUATION-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VALUATION-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-PROPERTY-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official registry determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-PROP-APPEAL-ACK",
+          "templateCode": "TEMPLATE-PROP-APPEAL-ACK-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-PROP-APPEAL-IDENTITY",
+          "TEMPLATE-PROP-APPEAL-PARCEL-REF"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-PROP-APPEAL-QUEUE",
+          "label": "Registry queue depth",
+          "metricType": "COUNT"
+        },
+        {
+          "indicatorCode": "TEMPLATE-PROP-APPEAL-SLA-RISK",
+          "label": "SLA risk indicator",
+          "metricType": "COUNT",
+          "threshold": 5
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-PROPERTY-APPEAL-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-PROP-PARCEL-ID-SCHEME",
+          "dependencyType": "CONFIGURATION",
+          "description": "NON_PRODUCTION jurisdiction-bound parcel identifier scheme"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-SURVEYOR-LICENSE",
+          "dependencyType": "PROFESSIONAL",
+          "description": "NON_PRODUCTION licensed surveyor verification dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TITLE-VERIFICATION",
+          "dependencyType": "VERIFICATION",
+          "description": "NON_PRODUCTION title verification workflow dependency"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-EXTERNAL-REGISTRY",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional external land registry integration",
+          "externalIntegrationCode": "TEMPLATE-PROP-EXTERNAL-LAND-REGISTRY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-PROP-TAX-TRANSFER",
+          "dependencyType": "INTEGRATION",
+          "description": "NON_PRODUCTION revenue/tax transfer fee dependency hook",
+          "externalIntegrationCode": "TEMPLATE-REV-TAX-TRANSFER-FEE"
+        }
+      ],
+      "description": "Property Registry Appeal / Review — NON_PRODUCTION placeholder land & property registry service with jurisdiction-bound rules.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION identity evidence placeholder",
+          "evidenceCode": "TEMPLATE-PROP-APPEAL-IDENTITY",
+          "label": "Applicant identity evidence",
+          "required": true,
+          "verificationCategory": "INTEGRITY"
+        },
+        {
+          "description": "NON_PRODUCTION parcel identifier evidence",
+          "evidenceCode": "TEMPLATE-PROP-APPEAL-PARCEL-REF",
+          "label": "Parcel reference evidence",
+          "required": true,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-PROP-APPEAL-FEE",
+          "label": "Placeholder registry fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-PROP-APPEAL-FORM",
+          "formName": "Property Registry Appeal / Review form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "parcelReference",
+                  "fieldType": "TEXT",
+                  "label": "Parcel reference",
+                  "required": true
+                },
+                {
+                  "fieldKey": "applicantCategory",
+                  "fieldType": "SELECT",
+                  "label": "Applicant category",
+                  "required": true
+                }
+              ],
+              "label": "Parcel identifiers (placeholder)",
+              "sectionKey": "parcel"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-PROPERTY-CERTIFICATE-ISSUE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-PROP-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Registry notice or certificate placeholder",
+          "outputCode": "TEMPLATE-PROP-APPEAL-OUTPUT",
+          "outputType": "CERTIFICATE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION registry appeal route",
+          "label": "Property registry appeal / review",
+          "routeCode": "TEMPLATE-PROP-APPEAL-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-PROP-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-LAND-PROPERTY",
+      "serviceName": "Property Registry Appeal / Review",
+      "serviceSlug": "template-prop-appeal",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder registry SLA",
+          "ruleCode": "TEMPLATE-PROP-APPEAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "VERIFY",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-VERIFY",
+          "consequenceLevel": "ADMINISTRATIVE",
+          "displayOrder": 2,
+          "label": "Completeness review",
+          "stageKey": "completeness",
+          "stepType": "COMPLETENESS_REVIEW"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-TITLE-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "label": "Substantive registry review",
+          "stageKey": "substantive",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-PROPERTY-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 4,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

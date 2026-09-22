@@ -5,14 +5,18 @@ import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard'
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { LabourModule } from '../../labour/labour.module';
 import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
+import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
+import { TransportationModule } from '../../transportation/transportation.module';
 import { BusinessAccessService } from '../common/business-access.service';
 import { BusinessAppointmentsController } from './business-appointments.controller';
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessDevelopmentController } from './business-development.controller';
 import { BusinessExperienceController } from './business-experience.controller';
+import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
+import { BusinessTransportationController } from './business-transportation.controller';
 import { BusinessWorkforceController } from './business-workforce.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
@@ -26,7 +30,9 @@ import { BusinessOrganizationDetailService } from './services/business-organizat
 import { BusinessOrganizationsService } from './services/business-organizations.service';
 import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
+import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
+import { BusinessTransportationService } from './services/business-transportation.service';
 import { BusinessWorkforceService } from './services/business-workforce.service';
 
 @Module({
@@ -37,6 +43,8 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     RevenueModule,
     PlanningConstructionModule,
     LabourModule,
+    PropertyRegistryModule,
+    TransportationModule,
   ],
   controllers: [
     BusinessExperienceController,
@@ -45,6 +53,8 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessRevenueController,
     BusinessDevelopmentController,
     BusinessWorkforceController,
+    BusinessPropertyController,
+    BusinessTransportationController,
   ],
   providers: [
     SessionAuthGuard,
@@ -63,6 +73,8 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessCorporateRegistryService,
     BusinessRevenueService,
     BusinessWorkforceService,
+    BusinessPropertyService,
+    BusinessTransportationService,
   ],
 })
 export class BusinessExperienceModule {}
