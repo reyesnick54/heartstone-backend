@@ -5,6 +5,7 @@ import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
+import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { BusinessAccessService } from '../common/business-access.service';
@@ -12,6 +13,7 @@ import { BusinessAppointmentsController } from './business-appointments.controll
 import { BusinessCorporateRegistryController } from './business-corporate-registry.controller';
 import { BusinessDevelopmentController } from './business-development.controller';
 import { BusinessExperienceController } from './business-experience.controller';
+import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
 import { BusinessTradeController } from './business-trade.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
@@ -26,6 +28,7 @@ import { BusinessOrganizationDetailService } from './services/business-organizat
 import { BusinessOrganizationsService } from './services/business-organizations.service';
 import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
+import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
 import { BusinessTradeService } from './services/business-trade.service';
 
@@ -37,6 +40,7 @@ import { BusinessTradeService } from './services/business-trade.service';
     RevenueModule,
     CustomsTradeModule,
     PlanningConstructionModule,
+    PropertyRegistryModule,
   ],
   controllers: [
     BusinessExperienceController,
@@ -45,6 +49,7 @@ import { BusinessTradeService } from './services/business-trade.service';
     BusinessRevenueController,
     BusinessTradeController,
     BusinessDevelopmentController,
+    BusinessPropertyController,
   ],
   providers: [
     SessionAuthGuard,
@@ -63,6 +68,7 @@ import { BusinessTradeService } from './services/business-trade.service';
     BusinessCorporateRegistryService,
     BusinessRevenueService,
     BusinessTradeService,
+    BusinessPropertyService,
   ],
 })
 export class BusinessExperienceModule {}
