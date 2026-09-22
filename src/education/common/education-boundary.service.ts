@@ -2,36 +2,47 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { EducationActorPersona } from '@prisma/client';
 
 import {
+  type EducationGuardianAccessScope,
   FORBIDDEN_AI_EDUCATION_ACTIONS,
-  GUARDIAN_ALLOWED_SCOPE_KEYS,
-  type GuardianAuthorizedScope,
+  FORBIDDEN_INSTITUTION_SELF_ACCREDITATION_ACTIONS,
 } from '../education.constants';
 
 @Injectable()
 export class EducationBoundaryService {
-  assertCrossStudentAccessBlocked(requesterIdentityId: string, subjectIdentityId: string): void {
-    if (requesterIdentityId !== subjectIdentityId) {
-      throw new ForbiddenException('Cross-student education record access is not permitted');
-    }
-  }
-
-  assertGuardianScope(
-    scope: GuardianAuthorizedScope,
-    requiredKey: (typeof GUARDIAN_ALLOWED_SCOPE_KEYS)[number],
-  ): void {
-    if (!scope[requiredKey]) {
-      throw new ForbiddenException(`Guardian relationship lacks authorized scope: ${requiredKey}`);
-    }
-  }
-
-  assertEnrollmentApplicationDoesNotGrantEnrollment(input: {
-    doesNotGrantEnrollment: boolean;
+  assertApplicationDoesNotCreateEnrollment(input: {
+    doesNotCreateEnrollment: boolean;
     enrollmentsCreated: number;
   }): void {
-    if (!input.doesNotGrantEnrollment || input.enrollmentsCreated > 0) {
+    if (input.enrollmentsCreated > 0) {
       throw new BadRequestException(
-        'Enrollment application submission must not create an active enrollment',
+        'Linking an education application profile cannot create official enrollment',
       );
+    }
+    if (!input.doesNotCreateEnrollment && input.enrollmentsCreated > 0) {
+      throw new BadRequestException('Application submission must remain distinct from enrollment');
+    }
+  }
+
+  assertRegistrationDoesNotCreateAccreditation(input: {
+    registrationDoesNotAccredit: boolean;
+    accreditationsCreated: number;
+  }): void {
+    if (input.accreditationsCreated > 0) {
+      throw new BadRequestException(
+        'Institution registration must not create government accreditation',
+      );
+    }
+    if (!input.registrationDoesNotAccredit && input.accreditationsCreated > 0) {
+      throw new BadRequestException('Registration and accreditation remain separate lifecycles');
+    }
+  }
+
+  assertInstitutionCannotSelfAccredit(actorPersona: EducationActorPersona, action: string): void {
+    if (
+      actorPersona === EducationActorPersona.INSTITUTION_ADMIN &&
+      FORBIDDEN_INSTITUTION_SELF_ACCREDITATION_ACTIONS.includes(action as never)
+    ) {
+      throw new ForbiddenException(`Institution cannot self-declare accreditation: ${action}`);
     }
   }
 
@@ -39,40 +50,26 @@ export class EducationBoundaryService {
     doesNotCreateAward: boolean;
     awardsCreated: number;
   }): void {
-    if (!input.doesNotCreateAward || input.awardsCreated > 0) {
+    if (input.awardsCreated > 0) {
       throw new BadRequestException(
-        'Scholarship application submission must not create a scholarship award',
+        'Scholarship application profiles must not create scholarship awards',
       );
     }
-  }
-
-  assertRecommendationIsNotAward(recommendationOnly: boolean, awardStatus: string): void {
-    if (recommendationOnly && awardStatus === 'AWARDED') {
-      throw new BadRequestException('Scholarship recommendation must not be treated as an award');
+    if (!input.doesNotCreateAward && input.awardsCreated > 0) {
+      throw new BadRequestException('Scholarship application remains distinct from award decision');
     }
   }
 
-  assertScholarshipAwardRequiresDecisionWorkflow(input: {
-    requiresDecisionWorkflow: boolean;
-    governmentDecisionId?: string | null;
-  }): void {
-    if (input.requiresDecisionWorkflow && !input.governmentDecisionId) {
-      throw new BadRequestException(
-        'Scholarship award requires a configured decision workflow and government decision reference',
-      );
+  assertPaymentDoesNotCreateAdmission(actorPersona: EducationActorPersona): void {
+    if (actorPersona === EducationActorPersona.PAYMENT_SYSTEM) {
+      throw new ForbiddenException('Payment receipt does not create admission or enrollment');
     }
   }
 
-  assertInstitutionCannotSelfAccredit(
-    accreditingOrganizationId: string,
-    subjectOrganizationId: string,
+  assertAiCannotApproveEducationDecision(
+    actorPersona: EducationActorPersona,
+    action: string,
   ): void {
-    if (accreditingOrganizationId === subjectOrganizationId) {
-      throw new ForbiddenException('Education institutions cannot self-accredit');
-    }
-  }
-
-  assertAiCannotGrantEducationAuthority(actorPersona: EducationActorPersona, action: string): void {
     if (
       actorPersona === EducationActorPersona.AI_ASSISTANCE &&
       FORBIDDEN_AI_EDUCATION_ACTIONS.includes(action as never)
@@ -81,35 +78,72 @@ export class EducationBoundaryService {
     }
   }
 
-  assertPlatformAdminCannotCreateEducationalLegalStatus(actorPersona: EducationActorPersona): void {
-    if (actorPersona === EducationActorPersona.PLATFORM_ADMINISTRATOR) {
-      throw new ForbiddenException(
-        'Platform administrators cannot create educational legal status or accreditation',
-      );
-    }
-  }
-
-  assertTechnicalAdminCannotGrantAccreditation(actorPersona: EducationActorPersona): void {
+  assertTechnicalAdminCannotIssueAcademicCredential(actorPersona: EducationActorPersona): void {
     if (actorPersona === EducationActorPersona.TECHNICAL_ADMIN) {
       throw new ForbiddenException(
-        'Technical administration cannot grant accreditation or institution licensure',
+        'Technical administration cannot issue or alter authoritative academic credentials',
       );
     }
   }
 
-  assertOfficialWithoutAuthorityCannotGrantAccreditation(hasAuthority: boolean): void {
-    if (!hasAuthority) {
-      throw new ForbiddenException(
-        'Accreditation requires configured official authority; access alone is insufficient',
-      );
-    }
-  }
-
-  assertCorrectionPreservesHistory(historyRowsAppended: number): void {
-    if (historyRowsAppended < 1) {
+  assertNoDestructiveTranscriptOverwrite(
+    existingVersionCount: number,
+    destructiveOverwriteRequested: boolean,
+  ): void {
+    if (destructiveOverwriteRequested && existingVersionCount > 0) {
       throw new BadRequestException(
-        'Education record corrections must append history rather than overwrite prior facts',
+        'Transcript corrections must preserve prior versions; destructive overwrite is forbidden',
       );
     }
+  }
+
+  assertCrossStudentAccessBlocked(requesterIdentityId: string, studentIdentityId: string): void {
+    if (requesterIdentityId !== studentIdentityId) {
+      throw new ForbiddenException('Cross-student education record access is not permitted');
+    }
+  }
+
+  assertGuardianScope(
+    scope: EducationGuardianAccessScope,
+    requested: keyof EducationGuardianAccessScope,
+  ): void {
+    if (!scope[requested]) {
+      throw new ForbiddenException(`Guardian education access denied for scope: ${requested}`);
+    }
+  }
+
+  rejectClientForgedCredentialFields(payload: Record<string, unknown>): void {
+    const forbidden = [
+      'lifecycleStatus',
+      'governmentDecisionId',
+      'officialInstrumentId',
+      'verificationStatus',
+    ];
+    for (const field of forbidden) {
+      if (field in payload && payload[field] !== undefined) {
+        throw new ForbiddenException(`Client may not set authoritative education field "${field}"`);
+      }
+    }
+  }
+
+  sanitizePublicVerificationPayload(payload: Record<string, unknown>): Record<string, unknown> {
+    const forbidden = [
+      'grades',
+      'transcript',
+      'transcriptContent',
+      'gpa',
+      'assessmentResults',
+      'disciplinaryRecords',
+      'guardianIdentityId',
+      'studentIdentityId',
+      'fullAcademicRecord',
+    ];
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (!forbidden.includes(key)) {
+        sanitized[key] = value;
+      }
+    }
+    return sanitized;
   }
 }

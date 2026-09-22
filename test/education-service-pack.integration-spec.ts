@@ -1,11 +1,18 @@
 import { type INestApplication } from '@nestjs/common';
-import { EducationGuardianRelationshipStatus, OrganizationStatus } from '@prisma/client';
+import {
+  EducationInstitutionKind,
+  EnrollmentRecordStatus,
+  GuardianEducationRelationshipKind,
+  GuardianEducationRelationshipStatus,
+  OrganizationStatus,
+} from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { PrismaService } from '../src/database/prisma.service';
-import { EducationInstitutionRegistryService } from '../src/education/profiles/education-institution-registry.service';
-import { EducationStudentProfileService } from '../src/education/profiles/education-student-profile.service';
+import { STUDENT_EDUCATION_PROFILE_PREFIX } from '../src/education/education.constants';
+import { EducationInstitutionService } from '../src/education/institutions/education-institution.service';
+import { StudentEducationProfileService } from '../src/education/students/student-education-profile.service';
 import { EDUCATION_SERVICE_PACK_TEMPLATE } from '../src/service-catalog/service-packs/education-service-pack.template';
 import { validateServicePackManifest } from '../src/service-catalog/service-packs/validate-service-pack';
 import { provisionAuthenticatedIdentity } from './helpers/identity-provisioning.fixture';
@@ -44,9 +51,9 @@ describe('Education service pack and experience (integration)', () => {
       data: { code: 'JUR-EDU-TEST', name: 'Education Test', type: 'NATIONAL', status: 'ACTIVE' },
     });
 
-    const profiles = app.get(EducationStudentProfileService);
-    const studentProfile = await profiles.ensureStudentProfile({
-      subjectIdentityId: student.identityId,
+    const profiles = app.get(StudentEducationProfileService);
+    const { profile: studentProfile } = await profiles.createStudentEducationProfile({
+      studentIdentityId: student.identityId,
       jurisdictionId: jurisdiction.id,
     });
 
@@ -59,7 +66,9 @@ describe('Education service pack and experience (integration)', () => {
 
     expect(home.ruleEnvironment).toBe('NON_PRODUCTION');
     expect(home.accessibleStudentProfiles).toBeGreaterThanOrEqual(1);
-    expect(studentProfile.profileNumber).toMatch(/^EDU-STU-/);
+    expect(studentProfile.profileReferenceNumber).toMatch(
+      new RegExp(`^${STUDENT_EDUCATION_PROFILE_PREFIX}-`),
+    );
   });
 
   it('denies student access to another student profile via guardian scope without active relationship', async () => {
@@ -81,9 +90,9 @@ describe('Education service pack and experience (integration)', () => {
       },
     });
 
-    const profiles = app.get(EducationStudentProfileService);
-    await profiles.ensureStudentProfile({
-      subjectIdentityId: studentB.identityId,
+    const profiles = app.get(StudentEducationProfileService);
+    await profiles.createStudentEducationProfile({
+      studentIdentityId: studentB.identityId,
       jurisdictionId: jurisdiction.id,
     });
 
@@ -113,28 +122,35 @@ describe('Education service pack and experience (integration)', () => {
       data: { code: 'ORG-SCHOOL-1', name: 'Test School', status: OrganizationStatus.ACTIVE },
     });
 
-    const studentProfiles = app.get(EducationStudentProfileService);
-    const studentProfile = await studentProfiles.ensureStudentProfile({
-      subjectIdentityId: student.identityId,
+    const institutions = app.get(EducationInstitutionService);
+    const { institution } = await institutions.registerInstitution({
+      organizationId: organization.id,
+      jurisdictionId: jurisdiction.id,
+      institutionKind: EducationInstitutionKind.PUBLIC_INSTITUTION,
+    });
+
+    const studentProfiles = app.get(StudentEducationProfileService);
+    const { profile: studentProfile } = await studentProfiles.createStudentEducationProfile({
+      studentIdentityId: student.identityId,
       jurisdictionId: jurisdiction.id,
     });
 
-    await prisma.educationGuardianRelationship.create({
+    await prisma.guardianEducationRelationship.create({
       data: {
         guardianIdentityId: guardian.identityId,
-        studentProfileId: studentProfile.id,
-        relationshipType: 'CHILD',
-        status: EducationGuardianRelationshipStatus.ACTIVE,
-        authorizedScope: { viewDependentEnrollments: true },
+        studentEducationProfileId: studentProfile.id,
+        relationshipKind: GuardianEducationRelationshipKind.PARENT,
+        status: GuardianEducationRelationshipStatus.ACTIVE,
+        authorizedAccessScopes: { viewEnrollmentSummary: true },
       },
     });
 
-    await prisma.educationEnrollmentRecord.create({
+    await prisma.enrollmentRecord.create({
       data: {
         enrollmentReference: 'ENR-TEST-1',
-        studentProfileId: studentProfile.id,
-        institutionOrganizationId: organization.id,
-        status: 'ACTIVE',
+        studentEducationProfileId: studentProfile.id,
+        educationInstitutionId: institution.id,
+        status: EnrollmentRecordStatus.ACTIVE,
       },
     });
 
@@ -168,8 +184,11 @@ describe('Education service pack and experience (integration)', () => {
       },
     });
 
-    const registry = app.get(EducationInstitutionRegistryService);
-    await registry.ensureInstitutionRegistry({ organizationId: organization.id });
+    const institutions = app.get(EducationInstitutionService);
+    await institutions.registerInstitution({
+      organizationId: organization.id,
+      institutionKind: EducationInstitutionKind.PRIVATE_INSTITUTION,
+    });
 
     const home = (
       await request(app.getHttpServer())
@@ -191,8 +210,9 @@ describe('Education service pack and experience (integration)', () => {
       data: { code: 'ORG-SCHOOL-3', name: 'School Org 3', status: OrganizationStatus.ACTIVE },
     });
 
-    await app.get(EducationInstitutionRegistryService).ensureInstitutionRegistry({
+    await app.get(EducationInstitutionService).registerInstitution({
       organizationId: organization.id,
+      institutionKind: EducationInstitutionKind.PRIVATE_INSTITUTION,
     });
 
     await request(app.getHttpServer())

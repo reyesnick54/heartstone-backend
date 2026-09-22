@@ -24,30 +24,32 @@ describe('Education schema guard', () => {
     });
   }
 
-  it('keeps enrollment applications from granting enrollment at link time', () => {
+  it('links student profiles to Identity without duplicate person tables', () => {
     expect(schema).toMatch(
-      /model EducationEnrollmentApplicationProfile[\s\S]*doesNotGrantEnrollment\s+Boolean\s+@default\(true\)/,
+      /model StudentEducationProfile[\s\S]*studentIdentityId[\s\S]*@relation\("EducationStudentProfile"/,
+    );
+    expect(schema).not.toMatch(/model EducationPerson\b/);
+  });
+
+  it('keeps admission application profiles from creating enrollment at link time', () => {
+    expect(schema).toMatch(
+      /model EducationAdmissionApplicationProfile[\s\S]*doesNotCreateEnrollment\s+Boolean\s+@default\(true\)/,
     );
   });
 
-  it('keeps scholarship applications from creating awards at link time', () => {
+  it('keeps institution registration distinct from accreditation', () => {
     expect(schema).toMatch(
-      /model ScholarshipApplicationProfile[\s\S]*doesNotCreateAward\s+Boolean\s+@default\(true\)/,
+      /model EducationInstitutionRegistration[\s\S]*registrationDoesNotAccredit\s+Boolean\s+@default\(true\)/,
     );
+    expect(schema).toContain('model EducationInstitutionAccreditation');
   });
 
-  it('requires scholarship awards to reference decision workflow', () => {
-    expect(schema).toMatch(
-      /model ScholarshipAwardRecord[\s\S]*requiresDecisionWorkflow\s+Boolean\s+@default\(true\)/,
-    );
-  });
-
-  it('preserves education record correction history rows', () => {
-    expect(schema).toContain('model EducationRecordCorrectionHistory');
+  it('preserves transcript correction history', () => {
+    expect(schema).toContain('model TranscriptRecordCorrectionHistory');
   });
 
   it('documents education invariants in constants', () => {
-    expect(EDUCATION_INVARIANTS.recommendationNotAward).toBe(true);
+    expect(EDUCATION_INVARIANTS.applicationNotEnrollment).toBe(true);
     expect(EDUCATION_INVARIANTS.institutionCannotSelfAccredit).toBe(true);
   });
 });

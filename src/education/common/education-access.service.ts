@@ -1,9 +1,22 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { EducationGuardianRelationshipStatus, MembershipStatus } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { GuardianEducationRelationshipStatus, MembershipStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { type GuardianAuthorizedScope } from '../education.constants';
+import { EDUCATION_REASON_CODES, type EducationGuardianAccessScope } from '../education.constants';
 import { EducationBoundaryService } from './education-boundary.service';
+
+export interface StudentSelfAccessContext {
+  accessorIdentityId: string;
+  studentEducationProfileId: string;
+  endpoint: string;
+}
+
+export interface GuardianAccessContext {
+  accessorIdentityId: string;
+  studentEducationProfileId: string;
+  endpoint: string;
+  requestedScope: keyof EducationGuardianAccessScope;
+}
 
 @Injectable()
 export class EducationAccessService {
@@ -12,90 +25,76 @@ export class EducationAccessService {
     private readonly boundary: EducationBoundaryService,
   ) {}
 
-  async assertStudentProfileAccess(
-    requesterIdentityId: string,
-    studentProfileId: string,
-  ): Promise<void> {
-    const profile = await this.prisma.educationStudentProfile.findUnique({
-      where: { id: studentProfileId },
-      select: { subjectIdentityId: true },
+  async assertStudentSelfAccess(context: StudentSelfAccessContext): Promise<void> {
+    const profile = await this.prisma.studentEducationProfile.findUnique({
+      where: { id: context.studentEducationProfileId },
     });
     if (!profile) {
-      throw new ForbiddenException('Education student profile not found');
+      throw new NotFoundException('Student education profile not found');
     }
 
-    if (profile.subjectIdentityId === requesterIdentityId) {
-      return;
+    this.boundary.assertCrossStudentAccessBlocked(
+      context.accessorIdentityId,
+      profile.studentIdentityId,
+    );
+  }
+
+  async assertGuardianAuthorizedAccess(context: GuardianAccessContext): Promise<void> {
+    const profile = await this.prisma.studentEducationProfile.findUnique({
+      where: { id: context.studentEducationProfileId },
+    });
+    if (!profile) {
+      throw new NotFoundException('Student education profile not found');
+    }
+
+    const relationship = await this.prisma.guardianEducationRelationship.findFirst({
+      where: {
+        studentEducationProfileId: context.studentEducationProfileId,
+        guardianIdentityId: context.accessorIdentityId,
+      },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+
+    if (!relationship) {
+      throw new ForbiddenException(EDUCATION_REASON_CODES.GUARDIAN_RELATIONSHIP_REQUIRED);
     }
 
     const now = new Date();
-    const guardianLink = await this.prisma.educationGuardianRelationship.findFirst({
-      where: {
-        guardianIdentityId: requesterIdentityId,
-        studentProfileId,
-        status: {
-          in: [
-            EducationGuardianRelationshipStatus.ACTIVE,
-            EducationGuardianRelationshipStatus.LIMITED,
-          ],
-        },
-        effectiveFrom: { lte: now },
-        OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
-      },
-    });
+    const active =
+      relationship.status === GuardianEducationRelationshipStatus.ACTIVE &&
+      relationship.effectiveFrom <= now &&
+      (relationship.effectiveUntil == null || relationship.effectiveUntil > now);
 
-    if (!guardianLink) {
-      throw new ForbiddenException('No authorized education access for this student profile');
+    if (!active) {
+      throw new ForbiddenException(EDUCATION_REASON_CODES.GUARDIAN_ACCESS_REVOKED);
     }
+
+    const scopes = relationship.authorizedAccessScopes as EducationGuardianAccessScope;
+    this.boundary.assertGuardianScope(scopes, context.requestedScope);
   }
 
   async resolveGuardianAuthorizedStudentProfileIds(guardianIdentityId: string): Promise<string[]> {
     const now = new Date();
-    const links = await this.prisma.educationGuardianRelationship.findMany({
+    const links = await this.prisma.guardianEducationRelationship.findMany({
       where: {
         guardianIdentityId,
-        status: {
-          in: [
-            EducationGuardianRelationshipStatus.ACTIVE,
-            EducationGuardianRelationshipStatus.LIMITED,
-          ],
-        },
+        status: GuardianEducationRelationshipStatus.ACTIVE,
         effectiveFrom: { lte: now },
         OR: [{ effectiveUntil: null }, { effectiveUntil: { gt: now } }],
       },
-      select: { studentProfileId: true, authorizedScope: true },
+      select: { studentEducationProfileId: true, authorizedAccessScopes: true },
     });
 
     return links
       .filter((link) => {
-        const scope = link.authorizedScope as GuardianAuthorizedScope;
+        const scope = link.authorizedAccessScopes as EducationGuardianAccessScope;
         return (
-          scope.viewDependentEnrollments === true ||
-          scope.viewEnrollmentApplications === true ||
-          scope.viewSchoolNotices === true ||
-          scope.viewRequiredActions === true ||
-          scope.viewEducationBenefits === true ||
-          scope.viewAppointments === true
+          scope.viewEnrollmentSummary === true ||
+          scope.viewTranscriptSummary === true ||
+          scope.viewSupportPrograms === true
         );
       })
-      .map((link) => link.studentProfileId);
-  }
-
-  async assertGuardianMayViewDependentEnrollments(
-    guardianIdentityId: string,
-    studentProfileId: string,
-  ): Promise<void> {
-    await this.assertStudentProfileAccess(guardianIdentityId, studentProfileId);
-    const link = await this.prisma.educationGuardianRelationship.findFirst({
-      where: { guardianIdentityId, studentProfileId },
-    });
-    if (!link) {
-      throw new ForbiddenException('Guardian relationship required');
-    }
-    this.boundary.assertGuardianScope(
-      link.authorizedScope as GuardianAuthorizedScope,
-      'viewDependentEnrollments',
-    );
+      .map((link) => link.studentEducationProfileId);
   }
 
   async assertOrganizationEducationAccess(
@@ -113,16 +112,14 @@ export class EducationAccessService {
       },
     });
     if (!membership) {
-      throw new ForbiddenException('Organization education access requires active membership');
+      throw new ForbiddenException(EDUCATION_REASON_CODES.ORGANIZATION_MEMBERSHIP_REQUIRED);
     }
 
-    const registry = await this.prisma.educationInstitutionRegistryRecord.findFirst({
+    const institution = await this.prisma.educationInstitution.findFirst({
       where: { organizationId },
     });
-    if (!registry) {
-      throw new ForbiddenException(
-        'Organization is not represented as a registered education institution profile',
-      );
+    if (!institution) {
+      throw new ForbiddenException(EDUCATION_REASON_CODES.INSTITUTION_PROFILE_REQUIRED);
     }
   }
 }

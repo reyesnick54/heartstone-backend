@@ -14,42 +14,51 @@ export class BusinessEducationService {
 
   private async requireInstitution(identityId: string, organizationId: string) {
     await this.access.assertOrganizationEducationAccess(identityId, organizationId);
-    return this.prisma.educationInstitutionRegistryRecord.findFirst({
+    return this.prisma.educationInstitution.findFirst({
       where: { organizationId },
     });
   }
 
   async getHome(identityId: string, organizationId: string) {
-    const registry = await this.requireInstitution(identityId, organizationId);
+    const institution = await this.requireInstitution(identityId, organizationId);
     return {
       organizationId,
       ruleEnvironment: this.boundary.ruleEnvironment,
       disclaimer: this.boundary.disclaimer,
-      institutionRegistryReference: registry?.registryNumber ?? null,
-      registrationStatus: registry?.registrationStatus ?? 'NOT_REGISTERED',
+      institutionRegistryReference: institution?.institutionReferenceNumber ?? null,
+      registrationStatus: institution?.operationalStatus ?? 'NOT_REGISTERED',
     };
   }
 
   async listLicensing(identityId: string, organizationId: string) {
-    await this.requireInstitution(identityId, organizationId);
-    return this.prisma.educationInstitutionLicenseRecord.findMany({
-      where: { organizationId },
+    const institution = await this.requireInstitution(identityId, organizationId);
+    if (!institution) {
+      return [];
+    }
+    return this.prisma.educationInstitutionLicense.findMany({
+      where: { educationInstitutionId: institution.id },
       take: 50,
     });
   }
 
   async listAccreditation(identityId: string, organizationId: string) {
-    await this.requireInstitution(identityId, organizationId);
-    return this.prisma.educationAccreditationRecord.findMany({
-      where: { organizationId },
+    const institution = await this.requireInstitution(identityId, organizationId);
+    if (!institution) {
+      return [];
+    }
+    return this.prisma.educationInstitutionAccreditation.findMany({
+      where: { educationInstitutionId: institution.id },
       take: 50,
     });
   }
 
   async listInspections(identityId: string, organizationId: string) {
-    await this.requireInstitution(identityId, organizationId);
-    return this.prisma.educationInstitutionInspectionReference.findMany({
-      where: { organizationId },
+    const institution = await this.requireInstitution(identityId, organizationId);
+    if (!institution) {
+      return [];
+    }
+    return this.prisma.educationInspectionReference.findMany({
+      where: { educationInstitutionId: institution.id },
       take: 50,
     });
   }

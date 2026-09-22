@@ -19,8 +19,8 @@ export class EducationScopeService {
   }
 
   async resolveAccessibleStudentProfileIds(identityId: string): Promise<string[]> {
-    const ownProfiles = await this.prisma.educationStudentProfile.findMany({
-      where: { subjectIdentityId: identityId },
+    const ownProfiles = await this.prisma.studentEducationProfile.findMany({
+      where: { studentIdentityId: identityId },
       select: { id: true },
     });
     const dependentProfiles =
