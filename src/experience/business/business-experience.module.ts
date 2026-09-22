@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { LabourModule } from '../../labour/labour.module';
 import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
 import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
 import { RevenueModule } from '../../revenue/revenue.module';
@@ -16,6 +17,7 @@ import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
 import { BusinessTransportationController } from './business-transportation.controller';
+import { BusinessWorkforceController } from './business-workforce.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
 import { BusinessApplicationsService } from './services/business-applications.service';
 import { BusinessAppointmentsService } from './services/business-appointments.service';
@@ -31,6 +33,7 @@ import { BusinessProjectsService } from './services/business-projects.service';
 import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
 import { BusinessTransportationService } from './services/business-transportation.service';
+import { BusinessWorkforceService } from './services/business-workforce.service';
 
 @Module({
   imports: [
@@ -39,6 +42,7 @@ import { BusinessTransportationService } from './services/business-transportatio
     CorporateRegistryModule,
     RevenueModule,
     PlanningConstructionModule,
+    LabourModule,
     PropertyRegistryModule,
     TransportationModule,
   ],
@@ -48,6 +52,7 @@ import { BusinessTransportationService } from './services/business-transportatio
     BusinessCorporateRegistryController,
     BusinessRevenueController,
     BusinessDevelopmentController,
+    BusinessWorkforceController,
     BusinessPropertyController,
     BusinessTransportationController,
   ],
@@ -67,6 +72,7 @@ import { BusinessTransportationService } from './services/business-transportatio
     BusinessAppointmentsService,
     BusinessCorporateRegistryService,
     BusinessRevenueService,
+    BusinessWorkforceService,
     BusinessPropertyService,
     BusinessTransportationService,
   ],
