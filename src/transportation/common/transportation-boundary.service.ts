@@ -50,7 +50,7 @@ export class TransportationBoundaryService {
     registrationRevokedWithoutDecision: boolean;
   }): void {
     if (
-      !input.inspectionResultDoesNotRevokeRegistration &&
+      input.inspectionResultDoesNotRevokeRegistration &&
       input.registrationRevokedWithoutDecision
     ) {
       throw new BadRequestException(
