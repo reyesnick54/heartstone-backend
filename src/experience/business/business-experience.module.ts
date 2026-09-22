@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
+import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { LabourModule } from '../../labour/labour.module';
@@ -16,6 +17,7 @@ import { BusinessDevelopmentController } from './business-development.controller
 import { BusinessExperienceController } from './business-experience.controller';
 import { BusinessPropertyController } from './business-property.controller';
 import { BusinessRevenueController } from './business-revenue.controller';
+import { BusinessTradeController } from './business-trade.controller';
 import { BusinessTransportationController } from './business-transportation.controller';
 import { BusinessWorkforceController } from './business-workforce.controller';
 import { BusinessActionCenterService } from './services/business-action-center.service';
@@ -32,6 +34,8 @@ import { BusinessPaymentsService } from './services/business-payments.service';
 import { BusinessProjectsService } from './services/business-projects.service';
 import { BusinessPropertyService } from './services/business-property.service';
 import { BusinessRevenueService } from './services/business-revenue.service';
+import { BusinessTradeService } from './services/business-trade.service';
+import { BusinessTradeAccessService } from './services/business-trade-access.service';
 import { BusinessTransportationService } from './services/business-transportation.service';
 import { BusinessWorkforceService } from './services/business-workforce.service';
 
@@ -41,6 +45,7 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     SchedulingModule,
     CorporateRegistryModule,
     RevenueModule,
+    CustomsTradeModule,
     PlanningConstructionModule,
     LabourModule,
     PropertyRegistryModule,
@@ -51,6 +56,7 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessAppointmentsController,
     BusinessCorporateRegistryController,
     BusinessRevenueController,
+    BusinessTradeController,
     BusinessDevelopmentController,
     BusinessWorkforceController,
     BusinessPropertyController,
@@ -72,6 +78,8 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessAppointmentsService,
     BusinessCorporateRegistryService,
     BusinessRevenueService,
+    BusinessTradeAccessService,
+    BusinessTradeService,
     BusinessWorkforceService,
     BusinessPropertyService,
     BusinessTransportationService,

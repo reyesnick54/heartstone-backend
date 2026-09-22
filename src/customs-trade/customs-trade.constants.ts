@@ -27,3 +27,17 @@ export const BROKER_REPRESENTATION_KINDS = [
   'FREIGHT_FORWARDER',
   'AUTHORIZED_COMPANY_REPRESENTATIVE',
 ] as const;
+
+export const CUSTOMS_TRADE_RULE_ENVIRONMENT = 'NON_PRODUCTION';
+
+export const CUSTOMS_BOUNDARY_DISCLAIMER =
+  'Customs declarations, assessments, and payments do not by themselves authorize cargo release.';
+
+export const CUSTOMS_PAYMENT_BOUNDARY_DISCLAIMER =
+  'Recording a customs payment does not release cargo or substitute for official release authorization.';
+
+export const CUSTOMS_AI_BOUNDARY_DISCLAIMER =
+  'AI assistance may recommend actions but cannot authorize release, issue assessments, or remove holds.';
+
+export const CUSTOMS_DASHBOARD_METRIC_DISCLAIMER =
+  'Operational metrics are indicative counts only and do not authorize release or enforcement actions.';
