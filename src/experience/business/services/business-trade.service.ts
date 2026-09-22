@@ -3,113 +3,113 @@ import {
   CustomsAssessmentStatus,
   CustomsDeclarationStatus,
   CustomsHoldStatus,
-  TradeAccessActorKind,
-  TradeShipmentStatus,
+  CustomsRegistrationStatus,
+  ShipmentReferenceStatus,
 } from '@prisma/client';
 
-import { CustomsTradeAccessService } from '../../../customs-trade/common/customs-trade-access.service';
-import { TradeScopeService } from '../../../customs-trade/experience/services/trade-scope.service';
 import { TradeExperienceBoundaryService } from '../../../customs-trade/experience/trade-experience-boundary.service';
 import { PrismaService } from '../../../database/prisma.service';
 import { BusinessAccessService } from '../../common/business-access.service';
 import { type PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { BusinessTradeAccessService } from './business-trade-access.service';
 
 @Injectable()
 export class BusinessTradeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly access: BusinessAccessService,
-    private readonly tradeAccess: CustomsTradeAccessService,
-    private readonly scope: TradeScopeService,
+    private readonly tradeAccess: BusinessTradeAccessService,
     private readonly boundary: TradeExperienceBoundaryService,
   ) {}
 
-  private async requireOrganizationProfile(identityId: string, organizationId: string) {
+  private async requireTraderAccount(identityId: string, organizationId: string) {
     const businessAccess = await this.access.assertOrganizationAccess(organizationId, identityId);
-    await this.tradeAccess.assertOrganizationTradeAccess({
-      accessorIdentityId: identityId,
-      organizationId,
-      actorKind: businessAccess.hasFullOrganizationVisibility
-        ? TradeAccessActorKind.ORGANIZATION_MEMBER
-        : TradeAccessActorKind.CUSTOMS_BROKER,
-      endpoint: 'business-trade',
-      businessAccess,
+    const traderAccount = await this.prisma.traderAccount.findFirst({
+      where: { organizationId },
+      include: {
+        importerRegistration: true,
+        exporterRegistration: true,
+        brokerAuthorizations: true,
+      },
     });
 
-    const profile = await this.scope.findOrganizationTradeProfile(organizationId);
-    if (!profile) {
-      throw new NotFoundException('No trade profile is registered for this organization');
+    if (!traderAccount) {
+      throw new NotFoundException('No trader account is registered for this organization');
     }
 
-    return { profile, businessAccess };
+    return { traderAccount, businessAccess };
   }
 
   async getHome(identityId: string, organizationId: string) {
-    const { profile, businessAccess } = await this.requireOrganizationProfile(
+    const { traderAccount, businessAccess } = await this.requireTraderAccount(
       identityId,
       organizationId,
     );
-    const shipmentWhere = this.tradeAccess.buildShipmentWhere(businessAccess);
+    const shipmentWhere = await this.tradeAccess.buildShipmentReferenceWhere(businessAccess);
 
     const [
       activeShipments,
       declarations,
       inspections,
       holds,
-      permits,
+      permitReferences,
       assessments,
-      payments,
       releaseRecords,
-      documentDeficiencies,
       externalDependencies,
-      appeals,
     ] = await Promise.all([
-      this.prisma.tradeShipment.count({
+      this.prisma.shipmentReference.count({
         where: {
           ...shipmentWhere,
-          status: { in: [TradeShipmentStatus.ACTIVE, TradeShipmentStatus.HELD] },
-        },
-      }),
-      this.prisma.customsDeclaration.count({
-        where: {
-          organizationId,
           status: {
             in: [
-              CustomsDeclarationStatus.SUBMITTED,
-              CustomsDeclarationStatus.UNDER_REVIEW,
-              CustomsDeclarationStatus.ACCEPTED,
+              ShipmentReferenceStatus.REGISTERED,
+              ShipmentReferenceStatus.IN_TRANSIT,
+              ShipmentReferenceStatus.ARRIVED,
+              ShipmentReferenceStatus.UNDER_CUSTOMS,
             ],
           },
         },
       }),
-      this.prisma.customsInspection.count({ where: { shipment: shipmentWhere } }),
-      this.prisma.customsHold.count({
-        where: { status: CustomsHoldStatus.ACTIVE, shipment: shipmentWhere },
-      }),
-      this.prisma.tradePermit.count({ where: { organizationId } }),
-      this.prisma.customsAssessment.count({
+      this.prisma.customsDeclaration.count({
         where: {
-          organizationId,
+          traderAccountId: traderAccount.id,
           status: {
-            in: [CustomsAssessmentStatus.ISSUED, CustomsAssessmentStatus.PARTIALLY_PAID],
+            in: [
+              CustomsDeclarationStatus.SUBMITTED,
+              CustomsDeclarationStatus.UNDER_REVIEW,
+              CustomsDeclarationStatus.ASSESSED,
+            ],
           },
         },
       }),
-      this.prisma.customsAssessmentPayment.count({
-        where: { customsAssessment: { organizationId } },
+      this.prisma.customsInspection.count({
+        where: { shipmentReference: shipmentWhere },
+      }),
+      this.prisma.customsHold.count({
+        where: { status: CustomsHoldStatus.ACTIVE, shipmentReference: shipmentWhere },
+      }),
+      this.prisma.tradePermitReference.count({
+        where: { customsDeclaration: { traderAccountId: traderAccount.id } },
+      }),
+      this.prisma.customsAssessment.count({
+        where: {
+          customsDeclaration: { traderAccountId: traderAccount.id },
+          status: { in: [CustomsAssessmentStatus.ISSUED, CustomsAssessmentStatus.PROPOSED] },
+        },
       }),
       this.prisma.customsReleaseRecord.findMany({
-        where: { shipment: shipmentWhere },
+        where: { shipmentReference: shipmentWhere },
         take: 10,
         orderBy: { updatedAt: 'desc' },
       }),
-      this.prisma.customsDocumentDeficiency.count({
-        where: { status: 'OPEN', shipment: shipmentWhere },
-      }),
       this.prisma.customsExternalDependency.count({
-        where: { status: 'PENDING', shipment: shipmentWhere },
+        where: {
+          OR: [
+            { shipmentReference: shipmentWhere },
+            { customsDeclaration: { traderAccountId: traderAccount.id } },
+          ],
+        },
       }),
-      this.prisma.customsAppeal.count({ where: { organizationId } }),
     ]);
 
     return {
@@ -117,37 +117,36 @@ export class BusinessTradeService {
       ruleEnvironment: this.boundary.ruleEnvironment,
       disclaimer: this.boundary.rulesDisclaimer,
       paymentDisclaimer: this.boundary.paymentDisclaimer,
-      tradeProfileReference: profile.profileReference,
+      tradeProfileReference: traderAccount.accountNumber,
       importerExporterStatus: {
-        importerStatus: profile.importerStatus,
-        exporterStatus: profile.exporterStatus,
-        brokerAuthorizationStatus: profile.brokerAuthorizationStatus,
+        importerStatus:
+          traderAccount.importerRegistration?.status ?? CustomsRegistrationStatus.DRAFT,
+        exporterStatus:
+          traderAccount.exporterRegistration?.status ?? CustomsRegistrationStatus.DRAFT,
+        brokerAuthorizationCount: traderAccount.brokerAuthorizations.length,
       },
       activeShipments,
       declarations,
       inspections,
       holds,
-      permits,
+      permits: permitReferences,
       outstandingAssessments: assessments,
-      payments,
       releaseStatus: releaseRecords,
-      documentDeficiencies,
       externalDependencyStatus: externalDependencies,
-      appeals,
       deadlines: [],
     };
   }
 
   async listShipments(identityId: string, organizationId: string, query: PaginationQueryDto) {
-    const { businessAccess } = await this.requireOrganizationProfile(identityId, organizationId);
+    const businessAccess = await this.access.assertOrganizationAccess(organizationId, identityId);
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
     const skip = (page - 1) * pageSize;
-    const where = this.tradeAccess.buildShipmentWhere(businessAccess);
+    const where = await this.tradeAccess.buildShipmentReferenceWhere(businessAccess);
 
     const [totalItems, items] = await Promise.all([
-      this.prisma.tradeShipment.count({ where }),
-      this.prisma.tradeShipment.findMany({
+      this.prisma.shipmentReference.count({ where }),
+      this.prisma.shipmentReference.findMany({
         where,
         skip,
         take: pageSize,
@@ -159,41 +158,42 @@ export class BusinessTradeService {
   }
 
   async listDeclarations(identityId: string, organizationId: string) {
-    await this.requireOrganizationProfile(identityId, organizationId);
+    const { traderAccount } = await this.requireTraderAccount(identityId, organizationId);
     return this.prisma.customsDeclaration.findMany({
-      where: { organizationId },
+      where: { traderAccountId: traderAccount.id },
       include: { currentVersion: true },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async listPermits(identityId: string, organizationId: string) {
-    await this.requireOrganizationProfile(identityId, organizationId);
-    return this.prisma.tradePermit.findMany({
-      where: { organizationId },
+    const { traderAccount } = await this.requireTraderAccount(identityId, organizationId);
+    return this.prisma.tradePermitReference.findMany({
+      where: { customsDeclaration: { traderAccountId: traderAccount.id } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async listAssessments(identityId: string, organizationId: string) {
-    await this.requireOrganizationProfile(identityId, organizationId);
+    const { traderAccount } = await this.requireTraderAccount(identityId, organizationId);
     return this.prisma.customsAssessment.findMany({
-      where: { organizationId },
-      include: { payments: true },
+      where: { customsDeclaration: { traderAccountId: traderAccount.id } },
+      include: { lines: true },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async listHolds(identityId: string, organizationId: string) {
-    const { businessAccess } = await this.requireOrganizationProfile(identityId, organizationId);
+    const businessAccess = await this.access.assertOrganizationAccess(organizationId, identityId);
+    const shipmentWhere = await this.tradeAccess.buildShipmentReferenceWhere(businessAccess);
     return this.prisma.customsHold.findMany({
-      where: { shipment: this.tradeAccess.buildShipmentWhere(businessAccess) },
+      where: { shipmentReference: shipmentWhere },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async listActions(identityId: string, organizationId: string) {
-    await this.requireOrganizationProfile(identityId, organizationId);
+    await this.requireTraderAccount(identityId, organizationId);
 
     return {
       actions: [
@@ -204,7 +204,7 @@ export class BusinessTradeService {
         { actionCode: 'PAY_CUSTOMS_ASSESSMENT', label: 'Pay customs assessment' },
         { actionCode: 'REQUEST_RELEASE_REVIEW', label: 'Request release review' },
         { actionCode: 'RESPOND_TO_HOLD', label: 'Respond to customs hold' },
-        { actionCode: 'FILE_CUSTOMS_APPEAL', label: 'File customs appeal' },
+        { actionCode: 'FILE_CUSTOMS_REFUND_CLAIM', label: 'File customs refund claim' },
       ],
       releaseExecutionExcluded: true,
     };

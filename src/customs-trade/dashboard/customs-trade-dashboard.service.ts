@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import {
   CustomsAssessmentStatus,
   CustomsDeclarationStatus,
-  CustomsExternalDependencyStatus,
   CustomsHoldStatus,
-  CustomsReleaseStatus,
-  TradePermitStatus,
+  CustomsRefundClaimStatus,
+  ShipmentReferenceStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
@@ -16,22 +15,17 @@ export class CustomsTradeDashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getOperationalMetrics(jurisdictionIds?: string[]) {
-    const profileFilter = jurisdictionIds?.length
-      ? { jurisdictionId: { in: jurisdictionIds } }
-      : {};
+    const traderFilter = jurisdictionIds?.length ? { jurisdictionId: { in: jurisdictionIds } } : {};
 
-    const shipmentFilter = {
-      tradeOrganizationProfile: profileFilter,
-    };
+    const shipmentFilter = traderFilter.jurisdictionId ? { traderAccount: traderFilter } : {};
 
     const [
       declarationsReceived,
       activeInspections,
       activeHolds,
-      unresolvedPermits,
       outstandingAssessments,
       releaseBacklog,
-      portDependencyIssues,
+      refundClaimsOpen,
     ] = await Promise.all([
       this.prisma.customsDeclaration.count({
         where: {
@@ -39,58 +33,49 @@ export class CustomsTradeDashboardService {
             in: [
               CustomsDeclarationStatus.SUBMITTED,
               CustomsDeclarationStatus.UNDER_REVIEW,
-              CustomsDeclarationStatus.ACCEPTED,
+              CustomsDeclarationStatus.ASSESSED,
             ],
           },
-          tradeOrganizationProfile: profileFilter,
+          traderAccount: traderFilter,
         },
       }),
-      this.prisma.customsInspection.count({ where: { shipment: shipmentFilter } }),
+      this.prisma.customsInspection.count({
+        where: { shipmentReference: shipmentFilter },
+      }),
       this.prisma.customsHold.count({
-        where: { status: CustomsHoldStatus.ACTIVE, shipment: shipmentFilter },
-      }),
-      this.prisma.tradePermit.count({
-        where: {
-          status: { in: [TradePermitStatus.REQUESTED, TradePermitStatus.UNDER_REVIEW] },
-          tradeOrganizationProfile: profileFilter,
-        },
+        where: { status: CustomsHoldStatus.ACTIVE, shipmentReference: shipmentFilter },
       }),
       this.prisma.customsAssessment.count({
         where: {
-          status: {
-            in: [CustomsAssessmentStatus.ISSUED, CustomsAssessmentStatus.PARTIALLY_PAID],
-          },
-          tradeOrganizationProfile: profileFilter,
+          status: { in: [CustomsAssessmentStatus.ISSUED, CustomsAssessmentStatus.PROPOSED] },
+          customsDeclaration: { traderAccount: traderFilter },
         },
       }),
-      this.prisma.customsReleaseRecord.count({
+      this.prisma.shipmentReference.count({
         where: {
-          status: { in: [CustomsReleaseStatus.NOT_RELEASED, CustomsReleaseStatus.BLOCKED] },
-          shipment: shipmentFilter,
+          status: ShipmentReferenceStatus.UNDER_CUSTOMS,
+          ...shipmentFilter,
         },
       }),
-      this.prisma.customsExternalDependency.count({
+      this.prisma.customsRefundClaim.count({
         where: {
           status: {
-            in: [CustomsExternalDependencyStatus.PENDING, CustomsExternalDependencyStatus.FAILED],
+            in: [CustomsRefundClaimStatus.SUBMITTED, CustomsRefundClaimStatus.UNDER_REVIEW],
           },
-          shipment: shipmentFilter,
+          customsDeclaration: { traderAccount: traderFilter },
         },
       }),
     ]);
 
     return {
       disclaimer: CUSTOMS_DASHBOARD_METRIC_DISCLAIMER,
-      metrics: {
-        declarationsReceived,
-        clearanceTimeHours: null,
-        inspections: activeInspections,
-        holds: activeHolds,
-        unresolvedPermits,
-        outstandingAssessments,
-        releaseBacklog,
-        portBorderDependencyIssues: portDependencyIssues,
-      },
+      declarationsReceived,
+      activeInspections,
+      activeHolds,
+      outstandingAssessments,
+      releaseBacklog,
+      refundClaimsOpen,
+      analyticsDoNotReleaseCargo: true,
     };
   }
 }

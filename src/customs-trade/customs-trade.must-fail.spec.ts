@@ -1,17 +1,25 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { IdentityType } from '@prisma/client';
+import {
+  CustomsActorPersona,
+  CustomsClassificationReferenceKind,
+  CustomsDeclarationType,
+  CustomsDeclarationVersionStatus,
+  CustomsPermitReferenceStatus,
+  CustomsValuationKind,
+  RepresentativeAuthorityStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
-import { CustomsTradeAccessService } from './common/customs-trade-access.service';
+import { CustomsTradeAccessService } from './access/customs-trade-access.service';
+import { CustomsAssessmentService } from './assessments/customs-assessment.service';
 import { CustomsTradeBoundaryService } from './common/customs-trade-boundary.service';
+import { PLATFORM_ADMIN_CUSTOMS_ROLE_MARKER } from './customs-trade.constants';
 import { CustomsDeclarationService } from './declarations/customs-declaration.service';
-import { CustomsAssessmentPaymentService } from './payments/customs-assessment-payment.service';
+import { CustomsHoldService } from './holds/customs-hold.service';
 import { CustomsReleaseService } from './release/customs-release.service';
-import { CustomsReleaseEligibilityService } from './release/customs-release-eligibility.service';
-import { PublicCustomsTradeVerificationService } from './verification/public-customs-trade-verification.service';
 
-describe('Customs & Trade must-fail gates', () => {
+describe('Customs trade must-fail gates', () => {
   describe('CustomsTradeBoundaryService', () => {
     let boundary: CustomsTradeBoundaryService;
 
@@ -22,103 +30,166 @@ describe('Customs & Trade must-fail gates', () => {
       boundary = module.get(CustomsTradeBoundaryService);
     });
 
-    it('blocks AI from executing cargo release', () => {
+    it('declaration submission does not release cargo', () => {
       expect(() => {
-        boundary.assertAiCannotExecuteRelease(IdentityType.SERVICE);
-      }).toThrow(ForbiddenException);
-    });
-
-    it('blocks AI recommendation actions that would release cargo', () => {
-      expect(() => {
-        boundary.assertAiCustomsActionForbidden('EXECUTE_CARGO_RELEASE');
-      }).toThrow(ForbiddenException);
-    });
-
-    it('blocks payment side-effect implying release', () => {
-      expect(() => {
-        boundary.assertPaymentDoesNotRelease('payment recorded; cargo released');
+        boundary.assertDeclarationSubmissionDoesNotReleaseCargo(false);
       }).toThrow(BadRequestException);
     });
 
-    it('requires authoritative release conditions', () => {
+    it('payment does not itself release cargo', () => {
       expect(() => {
-        boundary.assertReleaseAuthoritativeConditions({ reviewsComplete: true });
+        boundary.assertPaymentDoesNotReleaseCargo(CustomsActorPersona.PAYMENT_SYSTEM);
+      }).toThrow(ForbiddenException);
+    });
+
+    it('client cannot forge customs assessment', () => {
+      expect(() => {
+        boundary.rejectClientForgedAssessmentFields({ status: 'ISSUED' });
+      }).toThrow(ForbiddenException);
+    });
+
+    it('declared value and assessed value remain distinct', () => {
+      expect(() => {
+        boundary.assertDeclaredAndAssessedValuesDistinct(
+          { valuationKind: CustomsValuationKind.ASSESSED },
+          { valuationKind: CustomsValuationKind.ASSESSED },
+        );
       }).toThrow(BadRequestException);
     });
 
-    it('blocks destructive edit of locked declaration version', () => {
+    it('risk score does not become violation', () => {
       expect(() => {
-        boundary.assertSubmittedDeclarationVersionImmutable(new Date());
+        boundary.assertRiskScoreIsNotViolation(true, true);
+      }).toThrow(BadRequestException);
+    });
+
+    it('AI cannot authorize release', () => {
+      expect(() => {
+        boundary.assertAiCannotAuthorizeRelease(
+          'AUTHORIZE_RELEASE',
+          CustomsActorPersona.AI_ASSISTANCE,
+        );
+      }).toThrow(ForbiddenException);
+    });
+
+    it('unresolved mandatory permit blocks release', () => {
+      expect(() => {
+        boundary.assertMandatoryPermitsResolved([
+          {
+            isMandatoryForRelease: true,
+            blocksReleaseWhenUnresolved: true,
+            status: CustomsPermitReferenceStatus.UNRESOLVED_MANDATORY,
+          },
+        ]);
+      }).toThrow(BadRequestException);
+    });
+
+    it('hold cannot be removed by ordinary client update', () => {
+      expect(() => {
+        boundary.rejectClientForgedHoldRemovalFields({ status: 'REMOVED' });
+      }).toThrow(ForbiddenException);
+    });
+
+    it('technical admin cannot release shipment', () => {
+      expect(() => {
+        boundary.assertTechnicalAdminCannotReleaseShipment(CustomsActorPersona.TECHNICAL_ADMIN);
+      }).toThrow(ForbiddenException);
+      expect(() => {
+        boundary.assertTechnicalAdminCannotReleaseShipment(
+          CustomsActorPersona.CUSTOMS_OFFICER,
+          PLATFORM_ADMIN_CUSTOMS_ROLE_MARKER,
+        );
+      }).toThrow(ForbiddenException);
+    });
+
+    it('cross-company shipment access denied', () => {
+      expect(() => {
+        boundary.assertCrossCompanyAccessBlocked('org-a', 'org-b');
+      }).toThrow(ForbiddenException);
+    });
+
+    it('AI classification suggestion is not authoritative', () => {
+      expect(() => {
+        boundary.assertAiClassificationNotAuthoritative(
+          CustomsClassificationReferenceKind.AI_SUGGESTION,
+          true,
+        );
       }).toThrow(ForbiddenException);
     });
   });
 
   describe('CustomsTradeAccessService', () => {
     const prisma = {
-      tradeShipment: { findFirst: jest.fn() },
-      tradeAccessAudit: { create: jest.fn().mockResolvedValue({}) },
-      representativeAuthority: { findUnique: jest.fn() },
+      traderAccount: { findUnique: jest.fn() },
+      customsBrokerAuthorization: { findFirst: jest.fn() },
+      shipmentReference: { findUnique: jest.fn() },
     };
 
     let access: CustomsTradeAccessService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
-        providers: [CustomsTradeAccessService, { provide: PrismaService, useValue: prisma }],
+        providers: [
+          CustomsTradeAccessService,
+          CustomsTradeBoundaryService,
+          { provide: PrismaService, useValue: prisma },
+        ],
       }).compile();
       access = module.get(CustomsTradeAccessService);
       jest.clearAllMocks();
     });
 
-    it('denies access to another organization shipment', async () => {
-      prisma.tradeShipment.findFirst.mockResolvedValue(null);
+    it('broker requires active representation', async () => {
+      prisma.traderAccount.findUnique.mockResolvedValue({
+        id: 'ta-1',
+        organizationId: 'org-1',
+      });
+      prisma.customsBrokerAuthorization.findFirst.mockResolvedValue({
+        representativeAuthority: {
+          status: RepresentativeAuthorityStatus.PENDING,
+          identityId: 'broker-1',
+          organizationId: 'org-1',
+          effectiveFrom: new Date('2020-01-01'),
+          effectiveUntil: null,
+        },
+      });
 
       await expect(
-        access.assertShipmentAccess(
-          'identity-1',
-          'shipment-2',
-          {
-            organizationId: 'org-1',
-            identityId: 'identity-1',
-            hasActiveMembership: true,
-            activeMembershipIds: ['mem-1'],
-            activeRepresentativeAuthorityIds: [],
-            hasFullOrganizationVisibility: true,
-          },
-          'test',
-        ),
+        access.assertBrokerHasActiveRepresentation({
+          accessorIdentityId: 'broker-1',
+          traderAccountId: 'ta-1',
+          representativeAuthorityId: 'ra-1',
+          endpoint: 'test',
+        }),
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('enforces broker representative scope on shipment queries', () => {
-      const where = access.buildShipmentWhere({
-        organizationId: 'org-1',
-        identityId: 'broker-1',
-        hasActiveMembership: false,
-        activeMembershipIds: [],
-        activeRepresentativeAuthorityIds: ['auth-1'],
-        hasFullOrganizationVisibility: false,
+    it('cross-company shipment access denied', async () => {
+      prisma.shipmentReference.findUnique.mockResolvedValue({
+        ownerOrganizationId: 'org-owner',
       });
 
-      expect(where).toEqual({
-        organizationId: 'org-1',
-        representativeAuthorityId: { in: ['auth-1'] },
-      });
+      await expect(access.assertShipmentOrganizationAccess('org-other', 'ship-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
   describe('CustomsDeclarationService', () => {
-    const prisma = {
+    const tx = {
       customsDeclaration: {
-        findUnique: jest.fn(),
+        create: jest.fn(),
         update: jest.fn(),
       },
       customsDeclarationVersion: {
         create: jest.fn(),
-        findUnique: jest.fn(),
         update: jest.fn(),
       },
-      tradeShipment: { update: jest.fn() },
+      customsStatusHistory: { create: jest.fn() },
+    };
+    const prisma = {
+      $transaction: jest.fn((fn: (client: typeof tx) => unknown) => fn(tx)),
+      customsDeclaration: { findUnique: jest.fn() },
     };
 
     let service: CustomsDeclarationService;
@@ -135,173 +206,48 @@ describe('Customs & Trade must-fail gates', () => {
       jest.clearAllMocks();
     });
 
-    it('does not release cargo when submitting declaration', async () => {
-      prisma.customsDeclaration.findUnique.mockResolvedValue({
-        id: 'decl-1',
-        shipmentId: 'ship-1',
-        versions: [],
+    it('declaration submission does not release cargo', async () => {
+      tx.customsDeclaration.create.mockResolvedValue({
+        id: 'dec-1',
+        doesNotReleaseCargo: true,
       });
-      prisma.customsDeclarationVersion.create.mockResolvedValue({ id: 'v1', versionNumber: 1 });
-      prisma.customsDeclaration.update.mockResolvedValue({});
-      prisma.tradeShipment.update.mockResolvedValue({});
+      tx.customsDeclarationVersion.create.mockResolvedValue({ id: 'ver-1', versionNumber: 1 });
+      tx.customsDeclaration.update.mockResolvedValue({});
+      tx.customsStatusHistory.create.mockResolvedValue({});
 
-      const result = await service.submitInitialVersion({
-        customsDeclarationId: 'decl-1',
-        declarationData: { goods: 'widgets' },
-        submittedByIdentityId: 'identity-1',
+      const result = await service.submitDeclaration({
+        traderAccountId: 'ta-1',
+        declarationType: CustomsDeclarationType.IMPORT,
       });
 
       expect(result.cargoReleased).toBe(false);
+      expect(result.declaration.doesNotReleaseCargo).toBe(true);
     });
 
-    it('creates a new version for amendment instead of mutating prior version', async () => {
+    it('declaration amendments preserve prior version', async () => {
       prisma.customsDeclaration.findUnique.mockResolvedValue({
-        id: 'decl-1',
-        currentVersion: { id: 'v1', versionNumber: 1 },
-        versions: [{ versionNumber: 1 }],
+        id: 'dec-1',
+        currentVersion: { id: 'ver-1', versionNumber: 1 },
       });
-      prisma.customsDeclarationVersion.create.mockResolvedValue({
-        id: 'v2',
-        versionNumber: 2,
-        isAmendment: true,
-      });
-      prisma.customsDeclaration.update.mockResolvedValue({});
+      tx.customsDeclarationVersion.update.mockResolvedValue({});
+      tx.customsDeclarationVersion.create.mockResolvedValue({ id: 'ver-2', versionNumber: 2 });
+      tx.customsDeclaration.update.mockResolvedValue({});
 
-      const result = await service.amendDeclaration({
-        customsDeclarationId: 'decl-1',
-        declarationData: { amended: true },
-        submittedByIdentityId: 'identity-1',
-      });
+      const result = await service.amendDeclaration({ customsDeclarationId: 'dec-1' });
 
-      expect(result.previousVersionId).toBe('v1');
-      expect(prisma.customsDeclarationVersion.create).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('CustomsAssessmentPaymentService', () => {
-    const prisma = {
-      customsAssessment: {
-        findUnique: jest.fn(),
-        update: jest.fn(),
-      },
-      customsAssessmentPayment: { create: jest.fn() },
-    };
-
-    let service: CustomsAssessmentPaymentService;
-
-    beforeEach(async () => {
-      const module = await Test.createTestingModule({
-        providers: [
-          CustomsAssessmentPaymentService,
-          CustomsTradeBoundaryService,
-          { provide: PrismaService, useValue: prisma },
-        ],
-      }).compile();
-      service = module.get(CustomsAssessmentPaymentService);
-      jest.clearAllMocks();
-    });
-
-    it('does not release cargo when recording payment', async () => {
-      prisma.customsAssessment.findUnique.mockResolvedValue({
-        id: 'assess-1',
-        amountCents: 1000,
-        paidAmountCents: 0,
-      });
-      prisma.customsAssessmentPayment.create.mockResolvedValue({
-        id: 'pay-1',
-        releaseTriggered: false,
-      });
-      prisma.customsAssessment.update.mockResolvedValue({});
-
-      const result = await service.recordPayment({
-        customsAssessmentId: 'assess-1',
-        allocatedAmountCents: 500,
-        paymentReference: 'PAY-1',
-      });
-
-      expect(result.cargoReleased).toBe(false);
-      expect(result.releaseTriggered).toBe(false);
-    });
-  });
-
-  describe('CustomsReleaseEligibilityService', () => {
-    const prisma = {
-      tradeShipment: { findUnique: jest.fn() },
-      customsOfficialReleaseAuthority: { findFirst: jest.fn() },
-    };
-
-    let eligibility: CustomsReleaseEligibilityService;
-
-    beforeEach(async () => {
-      const module = await Test.createTestingModule({
-        providers: [CustomsReleaseEligibilityService, { provide: PrismaService, useValue: prisma }],
-      }).compile();
-      eligibility = module.get(CustomsReleaseEligibilityService);
-      jest.clearAllMocks();
-    });
-
-    it('blocks release when an active hold exists', async () => {
-      prisma.tradeShipment.findUnique.mockResolvedValue({
-        id: 'ship-1',
-        releaseRecord: { status: 'NOT_RELEASED' },
-        holds: [{ status: 'ACTIVE' }],
-        permits: [],
-        assessments: [],
-        externalDependencies: [],
-        documentDeficiencies: [],
-        releaseReview: {
-          declarationReviewStatus: 'COMPLETE',
-          classificationReviewStatus: 'COMPLETE',
-          valuationReviewStatus: 'COMPLETE',
-          permitVerificationStatus: 'COMPLETE',
-          riskReviewStatus: 'COMPLETE',
-        },
-        tradeOrganizationProfile: { jurisdictionId: 'jur-1' },
-      });
-      prisma.customsOfficialReleaseAuthority.findFirst.mockResolvedValue({ id: 'auth-1' });
-
-      const result = await eligibility.evaluateShipmentRelease('ship-1', 'officeholder-1');
-      expect(result.eligible).toBe(false);
-      expect(result.conditions.holdsCleared).toBe(false);
-    });
-
-    it('blocks release when a required permit is unresolved', async () => {
-      prisma.tradeShipment.findUnique.mockResolvedValue({
-        id: 'ship-1',
-        releaseRecord: { status: 'NOT_RELEASED' },
-        holds: [],
-        permits: [{ status: 'REQUESTED', requiredForRelease: true }],
-        assessments: [],
-        externalDependencies: [],
-        documentDeficiencies: [],
-        releaseReview: {
-          declarationReviewStatus: 'COMPLETE',
-          classificationReviewStatus: 'COMPLETE',
-          valuationReviewStatus: 'COMPLETE',
-          permitVerificationStatus: 'COMPLETE',
-          riskReviewStatus: 'COMPLETE',
-        },
-        tradeOrganizationProfile: { jurisdictionId: 'jur-1' },
-      });
-      prisma.customsOfficialReleaseAuthority.findFirst.mockResolvedValue({ id: 'auth-1' });
-
-      const result = await eligibility.evaluateShipmentRelease('ship-1', 'officeholder-1');
-      expect(result.eligible).toBe(false);
-      expect(result.conditions.permitsSatisfied).toBe(false);
+      expect(result.priorVersionPreserved).toBe(true);
+      expect(result.priorVersionId).toBe('ver-1');
+      expect(result.newVersion.versionNumber).toBe(2);
+      expect(tx.customsDeclarationVersion.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'ver-1' },
+          data: { status: CustomsDeclarationVersionStatus.SUPERSEDED },
+        }),
+      );
     });
   });
 
   describe('CustomsReleaseService', () => {
-    const prisma = {
-      $transaction: jest.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
-      customsReleaseRecord: { upsert: jest.fn().mockResolvedValue({}) },
-      tradeShipment: { update: jest.fn().mockResolvedValue({}) },
-    };
-
-    const eligibility = {
-      evaluateShipmentRelease: jest.fn(),
-    };
-
     let release: CustomsReleaseService;
 
     beforeEach(async () => {
@@ -309,79 +255,69 @@ describe('Customs & Trade must-fail gates', () => {
         providers: [
           CustomsReleaseService,
           CustomsTradeBoundaryService,
-          { provide: CustomsReleaseEligibilityService, useValue: eligibility },
-          { provide: PrismaService, useValue: prisma },
+          {
+            provide: PrismaService,
+            useValue: {
+              customsHold: { count: jest.fn().mockResolvedValue(0) },
+              customsDeclaration: { findFirst: jest.fn().mockResolvedValue(null) },
+              customsReleaseRecord: { create: jest.fn() },
+              shipmentReference: { update: jest.fn() },
+            },
+          },
         ],
       }).compile();
       release = module.get(CustomsReleaseService);
-      jest.clearAllMocks();
     });
 
-    it('rejects release for official without authority at execution', async () => {
-      eligibility.evaluateShipmentRelease.mockResolvedValue({
-        eligible: false,
-        conditions: {
-          reviewsComplete: true,
-          officialReleaseAuthority: false,
-          holdsCleared: true,
-          permitsSatisfied: true,
-          paymentConditionsSatisfied: true,
-          externalDependenciesSatisfied: true,
-          documentDeficienciesResolved: true,
-        },
-        blockingReasons: ['officialReleaseAuthority'],
-      });
-
-      await expect(
-        release.executeCargoRelease({
-          shipmentId: 'ship-1',
-          officeholderId: 'officeholder-1',
-        }),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('does not expose EXECUTE_CARGO_RELEASE on business action guard', () => {
+    it('payment does not itself release cargo', () => {
       expect(() => {
-        release.assertReleaseNotAvailableFromClientActionList('EXECUTE_CARGO_RELEASE');
-      }).toThrow(BadRequestException);
+        release.assertPaymentEventDoesNotRelease(CustomsActorPersona.PAYMENT_SYSTEM);
+      }).toThrow(ForbiddenException);
     });
   });
 
-  describe('PublicCustomsTradeVerificationService', () => {
-    const prisma = {
-      tradeOrganizationProfile: {
-        findUnique: jest.fn(),
-      },
-    };
-
-    let verification: PublicCustomsTradeVerificationService;
+  describe('CustomsAssessmentService', () => {
+    let assessment: CustomsAssessmentService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          PublicCustomsTradeVerificationService,
-          { provide: PrismaService, useValue: prisma },
+          CustomsAssessmentService,
+          CustomsTradeBoundaryService,
+          { provide: PrismaService, useValue: {} },
         ],
       }).compile();
-      verification = module.get(PublicCustomsTradeVerificationService);
-      jest.clearAllMocks();
+      assessment = module.get(CustomsAssessmentService);
     });
 
-    it('returns only public facts for verification', async () => {
-      prisma.tradeOrganizationProfile.findUnique.mockResolvedValue({
-        profileReference: 'TRADE-ABC',
-        ruleEnvironment: 'NON_PRODUCTION',
-        importerStatus: 'ACTIVE',
-        exporterStatus: 'NOT_REGISTERED',
-      });
+    it('client cannot forge customs assessment', () => {
+      expect(() => {
+        assessment.rejectClientForgedAssessment({ assessmentReference: 'forged' });
+      }).toThrow(ForbiddenException);
+    });
+  });
 
-      const response = await verification.verify('TRADE-ABC');
-      expect(response.publicFacts).toEqual({
-        importerRegistered: true,
-        exporterRegistered: false,
-      });
-      expect(JSON.stringify(response)).not.toContain('organizationId');
-      expect(JSON.stringify(response)).not.toContain('declarationData');
+  describe('CustomsHoldService', () => {
+    let holds: CustomsHoldService;
+
+    beforeEach(async () => {
+      const module = await Test.createTestingModule({
+        providers: [
+          CustomsHoldService,
+          CustomsTradeBoundaryService,
+          {
+            provide: PrismaService,
+            useValue: { customsHold: { create: jest.fn(), update: jest.fn() } },
+          },
+        ],
+      }).compile();
+      holds = module.get(CustomsHoldService);
+    });
+
+    it('hold cannot be removed by ordinary client update', () => {
+      expect(() => {
+        holds.rejectOrdinaryClientHoldUpdate({ removedAt: new Date().toISOString() });
+      }).toThrow(ForbiddenException);
     });
   });
 });

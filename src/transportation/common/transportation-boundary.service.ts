@@ -56,7 +56,7 @@ export class TransportationBoundaryService {
     }
     if (!input.inspectionResultDoesNotRevokeRegistration) {
       throw new BadRequestException(
-        'Inspection outcomes must be explicitly marked as not revoking registration unless a governed workflow applies',
+        'Inspection results must not revoke registration without an explicit governed decision path',
       );
     }
   }

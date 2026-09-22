@@ -1,24 +1,86 @@
-export const FORBIDDEN_CUSTOMS_DECLARATION_CLIENT_FIELDS = [
+export const CUSTOMS_TRADE_FOUNDATION_MODEL_NAMES = [
+  'TraderAccount',
+  'ImporterRegistration',
+  'ExporterRegistration',
+  'CustomsBrokerAuthorization',
+  'ShipmentReference',
+  'CargoManifestReference',
+  'BorderEntryReference',
+  'CustomsDeclaration',
+  'CustomsDeclarationVersion',
+  'CustomsDeclarationItem',
+  'CommodityClassificationReference',
+  'OriginDeclaration',
+  'CustomsValuationRecord',
+  'TradePermitReference',
+  'RestrictedGoodsRequirement',
+  'CustomsAssessment',
+  'CustomsAssessmentLine',
+  'CustomsHold',
+  'CustomsInspection',
+  'CustomsReleaseDecisionReference',
+  'CustomsReleaseRecord',
+  'CustomsAdjustment',
+  'CustomsRefundClaim',
+  'CustomsStatusHistory',
+  'CustomsExternalDependency',
+] as const;
+
+export const CUSTOMS_TRADE_FOUNDATION_ENUM_NAMES = [
+  'CustomsDataClassification',
+  'CustomsTraderAccountStatus',
+  'CustomsRegistrationStatus',
+  'TradeRepresentationKind',
+  'CustomsBrokerAuthorizationStatus',
+  'CustomsDeclarationType',
+  'CustomsDeclarationStatus',
+  'CustomsDeclarationVersionStatus',
+  'ShipmentReferenceStatus',
+  'CustomsClassificationReferenceKind',
+  'CustomsPermitReferenceStatus',
+  'CustomsAssessmentStatus',
+  'CustomsHoldStatus',
+  'CustomsInspectionLinkStatus',
+  'CustomsReleaseRecordStatus',
+  'CustomsAdjustmentKind',
+  'CustomsRefundClaimStatus',
+  'CustomsActorPersona',
+  'CustomsExternalDependencyType',
+  'CustomsExternalDependencyRecordedBy',
+  'CustomsStatusSubjectKind',
+  'CustomsValuationKind',
+] as const;
+
+export const FORBIDDEN_CUSTOMS_ASSESSMENT_CLIENT_FIELDS = [
   'status',
-  'currentVersionId',
-  'releaseStatus',
-  'releasedAt',
+  'issuedAt',
+  'issuedByOfficeholderId',
+  'assessmentReference',
+  'taxAssessmentId',
+  'paymentAllocationId',
+] as const;
+
+export const FORBIDDEN_CUSTOMS_HOLD_CLIENT_FIELDS = [
+  'status',
+  'removedAt',
+  'governedRemovalByOfficeholderId',
+  'removalDecisionReference',
 ] as const;
 
 export const FORBIDDEN_CUSTOMS_RELEASE_CLIENT_FIELDS = [
   'status',
   'releasedAt',
-  'releasedByOfficeholderId',
+  'authorizedByOfficeholderId',
+  'releaseDecisionReferenceId',
 ] as const;
-
-export const FORBIDDEN_CUSTOMS_ASSESSMENT_CLIENT_FIELDS = ['status', 'paidAmountCents'] as const;
 
 export const PUBLIC_CUSTOMS_VERIFICATION_FORBIDDEN_RESPONSE_KEYS = [
   'organizationId',
+  'traderAccountId',
   'declarationData',
-  'assessmentReference',
+  'submissionPayload',
   'amountCents',
-  'holdReason',
-  'grounds',
   'paidAmountCents',
+  'riskScore',
+  'primaryIdentityId',
 ] as const;

@@ -1,93 +1,108 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { CustomsReleaseStatus, TradeShipmentStatus } from '@prisma/client';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  CustomsActorPersona,
+  CustomsHoldStatus,
+  CustomsPermitReferenceStatus,
+  CustomsReleaseRecordStatus,
+  ShipmentReferenceStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { CustomsTradeBoundaryService } from '../common/customs-trade-boundary.service';
-import { CUSTOMS_REASON_CODES } from '../customs-trade.constants';
-import { CustomsReleaseEligibilityService } from './customs-release-eligibility.service';
 
 @Injectable()
 export class CustomsReleaseService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: CustomsTradeBoundaryService,
-    private readonly eligibility: CustomsReleaseEligibilityService,
   ) {}
 
-  async getAvailableOfficialActions(shipmentId: string, officeholderId?: string | null) {
-    const evaluation = await this.eligibility.evaluateShipmentRelease(shipmentId, officeholderId);
-    const actions: { actionCode: string; label: string }[] = [];
+  async evaluateReleaseReadiness(
+    shipmentReferenceId: string,
+  ): Promise<{ mayRelease: boolean; reasons: string[] }> {
+    const reasons: string[] = [];
 
-    if (evaluation.eligible) {
-      actions.push({
-        actionCode: 'EXECUTE_CARGO_RELEASE',
-        label: 'Execute cargo release (re-evaluated at execution)',
-      });
+    const activeHolds = await this.prisma.customsHold.count({
+      where: { shipmentReferenceId, status: CustomsHoldStatus.ACTIVE, blocksRelease: true },
+    });
+    if (activeHolds > 0) {
+      reasons.push('ACTIVE_HOLD');
     }
 
-    return {
-      actions,
-      eligibilityPreview: evaluation,
-      releaseRequiresExecutionReevaluation: true,
-    };
+    const declaration = await this.prisma.customsDeclaration.findFirst({
+      where: { shipmentReferenceId },
+      include: { permitReferences: true },
+    });
+    if (declaration) {
+      try {
+        this.boundary.assertMandatoryPermitsResolved(declaration.permitReferences);
+      } catch {
+        reasons.push('MANDATORY_PERMIT');
+      }
+    }
+
+    return { mayRelease: reasons.length === 0, reasons };
   }
 
-  async executeCargoRelease(input: {
-    shipmentId: string;
-    officeholderId: string;
-    actorPayload?: Record<string, unknown>;
+  async authorizeRelease(input: {
+    shipmentReferenceId: string;
+    actorPersona: CustomsActorPersona;
+    actorRoleMarker?: string;
+    authorizedByOfficeholderId: string;
+    releaseDecisionReferenceId?: string;
   }) {
-    if (input.actorPayload) {
-      this.boundary.rejectClientReleaseFields(input.actorPayload);
-    }
-
-    const evaluation = await this.eligibility.evaluateShipmentRelease(
-      input.shipmentId,
-      input.officeholderId,
+    this.boundary.assertTechnicalAdminCannotReleaseShipment(
+      input.actorPersona,
+      input.actorRoleMarker,
     );
+    this.boundary.assertAiCannotAuthorizeRelease('AUTHORIZE_RELEASE', input.actorPersona);
 
-    if (!evaluation.conditions.officialReleaseAuthority) {
-      throw new ForbiddenException(CUSTOMS_REASON_CODES.OFFICIAL_WITHOUT_AUTHORITY);
+    const readiness = await this.evaluateReleaseReadiness(input.shipmentReferenceId);
+    if (!readiness.mayRelease) {
+      throw new BadRequestException(`Release blocked: ${readiness.reasons.join(',')}`);
     }
 
-    this.boundary.assertReleaseAuthoritativeConditions(evaluation.conditions);
+    const releaseReference = `REL-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const now = new Date();
+    const record = await this.prisma.customsReleaseRecord.create({
+      data: {
+        shipmentReferenceId: input.shipmentReferenceId,
+        releaseReference,
+        status: CustomsReleaseRecordStatus.RELEASED,
+        authorizedByOfficeholderId: input.authorizedByOfficeholderId,
+        releaseDecisionReferenceId: input.releaseDecisionReferenceId,
+        releasedAt: new Date(),
+        paymentRecordedDoesNotRelease: true,
+      },
+    });
 
-    await this.prisma.$transaction([
-      this.prisma.customsReleaseRecord.upsert({
-        where: { shipmentId: input.shipmentId },
-        create: {
-          shipmentId: input.shipmentId,
-          status: CustomsReleaseStatus.RELEASED,
-          releasedAt: now,
-          releasedByOfficeholderId: input.officeholderId,
-          lastEligibilitySnapshot: evaluation.conditions,
-        },
-        update: {
-          status: CustomsReleaseStatus.RELEASED,
-          releasedAt: now,
-          releasedByOfficeholderId: input.officeholderId,
-          lastEligibilitySnapshot: evaluation.conditions,
-        },
-      }),
-      this.prisma.tradeShipment.update({
-        where: { id: input.shipmentId },
-        data: { status: TradeShipmentStatus.RELEASED },
-      }),
-    ]);
+    await this.prisma.shipmentReference.update({
+      where: { id: input.shipmentReferenceId },
+      data: {
+        currentReleaseRecordId: record.id,
+        status: ShipmentReferenceStatus.RELEASED,
+      },
+    });
 
-    return {
-      shipmentId: input.shipmentId,
-      status: CustomsReleaseStatus.RELEASED,
-      releasedAt: now.toISOString(),
-      reevaluatedAtExecution: true,
-    };
+    return record;
   }
 
-  assertReleaseNotAvailableFromClientActionList(actionCode: string): void {
-    if (actionCode === 'EXECUTE_CARGO_RELEASE') {
-      throw new BadRequestException(CUSTOMS_REASON_CODES.RELEASE_REEVALUATION_REQUIRED);
-    }
+  assertPaymentEventDoesNotRelease(actorPersona: CustomsActorPersona): void {
+    this.boundary.assertPaymentDoesNotReleaseCargo(actorPersona);
+  }
+
+  listBlockingPermits(
+    permits: {
+      isMandatoryForRelease: boolean;
+      blocksReleaseWhenUnresolved: boolean;
+      status: CustomsPermitReferenceStatus;
+    }[],
+  ): number {
+    return permits.filter(
+      (permit) =>
+        permit.isMandatoryForRelease &&
+        permit.blocksReleaseWhenUnresolved &&
+        permit.status === CustomsPermitReferenceStatus.UNRESOLVED_MANDATORY,
+    ).length;
   }
 }

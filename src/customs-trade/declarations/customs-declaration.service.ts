@@ -1,5 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CustomsDeclarationStatus, Prisma, TradeShipmentStatus } from '@prisma/client';
+import {
+  CustomsDeclarationStatus,
+  CustomsDeclarationType,
+  CustomsDeclarationVersionStatus,
+  CustomsStatusSubjectKind,
+  Prisma,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { CustomsTradeBoundaryService } from '../common/customs-trade-boundary.service';
@@ -11,117 +17,112 @@ export class CustomsDeclarationService {
     private readonly boundary: CustomsTradeBoundaryService,
   ) {}
 
-  async submitInitialVersion(input: {
-    customsDeclarationId: string;
-    declarationData: Record<string, unknown>;
-    submittedByIdentityId: string;
+  async submitDeclaration(input: {
+    traderAccountId: string;
+    declarationType: CustomsDeclarationType;
+    shipmentReferenceId?: string;
+    submissionPayload?: Record<string, unknown>;
   }) {
-    this.boundary.rejectClientDeclarationFields(input.declarationData);
+    const declarationNumber = `CD-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const declaration = await this.prisma.customsDeclaration.findUnique({
-      where: { id: input.customsDeclarationId },
-      include: { versions: { orderBy: { versionNumber: 'desc' }, take: 1 } },
+    const result = await this.prisma.$transaction(async (tx) => {
+      const declaration = await tx.customsDeclaration.create({
+        data: {
+          declarationNumber,
+          traderAccountId: input.traderAccountId,
+          shipmentReferenceId: input.shipmentReferenceId,
+          declarationType: input.declarationType,
+          status: CustomsDeclarationStatus.SUBMITTED,
+          doesNotReleaseCargo: true,
+          submittedAt: new Date(),
+        },
+      });
+
+      const version = await tx.customsDeclarationVersion.create({
+        data: {
+          customsDeclarationId: declaration.id,
+          versionNumber: 1,
+          status: CustomsDeclarationVersionStatus.LOCKED,
+          submissionPayload: (input.submissionPayload ?? {}) as Prisma.InputJsonValue,
+          submittedAt: new Date(),
+          lockedAt: new Date(),
+        },
+      });
+
+      await tx.customsDeclaration.update({
+        where: { id: declaration.id },
+        data: { currentVersionId: version.id },
+      });
+
+      await tx.customsStatusHistory.create({
+        data: {
+          subjectKind: CustomsStatusSubjectKind.DECLARATION,
+          customsDeclarationId: declaration.id,
+          toStatusCode: CustomsDeclarationStatus.SUBMITTED,
+          reasonSummary: 'Declaration submitted; cargo not released',
+        },
+      });
+
+      return { declaration, version };
     });
 
-    if (!declaration) {
-      throw new NotFoundException('Declaration not found');
-    }
-
-    const nextVersion = (declaration.versions[0]?.versionNumber ?? 0) + 1;
-    const now = new Date();
-
-    const version = await this.prisma.customsDeclarationVersion.create({
-      data: {
-        customsDeclarationId: declaration.id,
-        versionNumber: nextVersion,
-        declarationData: input.declarationData as Prisma.InputJsonValue,
-        submittedByIdentityId: input.submittedByIdentityId,
-        submittedAt: now,
-        lockedAt: now,
-        isAmendment: false,
-      },
-    });
-
-    await this.prisma.customsDeclaration.update({
-      where: { id: declaration.id },
-      data: {
-        currentVersionId: version.id,
-        status: CustomsDeclarationStatus.SUBMITTED,
-      },
-    });
-
-    await this.prisma.tradeShipment.update({
-      where: { id: declaration.shipmentId },
-      data: { status: TradeShipmentStatus.ACTIVE },
-    });
-
-    this.boundary.assertDeclarationSubmissionDoesNotRelease();
+    this.boundary.assertDeclarationSubmissionDoesNotReleaseCargo(
+      result.declaration.doesNotReleaseCargo,
+    );
 
     return {
-      version,
+      declaration: result.declaration,
+      version: result.version,
       cargoReleased: false,
     };
   }
 
   async amendDeclaration(input: {
     customsDeclarationId: string;
-    declarationData: Record<string, unknown>;
-    submittedByIdentityId: string;
+    submissionPayload?: Record<string, unknown>;
   }) {
-    this.boundary.rejectClientDeclarationFields(input.declarationData);
-
-    const declaration = await this.prisma.customsDeclaration.findUnique({
+    const existing = await this.prisma.customsDeclaration.findUnique({
       where: { id: input.customsDeclarationId },
-      include: {
-        currentVersion: true,
-        versions: { orderBy: { versionNumber: 'desc' }, take: 1 },
-      },
+      include: { currentVersion: true },
     });
-
-    if (!declaration?.currentVersion) {
+    if (!existing?.currentVersion) {
       throw new NotFoundException('Declaration not found');
     }
 
-    const priorVersion = declaration.currentVersion;
-    const nextVersion = (declaration.versions[0]?.versionNumber ?? 0) + 1;
-    const now = new Date();
+    const priorVersion = existing.currentVersion;
 
-    const version = await this.prisma.customsDeclarationVersion.create({
-      data: {
-        customsDeclarationId: declaration.id,
-        versionNumber: nextVersion,
-        declarationData: input.declarationData as Prisma.InputJsonValue,
-        submittedByIdentityId: input.submittedByIdentityId,
-        submittedAt: now,
-        lockedAt: now,
-        isAmendment: true,
-        supersedesVersionId: priorVersion.id,
-      },
-    });
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.customsDeclarationVersion.update({
+        where: { id: priorVersion.id },
+        data: { status: CustomsDeclarationVersionStatus.SUPERSEDED },
+      });
 
-    await this.prisma.customsDeclaration.update({
-      where: { id: declaration.id },
-      data: {
-        currentVersionId: version.id,
-        status: CustomsDeclarationStatus.ACCEPTED,
-      },
+      const nextVersionNumber = priorVersion.versionNumber + 1;
+      const version = await tx.customsDeclarationVersion.create({
+        data: {
+          customsDeclarationId: existing.id,
+          versionNumber: nextVersionNumber,
+          status: CustomsDeclarationVersionStatus.LOCKED,
+          submissionPayload: (input.submissionPayload ?? {}) as Prisma.InputJsonValue,
+          submittedAt: new Date(),
+          lockedAt: new Date(),
+          supersedesVersionId: priorVersion.id,
+        },
+      });
+
+      await tx.customsDeclaration.update({
+        where: { id: existing.id },
+        data: { currentVersionId: version.id },
+      });
+
+      return { priorVersion, version };
     });
 
     return {
-      version,
-      previousVersionId: priorVersion.id,
-      previousVersionNumber: priorVersion.versionNumber,
+      priorVersionId: result.priorVersion.id,
+      priorVersionNumber: result.priorVersion.versionNumber,
+      newVersion: result.version,
+      priorVersionPreserved: true,
     };
-  }
-
-  async attemptDestructiveEdit(versionId: string, payload: Record<string, unknown>) {
-    const version = await this.prisma.customsDeclarationVersion.findUnique({
-      where: { id: versionId },
-    });
-    this.boundary.assertSubmittedDeclarationVersionImmutable(version?.lockedAt);
-    return this.prisma.customsDeclarationVersion.update({
-      where: { id: versionId },
-      data: { declarationData: payload as Prisma.InputJsonValue },
-    });
   }
 }

@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CustomsRegistrationStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { CUSTOMS_TRADE_RULE_ENVIRONMENT } from '../customs-trade.constants';
 import { PUBLIC_CUSTOMS_VERIFICATION_FORBIDDEN_RESPONSE_KEYS } from '../customs-trade-schema.constants';
 
 export interface PublicCustomsTradeVerificationResponse {
@@ -15,32 +17,33 @@ export class PublicCustomsTradeVerificationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async verify(reference: string): Promise<PublicCustomsTradeVerificationResponse> {
-    const profile = await this.prisma.tradeOrganizationProfile.findUnique({
-      where: { profileReference: reference },
+    const traderAccount = await this.prisma.traderAccount.findUnique({
+      where: { accountNumber: reference },
       select: {
-        profileReference: true,
-        ruleEnvironment: true,
-        importerStatus: true,
-        exporterStatus: true,
+        accountNumber: true,
+        importerRegistration: { select: { status: true } },
+        exporterRegistration: { select: { status: true } },
       },
     });
 
-    if (!profile) {
+    if (!traderAccount) {
       return {
         reference,
         verificationState: 'NOT_FOUND',
-        ruleEnvironment: 'NON_PRODUCTION',
+        ruleEnvironment: CUSTOMS_TRADE_RULE_ENVIRONMENT,
         publicFacts: {},
       };
     }
 
     const response: PublicCustomsTradeVerificationResponse = {
-      reference: profile.profileReference,
+      reference: traderAccount.accountNumber,
       verificationState: 'VALID_FORMAT',
-      ruleEnvironment: profile.ruleEnvironment,
+      ruleEnvironment: CUSTOMS_TRADE_RULE_ENVIRONMENT,
       publicFacts: {
-        importerRegistered: profile.importerStatus === 'ACTIVE',
-        exporterRegistered: profile.exporterStatus === 'ACTIVE',
+        importerRegistered:
+          traderAccount.importerRegistration?.status === CustomsRegistrationStatus.ACTIVE,
+        exporterRegistered:
+          traderAccount.exporterRegistration?.status === CustomsRegistrationStatus.ACTIVE,
       },
     };
 

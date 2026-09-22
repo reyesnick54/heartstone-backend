@@ -6,9 +6,13 @@ import { PrismaService } from '../../../database/prisma.service';
 export class TradeScopeService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findOrganizationTradeProfile(organizationId: string) {
-    return this.prisma.tradeOrganizationProfile.findUnique({
+  findOrganizationTraderAccount(organizationId: string) {
+    return this.prisma.traderAccount.findFirst({
       where: { organizationId },
+      include: {
+        importerRegistration: true,
+        exporterRegistration: true,
+      },
     });
   }
 }

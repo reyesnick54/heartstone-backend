@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
-  CustomsAppealStatus,
-  CustomsAssessmentStatus,
   CustomsDeclarationStatus,
-  CustomsExternalDependencyStatus,
   CustomsHoldStatus,
-  CustomsInspectionStatus,
-  CustomsReleaseStatus,
-  CustomsReviewStageStatus,
-  TradePermitStatus,
+  CustomsRefundClaimStatus,
+  ShipmentReferenceStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
@@ -30,21 +25,15 @@ export class OfficialTradeProjectionService {
     }
 
     const jurisdictionIds = context.institutionalContext.jurisdictionIds;
-    const profileFilter = jurisdictionIds.length ? { jurisdictionId: { in: jurisdictionIds } } : {};
-    const shipmentFilter = { tradeOrganizationProfile: profileFilter };
+    const traderFilter = jurisdictionIds.length ? { jurisdictionId: { in: jurisdictionIds } } : {};
+    const shipmentFilter = jurisdictionIds.length ? { traderAccount: traderFilter } : {};
 
     const [
       declarationReviewQueue,
-      classificationReview,
-      valuationReview,
-      permitVerification,
-      riskReviewQueue,
       inspectionQueue,
       holdQueue,
       releaseReadyQueue,
       refundAdjustmentQueue,
-      appealQueue,
-      slaRisk,
       metrics,
     ] = await Promise.all([
       this.prisma.customsDeclaration.count({
@@ -52,76 +41,27 @@ export class OfficialTradeProjectionService {
           status: {
             in: [CustomsDeclarationStatus.SUBMITTED, CustomsDeclarationStatus.UNDER_REVIEW],
           },
-          tradeOrganizationProfile: profileFilter,
-        },
-      }),
-      this.prisma.customsReleaseReview.count({
-        where: {
-          classificationReviewStatus: {
-            in: [CustomsReviewStageStatus.NOT_STARTED, CustomsReviewStageStatus.IN_PROGRESS],
-          },
-          shipment: shipmentFilter,
-        },
-      }),
-      this.prisma.customsReleaseReview.count({
-        where: {
-          valuationReviewStatus: {
-            in: [CustomsReviewStageStatus.NOT_STARTED, CustomsReviewStageStatus.IN_PROGRESS],
-          },
-          shipment: shipmentFilter,
-        },
-      }),
-      this.prisma.tradePermit.count({
-        where: {
-          status: { in: [TradePermitStatus.REQUESTED, TradePermitStatus.UNDER_REVIEW] },
-          tradeOrganizationProfile: profileFilter,
-        },
-      }),
-      this.prisma.customsReleaseReview.count({
-        where: {
-          riskReviewStatus: {
-            in: [CustomsReviewStageStatus.NOT_STARTED, CustomsReviewStageStatus.IN_PROGRESS],
-          },
-          shipment: shipmentFilter,
+          traderAccount: traderFilter,
         },
       }),
       this.prisma.customsInspection.count({
-        where: {
-          status: {
-            in: [
-              CustomsInspectionStatus.REQUESTED,
-              CustomsInspectionStatus.SCHEDULED,
-              CustomsInspectionStatus.IN_PROGRESS,
-            ],
-          },
-          shipment: shipmentFilter,
-        },
+        where: { shipmentReference: shipmentFilter },
       }),
       this.prisma.customsHold.count({
-        where: { status: CustomsHoldStatus.ACTIVE, shipment: shipmentFilter },
+        where: { status: CustomsHoldStatus.ACTIVE, shipmentReference: shipmentFilter },
       }),
-      this.prisma.customsReleaseRecord.count({
+      this.prisma.shipmentReference.count({
         where: {
-          status: CustomsReleaseStatus.RELEASE_AUTHORIZED,
-          shipment: shipmentFilter,
+          status: ShipmentReferenceStatus.UNDER_CUSTOMS,
+          ...shipmentFilter,
         },
       }),
-      this.prisma.customsAssessment.count({
+      this.prisma.customsRefundClaim.count({
         where: {
-          status: { in: [CustomsAssessmentStatus.ADJUSTED, CustomsAssessmentStatus.ISSUED] },
-          tradeOrganizationProfile: profileFilter,
-        },
-      }),
-      this.prisma.customsAppeal.count({
-        where: {
-          status: { in: [CustomsAppealStatus.FILED, CustomsAppealStatus.UNDER_REVIEW] },
-          tradeOrganizationProfile: profileFilter,
-        },
-      }),
-      this.prisma.customsExternalDependency.count({
-        where: {
-          status: CustomsExternalDependencyStatus.PENDING,
-          shipment: shipmentFilter,
+          status: {
+            in: [CustomsRefundClaimStatus.SUBMITTED, CustomsRefundClaimStatus.UNDER_REVIEW],
+          },
+          customsDeclaration: { traderAccount: traderFilter },
         },
       }),
       this.dashboard.getOperationalMetrics(jurisdictionIds),
@@ -130,22 +70,17 @@ export class OfficialTradeProjectionService {
     return {
       generatedAt: new Date().toISOString(),
       ruleEnvironment: this.boundary.ruleEnvironment,
-      analyticsCannotExecuteRelease: this.boundary.analyticsCannotExecuteRelease,
+      disclaimer: this.boundary.rulesDisclaimer,
+      aiDisclaimer: this.boundary.aiDisclaimer,
       queues: {
         declarationReviewQueue,
-        classificationReview,
-        valuationReview,
-        permitVerification,
-        riskReviewQueue,
         inspectionQueue,
         holdQueue,
         releaseReadyQueue,
         refundAdjustmentQueue,
-        appealQueue,
-        slaRisk,
       },
-      metrics: metrics.metrics,
-      metricsDisclaimer: metrics.disclaimer,
+      metrics,
+      releaseExecutionExcludedFromWorkspace: true,
     };
   }
 
@@ -153,10 +88,10 @@ export class OfficialTradeProjectionService {
     return {
       generatedAt: new Date().toISOString(),
       ruleEnvironment: this.boundary.ruleEnvironment,
-      analyticsCannotExecuteRelease: this.boundary.analyticsCannotExecuteRelease,
+      disclaimer: this.boundary.rulesDisclaimer,
       queues: {},
-      metrics: {},
-      metricsDisclaimer: this.boundary.aiDisclaimer,
+      metrics: null,
+      releaseExecutionExcludedFromWorkspace: true,
     };
   }
 }

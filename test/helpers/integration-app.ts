@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
+import { resetLabourData } from '../../src/database/labour-test-reset';
 import { resetPlanningConstructionData } from '../../src/database/planning-construction-test-reset';
 import { PrismaService } from '../../src/database/prisma.service';
 import { resetPropertyRegistryData } from '../../src/database/property-test-reset';
@@ -196,5 +197,6 @@ export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetIntelligenceData(prisma);
   await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);
+  await resetLabourData(prisma);
   await resetIdentityData(prisma);
 }

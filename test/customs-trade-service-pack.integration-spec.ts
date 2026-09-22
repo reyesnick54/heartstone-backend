@@ -1,9 +1,13 @@
 import { type INestApplication } from '@nestjs/common';
-import { OrganizationStatus, TradeShipmentDirection } from '@prisma/client';
+import {
+  CustomsBrokerAuthorizationStatus,
+  OrganizationStatus,
+  TradeRepresentationKind,
+} from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { TradeOrganizationProfileService } from '../src/customs-trade/profile/trade-organization-profile.service';
+import { TraderAccountProfileService } from '../src/customs-trade/profile/trader-account-profile.service';
 import { PrismaService } from '../src/database/prisma.service';
 import { CUSTOMS_TRADE_SERVICE_PACK_TEMPLATE } from '../src/service-catalog/service-packs/customs-trade-service-pack.template';
 import { validateServicePackManifest } from '../src/service-catalog/service-packs/validate-service-pack';
@@ -33,7 +37,7 @@ describe('Customs & Trade service pack and experience (integration)', () => {
     expect(CUSTOMS_TRADE_SERVICE_PACK_TEMPLATE.services).toHaveLength(16);
   });
 
-  it('exposes business trade home for registered trade profile', async () => {
+  it('exposes business trade home for registered trader account', async () => {
     const member = await provisionAuthenticatedIdentity(app, prisma, {
       loginIdentifier: 'trade-member@test.local',
       password: 'TradeMember123!',
@@ -62,8 +66,8 @@ describe('Customs & Trade service pack and experience (integration)', () => {
       },
     });
 
-    const profiles = app.get(TradeOrganizationProfileService);
-    await profiles.ensureProfile({
+    const profiles = app.get(TraderAccountProfileService);
+    const traderAccount = await profiles.ensureTraderAccount({
       organizationId: organization.id,
       jurisdictionId: jurisdiction.id,
     });
@@ -76,7 +80,7 @@ describe('Customs & Trade service pack and experience (integration)', () => {
     ).body as { ruleEnvironment: string; tradeProfileReference: string };
 
     expect(home.ruleEnvironment).toBe('NON_PRODUCTION');
-    expect(home.tradeProfileReference).toMatch(/^TRADE-/);
+    expect(home.tradeProfileReference).toBe(traderAccount.accountNumber);
   });
 
   it('denies business trade access without organization relationship', async () => {
@@ -95,7 +99,7 @@ describe('Customs & Trade service pack and experience (integration)', () => {
       .expect(403);
   });
 
-  it('denies broker access to shipment outside representative scope', async () => {
+  it('scopes broker shipment list to authorized trader accounts', async () => {
     const broker = await provisionAuthenticatedIdentity(app, prisma, {
       loginIdentifier: 'trade-broker@test.local',
       password: 'TradeBroker123!',
@@ -122,36 +126,51 @@ describe('Customs & Trade service pack and experience (integration)', () => {
       data: {
         organizationId: organization.id,
         identityId: broker.identityId,
-        scopeDescription: 'Customs broker — scoped shipments only',
+        scopeDescription: 'Customs broker — scoped trader accounts only',
         status: 'ACTIVE',
         effectiveFrom: new Date('2020-01-01'),
       },
     });
 
-    const profiles = app.get(TradeOrganizationProfileService);
-    const profile = await profiles.ensureProfile({
+    const profiles = app.get(TraderAccountProfileService);
+    const authorizedTrader = await profiles.ensureTraderAccount({
       organizationId: organization.id,
       jurisdictionId: jurisdiction.id,
     });
 
-    await prisma.tradeShipment.create({
+    const otherTrader = await prisma.traderAccount.create({
       data: {
+        accountNumber: 'TRADE-OTHER-ACCT',
         organizationId: organization.id,
-        tradeOrganizationProfileId: profile.id,
-        shipmentReference: 'SHIP-OUT-OF-SCOPE',
-        direction: TradeShipmentDirection.IMPORT,
+        jurisdictionId: jurisdiction.id,
         status: 'ACTIVE',
       },
     });
 
-    const scopedShipment = await prisma.tradeShipment.create({
+    await prisma.customsBrokerAuthorization.create({
       data: {
-        organizationId: organization.id,
-        tradeOrganizationProfileId: profile.id,
+        traderAccountId: authorizedTrader.id,
         representativeAuthorityId: authority.id,
-        shipmentReference: 'SHIP-IN-SCOPE',
-        direction: TradeShipmentDirection.IMPORT,
-        status: 'ACTIVE',
+        representationKind: TradeRepresentationKind.CUSTOMS_BROKER,
+        status: CustomsBrokerAuthorizationStatus.ACTIVE,
+      },
+    });
+
+    await prisma.shipmentReference.create({
+      data: {
+        shipmentReferenceNumber: 'SHIP-OUT-OF-SCOPE',
+        ownerOrganizationId: organization.id,
+        traderAccountId: otherTrader.id,
+        status: 'REGISTERED',
+      },
+    });
+
+    const scopedShipment = await prisma.shipmentReference.create({
+      data: {
+        shipmentReferenceNumber: 'SHIP-IN-SCOPE',
+        ownerOrganizationId: organization.id,
+        traderAccountId: authorizedTrader.id,
+        status: 'REGISTERED',
       },
     });
 
