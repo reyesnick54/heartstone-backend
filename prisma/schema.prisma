@@ -125,6 +125,10 @@ model Jurisdiction {
   traderAccounts                 TraderAccount[]
   importerRegistrations          ImporterRegistration[]
   exporterRegistrations          ExporterRegistration[]
+  benefitCategories              BenefitCategory[]
+  benefitPrograms                BenefitProgram[]
+  benefitApplicantProfiles       BenefitApplicantProfile[]
+  householdRecords               HouseholdRecord[]
 
   @@map("jurisdictions")
 }
@@ -204,6 +208,7 @@ model Institution {
   propertyTransfers              PropertyTransfer[]
   propertyRegistryEntries        PropertyRegistryEntry[]
   surveyRecords                  SurveyRecord[]
+  benefitPrograms                BenefitProgram[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -436,6 +441,7 @@ model ExternalAuthority {
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
   customsExternalDependencies      CustomsExternalDependency[]
   restrictedGoodsRequirements      RestrictedGoodsRequirement[]
+  externalEligibilityDeterminations ExternalEligibilityDeterminationReference[]
 
   @@map("external_authorities")
 }
@@ -841,6 +847,10 @@ model Identity {
   traderAccountsAsPrimary                  TraderAccount[]                        @relation("TraderAccountPrimaryIdentity")
   customsStatusHistoryEvents               CustomsStatusHistory[]                 @relation("CustomsStatusHistoryActor")
   customsExternalDependenciesRecorded      CustomsExternalDependency[]            @relation("CustomsExternalDependencyRecorder")
+  socialProtectionApplicantProfiles        BenefitApplicantProfile[]              @relation("SocialProtectionApplicantProfile")
+  socialProtectionHouseholdMembers         HouseholdMember[]                      @relation("SocialProtectionHouseholdMember")
+  externalEligibilityDeterminationsRecorded ExternalEligibilityDeterminationReference[] @relation("ExternalEligibilityDeterminationRecorder")
+  benefitStatusHistoryEvents               BenefitStatusHistory[]                 @relation("BenefitStatusHistoryActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1251,6 +1261,7 @@ model FunctionAuthorityRecord {
   manualOperationAuthorizations ManualOperationAuthorization[]
   continuityDecisions           ContinuityDecision[]
   resumptionAuthorizations      ResumptionAuthorization[]
+  benefitSuspensions            BenefitSuspension[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1530,6 +1541,7 @@ model AuthorityEvaluationRecord {
   propertyRegistryCorrections       PropertyRegistryCorrection[]  @relation("PropertyRegistryCorrectionAuthority")
   propertyRegistryVerifications   PropertyRegistryVerification[] @relation("PropertyRegistryVerificationAuthority")
   titleVersions                   TitleVersion[]                @relation("TitleVersionAuthority")
+  benefitSuspensions              BenefitSuspension[]
 
   @@index([functionAuthorityRecordId])
   @@index([identityId])
@@ -1805,6 +1817,7 @@ model GovernmentServiceVersion {
   decisionTypeVersions                DecisionTypeVersion[]
   governmentDecisions                 GovernmentDecision[]
   officialInstruments                 OfficialInstrument[]
+  benefitProgramVersions              BenefitProgramVersion[]
 
   @@unique([governmentServiceId, version])
   @@index([governmentServiceId])
@@ -2463,6 +2476,7 @@ model Application {
   driverLicenseApplicationProfile DriverLicenseApplicationProfile?
   propertyTransfers          PropertyTransfer[]
   customsDeclarations        CustomsDeclaration[]
+  benefitApplicationProfile  BenefitApplicationProfile?
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2602,6 +2616,10 @@ model Case {
   propertyTransfers                 PropertyTransfer[]
   propertyRegistryEntries           PropertyRegistryEntry[]
   customsDeclarations               CustomsDeclaration[]
+  benefitApplicationProfile         BenefitApplicationProfile?
+  externalEligibilityDeterminations ExternalEligibilityDeterminationReference[]
+  benefitReviews                    BenefitReview[]
+  socialSupportCaseReferences       SocialSupportCaseReference[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3210,6 +3228,7 @@ model MasterAdministrativeFile {
   vehicleRecords                       VehicleRecord[]
   transportOperatorRecords             TransportOperatorRecord[]
   traderAccounts                       TraderAccount[]
+  benefitApplicantProfiles             BenefitApplicantProfile[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -3635,6 +3654,8 @@ model EvidenceRecord {
   obligationEvidenceLinks         ObligationEvidenceLink[]
   vitalEventEvidenceLinks         VitalEventEvidenceLink[]
   propertyTransferEvidenceLinks   PropertyTransferEvidenceLink[]
+  eligibilityEvidenceReferences     EligibilityEvidenceReference[]
+  householdRelationships            HouseholdRelationship[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5089,6 +5110,13 @@ model GovernmentDecision {
   cadastrePropertyInterestHistory   CadastrePropertyInterestHistory[] @relation("CadastrePropertyInterestHistoryDecision")
   titleVersions                     TitleVersion[]                  @relation("TitleVersionDecision")
   customsReleaseDecisionReference   CustomsReleaseDecisionReference?
+  benefitEligibilityHumanDecisions  BenefitEligibilityAssessment[]    @relation("BenefitEligibilityHumanDecision")
+  benefitAwards                     BenefitAward[]                    @relation("BenefitAwardDecision")
+  benefitAwardVersions              BenefitAwardVersion[]             @relation("BenefitAwardVersionDecision")
+  benefitSuspensions                BenefitSuspension[]               @relation("BenefitSuspensionDecision")
+  benefitTerminations               BenefitTermination[]              @relation("BenefitTerminationDecision")
+  benefitStatusHistory              BenefitStatusHistory[]            @relation("BenefitStatusHistoryDecision")
+  socialProtectionAppealsChallenged SocialProtectionAppealReference[] @relation("SocialProtectionAppealChallengedDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -7242,6 +7270,7 @@ model RedressMatter {
   judicialReviewInformationRecords    JudicialReviewInformationRecord[]
   employmentComplaints                EmploymentComplaint[]
   employmentDisputes                  EmploymentDispute[]
+  socialProtectionAppealReferences    SocialProtectionAppealReference[]
 
   @@index([routeVersionId])
   @@index([challengedDecisionId])
@@ -8245,6 +8274,7 @@ model Invoice {
   arrearsRecords             ArrearsRecord[]
   financialDisputes          FinancialDispute[]
   taxLiabilities             TaxLiability[]
+  benefitPaymentScheduleReferences BenefitPaymentScheduleReference[]
 
   @@index([feeAssessmentId])
   @@index([caseId])
@@ -8357,6 +8387,7 @@ model PaymentTransaction {
   events                         PaymentTransactionEvent[]
   taxPaymentAllocations          TaxPaymentAllocation[]
   propertyTransferFeePayments    PropertyTransfer[]       @relation("PropertyTransferFeePayment")
+  benefitDisbursementReferences  BenefitDisbursementReference[]
 
   @@unique([paymentProviderConfigurationId, providerTransactionReference])
   @@index([paymentIntentId])
@@ -20027,4 +20058,733 @@ model CustomsExternalDependency {
   @@index([shipmentReferenceId])
   @@index([customsDeclarationId])
   @@map("customs_external_dependencies")
+}
+// ─── Social Protection, Public Benefits & Citizen Support Foundation ─────────
+
+enum SocialProtectionDataClassification {
+  PUBLIC
+  OFFICIAL
+  APPLICANT_SELF
+  HOUSEHOLD_SCOPED
+  CASEWORKER
+  INSTITUTIONAL
+  CROSS_PROGRAM_RESTRICTED
+  HIGHLY_SENSITIVE
+}
+
+enum SocialProtectionActorPersona {
+  APPLICANT
+  HOUSEHOLD_MEMBER
+  AUTHORIZED_REPRESENTATIVE
+  CASEWORKER
+  ELIGIBILITY_OFFICER
+  BENEFIT_DECISION_OFFICER
+  SENIOR_DECISION_OFFICER
+  INSTITUTIONAL_REVIEWER
+  EXTERNAL_AUTHORITY_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum BenefitCategoryKind {
+  INCOME_SUPPORT
+  UNEMPLOYMENT_SUPPORT
+  DISABILITY_RELATED
+  PENSION_SOCIAL_SECURITY
+  HOUSING_ASSISTANCE
+  FOOD_ASSISTANCE
+  FAMILY_SUPPORT
+  CHILD_SUPPORT
+  ELDERLY_SUPPORT
+  EMERGENCY_ASSISTANCE
+  EDUCATION_BENEFITS
+  HEALTHCARE_SUPPORT
+  VETERAN_SUPPORT
+  DISASTER_RELIEF
+  TARGETED_SUBSIDY
+  MEANS_TESTED
+  CATEGORY_BASED
+  OTHER_CONFIGURED
+}
+
+enum BenefitProgramStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum BenefitProgramVersionStatus {
+  DRAFT
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum BenefitApplicantProfileStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum HouseholdRecordStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum HouseholdMemberRole {
+  PRIMARY_APPLICANT
+  MEMBER
+  DEPENDENT
+  REPRESENTED
+  OTHER_CONFIGURED
+}
+
+enum HouseholdRelationshipStatus {
+  ASSERTED
+  EVIDENCE_REQUIRED
+  VERIFIED
+  WITHDRAWN
+}
+
+enum BenefitApplicationProfileStatus {
+  LINKED
+  ACTIVE
+  WITHDRAWN
+  CLOSED
+}
+
+enum BenefitEligibilityAssessmentStatus {
+  DRAFT
+  PRELIMINARY
+  FINAL
+  SUPERSEDED
+}
+
+enum BenefitEligibilityOutcome {
+  UNDETERMINED
+  PRELIMINARILY_ELIGIBLE
+  PRELIMINARILY_INELIGIBLE
+  REQUIRES_HUMAN_DECISION
+  ELIGIBLE
+  INELIGIBLE
+}
+
+enum BenefitAwardLifecycleStatus {
+  NOT_AWARDED
+  PENDING_DECISION
+  AWARDED
+  EFFECTIVE
+  SUSPENDED
+  TERMINATED
+  SUPERSEDED
+  CLOSED
+}
+
+enum BenefitReviewKind {
+  PERIODIC
+  CHANGE_IN_CIRCUMSTANCE
+  COMPLIANCE
+  QUALITY
+  OTHER_CONFIGURED
+}
+
+enum BenefitRenewalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  DECIDED
+  CLOSED
+}
+
+enum BenefitSuspensionStatus {
+  PROPOSED
+  ACTIVE
+  LIFTED
+  CLOSED
+}
+
+enum BenefitTerminationStatus {
+  PROPOSED
+  EFFECTIVE
+  CLOSED
+}
+
+enum BenefitStatusHistorySubjectKind {
+  AWARD
+  APPLICATION_PROFILE
+  ELIGIBILITY_ASSESSMENT
+}
+
+enum HouseholdDeclarationStatus {
+  DRAFT
+  SUBMITTED
+  ACKNOWLEDGED
+  WITHDRAWN
+}
+
+enum ExternalEligibilityDeterminationRecordedBy {
+  EXTERNAL_AUTHORITY_LIAISON
+  INTEGRATION_SYSTEM
+  ELIGIBILITY_OFFICER
+  SYSTEM
+}
+
+enum SocialProtectionAppealReferenceStatus {
+  LINKED
+  ACTIVE
+  CLOSED
+}
+
+model BenefitCategory {
+  id               String              @id @default(uuid()) @db.Uuid
+  categoryCode     String              @unique
+  categoryKind     BenefitCategoryKind
+  displayLabel     String
+  jurisdictionId   String?             @db.Uuid
+  effectiveFrom    DateTime            @default(now())
+  effectiveUntil   DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  jurisdiction     Jurisdiction?       @relation(fields: [jurisdictionId], references: [id])
+  benefitPrograms  BenefitProgram[]
+
+  @@index([categoryKind])
+  @@index([jurisdictionId])
+  @@map("benefit_categories")
+}
+
+model BenefitProgram {
+  id                         String               @id @default(uuid()) @db.Uuid
+  programCode                String               @unique
+  programName                String
+  benefitCategoryId          String               @db.Uuid
+  jurisdictionId             String?              @db.Uuid
+  institutionId              String?              @db.Uuid
+  status                     BenefitProgramStatus @default(DRAFT)
+  doesNotEncodeEligibilityLaw Boolean             @default(true)
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+  benefitCategory            BenefitCategory      @relation(fields: [benefitCategoryId], references: [id])
+  jurisdiction               Jurisdiction?        @relation(fields: [jurisdictionId], references: [id])
+  institution                Institution?         @relation(fields: [institutionId], references: [id])
+  versions                   BenefitProgramVersion[]
+  applicationProfiles        BenefitApplicationProfile[]
+  eligibilityAssessments     BenefitEligibilityAssessment[]
+  awards                     BenefitAward[]
+
+  @@index([benefitCategoryId])
+  @@index([jurisdictionId])
+  @@index([status])
+  @@map("benefit_programs")
+}
+
+model BenefitProgramVersion {
+  id                              String                      @id @default(uuid()) @db.Uuid
+  benefitProgramId                String                      @db.Uuid
+  versionNumber                   Int
+  status                          BenefitProgramVersionStatus @default(DRAFT)
+  governmentServiceVersionId      String?                     @db.Uuid
+  eligibilityRuleVersionReference String?
+  humanDecisionRequired           Boolean                     @default(true)
+  workflowPermitsAutoAward        Boolean                     @default(false)
+  effectiveFrom                   DateTime?
+  effectiveUntil                  DateTime?
+  publishedAt                     DateTime?
+  createdAt                       DateTime                    @default(now())
+  updatedAt                       DateTime                    @updatedAt
+  benefitProgram                  BenefitProgram              @relation(fields: [benefitProgramId], references: [id], onDelete: Cascade)
+  governmentServiceVersion        GovernmentServiceVersion?   @relation(fields: [governmentServiceVersionId], references: [id])
+  applicationProfiles             BenefitApplicationProfile[]
+  eligibilityAssessments            BenefitEligibilityAssessment[]
+  awards                          BenefitAward[]
+
+  @@unique([benefitProgramId, versionNumber])
+  @@index([benefitProgramId])
+  @@index([status])
+  @@map("benefit_program_versions")
+}
+
+model BenefitApplicantProfile {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  profileReferenceNumber     String                        @unique
+  primaryApplicantIdentityId String                        @db.Uuid
+  jurisdictionId             String?                       @db.Uuid
+  masterAdministrativeFileId String?                       @db.Uuid
+  status                     BenefitApplicantProfileStatus   @default(ACTIVE)
+  dataClassification         SocialProtectionDataClassification @default(APPLICANT_SELF)
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
+  primaryApplicantIdentity   Identity                      @relation("SocialProtectionApplicantProfile", fields: [primaryApplicantIdentityId], references: [id])
+  jurisdiction               Jurisdiction?                 @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile   MasterAdministrativeFile?     @relation(fields: [masterAdministrativeFileId], references: [id])
+  householdRecords           HouseholdRecord[]
+  householdMemberships       HouseholdMember[]
+  applicationProfiles        BenefitApplicationProfile[]
+
+  @@index([primaryApplicantIdentityId])
+  @@index([jurisdictionId])
+  @@map("benefit_applicant_profiles")
+}
+
+model HouseholdRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  householdReferenceNumber   String                   @unique
+  benefitApplicantProfileId  String?                  @db.Uuid
+  jurisdictionId             String?                  @db.Uuid
+  status                     HouseholdRecordStatus    @default(DRAFT)
+  isSameAsFamily             Boolean                  @default(false)
+  isSameAsAddress            Boolean                  @default(false)
+  addressReferenceToken      String?
+  dataClassification         SocialProtectionDataClassification @default(HOUSEHOLD_SCOPED)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  benefitApplicantProfile    BenefitApplicantProfile? @relation(fields: [benefitApplicantProfileId], references: [id])
+  jurisdiction               Jurisdiction?            @relation(fields: [jurisdictionId], references: [id])
+  members                    HouseholdMember[]
+  relationships              HouseholdRelationship[]
+  incomeDeclarations         HouseholdIncomeDeclaration[]
+  assetDeclarations          HouseholdAssetDeclaration[]
+  applicationProfiles        BenefitApplicationProfile[]
+
+  @@index([benefitApplicantProfileId])
+  @@index([status])
+  @@map("household_records")
+}
+
+model HouseholdMember {
+  id                        String              @id @default(uuid()) @db.Uuid
+  householdRecordId         String              @db.Uuid
+  memberIdentityId          String?             @db.Uuid
+  benefitApplicantProfileId String?             @db.Uuid
+  memberRole                HouseholdMemberRole @default(MEMBER)
+  effectiveFrom             DateTime            @default(now())
+  effectiveUntil            DateTime?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  householdRecord           HouseholdRecord     @relation(fields: [householdRecordId], references: [id], onDelete: Cascade)
+  memberIdentity            Identity?           @relation("SocialProtectionHouseholdMember", fields: [memberIdentityId], references: [id])
+  benefitApplicantProfile   BenefitApplicantProfile? @relation(fields: [benefitApplicantProfileId], references: [id])
+  relationshipsFrom         HouseholdRelationship[] @relation("HouseholdRelationshipFrom")
+  relationshipsTo           HouseholdRelationship[] @relation("HouseholdRelationshipTo")
+
+  @@index([householdRecordId])
+  @@index([memberIdentityId])
+  @@map("household_members")
+}
+
+model HouseholdRelationship {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  householdRecordId       String                      @db.Uuid
+  fromHouseholdMemberId   String                      @db.Uuid
+  toHouseholdMemberId     String                      @db.Uuid
+  relationshipTypeCode    String
+  relationshipLabel       String?
+  status                  HouseholdRelationshipStatus @default(ASSERTED)
+  requiresEvidence        Boolean                     @default(false)
+  evidenceRecordId        String?                     @db.Uuid
+  isSharedFinances        Boolean                     @default(false)
+  isSpouseAssumption      Boolean                     @default(false)
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  householdRecord         HouseholdRecord             @relation(fields: [householdRecordId], references: [id], onDelete: Cascade)
+  fromHouseholdMember     HouseholdMember             @relation("HouseholdRelationshipFrom", fields: [fromHouseholdMemberId], references: [id], onDelete: Cascade)
+  toHouseholdMember       HouseholdMember             @relation("HouseholdRelationshipTo", fields: [toHouseholdMemberId], references: [id], onDelete: Cascade)
+  evidenceRecord          EvidenceRecord?             @relation(fields: [evidenceRecordId], references: [id])
+
+  @@index([householdRecordId])
+  @@index([fromHouseholdMemberId])
+  @@index([toHouseholdMemberId])
+  @@map("household_relationships")
+}
+
+model BenefitApplicationProfile {
+  id                         String                          @id @default(uuid()) @db.Uuid
+  profileNumber              String                          @unique
+  benefitApplicantProfileId  String                          @db.Uuid
+  benefitProgramId           String                          @db.Uuid
+  benefitProgramVersionId    String                          @db.Uuid
+  householdRecordId          String?                         @db.Uuid
+  caseId                     String                          @unique @db.Uuid
+  applicationId              String                          @unique @db.Uuid
+  status                     BenefitApplicationProfileStatus @default(LINKED)
+  doesNotCreateBenefitAward  Boolean                         @default(true)
+  doesNotInferEligibility    Boolean                         @default(true)
+  paymentDoesNotDetermineEligibility Boolean                 @default(true)
+  submissionAcknowledgedAt   DateTime?
+  createdAt                  DateTime                        @default(now())
+  updatedAt                  DateTime                        @updatedAt
+  benefitApplicantProfile    BenefitApplicantProfile           @relation(fields: [benefitApplicantProfileId], references: [id])
+  benefitProgram             BenefitProgram                    @relation(fields: [benefitProgramId], references: [id])
+  benefitProgramVersion      BenefitProgramVersion             @relation(fields: [benefitProgramVersionId], references: [id])
+  householdRecord            HouseholdRecord?                  @relation(fields: [householdRecordId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+  eligibilityAssessments     BenefitEligibilityAssessment[]
+  awards                     BenefitAward[]
+  socialSupportCaseReference SocialSupportCaseReference?
+
+  @@index([benefitApplicantProfileId])
+  @@index([benefitProgramId])
+  @@index([householdRecordId])
+  @@map("benefit_application_profiles")
+}
+
+model BenefitEligibilityAssessment {
+  id                              String                           @id @default(uuid()) @db.Uuid
+  assessmentReference             String                           @unique
+  benefitApplicationProfileId     String                           @db.Uuid
+  benefitProgramId                String                           @db.Uuid
+  benefitProgramVersionId         String                           @db.Uuid
+  eligibilityRuleVersionReference String
+  status                          BenefitEligibilityAssessmentStatus @default(DRAFT)
+  outcome                         BenefitEligibilityOutcome        @default(UNDETERMINED)
+  inputFacts                      Json                             @default("{}")
+  assessmentResult                Json                             @default("{}")
+  requiresHumanDecision           Boolean                          @default(true)
+  humanDecisionRecorded           Boolean                          @default(false)
+  humanDecisionGovernmentDecisionId String?                        @db.Uuid
+  doesNotCreateBenefitAward       Boolean                          @default(true)
+  actorPersona                    SocialProtectionActorPersona?
+  assessedAt                      DateTime?
+  createdAt                       DateTime                         @default(now())
+  updatedAt                       DateTime                         @updatedAt
+  benefitApplicationProfile       BenefitApplicationProfile        @relation(fields: [benefitApplicationProfileId], references: [id])
+  benefitProgram                  BenefitProgram                   @relation(fields: [benefitProgramId], references: [id])
+  benefitProgramVersion           BenefitProgramVersion            @relation(fields: [benefitProgramVersionId], references: [id])
+  humanDecisionGovernmentDecision GovernmentDecision?              @relation("BenefitEligibilityHumanDecision", fields: [humanDecisionGovernmentDecisionId], references: [id])
+  factorReferences                EligibilityFactorReference[]
+  evidenceReferences              EligibilityEvidenceReference[]
+  externalDeterminationReferences ExternalEligibilityDeterminationReference[]
+
+  @@index([benefitApplicationProfileId])
+  @@index([benefitProgramVersionId])
+  @@index([status])
+  @@map("benefit_eligibility_assessments")
+}
+
+model EligibilityFactorReference {
+  id                             String                     @id @default(uuid()) @db.Uuid
+  benefitEligibilityAssessmentId String                     @db.Uuid
+  factorCode                     String
+  factorLabel                    String?
+  configuredFactReference        String?
+  declaredValueSummary           String?
+  isVerifiedFact                 Boolean                    @default(false)
+  createdAt                      DateTime                   @default(now())
+  benefitEligibilityAssessment   BenefitEligibilityAssessment @relation(fields: [benefitEligibilityAssessmentId], references: [id], onDelete: Cascade)
+
+  @@index([benefitEligibilityAssessmentId])
+  @@map("eligibility_factor_references")
+}
+
+model EligibilityEvidenceReference {
+  id                             String                     @id @default(uuid()) @db.Uuid
+  benefitEligibilityAssessmentId String                     @db.Uuid
+  evidenceRecordId               String                     @db.Uuid
+  purposeCode                    String?
+  createdAt                      DateTime                   @default(now())
+  benefitEligibilityAssessment   BenefitEligibilityAssessment @relation(fields: [benefitEligibilityAssessmentId], references: [id], onDelete: Cascade)
+  evidenceRecord                 EvidenceRecord             @relation(fields: [evidenceRecordId], references: [id])
+
+  @@index([benefitEligibilityAssessmentId])
+  @@index([evidenceRecordId])
+  @@map("eligibility_evidence_references")
+}
+
+model ExternalEligibilityDeterminationReference {
+  id                             String                                   @id @default(uuid()) @db.Uuid
+  determinationReference         String                                   @unique
+  benefitEligibilityAssessmentId String?                                  @db.Uuid
+  caseId                         String?                                  @db.Uuid
+  externalAuthorityId            String                                   @db.Uuid
+  determinationStatus            ExternalDeterminationStatus              @default(PENDING)
+  isRequired                     Boolean                                  @default(false)
+  blocksDecisionWhenRequired     Boolean                                  @default(false)
+  isAuthenticated                Boolean                                  @default(false)
+  authenticatedPayloadHash       String?
+  recordedBy                     ExternalEligibilityDeterminationRecordedBy
+  recordedByIdentityId           String?                                  @db.Uuid
+  receivedAt                     DateTime                                 @default(now())
+  createdAt                      DateTime                                 @default(now())
+  updatedAt                      DateTime                                 @updatedAt
+  benefitEligibilityAssessment   BenefitEligibilityAssessment?            @relation(fields: [benefitEligibilityAssessmentId], references: [id])
+  case                           Case?                                    @relation(fields: [caseId], references: [id])
+  externalAuthority              ExternalAuthority                        @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity             Identity?                                @relation("ExternalEligibilityDeterminationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([benefitEligibilityAssessmentId])
+  @@index([caseId])
+  @@index([externalAuthorityId])
+  @@map("external_eligibility_determination_references")
+}
+
+model BenefitAward {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  awardNumber                String                      @unique
+  benefitApplicationProfileId String?                    @db.Uuid
+  benefitProgramId           String                      @db.Uuid
+  benefitProgramVersionId    String                      @db.Uuid
+  governmentDecisionId       String?                     @db.Uuid
+  lifecycleStatus            BenefitAwardLifecycleStatus @default(NOT_AWARDED)
+  currentBenefitAwardVersionId String?                   @unique @db.Uuid
+  doesNotDetermineContinuingEligibility Boolean          @default(true)
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  benefitApplicationProfile  BenefitApplicationProfile?  @relation(fields: [benefitApplicationProfileId], references: [id])
+  benefitProgram             BenefitProgram              @relation(fields: [benefitProgramId], references: [id])
+  benefitProgramVersion      BenefitProgramVersion       @relation(fields: [benefitProgramVersionId], references: [id])
+  governmentDecision         GovernmentDecision?         @relation("BenefitAwardDecision", fields: [governmentDecisionId], references: [id])
+  currentBenefitAwardVersion BenefitAwardVersion?        @relation("BenefitAwardCurrentVersion", fields: [currentBenefitAwardVersionId], references: [id])
+  versions                   BenefitAwardVersion[]       @relation("BenefitAwardVersions")
+  entitlementPeriods         BenefitEntitlementPeriod[]
+  paymentScheduleReferences  BenefitPaymentScheduleReference[]
+  disbursementReferences     BenefitDisbursementReference[]
+  reviews                    BenefitReview[]
+  renewals                   BenefitRenewal[]
+  suspensions                BenefitSuspension[]
+  terminations               BenefitTermination[]
+  statusHistory              BenefitStatusHistory[]
+  appealReferences           SocialProtectionAppealReference[]
+
+  @@index([benefitProgramId])
+  @@index([lifecycleStatus])
+  @@map("benefit_awards")
+}
+
+model BenefitAwardVersion {
+  id                    String                @id @default(uuid()) @db.Uuid
+  benefitAwardId        String                @db.Uuid
+  versionNumber         Int
+  amountCents           Int?
+  currency              String                @default("XCD")
+  effectiveFrom         DateTime?
+  effectiveUntil        DateTime?
+  conditionsSummary     String?
+  governmentDecisionId  String?               @db.Uuid
+  supersededAt          DateTime?
+  isCurrent             Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  benefitAward          BenefitAward          @relation("BenefitAwardVersions", fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  governmentDecision    GovernmentDecision?   @relation("BenefitAwardVersionDecision", fields: [governmentDecisionId], references: [id])
+  currentForAward       BenefitAward?         @relation("BenefitAwardCurrentVersion")
+  entitlementPeriods    BenefitEntitlementPeriod[]
+  appealOriginalFor     SocialProtectionAppealReference[] @relation("AppealOriginalAwardVersion")
+
+  @@unique([benefitAwardId, versionNumber])
+  @@index([benefitAwardId])
+  @@map("benefit_award_versions")
+}
+
+model BenefitEntitlementPeriod {
+  id                    String              @id @default(uuid()) @db.Uuid
+  benefitAwardId        String              @db.Uuid
+  benefitAwardVersionId String?             @db.Uuid
+  periodStart           DateTime
+  periodEnd             DateTime?
+  entitlementCode       String?
+  createdAt             DateTime            @default(now())
+  benefitAward          BenefitAward        @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  benefitAwardVersion   BenefitAwardVersion? @relation(fields: [benefitAwardVersionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@map("benefit_entitlement_periods")
+}
+
+model BenefitPaymentScheduleReference {
+  id               String       @id @default(uuid()) @db.Uuid
+  benefitAwardId   String       @db.Uuid
+  scheduleReference String      @unique
+  invoiceId        String?      @db.Uuid
+  authorizesSchedulingOnly Boolean @default(true)
+  doesNotDetermineEligibility Boolean @default(true)
+  createdAt        DateTime     @default(now())
+  benefitAward     BenefitAward @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  invoice          Invoice?     @relation(fields: [invoiceId], references: [id])
+
+  @@index([benefitAwardId])
+  @@map("benefit_payment_schedule_references")
+}
+
+model BenefitDisbursementReference {
+  id                    String              @id @default(uuid()) @db.Uuid
+  benefitAwardId        String              @db.Uuid
+  disbursementReference String              @unique
+  paymentTransactionId  String?             @db.Uuid
+  doesNotDetermineEligibility Boolean       @default(true)
+  recordedAt            DateTime            @default(now())
+  createdAt             DateTime            @default(now())
+  benefitAward          BenefitAward        @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@index([paymentTransactionId])
+  @@map("benefit_disbursement_references")
+}
+
+model BenefitReview {
+  id               String            @id @default(uuid()) @db.Uuid
+  benefitAwardId   String            @db.Uuid
+  caseId           String?           @db.Uuid
+  reviewKind       BenefitReviewKind
+  reviewReference  String            @unique
+  scheduledAt      DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime          @default(now())
+  benefitAward     BenefitAward      @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  case             Case?             @relation(fields: [caseId], references: [id])
+
+  @@index([benefitAwardId])
+  @@map("benefit_reviews")
+}
+
+model BenefitRenewal {
+  id               String               @id @default(uuid()) @db.Uuid
+  benefitAwardId   String               @db.Uuid
+  renewalReference String               @unique
+  status           BenefitRenewalStatus @default(NOT_STARTED)
+  dueAt            DateTime?
+  submittedAt      DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  benefitAward     BenefitAward         @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+
+  @@index([benefitAwardId])
+  @@index([status])
+  @@map("benefit_renewals")
+}
+
+model BenefitSuspension {
+  id                          String                  @id @default(uuid()) @db.Uuid
+  benefitAwardId              String                  @db.Uuid
+  suspensionReference         String                  @unique
+  status                      BenefitSuspensionStatus @default(PROPOSED)
+  reasonSummary               String?
+  functionAuthorityRecordId   String?                 @db.Uuid
+  authorityEvaluationRecordId String?                 @db.Uuid
+  governmentDecisionId        String?                 @db.Uuid
+  actorPersona                SocialProtectionActorPersona
+  effectiveFrom               DateTime?
+  liftedAt                    DateTime?
+  createdAt                   DateTime                @default(now())
+  updatedAt                   DateTime                @updatedAt
+  benefitAward                BenefitAward            @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  functionAuthorityRecord     FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
+  governmentDecision          GovernmentDecision?     @relation("BenefitSuspensionDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@index([status])
+  @@map("benefit_suspensions")
+}
+
+model BenefitTermination {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  benefitAwardId       String                   @db.Uuid
+  terminationReference String                   @unique
+  status               BenefitTerminationStatus @default(PROPOSED)
+  reasonSummary        String?
+  governmentDecisionId String?                  @db.Uuid
+  actorPersona         SocialProtectionActorPersona
+  effectiveAt          DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  benefitAward         BenefitAward             @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  governmentDecision   GovernmentDecision?      @relation("BenefitTerminationDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@map("benefit_terminations")
+}
+
+model BenefitStatusHistory {
+  id                 String                        @id @default(uuid()) @db.Uuid
+  subjectKind        BenefitStatusHistorySubjectKind
+  benefitAwardId     String?                       @db.Uuid
+  fromStatusCode     String?
+  toStatusCode       String
+  actorIdentityId    String?                       @db.Uuid
+  actorPersona       SocialProtectionActorPersona
+  reasonSummary      String?
+  governmentDecisionId String?                     @db.Uuid
+  recordedAt         DateTime                      @default(now())
+  benefitAward       BenefitAward?                 @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  actor              Identity?                     @relation("BenefitStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  governmentDecision GovernmentDecision?           @relation("BenefitStatusHistoryDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@index([recordedAt])
+  @@map("benefit_status_history")
+}
+
+model HouseholdIncomeDeclaration {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  householdRecordId        String                     @db.Uuid
+  declarationReference     String                     @unique
+  status                   HouseholdDeclarationStatus @default(DRAFT)
+  reportingPeriodCode      String?
+  declaredAmountCents      Int?
+  currency                 String                     @default("XCD")
+  isVerifiedGovernmentFact Boolean                    @default(false)
+  declaredAt               DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  householdRecord          HouseholdRecord            @relation(fields: [householdRecordId], references: [id], onDelete: Cascade)
+
+  @@index([householdRecordId])
+  @@map("household_income_declarations")
+}
+
+model HouseholdAssetDeclaration {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  householdRecordId        String                     @db.Uuid
+  declarationReference     String                     @unique
+  status                   HouseholdDeclarationStatus @default(DRAFT)
+  assetCategoryCode        String?
+  declaredValueCents       Int?
+  currency                 String                     @default("XCD")
+  isVerifiedGovernmentFact Boolean                    @default(false)
+  declaredAt               DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  householdRecord          HouseholdRecord            @relation(fields: [householdRecordId], references: [id], onDelete: Cascade)
+
+  @@index([householdRecordId])
+  @@map("household_asset_declarations")
+}
+
+model SocialSupportCaseReference {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  referenceToken              String                    @unique
+  benefitApplicationProfileId String                    @unique @db.Uuid
+  caseId                      String                    @db.Uuid
+  coordinationNotes           String?
+  createdAt                   DateTime                  @default(now())
+  benefitApplicationProfile   BenefitApplicationProfile @relation(fields: [benefitApplicationProfileId], references: [id], onDelete: Cascade)
+  case                        Case                      @relation(fields: [caseId], references: [id])
+
+  @@index([caseId])
+  @@map("social_support_case_references")
+}
+
+model SocialProtectionAppealReference {
+  id                            String                              @id @default(uuid()) @db.Uuid
+  appealReference               String                              @unique
+  benefitAwardId                String                              @db.Uuid
+  redressMatterId               String?                             @db.Uuid
+  originalBenefitAwardVersionId String                              @db.Uuid
+  challengedGovernmentDecisionId String?                            @db.Uuid
+  preservesOriginalDecision     Boolean                             @default(true)
+  status                        SocialProtectionAppealReferenceStatus @default(LINKED)
+  createdAt                     DateTime                            @default(now())
+  updatedAt                     DateTime                            @updatedAt
+  benefitAward                  BenefitAward                        @relation(fields: [benefitAwardId], references: [id], onDelete: Cascade)
+  redressMatter                 RedressMatter?                      @relation(fields: [redressMatterId], references: [id])
+  originalBenefitAwardVersion   BenefitAwardVersion                 @relation("AppealOriginalAwardVersion", fields: [originalBenefitAwardVersionId], references: [id])
+  challengedGovernmentDecision  GovernmentDecision?                 @relation("SocialProtectionAppealChallengedDecision", fields: [challengedGovernmentDecisionId], references: [id])
+
+  @@index([benefitAwardId])
+  @@index([redressMatterId])
+  @@map("social_protection_appeal_references")
 }
