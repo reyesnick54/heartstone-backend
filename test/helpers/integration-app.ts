@@ -4,6 +4,7 @@ import { type App } from 'supertest/types';
 
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
+import { resetImmigrationData } from '../../src/database/immigration-test-reset';
 import { PrismaService } from '../../src/database/prisma.service';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
@@ -139,6 +140,8 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
 }
 
 export async function resetSchedulingData(prisma: PrismaService): Promise<void> {
+  await prisma.immigrationInterview.deleteMany();
+  await prisma.biometricRequirement.deleteMany();
   await prisma.serviceAppointmentReminder.deleteMany();
   await prisma.serviceAppointmentAuditEvent.deleteMany();
   await prisma.appointmentOutcomeReference.deleteMany();
@@ -174,6 +177,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetImmigrationData(prisma);
   await resetSchedulingData(prisma);
   await resetProductionReadinessData(prisma);
   await resetComplianceOversightData(prisma);

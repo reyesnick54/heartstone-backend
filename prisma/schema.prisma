@@ -94,6 +94,7 @@ model Jurisdiction {
   reconsiderationProceedings    ReconsiderationProceeding[]
   internalAdministrativeReviews InternalAdministrativeReview[]
   servicePackJurisdictionTargets ServicePack[]                 @relation("ServicePackJurisdiction")
+  immigrationProfiles            ImmigrationProfile[]
 
   @@map("jurisdictions")
 }
@@ -373,6 +374,7 @@ model ExternalAuthority {
   documentVersionsReceived         DocumentVersion[]
   retainedDeterminations           GovernmentCommunicationRecord[]   @relation("RetainedDeterminationExternalAuthority")
   externalReviewReferrals          ExternalReviewReferral[]
+  immigrationExternalChecks        ImmigrationExternalCheck[]
 
   @@map("external_authorities")
 }
@@ -717,6 +719,11 @@ model Identity {
   servicePackVersionsAccepted              ServicePackVersion[]                   @relation("ServicePackVersionAccepter")
   servicePackImports                       ServicePackImport[]                    @relation("ServicePackImportActor")
   servicePackValidationResults             ServicePackValidationResult[]          @relation("ServicePackValidationActor")
+  immigrationProfilesAsSubject             ImmigrationProfile[]                   @relation("ImmigrationProfileSubject")
+  immigrationSponsorshipsAsSponsor         ImmigrationSponsorship[]               @relation("ImmigrationSponsorshipSponsor")
+  immigrationRequirementAssessments        ImmigrationRequirementAssessment[]     @relation("ImmigrationRequirementAssessor")
+  immigrationExternalChecksRecorded        ImmigrationExternalCheck[]             @relation("ImmigrationExternalCheckRecorder")
+  immigrationStatusHistoryEvents           ImmigrationStatusHistory[]             @relation("ImmigrationStatusHistoryActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -764,6 +771,7 @@ model Organization {
   complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
   appointmentParticipants       AppointmentParticipant[]
   serviceAppointments             ServiceAppointment[]
+  immigrationSponsorships         ImmigrationSponsorship[]
 
   @@index([status])
   @@map("organizations")
@@ -2305,6 +2313,9 @@ model Application {
   masterAdministrativeFile   MasterAdministrativeFile?
   feeAssessments             FeeAssessment[]
   serviceAppointments        ServiceAppointment[]
+  visaApplicationProfile     VisaApplicationProfile?
+  residencyApplicationProfile ResidencyApplicationProfile?
+  citizenshipApplicationProfile CitizenshipApplicationProfile?
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2414,6 +2425,16 @@ model Case {
   strategicProjectProfiles          StrategicProjectProfile[]
   analysisRequests                  AnalysisRequest[]
   serviceAppointments               ServiceAppointment[]
+  visaApplicationProfile            VisaApplicationProfile?
+  residencyApplicationProfile       ResidencyApplicationProfile?
+  citizenshipApplicationProfile     CitizenshipApplicationProfile?
+  immigrationSponsorships           ImmigrationSponsorship[]
+  dependentRelationships            DependentRelationship[]
+  immigrationRequirementAssessments ImmigrationRequirementAssessment[]
+  immigrationInterviews             ImmigrationInterview[]
+  biometricRequirements             BiometricRequirement[]
+  immigrationExternalChecks         ImmigrationExternalCheck[]
+  immigrationCaseProjection         ImmigrationCaseProjection?
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3014,6 +3035,7 @@ model MasterAdministrativeFile {
   communicationMessages                CommunicationMessage[]
   communicationMafIndexEntries         CommunicationMafIndexEntry[]
   integrationRequests                  IntegrationRequest[]
+  immigrationProfiles                  ImmigrationProfile[]
 
   @@index([governmentServiceId])
   @@index([responsibleInstitutionId])
@@ -4853,6 +4875,12 @@ model GovernmentDecision {
   redressMattersChallenged          RedressMatter[]                   @relation("RedressChallengedDecision")
   externalReviewReferralsChallenged ExternalReviewReferral[]          @relation("ExternalReviewChallengedDecision")
   redressDecisionsSuperseding       RedressDecision[]                 @relation("RedressSupersededDecision")
+  immigrationStatusRecords          ImmigrationStatusRecord[]
+  visaPermissionRecords             VisaPermissionRecord[]
+  residencyStatusRecords            ResidencyStatusRecord[]
+  residencyPermitRecords            ResidencyPermitRecord[]
+  citizenshipStatusRecords          CitizenshipStatusRecord[]
+  immigrationRestrictions           ImmigrationRestriction[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5326,6 +5354,9 @@ model OfficialInstrument {
   externalReviewReferralsChallenged ExternalReviewReferral[]          @relation("ExternalReviewChallengedInstrument")
   complianceMatters                 ComplianceMatter[]
   complianceStatusProjections       ComplianceStatusProjection[]
+  immigrationStatusRecords          ImmigrationStatusRecord[]
+  visaPermissionRecords             VisaPermissionRecord[]
+  residencyPermitRecords            ResidencyPermitRecord[]
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -13258,6 +13289,8 @@ model ServiceAppointment {
   outcomeReferences            AppointmentOutcomeReference[]
   auditEvents                  ServiceAppointmentAuditEvent[]
   reminders                    ServiceAppointmentReminder[]
+  immigrationInterview         ImmigrationInterview?
+  biometricRequirement         BiometricRequirement?
 
   @@index([status])
   @@index([institutionId])
@@ -13681,4 +13714,557 @@ model ServicePackImport {
   @@index([servicePackVersionId])
   @@index([status])
   @@map("service_pack_imports")
+}
+
+// ─── Immigration, Visa, Residency & Citizenship Foundation ────────────────
+
+
+enum ImmigrationDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_IMMIGRATION
+  PROTECTED_BIOMETRIC
+  PROTECTED_SECURITY
+}
+
+enum ImmigrationTravelDocumentType {
+  PASSPORT
+  EMERGENCY_TRAVEL_DOCUMENT
+  NATIONAL_ID_TRAVEL
+  REFUGEE_TRAVEL_DOCUMENT
+  OTHER_AUTHORIZED
+}
+
+enum TravelDocumentReferenceStatus {
+  REFERENCED
+  VALIDATION_PENDING
+  VALIDATED
+  VALIDATION_FAILED
+  EXPIRED
+  SUPERSEDED
+  WITHDRAWN
+}
+
+enum ImmigrationStatusCategory {
+  OVERALL
+  ENTRY
+  VISA
+  RESIDENCY
+  CITIZENSHIP
+}
+
+enum ImmigrationApplicationProfileStatus {
+  LINKED
+  ACTIVE
+  WITHDRAWN
+  CLOSED
+}
+
+enum ImmigrationCredentialLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  EXPIRED
+  REVOKED
+  SUSPENDED
+  SUPERSEDED
+  SURRENDERED
+}
+
+enum ImmigrationRequirementAssessmentOutcome {
+  INCOMPLETE
+  INFORMATION_ONLY
+  ELIGIBILITY_GUIDANCE
+  REQUIRES_EXTERNAL_DETERMINATION
+  REQUIRES_DECISION
+}
+
+enum ImmigrationInterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum BiometricRequirementStatus {
+  REQUIRED
+  SCHEDULED
+  CAPTURED
+  VERIFIED
+  WAIVED_BY_AUTHORIZED_ACTION
+  FAILED
+}
+
+enum ImmigrationExternalCheckType {
+  BORDER_AUTHORITY
+  LAW_ENFORCEMENT
+  SECURITY_SCREENING
+  HEALTH_SCREENING
+  LABOUR_AUTHORITY
+  CIVIL_REGISTRY
+  DIPLOMATIC_CONSULAR
+  TRAVEL_DOCUMENT_VALIDATION
+}
+
+enum ImmigrationExternalCheckRecordedBy {
+  EXTERNAL_AUTHORITY_LIAISON
+  INTEGRATION_SYSTEM
+  IMMIGRATION_OFFICER
+  SYSTEM
+}
+
+enum ImmigrationActorPersona {
+  APPLICANT
+  SPONSOR
+  DEPENDENT
+  AUTHORIZED_REPRESENTATIVE
+  IMMIGRATION_OFFICER
+  SENIOR_DECISION_OFFICER
+  EXTERNAL_AUTHORITY_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum ImmigrationSponsorshipStatus {
+  PROPOSED
+  ACTIVE
+  LIMITED
+  WITHDRAWN
+  CLOSED
+}
+
+enum DependentRelationshipType {
+  SPOUSE
+  CHILD
+  PARENT
+  OTHER_AUTHORIZED
+}
+
+enum ImmigrationRestrictionType {
+  TRAVEL
+  EMPLOYMENT
+  RESIDENCY_CONDITION
+  REPORTING
+  OTHER_AUTHORIZED
+}
+
+model ImmigrationProfile {
+  id                            String                      @id @default(uuid()) @db.Uuid
+  profileNumber                 String                      @unique
+  subjectIdentityId             String                      @db.Uuid
+  jurisdictionId                String?                     @db.Uuid
+  masterAdministrativeFileId    String?                     @db.Uuid
+  recordsClassificationReference String?
+  dataClassification            ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  dataCompartmentCode           String?
+  currentStatusRecordId         String?                     @unique @db.Uuid
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  subjectIdentity               Identity                    @relation("ImmigrationProfileSubject", fields: [subjectIdentityId], references: [id])
+  jurisdiction                  Jurisdiction?               @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?   @relation(fields: [masterAdministrativeFileId], references: [id])
+  currentStatusRecord           ImmigrationStatusRecord?    @relation("ImmigrationProfileCurrentStatus", fields: [currentStatusRecordId], references: [id])
+  statusRecords                 ImmigrationStatusRecord[]   @relation("ImmigrationProfileStatusRecords")
+  travelDocuments               TravelDocumentReference[]
+  visaApplicationProfiles       VisaApplicationProfile[]
+  residencyApplicationProfiles  ResidencyApplicationProfile[]
+  citizenshipApplicationProfiles CitizenshipApplicationProfile[]
+  visaPermissions               VisaPermissionRecord[]
+  residencyStatusRecords        ResidencyStatusRecord[]
+  residencyPermits              ResidencyPermitRecord[]
+  citizenshipStatusRecords      CitizenshipStatusRecord[]
+  sponsorshipsAsSponsored       ImmigrationSponsorship[]    @relation("ImmigrationSponsored")
+  primaryDependentLinks         DependentRelationship[]     @relation("DependentPrimary")
+  dependentOfLinks              DependentRelationship[]     @relation("DependentMember")
+  statusHistory                 ImmigrationStatusHistory[]
+  restrictions                  ImmigrationRestriction[]
+  biometricRequirements         BiometricRequirement[]
+  externalChecks                ImmigrationExternalCheck[]
+
+  @@index([subjectIdentityId])
+  @@index([jurisdictionId])
+  @@index([masterAdministrativeFileId])
+  @@map("immigration_profiles")
+}
+
+model TravelDocumentReference {
+  id                         String                        @id @default(uuid()) @db.Uuid
+  immigrationProfileId       String                        @db.Uuid
+  documentType               ImmigrationTravelDocumentType
+  documentReferenceToken     String
+  issuingCountryCode         String?
+  externalValidationReference String?
+  validatedAt                DateTime?
+  expiresAt                  DateTime?
+  status                     TravelDocumentReferenceStatus @default(REFERENCED)
+  dataClassification         ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
+  immigrationProfile         ImmigrationProfile            @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+
+  @@index([immigrationProfileId])
+  @@index([status])
+  @@map("travel_document_references")
+}
+
+model ImmigrationStatusRecord {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  immigrationProfileId String                    @db.Uuid
+  statusCategory       ImmigrationStatusCategory
+  statusCode           String
+  effectiveFrom        DateTime                  @default(now())
+  effectiveUntil       DateTime?
+  isCurrent            Boolean                   @default(true)
+  supersededAt         DateTime?
+  governmentDecisionId String?                   @db.Uuid
+  officialInstrumentId String?                   @db.Uuid
+  dataClassification   ImmigrationDataClassification @default(PROTECTED_IMMIGRATION)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  immigrationProfile   ImmigrationProfile        @relation("ImmigrationProfileStatusRecords", fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  currentForProfile    ImmigrationProfile?       @relation("ImmigrationProfileCurrentStatus")
+  governmentDecision   GovernmentDecision?       @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument   OfficialInstrument?       @relation(fields: [officialInstrumentId], references: [id])
+  historyFrom          ImmigrationStatusHistory[] @relation("ImmigrationStatusHistoryFrom")
+  historyTo            ImmigrationStatusHistory[] @relation("ImmigrationStatusHistoryTo")
+
+  @@index([immigrationProfileId, statusCategory, isCurrent])
+  @@index([governmentDecisionId])
+  @@index([officialInstrumentId])
+  @@map("immigration_status_records")
+}
+
+model VisaApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  serviceCategoryCode        String?
+  intendedPurposeCode        String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotIssueVisa           Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+  visaPermissions            VisaPermissionRecord[]
+
+  @@index([immigrationProfileId])
+  @@map("visa_application_profiles")
+}
+
+model ResidencyApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  residencyProgramCode       String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotCreateResidency     Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("residency_application_profiles")
+}
+
+model CitizenshipApplicationProfile {
+  id                         String                            @id @default(uuid()) @db.Uuid
+  profileNumber              String                            @unique
+  immigrationProfileId       String                            @db.Uuid
+  caseId                     String                            @unique @db.Uuid
+  applicationId              String                            @unique @db.Uuid
+  programCode                String?
+  status                     ImmigrationApplicationProfileStatus @default(LINKED)
+  submissionAcknowledgedAt   DateTime?
+  doesNotGrantCitizenship    Boolean                           @default(true)
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+  immigrationProfile         ImmigrationProfile                @relation(fields: [immigrationProfileId], references: [id])
+  case                       Case                              @relation(fields: [caseId], references: [id])
+  application                Application                       @relation(fields: [applicationId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("citizenship_application_profiles")
+}
+
+model VisaPermissionRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  permissionNumber         String                             @unique
+  immigrationProfileId     String                             @db.Uuid
+  visaApplicationProfileId String?                            @db.Uuid
+  officialInstrumentId     String?                            @db.Uuid
+  governmentDecisionId     String?                            @db.Uuid
+  permissionTypeCode       String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  lifecycleStatus          ImmigrationCredentialLifecycleStatus @default(NOT_ISSUED)
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id])
+  visaApplicationProfile   VisaApplicationProfile?            @relation(fields: [visaApplicationProfileId], references: [id])
+  officialInstrument       OfficialInstrument?                @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@index([lifecycleStatus])
+  @@index([validUntil])
+  @@map("visa_permission_records")
+}
+
+model ResidencyStatusRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                             @db.Uuid
+  statusCode               String
+  effectiveFrom            DateTime                           @default(now())
+  effectiveUntil           DateTime?
+  isCurrent                Boolean                            @default(true)
+  supersededAt             DateTime?
+  governmentDecisionId     String?                            @db.Uuid
+  workLinkPolicyReference  String?
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+  residencyPermits         ResidencyPermitRecord[]
+
+  @@index([immigrationProfileId, isCurrent])
+  @@map("residency_status_records")
+}
+
+model ResidencyPermitRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  permitNumber             String                             @unique
+  immigrationProfileId     String                             @db.Uuid
+  residencyStatusRecordId  String?                            @db.Uuid
+  officialInstrumentId     String?                            @db.Uuid
+  governmentDecisionId     String?                            @db.Uuid
+  permitTypeCode           String?
+  validFrom                DateTime?
+  validUntil               DateTime?
+  renewalOfPermitId        String?                            @unique @db.Uuid
+  lifecycleStatus          ImmigrationCredentialLifecycleStatus @default(NOT_ISSUED)
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_IMMIGRATION)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id])
+  residencyStatusRecord    ResidencyStatusRecord?             @relation(fields: [residencyStatusRecordId], references: [id])
+  officialInstrument       OfficialInstrument?                @relation(fields: [officialInstrumentId], references: [id])
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+  renewalOfPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal", fields: [renewalOfPermitId], references: [id])
+  renewedByPermit          ResidencyPermitRecord?             @relation("ResidencyPermitRenewal")
+
+  @@index([immigrationProfileId])
+  @@index([lifecycleStatus])
+  @@index([validUntil])
+  @@map("residency_permit_records")
+}
+
+model CitizenshipStatusRecord {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                             @db.Uuid
+  statusCode               String
+  effectiveFrom            DateTime                           @default(now())
+  effectiveUntil           DateTime?
+  isCurrent                Boolean                            @default(true)
+  isNaturalized            Boolean?
+  supersededAt             DateTime?
+  governmentDecisionId     String?                            @db.Uuid
+  dataClassification       ImmigrationDataClassification      @default(PROTECTED_SECURITY)
+  createdAt                DateTime                           @default(now())
+  updatedAt                DateTime                           @updatedAt
+  immigrationProfile       ImmigrationProfile                 @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  governmentDecision       GovernmentDecision?                @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([immigrationProfileId, isCurrent])
+  @@map("citizenship_status_records")
+}
+
+model ImmigrationSponsorship {
+  id                       String                       @id @default(uuid()) @db.Uuid
+  sponsorshipNumber        String                       @unique
+  sponsorIdentityId        String?                      @db.Uuid
+  sponsorOrganizationId    String?                      @db.Uuid
+  sponsoredProfileId       String                       @db.Uuid
+  caseId                   String?                      @db.Uuid
+  sponsorshipTypeCode      String?
+  authorizedScope          Json                         @default("{}")
+  status                   ImmigrationSponsorshipStatus @default(PROPOSED)
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  sponsorIdentity          Identity?                    @relation("ImmigrationSponsorshipSponsor", fields: [sponsorIdentityId], references: [id])
+  sponsorOrganization      Organization?                @relation(fields: [sponsorOrganizationId], references: [id])
+  sponsoredProfile         ImmigrationProfile           @relation("ImmigrationSponsored", fields: [sponsoredProfileId], references: [id])
+  case                     Case?                        @relation(fields: [caseId], references: [id])
+
+  @@index([sponsoredProfileId])
+  @@index([sponsorIdentityId])
+  @@index([caseId])
+  @@map("immigration_sponsorships")
+}
+
+model DependentRelationship {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  primaryProfileId         String                    @db.Uuid
+  dependentProfileId       String                    @db.Uuid
+  caseId                   String?                   @db.Uuid
+  relationshipType         DependentRelationshipType
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  primaryProfile           ImmigrationProfile        @relation("DependentPrimary", fields: [primaryProfileId], references: [id])
+  dependentProfile         ImmigrationProfile        @relation("DependentMember", fields: [dependentProfileId], references: [id])
+  case                     Case?                     @relation(fields: [caseId], references: [id])
+
+  @@unique([primaryProfileId, dependentProfileId, relationshipType])
+  @@index([caseId])
+  @@map("dependent_relationships")
+}
+
+model ImmigrationRequirementAssessment {
+  id                       String                                @id @default(uuid()) @db.Uuid
+  assessmentNumber         String                                @unique
+  caseId                   String                                @db.Uuid
+  assessmentTypeCode       String
+  outcome                  ImmigrationRequirementAssessmentOutcome
+  isImmigrationDecision    Boolean                               @default(false)
+  summary                  String?
+  assessedAt               DateTime                              @default(now())
+  assessedByIdentityId     String?                               @db.Uuid
+  createdAt                DateTime                              @default(now())
+  updatedAt                DateTime                              @updatedAt
+  case                     Case                                  @relation(fields: [caseId], references: [id])
+  assessedBy               Identity?                             @relation("ImmigrationRequirementAssessor", fields: [assessedByIdentityId], references: [id])
+
+  @@index([caseId])
+  @@map("immigration_requirement_assessments")
+}
+
+model ImmigrationInterview {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  caseId                   String                   @db.Uuid
+  serviceAppointmentId     String?                  @unique @db.Uuid
+  interviewTypeCode        String?
+  status                   ImmigrationInterviewStatus @default(SCHEDULED)
+  outcomeReference         String?
+  isDecision               Boolean                  @default(false)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  case                     Case                     @relation(fields: [caseId], references: [id])
+  serviceAppointment       ServiceAppointment?      @relation(fields: [serviceAppointmentId], references: [id])
+
+  @@index([caseId])
+  @@map("immigration_interviews")
+}
+
+model BiometricRequirement {
+  id                       String                     @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                     @db.Uuid
+  caseId                   String?                    @db.Uuid
+  serviceAppointmentId     String?                    @unique @db.Uuid
+  status                   BiometricRequirementStatus @default(REQUIRED)
+  capturedAt               DateTime?
+  dataClassification       ImmigrationDataClassification @default(PROTECTED_BIOMETRIC)
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  immigrationProfile       ImmigrationProfile         @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  case                     Case?                      @relation(fields: [caseId], references: [id])
+  serviceAppointment       ServiceAppointment?        @relation(fields: [serviceAppointmentId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@index([caseId])
+  @@map("biometric_requirements")
+}
+
+model ImmigrationExternalCheck {
+  id                         String                           @id @default(uuid()) @db.Uuid
+  checkReference             String                           @unique
+  caseId                     String                           @db.Uuid
+  immigrationProfileId       String?                          @db.Uuid
+  externalAuthorityId        String                           @db.Uuid
+  checkType                  ImmigrationExternalCheckType
+  determinationStatus        ExternalDeterminationStatus      @default(PENDING)
+  isRequired                 Boolean                          @default(true)
+  blocksDecisionWhenRequired Boolean                          @default(true)
+  isAuthenticated            Boolean                          @default(false)
+  authenticatedPayloadHash   String?
+  recordedBy                 ImmigrationExternalCheckRecordedBy
+  recordedByIdentityId       String?                          @db.Uuid
+  receivedAt                 DateTime                         @default(now())
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  case                       Case                             @relation(fields: [caseId], references: [id])
+  immigrationProfile         ImmigrationProfile?              @relation(fields: [immigrationProfileId], references: [id])
+  externalAuthority          ExternalAuthority                @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity         Identity?                        @relation("ImmigrationExternalCheckRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([caseId])
+  @@index([immigrationProfileId])
+  @@index([externalAuthorityId])
+  @@index([determinationStatus])
+  @@map("immigration_external_checks")
+}
+
+model ImmigrationStatusHistory {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                  @db.Uuid
+  fromStatusRecordId       String?                 @db.Uuid
+  toStatusRecordId         String                  @db.Uuid
+  changedAt                DateTime                @default(now())
+  actorIdentityId          String?                 @db.Uuid
+  actorPersona             ImmigrationActorPersona
+  reason                   String?
+  metadata                 Json                    @default("{}")
+  immigrationProfile       ImmigrationProfile      @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  fromStatusRecord         ImmigrationStatusRecord? @relation("ImmigrationStatusHistoryFrom", fields: [fromStatusRecordId], references: [id])
+  toStatusRecord           ImmigrationStatusRecord @relation("ImmigrationStatusHistoryTo", fields: [toStatusRecordId], references: [id])
+  actorIdentity            Identity?               @relation("ImmigrationStatusHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@index([immigrationProfileId, changedAt])
+  @@map("immigration_status_history")
+}
+
+model ImmigrationRestriction {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  immigrationProfileId     String                   @db.Uuid
+  restrictionType          ImmigrationRestrictionType
+  description              String?
+  effectiveFrom            DateTime                 @default(now())
+  effectiveUntil           DateTime?
+  sourceDecisionId         String?                  @db.Uuid
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  immigrationProfile       ImmigrationProfile       @relation(fields: [immigrationProfileId], references: [id], onDelete: Cascade)
+  sourceDecision           GovernmentDecision?      @relation(fields: [sourceDecisionId], references: [id])
+
+  @@index([immigrationProfileId])
+  @@map("immigration_restrictions")
+}
+
+model ImmigrationCaseProjection {
+  id                       String   @id @default(uuid()) @db.Uuid
+  caseId                   String   @unique @db.Uuid
+  projectedStatusLabel     String
+  disclaimer               String   @default("Non-authoritative operational projection; not an immigration decision or status.")
+  lastDerivedAt            DateTime @default(now())
+  metadata                 Json     @default("{}")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  case                     Case     @relation(fields: [caseId], references: [id])
+
+  @@map("immigration_case_projections")
 }

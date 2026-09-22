@@ -21,6 +21,7 @@ import { ExperienceModule } from './experience/experience.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
+import { ImmigrationModule } from './immigration/immigration.module';
 import { InstitutionalScopeModule } from './institutional-scope/institutional-scope.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
@@ -62,6 +63,7 @@ import { SystemModule } from './system/system.module';
     ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,
+    ImmigrationModule,
     CitizenExperienceModule,
     RecordsModule,
     EvidenceRecordsModule,
