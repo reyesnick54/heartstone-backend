@@ -1,35 +1,32 @@
 import {
   FORBIDDEN_AI_HEALTHCARE_ACTIONS,
   HEALTHCARE_BOUNDARY_DISCLAIMER,
-  HEALTHCARE_INTEROP_BOUNDARY_DISCLAIMER,
-  HEALTHCARE_RESEARCH_BOUNDARY_DISCLAIMER,
-  HEALTHCARE_SAFETY_BOUNDARY_DISCLAIMER,
+  HEALTHCARE_BREAK_GLASS_DISCLAIMER,
+  HEALTHCARE_LICENSING_BOUNDARY_DISCLAIMER,
+  HEALTHCARE_REASON_CODES,
 } from './healthcare.constants';
-import { FORBIDDEN_HEALTHCARE_CLIENT_AUTH_FIELDS } from './healthcare-schema.constants';
 
-describe('Healthcare invariants', () => {
-  it('documents consent is not universal permission', () => {
-    expect(HEALTHCARE_BOUNDARY_DISCLAIMER).toContain('not universal permission');
+describe('Healthcare architecture invariants', () => {
+  it('distinguishes platform identity from patient health identity', () => {
+    expect(HEALTHCARE_BOUNDARY_DISCLAIMER).toContain('Platform login');
+    expect(HEALTHCARE_BOUNDARY_DISCLAIMER).toContain('professional licensure');
   });
 
-  it('documents research access boundaries', () => {
-    expect(HEALTHCARE_RESEARCH_BOUNDARY_DISCLAIMER).toContain('minimum-necessary');
+  it('documents licensing as government service workflow', () => {
+    expect(HEALTHCARE_LICENSING_BOUNDARY_DISCLAIMER).toContain('government service workflows');
   });
 
-  it('documents safety report vs causality distinction', () => {
-    expect(HEALTHCARE_SAFETY_BOUNDARY_DISCLAIMER).toContain('does not by itself establish');
+  it('documents break-glass as bounded emergency access', () => {
+    expect(HEALTHCARE_BREAK_GLASS_DISCLAIMER).toContain('not unlimited administrative access');
   });
 
-  it('forbids AI establishing causality', () => {
-    expect(FORBIDDEN_AI_HEALTHCARE_ACTIONS).toContain('ESTABLISH_ADVERSE_EVENT_CAUSALITY');
+  it('defines reason codes for mandatory scenarios', () => {
+    expect(HEALTHCARE_REASON_CODES.CROSS_PATIENT_ACCESS_DENIED).toBeDefined();
+    expect(HEALTHCARE_REASON_CODES.BREAK_GLASS_REASON_REQUIRED).toBeDefined();
+    expect(HEALTHCARE_REASON_CODES.AI_NOT_HEALTHCARE_PROFESSIONAL).toBeDefined();
   });
 
-  it('forbids client-supplied causality and success fields', () => {
-    expect(FORBIDDEN_HEALTHCARE_CLIENT_AUTH_FIELDS).toContain('causalityEstablished');
-    expect(FORBIDDEN_HEALTHCARE_CLIENT_AUTH_FIELDS).toContain('succeeded');
-  });
-
-  it('documents interoperability capability vs compliance', () => {
-    expect(HEALTHCARE_INTEROP_BOUNDARY_DISCLAIMER).toContain('do not assert standards compliance');
+  it('forbids AI from becoming a healthcare professional', () => {
+    expect(FORBIDDEN_AI_HEALTHCARE_ACTIONS).toContain('REGISTER_AS_HEALTHCARE_PROFESSIONAL');
   });
 });

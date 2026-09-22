@@ -8,10 +8,7 @@ CREATE TYPE "HealthcareConsentRecordStatus" AS ENUM ('DRAFT', 'ACTIVE', 'SUPERSE
 CREATE TYPE "HealthcareAccessBasisKind" AS ENUM ('PATIENT_CONSENT', 'LEGAL_AUTHORITY', 'ADMINISTRATIVE', 'TREATMENT_RELATIONSHIP', 'EMERGENCY', 'RESEARCH_APPROVAL', 'PUBLIC_HEALTH');
 
 -- CreateEnum
-CREATE TYPE "HealthcareDataClassification" AS ENUM ('GENERAL', 'SENSITIVE', 'MENTAL_HEALTH', 'GENETIC', 'REPRODUCTIVE', 'SUBSTANCE_USE', 'HIV', 'SEALED');
-
--- CreateEnum
-CREATE TYPE "HealthcareActorPersona" AS ENUM ('PATIENT', 'CLINICIAN', 'RESEARCHER', 'REGULATOR', 'INTEGRATION_SYSTEM', 'AI_ASSISTANCE', 'PLATFORM_ADMIN', 'EXTERNAL_PROVIDER');
+CREATE TYPE "HealthDataRecordSensitivityClassification" AS ENUM ('GENERAL', 'SENSITIVE', 'MENTAL_HEALTH', 'GENETIC', 'REPRODUCTIVE', 'SUBSTANCE_USE', 'HIV', 'SEALED');
 
 -- CreateEnum
 CREATE TYPE "HealthDataRecordStatus" AS ENUM ('REGISTERED', 'VERIFIED', 'DISPUTED', 'SUPERSEDED', 'UNDER_LEGAL_HOLD');
@@ -42,6 +39,20 @@ CREATE TYPE "HealthcareIntegrationStandardKind" AS ENUM ('HL7_FHIR', 'LABORATORY
 
 -- CreateEnum
 CREATE TYPE "HealthcareIntegrationExchangeStatus" AS ENUM ('INITIATED', 'SUCCEEDED', 'FAILED', 'RECONCILING', 'DISCREPANCY_OPEN');
+
+-- AlterEnum
+-- This migration adds more than one value to an enum.
+-- With PostgreSQL versions 11 and earlier, this is not possible
+-- in a single migration. This can be worked around by creating
+-- multiple migrations, each migration adding only one value to
+-- the enum.
+
+
+ALTER TYPE "HealthcareActorPersona" ADD VALUE 'CLINICIAN';
+ALTER TYPE "HealthcareActorPersona" ADD VALUE 'RESEARCHER';
+ALTER TYPE "HealthcareActorPersona" ADD VALUE 'REGULATOR';
+ALTER TYPE "HealthcareActorPersona" ADD VALUE 'EXTERNAL_PROVIDER';
+ALTER TYPE "HealthcareActorPersona" ADD VALUE 'INTEGRATION_SYSTEM';
 
 -- CreateTable
 CREATE TABLE "healthcare_patient_references" (
@@ -139,6 +150,7 @@ CREATE TABLE "healthcare_consent_withdrawals" (
     "preservesHistory" BOOLEAN NOT NULL DEFAULT true,
     "actorIdentityId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "healthcareConsentId" UUID,
 
     CONSTRAINT "healthcare_consent_withdrawals_pkey" PRIMARY KEY ("id")
 );
@@ -220,7 +232,7 @@ CREATE TABLE "health_data_record_references" (
     "originatingProviderCode" TEXT,
     "externalRecordReference" TEXT,
     "storageLocationRef" TEXT,
-    "classification" "HealthcareDataClassification" NOT NULL DEFAULT 'GENERAL',
+    "classification" "HealthDataRecordSensitivityClassification" NOT NULL DEFAULT 'GENERAL',
     "status" "HealthDataRecordStatus" NOT NULL DEFAULT 'REGISTERED',
     "consentPurposeCode" TEXT,
     "retentionMetadata" JSONB NOT NULL DEFAULT '{}',
@@ -662,7 +674,7 @@ CREATE TABLE "healthcare_data_access_audits" (
     "actorPersona" "HealthcareActorPersona" NOT NULL,
     "endpoint" TEXT NOT NULL,
     "purposeCode" TEXT NOT NULL,
-    "classification" "HealthcareDataClassification",
+    "classification" "HealthDataRecordSensitivityClassification",
     "granted" BOOLEAN NOT NULL,
     "reasonCode" TEXT,
     "recordedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -910,6 +922,9 @@ CREATE INDEX "healthcare_data_access_audits_accessorIdentityId_idx" ON "healthca
 -- CreateIndex
 CREATE INDEX "healthcare_data_access_audits_patientReferenceId_idx" ON "healthcare_data_access_audits"("patientReferenceId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "clinical_trial_withdrawals_enrollmentId_key" ON "clinical_trial_withdrawals"("enrollmentId");
+
 -- RenameForeignKey
 ALTER TABLE "capability_revalidation_requirements" RENAME CONSTRAINT "capability_revalidation_requirements_capabilityDefinitionId_fke" TO "capability_revalidation_requirements_capabilityDefinitionI_fkey";
 
@@ -923,7 +938,37 @@ ALTER TABLE "civil_registry_certificate_verifications" RENAME CONSTRAINT "civil_
 ALTER TABLE "civil_registry_vital_record_versions" RENAME CONSTRAINT "civil_registry_vital_record_versions_registeredByOfficialIdenti" TO "civil_registry_vital_record_versions_registeredByOfficialI_fkey";
 
 -- RenameForeignKey
+ALTER TABLE "clinical_trial_eligibility_assessments" RENAME CONSTRAINT "clinical_trial_eligibility_assessments_assessorOfficeholderId_f" TO "clinical_trial_eligibility_assessments_assessorOfficeholde_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "clinical_trial_eligibility_assessments" RENAME CONSTRAINT "clinical_trial_eligibility_assessments_assessorProfessionalIden" TO "clinical_trial_eligibility_assessments_assessorProfessiona_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "clinical_trial_eligibility_evidence" RENAME CONSTRAINT "clinical_trial_eligibility_evidence_eligibilityAssessmentId_fke" TO "clinical_trial_eligibility_evidence_eligibilityAssessmentI_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "clinical_trial_external_registry_references" RENAME CONSTRAINT "clinical_trial_external_registry_references_clinicalTrialId_fke" TO "clinical_trial_external_registry_references_clinicalTrialI_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "clinical_trial_screening_reviews" RENAME CONSTRAINT "clinical_trial_screening_reviews_reviewerProfessionalIdentityId" TO "clinical_trial_screening_reviews_reviewerProfessionalIdent_fkey";
+
+-- RenameForeignKey
 ALTER TABLE "critical_service_definitions" RENAME CONSTRAINT "critical_service_definitions_institutionalOwnerInstitutionId_fk" TO "critical_service_definitions_institutionalOwnerInstitution_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "education_accreditation_records" RENAME CONSTRAINT "education_accreditation_records_institutionRegistryRecordId_fke" TO "education_accreditation_records_institutionRegistryRecordI_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "education_institution_inspection_references" RENAME CONSTRAINT "education_institution_inspection_references_inspectionRecordId_" TO "education_institution_inspection_references_inspectionReco_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "education_institution_inspection_references" RENAME CONSTRAINT "education_institution_inspection_references_institutionRegistry" TO "education_institution_inspection_references_institutionReg_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "education_institution_license_records" RENAME CONSTRAINT "education_institution_license_records_institutionRegistryRecord" TO "education_institution_license_records_institutionRegistryR_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "education_record_correction_history" RENAME CONSTRAINT "education_record_correction_history_educationRecordCorrectionId" TO "education_record_correction_history_educationRecordCorrect_fkey";
 
 -- RenameForeignKey
 ALTER TABLE "exit_acceptance_records" RENAME CONSTRAINT "exit_acceptance_records_institutionalAcceptorOfficeholderId_fke" TO "exit_acceptance_records_institutionalAcceptorOfficeholderI_fkey";
@@ -944,6 +989,15 @@ ALTER TABLE "measured_performance_claim_revalidations" RENAME CONSTRAINT "measur
 ALTER TABLE "measured_performance_claim_revalidations" RENAME CONSTRAINT "measured_performance_claim_revalidations_reviewerIdentityId_fke" TO "measured_performance_claim_revalidations_reviewerIdentityI_fkey";
 
 -- RenameForeignKey
+ALTER TABLE "patient_treatment_status_projections" RENAME CONSTRAINT "patient_treatment_status_projections_patientHealthcareProfileId" TO "patient_treatment_status_projections_patientHealthcareProf_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "public_safety_recovery_assistance_applications" RENAME CONSTRAINT "public_safety_recovery_assistance_applications_engagementId_fke" TO "public_safety_recovery_assistance_applications_engagementI_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "public_safety_recovery_assistance_applications" RENAME CONSTRAINT "public_safety_recovery_assistance_applications_serviceRequestId" TO "public_safety_recovery_assistance_applications_serviceRequ_fkey";
+
+-- RenameForeignKey
 ALTER TABLE "resumption_readiness_assessments" RENAME CONSTRAINT "resumption_readiness_assessments_technicalRecommenderIdentityId" TO "resumption_readiness_assessments_technicalRecommenderIdent_fkey";
 
 -- RenameForeignKey
@@ -951,6 +1005,24 @@ ALTER TABLE "service_pack_acceptance_records" RENAME CONSTRAINT "service_pack_ac
 
 -- RenameForeignKey
 ALTER TABLE "service_pack_deployment_audit_records" RENAME CONSTRAINT "service_pack_deployment_audit_records_servicePackDeploymentI_fk" TO "service_pack_deployment_audit_records_servicePackDeploymen_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_eligibility_reviews" RENAME CONSTRAINT "treatment_eligibility_reviews_governmentAdministrativeEvaluatio" TO "treatment_eligibility_reviews_governmentAdministrativeEval_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_patient_data_access_grants" RENAME CONSTRAINT "treatment_patient_data_access_grants_granteeProviderIdentityId_" TO "treatment_patient_data_access_grants_granteeProviderIdenti_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_patient_data_access_grants" RENAME CONSTRAINT "treatment_patient_data_access_grants_patientHealthcareProfileId" TO "treatment_patient_data_access_grants_patientHealthcareProf_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_patient_data_access_grants" RENAME CONSTRAINT "treatment_patient_data_access_grants_patientSubjectIdentityId_f" TO "treatment_patient_data_access_grants_patientSubjectIdentit_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_program_external_dependencies" RENAME CONSTRAINT "treatment_program_external_dependencies_externalAuthorityId_fke" TO "treatment_program_external_dependencies_externalAuthorityI_fkey";
+
+-- RenameForeignKey
+ALTER TABLE "treatment_program_external_dependencies" RENAME CONSTRAINT "treatment_program_external_dependencies_recordedByIdentityId_fk" TO "treatment_program_external_dependencies_recordedByIdentity_fkey";
 
 -- AddForeignKey
 ALTER TABLE "healthcare_patient_references" ADD CONSTRAINT "healthcare_patient_references_patientIdentityId_fkey" FOREIGN KEY ("patientIdentityId") REFERENCES "identities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -981,6 +1053,9 @@ ALTER TABLE "healthcare_consent_withdrawals" ADD CONSTRAINT "healthcare_consent_
 
 -- AddForeignKey
 ALTER TABLE "healthcare_consent_withdrawals" ADD CONSTRAINT "healthcare_consent_withdrawals_actorIdentityId_fkey" FOREIGN KEY ("actorIdentityId") REFERENCES "identities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "healthcare_consent_withdrawals" ADD CONSTRAINT "healthcare_consent_withdrawals_healthcareConsentId_fkey" FOREIGN KEY ("healthcareConsentId") REFERENCES "healthcare_consents"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "healthcare_data_sharing_authorizations" ADD CONSTRAINT "healthcare_data_sharing_authorizations_consentId_fkey" FOREIGN KEY ("consentId") REFERENCES "healthcare_consents"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1163,6 +1238,9 @@ ALTER INDEX "civil_registry_record_entitlements_vitalRecordId_identityId_ent" RE
 ALTER INDEX "civil_registry_vital_record_versions_vitalRecordId_versionNumbe" RENAME TO "civil_registry_vital_record_versions_vitalRecordId_versionN_key";
 
 -- RenameIndex
+ALTER INDEX "clinical_trial_eligibility_criteria_clinicalTrialId_criterionCo" RENAME TO "clinical_trial_eligibility_criteria_clinicalTrialId_criteri_key";
+
+-- RenameIndex
 ALTER INDEX "communication_maf_index_entries_masterAdministrativeFileId_mess" RENAME TO "communication_maf_index_entries_masterAdministrativeFileId__key";
 
 -- RenameIndex
@@ -1187,6 +1265,15 @@ ALTER INDEX "digital_twin_definitions_representedSubjectType_representedSubj" RE
 ALTER INDEX "digital_twin_relationships_fromDefinitionId_toDefinitionId_rela" RENAME TO "digital_twin_relationships_fromDefinitionId_toDefinitionId__key";
 
 -- RenameIndex
+ALTER INDEX "education_institution_inspection_references_inspectionRecordId_" RENAME TO "education_institution_inspection_references_inspectionRecor_idx";
+
+-- RenameIndex
+ALTER INDEX "education_institution_license_records_publicVerificationToken_k" RENAME TO "education_institution_license_records_publicVerificationTok_key";
+
+-- RenameIndex
+ALTER INDEX "education_record_correction_history_educationRecordCorrection_i" RENAME TO "education_record_correction_history_educationRecordCorrecti_idx";
+
+-- RenameIndex
 ALTER INDEX "immigration_status_records_immigrationProfileId_statusCategory_" RENAME TO "immigration_status_records_immigrationProfileId_statusCateg_idx";
 
 -- RenameIndex
@@ -1199,7 +1286,19 @@ ALTER INDEX "measured_performance_claim_evidence_links_performanceClaimId_id" RE
 ALTER INDEX "metric_dependency_classifications_metricVersionId_classificatio" RENAME TO "metric_dependency_classifications_metricVersionId_classific_key";
 
 -- RenameIndex
+ALTER INDEX "patient_treatment_status_projections_patientHealthcareProfileId" RENAME TO "patient_treatment_status_projections_patientHealthcareProfi_idx";
+
+-- RenameIndex
 ALTER INDEX "property_interest_entitlements_parcelId_identityId_entitlementK" RENAME TO "property_interest_entitlements_parcelId_identityId_entitlem_key";
+
+-- RenameIndex
+ALTER INDEX "public_safety_recovery_assistance_applications_applicationRefer" RENAME TO "public_safety_recovery_assistance_applications_applicationR_key";
+
+-- RenameIndex
+ALTER INDEX "public_safety_recovery_assistance_applications_serviceRequestId" RENAME TO "public_safety_recovery_assistance_applications_serviceReque_key";
+
+-- RenameIndex
+ALTER INDEX "research_ethics_approval_versions_researchEthicsApprovalId_vers" RENAME TO "research_ethics_approval_versions_researchEthicsApprovalId__key";
 
 -- RenameIndex
 ALTER INDEX "service_pack_components_servicePackVersionId_componentKind_comp" RENAME TO "service_pack_components_servicePackVersionId_componentKind__key";
@@ -1215,3 +1314,19 @@ ALTER INDEX "service_pack_jurisdiction_bindings_servicePackId_jurisdictionI_" RE
 
 -- RenameIndex
 ALTER INDEX "strategic_project_economic_claims_profileId_performanceClaimId_" RENAME TO "strategic_project_economic_claims_profileId_performanceClai_key";
+
+-- RenameIndex
+ALTER INDEX "treatment_care_team_references_treatmentEnrollmentId_memberIden" RENAME TO "treatment_care_team_references_treatmentEnrollmentId_member_key";
+
+-- RenameIndex
+ALTER INDEX "treatment_patient_data_access_grants_granteeProviderIdentityId_" RENAME TO "treatment_patient_data_access_grants_granteeProviderIdentit_idx";
+
+-- RenameIndex
+ALTER INDEX "treatment_patient_data_access_grants_patientHealthcareProfileId" RENAME TO "treatment_patient_data_access_grants_patientHealthcareProfi_idx";
+
+-- RenameIndex
+ALTER INDEX "treatment_patient_data_access_grants_patientSubjectIdentityId_i" RENAME TO "treatment_patient_data_access_grants_patientSubjectIdentity_idx";
+
+-- RenameIndex
+ALTER INDEX "treatment_program_eligibility_criteria_treatmentProgramId_crite" RENAME TO "treatment_program_eligibility_criteria_treatmentProgramId_c_key";
+

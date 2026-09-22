@@ -7,14 +7,14 @@ import {
 
 import { PrismaService } from '../../database/prisma.service';
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
-import { HealthcareDataAccessPolicyService } from '../common/healthcare-data-access-policy.service';
+import { HealthcareFoundationAccessPolicyService } from '../common/healthcare-data-access-policy.service';
 import { HEALTHCARE_REASON_CODES } from '../healthcare.constants';
 
 @Injectable()
 export class ResearchDataGovernanceService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly accessPolicy: HealthcareDataAccessPolicyService,
+    private readonly accessPolicy: HealthcareFoundationAccessPolicyService,
   ) {}
 
   async createDatasetWithProvenance(input: {

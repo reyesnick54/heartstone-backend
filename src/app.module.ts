@@ -18,6 +18,7 @@ import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { ExperienceModule } from './experience/experience.module';
@@ -35,6 +36,7 @@ import { OperationalSupportModule } from './operational-support/operational-supp
 import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
 import { ProductionReadinessModule } from './production-readiness/production-readiness.module';
 import { PropertyRegistryModule } from './property-registry/property-registry.module';
+import { PublicSafetyModule } from './public-safety/public-safety.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
@@ -43,6 +45,7 @@ import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
+import { SocialProtectionModule } from './social-protection/social-protection.module';
 import { SystemModule } from './system/system.module';
 import { TransportationModule } from './transportation/transportation.module';
 
@@ -62,6 +65,7 @@ import { TransportationModule } from './transportation/transportation.module';
     DatabaseModule,
     RedisModule,
     HealthModule,
+    HealthcareModule,
     SystemModule,
     GovernmentModule,
     IdentityModule,
@@ -76,7 +80,10 @@ import { TransportationModule } from './transportation/transportation.module';
     ApplicationProcessingModule,
     ImmigrationModule,
     LabourModule,
+    SocialProtectionModule,
+    EducationModule,
     TransportationModule,
+    HealthcareModule,
     CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
@@ -93,6 +100,7 @@ import { TransportationModule } from './transportation/transportation.module';
     RevenueModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
+    PublicSafetyModule,
     IntelligenceModule,
     OperationalSupportModule,
     OperationalReadinessModule,

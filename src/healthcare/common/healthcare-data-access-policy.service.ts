@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import {
   HealthcareAccessBasisKind,
   HealthcareActorPersona,
-  HealthcareDataClassification,
+  HealthDataRecordSensitivityClassification,
   IdentityType,
   type Prisma,
 } from '@prisma/client';
@@ -12,15 +12,15 @@ import { type ActorContext } from '../../identity/auth/context/actor-context.typ
 import { HealthcareConsentPolicyService } from '../consent/healthcare-consent-policy.service';
 import {
   HEALTHCARE_REASON_CODES,
-  PLATFORM_ADMIN_HEALTHCARE_ROLE_MARKER,
-  RESTRICTED_HEALTHCARE_CLASSIFICATIONS,
+  PLATFORM_ADMIN_ROLE_MARKER,
+  RESTRICTED_HEALTHCARE_RECORD_CLASSIFICATIONS,
 } from '../healthcare.constants';
 import { HealthcareBoundaryService } from './healthcare-boundary.service';
 
 export interface HealthcareDataAccessRequest {
   patientReferenceId: string;
   purposeCode: string;
-  classification: HealthcareDataClassification;
+  classification: HealthDataRecordSensitivityClassification;
   endpoint: string;
   consentPurposeCode?: string;
   accessBasisKind?: HealthcareAccessBasisKind;
@@ -31,7 +31,7 @@ export interface HealthcareDataAccessRequest {
 }
 
 @Injectable()
-export class HealthcareDataAccessPolicyService {
+export class HealthcareFoundationAccessPolicyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: HealthcareBoundaryService,
@@ -52,7 +52,10 @@ export class HealthcareDataAccessPolicyService {
     actor: ActorContext,
     request: HealthcareDataAccessRequest,
   ): Promise<void> {
-    if (request.roleMarker === PLATFORM_ADMIN_HEALTHCARE_ROLE_MARKER) {
+    if (
+      request.roleMarker === PLATFORM_ADMIN_ROLE_MARKER ||
+      request.roleMarker === 'PLATFORM_ADMIN'
+    ) {
       await this.recordAudit(
         actor,
         request,
@@ -86,7 +89,7 @@ export class HealthcareDataAccessPolicyService {
       throw new ForbiddenException(HEALTHCARE_REASON_CODES.EXTERNAL_PROVIDER_SCOPE_DENIED);
     }
 
-    if (RESTRICTED_HEALTHCARE_CLASSIFICATIONS.includes(request.classification as never)) {
+    if (RESTRICTED_HEALTHCARE_RECORD_CLASSIFICATIONS.includes(request.classification as never)) {
       const patient = await this.prisma.healthcarePatientReference.findUnique({
         where: { id: request.patientReferenceId },
       });

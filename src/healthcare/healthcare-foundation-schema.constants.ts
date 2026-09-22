@@ -1,0 +1,15 @@
+export const HEALTHCARE_FOUNDATION_MODEL_NAMES = [
+  'HealthcarePatientReference',
+  'HealthcareConsentPurposeDefinition',
+  'HealthcareConsentVersion',
+  'HealthcareConsent',
+  'HealthcareConsentGrant',
+  'HealthcareConsentWithdrawal',
+  'HealthDataRecordReference',
+  'ResearchDataset',
+  'ResearchDataAccessGrant',
+  'AdverseEventReport',
+  'HealthcareIntegrationAdapterDeclaration',
+  'HealthcareIntegrationExchangeRecord',
+  'HealthcareDataAccessAudit',
+] as const;

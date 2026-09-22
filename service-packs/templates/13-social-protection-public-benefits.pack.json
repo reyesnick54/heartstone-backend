@@ -1,0 +1,2185 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-SOCIAL-PROTECTION",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Social protection and public benefits family with household profiles, applications, awards, disbursements, changes, appeals, and external determinations.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-social-protection-public-benefits",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Social Protection & Public Benefits Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-INCOME-SUPPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-INCOME-SUPPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-INCOME-SUPPORT-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Income Support Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-INCOME-SUPPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-INCOME-SUPPORT-FORM",
+          "formName": "Income Support Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-INCOME-SUPPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-INCOME-SUPPORT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-INCOME-SUPPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Income Support Application",
+      "serviceSlug": "income-support-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-INCOME-SUPPORT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Unemployment Support Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-FORM",
+          "formName": "Unemployment Support Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Unemployment Support Application",
+      "serviceSlug": "unemployment-support-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-UNEMPLOYMENT-SUPPORT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-FAMILY-ASSISTANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Family Assistance Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-FORM",
+          "formName": "Family Assistance Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-FAMILY-ASSISTANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Family Assistance Application",
+      "serviceSlug": "family-assistance-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-FAMILY-ASSISTANCE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-HOUSING-ASSISTANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Housing Assistance Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-FORM",
+          "formName": "Housing Assistance Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-HOUSING-ASSISTANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Housing Assistance Application",
+      "serviceSlug": "housing-assistance-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-HOUSING-ASSISTANCE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-DISABILITY-SUPPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Disability Support Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-FORM",
+          "formName": "Disability Support Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-DISABILITY-SUPPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-DISABILITY-SUPPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Disability Support Application",
+      "serviceSlug": "disability-support-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-DISABILITY-SUPPORT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-ELDERLY-SUPPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Elderly Support Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-FORM",
+          "formName": "Elderly Support Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-ELDERLY-SUPPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-ELDERLY-SUPPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Elderly Support Application",
+      "serviceSlug": "elderly-support-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-ELDERLY-SUPPORT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Child / Family Support Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-FORM",
+          "formName": "Child / Family Support Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Child / Family Support Application",
+      "serviceSlug": "child-family-support-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-CHILD-FAMILY-SUPPORT-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Emergency Assistance Request — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-FORM",
+          "formName": "Emergency Assistance Request form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Emergency Assistance Request",
+      "serviceSlug": "emergency-assistance-request",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-EMERGENCY-ASSISTANCE-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-DISASTER-RELIEF-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-DISASTER-RELIEF-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-DISASTER-RELIEF-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        },
+        {
+          "dependencyCode": "TEMPLATE-BEN-DISASTER-RELIEF-EXTERNAL-DETERMINATION",
+          "dependencyType": "EXTERNAL_AUTHORITY",
+          "description": "External determination dependency (does not collapse into award status)",
+          "externalIntegrationCode": "TEMPLATE-EXT-DETERMINE-API"
+        }
+      ],
+      "description": "Disaster Relief Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-DISASTER-RELIEF-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-DISASTER-RELIEF-FORM",
+          "formName": "Disaster Relief Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-DISASTER-RELIEF-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-DISASTER-RELIEF-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-DISASTER-RELIEF",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Disaster Relief Application",
+      "serviceSlug": "disaster-relief-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-DISASTER-RELIEF-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT",
+        "BUSINESS"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Government Subsidy Application — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-FORM",
+          "formName": "Government Subsidy Application form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Government Subsidy Application",
+      "serviceSlug": "government-subsidy-application",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-GOVERNMENT-SUBSIDY-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-BENEFIT-RENEWAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Benefit Renewal — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-FORM",
+          "formName": "Benefit Renewal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-BENEFIT-RENEWAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-BENEFIT-RENEWAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Benefit Renewal",
+      "serviceSlug": "benefit-renewal",
+      "serviceType": "RENEWAL",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-BENEFIT-RENEWAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Change of Circumstances — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-FORM",
+          "formName": "Change of Circumstances form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Change of Circumstances",
+      "serviceSlug": "change-of-circumstances",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-CHANGE-CIRCUMSTANCES-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DISBURSE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-PAYMENT-INQUIRY-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DISBURSE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Benefit Payment Inquiry — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-FORM",
+          "formName": "Benefit Payment Inquiry form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-PAYMENT-INQUIRY-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-PAYMENT-INQUIRY",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Benefit Payment Inquiry",
+      "serviceSlug": "benefit-payment-inquiry",
+      "serviceType": "INQUIRY",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-PAYMENT-INQUIRY-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DISBURSE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-DECISION-REVIEW-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-DECISION-REVIEW-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-DECISION-REVIEW-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Benefit Decision Review — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-DECISION-REVIEW-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-DECISION-REVIEW-FORM",
+          "formName": "Benefit Decision Review form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-DECISION-REVIEW-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-DECISION-REVIEW-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-DECISION-REVIEW",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Benefit Decision Review",
+      "serviceSlug": "benefit-decision-review",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-DECISION-REVIEW-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "CITIZEN",
+        "INDIVIDUAL",
+        "RESIDENT"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-BENEFIT-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official benefit determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-BENEFIT-APPEAL-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-IDENTITY-LOOKUP",
+          "dependencyType": "REGISTRY_LOOKUP",
+          "description": "Optional identity registry lookup when configured",
+          "externalIntegrationCode": "TEMPLATE-IDENTITY-API"
+        }
+      ],
+      "description": "Public Benefits Appeal — NON_PRODUCTION social protection template without jurisdiction-specific eligibility thresholds.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-FORM",
+          "formName": "Public Benefits Appeal form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-BENEFIT-AWARD",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [],
+      "serviceCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-SOCIAL-PROTECTION",
+      "serviceName": "Public Benefits Appeal",
+      "serviceSlug": "public-benefits-appeal",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-BEN-PUBLIC-BENEFITS-APPEAL-SLA",
+          "targetDays": 30
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-DETERMINE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Benefit review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-BENEFIT-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

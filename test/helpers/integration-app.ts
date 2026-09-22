@@ -5,13 +5,16 @@ import { type App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
-import { resetHealthcareData } from '../../src/database/healthcare-test-reset';
+import { resetEducationData } from '../../src/database/education-test-reset';
+import { resetHealthcareFoundationData } from '../../src/database/healthcare-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
 import { resetLabourData } from '../../src/database/labour-test-reset';
 import { resetPlanningConstructionData } from '../../src/database/planning-construction-test-reset';
 import { PrismaService } from '../../src/database/prisma.service';
 import { resetPropertyRegistryData } from '../../src/database/property-test-reset';
+import { resetPublicSafetyData } from '../../src/database/public-safety-test-reset';
 import { resetRevenueData } from '../../src/database/revenue-test-reset';
+import { resetSocialProtectionData } from '../../src/database/social-protection-test-reset';
 import { resetTransportationData } from '../../src/database/transportation-test-reset';
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
@@ -186,11 +189,13 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
-  await resetHealthcareData(prisma);
+  await resetHealthcareFoundationData(prisma);
   await resetImmigrationData(prisma);
+  await resetEducationData(prisma);
   await resetCustomsTradeData(prisma);
   await resetPropertyRegistryData(prisma);
   await resetPlanningConstructionData(prisma);
+  await resetPublicSafetyData(prisma);
   await resetRevenueData(prisma);
   await resetTransportationData(prisma);
   await resetSchedulingData(prisma);
@@ -200,5 +205,6 @@ export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetOperationalSupportData(prisma);
   await resetGovernmentData(prisma);
   await resetLabourData(prisma);
+  await resetSocialProtectionData(prisma);
   await resetIdentityData(prisma);
 }

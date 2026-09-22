@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
   HealthcareAccessBasisKind,
-  HealthcareDataClassification,
   type HealthDataRecordReference,
+  HealthDataRecordSensitivityClassification,
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
-import { HealthcareDataAccessPolicyService } from '../common/healthcare-data-access-policy.service';
+import { HealthcareFoundationAccessPolicyService } from '../common/healthcare-data-access-policy.service';
 
 export interface RegisterHealthDataRecordInput {
   recordReference: string;
@@ -15,7 +15,7 @@ export interface RegisterHealthDataRecordInput {
   dataCategoryCode: string;
   sourceId: string;
   externalRecordReference?: string;
-  classification?: HealthcareDataClassification;
+  classification?: HealthDataRecordSensitivityClassification;
   consentPurposeCode?: string;
 }
 
@@ -23,7 +23,7 @@ export interface RegisterHealthDataRecordInput {
 export class HealthDataRegistryService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly accessPolicy: HealthcareDataAccessPolicyService,
+    private readonly accessPolicy: HealthcareFoundationAccessPolicyService,
   ) {}
 
   async registerRecordReference(
@@ -36,7 +36,7 @@ export class HealthDataRegistryService {
         dataCategoryCode: input.dataCategoryCode,
         sourceId: input.sourceId,
         externalRecordReference: input.externalRecordReference,
-        classification: input.classification ?? HealthcareDataClassification.GENERAL,
+        classification: input.classification ?? HealthDataRecordSensitivityClassification.GENERAL,
         consentPurposeCode: input.consentPurposeCode,
         provenanceRecords: {
           create: {

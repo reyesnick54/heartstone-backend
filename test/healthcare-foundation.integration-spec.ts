@@ -1,8 +1,8 @@
 import { type INestApplication } from '@nestjs/common';
 import {
   HealthcareConsentType,
-  HealthcareDataClassification,
   HealthcareIntegrationStandardKind,
+  HealthDataRecordSensitivityClassification,
   IdentityType,
 } from '@prisma/client';
 import { type App } from 'supertest/types';
@@ -115,7 +115,7 @@ describe('Healthcare foundation (integration)', () => {
       patientReferenceId: patientRef.id,
       dataCategoryCode: 'LAB_RESULT',
       sourceId: source.id,
-      classification: HealthcareDataClassification.GENERAL,
+      classification: HealthDataRecordSensitivityClassification.GENERAL,
       consentPurposeCode: 'TREATMENT-CARE',
     });
 
