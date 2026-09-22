@@ -780,6 +780,7 @@ model Organization {
   complianceMattersAsHolder       ComplianceMatter[]                @relation("ComplianceMatterHolderOrganization")
   appointmentParticipants       AppointmentParticipant[]
   serviceAppointments             ServiceAppointment[]
+  corporateRegistryProfile        CorporateRegistryProfile?
 
   @@index([status])
   @@map("organizations")
@@ -14109,4 +14110,301 @@ model ServicePackGovernanceAuditRecord {
   @@index([eventType])
   @@index([createdAt])
   @@map("service_pack_governance_audit_records")
+}
+// ─── Corporate Registry / Business Formation ─────────────────────────────────
+
+enum CorporateEntityType {
+  COMPANY
+  SOLE_TRADER
+  FOREIGN_COMPANY
+  BRANCH
+}
+
+enum CorporateRegistrationStatus {
+  DRAFT
+  PENDING_DECISION
+  ACTIVE
+  DISSOLVED
+  RESTORED
+  SUSPENDED
+}
+
+enum CorporateRegistryRecordStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SUPERSEDED
+}
+
+enum CorporateFilingType {
+  ANNUAL
+  AMENDMENT
+  BENEFICIAL_OWNERSHIP
+  INITIAL
+  OTHER
+}
+
+enum CorporateFilingStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  OVERDUE
+}
+
+enum CorporateOfficerRole {
+  DIRECTOR
+  OFFICER
+  SECRETARY
+  OTHER
+}
+
+enum CorporateRegistryActionType {
+  NAME_RESERVATION
+  INCORPORATION
+  AMENDMENT
+  ANNUAL_FILING
+  BENEFICIAL_OWNERSHIP_REVIEW
+  DISSOLUTION
+  RESTORATION
+  CERTIFICATE_ISSUANCE
+  RECORD_CORRECTION
+  COMPLIANCE
+  OTHER
+}
+
+enum CorporateRegistryActionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CorporateCertificateStatus {
+  DRAFT
+  PENDING_ISSUANCE
+  ISSUED
+  REVOKED
+}
+
+enum CorporateRegistryDecisionType {
+  INCORPORATION
+  REGISTRATION
+  AMENDMENT
+  DISSOLUTION
+  RESTORATION
+  CERTIFICATE_ISSUANCE
+  RECORD_CORRECTION
+  NAME_RESERVATION
+}
+
+enum CorporateRegistryStatusEventType {
+  STATUS_CHANGE
+  DISSOLUTION
+  RESTORATION
+  PAYMENT_RECEIVED
+  OFFICIAL_DECISION
+}
+
+enum CorporatePublicVerificationMode {
+  DISABLED
+  MINIMAL_FACTS
+}
+
+model CorporateRegistryConfiguration {
+  id                              String                        @id @default(uuid()) @db.Uuid
+  configurationKey                  String                        @unique
+  publicVerificationMode          CorporatePublicVerificationMode @default(DISABLED)
+  exposeRegisteredOfficePublicly    Boolean                       @default(false)
+  createdAt                         DateTime                      @default(now())
+  updatedAt                         DateTime                      @updatedAt
+
+  @@map("corporate_registry_configurations")
+}
+
+model CorporateRegistryProfile {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  organizationId             String                      @unique @db.Uuid
+  registeredName             String?
+  registrationReference      String?                     @unique
+  registrationStatus         CorporateRegistrationStatus @default(DRAFT)
+  entityType                 CorporateEntityType?
+  registrationDate           DateTime?
+  jurisdictionCode           String?
+  filingStatusSummary        String?
+  publicVerificationReference String?                    @unique
+  recordApprovalStatus       CorporateRegistryRecordStatus @default(DRAFT)
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  organization               Organization                @relation(fields: [organizationId], references: [id])
+  registeredOffices          CorporateRegisteredOffice[]
+  officers                   CorporateOfficerDisclosure[]
+  filings                    CorporateFiling[]
+  beneficialOwnershipDeclarations CorporateBeneficialOwnershipDeclaration[]
+  certificates               CorporateCertificate[]
+  actions                    CorporateRegistryAction[]
+  statusHistory              CorporateRegistryStatusHistory[]
+  officialDecisions          CorporateRegistryOfficialDecision[]
+  paymentEvents              CorporateRegistryPaymentEvent[]
+
+  @@index([registrationStatus])
+  @@index([registrationReference])
+  @@map("corporate_registry_profiles")
+}
+
+model CorporateRegisteredOffice {
+  id                String                        @id @default(uuid()) @db.Uuid
+  profileId         String                        @db.Uuid
+  addressLine1      String
+  addressLine2      String?
+  city              String?
+  region            String?
+  countryCode       String?
+  recordStatus      CorporateRegistryRecordStatus @default(DRAFT)
+  effectiveFrom     DateTime                      @default(now())
+  supersededAt      DateTime?
+  isCurrent         Boolean                       @default(false)
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+  profile           CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([recordStatus])
+  @@map("corporate_registered_offices")
+}
+
+model CorporateOfficerDisclosure {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  profileId              String                        @db.Uuid
+  displayName            String
+  role                   CorporateOfficerRole
+  permitsPublicDisclosure Boolean                      @default(false)
+  recordStatus           CorporateRegistryRecordStatus @default(DRAFT)
+  effectiveFrom          DateTime                      @default(now())
+  supersededAt           DateTime?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  profile                CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("corporate_officer_disclosures")
+}
+
+model CorporateFiling {
+  id           String              @id @default(uuid()) @db.Uuid
+  profileId    String              @db.Uuid
+  filingType   CorporateFilingType
+  status       CorporateFilingStatus @default(DRAFT)
+  label        String
+  dueDate      DateTime?
+  submittedAt  DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  profile      CorporateRegistryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([status])
+  @@map("corporate_filings")
+}
+
+model CorporateBeneficialOwnershipDeclaration {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  profileId             String                        @db.Uuid
+  declarationReference  String                        @unique
+  status                CorporateFilingStatus         @default(DRAFT)
+  restrictedSummary     String
+  recordApprovalStatus  CorporateRegistryRecordStatus @default(DRAFT)
+  submittedAt           DateTime?
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  profile               CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("corporate_beneficial_ownership_declarations")
+}
+
+model CorporateCertificate {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  profileId            String                     @db.Uuid
+  certificateReference String                     @unique
+  status               CorporateCertificateStatus @default(DRAFT)
+  label                String
+  issuedAt             DateTime?
+  sourceRecordStatus   CorporateRegistryRecordStatus @default(DRAFT)
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  profile              CorporateRegistryProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([status])
+  @@map("corporate_certificates")
+}
+
+model CorporateRegistryAction {
+  id         String                        @id @default(uuid()) @db.Uuid
+  profileId  String                        @db.Uuid
+  actionType CorporateRegistryActionType
+  status     CorporateRegistryActionStatus @default(OPEN)
+  label      String
+  dueDate    DateTime?
+  createdAt  DateTime                      @default(now())
+  updatedAt  DateTime                      @updatedAt
+  profile    CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([status])
+  @@index([actionType])
+  @@map("corporate_registry_actions")
+}
+
+model CorporateRegistryStatusHistory {
+  id              String                           @id @default(uuid()) @db.Uuid
+  profileId       String                           @db.Uuid
+  eventType       CorporateRegistryStatusEventType
+  fromStatus      CorporateRegistrationStatus?
+  toStatus        CorporateRegistrationStatus?
+  summary         String
+  preserved       Boolean                          @default(true)
+  recordedAt      DateTime                         @default(now())
+  decisionId      String?                          @db.Uuid
+  profile         CorporateRegistryProfile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  decision        CorporateRegistryOfficialDecision? @relation(fields: [decisionId], references: [id])
+
+  @@index([profileId])
+  @@index([eventType])
+  @@map("corporate_registry_status_history")
+}
+
+model CorporateRegistryOfficialDecision {
+  id                   String                        @id @default(uuid()) @db.Uuid
+  profileId            String                        @db.Uuid
+  decisionType         CorporateRegistryDecisionType
+  approved             Boolean
+  caseId               String?                       @db.Uuid
+  decidedByIdentityId  String?                       @db.Uuid
+  decidedAt            DateTime                      @default(now())
+  rationale            String?
+  createdAt            DateTime                      @default(now())
+  profile              CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  statusHistory        CorporateRegistryStatusHistory[]
+
+  @@index([profileId])
+  @@index([decisionType])
+  @@map("corporate_registry_official_decisions")
+}
+
+model CorporateRegistryPaymentEvent {
+  id              String                   @id @default(uuid()) @db.Uuid
+  profileId       String                   @db.Uuid
+  paymentReference String                  @unique
+  amount          Decimal                  @db.Decimal(18, 2)
+  currencyCode    String
+  receivedAt      DateTime                 @default(now())
+  activatesEntity Boolean                  @default(false)
+  profile         CorporateRegistryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("corporate_registry_payment_events")
 }
