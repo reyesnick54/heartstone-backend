@@ -73,3 +73,14 @@ export const FORBIDDEN_CUSTOMS_RELEASE_CLIENT_FIELDS = [
   'authorizedByOfficeholderId',
   'releaseDecisionReferenceId',
 ] as const;
+
+export const PUBLIC_CUSTOMS_VERIFICATION_FORBIDDEN_RESPONSE_KEYS = [
+  'organizationId',
+  'traderAccountId',
+  'declarationData',
+  'submissionPayload',
+  'amountCents',
+  'paidAmountCents',
+  'riskScore',
+  'primaryIdentityId',
+] as const;

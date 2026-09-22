@@ -1,0 +1,2748 @@
+{
+  "departmentCode": "TEMPLATE-DEPARTMENT-CUSTOMS",
+  "deploymentIntent": {
+    "requiresInstitutionalAcceptance": true,
+    "requiresOperationalActivation": true,
+    "targetMaturityStatus": "DRAFT",
+    "targetPublicAvailability": "UNDER_DEVELOPMENT"
+  },
+  "description": "NON_PRODUCTION / TEMPLATE ONLY — Customs & Trade family with placeholder rules, forms, workflows, fees, integrations, and dashboard indicators for the unified Trade Portal.",
+  "institutionCode": "TEMPLATE-INSTITUTION",
+  "packId": "template-customs-trade-administration",
+  "packLabel": "NON_PRODUCTION",
+  "packName": "Customs & Trade Government Service Pack",
+  "packVersion": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "services": [
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-REGISTER-IMPORTER-REMINDER",
+          "templateCode": "TEMPLATE-CUST-REGISTER-IMPORTER-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-REGISTER-IMPORTER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-REGISTER-IMPORTER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-REGISTER-IMPORTER-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-REGISTER-IMPORTER-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Register Importer — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-REGISTER-IMPORTER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-REGISTER-IMPORTER-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-REGISTER-IMPORTER-FORM",
+          "formName": "Register Importer form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-REGISTER-IMPORTER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-REGISTER-IMPORTER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-REGISTER-IMPORTER-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-REGISTER-IMPORTER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Register Importer",
+      "serviceSlug": "template-cust-register-importer",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-REGISTER-IMPORTER-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-REGISTER-EXPORTER-REMINDER",
+          "templateCode": "TEMPLATE-CUST-REGISTER-EXPORTER-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-REGISTER-EXPORTER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-REGISTER-EXPORTER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-REGISTER-EXPORTER-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-REGISTER-EXPORTER-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Register Exporter — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-REGISTER-EXPORTER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-REGISTER-EXPORTER-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-REGISTER-EXPORTER-FORM",
+          "formName": "Register Exporter form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-REGISTER-EXPORTER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-REGISTER-EXPORTER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-REGISTER-EXPORTER-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-REGISTER-EXPORTER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Register Exporter",
+      "serviceSlug": "template-cust-register-exporter",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-REGISTER-EXPORTER-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-REMINDER",
+          "templateCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-AUTHORIZE-BROKER-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Register / Authorize Customs Broker — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-FORM",
+          "formName": "Register / Authorize Customs Broker form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-AUTHORIZE-BROKER-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-AUTHORIZE-BROKER",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Register / Authorize Customs Broker",
+      "serviceSlug": "template-cust-authorize-customs-broker",
+      "serviceType": "REGISTRATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-AUTHORIZE-BROKER-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-REMINDER",
+          "templateCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Submit Import Declaration — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-FORM",
+          "formName": "Submit Import Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Submit Import Declaration",
+      "serviceSlug": "template-cust-submit-import-declaration",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-SUBMIT-IMPORT-DECLARATION-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-REMINDER",
+          "templateCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Submit Export Declaration — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-FORM",
+          "formName": "Submit Export Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Submit Export Declaration",
+      "serviceSlug": "template-cust-submit-export-declaration",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-SUBMIT-EXPORT-DECLARATION-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-AMEND-DECLARATION-REMINDER",
+          "templateCode": "TEMPLATE-CUST-AMEND-DECLARATION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-AMEND-DECLARATION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-AMEND-DECLARATION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-AMEND-DECLARATION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-AMEND-DECLARATION-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Amend Customs Declaration — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-AMEND-DECLARATION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-AMEND-DECLARATION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-AMEND-DECLARATION-FORM",
+          "formName": "Amend Customs Declaration form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-AMEND-DECLARATION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-AMEND-DECLARATION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-AMEND-DECLARATION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-AMEND-DECLARATION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Amend Customs Declaration",
+      "serviceSlug": "template-cust-amend-customs-declaration",
+      "serviceType": "AMENDMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-AMEND-DECLARATION-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-IMPORT-PERMIT-REMINDER",
+          "templateCode": "TEMPLATE-CUST-IMPORT-PERMIT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-IMPORT-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-IMPORT-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-IMPORT-PERMIT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-IMPORT-PERMIT-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Apply for Import Permit — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-IMPORT-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-IMPORT-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-IMPORT-PERMIT-FORM",
+          "formName": "Apply for Import Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-IMPORT-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-IMPORT-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-IMPORT-PERMIT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-IMPORT-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Apply for Import Permit",
+      "serviceSlug": "template-cust-apply-import-permit",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-IMPORT-PERMIT-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-EXPORT-PERMIT-REMINDER",
+          "templateCode": "TEMPLATE-CUST-EXPORT-PERMIT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-EXPORT-PERMIT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-EXPORT-PERMIT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-EXPORT-PERMIT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-EXPORT-PERMIT-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Apply for Export Permit — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-EXPORT-PERMIT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-EXPORT-PERMIT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-EXPORT-PERMIT-FORM",
+          "formName": "Apply for Export Permit form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-EXPORT-PERMIT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-EXPORT-PERMIT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-EXPORT-PERMIT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-EXPORT-PERMIT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Apply for Export Permit",
+      "serviceSlug": "template-cust-apply-export-permit",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-EXPORT-PERMIT-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-RESTRICTED-GOODS-REMINDER",
+          "templateCode": "TEMPLATE-CUST-RESTRICTED-GOODS-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-RESTRICTED-GOODS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-RESTRICTED-GOODS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-RESTRICTED-GOODS-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-RESTRICTED-GOODS-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Restricted Goods Authorization — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-RESTRICTED-GOODS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-RESTRICTED-GOODS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-RESTRICTED-GOODS-FORM",
+          "formName": "Restricted Goods Authorization form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-RESTRICTED-GOODS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-RESTRICTED-GOODS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-RESTRICTED-GOODS-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-RESTRICTED-GOODS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Restricted Goods Authorization",
+      "serviceSlug": "template-cust-restricted-goods-authorization",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-RESTRICTED-GOODS-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-PERMIT-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-REMINDER",
+          "templateCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-MANIFEST-REFERENCE-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Submit Cargo / Manifest Reference — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-FORM",
+          "formName": "Submit Cargo / Manifest Reference form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-MANIFEST-REFERENCE-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-MANIFEST-REFERENCE",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Submit Cargo / Manifest Reference",
+      "serviceSlug": "template-cust-submit-cargo-manifest-reference",
+      "serviceType": "REPORTING",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-MANIFEST-REFERENCE-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-REQUEST-INSPECTION-REMINDER",
+          "templateCode": "TEMPLATE-CUST-REQUEST-INSPECTION-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-REQUEST-INSPECTION-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-REQUEST-INSPECTION-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-REQUEST-INSPECTION-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-REQUEST-INSPECTION-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Request Customs Inspection — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-REQUEST-INSPECTION-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-REQUEST-INSPECTION-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-REQUEST-INSPECTION-FORM",
+          "formName": "Request Customs Inspection form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-REQUEST-INSPECTION-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-REQUEST-INSPECTION-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-REQUEST-INSPECTION-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-REQUEST-INSPECTION",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Request Customs Inspection",
+      "serviceSlug": "template-cust-request-customs-inspection",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-REQUEST-INSPECTION-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-RESPOND-HOLD-REMINDER",
+          "templateCode": "TEMPLATE-CUST-RESPOND-HOLD-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-RESPOND-HOLD-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-RESPOND-HOLD-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-RESPOND-HOLD-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-RESPOND-HOLD-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Respond to Customs Hold — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-RESPOND-HOLD-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-RESPOND-HOLD-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-RESPOND-HOLD-FORM",
+          "formName": "Respond to Customs Hold form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-RESPOND-HOLD-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-RESPOND-HOLD-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-RESPOND-HOLD-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-RESPOND-HOLD",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Respond to Customs Hold",
+      "serviceSlug": "template-cust-respond-customs-hold",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-RESPOND-HOLD-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-ASSESSMENT-ISSUE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-PAY-ASSESSMENT-REMINDER",
+          "templateCode": "TEMPLATE-CUST-PAY-ASSESSMENT-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-PAY-ASSESSMENT-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-PAY-ASSESSMENT-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-ASSESSMENT-ISSUE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-PAY-ASSESSMENT-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-PAY-ASSESSMENT-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Pay Customs Assessment — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-PAY-ASSESSMENT-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-PAY-ASSESSMENT-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-PAY-ASSESSMENT-FORM",
+          "formName": "Pay Customs Assessment form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-PAY-ASSESSMENT-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-PAY-ASSESSMENT-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-PAY-ASSESSMENT-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-PAY-ASSESSMENT",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Pay Customs Assessment",
+      "serviceSlug": "template-cust-pay-customs-assessment",
+      "serviceType": "PAYMENT",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-PAY-ASSESSMENT-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-ASSESSMENT-ISSUE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-REFUND-ADJUST",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-REMINDER",
+          "templateCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-ADJUSTMENT-REFUND-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-REFUND-ADJUST",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Request Customs Adjustment / Refund — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-FORM",
+          "formName": "Request Customs Adjustment / Refund form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-ADJUSTMENT-REFUND-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Request Customs Adjustment / Refund",
+      "serviceSlug": "template-cust-request-customs-adjustment-refund",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-ADJUSTMENT-REFUND-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-REFUND-ADJUST",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-RELEASE-AUTHORIZE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-RELEASE-REVIEW-REMINDER",
+          "templateCode": "TEMPLATE-CUST-RELEASE-REVIEW-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-RELEASE-REVIEW-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-RELEASE-REVIEW-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-RELEASE-AUTHORIZE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-RELEASE-REVIEW-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-RELEASE-REVIEW-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Request Release Review — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-RELEASE-REVIEW-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-RELEASE-REVIEW-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-RELEASE-REVIEW-FORM",
+          "formName": "Request Release Review form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-RELEASE-AUTHORIZE",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-RELEASE-REVIEW-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-RELEASE-REVIEW-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-RELEASE-REVIEW-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-RELEASE-REVIEW",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Request Release Review",
+      "serviceSlug": "template-cust-request-release-review",
+      "serviceType": "APPLICATION",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-RELEASE-REVIEW-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-RELEASE-AUTHORIZE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    },
+    {
+      "applicantCategories": [
+        "BUSINESS",
+        "COMPANY",
+        "AUTHORIZED_REPRESENTATIVE"
+      ],
+      "authorityFunctions": [
+        {
+          "authorityActionType": "PREPARE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-INTAKE",
+          "isConsequential": false,
+          "publicStageLabel": "Intake",
+          "sequenceOrder": 1
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "functionCode": "TEMPLATE-AUTH-CUSTOMS-APPEAL-DECIDE",
+          "isConsequential": true,
+          "publicStageLabel": "Official determination",
+          "sequenceOrder": 2
+        }
+      ],
+      "communications": [
+        {
+          "channel": "EMAIL",
+          "communicationCode": "TEMPLATE-CUST-APPEAL-REDRESS-REMINDER",
+          "templateCode": "TEMPLATE-CUST-APPEAL-REDRESS-REMINDER-TPL",
+          "triggerStageKey": "intake"
+        }
+      ],
+      "completenessReview": {
+        "enabled": true,
+        "requiredEvidenceCodes": [
+          "TEMPLATE-CUST-APPEAL-REDRESS-EVIDENCE"
+        ]
+      },
+      "dashboardIndicators": [
+        {
+          "indicatorCode": "TEMPLATE-CUST-APPEAL-REDRESS-QUEUE",
+          "label": "Queue depth",
+          "metricType": "COUNT"
+        }
+      ],
+      "decisionStages": [
+        {
+          "decisionActorFunctionCode": "TEMPLATE-AUTH-CUSTOMS-APPEAL-DECIDE",
+          "requiresSecondApproval": true,
+          "stageKey": "decision"
+        }
+      ],
+      "dependencies": [
+        {
+          "dependencyCode": "TEMPLATE-CUST-APPEAL-REDRESS-PAYMENT-PROVIDER",
+          "dependencyType": "PAYMENT_PROVIDER",
+          "description": "Uses HeartStone payment infrastructure when configured"
+        },
+        {
+          "dependencyCode": "TEMPLATE-CUST-APPEAL-REDRESS-PORT-BORDER-INTEGRATION",
+          "dependencyType": "INTEGRATION",
+          "description": "Optional port/border external dependency placeholder",
+          "externalIntegrationCode": "TEMPLATE-CUSTOMS-PORT-API"
+        }
+      ],
+      "description": "Customs Appeal / Redress — NON_PRODUCTION placeholder customs & trade service.",
+      "evidenceRequirements": [
+        {
+          "description": "NON_PRODUCTION evidence requirement",
+          "evidenceCode": "TEMPLATE-CUST-APPEAL-REDRESS-EVIDENCE",
+          "label": "Placeholder supporting evidence",
+          "required": false,
+          "verificationCategory": "CONTENT_FACT"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 0,
+          "currencyCode": "XCD",
+          "feeCode": "TEMPLATE-CUST-APPEAL-REDRESS-FEE",
+          "label": "Placeholder fee",
+          "waivable": true
+        }
+      ],
+      "forms": [
+        {
+          "formCode": "TEMPLATE-CUST-APPEAL-REDRESS-FORM",
+          "formName": "Customs Appeal / Redress form",
+          "sections": [
+            {
+              "fields": [
+                {
+                  "fieldKey": "placeholderField",
+                  "fieldType": "TEXT",
+                  "label": "Placeholder field",
+                  "required": false
+                }
+              ],
+              "label": "Placeholder section",
+              "sectionKey": "placeholder"
+            }
+          ],
+          "versionLabel": "1.0.0-NON_PRODUCTION"
+        }
+      ],
+      "issuance": {
+        "issuanceFunctionCode": "TEMPLATE-AUTH-CUSTOMS-VERIFY",
+        "issuanceStageKey": "decision",
+        "outputCodes": [
+          "TEMPLATE-CUST-APPEAL-REDRESS-OUTPUT"
+        ]
+      },
+      "lifecycle": {
+        "supportsRenewal": false
+      },
+      "outputs": [
+        {
+          "deliveryChannel": "PORTAL",
+          "label": "Placeholder output",
+          "outputCode": "TEMPLATE-CUST-APPEAL-REDRESS-OUTPUT",
+          "outputType": "NOTICE"
+        }
+      ],
+      "redress": [
+        {
+          "description": "NON_PRODUCTION appeal route",
+          "label": "Customs appeal / redress",
+          "routeCode": "TEMPLATE-CUST-APPEAL-REDRESS-APPEAL",
+          "routeType": "APPEAL"
+        }
+      ],
+      "serviceCode": "TEMPLATE-CUST-APPEAL-REDRESS",
+      "serviceFamilyCode": "TEMPLATE-FAMILY-CUSTOMS-TRADE",
+      "serviceName": "Customs Appeal / Redress",
+      "serviceSlug": "template-cust-customs-appeal-redress",
+      "serviceType": "REDRESS",
+      "slaRules": [
+        {
+          "clockStartsAtStageKey": "intake",
+          "label": "Placeholder SLA",
+          "ruleCode": "TEMPLATE-CUST-APPEAL-REDRESS-SLA",
+          "targetDays": 15
+        }
+      ],
+      "workflowStages": [
+        {
+          "consequenceLevel": "INFORMATIONAL",
+          "displayOrder": 1,
+          "label": "Intake",
+          "stageKey": "intake",
+          "stepType": "INTAKE"
+        },
+        {
+          "authorityActionType": "REVIEW",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-DECLARATION-REVIEW",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 2,
+          "label": "Customs review",
+          "stageKey": "review",
+          "stepType": "SUBSTANTIVE_REVIEW"
+        },
+        {
+          "authorityActionType": "DECIDE",
+          "authorityFunctionCode": "TEMPLATE-AUTH-CUSTOMS-APPEAL-DECIDE",
+          "consequenceLevel": "CONSEQUENTIAL",
+          "displayOrder": 3,
+          "isDecisionStage": true,
+          "label": "Official decision",
+          "stageKey": "decision",
+          "stepType": "DECISION_GATE"
+        }
+      ]
+    }
+  ]
+}

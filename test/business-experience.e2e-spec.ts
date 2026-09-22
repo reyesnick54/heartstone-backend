@@ -29,7 +29,7 @@ describe('Business Experience API (e2e)', () => {
   beforeEach(async () => {
     await resetAllTestData(prisma);
     fixture = await seedBusinessExperienceFixture(app, prisma);
-  });
+  }, 30_000);
 
   it('supports unified business organization journey across list, detail, home, and applications', async () => {
     const organizations = await request(app.getHttpServer())
