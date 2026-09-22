@@ -1,4 +1,7 @@
-import { TRANSPORTATION_SERVICE_PACK_ID, TRANSPORTATION_TEMPLATE_AUTHORITY } from './transportation.constants';
+import {
+  TRANSPORTATION_SERVICE_PACK_ID,
+  TRANSPORTATION_TEMPLATE_AUTHORITY,
+} from './transportation.constants';
 
 describe('Transportation service pack invariants', () => {
   it('declares canonical service pack id', () => {

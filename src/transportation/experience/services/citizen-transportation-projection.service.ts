@@ -174,7 +174,11 @@ export class CitizenTransportationProjectionService {
     actions.push(
       { actionCode: 'REGISTER_VEHICLE', label: 'Register vehicle', priority: 'LOW' },
       { actionCode: 'SCHEDULE_VEHICLE_INSPECTION', label: 'Schedule inspection', priority: 'LOW' },
-      { actionCode: 'FILE_TRANSPORT_APPEAL', label: 'Appeal transportation decision', priority: 'LOW' },
+      {
+        actionCode: 'FILE_TRANSPORT_APPEAL',
+        label: 'Appeal transportation decision',
+        priority: 'LOW',
+      },
     );
 
     return { generatedAt: new Date().toISOString(), actions };

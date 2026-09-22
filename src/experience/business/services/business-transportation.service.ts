@@ -29,7 +29,9 @@ export class BusinessTransportationService {
     });
 
     if (!operator) {
-      throw new NotFoundException('No transport operator record is registered for this organization');
+      throw new NotFoundException(
+        'No transport operator record is registered for this organization',
+      );
     }
 
     return {
@@ -83,7 +85,11 @@ export class BusinessTransportationService {
           priority: 'MEDIUM',
         },
         { actionCode: 'MANAGE_FLEET', label: 'Manage fleet registration', priority: 'MEDIUM' },
-        { actionCode: 'APPLY_TRANSPORT_PERMIT', label: 'Apply for transport permit', priority: 'LOW' },
+        {
+          actionCode: 'APPLY_TRANSPORT_PERMIT',
+          label: 'Apply for transport permit',
+          priority: 'LOW',
+        },
       ],
     };
   }
