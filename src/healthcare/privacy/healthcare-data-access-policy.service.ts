@@ -172,7 +172,9 @@ export class HealthcareDataAccessPolicyService {
 
     if (
       context.accessPurpose === HealthcareDataAccessPurpose.CLINICAL_RESEARCH &&
-      context.relationshipKinds.includes(HealthcarePatientRelationshipKind.CLINICAL_RESEARCH_CONTACT)
+      context.relationshipKinds.includes(
+        HealthcarePatientRelationshipKind.CLINICAL_RESEARCH_CONTACT,
+      )
     ) {
       return { decision: HealthcareAccessDecision.ALLOW };
     }
