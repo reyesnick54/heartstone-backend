@@ -180,6 +180,15 @@ const DOMAIN_PROFILES: Record<string, DomainSecurityProfile> = {
     actorSource: 'Authenticated institutional administrator',
     primarySecurityInvariant: 'Readiness metadata does not confer production authority',
   },
+  healthcare: {
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: 'Patient-owned healthcare profile or provider policy-scoped access',
+    authorityRequirement: 'HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority',
+    actorSource: 'Session identity with patient or governed provider context',
+    primarySecurityInvariant:
+      'Program discovery != medical recommendation; application != clinical authorization',
+  },
   'production-readiness': {
     routeClass: RouteClass.PUBLIC,
     authenticationRequired: false,
@@ -240,6 +249,7 @@ function resolveDomain(sourceFile: string): string {
   if (relative.startsWith('intelligence/')) return 'intelligence';
   if (relative.startsWith('operational-readiness/')) return 'operational-readiness';
   if (relative.startsWith('production-readiness/')) return 'production-readiness';
+  if (relative.startsWith('healthcare/')) return 'healthcare';
   if (relative === 'app.controller.ts' || relative.startsWith('system/')) return 'system';
 
   return 'system';
@@ -487,6 +497,16 @@ function classifyProtectedRoute(
   if (domain === 'compliance') {
     if (fullPath.includes('/dashboards/holder/')) {
       return RouteClass.AUTHENTICATED_SELF_SERVICE;
+    }
+    return RouteClass.AUTHENTICATED_INSTITUTIONAL;
+  }
+
+  if (domain === 'healthcare') {
+    if (fullPath.startsWith('/experience/citizen/healthcare')) {
+      return RouteClass.AUTHENTICATED_SELF_SERVICE;
+    }
+    if (fullPath.startsWith('/experience/provider/healthcare')) {
+      return RouteClass.AUTHENTICATED_INSTITUTIONAL;
     }
     return RouteClass.AUTHENTICATED_INSTITUTIONAL;
   }
