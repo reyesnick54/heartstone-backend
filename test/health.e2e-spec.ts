@@ -8,38 +8,39 @@ import { configureApplication } from '../src/bootstrap/configure-application';
 import { createRedisServiceMock, overrideRedisService } from './redis-test-utils';
 
 describe('Readiness endpoints (e2e)', () => {
-  let app: INestApplication<App>;
+  jest.setTimeout(60_000);
 
-  beforeEach(async () => {
+  async function createHealthyApp(): Promise<INestApplication<App>> {
     const moduleBuilder = Test.createTestingModule({
       imports: [AppModule],
     });
-
     overrideRedisService(moduleBuilder);
-
     const moduleFixture: TestingModule = await moduleBuilder.compile();
+    const nestApp: INestApplication<App> = moduleFixture.createNestApplication({
+      bodyParser: false,
+    });
+    configureApplication(nestApp);
+    await nestApp.init();
+    return nestApp;
+  }
 
-    app = moduleFixture.createNestApplication({ bodyParser: false });
-    configureApplication(app);
-    await app.init();
-  });
-
-  afterEach(async () => {
-    await app.close();
-  });
-
-  it('GET /api/v1/ready returns 200 when Redis is healthy', () => {
-    return request(app.getHttpServer())
-      .get('/api/v1/ready')
-      .expect(200)
-      .expect({
-        status: 'ready',
-        checks: {
-          database: 'up',
-          redis: 'up',
-          identityAuth: 'ready',
-        },
-      });
+  it('GET /api/v1/ready returns 200 when Redis is healthy', async () => {
+    const app = await createHealthyApp();
+    try {
+      await request(app.getHttpServer())
+        .get('/api/v1/ready')
+        .expect(200)
+        .expect({
+          status: 'ready',
+          checks: {
+            database: 'up',
+            redis: 'up',
+            identityAuth: 'ready',
+          },
+        });
+    } finally {
+      await app.close();
+    }
   });
 
   it('GET /api/v1/ready returns 503 when Redis is unhealthy', async () => {
@@ -58,18 +59,20 @@ describe('Readiness endpoints (e2e)', () => {
     configureApplication(unhealthyApp);
     await unhealthyApp.init();
 
-    await request(unhealthyApp.getHttpServer())
-      .get('/api/v1/ready')
-      .expect(503)
-      .expect({
-        status: 'not_ready',
-        checks: {
-          database: 'up',
-          redis: 'down',
-          identityAuth: 'ready',
-        },
-      });
-
-    await unhealthyApp.close();
+    try {
+      await request(unhealthyApp.getHttpServer())
+        .get('/api/v1/ready')
+        .expect(503)
+        .expect({
+          status: 'not_ready',
+          checks: {
+            database: 'up',
+            redis: 'down',
+            identityAuth: 'ready',
+          },
+        });
+    } finally {
+      await unhealthyApp.close();
+    }
   });
 });

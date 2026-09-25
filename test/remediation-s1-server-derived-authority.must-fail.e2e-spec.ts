@@ -8,6 +8,11 @@ import {
   ControlledFunctionClass,
   DecisionParticipantRole,
   DelegationStatus,
+  DocumentSecurityClassification,
+  DocumentSourceType,
+  EvidenceRecordStatus,
+  EvidenceSource,
+  EvidenceType,
   FunctionAuthorityLifecycleStatus,
   GoverningSourceStatus,
   IdentityOfficeholderLinkStatus,
@@ -67,7 +72,6 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
         officeholderId: officeholder.id,
         status: AppointmentStatus.ACTIVE,
         effectiveFrom: new Date('2020-01-01'),
-        effectiveUntil: new Date('2021-06-01'),
       },
     });
     const person = await prisma.person.create({
@@ -194,6 +198,10 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
 
   it('1. rejects backdated evaluation timestamps (server time governs live authorization)', async () => {
     const base = await seedActorToken();
+    await prisma.appointment.update({
+      where: { id: base.appointment.id },
+      data: { effectiveUntil: new Date('2021-06-01') },
+    });
     const result = await evaluate('s1-test-token', {
       functionAuthorityRecordId: base.fn.id,
       action: AuthorityActionType.DECIDE,
@@ -210,6 +218,10 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
 
   it('2. ignores claimed second approval without stored co-approver records', async () => {
     const base = await seedActorToken();
+    await prisma.appointment.update({
+      where: { id: base.appointment.id },
+      data: { effectiveUntil: null },
+    });
     await prisma.authorityCondition.create({
       data: {
         functionAuthorityRecordId: base.fn.id,
@@ -353,6 +365,10 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
 
   it('6. rejects expired delegation even when caller supplies delegation id manually', async () => {
     const base = await seedActorToken();
+    await prisma.appointment.update({
+      where: { id: base.appointment.id },
+      data: { effectiveUntil: null },
+    });
     await prisma.functionAuthorityRecord.update({
       where: { id: base.fn.id },
       data: { requiresDelegation: true },
@@ -426,6 +442,54 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
 
   it('8. positive path: server-derived evidence and co-approval allow when conditions satisfied', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
+
+    const documentVersion = await prisma.documentVersion.create({
+      data: {
+        documentRecord: {
+          create: {
+            documentNumber: `${fixture.marker}-S1-EVD-DOC`,
+            title: 'S1 decision support evidence',
+            documentType: 'supporting_evidence',
+            sourceType: DocumentSourceType.OFFICIAL_UPLOAD,
+            owningInstitutionId: fixture.institutionId,
+          },
+        },
+        versionNumber: 1,
+        originalFilename: 'evidence.pdf',
+        contentType: 'application/pdf',
+        sizeBytes: 8,
+        storageProvider: 'inline',
+        storageObjectKey: `${fixture.marker}/s1-evidence`,
+        sha256: `${fixture.marker}-s1-evidence-hash`,
+        securityClassification: DocumentSecurityClassification.INTERNAL,
+      },
+    });
+    const evidenceRecord = await prisma.evidenceRecord.create({
+      data: {
+        evidenceNumber: `${fixture.marker}-EVD-S1-001`,
+        caseId: fixture.caseId,
+        masterAdministrativeFileId: fixture.masterAdministrativeFileId,
+        documentVersionId: documentVersion.id,
+        evidenceType: EvidenceType.DOCUMENT,
+        source: EvidenceSource.APPLICANT,
+        submittingParty: fixture.applicantIdentityId,
+        dateReceived: new Date('2024-01-01'),
+        status: EvidenceRecordStatus.RECEIVED,
+        confidentialityClassification: 'OFFICIAL',
+        integrityReference: `${fixture.marker}-integrity`,
+        title: 'Decision support evidence',
+        description: 'S1 positive-path fixture evidence',
+      },
+    });
+    await prisma.evidencePacketItem.create({
+      data: {
+        packetVersionId: fixture.evidencePacketVersionId,
+        evidenceRecordId: evidenceRecord.id,
+        evidenceStatusAtInclusion: EvidenceRecordStatus.RECEIVED,
+        documentVersionId: documentVersion.id,
+        inclusionOrder: 1,
+      },
+    });
 
     const packetItems = await prisma.evidencePacketItem.findMany({
       where: { packetVersionId: fixture.evidencePacketVersionId },

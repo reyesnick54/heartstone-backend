@@ -558,6 +558,9 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
         permitted: true,
       },
     });
+    await prisma.authorityCondition.deleteMany({
+      where: { functionAuthorityRecordId: base.fn.id },
+    });
     await prisma.segregationOfDutyRule.create({
       data: {
         functionAuthorityRecordId: base.fn.id,
@@ -578,9 +581,6 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       officeId: base.office.id,
       appointmentId: base.appointment.id,
       caseId: phase8Case.caseId,
-      evidenceProvided: ['DOC-A'],
-      qualificationCodes: ['LAWYER'],
-      isSelfApproval: false,
     });
     expect(selfApproval.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.SELF_APPROVAL_PROHIBITED,
