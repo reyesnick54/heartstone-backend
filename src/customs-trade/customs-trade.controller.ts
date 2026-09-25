@@ -5,7 +5,7 @@ import { CustomsDeclarationType } from '@prisma/client';
 import { CustomsDeclarationService } from './declarations/customs-declaration.service';
 
 @ApiTags('customs-trade')
-@Controller('api/v1/customs-trade')
+@Controller('customs-trade')
 export class CustomsTradeController {
   constructor(private readonly declarationService: CustomsDeclarationService) {}
 

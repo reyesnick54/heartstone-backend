@@ -8,6 +8,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { resolveAdministrativeRoutePermission } from '../src/security/administrative-route-permissions';
 import { RouteClass } from '../src/security/route-class.enum';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -45,6 +46,9 @@ interface ScannedRoute {
   routeClass: RouteClass;
   authenticationRequired: boolean;
   isPublic: boolean;
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+  guardCoverage: string[];
   scopeRequirement: string;
   authorityRequirement: string;
   actorSource: string;
@@ -197,6 +201,22 @@ const DOMAIN_PROFILES: Record<string, DomainSecurityProfile> = {
     actorSource: 'Anonymous reader',
     primarySecurityInvariant: 'Boundary disclaimers are informational only',
   },
+  'service-packs': {
+    routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+    authenticationRequired: true,
+    scopeRequirement: 'Service pack authoring, validation, and deployment administration',
+    authorityRequirement: 'Technical permission; consequential governance routes require authority evaluation',
+    actorSource: 'Authenticated platform administrator',
+    primarySecurityInvariant: 'Pack compilation != production deployment authority',
+  },
+  scheduling: {
+    routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+    authenticationRequired: true,
+    scopeRequirement: 'Government scheduling configuration and appointment administration',
+    authorityRequirement: 'Institutional scheduling administration permission',
+    actorSource: 'Authenticated institutional administrator',
+    primarySecurityInvariant: 'Scheduling configuration does not confer appointment decision authority',
+  },
   system: {
     routeClass: RouteClass.SYSTEM_HEALTH,
     authenticationRequired: false,
@@ -250,13 +270,20 @@ function resolveDomain(sourceFile: string): string {
   if (relative.startsWith('operational-readiness/')) return 'operational-readiness';
   if (relative.startsWith('production-readiness/')) return 'production-readiness';
   if (relative.startsWith('healthcare/')) return 'healthcare';
+  if (relative.startsWith('service-packs/')) return 'service-packs';
+  if (relative.startsWith('scheduling/')) return 'scheduling';
+  if (relative.startsWith('evidence-records/')) return 'evidence-records';
   if (relative === 'app.controller.ts' || relative.startsWith('system/')) return 'system';
 
   return 'system';
 }
 
+function normalizeControllerPath(controllerPath: string): string {
+  return controllerPath.replace(/^api\/v1\/?/, '').trim();
+}
+
 function joinRoutePaths(controllerPath: string, methodPath: string): string {
-  const segments = [controllerPath, methodPath]
+  const segments = [normalizeControllerPath(controllerPath), methodPath]
     .map((segment) => segment.trim().replace(/^\/+|\/+$/g, ''))
     .filter(Boolean);
   return `/${segments.join('/')}`;
@@ -618,6 +645,18 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         routeAccess,
       });
 
+      const adminPermission = resolveAdministrativeRoutePermission(fullPath);
+      const guardCoverage = ['SessionAuthGuard'];
+      if (!classification.isPublic) {
+        guardCoverage.push('ClientIdentitySubstitutionGuard');
+      }
+      if (adminPermission) {
+        guardCoverage.push('AdministrativeRouteGuard');
+      }
+      if (requiresAuthority) {
+        guardCoverage.push('AuthorityPolicyGuard');
+      }
+
       routes.push({
         path: fullPath,
         method: httpMethod.toUpperCase(),
@@ -625,6 +664,9 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         controller: controllerName,
         sourceFile: relativeSource,
         handler,
+        technicalPermissionRequired: Boolean(adminPermission),
+        permissionCode: adminPermission?.rule.permissionCode ?? null,
+        guardCoverage,
         ...classification,
       });
     }

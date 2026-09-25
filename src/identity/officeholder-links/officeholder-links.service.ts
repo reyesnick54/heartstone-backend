@@ -16,7 +16,10 @@ export class OfficeholderLinksService {
     private readonly authorityBoundary: AuthorityBoundaryService,
   ) {}
 
-  async create(dto: CreateOfficeholderLinkDto): Promise<IdentityOfficeholderLink> {
+  async create(
+    dto: CreateOfficeholderLinkDto,
+    linkedByIdentityId: string,
+  ): Promise<IdentityOfficeholderLink> {
     await this.validation.ensureIdentityExists(dto.identityId);
     await this.validation.ensureOfficeholderExists(dto.officeholderId);
 
@@ -25,7 +28,7 @@ export class OfficeholderLinksService {
         data: {
           identityId: dto.identityId,
           officeholderId: dto.officeholderId,
-          linkedByIdentityId: dto.linkedByIdentityId,
+          linkedByIdentityId,
           status: dto.status ?? IdentityOfficeholderLinkStatus.ACTIVE,
         },
       });
@@ -38,7 +41,7 @@ export class OfficeholderLinksService {
       await this.audit.record({
         eventType: 'OFFICEHOLDER_LINK_CREATED',
         identityId: dto.identityId,
-        actorIdentityId: dto.linkedByIdentityId,
+        actorIdentityId: linkedByIdentityId,
         metadata: {
           officeholderId: dto.officeholderId,
           linkId: link.id,

@@ -5,7 +5,7 @@ import { ImmigrationApplicationProfileService } from './applications/immigration
 import { ImmigrationProfileService } from './profiles/immigration-profile.service';
 
 @ApiTags('immigration')
-@Controller('api/v1/immigration')
+@Controller('immigration')
 export class ImmigrationController {
   constructor(
     private readonly profileService: ImmigrationProfileService,

@@ -10,6 +10,9 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { hashSecret } from '../../src/identity/common/crypto.util';
+import {
+  INTEGRATION_ADMIN_PERMISSION_CODES,
+} from '../../src/security/technical-permission/technical-permission.constants';
 import { asLoginResponseBody } from './identity-test-types';
 
 export interface ProvisionedTestIdentity {
@@ -117,15 +120,38 @@ export function authHeader(sessionToken: string): { Authorization: string } {
 const INTEGRATION_ADMIN_LOGIN = 'integration-admin@test.gov';
 const INTEGRATION_ADMIN_PASSWORD = 'IntegrationAdmin123!';
 
+export async function ensureIntegrationAdminTechnicalPermissions(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<void> {
+  for (const permissionCode of INTEGRATION_ADMIN_PERMISSION_CODES) {
+    const existing = await prisma.technicalAccessPolicy.findFirst({
+      where: { identityId, permissionCode, institutionId: null },
+    });
+    if (existing) {
+      continue;
+    }
+    await prisma.technicalAccessPolicy.create({
+      data: {
+        identityId,
+        permissionCode,
+        scope: 'PLATFORM_WIDE',
+      },
+    });
+  }
+}
+
 export async function provisionIntegrationAdminSession(
   app: INestApplication<App>,
   prisma: PrismaClient,
 ): Promise<ProvisionedTestIdentity> {
-  return provisionAuthenticatedIdentity(app, prisma, {
+  const provisioned = await provisionAuthenticatedIdentity(app, prisma, {
     loginIdentifier: INTEGRATION_ADMIN_LOGIN,
     password: INTEGRATION_ADMIN_PASSWORD,
     displayName: 'Integration Admin',
   });
+  await ensureIntegrationAdminTechnicalPermissions(prisma, provisioned.identityId);
+  return provisioned;
 }
 
 export async function ensureIntegrationAdminSession(
@@ -152,6 +178,8 @@ export async function ensureIntegrationAdminSession(
     if (!existingAccount.personId) {
       throw new Error('Integration admin account exists without a person');
     }
+
+    await ensureIntegrationAdminTechnicalPermissions(prisma, identity.id);
 
     return {
       personId: existingAccount.personId,
@@ -193,6 +221,8 @@ export async function ensureIntegrationAdminSession(
     if (!account.personId) {
       throw new Error('Integration admin account exists without a person');
     }
+
+    await ensureIntegrationAdminTechnicalPermissions(prisma, identity.id);
 
     return {
       personId: account.personId,

@@ -13,6 +13,9 @@ describe('protected-route-manifest', () => {
       routeClass: RouteClass;
       authenticationRequired: boolean;
       isPublic: boolean;
+      technicalPermissionRequired?: boolean;
+      permissionCode?: string | null;
+      guardCoverage?: string[];
     }[];
   };
 
@@ -53,6 +56,22 @@ describe('protected-route-manifest', () => {
     for (const route of adminSample) {
       expect(route.authenticationRequired).toBe(true);
       expect(route.isPublic).toBe(false);
+    }
+  });
+
+  it('requires technical permission metadata on restricted administrative routes', () => {
+    const adminRoutes = manifest.routes.filter(
+      (route) => route.routeClass === RouteClass.RESTRICTED_ADMINISTRATIVE,
+    );
+
+    expect(adminRoutes.length).toBeGreaterThan(200);
+
+    for (const route of adminRoutes) {
+      expect(route.technicalPermissionRequired).toBe(true);
+      expect(typeof route.permissionCode).toBe('string');
+      expect(route.guardCoverage).toEqual(
+        expect.arrayContaining(['SessionAuthGuard', 'AdministrativeRouteGuard']),
+      );
     }
   });
 

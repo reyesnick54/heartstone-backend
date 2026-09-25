@@ -123,3 +123,17 @@ export const CLIENT_ACTOR_IDENTITY_FIELDS = [
   'personId',
   'sessionId',
 ] as const;
+
+/**
+ * Client payload keys that must not identify a different administrator than the session actor.
+ * Each entry maps to the canonical ActorContext field used for comparison.
+ */
+export const CLIENT_ADMIN_ACTOR_FIELD_ALIASES: Readonly<
+  Record<string, keyof Pick<ActorContext, 'identityId' | 'userAccountId'>>
+> = {
+  actorIdentityId: 'identityId',
+  linkedByIdentityId: 'identityId',
+  actingUserId: 'userAccountId',
+  administratorIdentityId: 'identityId',
+  performedByIdentityId: 'identityId',
+};

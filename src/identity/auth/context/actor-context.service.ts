@@ -21,6 +21,7 @@ import {
   type ActorContextOrganizationMembership,
   type ActorContextRepresentativeAuthority,
   CLIENT_ACTOR_IDENTITY_FIELDS,
+  CLIENT_ADMIN_ACTOR_FIELD_ALIASES,
 } from './actor-context.types';
 
 export interface ResolveActorContextInput {
@@ -139,8 +140,19 @@ export class ActorContextService {
       return;
     }
 
-    for (const field of CLIENT_ACTOR_IDENTITY_FIELDS) {
-      const clientValue = clientPayload[field];
+    const fieldsToValidate: { clientField: string; actorField: keyof ActorContext }[] = [
+      ...CLIENT_ACTOR_IDENTITY_FIELDS.map((field) => ({
+        clientField: field,
+        actorField: field,
+      })),
+      ...Object.entries(CLIENT_ADMIN_ACTOR_FIELD_ALIASES).map(([clientField, actorField]) => ({
+        clientField,
+        actorField,
+      })),
+    ];
+
+    for (const { clientField, actorField } of fieldsToValidate) {
+      const clientValue = clientPayload[clientField];
       if (
         clientValue === undefined ||
         clientValue === null ||
@@ -154,14 +166,14 @@ export class ActorContextService {
         continue;
       }
 
-      const actorValue = actor[field as keyof ActorContext];
+      const actorValue = actor[actorField];
       const normalizedClientValue = clientValue;
       const normalizedActorValue =
         typeof actorValue === 'string' ? actorValue : actorValue == null ? '' : null;
 
       if (normalizedActorValue === null || normalizedClientValue !== normalizedActorValue) {
         throw new ForbiddenException(
-          `Client-supplied ${field} does not match authenticated actor context`,
+          `Client-supplied ${clientField} does not match authenticated actor context`,
         );
       }
     }

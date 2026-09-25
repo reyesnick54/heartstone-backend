@@ -5,7 +5,7 @@ import { DriverLicenseApplicationProfileService } from './applications/driver-li
 import { DriverProfileService } from './profiles/driver-profile.service';
 
 @ApiTags('transportation')
-@Controller('api/v1/transportation')
+@Controller('transportation')
 export class TransportationController {
   constructor(
     private readonly driverProfileService: DriverProfileService,

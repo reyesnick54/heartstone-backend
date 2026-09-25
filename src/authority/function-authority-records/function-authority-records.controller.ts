@@ -61,10 +61,18 @@ export class FunctionAuthorityRecordsController {
   @ApiOperation({ summary: 'Activate a function authority record (controlled, audited)' })
   @ApiOkResponse({ type: FunctionAuthorityRecordResponseDto })
   activate(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActivateFunctionAuthorityRecordDto,
   ): Promise<FunctionAuthorityRecordResponseDto> {
-    return this.activationService.activate(id, dto);
+    return this.activationService.activate(id, {
+      actorIdentityId: session.identityId,
+      officeholderId: dto.officeholderId,
+      officeId: dto.officeId,
+      appointmentId: dto.appointmentId,
+      delegationId: dto.delegationId,
+      reason: dto.reason,
+    });
   }
 
   @Patch(':id/suspend')
@@ -83,7 +91,7 @@ export class FunctionAuthorityRecordsController {
     @Body() dto: ActivateFunctionAuthorityRecordDto,
   ): Promise<FunctionAuthorityRecordResponseDto> {
     return this.activationService.suspend(id, {
-      actorIdentityId: dto.actorIdentityId || session.identityId,
+      actorIdentityId: session.identityId,
       officeholderId: dto.officeholderId,
       officeId: dto.officeId,
       appointmentId: dto.appointmentId,

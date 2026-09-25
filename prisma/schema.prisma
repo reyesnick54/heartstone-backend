@@ -194,6 +194,7 @@ model Institution {
   dashboardDefinitions                  DashboardDefinition[]
   dashboardAccessPolicies               DashboardAccessPolicy[]
   platformAdministrativeAccessPolicies  PlatformAdministrativeAccessPolicy[]
+  technicalAccessPolicies               TechnicalAccessPolicy[]
   dashboardStatusDictionaryEntries      DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections         DashboardIndicatorProjection[]
   strategicProjectProfiles              StrategicProjectProfile[]
@@ -619,6 +620,31 @@ enum SecurityAuditEventType {
   SCOPE_ACCESS_DENIED
   PLATFORM_ADMIN_ACCESS_GRANTED
   PLATFORM_ADMIN_ACCESS_DENIED
+  TECHNICAL_PERMISSION_DENIED
+}
+
+enum TechnicalAccessPolicyScope {
+  PLATFORM_WIDE
+  INSTITUTION
+}
+
+model TechnicalAccessPolicy {
+  id             String                     @id @default(uuid()) @db.Uuid
+  identityId     String                     @db.Uuid
+  permissionCode String
+  institutionId  String?                    @db.Uuid
+  scope          TechnicalAccessPolicyScope @default(PLATFORM_WIDE)
+  effectiveFrom  DateTime?
+  effectiveUntil DateTime?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  identity       Identity                   @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  institution    Institution?               @relation(fields: [institutionId], references: [id])
+
+  @@index([identityId, permissionCode])
+  @@index([institutionId])
+  @@index([permissionCode])
+  @@map("technical_access_policies")
 }
 
 model Person {
@@ -742,6 +768,7 @@ model Identity {
   dashboardAccessPolicies                           DashboardAccessPolicy[]
   platformAdministrativeAccessPolicies              PlatformAdministrativeAccessPolicy[]
   platformAdministrativeAccessAudits                PlatformAdministrativeAccessAudit[]
+  technicalAccessPolicies                           TechnicalAccessPolicy[]
   dashboardQueryAudits                              DashboardQueryAudit[]
   dashboardSnapshotsCaptured                        DashboardSnapshot[]                         @relation("DashboardSnapshotCapturer")
   dashboardIndicatorProjectionsOwned                DashboardIndicatorProjection[]              @relation("DashboardIndicatorOwner")
