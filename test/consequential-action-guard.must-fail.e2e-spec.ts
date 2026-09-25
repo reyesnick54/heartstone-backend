@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  type INestApplication,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, type INestApplication, UnauthorizedException } from '@nestjs/common';
 import {
   AppointmentStatus,
   AuthorityActionType,
@@ -25,6 +21,7 @@ import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../src/authority/authori
 import { ConsequentialActionService } from '../src/authority/consequential-action/consequential-action.service';
 import { type ConsequentialActionDenial } from '../src/authority/consequential-action/consequential-action.types';
 import { PrismaService } from '../src/database/prisma.service';
+import { seedPhase8bDecisionFixture } from '../src/decisions/fixtures/phase-8b-test-fixtures';
 import { hashToken } from '../src/identity/common/crypto.util';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -212,23 +209,27 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     };
   }
 
-  function sessionContext(identityId: string) {
+  function sessionContext(
+    identityId: string,
+    session: { id: string; userAccountId: string | null },
+  ) {
     return {
-      sessionId: 'test-session',
+      sessionId: session.id,
       identityId,
-      userAccountId: identityId,
+      userAccountId: session.userAccountId ?? undefined,
       assuranceLevel: 'HIGH' as const,
     };
   }
 
   async function assertBlocked(
     identityId: string,
+    session: { id: string; userAccountId: string | null },
     body: Record<string, unknown>,
     expectedCodes: string[],
   ) {
     try {
       await consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(identityId),
+        sessionContext(identityId, session),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: body.functionAuthorityRecordId as string,
@@ -238,8 +239,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       );
       throw new Error('Expected consequential action to be blocked');
     } catch (error) {
-      const blocked =
-        error instanceof ForbiddenException || error instanceof UnauthorizedException;
+      const blocked = error instanceof ForbiddenException || error instanceof UnauthorizedException;
       expect(blocked).toBe(true);
       if (error instanceof UnauthorizedException) {
         return;
@@ -280,9 +280,20 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         status: IdentityOfficeholderLinkStatus.ACTIVE,
       },
     });
+    const unassignedSession = await prisma.session.create({
+      data: {
+        identityId: unassignedIdentity.id,
+        userAccountId: unassignedAccount.id,
+        tokenHash: hashToken('unassigned-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
 
     await assertBlocked(
       unassignedIdentity.id,
+      unassignedSession,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.wrongOfficeholder.id,
@@ -297,6 +308,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.wrongOfficeholder.id,
@@ -315,6 +327,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -344,6 +357,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -363,14 +377,20 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         ruleType: SodRuleType.SELF_APPROVAL,
       },
     });
+    const phase8Case = await seedPhase8bDecisionFixture(prisma);
+    await prisma.case.update({
+      where: { id: phase8Case.caseId },
+      data: { applicantIdentityId: base.identity.id },
+    });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
         officeId: base.office.id,
         appointmentId: base.appointment.id,
-        isSelfApproval: true,
+        caseId: phase8Case.caseId,
       },
       [AUTHORITY_EVALUATION_EXPLANATION_CODES.SELF_APPROVAL_PROHIBITED],
     );
@@ -386,6 +406,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -403,7 +424,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       data: { classification: AuthorityClassification.EXPRESSLY_RETAINED_NATIONAL },
     });
     const result = await consequentialActionService.evaluateConsequentialAction(
-      sessionContext(base.identity.id),
+      sessionContext(base.identity.id, base.session),
       {
         action: AuthorityActionType.APPROVE,
         functionAuthorityRecordId: base.fn.id,
@@ -422,9 +443,18 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
   it('service identity cannot make final decision', async () => {
     const base = await seedBase();
+    const serviceSession = await prisma.session.create({
+      data: {
+        identityId: base.serviceIdentity.id,
+        tokenHash: hashToken('service-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.serviceIdentity.id),
+        sessionContext(base.serviceIdentity.id, serviceSession),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: base.fn.id,
@@ -436,9 +466,18 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
   it('AI agent cannot make final decision', async () => {
     const base = await seedBase();
+    const aiSession = await prisma.session.create({
+      data: {
+        identityId: base.aiIdentity.id,
+        tokenHash: hashToken('ai-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.aiIdentity.id),
+        sessionContext(base.aiIdentity.id, aiSession),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: base.fn.id,
@@ -456,6 +495,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -507,7 +547,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         personId: loginAccount.personId,
       },
     });
-    await prisma.session.create({
+    const loginOnlySession = await prisma.session.create({
       data: {
         identityId: loginOnly.id,
         tokenHash: hashToken('login-only-token'),
@@ -519,6 +559,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
     await assertBlocked(
       loginOnly.id,
+      loginOnlySession,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -533,7 +574,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.identity.id),
+        sessionContext(base.identity.id, base.session),
         {
           action: AuthorityActionType.APPROVE,
           functionResolver: () => Promise.resolve(null),
