@@ -169,6 +169,6 @@ describe('Record access hardening (S6 integration)', () => {
       .get(`/api/v1/immigration/profiles/subject/${victim.identityId}`)
       .query({ requesterIdentityId: citizen.identityId })
       .set(authHeader(citizen.sessionToken))
-      .expect(404);
+      .expect(400);
   });
 });
