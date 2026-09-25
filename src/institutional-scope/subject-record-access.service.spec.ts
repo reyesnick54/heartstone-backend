@@ -35,6 +35,9 @@ describe('SubjectRecordAccessService', () => {
         {
           provide: PrismaService,
           useValue: {
+            session: {
+              findUnique: jest.fn().mockResolvedValue({ identityId: session.identityId }),
+            },
             representativeAuthority: { findMany: jest.fn().mockResolvedValue([]) },
             application: { findFirst: jest.fn().mockResolvedValue(null) },
           },
@@ -46,8 +49,9 @@ describe('SubjectRecordAccessService', () => {
   });
 
   it('rejects client-supplied identity that differs from session', () => {
-    expect(() => { service.assertSessionDerivedIdentity(session, '99999999-9999-4999-8999-999999999999'); },
-    ).toThrow(ForbiddenException);
+    expect(() => {
+      service.assertSessionDerivedIdentity(session, '99999999-9999-4999-8999-999999999999');
+    }).toThrow(ForbiddenException);
     try {
       service.assertSessionDerivedIdentity(session, '99999999-9999-4999-8999-999999999999');
     } catch (error) {
@@ -58,9 +62,9 @@ describe('SubjectRecordAccessService', () => {
   });
 
   it('blocks service identities from personal self-service', () => {
-    expect(() => { service.assertPersonaAllowsPersonalSelfService(session, IdentityType.SERVICE); }).toThrow(
-      ForbiddenException,
-    );
+    expect(() => {
+      service.assertPersonaAllowsPersonalSelfService(session, IdentityType.SERVICE);
+    }).toThrow(ForbiddenException);
   });
 
   it('allows session identity to access own subject id', async () => {

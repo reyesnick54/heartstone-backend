@@ -8,7 +8,7 @@ import { HouseholdRecordService } from './households/household-record.service';
 import { BenefitApplicantProfileService } from './profiles/benefit-applicant-profile.service';
 
 @ApiTags('social-protection')
-@Controller('api/v1/social-protection')
+@Controller('social-protection')
 export class SocialProtectionController {
   constructor(
     private readonly benefitApplicantProfileService: BenefitApplicantProfileService,

@@ -45,10 +45,14 @@ export class WorkerProfileReferenceService {
     }
 
     if (profile.workerIdentityId !== session.identityId) {
-      await this.subjectRecordAccess.assertSubjectIdentityVisible(session, profile.workerIdentityId, {
-        maskEnumeration: true,
-        representativeAuthorityId: query.representativeAuthorityId,
-      });
+      await this.subjectRecordAccess.assertSubjectIdentityVisible(
+        session,
+        profile.workerIdentityId,
+        {
+          maskEnumeration: true,
+          representativeAuthorityId: query.representativeAuthorityId,
+        },
+      );
     }
 
     return profile;

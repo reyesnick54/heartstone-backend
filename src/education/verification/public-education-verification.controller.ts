@@ -4,7 +4,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PublicEducationVerificationService } from './public-education-verification.service';
 
 @ApiTags('education-public-verification')
-@Controller('api/v1/public/education')
+@Controller('public/education')
 export class PublicEducationVerificationController {
   constructor(private readonly verificationService: PublicEducationVerificationService) {}
 

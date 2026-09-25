@@ -278,9 +278,9 @@ describe('Immigration must-fail gates', () => {
         assuranceLevel: AssuranceLevel.HIGH,
       };
 
-      await expect(
-        service.getProfileForSubject(session, 'subject-1', {}),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.getProfileForSubject(session, 'subject-1', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -16,6 +16,7 @@ import { CivilRegistryCertificateService } from './certificates/civil-registry-c
 import { PLATFORM_ADMIN_ROLE_MARKER } from './civil-registry.constants';
 import { CivilRegistryClassificationAccessService } from './common/civil-registry-access.service';
 import { CivilRegistryBoundaryService } from './common/civil-registry-boundary.service';
+import { CivilRegistryCanonicalPathService } from './common/civil-registry-canonical-path.service';
 import { CivilRecordCorrectionService } from './corrections/civil-record-correction.service';
 import { VitalEventIntakeService } from './intake/vital-event-intake.service';
 import { CivilRegistryReadService } from './queries/civil-registry-read.service';
@@ -134,6 +135,7 @@ describe('Civil registry must-fail gates', () => {
           CivilRegistryRegistrationService,
           CivilRegistryBoundaryService,
           CivilRegistryAuditService,
+          CivilRegistryCanonicalPathService,
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();

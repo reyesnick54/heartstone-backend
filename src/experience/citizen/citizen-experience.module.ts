@@ -3,9 +3,8 @@ import { Module } from '@nestjs/common';
 import { ApplicationProcessingModule } from '../../application-processing/application-processing.module';
 import { CivilRegistryModule } from '../../civil-registry/civil-registry.module';
 import { DatabaseModule } from '../../database/database.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { IdentityCommonModule } from '../../identity/common/identity-common.module';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
 import { OperationalSupportModule } from '../../operational-support/operational-support.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { ServiceCatalogModule } from '../../service-catalog/service-catalog.module';
@@ -31,7 +30,7 @@ import { CitizenMeService } from './services/citizen-me.service';
 @Module({
   imports: [
     DatabaseModule,
-    SessionsModule,
+    SessionAuthGuardModule,
     IdentityCommonModule,
     OperationalSupportModule,
     CivilRegistryModule,
@@ -41,7 +40,6 @@ import { CitizenMeService } from './services/citizen-me.service';
   ],
   controllers: [CitizenExperienceController, CitizenServicesController],
   providers: [
-    SessionAuthGuard,
     CitizenAccessService,
     CitizenAccessScopeService,
     CitizenExperienceBoundaryService,

@@ -10,7 +10,7 @@ import { ScholarshipApplicationProfileService } from './scholarships/scholarship
 import { StudentEducationProfileService } from './students/student-education-profile.service';
 
 @ApiTags('education')
-@Controller('api/v1/education')
+@Controller('education')
 export class EducationController {
   constructor(
     private readonly institutionService: EducationInstitutionService,

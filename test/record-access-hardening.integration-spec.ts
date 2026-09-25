@@ -8,6 +8,7 @@ import { type PrismaService } from '../src/database/prisma.service';
 import {
   authHeader,
   provisionAuthenticatedIdentity,
+  sessionContextFromToken,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -56,6 +57,8 @@ describe('Record access hardening (S6 integration)', () => {
       loginIdentifier: 'imm-self@test.gov',
       password: 'ImmSelf123!',
     });
+    const session = await sessionContextFromToken(prisma, citizen.sessionToken);
+    expect(session.identityId).toBe(citizen.identityId);
 
     await prisma.immigrationProfile.create({
       data: {
@@ -141,7 +144,7 @@ describe('Record access hardening (S6 integration)', () => {
     await request(app.getHttpServer())
       .get(`/api/v1/education/students/profiles/${profile.id}`)
       .set(authHeader(other.sessionToken))
-      .expect(403);
+      .expect(404);
   });
 
   it('rejects forged requesterIdentityId query parameters', async () => {
@@ -166,6 +169,6 @@ describe('Record access hardening (S6 integration)', () => {
       .get(`/api/v1/immigration/profiles/subject/${victim.identityId}`)
       .query({ requesterIdentityId: citizen.identityId })
       .set(authHeader(citizen.sessionToken))
-      .expect(404);
+      .expect(400);
   });
 });
