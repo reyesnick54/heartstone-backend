@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceStatus, Prisma } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
-import { PaymentIntentService } from '../../operational-support/financial/payment-intent.service';
-import { PHASE_11B_BOUNDARY_DISCLAIMER } from '../../operational-support/operational-support.constants';
+import { PrismaService } from '../../../../database/prisma.service';
+import { PaymentIntentService } from '../../../../operational-support/financial/payment-intent.service';
+import { PHASE_11B_BOUNDARY_DISCLAIMER } from '../../../../operational-support/operational-support.constants';
 import {
   CitizenAccessScope,
   CitizenAccessScopeService,

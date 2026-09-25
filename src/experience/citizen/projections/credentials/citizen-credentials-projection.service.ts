@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { OfficialInstrumentStatus, Prisma } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../../database/prisma.service';
 import {
   CitizenAccessScope,
   CitizenAccessScopeService,

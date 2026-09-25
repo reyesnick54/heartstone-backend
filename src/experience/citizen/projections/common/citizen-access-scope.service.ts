@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RepresentativeAuthorityStatus } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../../database/prisma.service';
 
 export interface CitizenAccessScope {
   identityId: string;

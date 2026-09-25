@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OfficialInstrumentStatus, Prisma } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../../database/prisma.service';
 import {
   CITIZEN_RENEWAL_PROJECTION_DISCLAIMER,
   RENEWAL_ELIGIBLE_INSTRUMENT_STATUSES,

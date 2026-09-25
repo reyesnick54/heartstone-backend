@@ -22,10 +22,13 @@ Record final government decisions, assess issuance readiness, issue official ins
 
 ## Canonical modules
 
-Phase 8 is implemented across two cooperating modules:
+Phase 8 is implemented across cooperating modules:
 
 - `src/decisions/` — decision catalog consumption, readiness assessment, non-final preparation, and authorized decision execution (Phase 8B)
-- `src/decisions-issuance/` — instrument catalog, issuance readiness, controlled issuance, and instrument lifecycle states (Phase 8E)
+- `src/decisions-issuance/` — instrument catalog, issuance readiness, controlled issuance, delivery, and public verification API (Phase 8E–8F)
+- `src/instruments/` — post-issuance `OfficialInstrument` lifecycle transitions and public verification cache fields on instruments (Phase 8G)
+
+Public verification records and HTTP verification endpoints are canonical in `decisions-issuance`. Lifecycle cache updates use `InstrumentPublicVerificationCacheService` in `instruments` (see [S8 domain consolidation (part 1)](./s8-domain-consolidation-part1.md)).
 
 ## Core distinctions
 

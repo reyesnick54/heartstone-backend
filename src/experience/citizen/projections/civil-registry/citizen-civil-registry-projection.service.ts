@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CivilRegistryCertificateStatus, CivilRegistryRecordStatus } from '@prisma/client';
 
-import { CivilRegistryAccessService } from '../../civil-registry/access/civil-registry-access.service';
+import { CivilRegistryAccessService } from '../../../../civil-registry/access/civil-registry-access.service';
 import {
   CIVIL_REGISTRY_DISCLAIMERS,
   CIVIL_REGISTRY_SERVICE_SLUGS,
-} from '../../civil-registry/civil-registry.constants';
-import { PrismaService } from '../../database/prisma.service';
+} from '../../../../civil-registry/civil-registry.constants';
+import { PrismaService } from '../../../../database/prisma.service';
 
 export interface CitizenCivilStatusSummary {
   identityId: string;

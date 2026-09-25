@@ -17,8 +17,13 @@ export interface HistoricalStatusSnapshot {
   eventType: string;
 }
 
+/**
+ * Lifecycle-side cache and historical replay for public verification fields on {@link OfficialInstrument}.
+ * Public verification API, rate limiting, and audit records live in
+ * `src/decisions-issuance/verification/instrument-verification.service.ts`.
+ */
 @Injectable()
-export class InstrumentVerificationService {
+export class InstrumentPublicVerificationCacheService {
   constructor(private readonly prisma: PrismaService) {}
 
   async updateVerificationCache(
