@@ -7,6 +7,7 @@ import { InstitutionalScopeGuard } from './guards/institutional-scope.guard';
 import { InstitutionalScopeService } from './institutional-scope.service';
 import { ResourceAccessService } from './resource-access.service';
 import { ResourceOwnershipResolver } from './resource-ownership.resolver';
+import { SubjectRecordAccessService } from './subject-record-access.service';
 
 @Global()
 @Module({
@@ -16,6 +17,7 @@ import { ResourceOwnershipResolver } from './resource-ownership.resolver';
     ActorContextService,
     InstitutionalScopeService,
     ResourceAccessService,
+    SubjectRecordAccessService,
     InstitutionalScopeGuard,
   ],
   exports: [
@@ -23,6 +25,7 @@ import { ResourceOwnershipResolver } from './resource-ownership.resolver';
     ActorContextService,
     InstitutionalScopeService,
     ResourceAccessService,
+    SubjectRecordAccessService,
     InstitutionalScopeGuard,
   ],
 })
