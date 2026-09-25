@@ -352,8 +352,7 @@ export class AuthorityEvaluationService {
       resourceScope?.evidencePacketVersionId != null;
 
     const requiresConflict = conditions.some(
-      (item) =>
-        item.isRequired && item.conditionType === AuthorityConditionType.CONFLICT_CHECK,
+      (item) => item.isRequired && item.conditionType === AuthorityConditionType.CONFLICT_CHECK,
     );
     const requiresRecusal = conditions.some(
       (item) => item.isRequired && item.conditionType === AuthorityConditionType.RECUSAL_CHECK,
@@ -507,7 +506,9 @@ export class AuthorityEvaluationService {
           resourceScope: request.resourceScope ?? {},
           derivedFacts: derivedFacts ?? null,
           authoritativeSourceRefs: sourceRefs ?? null,
-          evaluatedAtTrusted: request.privilegedHistoricalAt ? 'privileged-historical' : 'server-live',
+          evaluatedAtTrusted: request.privilegedHistoricalAt
+            ? 'privileged-historical'
+            : 'server-live',
           outcome,
           codes: uniqueCodes,
         } as unknown as Prisma.InputJsonObject,

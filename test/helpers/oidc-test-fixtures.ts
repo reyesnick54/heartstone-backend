@@ -1,4 +1,4 @@
-import { exportJWK, generateKeyPair, type JWK, type KeyLike,SignJWT } from 'jose';
+import { exportJWK, generateKeyPair, type JWK, type KeyLike, SignJWT } from 'jose';
 
 import { type OidcProviderConfig } from '../../src/config/config.constants';
 

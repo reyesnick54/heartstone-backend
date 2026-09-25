@@ -53,9 +53,7 @@ export class LoginLockoutService {
       return;
     }
 
-    const lockedUntil = new Date(
-      Date.now() + this.identityConfig.lockoutDurationSeconds * 1000,
-    );
+    const lockedUntil = new Date(Date.now() + this.identityConfig.lockoutDurationSeconds * 1000);
 
     await this.prisma.userAccount.update({
       where: { id: userAccountId },

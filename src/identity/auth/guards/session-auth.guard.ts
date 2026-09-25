@@ -7,10 +7,7 @@ import { ActorContextService } from '../context/actor-context.service';
 import { type ActorContext } from '../context/actor-context.types';
 import { SessionContextDto } from '../dto/session-context.dto';
 import { StepUpAuthService } from '../step-up/step-up-auth.service';
-import {
-  AUTH_REQUIREMENTS_KEY,
-  type AuthRequirementsOptions,
-} from './auth-requirements.decorator';
+import { AUTH_REQUIREMENTS_KEY, type AuthRequirementsOptions } from './auth-requirements.decorator';
 
 export interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>;

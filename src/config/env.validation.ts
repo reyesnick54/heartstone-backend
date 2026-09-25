@@ -132,8 +132,9 @@ export const envValidationSchema = Joi.object({
   if (nodeEnv !== 'production') {
     const pepper = env.SERVICE_CREDENTIAL_PEPPER?.trim() ?? '';
     if (!pepper) {
-      (env as ValidatedEnvironment & { SERVICE_CREDENTIAL_PEPPER: string }).SERVICE_CREDENTIAL_PEPPER =
-        'test-pepper-not-production';
+      (
+        env as ValidatedEnvironment & { SERVICE_CREDENTIAL_PEPPER: string }
+      ).SERVICE_CREDENTIAL_PEPPER = 'test-pepper-not-production';
     }
   }
 

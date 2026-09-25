@@ -19,7 +19,12 @@ import { ServicePackValidationService } from './validation/service-pack-validati
 import { ServicePackVersionService } from './versions/service-pack-version.service';
 
 @Module({
-  imports: [DatabaseModule, SessionAuthGuardModule, ServicePacksCommonModule, ServicePackGovernanceModule],
+  imports: [
+    DatabaseModule,
+    SessionAuthGuardModule,
+    ServicePacksCommonModule,
+    ServicePackGovernanceModule,
+  ],
   controllers: [ServicePacksRegistryController, ServicePacksController],
   providers: [
     ServicePacksService,

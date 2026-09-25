@@ -14,7 +14,9 @@ describe('ServiceIdentityAuthService', () => {
   };
   const audit = { record: jest.fn() };
   const configService = {
-    getOrThrow: jest.fn().mockReturnValue({ serviceCredentialPepper: 'test-pepper-not-production' }),
+    getOrThrow: jest
+      .fn()
+      .mockReturnValue({ serviceCredentialPepper: 'test-pepper-not-production' }),
   };
 
   const service = new ServiceIdentityAuthService(

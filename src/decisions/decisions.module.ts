@@ -12,11 +12,7 @@ import { DecisionReadinessService } from './readiness/decision-readiness.service
 @Module({
   imports: [SessionAuthGuardModule, AuthorityModule, ApplicationProcessingModule, RecordsModule],
   controllers: [DecisionsController],
-  providers: [
-    DecisionReadinessService,
-    DecisionExecutionService,
-    DecisionPreparationService,
-  ],
+  providers: [DecisionReadinessService, DecisionExecutionService, DecisionPreparationService],
   exports: [DecisionReadinessService, DecisionExecutionService, DecisionPreparationService],
 })
 export class DecisionsModule {}

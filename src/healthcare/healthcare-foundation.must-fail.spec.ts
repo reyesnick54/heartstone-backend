@@ -187,8 +187,13 @@ describe('Healthcare must-fail gates', () => {
       prisma.healthcareConsentGrant.findUnique.mockResolvedValue({
         id: 'grant-1',
         consentId: 'consent-1',
+        patientReferenceId: 'patient-ref-1',
         consent: { id: 'consent-1' },
         withdrawal: null,
+      });
+      prisma.healthcarePatientReference.findUnique.mockResolvedValue({
+        id: 'patient-ref-1',
+        patientIdentityId: '11111111-1111-4111-8111-111111111111',
       });
       prisma.healthcareConsentWithdrawal.create.mockResolvedValue({ preservesHistory: true });
       prisma.healthcareConsentGrant.update.mockResolvedValue({});

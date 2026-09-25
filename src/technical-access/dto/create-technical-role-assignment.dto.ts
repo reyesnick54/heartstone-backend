@@ -12,7 +12,10 @@ export class CreateTechnicalRoleAssignmentDto {
   @IsString()
   roleCode!: string;
 
-  @ApiPropertyOptional({ enum: TechnicalAccessScopeType, default: TechnicalAccessScopeType.PLATFORM })
+  @ApiPropertyOptional({
+    enum: TechnicalAccessScopeType,
+    default: TechnicalAccessScopeType.PLATFORM,
+  })
   @IsOptional()
   @IsEnum(TechnicalAccessScopeType)
   scopeType?: TechnicalAccessScopeType;

@@ -21,7 +21,12 @@ import { AppointmentSlotsController } from './slots/appointment-slots.controller
 import { AppointmentSlotsService } from './slots/appointment-slots.service';
 
 @Module({
-  imports: [DatabaseModule, SessionAuthGuardModule, OperationalSupportModule, ProductionReadinessModule],
+  imports: [
+    DatabaseModule,
+    SessionAuthGuardModule,
+    OperationalSupportModule,
+    ProductionReadinessModule,
+  ],
   controllers: [
     ServiceAppointmentsController,
     AppointmentSlotsController,

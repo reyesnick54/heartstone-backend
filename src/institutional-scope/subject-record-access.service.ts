@@ -30,7 +30,10 @@ export class SubjectRecordAccessService {
     private readonly prisma: PrismaService,
   ) {}
 
-  assertSessionDerivedIdentity(session: SessionContextDto, clientSuppliedIdentityId?: string): void {
+  assertSessionDerivedIdentity(
+    session: SessionContextDto,
+    clientSuppliedIdentityId?: string,
+  ): void {
     if (clientSuppliedIdentityId && clientSuppliedIdentityId !== session.identityId) {
       throw new ForbiddenException({
         message: 'Caller-supplied identity does not match authenticated session',
@@ -40,7 +43,10 @@ export class SubjectRecordAccessService {
     }
   }
 
-  assertPersonaAllowsPersonalSelfService(session: SessionContextDto, identityType: IdentityType): void {
+  assertPersonaAllowsPersonalSelfService(
+    session: SessionContextDto,
+    identityType: IdentityType,
+  ): void {
     if (identityType === IdentityType.SERVICE) {
       throw new ForbiddenException({
         message: 'Service identities cannot access personal subject records',
@@ -129,7 +135,10 @@ export class SubjectRecordAccessService {
     await this.resourceAccess.assertModification(session, resourceType, resourceId, options);
   }
 
-  resolveAccessorIdentityId(session: SessionContextDto, _deprecatedClientIdentityId?: string): string {
+  resolveAccessorIdentityId(
+    session: SessionContextDto,
+    _deprecatedClientIdentityId?: string,
+  ): string {
     this.assertSessionDerivedIdentity(session, _deprecatedClientIdentityId);
     return session.identityId;
   }

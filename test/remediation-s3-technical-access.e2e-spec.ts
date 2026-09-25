@@ -21,7 +21,10 @@ import {
   provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
-import { assignTechnicalRole, grantIdentityPlatformAdministrator } from './helpers/technical-access.fixture';
+import {
+  assignTechnicalRole,
+  grantIdentityPlatformAdministrator,
+} from './helpers/technical-access.fixture';
 
 describe('Remediation S3 technical access (e2e)', () => {
   let app: INestApplication<App>;

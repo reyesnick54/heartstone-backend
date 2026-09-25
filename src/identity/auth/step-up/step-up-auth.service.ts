@@ -59,6 +59,5 @@ export class StepUpAuthService {
       });
       throw new UnauthorizedException('Recent stronger authentication is required');
     }
-
   }
 }

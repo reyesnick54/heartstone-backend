@@ -534,11 +534,8 @@ export class SessionsService {
     const absoluteDeadline = new Date(
       session.issuedAt.getTime() + this.identityConfig.sessionAbsoluteTtlSeconds * 1000,
     );
-    const maxRenewedExpiry = new Date(
-      now.getTime() + this.identityConfig.sessionTtlSeconds * 1000,
-    );
-    const renewedExpiry =
-      maxRenewedExpiry < absoluteDeadline ? maxRenewedExpiry : absoluteDeadline;
+    const maxRenewedExpiry = new Date(now.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
+    const renewedExpiry = maxRenewedExpiry < absoluteDeadline ? maxRenewedExpiry : absoluteDeadline;
 
     if (timeRemaining > thresholdMs) {
       return this.prisma.session.update({

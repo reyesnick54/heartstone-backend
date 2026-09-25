@@ -50,10 +50,7 @@ export class AuthController {
   @Post('login/service')
   @ApiOperation({ summary: 'Authenticate a service identity with API key credentials' })
   @ApiCreatedResponse({ type: LoginResponseDto })
-  loginWithService(
-    @Body() dto: ServiceLoginDto,
-    @Req() req: Request,
-  ): Promise<LoginResponseDto> {
+  loginWithService(@Body() dto: ServiceLoginDto, @Req() req: Request): Promise<LoginResponseDto> {
     return this.authService.loginWithServiceCredentials(dto, {
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
@@ -75,9 +72,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke all sessions for the current user account' })
   @ApiOkResponse({ description: 'Sessions revoked' })
-  async logoutAll(
-    @CurrentSession() session: SessionContextDto,
-  ): Promise<{ revokedCount: number }> {
+  async logoutAll(@CurrentSession() session: SessionContextDto): Promise<{ revokedCount: number }> {
     const revokedCount = await this.authService.logoutAllSessions(session);
     return { revokedCount };
   }

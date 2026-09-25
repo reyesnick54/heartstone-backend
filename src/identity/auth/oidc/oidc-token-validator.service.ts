@@ -41,7 +41,11 @@ export class OidcTokenValidatorService {
         clockTolerance: provider.clockToleranceSeconds ?? 0,
       });
 
-      if (protectedHeader.typ && protectedHeader.typ !== 'JWT' && protectedHeader.typ !== 'at+jwt') {
+      if (
+        protectedHeader.typ &&
+        protectedHeader.typ !== 'JWT' &&
+        protectedHeader.typ !== 'at+jwt'
+      ) {
         throw new UnauthorizedException('Unsupported token type');
       }
 
