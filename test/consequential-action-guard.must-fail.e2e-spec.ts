@@ -219,7 +219,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         data: {
           identityId,
           userAccountId: userAccountId ?? null,
-          tokenHash: hashToken(`cag-session-${identityId}-${Date.now()}`),
+          tokenHash: hashToken(`cag-session-${identityId}-${String(Date.now())}`),
           status: 'ACTIVE',
           assuranceLevel: 'HIGH',
           expiresAt: new Date('2099-01-01'),
