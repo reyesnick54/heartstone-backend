@@ -66,6 +66,7 @@ describe('Readiness endpoints (e2e)', () => {
         checks: {
           database: 'up',
           redis: 'down',
+          identityAuth: 'ready',
         },
       });
 
