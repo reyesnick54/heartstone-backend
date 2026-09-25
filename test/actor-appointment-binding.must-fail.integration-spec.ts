@@ -8,6 +8,7 @@ import {
   DelegationStatus,
   FunctionAssignmentStatus,
   FunctionAuthorityLifecycleStatus,
+  GoverningSourceStatus,
   IdentityOfficeholderLinkStatus,
   IdentityType,
 } from '@prisma/client';
@@ -157,6 +158,22 @@ describe('Actor appointment binding must-fail invariants (integration)', () => {
     const userA = await provisionIdentity('user.a@s2.test', officeholderA.id);
     const userB = await provisionIdentity('user.b@s2.test', officeholderB.id);
 
+    const seedActorIdentity = await prisma.identity.create({
+      data: { type: IdentityType.INDIVIDUAL, displayName: 'S2 Seed Actor' },
+    });
+    const governingSource = await prisma.governingSource.create({
+      data: {
+        code: 'S2-SRC',
+        title: 'S2 Source',
+        versionLabel: '1',
+        status: GoverningSourceStatus.AUTHENTICATED,
+        effectiveFrom: new Date('2020-01-01'),
+        authenticatedAt: new Date('2020-01-01'),
+        authenticatedByIdentityId: seedActorIdentity.id,
+        contentHash: 's2-test-hash',
+      },
+    });
+
     const fn = await prisma.functionAuthorityRecord.create({
       data: {
         code: 'S2-FN',
@@ -166,6 +183,14 @@ describe('Actor appointment binding must-fail invariants (integration)', () => {
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,
         officeId: office.id,
+        activatedAt: new Date('2020-01-01'),
+        activatedByIdentityId: seedActorIdentity.id,
+      },
+    });
+    await prisma.functionGoverningSource.create({
+      data: {
+        functionAuthorityRecordId: fn.id,
+        governingSourceId: governingSource.id,
       },
     });
     await prisma.functionAuthorityAssignment.create({

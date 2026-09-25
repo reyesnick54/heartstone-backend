@@ -5,8 +5,10 @@
 export {
   ActorContextService,
   ActorInstitutionalBindingException,
+  type ResolveActorContextInput,
 } from '../../identity/auth/context/actor-context.service';
 export {
+  type InstitutionalCaseAccessActor,
   type ResolvedActorContext,
   toResolvedActorContext,
 } from '../../identity/auth/context/actor-context.types';

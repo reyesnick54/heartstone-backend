@@ -81,8 +81,6 @@ export class ConsequentialActionService {
       throw this.buildScopeDeniedException();
     }
 
-    await this.assertHumanActorWhenRequired(session.identityId, metadata);
-
     const institutional = readInstitutionalContext(context, metadata.institutionalFieldPrefixes);
     const body = request.body ?? {};
     const modifiers = readEvaluationModifiers(body);
@@ -119,6 +117,8 @@ export class ConsequentialActionService {
       }
       throw error;
     }
+
+    await this.assertHumanActorWhenRequired(session.identityId, metadata);
 
     const evaluationRequest: AuthorityEvaluationRequest = {
       identityId: session.identityId,

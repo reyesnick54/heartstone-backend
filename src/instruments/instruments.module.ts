@@ -5,21 +5,21 @@ import { InstrumentLifecycleBoundaryService } from './common/instrument-lifecycl
 import { GovernmentDecisionService } from './lifecycle/government-decision.service';
 import { InstrumentLifecycleService } from './lifecycle/instrument-lifecycle.service';
 import { InstrumentLifecycleGuardService } from './lifecycle/instrument-lifecycle-guard.service';
-import { InstrumentVerificationService } from './lifecycle/instrument-verification.service';
+import { InstrumentPublicVerificationCacheService } from './lifecycle/instrument-public-verification-cache.service';
 
 @Module({
   imports: [DatabaseModule],
   providers: [
     InstrumentLifecycleBoundaryService,
     InstrumentLifecycleGuardService,
-    InstrumentVerificationService,
+    InstrumentPublicVerificationCacheService,
     GovernmentDecisionService,
     InstrumentLifecycleService,
   ],
   exports: [
     InstrumentLifecycleBoundaryService,
     InstrumentLifecycleGuardService,
-    InstrumentVerificationService,
+    InstrumentPublicVerificationCacheService,
     GovernmentDecisionService,
     InstrumentLifecycleService,
   ],
