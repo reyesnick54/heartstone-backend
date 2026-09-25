@@ -48,37 +48,31 @@ export function readInstitutionalContext(
   };
 }
 
-export function readEvaluationModifiers(body: Record<string, unknown>): {
-  evidenceProvided?: string[];
-  qualificationCodes?: string[];
+/** Category-A resource identifiers only; authority facts are never read from the request body. */
+export function readEvaluationResourceScope(body: Record<string, unknown>): {
+  caseId?: string;
+  evidencePacketVersionId?: string;
+  decisionReadinessAssessmentId?: string;
   transactionAmount?: number;
   scopeValue?: string;
-  hasSecondApproval?: boolean;
-  hasConsultation?: boolean;
-  hasSupervision?: boolean;
-  hasLiaison?: boolean;
-  isSelfApproval?: boolean;
-  isConflicted?: boolean;
-  isRecused?: boolean;
-  priorActions?: never;
   externalDataAccessOnly?: boolean;
-  at?: Date;
 } {
-  const atValue = body.at;
   return {
-    evidenceProvided: body.evidenceProvided as string[] | undefined,
-    qualificationCodes: body.qualificationCodes as string[] | undefined,
-    transactionAmount: body.transactionAmount as number | undefined,
-    scopeValue: body.scopeValue as string | undefined,
-    hasSecondApproval: body.hasSecondApproval as boolean | undefined,
-    hasConsultation: body.hasConsultation as boolean | undefined,
-    hasSupervision: body.hasSupervision as boolean | undefined,
-    hasLiaison: body.hasLiaison as boolean | undefined,
-    isSelfApproval: body.isSelfApproval as boolean | undefined,
-    isConflicted: body.isConflicted as boolean | undefined,
-    isRecused: body.isRecused as boolean | undefined,
-    priorActions: body.priorActions as never,
-    externalDataAccessOnly: body.externalDataAccessOnly as boolean | undefined,
-    at: typeof atValue === 'string' ? new Date(atValue) : undefined,
+    caseId: typeof body.caseId === 'string' ? body.caseId : undefined,
+    evidencePacketVersionId:
+      typeof body.evidencePacketVersionId === 'string'
+        ? body.evidencePacketVersionId
+        : undefined,
+    decisionReadinessAssessmentId:
+      typeof body.decisionReadinessAssessmentId === 'string'
+        ? body.decisionReadinessAssessmentId
+        : undefined,
+    transactionAmount:
+      typeof body.transactionAmount === 'number' ? body.transactionAmount : undefined,
+    scopeValue: typeof body.scopeValue === 'string' ? body.scopeValue : undefined,
+    externalDataAccessOnly:
+      typeof body.externalDataAccessOnly === 'boolean'
+        ? body.externalDataAccessOnly
+        : undefined,
   };
 }

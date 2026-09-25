@@ -125,8 +125,7 @@ export class OfficialAvailableActionsService {
         officeId: primaryAppointment?.officeId,
         appointmentId: primaryAppointment?.appointmentId,
         delegationId: primaryDelegation?.delegationId,
-        priorActions: candidate.priorActions,
-        hasSecondApproval: false,
+        resourceScope: { caseId },
       });
 
       const available = evaluation.outcome === AuthorityEvaluationOutcome.ALLOW;

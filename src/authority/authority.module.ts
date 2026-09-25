@@ -12,6 +12,7 @@ import { AuthorityDependenciesService } from './dependencies/authority-dependenc
 import { AuthorityDependencyEvaluator } from './dependencies/authority-dependency-evaluator.service';
 import { AuthorityEvaluationController } from './evaluation/authority-evaluation.controller';
 import { AuthorityEvaluationService } from './evaluation/authority-evaluation.service';
+import { AuthorityFactsResolver } from './evaluation/authority-facts-resolver.service';
 import { AuthorityExplanationService } from './explanation/authority-explanation.service';
 import { FunctionActivationService } from './function-authority-records/function-activation.service';
 import { FunctionAuthorityRecordsController } from './function-authority-records/function-authority-records.controller';
@@ -36,6 +37,7 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     FunctionAuthorityRecordsService,
     FunctionActivationService,
     AuthorityEvaluationService,
+    AuthorityFactsResolver,
     AuthorityExplanationService,
     InstitutionalActorResolver,
     AuthorityConditionEvaluator,
