@@ -144,7 +144,7 @@ describe('Record access hardening (S6 integration)', () => {
       .expect(404);
   });
 
-  it('rejects forged requesterIdentityId query parameters', async () => {
+  it('rejects client-supplied requesterIdentityId query parameters', async () => {
     const citizen = await provisionAuthenticatedIdentity(app, prisma, {
       loginIdentifier: 'forged-query@test.gov',
       password: 'ForgedQuery123!',
