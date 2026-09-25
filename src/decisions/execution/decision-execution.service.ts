@@ -147,11 +147,11 @@ export class DecisionExecutionService {
       officeholderId: input.decisionMakerOfficeholderId,
       appointmentId: input.appointmentId,
       delegationId: input.delegationId,
-      isConflicted: input.isConflicted,
-      isRecused: input.isRecused,
-      hasSecondApproval: input.hasSecondApproval,
-      priorActions: input.priorActions as AuthorityActionType[] | undefined,
-      at,
+      resourceScope: {
+        caseId: input.caseId,
+        evidencePacketVersionId: input.evidencePacketVersionId,
+      },
+      privilegedHistoricalAt: at,
     });
 
     if (authorityResult.outcome !== AuthorityEvaluationOutcome.ALLOW) {

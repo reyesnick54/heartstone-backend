@@ -102,8 +102,7 @@ export class DepartmentalReviewService {
       officeholderId: input.reviewerOfficeholderId,
       functionAuthorityRecordId: review.functionAuthorityRecordId,
       action: AuthorityActionType.REVIEW,
-      evidenceProvided:
-        input.evidenceRecordIds ?? review.evidenceConsidered.map((e) => e.evidenceRecordId),
+      resourceScope: { caseId: review.caseId },
     });
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {
