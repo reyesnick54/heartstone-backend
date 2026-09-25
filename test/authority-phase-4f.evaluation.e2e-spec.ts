@@ -15,6 +15,7 @@ import { FunctionAuthorityRecordsService } from '../src/authority/function-autho
 import { GoverningSourcesService } from '../src/authority/governing-sources/governing-sources.service';
 import { AuthorityEvaluationStatus } from '../src/authority/policy/authority-evaluation-status.enum';
 import { PrismaService } from '../src/database/prisma.service';
+import { seedPhase8bDecisionFixture } from '../src/decisions/fixtures/phase-8b-test-fixtures';
 import { hashToken } from '../src/identity/common/crypto.util';
 import { asAuthorityEvaluationBody } from './helpers/authority-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
@@ -214,6 +215,11 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
     });
 
     const token = await authenticate(ctx.identityId, 'sod-token');
+    const phase8Case = await seedPhase8bDecisionFixture(prisma);
+    await prisma.case.update({
+      where: { id: phase8Case.caseId },
+      data: { applicantIdentityId: ctx.identityId },
+    });
 
     const response = await request(app.getHttpServer())
       .post('/api/v1/authority/evaluate')
@@ -223,7 +229,7 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
         action: AuthorityActionType.DECIDE,
         officeholderId: ctx.officeholderId,
         appointmentId: ctx.appointmentId,
-        isSelfApproval: true,
+        caseId: phase8Case.caseId,
       })
       .expect(201);
 

@@ -565,6 +565,10 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
       },
     });
 
+    await prisma.authorityCondition.deleteMany({
+      where: { functionAuthorityRecordId: base.fn.id },
+    });
+
     const phase8Case = await seedPhase8bDecisionFixture(prisma);
     await prisma.case.update({
       where: { id: phase8Case.caseId },

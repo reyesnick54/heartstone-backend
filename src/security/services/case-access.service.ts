@@ -1,7 +1,28 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
-import { type InstitutionalCaseAccessActor } from '../../identity/auth/context/actor-context.types';
+import {
+  type ActorContext,
+  type InstitutionalCaseAccessActor,
+} from '../../identity/auth/context/actor-context.types';
+
+type CaseAccessActor = ActorContext | InstitutionalCaseAccessActor;
+
+function hasInstitutionalRelationships(actor: CaseAccessActor): boolean {
+  if ('hasInstitutionalRelationships' in actor) {
+    return actor.hasInstitutionalRelationships;
+  }
+
+  return actor.hasActiveOfficeholderLink;
+}
+
+function linkedInstitutionIds(actor: CaseAccessActor): string[] {
+  if ('institutionContexts' in actor) {
+    return actor.institutionContexts.map((context) => context.institutionId);
+  }
+
+  return actor.linkedInstitutionIds;
+}
 
 @Injectable()
 export class CaseAccessService {
@@ -22,10 +43,7 @@ export class CaseAccessService {
     }
   }
 
-  async assertOfficialInstitutionalAccess(
-    caseId: string,
-    actor: InstitutionalCaseAccessActor,
-  ): Promise<void> {
+  async assertOfficialInstitutionalAccess(caseId: string, actor: CaseAccessActor): Promise<void> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
       select: { responsibleInstitutionId: true },
@@ -35,20 +53,20 @@ export class CaseAccessService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    if (!actor.hasActiveOfficeholderLink) {
+    if (!hasInstitutionalRelationships(actor)) {
       throw new ForbiddenException(
         'Institutional case access requires an active officeholder link',
       );
     }
 
-    if (!actor.linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)) {
+    if (!linkedInstitutionIds(actor).includes(caseRecord.responsibleInstitutionId)) {
       throw new ForbiddenException('Case is outside the authenticated actor institution scope');
     }
   }
 
   async assertApplicantOrOfficialAccess(
     caseId: string,
-    actor: InstitutionalCaseAccessActor,
+    actor: CaseAccessActor,
   ): Promise<'APPLICANT' | 'OFFICIAL'> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
@@ -64,8 +82,8 @@ export class CaseAccessService {
     }
 
     if (
-      actor.hasActiveOfficeholderLink &&
-      actor.linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)
+      hasInstitutionalRelationships(actor) &&
+      linkedInstitutionIds(actor).includes(caseRecord.responsibleInstitutionId)
     ) {
       return 'OFFICIAL';
     }

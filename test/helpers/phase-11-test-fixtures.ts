@@ -133,7 +133,7 @@ export async function seedPhase11Fixture(
     approverIdentityId: phase8.approverIdentityId,
     approverOfficeholderId: phase8.approverOfficeholderId,
     functionAuthorityRecordId: phase8.functionAuthorityRecordId,
-    appointmentId: phase8.appointmentId,
+    appointmentId: phase8.approverAppointmentId,
     effectiveFrom: new Date('2020-01-01'),
   });
 

@@ -1,9 +1,14 @@
 /**
- * @deprecated Import ActorContextService from `identity/auth/context/actor-context.service` instead.
- * This re-export preserves legacy SecurityModule wiring during S9 consolidation.
+ * @deprecated Import from `src/identity/auth/context/actor-context.service` instead.
+ * Retained temporarily so existing security-layer imports resolve to the canonical resolver.
  */
 export {
   ActorContextService,
+  ActorInstitutionalBindingException,
   type ResolveActorContextInput,
 } from '../../identity/auth/context/actor-context.service';
-export type { InstitutionalCaseAccessActor as ResolvedActorContext } from '../../identity/auth/context/actor-context.types';
+export {
+  type InstitutionalCaseAccessActor,
+  type ResolvedActorContext,
+  toResolvedActorContext,
+} from '../../identity/auth/context/actor-context.types';
