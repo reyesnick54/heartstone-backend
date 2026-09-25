@@ -10,6 +10,8 @@ export class HealthcareConsentPolicyService {
   async assertActiveConsentForPurpose(input: {
     patientReferenceId: string;
     purposeCode: string;
+    accessorIdentityId?: string;
+    requiredRecipientCode?: string;
   }): Promise<void> {
     const purpose = await this.prisma.healthcareConsentPurposeDefinition.findUnique({
       where: { purposeCode: input.purposeCode },
@@ -27,10 +29,36 @@ export class HealthcareConsentPolicyService {
         OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
         withdrawal: null,
       },
+      include: {
+        consent: { include: { scopes: true } },
+      },
     });
 
     if (!activeGrant) {
       throw new ForbiddenException(HEALTHCARE_REASON_CODES.CONSENT_REVOKED);
+    }
+
+    if (input.requiredRecipientCode) {
+      const scopes = activeGrant.consent.scopes;
+      const allowedRecipients = scopes.flatMap((scope) => scope.recipientCodes);
+      if (
+        allowedRecipients.length > 0 &&
+        !allowedRecipients.includes(input.requiredRecipientCode)
+      ) {
+        throw new ForbiddenException(HEALTHCARE_REASON_CODES.PURPOSE_MISMATCH);
+      }
+    }
+
+    if (input.accessorIdentityId && input.requiredRecipientCode) {
+      const patient = await this.prisma.healthcarePatientReference.findUnique({
+        where: { id: input.patientReferenceId },
+      });
+      if (
+        patient?.patientIdentityId !== input.accessorIdentityId &&
+        input.requiredRecipientCode === 'patient-self'
+      ) {
+        throw new ForbiddenException(HEALTHCARE_REASON_CODES.PURPOSE_MISMATCH);
+      }
     }
   }
 

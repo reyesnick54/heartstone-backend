@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
+import { SubjectAccessQueryDto } from '../institutional-scope/dto/subject-access-query.dto';
 import { EmploymentComplaintService } from './complaints/employment-complaint.service';
 import {
   EmployerRegistryService,
@@ -37,10 +40,11 @@ export class LabourController {
 
   @Get('workers/profile-references/:id')
   getWorkerProfile(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('requesterIdentityId', ParseUUIDPipe) requesterIdentityId: string,
+    @Query() query: SubjectAccessQueryDto,
   ) {
-    return this.workerProfileService.getWorkerProfileForSubject(id, requesterIdentityId);
+    return this.workerProfileService.getWorkerProfileForSubject(session, id, query);
   }
 
   @Post('work-permit-application-profiles')

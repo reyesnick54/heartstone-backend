@@ -10,6 +10,8 @@ import { SessionContextDto } from '../dto/session-context.dto';
 export interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>;
   body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query?: Record<string, string>;
   session?: SessionContextDto;
   actor?: ActorContext;
 }

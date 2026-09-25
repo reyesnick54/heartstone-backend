@@ -2,6 +2,8 @@ import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CustomsDeclarationType } from '@prisma/client';
 
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { CustomsDeclarationService } from './declarations/customs-declaration.service';
 
 @ApiTags('customs-trade')
@@ -26,10 +28,11 @@ export class CustomsTradeController {
   @Post('declarations/:id/amendments')
   @ApiOkResponse({ description: 'Amendment creates a new locked version; prior version preserved' })
   amendDeclaration(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { submissionPayload?: Record<string, unknown> },
   ) {
-    return this.declarationService.amendDeclaration({
+    return this.declarationService.amendDeclaration(session, {
       customsDeclarationId: id,
       submissionPayload: body.submissionPayload,
     });

@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
+import { SubjectAccessQueryDto } from '../institutional-scope/dto/subject-access-query.dto';
 import { ImmigrationApplicationProfileService } from './applications/immigration-application-profile.service';
 import { ImmigrationProfileService } from './profiles/immigration-profile.service';
 
@@ -20,14 +23,18 @@ export class ImmigrationController {
 
   @Get('profiles/subject/:subjectIdentityId')
   getProfileForSubject(
+    @CurrentSession() session: SessionContextDto,
     @Param('subjectIdentityId', ParseUUIDPipe) subjectIdentityId: string,
-    @Query('requesterIdentityId', ParseUUIDPipe) requesterIdentityId: string,
+    @Query() query: SubjectAccessQueryDto,
   ) {
-    return this.profileService.getProfileForSubject(subjectIdentityId, requesterIdentityId);
+    return this.profileService.getProfileForSubject(session, subjectIdentityId, query);
   }
 
   @Get('visa-application-profiles/:id')
-  getVisaApplicationProfile(@Param('id', ParseUUIDPipe) id: string) {
-    return this.applicationProfileService.getVisaApplicationProfile(id);
+  getVisaApplicationProfile(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.applicationProfileService.getVisaApplicationProfile(session, id);
   }
 }

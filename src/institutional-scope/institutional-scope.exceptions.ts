@@ -29,11 +29,20 @@ export function maskDeniedAsNotFound(
   resourceId: string,
   reason: ScopeDenialReason,
 ): Error {
+  const subjectBoundTypes = new Set<ScopedResourceType>([
+    ScopedResourceType.IDENTITY,
+    ScopedResourceType.IMMIGRATION_PROFILE,
+    ScopedResourceType.DRIVER_PROFILE,
+    ScopedResourceType.WORKER_PROFILE_REFERENCE,
+    ScopedResourceType.STUDENT_EDUCATION_PROFILE,
+    ScopedResourceType.VEHICLE_RECORD,
+    ScopedResourceType.APPLICATION,
+  ]);
+
   if (
     reason === ScopeDenialReason.CROSS_APPLICANT ||
     reason === ScopeDenialReason.RAW_UUID_INSUFFICIENT ||
-    (resourceType === ScopedResourceType.APPLICATION &&
-      reason !== ScopeDenialReason.RESOURCE_NOT_FOUND)
+    (subjectBoundTypes.has(resourceType) && reason !== ScopeDenialReason.RESOURCE_NOT_FOUND)
   ) {
     return new ScopedResourceNotFoundException(resourceType, resourceId);
   }

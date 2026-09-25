@@ -19,6 +19,7 @@ import {
   asUserAccountBody,
 } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { grantIdentityPlatformAdministrator } from './helpers/technical-access.fixture';
 
 describe('Phase 3 Identity & Access (integration)', () => {
   let app: INestApplication<App>;
@@ -44,6 +45,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
       password: 'BootstrapPass123!',
     });
     await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    await grantIdentityPlatformAdministrator(prisma, bootstrap.identityId);
     return loginAndGetSessionToken(app, bootstrap.loginIdentifier, bootstrap.password);
   }
 
