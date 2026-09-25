@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { ComplianceDashboardService } from './compliance-dashboard.service';
 import { ComplianceMonitoringService } from './compliance-monitoring.service';
 import { ComplianceProjectionService } from './compliance-projection.service';
@@ -9,6 +11,14 @@ import { DeriveComplianceProjectionDto } from './dto/derive-compliance-projectio
 import { EvaluateMonitoringRuleDto } from './dto/evaluate-monitoring-rule.dto';
 import { RecordRevalidationDto } from './dto/record-revalidation.dto';
 
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Compliance oversight dashboards and obligation administration",
+  authorityRequirement: "Institutional compliance role or holder-scoped dashboard access",
+  actorSource: "Session identity with compliance or holder context",
+  primarySecurityInvariant: "Compliance status is derived from authoritative records",
+})
 @Controller('compliance/status')
 export class ComplianceStatusController {
   constructor(

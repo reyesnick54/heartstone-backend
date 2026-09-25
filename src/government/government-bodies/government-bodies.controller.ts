@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateGovernmentBodyDto } from './dto/create-government-body.dto';
 import { GovernmentBodyResponseDto } from './dto/government-body-response.dto';
 import { QueryGovernmentBodiesDto } from './dto/query-government-bodies.dto';
@@ -8,6 +10,14 @@ import { UpdateGovernmentBodyDto } from './dto/update-government-body.dto';
 import { GovernmentBodiesService } from './government-bodies.service';
 
 @ApiTags('government-bodies')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government structure administration",
+  authorityRequirement: "Institutional configuration authority (not self-granted)",
+  actorSource: "Authenticated institutional administrator",
+  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+})
 @Controller('government-bodies')
 export class GovernmentBodiesController {
   constructor(private readonly service: GovernmentBodiesService) {}

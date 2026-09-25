@@ -13,6 +13,8 @@ import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ScopedResourceType } from '../institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../institutional-scope/resource-access.service';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { MasterFileCompletenessAssessmentService } from './completeness/master-file-completeness-assessment.service';
 import { AssessMasterFileCompletenessDto } from './dto/assess-master-file-completeness.dto';
 import { MasterAdministrativeFileService } from './master-administrative-file.service';
@@ -23,6 +25,14 @@ import {
 import { MasterAdministrativeFileIndexService } from './master-administrative-file-index.service';
 
 @ApiTags('records')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Master administrative file institutional read scope",
+  authorityRequirement: "Institutional records access; service identities excluded",
+  actorSource: "Authenticated human institutional actor",
+  primarySecurityInvariant: "Records access is institutional and attributable",
+})
 @Controller('records/master-files')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

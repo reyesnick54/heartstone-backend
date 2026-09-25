@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { MembershipResponseDto } from './dto/membership-response.dto';
 import { QueryMembershipsDto } from './dto/query-memberships.dto';
@@ -8,6 +10,14 @@ import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { MembershipsService } from './memberships.service';
 
 @ApiTags('identity-memberships')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/memberships')
 export class MembershipsController {
   constructor(private readonly membershipsService: MembershipsService) {}

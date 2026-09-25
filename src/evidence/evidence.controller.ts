@@ -9,12 +9,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthorityActionType } from '@prisma/client';
 
+import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { EvidenceClientAssertionForbiddenException } from './common/exceptions/evidence.exceptions';
-import { FORBIDDEN_CLIENT_EVIDENCE_FIELDS } from './evidence.constants';
+import { EVIDENCE_AUTHORITY_FUNCTION_CODES, FORBIDDEN_CLIENT_EVIDENCE_FIELDS } from './evidence.constants';
 import { ReceiveEvidenceDto } from './records/dto/receive-evidence.dto';
 import { EvidenceRecordsService } from './records/evidence-records.service';
 import {
@@ -32,7 +37,15 @@ import { EvidenceVerificationService } from './verification/evidence-verificatio
 
 @ApiTags('evidence')
 @ApiBearerAuth()
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
+  authorityRequirement: "Document/evidence access guard or institutional evidence role",
+  actorSource: "Session identity with applicant or official actor context",
+  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+})
 @Controller('evidence')
 export class EvidenceController {
   constructor(
@@ -100,6 +113,10 @@ export class EvidenceController {
   }
 
   @Post('quality-assessments/:assessmentId/finalize')
+  @ConsequentialAction({
+    action: AuthorityActionType.APPROVE,
+    functionCode: EVIDENCE_AUTHORITY_FUNCTION_CODES.QUALITY_ASSESSMENT_FINALIZE,
+  })
   finalizeQuality(
     @CurrentSession() session: SessionContextDto,
     @Param('assessmentId', ParseUUIDPipe) assessmentId: string,
@@ -119,6 +136,14 @@ export class EvidenceController {
 @ApiTags('evidence-ai')
 @ApiBearerAuth()
 @UseGuards(SessionAuthGuard)
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
+  authorityRequirement: "Document/evidence access guard or institutional evidence role",
+  actorSource: "Session identity with applicant or official actor context",
+  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+})
 @Controller('evidence/ai')
 export class EvidenceAiController {
   constructor(private readonly evidenceVerification: EvidenceVerificationService) {}

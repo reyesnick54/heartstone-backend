@@ -4,7 +4,9 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swa
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import type {
   PublicEligibilityResult,
   PublicServiceDetail,
@@ -21,6 +23,14 @@ import { CitizenServicesService, type CitizenStartExperience } from './citizen-s
 import { CreateCitizenApplicationDto } from './dto/create-citizen-application.dto';
 
 @ApiTags('citizen-experience')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience/citizen/services')
 export class CitizenServicesController {
   constructor(private readonly citizenServicesService: CitizenServicesService) {}

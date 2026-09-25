@@ -4,6 +4,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { CitizenCivilRegistryProjectionService } from './civil-registry/citizen-civil-registry-projection.service';
 import { CitizenExperienceBoundaryService } from './common/citizen-experience-boundary.service';
 import { CitizenCredentialsProjectionService } from './credentials/citizen-credentials-projection.service';
@@ -22,6 +24,14 @@ import { CitizenPaymentsProjectionService } from './payments/citizen-payments-pr
 import { CitizenRenewalsProjectionService } from './renewals/citizen-renewals-projection.service';
 
 @ApiTags('citizen-experience')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience/citizen')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

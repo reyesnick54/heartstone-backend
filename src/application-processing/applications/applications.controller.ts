@@ -13,12 +13,22 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { SubmitApplicationDto } from './dto/submit-application.dto';
 import { UpdateApplicationDraftDto } from './dto/update-application-draft.dto';
 
 @ApiTags('application-processing-applications')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('applications')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

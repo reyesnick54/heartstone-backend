@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateUserAccountDto } from './dto/create-user-account.dto';
 import { QueryUserAccountsDto } from './dto/query-user-accounts.dto';
 import { UpdateUserAccountDto } from './dto/update-user-account.dto';
@@ -8,6 +10,14 @@ import { UserAccountResponseDto } from './dto/user-account-response.dto';
 import { UserAccountsService } from './user-accounts.service';
 
 @ApiTags('identity-user-accounts')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/user-accounts')
 export class UserAccountsController {
   constructor(private readonly userAccountsService: UserAccountsService) {}

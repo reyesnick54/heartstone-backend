@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { CitizenExperienceModule } from '../experience/citizen/citizen-experience.module';
 import { OfficialModule } from '../experience/official/official.module';
@@ -24,7 +25,7 @@ import { TaxReturnService } from './returns/tax-return.service';
 import { RevenueController } from './revenue.controller';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, CitizenExperienceModule, OfficialModule],
+  imports: [DatabaseModule, SessionsModule, CitizenExperienceModule, OfficialModule, AuthorityModule],
   controllers: [RevenueController, CitizenRevenueController, OfficialRevenueController],
   providers: [
     RevenueBoundaryService,

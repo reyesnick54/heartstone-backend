@@ -8,12 +8,22 @@ import { resolveFunctionFromInstrumentTypeVersion } from '../../authority/conseq
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { AssessIssuanceReadinessDto } from '../issuance/dto/assess-issuance-readiness.dto';
 import { IssueOfficialInstrumentDto } from '../issuance/dto/issue-official-instrument.dto';
 import { IssuanceService } from '../issuance/issuance.service';
 import { IssuanceReadinessService } from '../issuance/issuance-readiness.service';
 
 @ApiTags('Official Instrument Issuance')
+@ControllerRouteAccess({
+  routeClass: RouteClass.CONSEQUENTIAL_AUTHORITY_CONTROLLED,
+  authenticationRequired: true,
+  scopeRequirement: "Issuance readiness and official instrument issuance scope",
+  authorityRequirement: "Function authority ISSUE evaluation via ConsequentialActionGuard",
+  actorSource: "Session identity with evaluated issuer authority context",
+  primarySecurityInvariant: "Issuance requires explicit authority evaluation, not authentication alone",
+})
 @Controller('decisions-issuance')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 export class IssuanceController {

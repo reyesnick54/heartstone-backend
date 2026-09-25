@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import type {
   PublicEligibilityResult,
   PublicServiceDetail,
@@ -19,6 +21,14 @@ import { PublicServiceDiscoveryService } from './public-service-discovery.servic
 
 @ApiTags('public-services')
 @Public()
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Service catalog administration or public discovery opt-out",
+  authorityRequirement: "Catalog configuration authority for protected routes",
+  actorSource: "Administrator or anonymous reader for explicitly public catalog routes",
+  primarySecurityInvariant: "Published catalog visibility does not grant case or decision access",
+})
 @Controller('public/services')
 export class PublicServiceDiscoveryController {
   constructor(private readonly publicServiceDiscoveryService: PublicServiceDiscoveryService) {}

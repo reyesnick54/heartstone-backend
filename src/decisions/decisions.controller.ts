@@ -13,6 +13,8 @@ import { type SessionContextDto } from '../identity/auth/dto/session-context.dto
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ScopedResourceType } from '../institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../institutional-scope/resource-access.service';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { ActorContextService } from '../security/services/actor-context.service';
 import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
 import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
@@ -22,6 +24,14 @@ import { DecisionPreparationService } from './preparation/decision-preparation.s
 import { DecisionReadinessService } from './readiness/decision-readiness.service';
 
 @ApiTags('decisions')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Case-bound decision preparation and execution scope",
+  authorityRequirement: "Explicit decision-maker identity match and institutional authority for execution",
+  actorSource: "Session identity; decisionMakerIdentityId must match session",
+  primarySecurityInvariant: "Recommendations and preparation do not equal official decisions",
+})
 @Controller('decisions')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 export class DecisionsController {

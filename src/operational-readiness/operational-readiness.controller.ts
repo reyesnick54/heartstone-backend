@@ -1,9 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthorityActionType } from '@prisma/client';
 
+import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { ActivationGovernanceService } from './activation/activation-governance.service';
 import { CapabilityDefinitionService } from './capabilities/capability-definition.service';
 import { CapabilityMaturityService } from './capabilities/capability-maturity.service';
@@ -13,14 +18,25 @@ import { CreateCapabilityDefinitionDto } from './dto/create-capability-definitio
 import { CreateCapabilityVersionDto } from './dto/create-capability-version.dto';
 import { CreateMaturityAssessmentDto } from './dto/create-maturity-assessment.dto';
 import { RecordMaturityDecisionDto } from './dto/record-maturity-decision.dto';
-import { PHASE_13A_BOUNDARY_DISCLAIMER } from './operational-readiness.constants';
+import {
+  OPERATIONAL_READINESS_AUTHORITY_FUNCTION_CODES,
+  PHASE_13A_BOUNDARY_DISCLAIMER,
+} from './operational-readiness.constants';
 import { CapabilityOwnerService } from './owners/capability-owner.service';
 import { ProductionReadinessService } from './readiness/production-readiness.service';
 import { CapabilityRevalidationService } from './revalidation/capability-revalidation.service';
 
 @ApiTags('operational-readiness')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Operational readiness assessment administration",
+  authorityRequirement: "Institutional readiness configuration authority",
+  actorSource: "Authenticated institutional administrator",
+  primarySecurityInvariant: "Readiness metadata does not confer production authority",
+})
 @Controller('operational-readiness')
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 export class OperationalReadinessController {
   constructor(
     private readonly boundary: OperationalReadinessBoundaryService,
@@ -84,6 +100,10 @@ export class OperationalReadinessController {
   }
 
   @Post('capabilities/maturity-assessments/:id/decision')
+  @ConsequentialAction({
+    action: AuthorityActionType.DECIDE,
+    functionCode: OPERATIONAL_READINESS_AUTHORITY_FUNCTION_CODES.MATURITY_DECISION,
+  })
   recordMaturityDecision(
     @Param('id') id: string,
     @Body() body: RecordMaturityDecisionDto,

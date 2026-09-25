@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CredentialsService } from './credentials.service';
 import { CreateCredentialDto } from './dto/create-credential.dto';
 import { CredentialResponseDto } from './dto/credential-response.dto';
@@ -8,6 +10,14 @@ import { QueryCredentialsDto } from './dto/query-credentials.dto';
 import { UpdateCredentialDto } from './dto/update-credential.dto';
 
 @ApiTags('identity-credentials')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/credentials')
 export class CredentialsController {
   constructor(private readonly credentialsService: CredentialsService) {}

@@ -10,11 +10,21 @@ import {
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { AuthorityEvaluationService } from './authority-evaluation.service';
 import { AuthorityEvaluationResponseDto } from './dto/authority-evaluation-response.dto';
 import { EvaluateAuthorityDto } from './dto/evaluate-authority.dto';
 
 @ApiTags('authority-evaluation')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Authority configuration or evaluated institutional action scope",
+  authorityRequirement: "Explicit function authority evaluation for consequential actions",
+  actorSource: "Session identity with officeholder linkage when evaluating authority",
+  primarySecurityInvariant: "Technical permission does not create legal authority",
+})
 @Controller('authority/evaluate')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

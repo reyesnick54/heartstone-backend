@@ -19,6 +19,8 @@ import { type Response } from 'express';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { ActorContextService } from '../../security/services/actor-context.service';
 import { ForbiddenDocumentFieldsInterceptor } from '../common/forbidden-document-fields.interceptor';
 import { DocumentAccessService } from './document-access.service';
@@ -31,6 +33,14 @@ import { UpdateClassificationDto } from './dto/update-classification.dto';
 import { UploadDocumentVersionDto } from './dto/upload-document-version.dto';
 
 @ApiTags('evidence-records-documents')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
+  authorityRequirement: "Document/evidence access guard or institutional evidence role",
+  actorSource: "Session identity with applicant or official actor context",
+  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+})
 @Controller('documents')
 @UseGuards(SessionAuthGuard)
 @UseInterceptors(ForbiddenDocumentFieldsInterceptor)

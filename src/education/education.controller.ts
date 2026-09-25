@@ -1,12 +1,22 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { EducationAdmissionApplicationProfileService } from './admissions/education-admission-application-profile.service';
 import { EducationInstitutionService } from './institutions/education-institution.service';
 import { ScholarshipApplicationProfileService } from './scholarships/scholarship-application-profile.service';
 import { StudentEducationProfileService } from './students/student-education-profile.service';
 
 @ApiTags('education')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('api/v1/education')
 export class EducationController {
   constructor(

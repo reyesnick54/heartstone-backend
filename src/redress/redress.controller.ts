@@ -11,6 +11,8 @@ import {
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
 import { CreateExternalReviewReferralDto } from './dto/create-external-review-referral.dto';
@@ -24,6 +26,14 @@ import { RedressMatterService } from './matters/redress-matter.service';
 import { RedressNoticeService } from './notices/redress-notice.service';
 import { PHASE_10F_BOUNDARY_DISCLAIMER, PHASE_10G_BOUNDARY_DISCLAIMER } from './redress.constants';
 
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Redress and appeals administration",
+  authorityRequirement: "Institutional redress handling authority",
+  actorSource: "Authenticated institutional actor",
+  primarySecurityInvariant: "Redress access does not bypass original decision authority chain",
+})
 @Controller('redress')
 export class RedressController {
   constructor(

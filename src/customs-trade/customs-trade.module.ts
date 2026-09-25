@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { OfficialModule } from '../experience/official/official.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
@@ -20,7 +21,7 @@ import { PublicCustomsTradeVerificationController } from './verification/public-
 import { PublicCustomsTradeVerificationService } from './verification/public-customs-trade-verification.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, OfficialModule],
+  imports: [DatabaseModule, SessionsModule, OfficialModule, AuthorityModule],
   controllers: [
     CustomsTradeController,
     OfficialTradeController,
