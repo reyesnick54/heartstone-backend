@@ -1,5 +1,9 @@
 import { CapabilityMaturityState } from '@prisma/client';
 
+export const OPERATIONAL_READINESS_AUTHORITY_FUNCTION_CODES = {
+  MATURITY_DECISION: 'OPERATIONAL-READINESS-MATURITY-DECIDE',
+} as const;
+
 export const PHASE_13A_BOUNDARY_DISCLAIMER =
   'Operational readiness machinery records assessments, conditions, and governance evidence. ' +
   'Authority does not equal activation. Technical completion does not equal production readiness. ' +

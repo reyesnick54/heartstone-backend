@@ -18,6 +18,8 @@ import {
 } from '@nestjs/swagger';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateGovernmentServiceVersionDto } from '../government-service-versions/dto/create-government-service-version.dto';
 import { GovernmentServiceVersionResponseDto } from '../government-service-versions/dto/government-service-version-response.dto';
 import { GovernmentServiceVersionsService } from '../government-service-versions/government-service-versions.service';
@@ -28,6 +30,14 @@ import { UpdateGovernmentServiceDto } from './dto/update-government-service.dto'
 import { GovernmentServicesService } from './government-services.service';
 
 @ApiTags('service-catalog')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Service catalog administration or public discovery opt-out",
+  authorityRequirement: "Catalog configuration authority for protected routes",
+  actorSource: "Administrator or anonymous reader for explicitly public catalog routes",
+  primarySecurityInvariant: "Published catalog visibility does not grant case or decision access",
+})
 @Controller('service-catalog/services')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

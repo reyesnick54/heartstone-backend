@@ -1,6 +1,8 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { type ActorContext } from '../auth/context/actor-context.types';
 import { CurrentActor } from '../auth/decorators/current-actor.decorator';
@@ -30,6 +32,14 @@ export class ProtectedProfileResponseDto {
 }
 
 @ApiTags('identity-protected')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/me')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

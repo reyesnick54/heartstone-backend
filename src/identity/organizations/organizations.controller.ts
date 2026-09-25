@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { OrganizationResponseDto } from './dto/organization-response.dto';
 import { QueryOrganizationsDto } from './dto/query-organizations.dto';
@@ -8,6 +10,14 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationsService } from './organizations.service';
 
 @ApiTags('identity-organizations')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}

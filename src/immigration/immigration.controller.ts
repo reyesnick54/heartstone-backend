@@ -1,10 +1,20 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { ImmigrationApplicationProfileService } from './applications/immigration-application-profile.service';
 import { ImmigrationProfileService } from './profiles/immigration-profile.service';
 
 @ApiTags('immigration')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('api/v1/immigration')
 export class ImmigrationController {
   constructor(

@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { AuthenticationMethodsService } from './authentication-methods.service';
 import { AuthenticationMethodResponseDto } from './dto/authentication-method-response.dto';
 import { CreateAuthenticationMethodDto } from './dto/create-authentication-method.dto';
@@ -8,6 +10,14 @@ import { QueryAuthenticationMethodsDto } from './dto/query-authentication-method
 import { UpdateAuthenticationMethodDto } from './dto/update-authentication-method.dto';
 
 @ApiTags('identity-authentication-methods')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/authentication-methods')
 export class AuthenticationMethodsController {
   constructor(private readonly authenticationMethodsService: AuthenticationMethodsService) {}

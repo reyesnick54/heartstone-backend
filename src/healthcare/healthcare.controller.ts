@@ -4,6 +4,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type ActorContext } from '../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../identity/auth/decorators/current-actor.decorator';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { HealthcareConsentService } from './consent/healthcare-consent.service';
 import { HealthDataRegistryService } from './data-registry/health-data-registry.service';
 import { HEALTHCARE_API_TAG } from './healthcare.constants';
@@ -13,6 +15,14 @@ import { ResearchDataGovernanceService } from './research/research-data-governan
 import { ClinicalSafetyService } from './safety/clinical-safety.service';
 
 @ApiTags(HEALTHCARE_API_TAG)
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Patient-owned healthcare profile or provider policy-scoped access",
+  authorityRequirement: "HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority",
+  actorSource: "Session identity with patient or governed provider context",
+  primarySecurityInvariant: "Program discovery != medical recommendation; application != clinical authorization",
+})
 @Controller('api/v1/healthcare')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

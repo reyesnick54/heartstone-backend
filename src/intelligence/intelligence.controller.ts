@@ -13,6 +13,8 @@ import { IdentityType } from '@prisma/client';
 
 import { type ActorContext } from '../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../identity/auth/decorators/current-actor.decorator';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
@@ -42,6 +44,14 @@ const INTELLIGENCE_ACTOR_GUARDS = [IntelligenceSuspendedAiGuard] as const;
 
 @ApiTags('intelligence')
 @UseInterceptors(IntelligenceForbiddenClientFieldsInterceptor)
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Analytics, metrics, and command-console institutional scope",
+  authorityRequirement: "Intelligence module access; analytics do not create authority",
+  actorSource: "Authenticated institutional analyst or administrator",
+  primarySecurityInvariant: "Analytics and AI outputs are advisory, not official decisions",
+})
 @Controller('intelligence')
 export class IntelligenceController {
   constructor(

@@ -15,6 +15,8 @@ import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { CancelServiceAppointmentDto } from '../../scheduling/service-appointments/dto/cancel-service-appointment.dto';
 import { RescheduleServiceAppointmentDto } from '../../scheduling/service-appointments/dto/reschedule-service-appointment.dto';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CitizenActionsResponseDto } from './dto/citizen-action.dto';
 import {
@@ -36,6 +38,14 @@ import { CitizenHomeService } from './services/citizen-home.service';
 import { CitizenMeService } from './services/citizen-me.service';
 
 @ApiTags('citizen-experience')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience/citizen')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

@@ -6,6 +6,8 @@ import { CurrentActor } from '../../../identity/auth/decorators/current-actor.de
 import { CurrentSession } from '../../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../../security/route-class.enum';
 import { ExperienceActionsResponseDto } from '../dto/experience-action.dto';
 import { ExperienceInboxResponseDto } from '../dto/experience-inbox.dto';
 import { ExperienceNavigationResponseDto } from '../dto/experience-navigation.dto';
@@ -28,6 +30,14 @@ import { ExperienceResponseMetadataService } from '../services/experience-respon
 import { UnifiedExperienceSearchService } from '../services/unified-experience-search.service';
 
 @ApiTags('experience')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

@@ -10,6 +10,8 @@ import {
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
 import { ClientIdentitySubstitutionGuard } from '../../identity/auth/guards/client-identity-substitution.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
@@ -28,6 +30,14 @@ const COMMAND_CONSOLE_GUARDS = [
 @ApiTags('intelligence/command-console')
 @ApiBearerAuth()
 @UseGuards(...COMMAND_CONSOLE_GUARDS)
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Analytics, metrics, and command-console institutional scope",
+  authorityRequirement: "Intelligence module access; analytics do not create authority",
+  actorSource: "Authenticated institutional analyst or administrator",
+  primarySecurityInvariant: "Analytics and AI outputs are advisory, not official decisions",
+})
 @Controller('intelligence/command-console')
 export class CommandConsoleController {
   constructor(

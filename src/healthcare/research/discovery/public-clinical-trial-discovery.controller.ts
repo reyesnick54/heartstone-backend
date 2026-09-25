@@ -2,10 +2,20 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ClinicalTrialRecruitmentStatus } from '@prisma/client';
 
+import { ControllerRouteAccess } from '../../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../../security/decorators/public.decorator';
+import { RouteClass } from '../../../security/route-class.enum';
 import { ClinicalTrialDiscoveryService } from './clinical-trial-discovery.service';
 
 @ApiTags('public-clinical-trials')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Patient-owned healthcare profile or provider policy-scoped access",
+  authorityRequirement: "HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority",
+  actorSource: "Session identity with patient or governed provider context",
+  primarySecurityInvariant: "Program discovery != medical recommendation; application != clinical authorization",
+})
 @Controller('public/clinical-trials')
 export class PublicClinicalTrialDiscoveryController {
   constructor(private readonly discoveryService: ClinicalTrialDiscoveryService) {}

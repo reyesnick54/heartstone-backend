@@ -13,6 +13,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { SCHEDULING_API_TAG } from '../scheduling.constants';
 import { CancelServiceAppointmentDto } from './dto/cancel-service-appointment.dto';
 import { CompleteServiceAppointmentDto } from './dto/complete-service-appointment.dto';
@@ -22,6 +24,14 @@ import { ServiceAppointmentsService } from './service-appointments.service';
 
 @ApiTags(SCHEDULING_API_TAG)
 @ApiBearerAuth()
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('scheduling/appointments')
 @UseGuards(SessionAuthGuard)
 export class ServiceAppointmentsController {

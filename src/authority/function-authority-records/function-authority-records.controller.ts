@@ -15,6 +15,8 @@ import { AuthorityActionType, FunctionAuthorityLifecycleStatus } from '@prisma/c
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { ConsequentialAction } from '../consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../consequential-action/consequential-action.guard';
 import { resolveFunctionFromRouteParam } from '../consequential-action/consequential-action-resolvers';
@@ -25,6 +27,14 @@ import { FunctionActivationService } from './function-activation.service';
 import { FunctionAuthorityRecordsService } from './function-authority-records.service';
 
 @ApiTags('authority-functions')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Authority configuration or evaluated institutional action scope",
+  authorityRequirement: "Explicit function authority evaluation for consequential actions",
+  actorSource: "Session identity with officeholder linkage when evaluating authority",
+  primarySecurityInvariant: "Technical permission does not create legal authority",
+})
 @Controller('authority/functions')
 export class FunctionAuthorityRecordsController {
   constructor(

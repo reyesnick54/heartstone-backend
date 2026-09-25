@@ -19,6 +19,8 @@ import {
 import { CurrentSession } from '../../../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../../security/route-class.enum';
 import { ActorContextService } from '../../../security/services/actor-context.service';
 import { CaseAccessService } from '../../../security/services/case-access.service';
 import { CaseCommunicationService } from './case-communication.service';
@@ -30,6 +32,14 @@ import { CreateCaseCommunicationDto } from './dto/create-case-communication.dto'
 import { CreateCaseMilestoneDto } from './dto/create-case-milestone.dto';
 
 @ApiTags('cases')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('cases')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

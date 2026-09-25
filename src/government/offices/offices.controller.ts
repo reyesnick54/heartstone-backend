@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { OfficeResponseDto } from './dto/office-response.dto';
 import { QueryOfficesDto } from './dto/query-offices.dto';
@@ -8,6 +10,14 @@ import { UpdateOfficeDto } from './dto/update-office.dto';
 import { OfficesService } from './offices.service';
 
 @ApiTags('offices')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government structure administration",
+  authorityRequirement: "Institutional configuration authority (not self-granted)",
+  actorSource: "Authenticated institutional administrator",
+  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+})
 @Controller('offices')
 export class OfficesController {
   constructor(private readonly service: OfficesService) {}

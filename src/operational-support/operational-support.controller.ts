@@ -10,6 +10,8 @@ import {
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { CommunicationDeliveryService } from './communications/communication-delivery.service';
 import { CommunicationMessageService } from './communications/communication-message.service';
 import { CommunicationTemplateService } from './communications/communication-template.service';
@@ -34,6 +36,14 @@ import { MafIndexingService } from './maf/maf-indexing.service';
 import { OPERATIONAL_SUPPORT_BOUNDARY_DISCLAIMER } from './operational-support.constants';
 
 @ApiTags('operational-support')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Operational support and platform administration",
+  authorityRequirement: "Restricted platform operations authority",
+  actorSource: "Authenticated platform administrator",
+  primarySecurityInvariant: "Operational tooling cannot mutate authoritative government decisions",
+})
 @Controller('operational-support')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

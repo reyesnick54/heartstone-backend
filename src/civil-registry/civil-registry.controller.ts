@@ -11,6 +11,8 @@ import { ConsequentialActionGuard } from '../authority/consequential-action/cons
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { CivilRegistryVitalRecordCertificateService } from './certificates/civil-registry-vital-record-certificate.service';
 import {
   CIVIL_REGISTRY_API_TAG,
@@ -24,6 +26,14 @@ import { CivilRegistryReadService } from './queries/civil-registry-read.service'
 import { CivilRegistryVitalRecordRegistrationService } from './registration/civil-registry-vital-record-registration.service';
 
 @ApiTags(CIVIL_REGISTRY_API_TAG)
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('civil-registry')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

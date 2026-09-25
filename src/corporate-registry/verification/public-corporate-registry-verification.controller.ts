@@ -1,7 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CORPORATE_REGISTRY_API_TAG } from '../corporate-registry.constants';
 import {
   type PublicCorporateRegistryVerificationResponse,
@@ -10,6 +12,14 @@ import {
 
 @ApiTags(CORPORATE_REGISTRY_API_TAG)
 @Public()
+@ControllerRouteAccess({
+  routeClass: RouteClass.SYSTEM_HEALTH,
+  authenticationRequired: false,
+  scopeRequirement: "Process and dependency health probes",
+  authorityRequirement: "None",
+  actorSource: "Anonymous monitor",
+  primarySecurityInvariant: "Health endpoints expose no protected domain data",
+})
 @Controller('public/corporate-registry')
 export class PublicCorporateRegistryVerificationController {
   constructor(private readonly verificationService: PublicCorporateRegistryVerificationService) {}

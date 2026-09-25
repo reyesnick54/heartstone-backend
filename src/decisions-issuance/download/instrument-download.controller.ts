@@ -14,11 +14,21 @@ import { type Response } from 'express';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { InstrumentDownloadService } from './instrument-download.service';
 
 @ApiTags('instrument-downloads')
 @ApiBearerAuth()
 @UseGuards(SessionAuthGuard)
+@ControllerRouteAccess({
+  routeClass: RouteClass.CONSEQUENTIAL_AUTHORITY_CONTROLLED,
+  authenticationRequired: true,
+  scopeRequirement: "Issuance readiness and official instrument issuance scope",
+  authorityRequirement: "Function authority ISSUE evaluation via ConsequentialActionGuard",
+  actorSource: "Session identity with evaluated issuer authority context",
+  primarySecurityInvariant: "Issuance requires explicit authority evaluation, not authentication alone",
+})
 @Controller('instruments')
 export class InstrumentDownloadController {
   constructor(private readonly downloadService: InstrumentDownloadService) {}

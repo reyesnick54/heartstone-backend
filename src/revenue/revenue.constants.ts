@@ -42,6 +42,10 @@ export const REVENUE_REASON_CODES = {
   AUDIT_NOT_VIOLATION: 'AUDIT_NOT_VIOLATION',
 } as const;
 
+export const REVENUE_AUTHORITY_FUNCTION_CODES = {
+  TAX_ASSESSMENT_ISSUE: 'REVENUE-TAX-ASSESSMENT-ISSUE',
+} as const;
+
 export const TAX_CLEARANCE_REQUIRED_CONDITION_KEYS = [
   'filingCurrent',
   'noOutstandingBalance',

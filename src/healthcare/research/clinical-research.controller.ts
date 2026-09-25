@@ -1,7 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ClinicalResearchActorPersona } from '@prisma/client';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthorityActionType, ClinicalResearchActorPersona } from '@prisma/client';
 
+import { ConsequentialAction } from '../../authority/consequential-action/consequential-action.decorator';
+import { ConsequentialActionGuard } from '../../authority/consequential-action/consequential-action.guard';
+import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
+import { CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES } from './clinical-research.constants';
 import { ClinicalTrialConsentService } from './consent/clinical-trial-consent.service';
 import { ClinicalTrialEnrollmentService } from './enrollment/clinical-trial-enrollment.service';
 import { ResearchEthicsApprovalService } from './ethics/research-ethics-approval.service';
@@ -11,7 +17,17 @@ import { ClinicalTrialProtocolVersionService } from './protocol/clinical-trial-p
 import { ClinicalTrialWithdrawalService } from './withdrawal/clinical-trial-withdrawal.service';
 
 @ApiTags('clinical-research')
-@Controller('api/v1/clinical-research')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Patient-owned healthcare profile or provider policy-scoped access",
+  authorityRequirement: "HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority",
+  actorSource: "Session identity with patient or governed provider context",
+  primarySecurityInvariant: "Program discovery != medical recommendation; application != clinical authorization",
+})
+@Controller('clinical-research')
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
+@ApiBearerAuth()
 export class ClinicalResearchController {
   constructor(
     private readonly matchingService: PreliminaryTrialMatchingService,
@@ -47,6 +63,10 @@ export class ClinicalResearchController {
   }
 
   @Post('ethics-approvals/versions')
+  @ConsequentialAction({
+    action: AuthorityActionType.APPROVE,
+    functionCode: CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES.ETHICS_APPROVAL,
+  })
   recordEthicsVersion(
     @Body()
     body: Parameters<ResearchEthicsApprovalService['recordEthicsApprovalVersion']>[0],

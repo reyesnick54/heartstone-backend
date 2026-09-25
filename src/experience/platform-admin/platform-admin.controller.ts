@@ -9,6 +9,8 @@ import {
 } from '@nestjs/swagger';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CurrentPlatformAdminContext } from './decorators/current-platform-admin-context.decorator';
 import {
   PlatformAdminAvailableActionsResponseDto,
@@ -24,6 +26,14 @@ import { type ResolvedPlatformAdminContext } from './types/platform-admin-contex
 
 @ApiTags(PLATFORM_ADMIN_EXPERIENCE_API_TAG)
 @ApiBearerAuth()
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience/platform-admin')
 @UseGuards(SessionAuthGuard, PlatformAdminExperienceGuard)
 export class PlatformAdminController {
