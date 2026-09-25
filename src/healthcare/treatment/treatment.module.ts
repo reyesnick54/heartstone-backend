@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../database/database.module';
 import { SessionsModule } from '../../identity/sessions/sessions.module';
-import { HealthcareDataAccessPolicyService } from './access/healthcare-data-access-policy.service';
+import { TreatmentPatientDataAccessPolicyService } from './access/healthcare-data-access-policy.service';
 import { TreatmentExperienceBoundaryService } from './boundary/treatment-experience-boundary.service';
 import { TreatmentBoundaryService } from './common/treatment-boundary.service';
 import { TreatmentEnrollmentService } from './enrollment/treatment-enrollment.service';
@@ -19,7 +19,7 @@ import { TreatmentEligibilityReviewService } from './reviews/treatment-eligibili
   providers: [
     TreatmentBoundaryService,
     TreatmentExperienceBoundaryService,
-    HealthcareDataAccessPolicyService,
+    TreatmentPatientDataAccessPolicyService,
     HealthcareScopeService,
     CitizenHealthcareProjectionService,
     ProviderHealthcareProjectionService,
@@ -29,7 +29,7 @@ import { TreatmentEligibilityReviewService } from './reviews/treatment-eligibili
   exports: [
     TreatmentBoundaryService,
     TreatmentExperienceBoundaryService,
-    HealthcareDataAccessPolicyService,
+    TreatmentPatientDataAccessPolicyService,
     HealthcareScopeService,
     CitizenHealthcareProjectionService,
     ProviderHealthcareProjectionService,

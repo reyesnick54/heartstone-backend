@@ -16,10 +16,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { type Response } from 'express';
 
+import { ActorContextService } from '../../identity/auth/context/actor-context.service';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { ActorContextService } from '../../security/services/actor-context.service';
 import { ForbiddenDocumentFieldsInterceptor } from '../common/forbidden-document-fields.interceptor';
 import { DocumentAccessService } from './document-access.service';
 import { DocumentAssociationsService } from './document-associations.service';
@@ -63,7 +63,7 @@ export class DocumentsController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.access.assertRecordMetadataAccess(id, {
       actorIdentityId: session.identityId,
       isOfficial: actor.hasActiveOfficeholderLink,
@@ -91,7 +91,7 @@ export class DocumentsController {
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) documentRecordId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.access.assertRecordMetadataAccess(documentRecordId, {
       actorIdentityId: session.identityId,
       isOfficial: actor.hasActiveOfficeholderLink,
@@ -104,7 +104,7 @@ export class DocumentsController {
     @CurrentSession() session: SessionContextDto,
     @Param('versionId', ParseUUIDPipe) versionId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.access.assertVersionMetadataAccess(versionId, {
       actorIdentityId: session.identityId,
       isOfficial: actor.hasActiveOfficeholderLink,
@@ -128,7 +128,7 @@ export class DocumentsController {
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @Res({ passthrough: false }) res: Response,
   ): Promise<void> {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     const result = await this.access.downloadVersion(versionId, {
       actorIdentityId: session.identityId,
       isOfficial: actor.hasActiveOfficeholderLink,
@@ -158,7 +158,7 @@ export class DocumentsController {
     @Query('targetType') targetType: string,
     @Query('targetId', ParseUUIDPipe) targetId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.access.assertAssociationTargetAccess(targetType, targetId, {
       actorIdentityId: session.identityId,
       isOfficial: actor.hasActiveOfficeholderLink,

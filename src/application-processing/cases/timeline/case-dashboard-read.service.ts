@@ -3,7 +3,7 @@ import { AuthorityActionType } from '@prisma/client';
 
 import { AuthorityEvaluationService } from '../../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../../database/prisma.service';
-import { ActorContextService } from '../../../security/services/actor-context.service';
+import { ActorContextService } from '../../../identity/auth/context/actor-context.service';
 import { CaseAccessService } from '../../../security/services/case-access.service';
 import { CaseEventService } from './case-event.service';
 import { CaseMilestoneService } from './case-milestone.service';
@@ -59,7 +59,7 @@ export class CaseDashboardReadService {
     actorIdentityId: string,
     actorOfficeholderId?: string,
   ): Promise<CaseDashboardReadModel> {
-    const actor = await this.actorContext.resolveFromIdentityId(actorIdentityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(actorIdentityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
 
     const caseRecord = await this.prisma.case.findUnique({
