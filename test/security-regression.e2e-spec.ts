@@ -35,7 +35,6 @@ import {
   authHeader,
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
-  loginAndGetSessionToken,
   provisionAuthenticatedIdentity,
   provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
@@ -335,8 +334,7 @@ describe('Security regression suite (e2e)', () => {
     });
 
     it('rejects service identities from master administrative file access', async () => {
-      const fixture = await seedApplicationProcessingFixture(app, prisma);
-      const { caseId } = await seedCaseFromApplication(prisma, foundation, fixture);
+      await seedApplicationProcessingFixture(app, prisma);
 
       const account = await prisma.userAccount.create({
         data: {
