@@ -35,6 +35,9 @@ describe('SubjectRecordAccessService', () => {
         {
           provide: PrismaService,
           useValue: {
+            session: {
+              findUnique: jest.fn().mockResolvedValue({ identityId: session.identityId }),
+            },
             representativeAuthority: { findMany: jest.fn().mockResolvedValue([]) },
             application: { findFirst: jest.fn().mockResolvedValue(null) },
           },

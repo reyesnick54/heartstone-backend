@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { ForbiddenException, type INestApplication,UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, type INestApplication, UnauthorizedException } from '@nestjs/common';
 import {
   AccountStatus,
   AuthorityClassification,
