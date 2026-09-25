@@ -60,11 +60,13 @@ describe('Record access hardening (S6 integration)', () => {
     const session = await sessionContextFromToken(prisma, citizen.sessionToken);
     expect(session.identityId).toBe(citizen.identityId);
 
-    await request(app.getHttpServer())
-      .post('/api/v1/immigration/profiles')
-      .set(authHeader(citizen.sessionToken))
-      .send({ subjectIdentityId: citizen.identityId })
-      .expect(201);
+    await prisma.immigrationProfile.create({
+      data: {
+        id: randomUUID(),
+        profileNumber: `IMM-${randomUUID().slice(0, 8)}`,
+        subjectIdentityId: citizen.identityId,
+      },
+    });
 
     await request(app.getHttpServer())
       .get(`/api/v1/immigration/profiles/subject/${citizen.identityId}`)

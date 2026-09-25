@@ -13,7 +13,7 @@ import { WorkPermitApplicationProfileService } from './work-permits/work-permit-
 import { WorkerProfileReferenceService } from './workers/worker-profile-reference.service';
 
 @ApiTags('labour')
-@Controller('api/v1/labour')
+@Controller('labour')
 export class LabourController {
   constructor(
     private readonly employerRegistryService: EmployerRegistryService,
