@@ -6,8 +6,8 @@ import {
   Prisma,
 } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
-import { SecurityAuditService } from '../../identity/audit/security-audit.service';
+import { PrismaService } from '../../../../database/prisma.service';
+import { SecurityAuditService } from '../../../../identity/audit/security-audit.service';
 import { CITIZEN_MESSAGE_ACKNOWLEDGMENT_DISCLAIMER } from '../citizen-experience.constants';
 import {
   CitizenAccessScope,
