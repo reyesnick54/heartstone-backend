@@ -8,6 +8,7 @@ import { type PrismaService } from '../src/database/prisma.service';
 import {
   authHeader,
   provisionAuthenticatedIdentity,
+  sessionContextFromToken,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -56,6 +57,8 @@ describe('Record access hardening (S6 integration)', () => {
       loginIdentifier: 'imm-self@test.gov',
       password: 'ImmSelf123!',
     });
+    const session = await sessionContextFromToken(prisma, citizen.sessionToken);
+    expect(session.identityId).toBe(citizen.identityId);
 
     await prisma.immigrationProfile.create({
       data: {

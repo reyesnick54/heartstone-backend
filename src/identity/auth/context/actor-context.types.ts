@@ -9,6 +9,8 @@ import {
   type SessionStatus,
 } from '@prisma/client';
 
+import { type AuthenticatedPrincipal } from '../domain/authenticated-principal';
+
 /**
  * Server-derived authenticated actor context.
  *
@@ -93,13 +95,10 @@ export interface InstitutionalCaseAccessActor {
   linkedInstitutionIds: string[];
 }
 
-export interface ActorContext {
-  identityId: string;
+export interface ActorContext extends AuthenticatedPrincipal {
   userAccountId: string | null;
-  personId: string | null;
-  sessionId: string;
   identityType: IdentityType;
-  assuranceLevel: AssuranceLevel;
+  personId: string | null;
 
   session: ActorContextSessionMetadata;
   organizationMemberships: ActorContextOrganizationMembership[];

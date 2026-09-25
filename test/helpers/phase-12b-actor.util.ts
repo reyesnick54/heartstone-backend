@@ -1,15 +1,16 @@
-import { type PrismaService } from '../../src/database/prisma.service';
-import { type AuthenticatedPrincipal } from '../../src/identity/auth/domain/authenticated-principal';
-import { sessionPrincipalForIdentity } from './identity-provisioning.fixture';
+import { AssuranceLevel } from '@prisma/client';
 
-export async function toDashboardActor(
-  prisma: PrismaService,
+import { type AuthenticatedPrincipal } from '../../src/identity/auth/domain/authenticated-principal';
+
+export function toDashboardActor(
   identityId: string,
+  sessionId: string,
   userAccountId?: string | null,
-): Promise<AuthenticatedPrincipal> {
-  const principal = await sessionPrincipalForIdentity(prisma, identityId);
-  if (userAccountId !== undefined) {
-    return { ...principal, userAccountId };
-  }
-  return principal;
+): AuthenticatedPrincipal {
+  return {
+    sessionId,
+    identityId,
+    userAccountId: userAccountId ?? null,
+    assuranceLevel: AssuranceLevel.MEDIUM,
+  };
 }

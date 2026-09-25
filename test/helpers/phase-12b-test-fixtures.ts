@@ -25,6 +25,7 @@ import {
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
+  sessionContextFromToken,
 } from './identity-provisioning.fixture';
 
 export interface Phase12BFixtureContext {
@@ -33,12 +34,16 @@ export interface Phase12BFixtureContext {
   departmentBId: string;
   executiveIdentityId: string;
   executiveSessionToken: string;
+  executiveSessionId: string;
   deptAIdentityId: string;
   deptASessionToken: string;
+  deptASessionId: string;
   deptBIdentityId: string;
   deptBSessionToken: string;
+  deptBSessionId: string;
   technicalAdminIdentityId: string;
   technicalAdminSessionToken: string;
+  technicalAdminSessionId: string;
   authoritativeRecordId: string;
   evidencePacketId: string;
   executiveDashboardId: string;
@@ -137,6 +142,19 @@ export async function seedPhase12BFixture(
     technicalAdminIdentity.id,
     'technical-admin@phase12b.test',
   );
+
+  const executiveSessionId = executiveSessionToken
+    ? (await sessionContextFromToken(prisma, executiveSessionToken)).sessionId
+    : '';
+  const deptASessionId = deptASessionToken
+    ? (await sessionContextFromToken(prisma, deptASessionToken)).sessionId
+    : '';
+  const deptBSessionId = deptBSessionToken
+    ? (await sessionContextFromToken(prisma, deptBSessionToken)).sessionId
+    : '';
+  const technicalAdminSessionId = technicalAdminSessionToken
+    ? (await sessionContextFromToken(prisma, technicalAdminSessionToken)).sessionId
+    : '';
 
   const linkIdentityToDepartmentOffice = async (
     identityId: string,
@@ -390,12 +408,16 @@ export async function seedPhase12BFixture(
     departmentBId: departmentB.id,
     executiveIdentityId: executiveIdentity.id,
     executiveSessionToken,
+    executiveSessionId,
     deptAIdentityId: deptAIdentity.id,
     deptASessionToken,
+    deptASessionId,
     deptBIdentityId: deptBIdentity.id,
     deptBSessionToken,
+    deptBSessionId,
     technicalAdminIdentityId: technicalAdminIdentity.id,
     technicalAdminSessionToken,
+    technicalAdminSessionId,
     authoritativeRecordId,
     evidencePacketId,
     executiveDashboardId: executiveDashboard.id,

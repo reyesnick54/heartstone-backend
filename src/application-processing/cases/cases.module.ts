@@ -1,8 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../../authority/authority.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { RecordsModule } from '../../records/records.module';
 import { ApplicationsModule } from '../applications/applications.module';
 import { ApplicationProcessingCommonModule } from '../common/application-processing-common.module';
@@ -28,14 +27,13 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
 @Module({
   imports: [
     ApplicationProcessingCommonModule,
-    SessionsModule,
+    SessionAuthGuardModule,
     AuthorityModule,
     RecordsModule,
     forwardRef(() => ApplicationsModule),
   ],
   controllers: [CasesController, CaseTimelineController],
   providers: [
-    SessionAuthGuard,
     CasesService,
     CaseFoundationService,
     CaseEventsService,

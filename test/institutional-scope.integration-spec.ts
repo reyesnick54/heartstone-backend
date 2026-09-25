@@ -17,7 +17,7 @@ import {
 import { ResourceAccessService } from '../src/institutional-scope/resource-access.service';
 import {
   provisionAuthenticatedIdentity,
-  sessionPrincipalForIdentity,
+  sessionContextFromToken,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
@@ -58,8 +58,7 @@ describe('Institutional scope enforcement (integration)', () => {
       displayName: `Scope ${loginSuffix}`,
     });
 
-    const session = await sessionPrincipalForIdentity(prisma, identity.identityId);
-    return { identityId: identity.identityId, sessionToken: identity.sessionToken, session };
+    return { identityId: identity.identityId, sessionToken: identity.sessionToken };
   }
 
   async function submitApplicationForApplicant(sessionToken: string) {
@@ -173,7 +172,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = await sessionPrincipalForIdentity(prisma, fixture.officialIdentityId);
+    const session = await sessionContextFromToken(prisma, fixture.officialSessionToken);
 
     const dashboardAccess = await resourceAccess.evaluateWithoutThrow({
       session,
@@ -221,8 +220,10 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
+    const session = await sessionContextFromToken(prisma, representative.sessionToken);
+
     const result = await resourceAccess.evaluateWithoutThrow({
-      session: representative.session,
+      session,
       resourceType: ScopedResourceType.APPLICATION,
       resourceId: application.id,
       intent: ScopeAccessIntent.VISIBILITY,
@@ -265,9 +266,11 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
+    const session = await sessionContextFromToken(prisma, representative.sessionToken);
+
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session: representative.session,
+        session,
         resourceType: ScopedResourceType.APPLICATION,
         resourceId: application.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -275,7 +278,7 @@ describe('Institutional scope enforcement (integration)', () => {
       }),
     ).resolves.toMatchObject({
       allowed: false,
-      reason: 'inactive_representative',
+      reason: 'representation_out_of_scope',
     });
   });
 
@@ -297,9 +300,11 @@ describe('Institutional scope enforcement (integration)', () => {
       data: { code: 'SCOPE-OTHER-ORG', name: 'Other Org' },
     });
 
+    const session = await sessionContextFromToken(prisma, member.sessionToken);
+
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session: member.session,
+        session,
         resourceType: ScopedResourceType.ORGANIZATION,
         resourceId: otherOrg.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -332,9 +337,11 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
+    const session = await sessionContextFromToken(prisma, actor.sessionToken);
+
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session: actor.session,
+        session,
         resourceType: ScopedResourceType.DASHBOARD,
         resourceId: dashboard.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -349,7 +356,7 @@ describe('Institutional scope enforcement (integration)', () => {
     const owner = await createCitizenSession('tech-admin-owner');
     const submitted = await submitApplicationForApplicant(owner.sessionToken);
 
-    const session = await sessionPrincipalForIdentity(prisma, fixture.officialIdentityId);
+    const session = await sessionContextFromToken(prisma, fixture.officialSessionToken);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({

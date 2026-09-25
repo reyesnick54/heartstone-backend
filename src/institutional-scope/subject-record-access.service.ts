@@ -63,7 +63,8 @@ export class SubjectRecordAccessService {
   ): Promise<void> {
     this.assertSessionDerivedIdentity(session);
 
-    if (session.identityId === subjectIdentityId) {
+    const accessorIdentityId = await this.resolveCanonicalSessionIdentityId(session);
+    if (accessorIdentityId === subjectIdentityId) {
       return;
     }
 
@@ -141,6 +142,19 @@ export class SubjectRecordAccessService {
   ): string {
     this.assertSessionDerivedIdentity(session, _deprecatedClientIdentityId);
     return session.identityId;
+  }
+
+  private async resolveCanonicalSessionIdentityId(session: SessionContextDto): Promise<string> {
+    if (!session.sessionId) {
+      return session.identityId;
+    }
+
+    const persisted = await this.prisma.session.findUnique({
+      where: { id: session.sessionId },
+      select: { identityId: true },
+    });
+
+    return persisted?.identityId ?? session.identityId;
   }
 
   private async resolveRepresentativeScope(identityId: string): Promise<{

@@ -121,6 +121,11 @@ export class ActorContextService {
       sessionId: session.id,
       identityType: identity.type,
       assuranceLevel: session.assuranceLevel,
+      authMethod: session.authMethod,
+      mfaSatisfied: session.mfaSatisfied,
+      authenticatedAt: session.authenticatedAt,
+      oidcProviderCode: session.oidcProviderCode,
+      isServicePrincipal: identity.type === IdentityType.SERVICE,
       session: {
         sessionId: session.id,
         status: session.status,

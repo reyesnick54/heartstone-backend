@@ -13,7 +13,7 @@ import { ResearchDataGovernanceService } from './research/research-data-governan
 import { ClinicalSafetyService } from './safety/clinical-safety.service';
 
 @ApiTags(HEALTHCARE_API_TAG)
-@Controller('api/v1/healthcare')
+@Controller('healthcare')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
 export class HealthcareController {

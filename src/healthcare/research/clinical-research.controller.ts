@@ -11,7 +11,7 @@ import { ClinicalTrialProtocolVersionService } from './protocol/clinical-trial-p
 import { ClinicalTrialWithdrawalService } from './withdrawal/clinical-trial-withdrawal.service';
 
 @ApiTags('clinical-research')
-@Controller('api/v1/clinical-research')
+@Controller('clinical-research')
 export class ClinicalResearchController {
   constructor(
     private readonly matchingService: PreliminaryTrialMatchingService,

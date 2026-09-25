@@ -125,7 +125,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: await toDashboardActor(prisma, fixture.technicalAdminIdentityId),
+        actor: toDashboardActor(fixture.technicalAdminIdentityId, fixture.technicalAdminSessionId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -175,7 +175,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       queryService.queryExecutiveConsole({
-        actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+        actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -189,7 +189,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+        actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -219,7 +219,11 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: await toDashboardActor(prisma, fixture.executiveIdentityId, userAccountId),
+        actor: toDashboardActor(
+          fixture.executiveIdentityId,
+          fixture.executiveSessionId,
+          userAccountId,
+        ),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,

@@ -4,7 +4,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PublicVehicleVerificationService } from '../verification/public-vehicle-verification.service';
 
 @ApiTags('transportation-public')
-@Controller('api/v1/transportation/public')
+@Controller('transportation/public')
 export class PublicVehicleVerificationController {
   constructor(private readonly verificationService: PublicVehicleVerificationService) {}
 

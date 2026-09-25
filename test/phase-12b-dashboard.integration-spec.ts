@@ -110,7 +110,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+        actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -127,7 +127,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
     await expect(
       queryService.queryDepartmentalConsole({
-        actor: await toDashboardActor(prisma, fixture.deptAIdentityId),
+        actor: toDashboardActor(fixture.deptAIdentityId, fixture.deptASessionId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -142,7 +142,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: await toDashboardActor(prisma, fixture.technicalAdminIdentityId),
+        actor: toDashboardActor(fixture.technicalAdminIdentityId, fixture.technicalAdminSessionId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.TECHNICAL_OPERATIONS,
@@ -160,7 +160,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
     );
 
     const response = await queryService.queryExecutiveConsole({
-      actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+      actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
       dashboardDefinitionId: fixture.executiveDashboardId,
       institutionId: fixture.institutionId,
       purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -215,7 +215,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
     }
 
     const response = await queryService.queryExecutiveConsole({
-      actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+      actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
       dashboardDefinitionId: fixture.executiveDashboardId,
       institutionId: fixture.institutionId,
       purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -284,7 +284,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
     });
 
     const snapshot = await snapshotService.captureSnapshot({
-      actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
+      actor: toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
       dashboardVersionId: fixture.executiveVersionId,
       projectionIds: [projection.id],
     });
@@ -294,7 +294,7 @@ describe('Phase 12B executive command console and departmental intelligence (int
 
     const replay = await snapshotService.replaySnapshot(
       snapshot.replayToken,
-      await toDashboardActor(prisma, fixture.executiveIdentityId),
+      toDashboardActor(fixture.executiveIdentityId, fixture.executiveSessionId),
     );
     expect(replay.payload).toEqual(snapshot.snapshotPayload);
     expect(replay.snapshotHash).toBe(snapshot.snapshotHash);

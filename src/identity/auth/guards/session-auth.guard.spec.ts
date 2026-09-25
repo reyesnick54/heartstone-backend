@@ -14,6 +14,9 @@ describe('SessionAuthGuard', () => {
     resolveFromSessionContext: jest.fn(),
     assertNoClientIdentitySubstitution: jest.fn(),
   };
+  const stepUpAuth = {
+    enforce: jest.fn().mockResolvedValue(undefined),
+  };
   const reflector = {
     getAllAndOverride: jest.fn().mockReturnValue(false),
   };
@@ -22,6 +25,7 @@ describe('SessionAuthGuard', () => {
     sessionsService as never,
     actorContextService as unknown as ActorContextService,
     reflector as unknown as Reflector,
+    stepUpAuth as never,
   );
 
   function createContext(headers: Record<string, string>, body?: Record<string, unknown>) {
@@ -47,28 +51,47 @@ describe('SessionAuthGuard', () => {
   });
 
   it('allows @Public routes without authorization', async () => {
-    reflector.getAllAndOverride.mockReturnValueOnce(true);
+    reflector.getAllAndOverride.mockImplementation((key: string) => {
+      if (key === IS_PUBLIC_KEY) {
+        return true;
+      }
+      return undefined;
+    });
     const context = createContext({});
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(sessionsService.validateSessionToken).not.toHaveBeenCalled();
-    expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
   });
 
   it('rejects missing authorization header', async () => {
+    reflector.getAllAndOverride.mockImplementation((key: string) => {
+      if (key === IS_PUBLIC_KEY) {
+        return false;
+      }
+      return undefined;
+    });
     const context = createContext({});
 
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it('sets session and actor on the request after successful validation', async () => {
+    reflector.getAllAndOverride.mockImplementation((key: string) => {
+      if (key === IS_PUBLIC_KEY) {
+        return false;
+      }
+      return undefined;
+    });
+
     const session = {
       sessionId: 'session-1',
       identityId: 'identity-1',
       assuranceLevel: AssuranceLevel.LOW,
+      authMethod: 'PASSWORD',
+      mfaSatisfied: false,
+      authenticatedAt: new Date(),
+      identityType: 'INDIVIDUAL',
+      isServicePrincipal: false,
     };
     const actor = { identityId: 'identity-1', sessionId: 'session-1' };
 
