@@ -16,9 +16,9 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { type Response } from 'express';
 
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
-import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ForbiddenDocumentFieldsInterceptor } from '../common/forbidden-document-fields.interceptor';
