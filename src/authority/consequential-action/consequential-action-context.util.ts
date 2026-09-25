@@ -60,9 +60,7 @@ export function readEvaluationResourceScope(body: Record<string, unknown>): {
   return {
     caseId: typeof body.caseId === 'string' ? body.caseId : undefined,
     evidencePacketVersionId:
-      typeof body.evidencePacketVersionId === 'string'
-        ? body.evidencePacketVersionId
-        : undefined,
+      typeof body.evidencePacketVersionId === 'string' ? body.evidencePacketVersionId : undefined,
     decisionReadinessAssessmentId:
       typeof body.decisionReadinessAssessmentId === 'string'
         ? body.decisionReadinessAssessmentId
@@ -71,8 +69,6 @@ export function readEvaluationResourceScope(body: Record<string, unknown>): {
       typeof body.transactionAmount === 'number' ? body.transactionAmount : undefined,
     scopeValue: typeof body.scopeValue === 'string' ? body.scopeValue : undefined,
     externalDataAccessOnly:
-      typeof body.externalDataAccessOnly === 'boolean'
-        ? body.externalDataAccessOnly
-        : undefined,
+      typeof body.externalDataAccessOnly === 'boolean' ? body.externalDataAccessOnly : undefined,
   };
 }

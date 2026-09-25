@@ -1,9 +1,5 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import {
-  AuthorityActionType,
-  DecisionParticipantRole,
-  InstitutionalActType,
-} from '@prisma/client';
+import { AuthorityActionType, DecisionParticipantRole, InstitutionalActType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { AuthorityFactsResolver } from './authority-facts-resolver.service';

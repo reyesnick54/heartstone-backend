@@ -73,10 +73,7 @@ export class PermissionsGuard implements CanActivate {
       );
     }
 
-    const requestScope = resolveRequestPermissionScope(
-      permissionMetadata.scope,
-      request.params,
-    );
+    const requestScope = resolveRequestPermissionScope(permissionMetadata.scope, request.params);
 
     const result = await this.evaluation.evaluate({
       session,

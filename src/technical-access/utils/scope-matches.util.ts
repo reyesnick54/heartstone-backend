@@ -26,22 +26,17 @@ export function assignmentScopeMatchesRequest(
   switch (assignment.scopeType) {
     case TechnicalAccessScopeType.JURISDICTION:
       return (
-        !requestScope.jurisdictionId ||
-        assignment.jurisdictionId === requestScope.jurisdictionId
+        !requestScope.jurisdictionId || assignment.jurisdictionId === requestScope.jurisdictionId
       );
     case TechnicalAccessScopeType.INSTITUTION:
-      return (
-        !requestScope.institutionId || assignment.institutionId === requestScope.institutionId
-      );
+      return !requestScope.institutionId || assignment.institutionId === requestScope.institutionId;
     case TechnicalAccessScopeType.GOVERNMENT_BODY:
       return (
         !requestScope.governmentBodyId ||
         assignment.governmentBodyId === requestScope.governmentBodyId
       );
     case TechnicalAccessScopeType.DEPARTMENT:
-      return (
-        !requestScope.departmentId || assignment.departmentId === requestScope.departmentId
-      );
+      return !requestScope.departmentId || assignment.departmentId === requestScope.departmentId;
     case TechnicalAccessScopeType.OFFICE:
       return !requestScope.officeId || assignment.officeId === requestScope.officeId;
     default:
@@ -52,9 +47,9 @@ export function assignmentScopeMatchesRequest(
 function hasAnyScopeId(scope: RequestPermissionScope): boolean {
   return Boolean(
     scope.jurisdictionId ??
-      scope.institutionId ??
-      scope.governmentBodyId ??
-      scope.departmentId ??
-      scope.officeId,
+    scope.institutionId ??
+    scope.governmentBodyId ??
+    scope.departmentId ??
+    scope.officeId,
   );
 }

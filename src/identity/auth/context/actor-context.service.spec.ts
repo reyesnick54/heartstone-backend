@@ -353,7 +353,9 @@ describe('ActorContextService', () => {
 
     await expect(
       service.resolveBoundAppointment(actor, { appointmentId: 'appt-b' }),
-    ).rejects.toThrow('Appointment belongs to a different officeholder than the authenticated actor');
+    ).rejects.toThrow(
+      'Appointment belongs to a different officeholder than the authenticated actor',
+    );
   });
 
   it('resolves a valid bound appointment for the authenticated actor', async () => {

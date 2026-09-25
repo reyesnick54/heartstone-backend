@@ -76,10 +76,14 @@ export class StudentEducationProfileService {
       return profile;
     }
 
-    await this.subjectRecordAccess.assertSubjectIdentityVisible(session, profile.studentIdentityId, {
-      maskEnumeration: true,
-      representativeAuthorityId: query.representativeAuthorityId,
-    });
+    await this.subjectRecordAccess.assertSubjectIdentityVisible(
+      session,
+      profile.studentIdentityId,
+      {
+        maskEnumeration: true,
+        representativeAuthorityId: query.representativeAuthorityId,
+      },
+    );
 
     await this.subjectRecordAccess.assertScopedResourceVisibility(
       session,

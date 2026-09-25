@@ -43,10 +43,7 @@ export class CaseAccessService {
     }
   }
 
-  async assertOfficialInstitutionalAccess(
-    caseId: string,
-    actor: CaseAccessActor,
-  ): Promise<void> {
+  async assertOfficialInstitutionalAccess(caseId: string, actor: CaseAccessActor): Promise<void> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
       select: { responsibleInstitutionId: true },
