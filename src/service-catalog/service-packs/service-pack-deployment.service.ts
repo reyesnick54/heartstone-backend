@@ -14,6 +14,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ServicePackCanonicalGovernanceService } from '../../service-packs/common/service-pack-canonical-governance.service';
 import { ServicePackAcceptanceService } from '../../service-packs/governance/service-pack-acceptance.service';
 import { buildServicePackConfigurationFingerprintFromManifest } from './service-pack-configuration-fingerprint.util';
 import { SERVICE_PACK_DEPLOYMENT_REASON_CODES } from './service-pack-deployment.constants';
@@ -33,6 +34,7 @@ export class ServicePackDeploymentService {
     private readonly prisma: PrismaService,
     private readonly auditService: ServicePackDeploymentAuditService,
     private readonly governanceAcceptance: ServicePackAcceptanceService,
+    private readonly canonicalGovernance: ServicePackCanonicalGovernanceService,
   ) {}
 
   async acceptServicePackVersion(
@@ -107,6 +109,11 @@ export class ServicePackDeploymentService {
   async deploy(request: ServicePackDeployRequest): Promise<ServicePackDeploymentResult> {
     const deployment = await this.loadDeployment(request.deploymentId);
     const version = await this.loadServicePackVersion(deployment.servicePackVersionId);
+    await this.canonicalGovernance.assertPackRegistered(version.servicePackId);
+    await this.canonicalGovernance.assertVersionBelongsToPack(
+      version.servicePackId,
+      deployment.servicePackVersionId,
+    );
     const manifest = this.parseManifest(version.manifest, version.id, version.version);
 
     if (deployment.status !== ServicePackDeploymentStatus.DEPLOYMENT_READY) {

@@ -16,10 +16,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ActorContextService } from '../../../identity/auth/context/actor-context.service';
 import { CurrentSession } from '../../../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
-import { ActorContextService } from '../../../security/services/actor-context.service';
 import { CaseAccessService } from '../../../security/services/case-access.service';
 import { CaseCommunicationService } from './case-communication.service';
 import { CaseDashboardReadService } from './case-dashboard-read.service';
@@ -51,7 +51,7 @@ export class CaseTimelineController {
     @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.caseEventService.listOfficialTimeline(caseId);
   }
@@ -73,7 +73,7 @@ export class CaseTimelineController {
     @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.communicationService.listOfficialCommunications(caseId);
   }
@@ -96,7 +96,7 @@ export class CaseTimelineController {
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseCommunicationDto,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertApplicantOrOfficialAccess(caseId, actor);
     this.actorContext.assertActorIdentityMatchesSession(
       session.identityId,
@@ -127,7 +127,7 @@ export class CaseTimelineController {
     @CurrentSession() session: SessionContextDto,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.listForCase(caseId);
   }
@@ -140,7 +140,7 @@ export class CaseTimelineController {
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseMilestoneDto,
   ) {
-    const actor = await this.actorContext.resolveFromIdentityId(session.identityId);
+    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.create({
       caseId,

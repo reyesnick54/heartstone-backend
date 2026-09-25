@@ -8,7 +8,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { HealthcareDataAccessPolicyService } from './access/healthcare-data-access-policy.service';
+import { TreatmentPatientDataAccessPolicyService } from './access/healthcare-data-access-policy.service';
 import { TreatmentBoundaryService } from './common/treatment-boundary.service';
 import { TreatmentEnrollmentService } from './enrollment/treatment-enrollment.service';
 import { TreatmentEligibilityReviewService } from './reviews/treatment-eligibility-review.service';
@@ -117,23 +117,23 @@ describe('Treatment must-fail gates', () => {
     });
   });
 
-  describe('HealthcareDataAccessPolicyService', () => {
+  describe('TreatmentPatientDataAccessPolicyService', () => {
     const prisma = {
       treatmentPatientDataAccessGrant: { findFirst: jest.fn() },
       treatmentEnrollment: { findUnique: jest.fn() },
     };
 
-    let access: HealthcareDataAccessPolicyService;
+    let access: TreatmentPatientDataAccessPolicyService;
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
         providers: [
-          HealthcareDataAccessPolicyService,
+          TreatmentPatientDataAccessPolicyService,
           TreatmentBoundaryService,
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();
-      access = module.get(HealthcareDataAccessPolicyService);
+      access = module.get(TreatmentPatientDataAccessPolicyService);
       jest.clearAllMocks();
     });
 
