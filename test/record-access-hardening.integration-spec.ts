@@ -58,17 +58,16 @@ describe('Record access hardening (S6 integration)', () => {
       password: 'ImmSelf123!',
     });
     const session = await sessionContextFromToken(prisma, citizen.sessionToken);
-
-    await prisma.immigrationProfile.create({
-      data: {
-        id: randomUUID(),
-        profileNumber: `IMM-${randomUUID().slice(0, 8)}`,
-        subjectIdentityId: session.identityId,
-      },
-    });
+    expect(session.identityId).toBe(citizen.identityId);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/immigration/profiles/subject/${session.identityId}`)
+      .post('/api/v1/immigration/profiles')
+      .set(authHeader(citizen.sessionToken))
+      .send({ subjectIdentityId: citizen.identityId })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get(`/api/v1/immigration/profiles/subject/${citizen.identityId}`)
       .set(authHeader(citizen.sessionToken))
       .expect(200);
   });
