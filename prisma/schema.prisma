@@ -148,6 +148,7 @@ model Jurisdiction {
   publicSafetyOfficialNotices         PublicSafetyOfficialNotice[]
   patientHealthcareProfiles           PatientHealthcareProfile[]
   treatmentPrograms                   TreatmentProgram[]
+  technicalRoleAssignments            TechnicalRoleAssignment[]
 
   @@map("jurisdictions")
 }
@@ -194,6 +195,7 @@ model Institution {
   dashboardDefinitions                  DashboardDefinition[]
   dashboardAccessPolicies               DashboardAccessPolicy[]
   platformAdministrativeAccessPolicies  PlatformAdministrativeAccessPolicy[]
+  technicalRoleAssignments              TechnicalRoleAssignment[]
   dashboardStatusDictionaryEntries      DashboardStatusDictionaryEntry[]
   dashboardIndicatorProjections         DashboardIndicatorProjection[]
   strategicProjectProfiles              StrategicProjectProfile[]
@@ -253,7 +255,8 @@ model GovernmentBody {
   status        StructuralLifecycleStatus @default(ACTIVE)
   createdAt     DateTime                  @default(now())
   updatedAt     DateTime                  @updatedAt
-  institution   Institution               @relation(fields: [institutionId], references: [id])
+  institution              Institution               @relation(fields: [institutionId], references: [id])
+  technicalRoleAssignments TechnicalRoleAssignment[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -293,6 +296,7 @@ model Department {
   serviceAppointments                  ServiceAppointment[]
   developmentProjects                  DevelopmentProject[]
   publicSafetyEngagements              PublicSafetyEngagement[]
+  technicalRoleAssignments             TechnicalRoleAssignment[]
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -317,6 +321,7 @@ model Office {
   masterFilesAsAdministrativeOwner MasterAdministrativeFile[]    @relation("MasterFileAdministrativeOwner")
   masterFilesAsRecordsCustodian    MasterAdministrativeFile[]    @relation("MasterFileRecordsCustodian")
   continuingObligationReviews      ContinuingObligation[]        @relation("ObligationReviewingOffice")
+  technicalRoleAssignments         TechnicalRoleAssignment[]
 
   @@unique([departmentId, code])
   @@index([departmentId])
@@ -619,6 +624,9 @@ enum SecurityAuditEventType {
   SCOPE_ACCESS_DENIED
   PLATFORM_ADMIN_ACCESS_GRANTED
   PLATFORM_ADMIN_ACCESS_DENIED
+  TECHNICAL_PERMISSION_GRANTED
+  TECHNICAL_PERMISSION_DENIED
+  TECHNICAL_ROLE_ASSIGNED
 }
 
 model Person {
@@ -943,6 +951,8 @@ model Identity {
   treatmentPatientDataAccessGrantsAsGrantee        TreatmentPatientDataAccessGrant[]    @relation("TreatmentPatientDataAccessGrantee")
   treatmentPatientDataAccessGrantsAsPatientSubject TreatmentPatientDataAccessGrant[]    @relation("TreatmentPatientDataAccessPatientSubject")
   treatmentProgramProviderLinks                    TreatmentProgramProvider[]           @relation("TreatmentProgramProviderIdentity")
+  technicalRoleAssignments                         TechnicalRoleAssignment[]
+  technicalAccessAuditEvents                       TechnicalAccessAuditEvent[]
 
   @@index([userAccountId])
   @@index([personId])
@@ -1118,6 +1128,133 @@ model IdentityOfficeholderLink {
   @@index([identityId])
   @@index([officeholderId])
   @@map("identity_officeholder_links")
+}
+
+enum TechnicalAccessScopeType {
+  PLATFORM
+  JURISDICTION
+  INSTITUTION
+  GOVERNMENT_BODY
+  DEPARTMENT
+  OFFICE
+}
+
+enum TechnicalAccessLevel {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+enum TechnicalAccessAuditResult {
+  GRANTED
+  DENIED_NO_PERMISSION
+  DENIED_SCOPE
+  DENIED_ADMINISTRATIVE_DEFAULT
+  DENIED_ACCOUNT_INACTIVE
+}
+
+model TechnicalPermission {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  description String?
+  domain      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  rolePermissions        TechnicalRolePermission[]
+  accessLevelPermissions TechnicalAccessLevelPermission[]
+
+  @@index([domain])
+  @@map("technical_permissions")
+}
+
+model TechnicalRole {
+  id           String                @id @default(uuid()) @db.Uuid
+  code         String                @unique
+  name         String
+  description  String?
+  accessLevel  TechnicalAccessLevel?
+  isSystemRole Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  permissions  TechnicalRolePermission[]
+  assignments  TechnicalRoleAssignment[]
+
+  @@map("technical_roles")
+}
+
+model TechnicalRolePermission {
+  id           String              @id @default(uuid()) @db.Uuid
+  roleId       String              @db.Uuid
+  permissionId String              @db.Uuid
+  createdAt    DateTime            @default(now())
+  role         TechnicalRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   TechnicalPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("technical_role_permissions")
+}
+
+model TechnicalRoleAssignment {
+  id               String                   @id @default(uuid()) @db.Uuid
+  identityId       String                   @db.Uuid
+  roleId           String                   @db.Uuid
+  scopeType        TechnicalAccessScopeType @default(PLATFORM)
+  jurisdictionId   String?                  @db.Uuid
+  institutionId    String?                  @db.Uuid
+  governmentBodyId String?                  @db.Uuid
+  departmentId     String?                  @db.Uuid
+  officeId         String?                  @db.Uuid
+  effectiveFrom    DateTime?
+  effectiveUntil   DateTime?
+  assignedByIdentityId String?              @db.Uuid
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  identity         Identity                 @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  role             TechnicalRole            @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  jurisdiction     Jurisdiction?            @relation(fields: [jurisdictionId], references: [id])
+  institution      Institution?             @relation(fields: [institutionId], references: [id])
+  governmentBody   GovernmentBody?          @relation(fields: [governmentBodyId], references: [id])
+  department       Department?              @relation(fields: [departmentId], references: [id])
+  office           Office?                  @relation(fields: [officeId], references: [id])
+
+  @@index([identityId])
+  @@index([roleId])
+  @@index([scopeType])
+  @@index([institutionId])
+  @@map("technical_role_assignments")
+}
+
+model TechnicalAccessLevelPermission {
+  id           String                @id @default(uuid()) @db.Uuid
+  accessLevel  TechnicalAccessLevel
+  permissionId String                @db.Uuid
+  createdAt    DateTime              @default(now())
+  permission   TechnicalPermission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([accessLevel, permissionId])
+  @@map("technical_access_level_permissions")
+}
+
+model TechnicalAccessAuditEvent {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  identityId           String                     @db.Uuid
+  sessionId            String?                    @db.Uuid
+  permissionCode       String?
+  endpoint             String
+  accessResult         TechnicalAccessAuditResult
+  scopeType            TechnicalAccessScopeType?
+  scopeInstitutionId   String?                    @db.Uuid
+  metadata             Json                       @default("{}")
+  createdAt            DateTime                   @default(now())
+  identity             Identity                   @relation(fields: [identityId], references: [id])
+
+  @@index([identityId])
+  @@index([accessResult])
+  @@index([createdAt])
+  @@map("technical_access_audit_events")
 }
 
 model SecurityAuditEvent {

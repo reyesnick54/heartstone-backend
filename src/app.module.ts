@@ -47,6 +47,7 @@ import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SocialProtectionModule } from './social-protection/social-protection.module';
 import { SystemModule } from './system/system.module';
+import { TechnicalAccessModule } from './technical-access/technical-access.module';
 import { TransportationModule } from './transportation/transportation.module';
 
 @Module({
@@ -62,6 +63,7 @@ import { TransportationModule } from './transportation/transportation.module';
     }),
     LoggerModule.forRoot(createPinoConfig()),
     SecurityModule,
+    TechnicalAccessModule,
     DatabaseModule,
     RedisModule,
     HealthModule,

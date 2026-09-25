@@ -11,6 +11,7 @@ import { type App } from 'supertest/types';
 
 import { hashSecret } from '../../src/identity/common/crypto.util';
 import { asLoginResponseBody } from './identity-test-types';
+import { ensureIntegrationAdminTechnicalRoles } from './technical-access.fixture';
 
 export interface ProvisionedTestIdentity {
   personId: string;
@@ -121,11 +122,13 @@ export async function provisionIntegrationAdminSession(
   app: INestApplication<App>,
   prisma: PrismaClient,
 ): Promise<ProvisionedTestIdentity> {
-  return provisionAuthenticatedIdentity(app, prisma, {
+  const provisioned = await provisionAuthenticatedIdentity(app, prisma, {
     loginIdentifier: INTEGRATION_ADMIN_LOGIN,
     password: INTEGRATION_ADMIN_PASSWORD,
     displayName: 'Integration Admin',
   });
+  await ensureIntegrationAdminTechnicalRoles(prisma, provisioned.identityId);
+  return provisioned;
 }
 
 export async function ensureIntegrationAdminSession(
@@ -152,6 +155,8 @@ export async function ensureIntegrationAdminSession(
     if (!existingAccount.personId) {
       throw new Error('Integration admin account exists without a person');
     }
+
+    await ensureIntegrationAdminTechnicalRoles(prisma, identity.id);
 
     return {
       personId: existingAccount.personId,
@@ -193,6 +198,8 @@ export async function ensureIntegrationAdminSession(
     if (!account.personId) {
       throw new Error('Integration admin account exists without a person');
     }
+
+    await ensureIntegrationAdminTechnicalRoles(prisma, identity.id);
 
     return {
       personId: account.personId,

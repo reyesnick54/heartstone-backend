@@ -27,6 +27,7 @@ import {
   asUserAccountBody,
 } from './helpers/identity-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { grantIdentityPlatformAdministrator } from './helpers/technical-access.fixture';
 
 describe('Phase 3F Identity & Access E2E acceptance', () => {
   let app: INestApplication<App>;
@@ -52,6 +53,7 @@ describe('Phase 3F Identity & Access E2E acceptance', () => {
       password: 'BootstrapPass123!',
     });
     await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    await grantIdentityPlatformAdministrator(prisma, bootstrap.identityId);
     const bootstrapToken = await loginAndGetSessionToken(
       app,
       bootstrap.loginIdentifier,
