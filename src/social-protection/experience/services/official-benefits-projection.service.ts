@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { AssuranceLevel } from '@prisma/client';
 import {
   AuthorityEvaluationOutcome,
   BenefitApplicationProfileStatus,
@@ -14,6 +15,9 @@ import { AuthorityDependencyEvaluator } from '../../../authority/dependencies/au
 import { AuthorityEvaluationService } from '../../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../../database/prisma.service';
 import { type ResolvedOfficialContext } from '../../../experience/official/types/official-context.types';
+import { SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../../institutional-scope/institutional-scope.types';
+import { SubjectRecordAccessService } from '../../../institutional-scope/subject-record-access.service';
 import { SocialProtectionExperienceBoundaryService } from '../social-protection-experience-boundary.service';
 import { BenefitScopeService } from './benefit-scope.service';
 
@@ -63,6 +67,7 @@ export class OfficialBenefitsProjectionService {
     private readonly boundary: SocialProtectionExperienceBoundaryService,
     private readonly authorityEvaluation: AuthorityEvaluationService,
     private readonly dependencyEvaluator: AuthorityDependencyEvaluator,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
   ) {}
 
   async buildWorkspace(context: ResolvedOfficialContext) {
@@ -176,6 +181,19 @@ export class OfficialBenefitsProjectionService {
   }
 
   async getAvailableActions(context: ResolvedOfficialContext, benefitAwardId: string) {
+    const session: SessionContextDto = {
+      identityId: context.identityId,
+      sessionId: `official-${context.identityId}`,
+      userAccountId: context.userAccountId,
+      assuranceLevel: context.assuranceLevel as AssuranceLevel,
+    };
+
+    await this.subjectRecordAccess.assertOfficialInstitutionalResource(
+      session,
+      ScopedResourceType.BENEFIT_AWARD,
+      benefitAwardId,
+    );
+
     const award = await this.prisma.benefitAward.findUnique({
       where: { id: benefitAwardId },
     });

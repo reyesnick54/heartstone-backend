@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
+  AssuranceLevel,
   DriverLicenseLifecycleStatus,
   DriverTestRecordOutcome,
   TransportationActorPersona,
@@ -9,6 +10,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
+import { SubjectRecordAccessService } from '../institutional-scope/subject-record-access.service';
 import { TransportationAccessService } from './access/transportation-access.service';
 import { DriverLicenseApplicationProfileService } from './applications/driver-license-application-profile.service';
 import { TransportationExperienceBoundaryService } from './boundary/transportation-experience-boundary.service';
@@ -100,6 +102,10 @@ describe('Transportation must-fail gates', () => {
         providers: [
           DriverLicenseApplicationProfileService,
           { provide: PrismaService, useValue: prisma },
+          {
+            provide: SubjectRecordAccessService,
+            useValue: { assertApplicationLinkedRecord: jest.fn() },
+          },
         ],
       }).compile();
       service = module.get(DriverLicenseApplicationProfileService);
@@ -304,11 +310,25 @@ describe('Transportation must-fail gates', () => {
   describe('Driver profile cross-subject access', () => {
     it('blocks cross-subject profile reads', async () => {
       const prisma = { driverProfile: { findFirst: jest.fn() } };
+      const subjectRecordAccess = {
+        assertSubjectIdentityVisible: jest
+          .fn()
+          .mockRejectedValue(new NotFoundException('Driver profile not found')),
+      };
       const module = await Test.createTestingModule({
-        providers: [DriverProfileService, { provide: PrismaService, useValue: prisma }],
+        providers: [
+          DriverProfileService,
+          { provide: PrismaService, useValue: prisma },
+          { provide: SubjectRecordAccessService, useValue: subjectRecordAccess },
+        ],
       }).compile();
       const service = module.get(DriverProfileService);
-      await expect(service.getProfileForSubject('subject-1', 'other')).rejects.toThrow(
+      const session = {
+        sessionId: '11111111-1111-4111-8111-111111111111',
+        identityId: 'other',
+        assuranceLevel: AssuranceLevel.HIGH,
+      };
+      await expect(service.getProfileForSubject(session, 'subject-1', {})).rejects.toThrow(
         NotFoundException,
       );
     });
