@@ -24,12 +24,48 @@ import { IdentityModule } from '../src/identity/identity.module';
 import { SessionsService } from '../src/identity/sessions/sessions.service';
 import { TEST_OIDC_PROVIDER } from './helpers/oidc-test-fixtures';
 
+const S7_TEST_LOGIN_IDENTIFIERS = [
+  'lockout@test.gov',
+  'sessions@test.gov',
+  'suspended@test.gov',
+  'mfa@test.gov',
+] as const;
+
 describe('S7 production authentication boundary (integration)', () => {
   let moduleRef: TestingModule;
   let prisma: PrismaService;
   let sessions: SessionsService;
   let oidcIdentityResolver: OidcIdentityResolverService;
   let claimMapper: ClaimMapperService;
+
+  async function resetS7Fixtures(): Promise<void> {
+    const accounts = await prisma.userAccount.findMany({
+      where: { loginIdentifier: { in: [...S7_TEST_LOGIN_IDENTIFIERS] } },
+      select: { id: true, personId: true },
+    });
+    const accountIds = accounts.map((account) => account.id);
+    const identities = await prisma.identity.findMany({
+      where: { userAccountId: { in: accountIds } },
+      select: { id: true },
+    });
+    const identityIds = identities.map((identity) => identity.id);
+    const personIds = accounts.map((account) => account.personId).filter(Boolean) as string[];
+
+    if (identityIds.length > 0) {
+      await prisma.securityAuditEvent.deleteMany({ where: { identityId: { in: identityIds } } });
+      await prisma.session.deleteMany({ where: { identityId: { in: identityIds } } });
+      await prisma.credential.deleteMany({ where: { identityId: { in: identityIds } } });
+      await prisma.identity.deleteMany({ where: { id: { in: identityIds } } });
+    }
+
+    if (accountIds.length > 0) {
+      await prisma.userAccount.deleteMany({ where: { id: { in: accountIds } } });
+    }
+
+    if (personIds.length > 0) {
+      await prisma.person.deleteMany({ where: { id: { in: personIds } } });
+    }
+  }
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -50,12 +86,7 @@ describe('S7 production authentication boundary (integration)', () => {
   });
 
   beforeEach(async () => {
-    await prisma.securityAuditEvent.deleteMany();
-    await prisma.session.deleteMany();
-    await prisma.credential.deleteMany();
-    await prisma.identity.deleteMany();
-    await prisma.userAccount.deleteMany();
-    await prisma.person.deleteMany();
+    await resetS7Fixtures();
   });
 
   afterAll(async () => {
