@@ -125,7 +125,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: toDashboardActor(fixture.technicalAdminIdentityId),
+        actor: await toDashboardActor(prisma, fixture.technicalAdminIdentityId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -175,7 +175,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       queryService.queryExecutiveConsole({
-        actor: toDashboardActor(fixture.executiveIdentityId),
+        actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
@@ -189,7 +189,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: toDashboardActor(fixture.executiveIdentityId),
+        actor: await toDashboardActor(prisma, fixture.executiveIdentityId),
         dashboardDefinitionId: fixture.departmentalDashboardId,
         institutionId: fixture.institutionId,
         departmentId: fixture.departmentBId,
@@ -219,7 +219,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
 
     await expect(
       accessPolicyService.evaluateAccess({
-        actor: toDashboardActor(fixture.executiveIdentityId, userAccountId),
+        actor: await toDashboardActor(prisma, fixture.executiveIdentityId, userAccountId),
         dashboardDefinitionId: fixture.executiveDashboardId,
         institutionId: fixture.institutionId,
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,

@@ -41,6 +41,7 @@ export interface Phase8FixtureContext extends Phase8SessionContext {
   officeId: string;
   officialOfficeholderId: string;
   appointmentId: string;
+  approverAppointmentId: string;
   caseId: string;
   masterAdministrativeFileId: string;
   decisionTypeVersionId: string;
@@ -421,6 +422,7 @@ export async function seedPhase8Fixture(
   });
 
   let officialAppointmentId = base.appointmentId;
+  let approverAppointmentId = base.appointmentId;
 
   if (official.officeholderId) {
     const officialAppointment = await prisma.appointment.create({
@@ -456,7 +458,7 @@ export async function seedPhase8Fixture(
   }
 
   if (approver.officeholderId) {
-    await prisma.appointment.create({
+    const approverAppointment = await prisma.appointment.create({
       data: {
         officeId: base.officeId,
         officeholderId: approver.officeholderId,
@@ -464,6 +466,7 @@ export async function seedPhase8Fixture(
         effectiveFrom: new Date('2020-01-01'),
       },
     });
+    approverAppointmentId = approverAppointment.id;
 
     await prisma.functionAuthorityAssignment.create({
       data: {
@@ -549,6 +552,7 @@ export async function seedPhase8Fixture(
     officeId: base.officeId,
     officialOfficeholderId: official.officeholderId ?? base.officeholderId,
     appointmentId: officialAppointmentId,
+    approverAppointmentId,
     caseId: base.caseId,
     masterAdministrativeFileId: base.masterAdministrativeFileId,
     decisionTypeVersionId: base.decisionTypeVersionId,

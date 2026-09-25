@@ -5,10 +5,12 @@ import {
   CredentialStatus,
   IdentityType,
   type PrismaClient,
+  SessionStatus,
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
+import { type AuthenticatedPrincipal } from '../../src/identity/auth/domain/authenticated-principal';
 import { hashSecret } from '../../src/identity/common/crypto.util';
 import { asLoginResponseBody } from './identity-test-types';
 import { ensureIntegrationAdminTechnicalRoles } from './technical-access.fixture';
@@ -71,6 +73,23 @@ export async function provisionIdentityViaPrisma(
     identityId: identity.id,
     loginIdentifier: options.loginIdentifier,
     password: options.password,
+  };
+}
+
+export async function sessionPrincipalForIdentity(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<AuthenticatedPrincipal> {
+  const session = await prisma.session.findFirstOrThrow({
+    where: { identityId, status: SessionStatus.ACTIVE },
+    orderBy: { issuedAt: 'desc' },
+  });
+
+  return {
+    sessionId: session.id,
+    identityId: session.identityId,
+    userAccountId: session.userAccountId,
+    assuranceLevel: session.assuranceLevel,
   };
 }
 

@@ -141,7 +141,7 @@ describe('Record access hardening (S6 integration)', () => {
     await request(app.getHttpServer())
       .get(`/api/v1/education/students/profiles/${profile.id}`)
       .set(authHeader(other.sessionToken))
-      .expect(403);
+      .expect(404);
   });
 
   it('rejects forged requesterIdentityId query parameters', async () => {

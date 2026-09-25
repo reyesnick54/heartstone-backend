@@ -15,7 +15,10 @@ import {
   ScopedResourceType,
 } from '../src/institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../src/institutional-scope/resource-access.service';
-import { provisionAuthenticatedIdentity } from './helpers/identity-provisioning.fixture';
+import {
+  provisionAuthenticatedIdentity,
+  sessionPrincipalForIdentity,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   type Phase6FixtureContext,
@@ -55,7 +58,8 @@ describe('Institutional scope enforcement (integration)', () => {
       displayName: `Scope ${loginSuffix}`,
     });
 
-    return { identityId: identity.identityId, sessionToken: identity.sessionToken };
+    const session = await sessionPrincipalForIdentity(prisma, identity.identityId);
+    return { identityId: identity.identityId, sessionToken: identity.sessionToken, session };
   }
 
   async function submitApplicationForApplicant(sessionToken: string) {
@@ -169,12 +173,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'test-session',
-      identityId: fixture.officialIdentityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionPrincipalForIdentity(prisma, fixture.officialIdentityId);
 
     const dashboardAccess = await resourceAccess.evaluateWithoutThrow({
       session,
@@ -222,15 +221,8 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'rep-session',
-      identityId: representative.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
-
     const result = await resourceAccess.evaluateWithoutThrow({
-      session,
+      session: representative.session,
       resourceType: ScopedResourceType.APPLICATION,
       resourceId: application.id,
       intent: ScopeAccessIntent.VISIBILITY,
@@ -273,16 +265,9 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'inactive-rep-session',
-      identityId: representative.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
-
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session,
+        session: representative.session,
         resourceType: ScopedResourceType.APPLICATION,
         resourceId: application.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -312,16 +297,9 @@ describe('Institutional scope enforcement (integration)', () => {
       data: { code: 'SCOPE-OTHER-ORG', name: 'Other Org' },
     });
 
-    const session = {
-      sessionId: 'org-member-session',
-      identityId: member.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
-
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session,
+        session: member.session,
         resourceType: ScopedResourceType.ORGANIZATION,
         resourceId: otherOrg.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -354,16 +332,9 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'unresolved-session',
-      identityId: actor.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
-
     await expect(
       resourceAccess.evaluateWithoutThrow({
-        session,
+        session: actor.session,
         resourceType: ScopedResourceType.DASHBOARD,
         resourceId: dashboard.id,
         intent: ScopeAccessIntent.VISIBILITY,
@@ -378,12 +349,7 @@ describe('Institutional scope enforcement (integration)', () => {
     const owner = await createCitizenSession('tech-admin-owner');
     const submitted = await submitApplicationForApplicant(owner.sessionToken);
 
-    const session = {
-      sessionId: 'tech-admin-session',
-      identityId: fixture.officialIdentityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionPrincipalForIdentity(prisma, fixture.officialIdentityId);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({
