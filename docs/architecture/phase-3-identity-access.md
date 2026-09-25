@@ -73,6 +73,10 @@ See `docs/architecture/actor-context-trust-boundary.md` for the authenticated ac
 
 Authentication establishes actor identity. A separate institutional scope layer (`src/institutional-scope/`) enforces resource ownership before domain services return data. See [phase-14-institutional-scope-enforcement.md](./phase-14-institutional-scope-enforcement.md).
 
+## Technical access (Remediation S3)
+
+Canonical roles, permissions, access levels A–F, scope enforcement, and deny-by-default administrative guards live in `src/technical-access/`. See [remediation-s3-technical-access.md](./remediation-s3-technical-access.md).
+
 ## Explicit exclusions (Phase 4+)
 
 - Authority Engine evaluation
