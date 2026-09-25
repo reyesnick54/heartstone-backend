@@ -78,7 +78,7 @@ export const envValidationSchema = Joi.object({
   SERVICE_CREDENTIAL_PEPPER: Joi.when('NODE_ENV', {
     is: 'production',
     then: Joi.string().min(16).required(),
-    otherwise: Joi.string().min(16).default('test-pepper-not-production'),
+    otherwise: Joi.string().min(16).empty('').default('test-pepper-not-production'),
   }),
   AUTH_LOCAL_PASSWORD_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').optional(),
 }).custom((value, helpers) => {
@@ -127,6 +127,14 @@ export const envValidationSchema = Joi.object({
     return helpers.error('any.custom', {
       message: 'OIDC_PROVIDERS_JSON is required in production when OIDC is enabled',
     });
+  }
+
+  if (nodeEnv !== 'production') {
+    const pepper = env.SERVICE_CREDENTIAL_PEPPER?.trim() ?? '';
+    if (!pepper) {
+      (env as ValidatedEnvironment & { SERVICE_CREDENTIAL_PEPPER: string }).SERVICE_CREDENTIAL_PEPPER =
+        'test-pepper-not-production';
+    }
   }
 
   return value as ValidatedEnvironment;

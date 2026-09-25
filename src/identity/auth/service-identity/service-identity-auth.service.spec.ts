@@ -1,9 +1,9 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { IdentityType } from '@prisma/client';
 
-import { PrismaService } from '../../../database/prisma.service';
-import { SecurityAuditService } from '../../audit/security-audit.service';
+import type { PrismaService } from '../../../database/prisma.service';
+import type { SecurityAuditService } from '../../audit/security-audit.service';
 import { hashApiKeySecret } from '../../common/crypto.util';
 import { ServiceIdentityAuthService } from './service-identity-auth.service';
 

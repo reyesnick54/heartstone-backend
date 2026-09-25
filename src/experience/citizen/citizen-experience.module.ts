@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { ApplicationProcessingModule } from '../../application-processing/application-processing.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { ServiceCatalogModule } from '../../service-catalog/service-catalog.module';
 import { CitizenAccessService } from '../common/citizen-access.service';
@@ -17,10 +16,9 @@ import { CitizenHomeService } from './services/citizen-home.service';
 import { CitizenMeService } from './services/citizen-me.service';
 
 @Module({
-  imports: [SessionsModule, ApplicationProcessingModule, ServiceCatalogModule, SchedulingModule],
+  imports: [SessionAuthGuardModule, ApplicationProcessingModule, ServiceCatalogModule, SchedulingModule],
   controllers: [CitizenExperienceController, CitizenServicesController],
   providers: [
-    SessionAuthGuard,
     CitizenAccessService,
     CitizenMeService,
     CitizenHomeService,

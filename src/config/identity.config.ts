@@ -34,8 +34,12 @@ export default registerAs(IDENTITY_CONFIG, (): IdentityConfig => {
       process.env.STEP_UP_MAX_AUTHENTICATION_AGE_SECONDS ?? '900',
       10,
     ),
-    serviceCredentialPepper:
-      process.env.SERVICE_CREDENTIAL_PEPPER ??
-      (nodeEnv === 'production' ? '' : 'test-pepper-not-production'),
+    serviceCredentialPepper: (() => {
+      const configured = process.env.SERVICE_CREDENTIAL_PEPPER?.trim();
+      if (configured && configured.length >= 16) {
+        return configured;
+      }
+      return nodeEnv === 'production' ? '' : 'test-pepper-not-production';
+    })(),
   };
 });
