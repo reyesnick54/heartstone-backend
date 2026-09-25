@@ -613,7 +613,12 @@ enum SecurityAuditEventType {
   OFFICEHOLDER_LINK_CREATED
   OFFICEHOLDER_LINK_REVOKED
   OIDC_CLAIM_RECEIVED
+  OIDC_ACCOUNT_LINKED
   MFA_VERIFIED
+  STEP_UP_REQUIRED
+  STEP_UP_SATISFIED
+  ACCOUNT_LOCKED
+  AUTHENTICATION_REJECTED
   SERVICE_IDENTITY_AUTHENTICATED
   PROTECTED_ENDPOINT_ACCESS
   SCOPE_ACCESS_DENIED
@@ -640,12 +645,14 @@ model Person {
 }
 
 model UserAccount {
-  id              String        @id @default(uuid()) @db.Uuid
-  personId        String?       @unique @db.Uuid
-  loginIdentifier String        @unique
-  status          AccountStatus @default(PENDING)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                   String        @id @default(uuid()) @db.Uuid
+  personId             String?       @unique @db.Uuid
+  loginIdentifier      String        @unique
+  status               AccountStatus @default(PENDING)
+  failedLoginAttempts  Int           @default(0)
+  lockedUntil          DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
   person          Person?       @relation(fields: [personId], references: [id])
   identities      Identity[]
   sessions        Session[]
@@ -1082,6 +1089,10 @@ model Session {
   tokenHash        String                   @unique
   status           SessionStatus            @default(ACTIVE)
   assuranceLevel   AssuranceLevel           @default(LOW)
+  authMethod       AuthenticationMethodType @default(PASSWORD)
+  oidcProviderCode String?
+  mfaSatisfied     Boolean                  @default(false)
+  authenticatedAt  DateTime                 @default(now())
   issuedAt         DateTime                 @default(now())
   expiresAt        DateTime
   lastUsedAt       DateTime?

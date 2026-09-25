@@ -11,6 +11,7 @@ import { ComplianceModule } from './compliance/compliance.module';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
 import identityConfig from './config/identity.config';
+import oidcConfig from './config/oidc.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { CorporateRegistryModule } from './corporate-registry/corporate-registry.module';
@@ -54,7 +55,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, redisConfig, securityConfig, identityConfig],
+      load: [appConfig, redisConfig, securityConfig, identityConfig, oidcConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: true,

@@ -1,11 +1,13 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { AssuranceLevel } from '@prisma/client';
 
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { type ActorContext } from '../auth/context/actor-context.types';
 import { CurrentActor } from '../auth/decorators/current-actor.decorator';
 import { CurrentSession } from '../auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../auth/dto/session-context.dto';
+import { AuthRequirements } from '../auth/guards/auth-requirements.decorator';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AuthorityBoundaryService } from '../common/authority-boundary.service';
 
@@ -68,5 +70,19 @@ export class ProtectedController {
         'Authentication establishes identity only; government authority requires function-level evaluation.',
       hasInstitutionalRelationships: actor.hasInstitutionalRelationships,
     };
+  }
+
+  @Get('step-up-protected')
+  @AuthRequirements({
+    minimumAssuranceLevel: AssuranceLevel.HIGH,
+    mfaVerified: true,
+    requireRecentAuthentication: true,
+  })
+  @ApiOperation({
+    summary: 'Protected route requiring recent MFA/step-up (technical access only)',
+  })
+  @ApiOkResponse({ description: 'Step-up satisfied' })
+  stepUpProtected(@CurrentSession() session: SessionContextDto): { ok: true; sessionId: string } {
+    return { ok: true, sessionId: session.sessionId };
   }
 }
