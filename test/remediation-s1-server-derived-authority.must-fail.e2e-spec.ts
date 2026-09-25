@@ -67,7 +67,6 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
         officeholderId: officeholder.id,
         status: AppointmentStatus.ACTIVE,
         effectiveFrom: new Date('2020-01-01'),
-        effectiveUntil: new Date('2021-06-01'),
       },
     });
     const person = await prisma.person.create({
@@ -427,10 +426,37 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
   it('8. positive path: server-derived evidence and co-approval allow when conditions satisfied', async () => {
     const fixture = await seedPhase8Fixture(app, prisma);
 
-    const packetItems = await prisma.evidencePacketItem.findMany({
+    let packetItems = await prisma.evidencePacketItem.findMany({
       where: { packetVersionId: fixture.evidencePacketVersionId },
       include: { evidenceRecord: true },
     });
+    if (packetItems.length === 0) {
+      const evidenceRecord = await prisma.evidenceRecord.create({
+        data: {
+          evidenceNumber: 'S1-EVID-001',
+          caseId: fixture.caseId,
+          masterAdministrativeFileId: fixture.masterAdministrativeFileId,
+          evidenceType: 'DOCUMENT',
+          source: 'APPLICANT',
+          submittingParty: fixture.applicantIdentityId,
+          dateReceived: new Date('2024-01-01'),
+          confidentialityClassification: 'OFFICIAL',
+          integrityReference: 's1-positive-path',
+          title: 'S1 positive path evidence',
+        },
+      });
+      await prisma.evidencePacketItem.create({
+        data: {
+          packetVersionId: fixture.evidencePacketVersionId,
+          evidenceRecordId: evidenceRecord.id,
+          sortOrder: 1,
+        },
+      });
+      packetItems = await prisma.evidencePacketItem.findMany({
+        where: { packetVersionId: fixture.evidencePacketVersionId },
+        include: { evidenceRecord: true },
+      });
+    }
     const firstItem = packetItems[0];
     if (!firstItem) {
       throw new Error('Expected at least one evidence packet item in Phase 8 fixture');
