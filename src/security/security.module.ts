@@ -3,7 +3,6 @@ import { APP_GUARD } from '@nestjs/core';
 
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
-import { ActorContextService } from './services/actor-context.service';
 import { CaseAccessService } from './services/case-access.service';
 
 @Global()
@@ -16,6 +15,6 @@ import { CaseAccessService } from './services/case-access.service';
       useExisting: SessionAuthGuard,
     },
   ],
-  exports: [SessionAuthGuardModule, ActorContextService, CaseAccessService],
+  exports: [SessionAuthGuardModule, CaseAccessService],
 })
 export class SecurityModule {}

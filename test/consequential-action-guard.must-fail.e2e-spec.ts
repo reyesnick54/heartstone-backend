@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  type INestApplication,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, type INestApplication, UnauthorizedException } from '@nestjs/common';
 import {
   AppointmentStatus,
   AuthorityActionType,
@@ -255,8 +251,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       );
       throw new Error('Expected consequential action to be blocked');
     } catch (error) {
-      const blocked =
-        error instanceof ForbiddenException || error instanceof UnauthorizedException;
+      const blocked = error instanceof ForbiddenException || error instanceof UnauthorizedException;
       expect(blocked).toBe(true);
       if (error instanceof UnauthorizedException) {
         return;
