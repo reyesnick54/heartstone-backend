@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { OrganizationResponseDto } from './dto/organization-response.dto';
 import { QueryOrganizationsDto } from './dto/query-organizations.dto';
@@ -9,10 +12,12 @@ import { OrganizationsService } from './organizations.service';
 
 @ApiTags('identity-organizations')
 @Controller('identity/organizations')
+@DenyByDefaultAdministrative()
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_CREATE)
   @ApiOperation({ summary: 'Create an organization' })
   @ApiCreatedResponse({ type: OrganizationResponseDto })
   create(@Body() dto: CreateOrganizationDto): Promise<OrganizationResponseDto> {
@@ -20,6 +25,7 @@ export class OrganizationsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_READ)
   @ApiOperation({ summary: 'List organizations' })
   @ApiOkResponse({ type: OrganizationResponseDto, isArray: true })
   findAll(@Query() query: QueryOrganizationsDto): Promise<OrganizationResponseDto[]> {
@@ -27,6 +33,7 @@ export class OrganizationsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_READ)
   @ApiOperation({ summary: 'Get an organization by id' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<OrganizationResponseDto> {
@@ -34,6 +41,7 @@ export class OrganizationsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_UPDATE)
   @ApiOperation({ summary: 'Update organization metadata' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   update(
@@ -44,6 +52,7 @@ export class OrganizationsController {
   }
 
   @Patch(':id/activate')
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_UPDATE)
   @ApiOperation({ summary: 'Activate an organization' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   activate(@Param('id', ParseUUIDPipe) id: string): Promise<OrganizationResponseDto> {
@@ -51,6 +60,7 @@ export class OrganizationsController {
   }
 
   @Patch(':id/suspend')
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_UPDATE)
   @ApiOperation({ summary: 'Suspend an organization' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   suspend(@Param('id', ParseUUIDPipe) id: string): Promise<OrganizationResponseDto> {
@@ -58,6 +68,7 @@ export class OrganizationsController {
   }
 
   @Patch(':id/revoke')
+  @RequirePermissions(PermissionCodes.IDENTITY_ORGANIZATION_UPDATE)
   @ApiOperation({ summary: 'Revoke an organization' })
   @ApiOkResponse({ type: OrganizationResponseDto })
   revoke(@Param('id', ParseUUIDPipe) id: string): Promise<OrganizationResponseDto> {

@@ -4,7 +4,6 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuthorityModule } from './authority/authority.module';
-import { CitizenExperienceModule } from './citizen-experience/citizen-experience.module';
 import { CivilRegistryModule } from './civil-registry/civil-registry.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import { ComplianceModule } from './compliance/compliance.module';
@@ -48,6 +47,7 @@ import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
 import { SocialProtectionModule } from './social-protection/social-protection.module';
 import { SystemModule } from './system/system.module';
+import { TechnicalAccessModule } from './technical-access/technical-access.module';
 import { TransportationModule } from './transportation/transportation.module';
 
 @Module({
@@ -63,6 +63,7 @@ import { TransportationModule } from './transportation/transportation.module';
     }),
     LoggerModule.forRoot(createPinoConfig()),
     SecurityModule,
+    TechnicalAccessModule,
     DatabaseModule,
     RedisModule,
     HealthModule,
@@ -86,7 +87,6 @@ import { TransportationModule } from './transportation/transportation.module';
     EducationModule,
     TransportationModule,
     HealthcareModule,
-    CitizenExperienceModule,
     CivilRegistryModule,
     RecordsModule,
     EvidenceRecordsModule,

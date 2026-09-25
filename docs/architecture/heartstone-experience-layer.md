@@ -11,13 +11,10 @@ Citizen Mobile App ──┐
 Citizen Web Portal ──┤
 Business Portal ─────┼──► src/experience/common/  (shared contracts)
 Government Workstations ──┤         │
-Platform Administration ──┘         ├──► src/experience/citizen/
+Platform Administration ──┘                                             ├──► src/experience/citizen/  (dashboard + projections)
                                     ├──► src/experience/official/
-                                    └──► src/citizen-experience/ (projections)
-                                              │
-                                              ▼
-                                    Domain modules (applications, records,
-                                    operational support, authority, etc.)
+                                    └──► domain modules (applications, records,
+                                         operational support, authority, etc.)
 ```
 
 ## Shared module

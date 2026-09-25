@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
-import { type ResolvedActorContext } from './actor-context.service';
+import { type InstitutionalCaseAccessActor } from '../../identity/auth/context/actor-context.types';
 
 @Injectable()
 export class CaseAccessService {
@@ -24,7 +24,7 @@ export class CaseAccessService {
 
   async assertOfficialInstitutionalAccess(
     caseId: string,
-    actor: ResolvedActorContext,
+    actor: InstitutionalCaseAccessActor,
   ): Promise<void> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
@@ -48,7 +48,7 @@ export class CaseAccessService {
 
   async assertApplicantOrOfficialAccess(
     caseId: string,
-    actor: ResolvedActorContext,
+    actor: InstitutionalCaseAccessActor,
   ): Promise<'APPLICANT' | 'OFFICIAL'> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },

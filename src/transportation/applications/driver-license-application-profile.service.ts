@@ -3,11 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SubjectRecordAccessService } from '../../institutional-scope/subject-record-access.service';
 import { DRIVER_LICENSE_APPLICATION_PROFILE_NUMBER_PREFIX } from '../transportation.constants';
 
 @Injectable()
 export class DriverLicenseApplicationProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
+  ) {}
 
   async linkDriverLicenseApplicationProfile(input: {
     driverProfileId: string;
@@ -32,11 +37,16 @@ export class DriverLicenseApplicationProfileService {
     return { profile, driverLicenseRecordsCreated: 0 };
   }
 
-  async getDriverLicenseApplicationProfile(id: string) {
+  async getDriverLicenseApplicationProfile(session: SessionContextDto, id: string) {
     const profile = await this.prisma.driverLicenseApplicationProfile.findUnique({ where: { id } });
     if (!profile) {
       throw new NotFoundException(`Driver license application profile "${id}" was not found`);
     }
+
+    await this.subjectRecordAccess.assertApplicationLinkedRecord(session, profile.applicationId, {
+      maskEnumeration: true,
+    });
+
     return profile;
   }
 }

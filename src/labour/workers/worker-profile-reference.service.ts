@@ -3,14 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
-import { LabourAccessService } from '../common/labour-access.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SubjectAccessQueryDto } from '../../institutional-scope/dto/subject-access-query.dto';
+import { SubjectRecordAccessService } from '../../institutional-scope/subject-record-access.service';
 import { WORKER_PROFILE_REFERENCE_PREFIX } from '../labour.constants';
 
 @Injectable()
 export class WorkerProfileReferenceService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly access: LabourAccessService,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
   ) {}
 
   async createWorkerProfileReference(input: {
@@ -30,19 +32,25 @@ export class WorkerProfileReferenceService {
     });
   }
 
-  async getWorkerProfileForSubject(workerProfileReferenceId: string, requesterIdentityId: string) {
-    await this.access.assertWorkerSelfAccess({
-      accessorIdentityId: requesterIdentityId,
-      workerProfileReferenceId,
-      endpoint: 'GET worker profile',
-    });
-
+  async getWorkerProfileForSubject(
+    session: SessionContextDto,
+    workerProfileReferenceId: string,
+    query: SubjectAccessQueryDto,
+  ) {
     const profile = await this.prisma.workerProfileReference.findUnique({
       where: { id: workerProfileReferenceId },
     });
     if (!profile) {
       throw new NotFoundException('Worker profile reference not found');
     }
+
+    if (profile.workerIdentityId !== session.identityId) {
+      await this.subjectRecordAccess.assertSubjectIdentityVisible(session, profile.workerIdentityId, {
+        maskEnumeration: true,
+        representativeAuthorityId: query.representativeAuthorityId,
+      });
+    }
+
     return profile;
   }
 }

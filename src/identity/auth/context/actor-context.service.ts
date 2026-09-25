@@ -21,6 +21,7 @@ import {
   type ActorContextOrganizationMembership,
   type ActorContextRepresentativeAuthority,
   CLIENT_ACTOR_IDENTITY_FIELDS,
+  type InstitutionalCaseAccessActor,
 } from './actor-context.types';
 
 export interface ResolveActorContextInput {
@@ -180,6 +181,87 @@ export class ActorContextService {
     if (!session?.sessionId || !session.identityId) {
       throw new UnauthorizedException(
         'Actor context requires authenticated server-derived session context',
+      );
+    }
+  }
+
+  /**
+   * Resolves institutional relationships for case/document access without a live session token.
+   * Callers must still authenticate the identity through a validated session elsewhere.
+   */
+  async resolveInstitutionalCaseAccessActor(
+    identityId: string,
+  ): Promise<InstitutionalCaseAccessActor> {
+    const identity = await this.prisma.identity.findUnique({
+      where: { id: identityId },
+      select: {
+        type: true,
+        userAccountId: true,
+        officeholderLinks: {
+          where: { status: IdentityOfficeholderLinkStatus.ACTIVE },
+          select: {
+            officeholderId: true,
+            officeholder: {
+              select: {
+                appointments: {
+                  where: { status: 'ACTIVE' },
+                  select: {
+                    officeId: true,
+                    office: {
+                      select: {
+                        department: { select: { institutionId: true } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!identity) {
+      throw new UnauthorizedException(`Identity "${identityId}" was not found`);
+    }
+
+    const activeLinks = identity.officeholderLinks;
+    const linkedOfficeIds = activeLinks.flatMap((link) =>
+      link.officeholder.appointments.map((appointment) => appointment.officeId),
+    );
+    const linkedInstitutionIds = [
+      ...new Set(
+        activeLinks.flatMap((link) =>
+          link.officeholder.appointments.map(
+            (appointment) => appointment.office.department.institutionId,
+          ),
+        ),
+      ),
+    ] as string[];
+
+    return {
+      identityId,
+      identityType: identity.type,
+      userAccountId: identity.userAccountId,
+      officeholderId: activeLinks[0]?.officeholderId,
+      linkedOfficeIds,
+      hasActiveOfficeholderLink: activeLinks.length > 0,
+      linkedInstitutionIds,
+    };
+  }
+
+  assertActorIdentityMatchesSession(
+    sessionIdentityId: string,
+    suppliedIdentityId: string | undefined | null,
+    fieldName: string,
+  ): void {
+    if (!suppliedIdentityId) {
+      return;
+    }
+
+    if (suppliedIdentityId !== sessionIdentityId) {
+      throw new ForbiddenException(
+        `Client-supplied ${fieldName} must not differ from authenticated session identity`,
       );
     }
   }

@@ -16,7 +16,7 @@ import {
   FINAL_DECISION_ACTIONS,
 } from './consequential-action.types';
 import {
-  readEvaluationModifiers,
+  readEvaluationResourceScope,
   readInstitutionalContext,
 } from './consequential-action-context.util';
 import { buildConsequentialActionDenial } from './consequential-action-denial.util';
@@ -71,7 +71,7 @@ export class ConsequentialActionService {
 
     const institutional = readInstitutionalContext(context, metadata.institutionalFieldPrefixes);
     const body = request.body ?? {};
-    const modifiers = readEvaluationModifiers(body);
+    const resourceIdentifiers = readEvaluationResourceScope(body);
 
     const evaluationRequest: AuthorityEvaluationRequest = {
       identityId: session.identityId,
@@ -81,8 +81,14 @@ export class ConsequentialActionService {
       officeId: institutional.officeId ?? resourceScope?.officeId,
       appointmentId: institutional.appointmentId,
       delegationId: institutional.delegationId,
-      scopeValue: modifiers.scopeValue ?? resourceScope?.scopeValue,
-      ...modifiers,
+      resourceScope: {
+        caseId: resourceIdentifiers.caseId,
+        evidencePacketVersionId: resourceIdentifiers.evidencePacketVersionId,
+        decisionReadinessAssessmentId: resourceIdentifiers.decisionReadinessAssessmentId,
+      },
+      scopeValue: resourceIdentifiers.scopeValue ?? resourceScope?.scopeValue,
+      transactionAmount: resourceIdentifiers.transactionAmount,
+      externalDataAccessOnly: resourceIdentifiers.externalDataAccessOnly,
     };
 
     return this.evaluationService.evaluate(evaluationRequest);

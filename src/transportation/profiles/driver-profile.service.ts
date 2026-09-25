@@ -3,11 +3,17 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SubjectAccessQueryDto } from '../../institutional-scope/dto/subject-access-query.dto';
+import { SubjectRecordAccessService } from '../../institutional-scope/subject-record-access.service';
 import { DRIVER_PROFILE_NUMBER_PREFIX } from '../transportation.constants';
 
 @Injectable()
 export class DriverProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
+  ) {}
 
   async createProfile(input: {
     subjectIdentityId: string;
@@ -28,10 +34,16 @@ export class DriverProfileService {
     });
   }
 
-  async getProfileForSubject(subjectIdentityId: string, requesterIdentityId: string) {
-    if (subjectIdentityId !== requesterIdentityId) {
-      throw new NotFoundException('Driver profile not found');
-    }
+  async getProfileForSubject(
+    session: SessionContextDto,
+    subjectIdentityId: string,
+    query: SubjectAccessQueryDto,
+  ) {
+    await this.subjectRecordAccess.assertSubjectIdentityVisible(session, subjectIdentityId, {
+      representativeAuthorityId: query.representativeAuthorityId,
+      maskEnumeration: true,
+    });
+
     const profile = await this.prisma.driverProfile.findFirst({
       where: { subjectIdentityId },
       orderBy: { createdAt: 'desc' },

@@ -1,20 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RedressMatterStatus } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
 import { type ActorContext } from '../../../identity/auth/context/actor-context.types';
+import { ACTIVE_REDRESS_MATTER_STATUSES } from '../../../redress/common/active-redress-matter-statuses.constants';
 import { DepartmentAppealsResponseDto } from '../dto/department-appeals-response.dto';
 import { DepartmentAccessService } from './department-access.service';
 import { DepartmentMetricsFreshnessService } from './department-metrics-freshness.service';
-
-const ACTIVE_APPEAL_STATUSES: RedressMatterStatus[] = [
-  RedressMatterStatus.FILED,
-  RedressMatterStatus.UNDER_REVIEW,
-  RedressMatterStatus.INTERIM_RELIEF_PENDING,
-  RedressMatterStatus.DECISION_PENDING,
-  RedressMatterStatus.IMPLEMENTATION_PENDING,
-  RedressMatterStatus.IMPLEMENTATION_IN_PROGRESS,
-];
 
 @Injectable()
 export class DepartmentAppealsService {
@@ -34,7 +25,7 @@ export class DepartmentAppealsService {
     const appeals = await this.prisma.redressMatter.findMany({
       where: {
         case: { responsibleDepartmentId: departmentId },
-        status: { in: ACTIVE_APPEAL_STATUSES },
+        status: { in: [...ACTIVE_REDRESS_MATTER_STATUSES] },
       },
       select: {
         id: true,

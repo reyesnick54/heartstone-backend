@@ -4,6 +4,7 @@ import { DatabaseModule } from '../database/database.module';
 import { ActorContextModule } from '../identity/auth/context/actor-context.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { HealthcareBoundaryService } from './common/healthcare-boundary.service';
+import { HealthcareCanonicalAccessPolicyService } from './common/healthcare-canonical-access-policy.service';
 import { HealthcareFoundationAccessPolicyService } from './common/healthcare-data-access-policy.service';
 import { HealthcareConsentService } from './consent/healthcare-consent.service';
 import { HealthcareConsentPolicyService } from './consent/healthcare-consent-policy.service';
@@ -36,6 +37,7 @@ import { TreatmentModule } from './treatment/treatment.module';
   providers: [
     HealthcareBoundaryService,
     HealthcareFoundationAccessPolicyService,
+    HealthcareCanonicalAccessPolicyService,
     HealthcareConsentPolicyService,
     HealthcareConsentService,
     HealthDataRegistryService,
@@ -54,6 +56,7 @@ import { TreatmentModule } from './treatment/treatment.module';
   ],
   exports: [
     HealthcareFoundationAccessPolicyService,
+    HealthcareCanonicalAccessPolicyService,
     HealthcareConsentPolicyService,
     HealthcareConsentService,
     HealthDataRegistryService,

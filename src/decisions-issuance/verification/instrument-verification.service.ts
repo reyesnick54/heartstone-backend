@@ -47,6 +47,11 @@ export interface InternalInstrumentVerificationResponse extends PublicInstrument
   receiptCount: number;
 }
 
+/**
+ * Canonical public and internal official-instrument verification API (records, rate limits, audit).
+ * Lifecycle cache updates on {@link OfficialInstrument} use
+ * `InstrumentPublicVerificationCacheService` in `src/instruments/lifecycle/`.
+ */
 @Injectable()
 export class InstrumentVerificationService {
   constructor(

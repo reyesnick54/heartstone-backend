@@ -2,6 +2,8 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { AssuranceLevel } from '@prisma/client';
 
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { SecurityAuditService } from '../audit/security-audit.service';
 import { type ActorContext } from '../auth/context/actor-context.types';
 import { CurrentActor } from '../auth/decorators/current-actor.decorator';
@@ -42,6 +44,7 @@ export class ProtectedController {
   ) {}
 
   @Get()
+  @RequirePermissions(PermissionCodes.IDENTITY_SELF_READ)
   @ApiOperation({ summary: 'Access protected identity profile (technical access only)' })
   @ApiOkResponse({ type: ProtectedProfileResponseDto })
   async getProfile(

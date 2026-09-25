@@ -10,6 +10,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { CivilRegistryAuditService } from '../audit/civil-registry-audit.service';
 import { CIVIL_REGISTRY_ENTRY_REFERENCE_PREFIX } from '../civil-registry.constants';
 import { CivilRegistryBoundaryService } from '../common/civil-registry-boundary.service';
+import { CivilRegistryCanonicalPathService } from '../common/civil-registry-canonical-path.service';
 import { buildCivilReference } from '../common/civil-registry-reference.util';
 
 export interface RecordOfficialRegistryEntryInput {
@@ -34,6 +35,7 @@ export class CivilRegistryRegistrationService {
     private readonly prisma: PrismaService,
     private readonly boundary: CivilRegistryBoundaryService,
     private readonly audit: CivilRegistryAuditService,
+    private readonly canonicalPath: CivilRegistryCanonicalPathService,
   ) {}
 
   async recordOfficialEntry(actorIdentityId: string, input: RecordOfficialRegistryEntryInput) {
@@ -121,6 +123,12 @@ export class CivilRegistryRegistrationService {
         authorityEvaluationRecordId: input.authorityEvaluationRecordId,
         governmentDecisionId: input.governmentDecisionId,
       },
+    });
+
+    await this.canonicalPath.syncServicePackRecordsForOfficialEntry({
+      civilRegistryEntryId: result.entry.id,
+      vitalEventId: input.vitalEventId,
+      caseId: input.caseId,
     });
 
     return result;

@@ -84,6 +84,17 @@ export interface ActorContextInstitutionContext {
   officeIds: string[];
 }
 
+/** Lightweight institutional actor profile for case and document access checks. */
+export interface InstitutionalCaseAccessActor {
+  identityId: string;
+  identityType: IdentityType;
+  userAccountId: string | null;
+  officeholderId?: string;
+  linkedOfficeIds: string[];
+  hasActiveOfficeholderLink: boolean;
+  linkedInstitutionIds: string[];
+}
+
 export interface ActorContext extends AuthenticatedPrincipal {
   userAccountId: string | null;
   identityType: IdentityType;

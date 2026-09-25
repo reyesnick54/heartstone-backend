@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AuthorityActionType,
   AuthorityClassification,
+  AuthorityConditionType,
   AuthorityDependencyBlockingStatus,
   AuthorityDependencyType,
   AuthorityEvaluationOutcome,
@@ -25,6 +26,11 @@ import { InstitutionalActorResolver } from '../institutional-actor/institutional
 import { deriveEvaluationStatus } from '../policy/derive-evaluation-status.util';
 import { SegregationOfDutyEvaluator } from '../sod/segregation-of-duty-evaluator.service';
 import { type AuthorityEvaluationRequest } from './authority-evaluation.types';
+import {
+  type AuthorityFactsSourceRefs,
+  type DerivedAuthorityFacts,
+} from './authority-evaluation-trust.types';
+import { AuthorityFactsResolver } from './authority-facts-resolver.service';
 import { AuthorityEvaluationResponseDto } from './dto/authority-evaluation-response.dto';
 
 @Injectable()
@@ -36,10 +42,11 @@ export class AuthorityEvaluationService {
     private readonly dependencyEvaluator: AuthorityDependencyEvaluator,
     private readonly sodEvaluator: SegregationOfDutyEvaluator,
     private readonly explanationService: AuthorityExplanationService,
+    private readonly factsResolver: AuthorityFactsResolver,
   ) {}
 
   async evaluate(request: AuthorityEvaluationRequest): Promise<AuthorityEvaluationResponseDto> {
-    const at = request.at ?? new Date();
+    const at = request.privilegedHistoricalAt ?? new Date();
     const codes: AuthorityExplanationCode[] = [];
 
     const functionRecord = await this.prisma.functionAuthorityRecord.findUnique({
@@ -228,35 +235,66 @@ export class AuthorityEvaluationService {
       }
     }
 
+    const resolvedFacts = await this.factsResolver.resolve({
+      identityId: request.identityId,
+      officeholderId: actor.officeholderId,
+      functionAuthorityRecordId: functionRecord.id,
+      action: request.action,
+      at,
+      resourceScope: request.resourceScope,
+    });
+
+    const derivedFacts = this.applyFailClosedConflictRecusal(
+      functionRecord.conditions,
+      resolvedFacts.facts,
+      request.resourceScope,
+    );
+
     const conditionFailures = this.conditionEvaluator.evaluate(functionRecord.conditions, {
       action: request.action,
-      evidenceProvided: request.evidenceProvided,
-      qualificationCodes: request.qualificationCodes,
+      evidenceProvided: derivedFacts.evidenceProvided,
+      qualificationCodes: derivedFacts.qualificationCodes,
       transactionAmount: request.transactionAmount,
       scopeValue: request.scopeValue,
-      hasSecondApproval: request.hasSecondApproval,
-      hasConsultation: request.hasConsultation,
-      hasSupervision: request.hasSupervision,
-      hasLiaison: request.hasLiaison,
-      isSelfApproval: request.isSelfApproval,
-      isConflicted: request.isConflicted,
-      isRecused: request.isRecused,
-      priorActions: request.priorActions,
+      hasSecondApproval: derivedFacts.hasSecondApproval,
+      hasConsultation: derivedFacts.hasConsultation,
+      hasSupervision: derivedFacts.hasSupervision,
+      hasLiaison: derivedFacts.hasLiaison,
+      isSelfApproval: derivedFacts.isSelfApproval,
+      isConflicted: derivedFacts.isConflicted,
+      isRecused: derivedFacts.isRecused,
+      priorActions: derivedFacts.priorActions,
     });
     if (conditionFailures.length > 0) {
       codes.push(...conditionFailures);
-      return this.finalize(request, codes, AuthorityEvaluationOutcome.DENY, actor, at);
+      return this.finalize(
+        request,
+        codes,
+        AuthorityEvaluationOutcome.DENY,
+        actor,
+        at,
+        derivedFacts,
+        resolvedFacts.sourceRefs,
+      );
     }
 
     const sodFailures = this.sodEvaluator.evaluate(functionRecord.sodRules, {
       action: request.action,
-      priorActions: request.priorActions,
-      isSelfApproval: request.isSelfApproval,
-      hasSecondApproval: request.hasSecondApproval,
+      priorActions: derivedFacts.priorActions,
+      isSelfApproval: derivedFacts.isSelfApproval,
+      hasSecondApproval: derivedFacts.hasSecondApproval,
     });
     if (sodFailures.length > 0) {
       codes.push(...sodFailures);
-      return this.finalize(request, codes, AuthorityEvaluationOutcome.DENY, actor, at);
+      return this.finalize(
+        request,
+        codes,
+        AuthorityEvaluationOutcome.DENY,
+        actor,
+        at,
+        derivedFacts,
+        resolvedFacts.sourceRefs,
+      );
     }
 
     const dependencyFailures = await this.dependencyEvaluator.evaluate(
@@ -292,7 +330,41 @@ export class AuthorityEvaluationService {
     }
 
     codes.push(AUTHORITY_EVALUATION_EXPLANATION_CODES.ALLOW);
-    return this.finalize(request, codes, AuthorityEvaluationOutcome.ALLOW, actor, at);
+    return this.finalize(
+      request,
+      codes,
+      AuthorityEvaluationOutcome.ALLOW,
+      actor,
+      at,
+      derivedFacts,
+      resolvedFacts.sourceRefs,
+    );
+  }
+
+  private applyFailClosedConflictRecusal(
+    conditions: { conditionType: AuthorityConditionType; isRequired: boolean }[],
+    facts: DerivedAuthorityFacts,
+    resourceScope: AuthorityEvaluationRequest['resourceScope'],
+  ): DerivedAuthorityFacts {
+    const hasInstitutionalContext =
+      resourceScope?.caseId != null ||
+      resourceScope?.decisionReadinessAssessmentId != null ||
+      resourceScope?.evidencePacketVersionId != null;
+
+    const requiresConflict = conditions.some(
+      (item) =>
+        item.isRequired && item.conditionType === AuthorityConditionType.CONFLICT_CHECK,
+    );
+    const requiresRecusal = conditions.some(
+      (item) => item.isRequired && item.conditionType === AuthorityConditionType.RECUSAL_CHECK,
+    );
+
+    return {
+      ...facts,
+      isConflicted:
+        facts.isConflicted || (requiresConflict && !hasInstitutionalContext ? true : false),
+      isRecused: facts.isRecused || (requiresRecusal && !hasInstitutionalContext ? true : false),
+    };
   }
 
   private resolveDependencyOutcome(
@@ -398,6 +470,8 @@ export class AuthorityEvaluationService {
       delegation: { id: string } | null;
     } | null,
     at: Date,
+    derivedFacts?: DerivedAuthorityFacts,
+    sourceRefs?: AuthorityFactsSourceRefs,
   ): Promise<AuthorityEvaluationResponseDto> {
     const uniqueCodes = [...new Set(codes)];
     const explanation = this.explanationService.buildExplanation(outcome, uniqueCodes);
@@ -430,9 +504,13 @@ export class AuthorityEvaluationService {
             appointmentId: request.appointmentId,
             delegationId: request.delegationId,
           },
+          resourceScope: request.resourceScope ?? {},
+          derivedFacts: derivedFacts ?? null,
+          authoritativeSourceRefs: sourceRefs ?? null,
+          evaluatedAtTrusted: request.privilegedHistoricalAt ? 'privileged-historical' : 'server-live',
           outcome,
           codes: uniqueCodes,
-        } satisfies Prisma.InputJsonObject,
+        } as unknown as Prisma.InputJsonObject,
         explanationCodes: uniqueCodes,
         requestHash,
       },

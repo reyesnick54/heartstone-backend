@@ -4,7 +4,7 @@ import { Prisma, SecurityAuditEventType } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { SecurityAuditService } from '../identity/audit/security-audit.service';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
-import { ActorContextService } from './actor-context.service';
+import { InstitutionalActorScopeService } from './institutional-actor-scope.service';
 import {
   InstitutionalScopeDeniedException,
   maskDeniedAsNotFound,
@@ -34,7 +34,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 @Injectable()
 export class ResourceAccessService {
   constructor(
-    private readonly actorContext: ActorContextService,
+    private readonly actorContext: InstitutionalActorScopeService,
     private readonly scopeService: InstitutionalScopeService,
     private readonly securityAudit: SecurityAuditService,
     private readonly prisma: PrismaService,
