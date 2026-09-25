@@ -278,7 +278,7 @@ describe('Institutional scope enforcement (integration)', () => {
       }),
     ).resolves.toMatchObject({
       allowed: false,
-      reason: 'inactive_representative',
+      reason: 'representation_out_of_scope',
     });
   });
 

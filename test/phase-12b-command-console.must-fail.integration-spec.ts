@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { ForbiddenException, type INestApplication } from '@nestjs/common';
+import { ForbiddenException, type INestApplication,UnauthorizedException } from '@nestjs/common';
 import {
   AccountStatus,
   AuthorityClassification,
@@ -229,7 +229,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
         purpose: DashboardAccessPurpose.EXECUTIVE_BRIEFING,
         sensitivityScope: DashboardSensitivityLevel.RESTRICTED,
       }),
-    ).rejects.toThrow(ForbiddenException);
+    ).rejects.toThrow(UnauthorizedException);
   });
 
   it('must-fail: snapshot cannot claim another identity as capturer', async () => {

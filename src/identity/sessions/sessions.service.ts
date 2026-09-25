@@ -104,7 +104,14 @@ export class SessionsService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const identity = account.identities[0];
+    const identity =
+      account.identities.find((candidate) =>
+        candidate.credentials.some(
+          (credential) =>
+            credential.type === CredentialType.PASSWORD &&
+            credential.status === CredentialStatus.ACTIVE,
+        ),
+      ) ?? account.identities[0];
     if (!identity) {
       await this.audit.record({
         eventType: 'AUTHENTICATION_FAILURE',
