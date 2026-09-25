@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
+import { ActorContextModule } from '../identity/auth/context/actor-context.module';
 import { IdentityCommonModule } from '../identity/common/identity-common.module';
 import { ActorContextService } from './actor-context.service';
 import { InstitutionalScopeGuard } from './guards/institutional-scope.guard';
@@ -10,7 +11,7 @@ import { ResourceOwnershipResolver } from './resource-ownership.resolver';
 
 @Global()
 @Module({
-  imports: [DatabaseModule, IdentityCommonModule],
+  imports: [DatabaseModule, IdentityCommonModule, ActorContextModule],
   providers: [
     ResourceOwnershipResolver,
     ActorContextService,

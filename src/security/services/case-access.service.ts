@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
-import { type ResolvedActorContext } from './actor-context.service';
+import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 
 @Injectable()
 export class CaseAccessService {
@@ -24,7 +24,7 @@ export class CaseAccessService {
 
   async assertOfficialInstitutionalAccess(
     caseId: string,
-    actor: ResolvedActorContext,
+    actor: ActorContext,
   ): Promise<void> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
@@ -35,20 +35,23 @@ export class CaseAccessService {
       throw new NotFoundException(`Case "${caseId}" was not found`);
     }
 
-    if (!actor.hasActiveOfficeholderLink) {
+    if (!actor.hasInstitutionalRelationships) {
       throw new ForbiddenException(
         'Institutional case access requires an active officeholder link',
       );
     }
 
-    if (!actor.linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)) {
+    const linkedInstitutionIds = actor.institutionContexts.map(
+      (context) => context.institutionId,
+    );
+    if (!linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)) {
       throw new ForbiddenException('Case is outside the authenticated actor institution scope');
     }
   }
 
   async assertApplicantOrOfficialAccess(
     caseId: string,
-    actor: ResolvedActorContext,
+    actor: ActorContext,
   ): Promise<'APPLICANT' | 'OFFICIAL'> {
     const caseRecord = await this.prisma.case.findUnique({
       where: { id: caseId },
@@ -63,9 +66,12 @@ export class CaseAccessService {
       return 'APPLICANT';
     }
 
+    const linkedInstitutionIds = actor.institutionContexts.map(
+      (context) => context.institutionId,
+    );
     if (
-      actor.hasActiveOfficeholderLink &&
-      actor.linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)
+      actor.hasInstitutionalRelationships &&
+      linkedInstitutionIds.includes(caseRecord.responsibleInstitutionId)
     ) {
       return 'OFFICIAL';
     }

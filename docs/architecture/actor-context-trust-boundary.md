@@ -90,7 +90,9 @@ export class ExampleController {
 }
 ```
 
-When a route accepts institutional selectors (`officeholderId`, `appointmentId`, `delegationId`) for a specific action, validate those selectors against `actor` relationships or delegate to `AuthorityEvaluationService`. Never treat client identity fields as authoritative.
+When a route accepts institutional selectors (`officeholderId`, `appointmentId`, `delegationId`) for a specific action, validate those selectors against `actor` relationships using `ActorContextService.assertInstitutionalSelectorsBoundToActor()` (also enforced centrally by `ConsequentialActionService` before authority evaluation). Never treat client identity fields as authoritative.
+
+`ActorContextService.buildResolutionAudit()` produces a server-verified snapshot (identity, person, officeholder link, appointment, delegation, institution, effective time) suitable for attaching to consequential action handling and future audit persistence.
 
 ## Related documentation
 

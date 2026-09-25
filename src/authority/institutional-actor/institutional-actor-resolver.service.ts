@@ -252,6 +252,15 @@ export class InstitutionalActorResolver {
       };
     }
 
+    if (appointment.officeholderId !== officeholderLink.officeholderId) {
+      return {
+        failure: {
+          code: AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_OFFICEHOLDER_LINK,
+          message: 'Appointment does not belong to the authenticated officeholder link',
+        },
+      };
+    }
+
     if (appointment.status === AppointmentStatus.SUSPENDED) {
       return {
         failure: {

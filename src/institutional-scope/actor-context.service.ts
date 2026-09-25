@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { IdentityOfficeholderLinkStatus } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 
-import { PrismaService } from '../database/prisma.service';
+import { ActorContextService as CanonicalActorContextService } from '../identity/auth/context/actor-context.service';
 import {
   ActorScopeContext,
   BuildActorContextInput,
@@ -10,61 +9,37 @@ import {
 
 @Injectable()
 export class ActorContextService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly canonicalActorContext: CanonicalActorContextService) {}
 
   async buildFromSession(input: BuildActorContextInput): Promise<ActorScopeContext> {
-    const identity = await this.prisma.identity.findUnique({
-      where: { id: input.session.identityId },
-      include: {
-        officeholderLinks: {
-          where: { status: IdentityOfficeholderLinkStatus.ACTIVE },
-          include: {
-            officeholder: {
-              include: {
-                appointments: {
-                  where: { status: 'ACTIVE' },
-                  include: {
-                    office: {
-                      select: {
-                        id: true,
-                        departmentId: true,
-                        department: { select: { institutionId: true } },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        representativeAuthorities: true,
-        memberships: { select: { organizationId: true } },
-      },
+    const actor = await this.canonicalActorContext.resolveFromSessionContext({
+      session: input.session,
     });
 
-    if (!identity) {
-      throw new NotFoundException(`Identity "${input.session.identityId}" was not found`);
-    }
-
-    const officialContext = identity.officeholderLinks.map((link) =>
-      this.buildOfficialContext(link.officeholderId, link.officeholder.appointments),
+    const officialContext = actor.officeholderLinks.map((link) =>
+      this.buildOfficialContext(
+        link.officeholderId,
+        actor.activeAppointments.filter(
+          (appointment) => appointment.officeholderId === link.officeholderId,
+        ),
+      ),
     );
 
     return {
-      identityId: identity.id,
-      sessionId: input.session.sessionId,
-      userAccountId: input.session.userAccountId,
-      identityType: identity.type,
+      identityId: actor.identityId,
+      sessionId: actor.sessionId,
+      userAccountId: actor.userAccountId,
+      identityType: actor.identityType,
       officialContext,
-      representativeAuthorities: identity.representativeAuthorities.map((authority) => ({
-        id: authority.id,
+      representativeAuthorities: actor.representativeAuthorities.map((authority) => ({
+        id: authority.representativeAuthorityId,
         organizationId: authority.organizationId,
-        identityId: authority.identityId,
+        identityId: actor.identityId,
         status: authority.status,
         effectiveFrom: authority.effectiveFrom,
         effectiveUntil: authority.effectiveUntil,
       })),
-      organizationMembershipIds: identity.memberships.map(
+      organizationMembershipIds: actor.organizationMemberships.map(
         (membership) => membership.organizationId,
       ),
       isTechnicalAdministrator: input.isTechnicalAdministrator ?? false,
@@ -73,22 +48,16 @@ export class ActorContextService {
 
   private buildOfficialContext(
     officeholderId: string,
-    appointments: {
-      office: {
-        id: string;
-        departmentId: string;
-        department: { institutionId: string };
-      };
-    }[],
+    appointments: { officeId: string; departmentId: string; institutionId: string }[],
   ): OfficialInstitutionalContext {
     const officeIds = new Set<string>();
     const departmentIds = new Set<string>();
     const institutionIds = new Set<string>();
 
     for (const appointment of appointments) {
-      officeIds.add(appointment.office.id);
-      departmentIds.add(appointment.office.departmentId);
-      institutionIds.add(appointment.office.department.institutionId);
+      officeIds.add(appointment.officeId);
+      departmentIds.add(appointment.departmentId);
+      institutionIds.add(appointment.institutionId);
     }
 
     return {
