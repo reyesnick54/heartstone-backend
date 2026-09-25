@@ -445,11 +445,16 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
           title: 'S1 positive path evidence',
         },
       });
+      if (!fixture.signatureDocumentVersionId) {
+        throw new Error('Expected signature document version in Phase 8 fixture');
+      }
       await prisma.evidencePacketItem.create({
         data: {
           packetVersionId: fixture.evidencePacketVersionId,
           evidenceRecordId: evidenceRecord.id,
-          sortOrder: 1,
+          documentVersionId: fixture.signatureDocumentVersionId,
+          evidenceStatusAtInclusion: evidenceRecord.status,
+          inclusionOrder: 1,
         },
       });
       packetItems = await prisma.evidencePacketItem.findMany({
