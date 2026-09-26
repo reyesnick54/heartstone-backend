@@ -9,8 +9,8 @@ import {
   authHeader,
   provisionAuthenticatedIdentity,
 } from './helpers/identity-provisioning.fixture';
-import { assignTechnicalRole } from './helpers/technical-access.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { assignTechnicalRole } from './helpers/technical-access.fixture';
 
 describe('S4 administrative route lockdown must-fail (integration)', () => {
   let app: INestApplication<App>;
