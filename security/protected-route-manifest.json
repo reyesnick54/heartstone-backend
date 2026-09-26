@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T08:49:27.254Z",
+  "generatedAt": "2026-09-26T08:55:04.299Z",
   "routeCount": 672,
   "summary": {
     "public": 27,
@@ -143,7 +143,7 @@
       "sourceFile": "src/government/appointments/appointments.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:appointment:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -165,7 +165,7 @@
       "sourceFile": "src/government/appointments/appointments.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:appointment:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -187,7 +187,7 @@
       "sourceFile": "src/government/appointments/appointments.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:appointment:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -209,7 +209,7 @@
       "sourceFile": "src/government/appointments/appointments.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:appointment:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -315,7 +315,7 @@
       "sourceFile": "src/authority/function-authority-records/function-authority-records.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "authority:function-record:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -337,7 +337,7 @@
       "sourceFile": "src/authority/function-authority-records/function-authority-records.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "authority:function-record:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -359,7 +359,7 @@
       "sourceFile": "src/authority/function-authority-records/function-authority-records.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "authority:function-record:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -381,7 +381,7 @@
       "sourceFile": "src/authority/function-authority-records/function-authority-records.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "authority:function-record:activate",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -403,7 +403,7 @@
       "sourceFile": "src/authority/function-authority-records/function-authority-records.controller.ts",
       "handler": "ApiOperation",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "authority:function-record:activate",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -1727,7 +1727,7 @@
       "sourceFile": "src/government/delegations/delegations.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:delegation:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -1749,7 +1749,7 @@
       "sourceFile": "src/government/delegations/delegations.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:delegation:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -1771,7 +1771,7 @@
       "sourceFile": "src/government/delegations/delegations.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:delegation:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -1793,7 +1793,7 @@
       "sourceFile": "src/government/delegations/delegations.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:delegation:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8043,7 +8043,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8065,7 +8065,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8087,7 +8087,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8109,7 +8109,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8131,7 +8131,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8153,7 +8153,7 @@
       "sourceFile": "src/identity/authentication-methods/authentication-methods.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:authentication-method:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8175,7 +8175,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8197,7 +8197,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8219,7 +8219,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8241,7 +8241,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8263,7 +8263,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8285,7 +8285,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "revoke",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8307,7 +8307,7 @@
       "sourceFile": "src/identity/credentials/credentials.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:credential:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8329,7 +8329,7 @@
       "sourceFile": "src/identity/identities/identities.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:identity:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8351,7 +8351,7 @@
       "sourceFile": "src/identity/identities/identities.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:identity:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8373,7 +8373,7 @@
       "sourceFile": "src/identity/identities/identities.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:identity:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8395,7 +8395,7 @@
       "sourceFile": "src/identity/identities/identities.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:identity:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8416,11 +8416,12 @@
       "controller": "ProtectedController",
       "sourceFile": "src/identity/protected/protected.controller.ts",
       "handler": "getProfile",
-      "technicalPermissionRequired": false,
-      "permissionCode": null,
+      "technicalPermissionRequired": true,
+      "permissionCode": "identity:self:read",
       "guardCoverage": [
         "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard"
+        "ClientIdentitySubstitutionGuard",
+        "PermissionsGuard"
       ],
       "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
@@ -8459,7 +8460,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8481,7 +8482,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8503,7 +8504,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8525,7 +8526,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8547,7 +8548,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8569,7 +8570,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "end",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8591,7 +8592,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "revoke",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8613,7 +8614,7 @@
       "sourceFile": "src/identity/memberships/memberships.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:membership:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8635,7 +8636,7 @@
       "sourceFile": "src/identity/officeholder-links/officeholder-links.controller.ts",
       "handler": "officeholder",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:officeholder-link:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8657,7 +8658,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8679,7 +8680,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8701,7 +8702,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8723,7 +8724,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8745,7 +8746,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8767,7 +8768,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "revoke",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8789,7 +8790,7 @@
       "sourceFile": "src/identity/organizations/organizations.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:organization:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8811,7 +8812,7 @@
       "sourceFile": "src/identity/persons/persons.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:person:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8833,7 +8834,7 @@
       "sourceFile": "src/identity/persons/persons.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:person:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8855,7 +8856,7 @@
       "sourceFile": "src/identity/persons/persons.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:person:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8877,7 +8878,7 @@
       "sourceFile": "src/identity/persons/persons.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:person:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8899,7 +8900,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8921,7 +8922,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "authority",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8943,7 +8944,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8965,7 +8966,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -8987,7 +8988,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9009,7 +9010,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "end",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9031,7 +9032,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "revoke",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9053,7 +9054,7 @@
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:representative-authority:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9075,7 +9076,7 @@
       "sourceFile": "src/technical-access/technical-access.controller.ts",
       "handler": "listAssignments",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:technical-access:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9097,7 +9098,7 @@
       "sourceFile": "src/technical-access/technical-access.controller.ts",
       "handler": "assignRole",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:technical-access:role-assign",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9119,7 +9120,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9141,7 +9142,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9163,7 +9164,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9185,7 +9186,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "update",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:update",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9207,7 +9208,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "activate",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:activate",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9229,7 +9230,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "revoke",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:revoke",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9251,7 +9252,7 @@
       "sourceFile": "src/identity/user-accounts/user-accounts.controller.ts",
       "handler": "suspend",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "identity:user-account:suspend",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9420,7 +9421,7 @@
       "sourceFile": "src/government/institutions/institutions.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:institution:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9442,7 +9443,7 @@
       "sourceFile": "src/government/institutions/institutions.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:institution:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9464,7 +9465,7 @@
       "sourceFile": "src/government/institutions/institutions.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:institution:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -9508,7 +9509,7 @@
       "sourceFile": "src/government/institutions/institutions.controller.ts",
       "handler": "getStructure",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:institution:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -10559,7 +10560,7 @@
       "sourceFile": "src/government/jurisdictions/jurisdictions.controller.ts",
       "handler": "findAll",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:jurisdiction:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -10581,7 +10582,7 @@
       "sourceFile": "src/government/jurisdictions/jurisdictions.controller.ts",
       "handler": "create",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:jurisdiction:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -10603,7 +10604,7 @@
       "sourceFile": "src/government/jurisdictions/jurisdictions.controller.ts",
       "handler": "findOne",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:jurisdiction:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -10647,7 +10648,7 @@
       "sourceFile": "src/government/jurisdictions/jurisdictions.controller.ts",
       "handler": "getStructure",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "government:jurisdiction:read",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -14114,7 +14115,7 @@
       "sourceFile": "src/application-processing/workflow/workflow.controller.ts",
       "handler": "createDefinition",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "workflow:definition:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -14136,7 +14137,7 @@
       "sourceFile": "src/application-processing/workflow/workflow.controller.ts",
       "handler": "createVersion",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "workflow:definition:create",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",
@@ -14158,7 +14159,7 @@
       "sourceFile": "src/application-processing/workflow/workflow.controller.ts",
       "handler": "approveVersion",
       "technicalPermissionRequired": true,
-      "permissionCode": null,
+      "permissionCode": "workflow:definition:approve",
       "guardCoverage": [
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard",

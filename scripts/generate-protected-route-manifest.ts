@@ -405,11 +405,12 @@ function collectLeadingDecorators(content: string, controllerIndex: number): str
 }
 
 function collectDecoratorBlock(classBody: string, methodMatchIndex: number, methodDecoratorLine: string): string {
-  const lines = classBody.slice(0, methodMatchIndex + methodDecoratorLine.length).split('\n');
+  const blockEnd = methodMatchIndex + methodDecoratorLine.length;
+  const beforeLines = classBody.slice(0, blockEnd).split('\n');
   const decoratorLines: string[] = [];
 
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const trimmed = lines[index]?.trim() ?? '';
+  for (let index = beforeLines.length - 1; index >= 0; index -= 1) {
+    const trimmed = beforeLines[index]?.trim() ?? '';
     if (!trimmed) {
       if (decoratorLines.length > 0) {
         break;
@@ -417,12 +418,26 @@ function collectDecoratorBlock(classBody: string, methodMatchIndex: number, meth
       continue;
     }
     if (trimmed.startsWith('@')) {
-      decoratorLines.unshift(lines[index] ?? '');
+      decoratorLines.unshift(beforeLines[index] ?? '');
       continue;
     }
     if (decoratorLines.length > 0) {
       break;
     }
+  }
+
+  const afterSlice = classBody.slice(blockEnd);
+  const afterLines = afterSlice.split('\n');
+  for (const line of afterLines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+    if (trimmed.startsWith('@')) {
+      decoratorLines.push(line);
+      continue;
+    }
+    break;
   }
 
   return decoratorLines.join('\n');
