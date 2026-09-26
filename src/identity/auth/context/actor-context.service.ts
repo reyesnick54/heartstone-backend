@@ -454,18 +454,34 @@ export class ActorContextService {
     };
   }
 
-  assertBoundDelegation(
+  async assertBoundDelegation(
     actor: ActorContext,
     binding: ResolvedActorInstitutionalBinding,
     delegationId: string,
     at: Date = new Date(),
-  ): ActorContextDelegation {
-    const delegation = actor.activeDelegations.find((item) => item.delegationId === delegationId);
+  ): Promise<ActorContextDelegation> {
+    let delegation = actor.activeDelegations.find((item) => item.delegationId === delegationId);
+
     if (!delegation) {
-      throw new ActorInstitutionalBindingException(
-        ACTOR_BINDING_FAILURE_CODES.DELEGATION_NOT_OWNED,
-        'Delegation is not active for the authenticated actor',
-      );
+      const record = await this.prisma.delegation.findUnique({
+        where: { id: delegationId },
+      });
+      if (record?.status !== DelegationStatus.ACTIVE) {
+        throw new ActorInstitutionalBindingException(
+          ACTOR_BINDING_FAILURE_CODES.DELEGATION_NOT_OWNED,
+          'Delegation is not active for the authenticated actor',
+        );
+      }
+
+      delegation = {
+        delegationId: record.id,
+        institutionId: record.institutionId,
+        recipientOfficeholderId: record.recipientOfficeholderId,
+        recipientOfficeId: record.recipientOfficeId,
+        status: record.status,
+        effectiveFrom: record.effectiveFrom,
+        effectiveUntil: record.effectiveUntil,
+      };
     }
 
     const recipientMatches =
@@ -534,7 +550,12 @@ export class ActorContextService {
     }
 
     if (selectors.delegationId) {
-      const delegation = this.assertBoundDelegation(actor, binding, selectors.delegationId, at);
+      const delegation = await this.assertBoundDelegation(
+        actor,
+        binding,
+        selectors.delegationId,
+        at,
+      );
       return { ...binding, delegation };
     }
 
