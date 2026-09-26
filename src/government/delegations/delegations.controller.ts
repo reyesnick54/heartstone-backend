@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { DelegationsService } from './delegations.service';
 import { CreateDelegationDto } from './dto/create-delegation.dto';
 import { DelegationResponseDto } from './dto/delegation-response.dto';
@@ -9,10 +12,12 @@ import { UpdateDelegationDto } from './dto/update-delegation.dto';
 
 @ApiTags('delegations')
 @Controller('delegations')
+@DenyByDefaultAdministrative()
 export class DelegationsController {
   constructor(private readonly service: DelegationsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_DELEGATION_CREATE)
   @ApiOperation({ summary: 'Create a delegation' })
   @ApiCreatedResponse({ type: DelegationResponseDto })
   create(@Body() dto: CreateDelegationDto): Promise<DelegationResponseDto> {
@@ -20,6 +25,7 @@ export class DelegationsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_DELEGATION_READ)
   @ApiOperation({ summary: 'List delegations' })
   @ApiOkResponse({ type: DelegationResponseDto, isArray: true })
   findAll(@Query() query: QueryDelegationsDto): Promise<DelegationResponseDto[]> {
@@ -27,6 +33,7 @@ export class DelegationsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_DELEGATION_READ)
   @ApiOperation({ summary: 'Get a delegation by id' })
   @ApiOkResponse({ type: DelegationResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<DelegationResponseDto> {
@@ -34,6 +41,7 @@ export class DelegationsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_DELEGATION_UPDATE)
   @ApiOperation({ summary: 'Update a delegation' })
   @ApiOkResponse({ type: DelegationResponseDto })
   update(

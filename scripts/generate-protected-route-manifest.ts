@@ -8,6 +8,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { PermissionCodes } from '../src/technical-access/constants/permission-codes.constants';
 import { RouteClass } from '../src/security/route-class.enum';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -45,6 +46,9 @@ interface ScannedRoute {
   routeClass: RouteClass;
   authenticationRequired: boolean;
   isPublic: boolean;
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+  guardCoverage: string[];
   scopeRequirement: string;
   authorityRequirement: string;
   actorSource: string;
@@ -197,6 +201,22 @@ const DOMAIN_PROFILES: Record<string, DomainSecurityProfile> = {
     actorSource: 'Anonymous reader',
     primarySecurityInvariant: 'Boundary disclaimers are informational only',
   },
+  'service-packs': {
+    routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+    authenticationRequired: true,
+    scopeRequirement: 'Service pack authoring, validation, and deployment administration',
+    authorityRequirement: 'Technical permission; consequential governance routes require authority evaluation',
+    actorSource: 'Authenticated platform administrator',
+    primarySecurityInvariant: 'Pack compilation != production deployment authority',
+  },
+  scheduling: {
+    routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+    authenticationRequired: true,
+    scopeRequirement: 'Government scheduling configuration and appointment administration',
+    authorityRequirement: 'Institutional scheduling administration permission',
+    actorSource: 'Authenticated institutional administrator',
+    primarySecurityInvariant: 'Scheduling configuration does not confer appointment decision authority',
+  },
   system: {
     routeClass: RouteClass.SYSTEM_HEALTH,
     authenticationRequired: false,
@@ -250,13 +270,20 @@ function resolveDomain(sourceFile: string): string {
   if (relative.startsWith('operational-readiness/')) return 'operational-readiness';
   if (relative.startsWith('production-readiness/')) return 'production-readiness';
   if (relative.startsWith('healthcare/')) return 'healthcare';
+  if (relative.startsWith('service-packs/')) return 'service-packs';
+  if (relative.startsWith('scheduling/')) return 'scheduling';
+  if (relative.startsWith('evidence-records/')) return 'evidence-records';
   if (relative === 'app.controller.ts' || relative.startsWith('system/')) return 'system';
 
   return 'system';
 }
 
+function normalizeControllerPath(controllerPath: string): string {
+  return controllerPath.replace(/^api\/v1\/?/, '').trim();
+}
+
 function joinRoutePaths(controllerPath: string, methodPath: string): string {
-  const segments = [controllerPath, methodPath]
+  const segments = [normalizeControllerPath(controllerPath), methodPath]
     .map((segment) => segment.trim().replace(/^\/+|\/+$/g, ''))
     .filter(Boolean);
   return `/${segments.join('/')}`;
@@ -272,6 +299,41 @@ function hasRequiresAuthority(decoratorBlock: string): boolean {
 
 function hasAuthorityPolicyGuard(decoratorBlock: string): boolean {
   return /@UseGuards\s*\([^)]*AuthorityPolicyGuard/.test(decoratorBlock);
+}
+
+function hasDenyByDefaultAdministrative(decoratorBlock: string): boolean {
+  return /@DenyByDefaultAdministrative\s*\(\s*\)/.test(decoratorBlock);
+}
+
+function extractRequirePermissionsCode(decoratorBlock: string): string | null {
+  const match = decoratorBlock.match(
+    /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/,
+  );
+  if (!match?.[1]) {
+    return null;
+  }
+  const key = match[1] as keyof typeof PermissionCodes;
+  return PermissionCodes[key] ?? null;
+}
+
+function resolveTechnicalAccessMetadata(input: {
+  classHeader: string;
+  decoratorBlock: string;
+}): {
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+} {
+  const denyByDefault =
+    hasDenyByDefaultAdministrative(input.classHeader) ||
+    hasDenyByDefaultAdministrative(input.decoratorBlock);
+  const permissionCode =
+    extractRequirePermissionsCode(input.decoratorBlock) ??
+    extractRequirePermissionsCode(input.classHeader);
+
+  return {
+    technicalPermissionRequired: denyByDefault || permissionCode !== null,
+    permissionCode,
+  };
 }
 
 function parseRouteAccessOverride(decoratorBlock: string): RouteAccessOverride | undefined {
@@ -343,11 +405,12 @@ function collectLeadingDecorators(content: string, controllerIndex: number): str
 }
 
 function collectDecoratorBlock(classBody: string, methodMatchIndex: number, methodDecoratorLine: string): string {
-  const lines = classBody.slice(0, methodMatchIndex + methodDecoratorLine.length).split('\n');
+  const blockEnd = methodMatchIndex + methodDecoratorLine.length;
+  const beforeLines = classBody.slice(0, blockEnd).split('\n');
   const decoratorLines: string[] = [];
 
-  for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const trimmed = lines[index]?.trim() ?? '';
+  for (let index = beforeLines.length - 1; index >= 0; index -= 1) {
+    const trimmed = beforeLines[index]?.trim() ?? '';
     if (!trimmed) {
       if (decoratorLines.length > 0) {
         break;
@@ -355,12 +418,26 @@ function collectDecoratorBlock(classBody: string, methodMatchIndex: number, meth
       continue;
     }
     if (trimmed.startsWith('@')) {
-      decoratorLines.unshift(lines[index] ?? '');
+      decoratorLines.unshift(beforeLines[index] ?? '');
       continue;
     }
     if (decoratorLines.length > 0) {
       break;
     }
+  }
+
+  const afterSlice = classBody.slice(blockEnd);
+  const afterLines = afterSlice.split('\n');
+  for (const line of afterLines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+    if (trimmed.startsWith('@')) {
+      decoratorLines.push(line);
+      continue;
+    }
+    break;
   }
 
   return decoratorLines.join('\n');
@@ -618,6 +695,21 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         routeAccess,
       });
 
+      const technicalAccess = resolveTechnicalAccessMetadata({
+        classHeader,
+        decoratorBlock,
+      });
+      const guardCoverage = ['SessionAuthGuard'];
+      if (!classification.isPublic) {
+        guardCoverage.push('ClientIdentitySubstitutionGuard');
+      }
+      if (technicalAccess.technicalPermissionRequired) {
+        guardCoverage.push('PermissionsGuard');
+      }
+      if (requiresAuthority) {
+        guardCoverage.push('AuthorityPolicyGuard');
+      }
+
       routes.push({
         path: fullPath,
         method: httpMethod.toUpperCase(),
@@ -625,6 +717,9 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         controller: controllerName,
         sourceFile: relativeSource,
         handler,
+        technicalPermissionRequired: technicalAccess.technicalPermissionRequired,
+        permissionCode: technicalAccess.permissionCode,
+        guardCoverage,
         ...classification,
       });
     }

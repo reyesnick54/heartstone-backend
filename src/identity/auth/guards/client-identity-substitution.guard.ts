@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 import { ActorContextService } from '../context/actor-context.service';
-import { type ActorContext } from '../context/actor-context.types';
+import { type ActorContext, normalizeActorGuardRequestPath } from '../context/actor-context.types';
 
 /**
  * Rejects requests where the client attempts to substitute identity fields
@@ -15,10 +15,15 @@ export class ClientIdentitySubstitutionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<{
       actor?: ActorContext;
       body?: Record<string, unknown>;
+      path?: string;
+      url?: string;
     }>();
 
     if (request.actor) {
-      this.actorContextService.assertNoClientIdentitySubstitution(request.actor, request.body);
+      const requestPath = normalizeActorGuardRequestPath(request.path ?? request.url ?? '/');
+      this.actorContextService.assertNoClientIdentitySubstitution(request.actor, request.body, {
+        requestPath,
+      });
     }
 
     return true;

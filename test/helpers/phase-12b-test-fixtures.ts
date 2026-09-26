@@ -27,6 +27,7 @@ import {
   loginAndGetSessionToken,
   sessionContextFromToken,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface Phase12BFixtureContext {
   institutionId: string;
@@ -118,6 +119,9 @@ export async function seedPhase12BFixture(
     const password = 'Phase12B123!';
     await createPasswordCredentialViaPrisma(prisma, identityId, password);
     await createPasswordAuthenticationMethodViaPrisma(prisma, identityId);
+    await ensureIntegrationTestTechnicalRoles(prisma, identityId, {
+      institutionIds: [institution.id],
+    });
     return loginAndGetSessionToken(app, loginIdentifier, password);
   };
 

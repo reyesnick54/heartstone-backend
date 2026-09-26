@@ -26,7 +26,10 @@ import {
   type ActorContextResolutionAudit,
   type ActorInstitutionalSelectors,
   CLIENT_ACTOR_IDENTITY_FIELDS,
+  CLIENT_ADMIN_ACTOR_FIELD_ALIASES,
+  CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS,
   type InstitutionalCaseAccessActor,
+  isClientResourceReferenceIdentityPath,
   type ResolvedActorContext,
   type ResolvedActorInstitutionalBinding,
   toResolvedActorContext,
@@ -157,13 +160,35 @@ export class ActorContextService {
   assertNoClientIdentitySubstitution(
     actor: ActorContext,
     clientPayload: Record<string, unknown> | null | undefined,
+    options?: { requestPath?: string },
   ): void {
     if (!clientPayload || typeof clientPayload !== 'object') {
       return;
     }
 
-    for (const field of CLIENT_ACTOR_IDENTITY_FIELDS) {
-      const clientValue = clientPayload[field];
+    const enforceCanonicalIdentityFields =
+      options?.requestPath === undefined ||
+      !isClientResourceReferenceIdentityPath(options.requestPath);
+
+    const fieldsToValidate: { clientField: string; actorField: keyof ActorContext }[] = [
+      ...CLIENT_ACTOR_IDENTITY_FIELDS.map((field) => ({
+        clientField: field,
+        actorField: field,
+      })),
+      ...(enforceCanonicalIdentityFields
+        ? CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS.map((field) => ({
+            clientField: field,
+            actorField: field,
+          }))
+        : []),
+      ...Object.entries(CLIENT_ADMIN_ACTOR_FIELD_ALIASES).map(([clientField, actorField]) => ({
+        clientField,
+        actorField,
+      })),
+    ];
+
+    for (const { clientField, actorField } of fieldsToValidate) {
+      const clientValue = clientPayload[clientField];
       if (
         clientValue === undefined ||
         clientValue === null ||
@@ -177,14 +202,14 @@ export class ActorContextService {
         continue;
       }
 
-      const actorValue = actor[field as keyof ActorContext];
+      const actorValue = actor[actorField];
       const normalizedClientValue = clientValue;
       const normalizedActorValue =
         typeof actorValue === 'string' ? actorValue : actorValue == null ? '' : null;
 
       if (normalizedActorValue === null || normalizedClientValue !== normalizedActorValue) {
         throw new ForbiddenException(
-          `Client-supplied ${field} does not match authenticated actor context`,
+          `Client-supplied ${clientField} does not match authenticated actor context`,
         );
       }
     }
@@ -429,18 +454,34 @@ export class ActorContextService {
     };
   }
 
-  assertBoundDelegation(
+  async assertBoundDelegation(
     actor: ActorContext,
     binding: ResolvedActorInstitutionalBinding,
     delegationId: string,
     at: Date = new Date(),
-  ): ActorContextDelegation {
-    const delegation = actor.activeDelegations.find((item) => item.delegationId === delegationId);
+  ): Promise<ActorContextDelegation> {
+    let delegation = actor.activeDelegations.find((item) => item.delegationId === delegationId);
+
     if (!delegation) {
-      throw new ActorInstitutionalBindingException(
-        ACTOR_BINDING_FAILURE_CODES.DELEGATION_NOT_OWNED,
-        'Delegation is not active for the authenticated actor',
-      );
+      const record = await this.prisma.delegation.findUnique({
+        where: { id: delegationId },
+      });
+      if (record?.status !== DelegationStatus.ACTIVE) {
+        throw new ActorInstitutionalBindingException(
+          ACTOR_BINDING_FAILURE_CODES.DELEGATION_NOT_OWNED,
+          'Delegation is not active for the authenticated actor',
+        );
+      }
+
+      delegation = {
+        delegationId: record.id,
+        institutionId: record.institutionId,
+        recipientOfficeholderId: record.recipientOfficeholderId,
+        recipientOfficeId: record.recipientOfficeId,
+        status: record.status,
+        effectiveFrom: record.effectiveFrom,
+        effectiveUntil: record.effectiveUntil,
+      };
     }
 
     const recipientMatches =
@@ -509,7 +550,12 @@ export class ActorContextService {
     }
 
     if (selectors.delegationId) {
-      const delegation = this.assertBoundDelegation(actor, binding, selectors.delegationId, at);
+      const delegation = await this.assertBoundDelegation(
+        actor,
+        binding,
+        selectors.delegationId,
+        at,
+      );
       return { ...binding, delegation };
     }
 

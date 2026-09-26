@@ -21,8 +21,10 @@ import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../src/authority/authori
 import { ConsequentialActionService } from '../src/authority/consequential-action/consequential-action.service';
 import { type ConsequentialActionDenial } from '../src/authority/consequential-action/consequential-action.types';
 import { PrismaService } from '../src/database/prisma.service';
+import { seedPhase8bDecisionFixture } from '../src/decisions/fixtures/phase-8b-test-fixtures';
 import { hashToken } from '../src/identity/common/crypto.util';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { grantAuthorityFunctionLifecycleOperator } from './helpers/technical-access.fixture';
 
 describe('Consequential Action Guard must-fail invariants (e2e)', () => {
   let app: INestApplication<App>;
@@ -375,6 +377,11 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         ruleType: SodRuleType.SELF_APPROVAL,
       },
     });
+    const phase8Case = await seedPhase8bDecisionFixture(prisma);
+    await prisma.case.update({
+      where: { id: phase8Case.caseId },
+      data: { applicantIdentityId: base.identity.id },
+    });
     await assertBlocked(
       base.identity.id,
       {
@@ -382,7 +389,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         officeholderId: base.officeholder.id,
         officeId: base.office.id,
         appointmentId: base.appointment.id,
-        isSelfApproval: true,
+        caseId: phase8Case.caseId,
       },
       [AUTHORITY_EVALUATION_EXPLANATION_CODES.SELF_APPROVAL_PROHIBITED],
     );
@@ -484,6 +491,8 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         permitted: true,
       },
     });
+
+    await grantAuthorityFunctionLifecycleOperator(prisma, base.identity.id);
 
     const response = await request(app.getHttpServer())
       .patch(`/api/v1/authority/functions/${base.fn.id}/suspend`)

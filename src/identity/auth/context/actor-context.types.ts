@@ -126,13 +126,60 @@ export const FORBIDDEN_ACTOR_CONTEXT_AUTHORITY_FIELDS = [
   'mayPerformAction',
 ] as const;
 
-/** Client payload keys that must not override server-derived actor identity. */
-export const CLIENT_ACTOR_IDENTITY_FIELDS = [
+/** Client payload keys that must match the authenticated session when present. */
+export const CLIENT_ACTOR_IDENTITY_FIELDS = ['sessionId'] as const;
+
+/**
+ * Canonical actor identity fields — enforced on routes where body ids are not
+ * legitimate subject references (see {@link isClientResourceReferenceIdentityPath}).
+ */
+export const CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS = [
   'identityId',
   'userAccountId',
   'personId',
-  'sessionId',
 ] as const;
+
+/** Routes where identityId / personId / userAccountId refer to provisioned subjects. */
+export const CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES = [
+  '/identity/user-accounts',
+  '/identity/persons',
+  '/identity/identities',
+  '/identity/memberships',
+  '/identity/organizations',
+  '/identity/credentials',
+  '/identity/authentication-methods',
+  '/identity/representative-authorities',
+  '/identity/officeholder-links',
+] as const;
+
+export function normalizeActorGuardRequestPath(rawUrl: string): string {
+  const pathOnly = rawUrl.split('?')[0] ?? rawUrl;
+  const withoutGlobalPrefix = pathOnly.replace(/^\/api\/v1(?=\/|$)/, '');
+  if (!withoutGlobalPrefix || withoutGlobalPrefix === '/') {
+    return '/';
+  }
+  return withoutGlobalPrefix.startsWith('/') ? withoutGlobalPrefix : `/${withoutGlobalPrefix}`;
+}
+
+export function isClientResourceReferenceIdentityPath(normalizedPath: string): boolean {
+  return CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES.some(
+    (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+  );
+}
+
+/**
+ * Client payload keys that must not identify a different administrator than the session actor.
+ * Each entry maps to the canonical ActorContext field used for comparison.
+ */
+export const CLIENT_ADMIN_ACTOR_FIELD_ALIASES: Readonly<
+  Record<string, keyof Pick<ActorContext, 'identityId' | 'userAccountId'>>
+> = {
+  actorIdentityId: 'identityId',
+  linkedByIdentityId: 'identityId',
+  actingUserId: 'userAccountId',
+  administratorIdentityId: 'identityId',
+  performedByIdentityId: 'identityId',
+};
 
 /** Client payload keys that identify the acting institutional binding for an action. */
 export const CLIENT_INSTITUTIONAL_SELECTOR_FIELDS = [

@@ -23,6 +23,7 @@ import {
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface IntelligenceActorFixtureContext {
   institutionAId: string;
@@ -88,6 +89,8 @@ async function createPasswordSession(
   await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
   await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
   const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
+
+  await ensureIntegrationTestTechnicalRoles(prisma, identity.id);
 
   return {
     identityId: identity.id,

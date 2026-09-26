@@ -205,11 +205,14 @@ describe('Phase 3 architectural must-fail invariants', () => {
     const officeholderId = await createOfficeholder('OH-LINK-1');
     const { identity } = await provisionUser('carol@test.gov', 'password123');
 
-    await officeholderLinks.create({
-      identityId: identity.id,
-      officeholderId,
-      status: IdentityOfficeholderLinkStatus.ACTIVE,
-    });
+    await officeholderLinks.create(
+      {
+        identityId: identity.id,
+        officeholderId,
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+      },
+      identity.id,
+    );
 
     expect(
       await prisma.appointment.count({
@@ -222,11 +225,14 @@ describe('Phase 3 architectural must-fail invariants', () => {
     const officeholderId = await createOfficeholder('OH-LINK-2');
     const { identity } = await provisionUser('dave@test.gov', 'password123');
 
-    await officeholderLinks.create({
-      identityId: identity.id,
-      officeholderId,
-      status: IdentityOfficeholderLinkStatus.ACTIVE,
-    });
+    await officeholderLinks.create(
+      {
+        identityId: identity.id,
+        officeholderId,
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+      },
+      identity.id,
+    );
 
     expect(await prisma.delegation.count()).toBe(0);
   });
@@ -355,11 +361,14 @@ describe('Phase 3 architectural must-fail invariants', () => {
     const officeholderId = await createOfficeholder('OH-LINK-3');
     const { identity } = await provisionUser('link@test.gov', 'password123');
 
-    const pendingLink = await officeholderLinks.create({
-      identityId: identity.id,
-      officeholderId,
-      status: IdentityOfficeholderLinkStatus.PENDING,
-    });
+    const pendingLink = await officeholderLinks.create(
+      {
+        identityId: identity.id,
+        officeholderId,
+        status: IdentityOfficeholderLinkStatus.PENDING,
+      },
+      identity.id,
+    );
 
     const activeLinks = await prisma.identityOfficeholderLink.findMany({
       where: {
@@ -392,11 +401,14 @@ describe('Phase 3 architectural must-fail invariants', () => {
     const officeholderId = await createOfficeholder('OH-AUDIT');
     const { identity } = await provisionUser('audit@test.gov', 'password123');
 
-    const link = await officeholderLinks.create({
-      identityId: identity.id,
-      officeholderId,
-      status: IdentityOfficeholderLinkStatus.PENDING,
-    });
+    const link = await officeholderLinks.create(
+      {
+        identityId: identity.id,
+        officeholderId,
+        status: IdentityOfficeholderLinkStatus.PENDING,
+      },
+      identity.id,
+    );
 
     await prisma.identityOfficeholderLink.update({
       where: { id: link.id },

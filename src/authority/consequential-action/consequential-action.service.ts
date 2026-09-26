@@ -15,6 +15,7 @@ import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
 import { InstitutionalActorResolver } from '../institutional-actor/institutional-actor-resolver.service';
 import { type AuthorityPolicyMetadata } from '../policy/authority-policy.decorator';
+import { buildActorBindingConsequentialDenial } from './actor-binding-denial.util';
 import {
   type ConsequentialActionContext,
   type ConsequentialActionMetadata,
@@ -110,9 +111,14 @@ export class ConsequentialActionService {
     } catch (error) {
       if (error instanceof ActorInstitutionalBindingException) {
         throw new ForbiddenException({
-          message: error.message,
+          ...buildActorBindingConsequentialDenial({
+            code: error.code,
+            message: error.message,
+            functionAuthorityRecordId,
+            identityId: session.identityId,
+            action: metadata.action,
+          }),
           code: error.code,
-          outcome: AuthorityEvaluationOutcome.DENY,
         });
       }
       throw error;

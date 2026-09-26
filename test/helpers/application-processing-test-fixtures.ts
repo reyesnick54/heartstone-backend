@@ -26,6 +26,7 @@ import {
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface ApplicationProcessingFixtureContext {
   jurisdictionId: string;
@@ -268,6 +269,10 @@ export async function seedApplicationProcessingFixture(
 
   let applicantSessionToken = '';
   let officialSessionToken = '';
+
+  await ensureIntegrationTestTechnicalRoles(prisma, officialIdentity.id, {
+    institutionIds: [institution.id],
+  });
 
   for (const [identityId, password, login] of [
     [applicantIdentity.id, 'Applicant123!', `${marker}-applicant@test.gov`],
