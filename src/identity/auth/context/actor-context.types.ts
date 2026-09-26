@@ -126,13 +126,12 @@ export const FORBIDDEN_ACTOR_CONTEXT_AUTHORITY_FIELDS = [
   'mayPerformAction',
 ] as const;
 
-/** Client payload keys that must not override server-derived actor identity. */
-export const CLIENT_ACTOR_IDENTITY_FIELDS = [
-  'identityId',
-  'userAccountId',
-  'personId',
-  'sessionId',
-] as const;
+/**
+ * Client payload keys that must match the authenticated session when present.
+ * Resource-reference fields (e.g. subject personId on provisioning DTOs) are validated
+ * in domain services — not treated as actor substitution here.
+ */
+export const CLIENT_ACTOR_IDENTITY_FIELDS = ['sessionId'] as const;
 
 /**
  * Client payload keys that must not identify a different administrator than the session actor.

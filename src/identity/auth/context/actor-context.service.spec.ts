@@ -298,8 +298,8 @@ describe('ActorContextService', () => {
     } as never;
 
     expect(() => {
-      service.assertNoClientIdentitySubstitution(actor, { identityId: 'identity-2' });
-    }).toThrow('Client-supplied identityId does not match authenticated actor context');
+      service.assertNoClientIdentitySubstitution(actor, { actorIdentityId: 'identity-2' });
+    }).toThrow('Client-supplied actorIdentityId does not match authenticated actor context');
   });
 
   it('assertServerDerivedSession rejects body-only identifiers', () => {
