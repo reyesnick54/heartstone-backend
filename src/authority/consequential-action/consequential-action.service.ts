@@ -110,15 +110,16 @@ export class ConsequentialActionService {
       }
     } catch (error) {
       if (error instanceof ActorInstitutionalBindingException) {
-        throw new ForbiddenException(
-          buildActorBindingConsequentialDenial({
+        throw new ForbiddenException({
+          ...buildActorBindingConsequentialDenial({
             code: error.code,
             message: error.message,
             functionAuthorityRecordId,
             identityId: session.identityId,
             action: metadata.action,
           }),
-        );
+          code: error.code,
+        });
       }
       throw error;
     }
