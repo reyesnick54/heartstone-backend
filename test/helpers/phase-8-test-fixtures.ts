@@ -377,6 +377,7 @@ export async function seedPhase8Fixture(
 
   const actions = [
     AuthorityActionType.DECIDE,
+    AuthorityActionType.APPROVE,
     AuthorityActionType.SIGN,
     AuthorityActionType.ISSUE,
     AuthorityActionType.SUSPEND,
