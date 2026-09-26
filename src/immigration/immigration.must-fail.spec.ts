@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
+  AssuranceLevel,
   ExternalDeterminationStatus,
   ImmigrationActorPersona,
   ImmigrationCredentialLifecycleStatus,
@@ -10,6 +11,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
+import { SubjectRecordAccessService } from '../institutional-scope/subject-record-access.service';
 import { ImmigrationAccessService } from './access/immigration-access.service';
 import { ImmigrationApplicationProfileService } from './applications/immigration-application-profile.service';
 import { ImmigrationBoundaryService } from './common/immigration-boundary.service';
@@ -104,6 +106,10 @@ describe('Immigration must-fail gates', () => {
         providers: [
           ImmigrationApplicationProfileService,
           { provide: PrismaService, useValue: prisma },
+          {
+            provide: SubjectRecordAccessService,
+            useValue: { assertApplicationLinkedRecord: jest.fn() },
+          },
         ],
       }).compile();
       service = module.get(ImmigrationApplicationProfileService);
@@ -252,12 +258,27 @@ describe('Immigration must-fail gates', () => {
       const prisma = {
         immigrationProfile: { findFirst: jest.fn(), create: jest.fn() },
       };
+      const subjectRecordAccess = {
+        assertSubjectIdentityVisible: jest
+          .fn()
+          .mockRejectedValue(new NotFoundException('Immigration profile not found')),
+      };
       const module = await Test.createTestingModule({
-        providers: [ImmigrationProfileService, { provide: PrismaService, useValue: prisma }],
+        providers: [
+          ImmigrationProfileService,
+          { provide: PrismaService, useValue: prisma },
+          { provide: SubjectRecordAccessService, useValue: subjectRecordAccess },
+        ],
       }).compile();
       const service = module.get(ImmigrationProfileService);
 
-      await expect(service.getProfileForSubject('subject-1', 'other-identity')).rejects.toThrow(
+      const session = {
+        sessionId: '11111111-1111-4111-8111-111111111111',
+        identityId: 'other-identity',
+        assuranceLevel: AssuranceLevel.HIGH,
+      };
+
+      await expect(service.getProfileForSubject(session, 'subject-1', {})).rejects.toThrow(
         NotFoundException,
       );
     });

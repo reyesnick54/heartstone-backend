@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
+import { SubjectAccessQueryDto } from '../institutional-scope/dto/subject-access-query.dto';
 import { EducationAdmissionApplicationProfileService } from './admissions/education-admission-application-profile.service';
 import { EducationInstitutionService } from './institutions/education-institution.service';
 import { ScholarshipApplicationProfileService } from './scholarships/scholarship-application-profile.service';
@@ -40,10 +43,11 @@ export class EducationController {
 
   @Get('students/profiles/:id')
   getStudentProfile(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('requesterIdentityId', ParseUUIDPipe) requesterIdentityId: string,
+    @Query() query: SubjectAccessQueryDto,
   ) {
-    return this.studentProfileService.getStudentProfileForSubject(id, requesterIdentityId);
+    return this.studentProfileService.getStudentProfileForSubject(session, id, query);
   }
 
   @Post('admission-application-profiles')

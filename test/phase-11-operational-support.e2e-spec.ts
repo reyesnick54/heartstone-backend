@@ -212,7 +212,7 @@ describe('Phase 11 operational support (e2e)', () => {
       authorizerOfficeholderId: fixture.approverOfficeholderId,
       functionAuthorityRecordId: fixture.functionAuthorityRecordId,
       authorizedAmountCents: 5_000,
-      appointmentId: fixture.appointmentId,
+      appointmentId: fixture.approverAppointmentId,
     });
 
     expect(authorized.status).toBe(RefundRequestStatus.AUTHORIZED);
@@ -280,7 +280,7 @@ describe('Phase 11 operational support (e2e)', () => {
         approverIdentityId: fixture.approverIdentityId,
         approverOfficeholderId: fixture.approverOfficeholderId,
         functionAuthorityRecordId: fixture.functionAuthorityRecordId,
-        appointmentId: fixture.appointmentId,
+        appointmentId: fixture.approverAppointmentId,
       }),
     ).resolves.toBeTruthy();
   });

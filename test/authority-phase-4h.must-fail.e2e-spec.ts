@@ -20,6 +20,7 @@ import { type App } from 'supertest/types';
 
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../src/authority/authority.constants';
 import { PrismaService } from '../src/database/prisma.service';
+import { seedPhase8bDecisionFixture } from '../src/decisions/fixtures/phase-8b-test-fixtures';
 import { hashToken } from '../src/identity/common/crypto.util';
 import { asAuthorityEvaluationBody } from './helpers/authority-test-types';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
@@ -563,15 +564,27 @@ describe('Phase 4H must-fail invariants (e2e)', () => {
         ruleType: SodRuleType.SELF_APPROVAL,
       },
     });
+
+    await prisma.authorityCondition.deleteMany({
+      where: { functionAuthorityRecordId: base.fn.id },
+    });
+
+    const phase8Case = await seedPhase8bDecisionFixture(prisma);
+    await prisma.case.update({
+      where: { id: phase8Case.caseId },
+      data: { applicantIdentityId: base.identity.id },
+    });
+
     const selfApproval = await evaluate('mf-test-token', {
       functionAuthorityRecordId: base.fn.id,
       action: AuthorityActionType.APPROVE,
       officeholderId: base.officeholder.id,
       officeId: base.office.id,
       appointmentId: base.appointment.id,
+      caseId: phase8Case.caseId,
       evidenceProvided: ['DOC-A'],
       qualificationCodes: ['LAWYER'],
-      isSelfApproval: true,
+      isSelfApproval: false,
     });
     expect(selfApproval.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.SELF_APPROVAL_PROHIBITED,

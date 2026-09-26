@@ -4,6 +4,7 @@ import { AccountsModule } from '../accounts/accounts.module';
 import { PasswordCredentialVerifier } from '../auth/adapters/password-credential-verifier.adapter';
 import { ActorContextModule } from '../auth/context/actor-context.module';
 import { CREDENTIAL_VERIFIER } from '../auth/interfaces/credential-verifier.interface';
+import { LoginLockoutService } from '../auth/lockout/login-lockout.service';
 import { IdentityResolutionService } from '../auth/services/identity-resolution.service';
 import { IdentityCommonModule } from '../common/identity-common.module';
 import { SessionsService } from './sessions.service';
@@ -13,6 +14,7 @@ import { SessionsService } from './sessions.service';
   providers: [
     SessionsService,
     IdentityResolutionService,
+    LoginLockoutService,
     PasswordCredentialVerifier,
     {
       provide: CREDENTIAL_VERIFIER,

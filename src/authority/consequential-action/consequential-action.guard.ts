@@ -10,7 +10,10 @@ import { type SessionContextDto } from '../../identity/auth/dto/session-context.
 import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority-evaluation-response.dto';
 import { CONSEQUENTIAL_ACTION_KEY } from './consequential-action.decorator';
 import { ConsequentialActionService } from './consequential-action.service';
-import { type ConsequentialActionMetadata } from './consequential-action.types';
+import {
+  ACTOR_CONTEXT_RESOLUTION_AUDIT_KEY,
+  type ConsequentialActionMetadata,
+} from './consequential-action.types';
 
 export const AUTHORITY_EVALUATION_REQUEST_KEY = 'authorityEvaluation';
 export const CONSEQUENTIAL_ACTION_EVALUATION_KEY = 'consequentialActionEvaluation';
@@ -40,6 +43,7 @@ export class ConsequentialActionGuard implements CanActivate {
       query?: Record<string, string>;
       [AUTHORITY_EVALUATION_REQUEST_KEY]?: AuthorityEvaluationResponseDto;
       [CONSEQUENTIAL_ACTION_EVALUATION_KEY]?: AuthorityEvaluationResponseDto;
+      [ACTOR_CONTEXT_RESOLUTION_AUDIT_KEY]?: unknown;
     }>();
 
     const session = request.session;
@@ -49,18 +53,24 @@ export class ConsequentialActionGuard implements CanActivate {
       );
     }
 
-    const evaluation = await this.consequentialActionService.assertConsequentialActionAllowed(
-      session,
-      metadata,
-      {
-        body: request.body,
-        params: request.params,
-        query: request.query,
-      },
-    );
+    const actionRequest = {
+      body: request.body,
+      params: request.params,
+      query: request.query,
+    };
+
+    const { evaluation, actorResolutionAudit } =
+      await this.consequentialActionService.assertConsequentialActionAllowedWithAudit(
+        session,
+        metadata,
+        actionRequest,
+      );
 
     request[AUTHORITY_EVALUATION_REQUEST_KEY] = evaluation;
     request[CONSEQUENTIAL_ACTION_EVALUATION_KEY] = evaluation;
+    if (actorResolutionAudit) {
+      request[ACTOR_CONTEXT_RESOLUTION_AUDIT_KEY] = actorResolutionAudit;
+    }
 
     return true;
   }

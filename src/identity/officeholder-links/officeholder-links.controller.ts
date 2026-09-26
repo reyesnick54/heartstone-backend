@@ -1,6 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CurrentSession } from '../auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../auth/dto/session-context.dto';
 import { CreateOfficeholderLinkDto } from './dto/create-officeholder-link.dto';
@@ -9,10 +12,12 @@ import { OfficeholderLinksService } from './officeholder-links.service';
 
 @ApiTags('identity-officeholder-links')
 @Controller('identity/officeholder-links')
+@DenyByDefaultAdministrative()
 export class OfficeholderLinksController {
   constructor(private readonly officeholderLinksService: OfficeholderLinksService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.IDENTITY_OFFICEHOLDER_LINK_CREATE)
   @ApiOperation({
     summary: 'Link an identity to an officeholder (controlled path, no authority conferred)',
   })

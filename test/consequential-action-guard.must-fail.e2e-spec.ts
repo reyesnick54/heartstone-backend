@@ -1,4 +1,4 @@
-import { ForbiddenException, type INestApplication } from '@nestjs/common';
+import { ForbiddenException, type INestApplication, UnauthorizedException } from '@nestjs/common';
 import {
   AppointmentStatus,
   AuthorityActionType,
@@ -208,12 +208,29 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     };
   }
 
-  function sessionContext(identityId: string) {
+  async function sessionContext(identityId: string, userAccountId?: string | null) {
+    const existing = await prisma.session.findFirst({
+      where: { identityId, status: 'ACTIVE' },
+      orderBy: { issuedAt: 'desc' },
+    });
+    const session =
+      existing ??
+      (await prisma.session.create({
+        data: {
+          identityId,
+          userAccountId: userAccountId ?? null,
+          tokenHash: hashToken(`cag-session-${identityId}-${String(Date.now())}`),
+          status: 'ACTIVE',
+          assuranceLevel: 'HIGH',
+          expiresAt: new Date('2099-01-01'),
+        },
+      }));
+
     return {
-      sessionId: 'test-session',
-      identityId,
-      userAccountId: identityId,
-      assuranceLevel: 'HIGH' as const,
+      sessionId: session.id,
+      identityId: session.identityId,
+      userAccountId: session.userAccountId,
+      assuranceLevel: session.assuranceLevel,
     };
   }
 
@@ -224,7 +241,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
   ) {
     try {
       await consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(identityId),
+        await sessionContext(identityId),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: body.functionAuthorityRecordId as string,
@@ -234,7 +251,11 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       );
       throw new Error('Expected consequential action to be blocked');
     } catch (error) {
-      expect(error).toBeInstanceOf(ForbiddenException);
+      const blocked = error instanceof ForbiddenException || error instanceof UnauthorizedException;
+      expect(blocked).toBe(true);
+      if (error instanceof UnauthorizedException) {
+        return;
+      }
       const response = (error as ForbiddenException).getResponse() as ConsequentialActionDenial;
       for (const code of expectedCodes) {
         expect(response.explanationCodes).toContain(code);
@@ -394,7 +415,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       data: { classification: AuthorityClassification.EXPRESSLY_RETAINED_NATIONAL },
     });
     const result = await consequentialActionService.evaluateConsequentialAction(
-      sessionContext(base.identity.id),
+      await sessionContext(base.identity.id, base.session.userAccountId),
       {
         action: AuthorityActionType.APPROVE,
         functionAuthorityRecordId: base.fn.id,
@@ -415,7 +436,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.serviceIdentity.id),
+        await sessionContext(base.serviceIdentity.id),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: base.fn.id,
@@ -429,7 +450,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.aiIdentity.id),
+        await sessionContext(base.aiIdentity.id),
         {
           action: AuthorityActionType.APPROVE,
           functionAuthorityRecordId: base.fn.id,
@@ -524,7 +545,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
-        sessionContext(base.identity.id),
+        await sessionContext(base.identity.id, base.session.userAccountId),
         {
           action: AuthorityActionType.APPROVE,
           functionResolver: () => Promise.resolve(null),

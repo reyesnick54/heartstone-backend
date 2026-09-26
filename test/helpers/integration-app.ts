@@ -46,9 +46,10 @@ export async function createIntegrationApp(): Promise<{
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await resetCorporateRegistryData(prisma);
+  await prisma.technicalAccessAuditEvent.deleteMany();
+  await prisma.technicalRoleAssignment.deleteMany();
   await prisma.platformAdministrativeAccessAudit.deleteMany();
   await prisma.platformAdministrativeAccessPolicy.deleteMany();
-  await prisma.technicalAccessPolicy.deleteMany();
   await prisma.securityAuditEvent.deleteMany();
   await prisma.session.deleteMany();
   await prisma.identityOfficeholderLink.deleteMany();

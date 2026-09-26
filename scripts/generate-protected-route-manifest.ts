@@ -8,7 +8,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { resolveAdministrativeRoutePermission } from '../src/security/administrative-route-permissions';
+import { PermissionCodes } from '../src/technical-access/constants/permission-codes.constants';
 import { RouteClass } from '../src/security/route-class.enum';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -299,6 +299,41 @@ function hasRequiresAuthority(decoratorBlock: string): boolean {
 
 function hasAuthorityPolicyGuard(decoratorBlock: string): boolean {
   return /@UseGuards\s*\([^)]*AuthorityPolicyGuard/.test(decoratorBlock);
+}
+
+function hasDenyByDefaultAdministrative(decoratorBlock: string): boolean {
+  return /@DenyByDefaultAdministrative\s*\(\s*\)/.test(decoratorBlock);
+}
+
+function extractRequirePermissionsCode(decoratorBlock: string): string | null {
+  const match = decoratorBlock.match(
+    /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/,
+  );
+  if (!match?.[1]) {
+    return null;
+  }
+  const key = match[1] as keyof typeof PermissionCodes;
+  return PermissionCodes[key] ?? null;
+}
+
+function resolveTechnicalAccessMetadata(input: {
+  classHeader: string;
+  decoratorBlock: string;
+}): {
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+} {
+  const denyByDefault =
+    hasDenyByDefaultAdministrative(input.classHeader) ||
+    hasDenyByDefaultAdministrative(input.decoratorBlock);
+  const permissionCode =
+    extractRequirePermissionsCode(input.decoratorBlock) ??
+    extractRequirePermissionsCode(input.classHeader);
+
+  return {
+    technicalPermissionRequired: denyByDefault || permissionCode !== null,
+    permissionCode,
+  };
 }
 
 function parseRouteAccessOverride(decoratorBlock: string): RouteAccessOverride | undefined {
@@ -645,13 +680,16 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         routeAccess,
       });
 
-      const adminPermission = resolveAdministrativeRoutePermission(fullPath);
+      const technicalAccess = resolveTechnicalAccessMetadata({
+        classHeader,
+        decoratorBlock,
+      });
       const guardCoverage = ['SessionAuthGuard'];
       if (!classification.isPublic) {
         guardCoverage.push('ClientIdentitySubstitutionGuard');
       }
-      if (adminPermission) {
-        guardCoverage.push('AdministrativeRouteGuard');
+      if (technicalAccess.technicalPermissionRequired) {
+        guardCoverage.push('PermissionsGuard');
       }
       if (requiresAuthority) {
         guardCoverage.push('AuthorityPolicyGuard');
@@ -664,8 +702,8 @@ function parseControllerFile(sourceFile: string): ScannedRoute[] {
         controller: controllerName,
         sourceFile: relativeSource,
         handler,
-        technicalPermissionRequired: Boolean(adminPermission),
-        permissionCode: adminPermission?.rule.permissionCode ?? null,
+        technicalPermissionRequired: technicalAccess.technicalPermissionRequired,
+        permissionCode: technicalAccess.permissionCode,
         guardCoverage,
         ...classification,
       });

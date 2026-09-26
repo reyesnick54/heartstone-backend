@@ -14,6 +14,9 @@ import { AuthorityActionType, FunctionAuthorityLifecycleStatus } from '@prisma/c
 
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ConsequentialAction } from '../consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../consequential-action/consequential-action.guard';
@@ -26,6 +29,7 @@ import { FunctionAuthorityRecordsService } from './function-authority-records.se
 
 @ApiTags('authority-functions')
 @Controller('authority/functions')
+@DenyByDefaultAdministrative()
 export class FunctionAuthorityRecordsController {
   constructor(
     private readonly service: FunctionAuthorityRecordsService,
@@ -33,6 +37,7 @@ export class FunctionAuthorityRecordsController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.AUTHORITY_FUNCTION_RECORD_CREATE)
   @ApiOperation({ summary: 'Create a function authority record (draft)' })
   @ApiCreatedResponse({ type: FunctionAuthorityRecordResponseDto })
   create(
@@ -42,6 +47,7 @@ export class FunctionAuthorityRecordsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.AUTHORITY_FUNCTION_RECORD_READ)
   @ApiOperation({ summary: 'List function authority records' })
   @ApiOkResponse({ type: FunctionAuthorityRecordResponseDto, isArray: true })
   findAll(
@@ -51,6 +57,7 @@ export class FunctionAuthorityRecordsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.AUTHORITY_FUNCTION_RECORD_READ)
   @ApiOperation({ summary: 'Get a function authority record by id' })
   @ApiOkResponse({ type: FunctionAuthorityRecordResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<FunctionAuthorityRecordResponseDto> {
@@ -58,6 +65,7 @@ export class FunctionAuthorityRecordsController {
   }
 
   @Patch(':id/activate')
+  @RequirePermissions(PermissionCodes.AUTHORITY_FUNCTION_RECORD_ACTIVATE)
   @ApiOperation({ summary: 'Activate a function authority record (controlled, audited)' })
   @ApiOkResponse({ type: FunctionAuthorityRecordResponseDto })
   activate(
@@ -76,6 +84,7 @@ export class FunctionAuthorityRecordsController {
   }
 
   @Patch(':id/suspend')
+  @RequirePermissions(PermissionCodes.AUTHORITY_FUNCTION_RECORD_ACTIVATE)
   @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
   @ConsequentialAction({
     action: AuthorityActionType.SUSPEND,

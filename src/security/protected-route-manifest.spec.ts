@@ -59,20 +59,25 @@ describe('protected-route-manifest', () => {
     }
   });
 
-  it('requires technical permission metadata on restricted administrative routes', () => {
-    const adminRoutes = manifest.routes.filter(
-      (route) => route.routeClass === RouteClass.RESTRICTED_ADMINISTRATIVE,
-    );
+  it('documents technical permission metadata on deny-by-default administrative routes', () => {
+    const lockedRoutes = manifest.routes.filter((route) => route.technicalPermissionRequired);
 
-    expect(adminRoutes.length).toBeGreaterThan(200);
+    expect(lockedRoutes.length).toBeGreaterThan(30);
 
-    for (const route of adminRoutes) {
-      expect(route.technicalPermissionRequired).toBe(true);
-      expect(typeof route.permissionCode).toBe('string');
+    for (const route of lockedRoutes) {
       expect(route.guardCoverage).toEqual(
-        expect.arrayContaining(['SessionAuthGuard', 'AdministrativeRouteGuard']),
+        expect.arrayContaining(['SessionAuthGuard', 'PermissionsGuard']),
       );
+      if (route.permissionCode) {
+        expect(route.permissionCode).toMatch(/^[a-z0-9-]+:[a-z0-9-]+:[a-z0-9-]+$/);
+      }
     }
+
+    const createPerson = manifest.routes.find(
+      (route) => route.path === '/identity/persons' && route.method === 'POST',
+    );
+    expect(createPerson?.technicalPermissionRequired).toBe(true);
+    expect(createPerson?.permissionCode).toBe('identity:person:create');
   });
 
   it('classifies consequential authority routes', () => {

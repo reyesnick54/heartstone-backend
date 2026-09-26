@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import {
   HealthcareAccessBasisKind,
   HealthcareConsentRecordStatus,
@@ -86,6 +86,13 @@ export class HealthcareConsentService {
     });
     if (!grant || grant.withdrawal) {
       throw new BadRequestException('Consent grant not eligible for withdrawal');
+    }
+
+    const patient = await this.prisma.healthcarePatientReference.findUnique({
+      where: { id: grant.patientReferenceId },
+    });
+    if (patient?.patientIdentityId !== actor.identityId) {
+      throw new ForbiddenException('Only the patient subject may withdraw this consent grant');
     }
 
     const withdrawal = await this.prisma.healthcareConsentWithdrawal.create({

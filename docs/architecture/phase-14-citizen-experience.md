@@ -36,28 +36,26 @@ It must not:
 
 ## Canonical module
 
-All Citizen Experience logic lives under `src/citizen-experience/`:
+All citizen experience logic lives under `src/experience/citizen/` (registered via `ExperienceModule`). See also [S8 domain consolidation (part 1)](./s8-domain-consolidation-part1.md).
 
 ```
-src/citizen-experience/
+src/experience/citizen/
   citizen-experience.module.ts
   citizen-experience.controller.ts
-  citizen-experience.constants.ts
-  common/
-    citizen-access-scope.service.ts
-    citizen-experience-boundary.service.ts
-  documents/
-    citizen-documents-projection.service.ts
-  credentials/
-    citizen-credentials-projection.service.ts
-  payments/
-    citizen-payments-projection.service.ts
-  messages/
-    citizen-messages-projection.service.ts
-  renewals/
-    citizen-renewals-projection.service.ts
+  citizen-services.controller.ts
+  services/          # home, me, applications, appointments, case status, actions
+  projections/       # read-model projections (Phase 14)
+    citizen-experience.constants.ts
+    common/
+    documents/
+    credentials/
+    payments/
+    messages/
+    renewals/
+    civil-registry/
   dto/
     citizen-experience-response.dto.ts
+    ...
 ```
 
 ## HTTP surface

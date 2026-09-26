@@ -24,9 +24,9 @@ import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/
 import {
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
-  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface ApplicationProcessingFixtureContext {
   jurisdictionId: string;
@@ -270,7 +270,7 @@ export async function seedApplicationProcessingFixture(
   let applicantSessionToken = '';
   let officialSessionToken = '';
 
-  await ensureTechnicalPermissionsForIdentity(prisma, officialIdentity.id, {
+  await ensureIntegrationTestTechnicalRoles(prisma, officialIdentity.id, {
     institutionIds: [institution.id],
   });
 

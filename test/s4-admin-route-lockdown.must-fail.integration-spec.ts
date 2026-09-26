@@ -1,14 +1,15 @@
 import { type INestApplication } from '@nestjs/common';
-import { TechnicalAccessPolicyScope } from '@prisma/client';
+import { TechnicalAccessScopeType } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { type PrismaService } from '../src/database/prisma.service';
-import { TECHNICAL_PERMISSION } from '../src/security/technical-permission/technical-permission.constants';
+import { TechnicalRoleCodes } from '../src/technical-access/config/technical-access-bootstrap.config';
 import {
   authHeader,
   provisionAuthenticatedIdentity,
 } from './helpers/identity-provisioning.fixture';
+import { assignTechnicalRole } from './helpers/technical-access.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('S4 administrative route lockdown must-fail (integration)', () => {
@@ -130,13 +131,11 @@ describe('S4 administrative route lockdown must-fail (integration)', () => {
       },
     });
 
-    await prisma.technicalAccessPolicy.create({
-      data: {
-        identityId: citizen.identityId,
-        permissionCode: TECHNICAL_PERMISSION.GOVERNMENT_STRUCTURE_ADMIN,
-        institutionId: institutionA.id,
-        scope: TechnicalAccessPolicyScope.INSTITUTION,
-      },
+    await assignTechnicalRole(prisma, {
+      identityId: citizen.identityId,
+      roleCode: TechnicalRoleCodes.INSTITUTION_SCOPED_OPERATOR,
+      scopeType: TechnicalAccessScopeType.INSTITUTION,
+      institutionId: institutionA.id,
     });
 
     await request(app.getHttpServer())

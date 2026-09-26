@@ -5,13 +5,16 @@ import {
   CredentialStatus,
   IdentityType,
   type PrismaClient,
+  SessionStatus,
 } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { hashSecret } from '../../src/identity/common/crypto.util';
-import { INTEGRATION_ADMIN_PERMISSION_CODES } from '../../src/security/technical-permission/technical-permission.constants';
+import { type AuthenticatedPrincipal } from '../../src/identity/auth/domain/authenticated-principal';
+import { type SessionContextDto } from '../../src/identity/auth/dto/session-context.dto';
+import { hashSecret, hashToken } from '../../src/identity/common/crypto.util';
 import { asLoginResponseBody } from './identity-test-types';
+import { ensureIntegrationAdminTechnicalRoles } from './technical-access.fixture';
 
 export interface ProvisionedTestIdentity {
   personId: string;
@@ -74,6 +77,23 @@ export async function provisionIdentityViaPrisma(
   };
 }
 
+export async function sessionPrincipalForIdentity(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<AuthenticatedPrincipal> {
+  const session = await prisma.session.findFirstOrThrow({
+    where: { identityId, status: SessionStatus.ACTIVE },
+    orderBy: { issuedAt: 'desc' },
+  });
+
+  return {
+    sessionId: session.id,
+    identityId: session.identityId,
+    userAccountId: session.userAccountId,
+    assuranceLevel: session.assuranceLevel,
+  };
+}
+
 export async function loginAndGetSessionToken(
   app: INestApplication<App> | { getHttpServer: () => App },
   loginIdentifier: string,
@@ -115,48 +135,33 @@ export function authHeader(sessionToken: string): { Authorization: string } {
   return { Authorization: `Bearer ${sessionToken}` };
 }
 
-const INTEGRATION_ADMIN_LOGIN = 'integration-admin@test.gov';
-const INTEGRATION_ADMIN_PASSWORD = 'IntegrationAdmin123!';
-
-export async function ensureTechnicalPermissionsForIdentity(
+/** Resolves persisted session metadata for integration tests (matches SessionAuthGuard validation). */
+export async function sessionContextFromToken(
   prisma: PrismaClient,
-  identityId: string,
-  options?: { institutionIds?: string[] },
-): Promise<void> {
-  for (const permissionCode of INTEGRATION_ADMIN_PERMISSION_CODES) {
-    const existing = await prisma.technicalAccessPolicy.findFirst({
-      where: { identityId, permissionCode, institutionId: null },
-    });
-    if (!existing) {
-      await prisma.technicalAccessPolicy.create({
-        data: {
-          identityId,
-          permissionCode,
-          scope: 'PLATFORM_WIDE',
-        },
-      });
-    }
+  sessionToken: string,
+): Promise<SessionContextDto> {
+  const session = await prisma.session.findUnique({
+    where: { tokenHash: hashToken(sessionToken) },
+  });
 
-    for (const institutionId of options?.institutionIds ?? []) {
-      const scoped = await prisma.technicalAccessPolicy.findFirst({
-        where: { identityId, permissionCode, institutionId },
-      });
-      if (!scoped) {
-        await prisma.technicalAccessPolicy.create({
-          data: {
-            identityId,
-            permissionCode,
-            institutionId,
-            scope: 'INSTITUTION',
-          },
-        });
-      }
-    }
+  if (!session) {
+    throw new Error('Integration test session token does not match a persisted session');
   }
+
+  return {
+    sessionId: session.id,
+    identityId: session.identityId,
+    userAccountId: session.userAccountId,
+    assuranceLevel: session.assuranceLevel,
+    authMethod: session.authMethod,
+    mfaSatisfied: session.mfaSatisfied,
+    authenticatedAt: session.authenticatedAt,
+    oidcProviderCode: session.oidcProviderCode,
+  };
 }
 
-/** @deprecated Prefer {@link ensureTechnicalPermissionsForIdentity} */
-export const ensureIntegrationAdminTechnicalPermissions = ensureTechnicalPermissionsForIdentity;
+const INTEGRATION_ADMIN_LOGIN = 'integration-admin@test.gov';
+const INTEGRATION_ADMIN_PASSWORD = 'IntegrationAdmin123!';
 
 export async function provisionIntegrationAdminSession(
   app: INestApplication<App>,
@@ -167,7 +172,7 @@ export async function provisionIntegrationAdminSession(
     password: INTEGRATION_ADMIN_PASSWORD,
     displayName: 'Integration Admin',
   });
-  await ensureIntegrationAdminTechnicalPermissions(prisma, provisioned.identityId);
+  await ensureIntegrationAdminTechnicalRoles(prisma, provisioned.identityId);
   return provisioned;
 }
 
@@ -196,7 +201,7 @@ export async function ensureIntegrationAdminSession(
       throw new Error('Integration admin account exists without a person');
     }
 
-    await ensureIntegrationAdminTechnicalPermissions(prisma, identity.id);
+    await ensureIntegrationAdminTechnicalRoles(prisma, identity.id);
 
     return {
       personId: existingAccount.personId,
@@ -239,7 +244,7 @@ export async function ensureIntegrationAdminSession(
       throw new Error('Integration admin account exists without a person');
     }
 
-    await ensureIntegrationAdminTechnicalPermissions(prisma, identity.id);
+    await ensureIntegrationAdminTechnicalRoles(prisma, identity.id);
 
     return {
       personId: account.personId,

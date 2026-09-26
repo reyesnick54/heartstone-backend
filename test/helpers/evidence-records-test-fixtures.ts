@@ -15,10 +15,10 @@ import { MALWARE_SCANNING_PORT } from '../../src/evidence-records/ports/malware-
 import { asDocumentRecordBody, asDocumentVersionBody } from './evidence-records-test-types';
 import {
   createPasswordAuthenticationMethodViaPrisma,
-  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
   provisionIdentityViaPrisma,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface EvidenceRecordsFixture {
   applicantIdentityId: string;
@@ -46,7 +46,7 @@ async function createIdentityWithSession(
   });
   await createPasswordAuthenticationMethodViaPrisma(prisma, identity.identityId);
   if (options?.grantTechnicalPermissions) {
-    await ensureTechnicalPermissionsForIdentity(prisma, identity.identityId);
+    await ensureIntegrationTestTechnicalRoles(prisma, identity.identityId);
   }
   const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, password);
   return { identityId: identity.identityId, sessionToken };

@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import {
   AccountStatus,
   AssuranceLevel,
+  AuthenticationMethodType,
   CredentialStatus,
   CredentialType,
+  IdentityType,
   Session,
   SessionRevocationReason,
   SessionStatus,
@@ -20,6 +22,9 @@ import {
   CREDENTIAL_VERIFIER,
   type CredentialVerifier,
 } from '../auth/interfaces/credential-verifier.interface';
+import { LoginLockoutService } from '../auth/lockout/login-lockout.service';
+import type { MappedOidcClaims } from '../auth/oidc/types/mapped-oidc-claims';
+import type { ServiceIdentityAuthResult } from '../auth/service-identity/service-identity-auth.service';
 import { IdentityResolutionService } from '../auth/services/identity-resolution.service';
 import { generateOpaqueToken, hashToken } from '../common/crypto.util';
 
@@ -33,6 +38,7 @@ export class SessionsService {
     private readonly audit: SecurityAuditService,
     private readonly accountLookup: AccountLookupService,
     private readonly identityResolution: IdentityResolutionService,
+    private readonly loginLockout: LoginLockoutService,
     @Inject(CREDENTIAL_VERIFIER)
     credentialVerifiers: CredentialVerifier[],
   ) {
@@ -86,6 +92,8 @@ export class SessionsService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    await this.loginLockout.assertAccountNotLocked(account.id);
+
     if (!this.accountLookup.isAuthenticatable(account)) {
       await this.audit.record({
         eventType: 'AUTHENTICATION_FAILURE',
@@ -96,12 +104,29 @@ export class SessionsService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const identity = account.identities[0];
+    const identity =
+      account.identities.find((candidate) =>
+        candidate.credentials.some(
+          (credential) =>
+            credential.type === CredentialType.PASSWORD &&
+            credential.status === CredentialStatus.ACTIVE,
+        ),
+      ) ?? account.identities[0];
     if (!identity) {
       await this.audit.record({
         eventType: 'AUTHENTICATION_FAILURE',
         userAccountId: account.id,
         metadata: { reason: 'no_identity' },
+        ipAddress: context?.ipAddress,
+      });
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if ((identity.type as IdentityType) === IdentityType.SERVICE) {
+      await this.audit.record({
+        eventType: 'AUTHENTICATION_REJECTED',
+        identityId: identity.id,
+        metadata: { reason: 'service_identity_password_login_forbidden' },
         ipAddress: context?.ipAddress,
       });
       throw new UnauthorizedException('Invalid credentials');
@@ -150,13 +175,18 @@ export class SessionsService {
         metadata: { reason: 'invalid_password' },
         ipAddress: context?.ipAddress,
       });
+      await this.loginLockout.recordFailedAttempt(account.id, identity.id);
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    await this.loginLockout.resetFailedAttempts(account.id);
 
     const { session, sessionToken } = await this.createSession({
       identityId: identity.id,
       userAccountId: account.id,
       assuranceLevel: AssuranceLevel.LOW,
+      authMethod: AuthenticationMethodType.PASSWORD,
+      mfaSatisfied: false,
       ipAddress: context?.ipAddress,
       userAgent: context?.userAgent,
     });
@@ -172,17 +202,117 @@ export class SessionsService {
     return { session, sessionToken };
   }
 
+  async authenticateWithOidc(
+    claims: MappedOidcClaims,
+    resolved: {
+      identityId: string;
+      userAccountId?: string | null;
+      identityType: IdentityType;
+    },
+    context?: { ipAddress?: string; userAgent?: string },
+  ): Promise<{ session: Session; sessionToken: string }> {
+    if (resolved.identityType === IdentityType.SERVICE) {
+      throw new UnauthorizedException('Service identities cannot authenticate via OIDC login');
+    }
+
+    await this.audit.record({
+      eventType: 'OIDC_CLAIM_RECEIVED',
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      metadata: {
+        providerCode: claims.providerCode,
+        subject: claims.subject,
+        assuranceLevel: claims.assuranceLevel,
+        mfaSatisfied: claims.mfaSatisfied,
+      },
+      ipAddress: context?.ipAddress,
+    });
+
+    if (claims.mfaSatisfied) {
+      await this.audit.record({
+        eventType: 'MFA_VERIFIED',
+        identityId: resolved.identityId,
+        metadata: { providerCode: claims.providerCode, amr: claims.amr },
+        ipAddress: context?.ipAddress,
+      });
+    }
+
+    const { session, sessionToken } = await this.createSession({
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      assuranceLevel: claims.assuranceLevel,
+      authMethod: AuthenticationMethodType.OIDC,
+      oidcProviderCode: claims.providerCode,
+      mfaSatisfied: claims.mfaSatisfied,
+      authenticatedAt: claims.authenticatedAt,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
+    await this.audit.record({
+      eventType: 'AUTHENTICATION_SUCCESS',
+      identityId: resolved.identityId,
+      userAccountId: resolved.userAccountId ?? undefined,
+      sessionId: session.id,
+      metadata: { method: AuthenticationMethodType.OIDC, providerCode: claims.providerCode },
+      ipAddress: context?.ipAddress,
+    });
+
+    return { session, sessionToken };
+  }
+
+  async authenticateWithServiceApiKey(
+    authResult: ServiceIdentityAuthResult,
+    context?: { ipAddress?: string; userAgent?: string },
+  ): Promise<{ session: Session; sessionToken: string }> {
+    const { session, sessionToken } = await this.createSession({
+      identityId: authResult.identityId,
+      assuranceLevel: authResult.assuranceLevel,
+      authMethod: AuthenticationMethodType.SERVICE_API_KEY,
+      mfaSatisfied: authResult.mfaSatisfied,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
+    await this.audit.record({
+      eventType: 'AUTHENTICATION_SUCCESS',
+      identityId: authResult.identityId,
+      sessionId: session.id,
+      metadata: {
+        method: AuthenticationMethodType.SERVICE_API_KEY,
+        serviceCode: authResult.serviceCode,
+      },
+      ipAddress: context?.ipAddress,
+    });
+
+    return { session, sessionToken };
+  }
+
   async createSession(input: {
     identityId: string;
     userAccountId?: string;
     assuranceLevel?: AssuranceLevel;
+    authMethod?: AuthenticationMethodType;
+    oidcProviderCode?: string;
+    mfaSatisfied?: boolean;
+    authenticatedAt?: Date;
     ipAddress?: string;
     userAgent?: string;
   }): Promise<{ session: Session; sessionToken: string }> {
+    if (input.userAccountId) {
+      await this.enforceSessionLimit(input.userAccountId);
+    }
+
     const sessionToken = generateOpaqueToken();
     const tokenHash = hashToken(sessionToken);
     const issuedAt = new Date();
-    const expiresAt = new Date(issuedAt.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
+    const slidingExpiry = new Date(
+      issuedAt.getTime() + this.identityConfig.sessionTtlSeconds * 1000,
+    );
+    const absoluteExpiry = new Date(
+      issuedAt.getTime() + this.identityConfig.sessionAbsoluteTtlSeconds * 1000,
+    );
+    const expiresAt = slidingExpiry < absoluteExpiry ? slidingExpiry : absoluteExpiry;
 
     const session = await this.prisma.session.create({
       data: {
@@ -191,6 +321,10 @@ export class SessionsService {
         tokenHash,
         status: SessionStatus.ACTIVE,
         assuranceLevel: input.assuranceLevel ?? AssuranceLevel.LOW,
+        authMethod: input.authMethod ?? AuthenticationMethodType.PASSWORD,
+        oidcProviderCode: input.oidcProviderCode,
+        mfaSatisfied: input.mfaSatisfied ?? false,
+        authenticatedAt: input.authenticatedAt ?? issuedAt,
         issuedAt,
         expiresAt,
         ipAddress: input.ipAddress,
@@ -213,7 +347,7 @@ export class SessionsService {
     const tokenHash = hashToken(token);
     const session = await this.prisma.session.findUnique({
       where: { tokenHash },
-      include: { userAccount: true },
+      include: { userAccount: true, identity: true },
     });
 
     if (!session) {
@@ -237,20 +371,34 @@ export class SessionsService {
     const now = new Date();
 
     if (session.expiresAt < now) {
-      await this.prisma.session.update({
-        where: { id: session.id },
-        data: {
-          status: SessionStatus.EXPIRED,
-          revokedAt: now,
-          revocationReason: SessionRevocationReason.EXPIRED,
-        },
-      });
-      await this.audit.record({
-        eventType: 'SESSION_EXPIRED',
-        sessionId: session.id,
-        identityId: session.identityId,
-        metadata: { reason: 'session_expired' },
-      });
+      await this.expireSession(session.id, session.identityId, SessionRevocationReason.EXPIRED);
+      throw new UnauthorizedException('Session has expired');
+    }
+
+    const absoluteDeadline = new Date(
+      session.issuedAt.getTime() + this.identityConfig.sessionAbsoluteTtlSeconds * 1000,
+    );
+    if (absoluteDeadline < now) {
+      await this.expireSession(
+        session.id,
+        session.identityId,
+        SessionRevocationReason.EXPIRED,
+        'absolute_lifetime_exceeded',
+      );
+      throw new UnauthorizedException('Session has expired');
+    }
+
+    const idleReference = session.lastUsedAt ?? session.issuedAt;
+    const idleDeadline = new Date(
+      idleReference.getTime() + this.identityConfig.sessionIdleTimeoutSeconds * 1000,
+    );
+    if (idleDeadline < now) {
+      await this.expireSession(
+        session.id,
+        session.identityId,
+        SessionRevocationReason.EXPIRED,
+        'idle_timeout',
+      );
       throw new UnauthorizedException('Session has expired');
     }
 
@@ -332,25 +480,85 @@ export class SessionsService {
     return this.identityResolution.resolveFromSession(session);
   }
 
+  private async enforceSessionLimit(userAccountId: string): Promise<void> {
+    const maxSessions = this.identityConfig.maxActiveSessionsPerAccount;
+    const activeSessions = await this.prisma.session.findMany({
+      where: { userAccountId, status: SessionStatus.ACTIVE },
+      orderBy: { issuedAt: 'asc' },
+      select: { id: true },
+    });
+
+    if (activeSessions.length < maxSessions) {
+      return;
+    }
+
+    const excess = activeSessions.length - maxSessions + 1;
+    const toRevoke = activeSessions.slice(0, excess);
+
+    await this.prisma.session.updateMany({
+      where: { id: { in: toRevoke.map((s) => s.id) } },
+      data: {
+        status: SessionStatus.REVOKED,
+        revokedAt: new Date(),
+        revocationReason: SessionRevocationReason.REPLACED,
+      },
+    });
+
+    await this.audit.record({
+      eventType: 'SESSION_REVOKED',
+      userAccountId,
+      metadata: { reason: 'session_limit', revokedCount: excess },
+    });
+  }
+
+  private async expireSession(
+    sessionId: string,
+    identityId: string,
+    reason: SessionRevocationReason,
+    metadataReason?: string,
+  ): Promise<void> {
+    const now = new Date();
+    await this.prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        status: SessionStatus.EXPIRED,
+        revokedAt: now,
+        revocationReason: reason,
+      },
+    });
+    await this.audit.record({
+      eventType: 'SESSION_EXPIRED',
+      sessionId,
+      identityId,
+      metadata: { reason: metadataReason ?? 'session_expired' },
+    });
+  }
+
   private async maybeRenewSession(session: Session, now: Date): Promise<Session> {
     const thresholdMs = this.identityConfig.sessionRenewalThresholdSeconds * 1000;
     const timeRemaining = session.expiresAt.getTime() - now.getTime();
+
+    const absoluteDeadline = new Date(
+      session.issuedAt.getTime() + this.identityConfig.sessionAbsoluteTtlSeconds * 1000,
+    );
+    const maxRenewedExpiry = new Date(now.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
+    const renewedExpiry = maxRenewedExpiry < absoluteDeadline ? maxRenewedExpiry : absoluteDeadline;
 
     if (timeRemaining > thresholdMs) {
       return this.prisma.session.update({
         where: { id: session.id },
         data: { lastUsedAt: now },
+        include: { identity: true },
       });
     }
-
-    const newExpiresAt = new Date(now.getTime() + this.identityConfig.sessionTtlSeconds * 1000);
 
     return this.prisma.session.update({
       where: { id: session.id },
       data: {
         lastUsedAt: now,
-        expiresAt: newExpiresAt,
+        expiresAt: renewedExpiry,
       },
+      include: { identity: true },
     });
   }
 
@@ -360,6 +568,12 @@ export class SessionsService {
       identityId: principal.identityId,
       userAccountId: principal.userAccountId,
       assuranceLevel: principal.assuranceLevel,
+      authMethod: principal.authMethod,
+      mfaSatisfied: principal.mfaSatisfied,
+      authenticatedAt: principal.authenticatedAt,
+      oidcProviderCode: principal.oidcProviderCode,
+      identityType: principal.identityType,
+      isServicePrincipal: principal.isServicePrincipal,
     };
   }
 }

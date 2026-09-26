@@ -2,6 +2,11 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { AuthorityEvaluationOutcome, IdentityType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import {
+  ActorContextService,
+  ActorInstitutionalBindingException,
+} from '../../identity/auth/context/actor-context.service';
+import { type ActorContextResolutionAudit } from '../../identity/auth/context/actor-context.types';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { AuthorityEvaluationService } from '../evaluation/authority-evaluation.service';
@@ -16,7 +21,7 @@ import {
   FINAL_DECISION_ACTIONS,
 } from './consequential-action.types';
 import {
-  readEvaluationModifiers,
+  readEvaluationResourceScope,
   readInstitutionalContext,
 } from './consequential-action-context.util';
 import { buildConsequentialActionDenial } from './consequential-action-denial.util';
@@ -28,6 +33,7 @@ export class ConsequentialActionService {
     private readonly evaluationService: AuthorityEvaluationService,
     private readonly functionRecords: FunctionAuthorityRecordsService,
     private readonly actorResolver: InstitutionalActorResolver,
+    private readonly actorContextService: ActorContextService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -49,6 +55,14 @@ export class ConsequentialActionService {
     request: ConsequentialActionContext['request'],
   ): Promise<AuthorityEvaluationResponseDto> {
     const context = this.buildContext(session, request);
+    return this.evaluateConsequentialActionContext(context, metadata);
+  }
+
+  private async evaluateConsequentialActionContext(
+    context: ConsequentialActionContext,
+    metadata: ConsequentialActionMetadata,
+  ): Promise<AuthorityEvaluationResponseDto> {
+    const { session, request } = context;
     const functionAuthorityRecordId = await this.resolveFunctionAuthorityRecordId(
       metadata,
       context,
@@ -67,11 +81,46 @@ export class ConsequentialActionService {
       throw this.buildScopeDeniedException();
     }
 
-    await this.assertHumanActorWhenRequired(session.identityId, metadata);
-
     const institutional = readInstitutionalContext(context, metadata.institutionalFieldPrefixes);
     const body = request.body ?? {};
-    const modifiers = readEvaluationModifiers(body);
+    const atValue = body.at;
+    const at = typeof atValue === 'string' ? new Date(atValue) : new Date();
+
+    try {
+      const actor = await this.actorContextService.resolveFromSessionContext({ session, at });
+      const binding = await this.actorContextService.assertInstitutionalSelectorsBoundToActor(
+        actor,
+        institutional,
+        { at },
+      );
+      context.actorResolutionAudit = this.actorContextService.buildResolutionAudit(
+        actor,
+        binding,
+        at,
+      );
+
+      if (binding) {
+        institutional.officeholderId = binding.officeholderId;
+        institutional.appointmentId = binding.appointment.appointmentId;
+        institutional.officeId = binding.appointment.officeId;
+        if (binding.delegation) {
+          institutional.delegationId = binding.delegation.delegationId;
+        }
+      }
+    } catch (error) {
+      if (error instanceof ActorInstitutionalBindingException) {
+        throw new ForbiddenException({
+          message: error.message,
+          code: error.code,
+          outcome: AuthorityEvaluationOutcome.DENY,
+        });
+      }
+      throw error;
+    }
+
+    await this.assertHumanActorWhenRequired(session.identityId, metadata);
+
+    const resourceIdentifiers = readEvaluationResourceScope(body);
 
     const evaluationRequest: AuthorityEvaluationRequest = {
       identityId: session.identityId,
@@ -81,8 +130,14 @@ export class ConsequentialActionService {
       officeId: institutional.officeId ?? resourceScope?.officeId,
       appointmentId: institutional.appointmentId,
       delegationId: institutional.delegationId,
-      scopeValue: modifiers.scopeValue ?? resourceScope?.scopeValue,
-      ...modifiers,
+      resourceScope: {
+        caseId: resourceIdentifiers.caseId,
+        evidencePacketVersionId: resourceIdentifiers.evidencePacketVersionId,
+        decisionReadinessAssessmentId: resourceIdentifiers.decisionReadinessAssessmentId,
+      },
+      scopeValue: resourceIdentifiers.scopeValue ?? resourceScope?.scopeValue,
+      transactionAmount: resourceIdentifiers.transactionAmount,
+      externalDataAccessOnly: resourceIdentifiers.externalDataAccessOnly,
     };
 
     return this.evaluationService.evaluate(evaluationRequest);
@@ -93,13 +148,26 @@ export class ConsequentialActionService {
     metadata: ConsequentialActionMetadata,
     request: ConsequentialActionContext['request'],
   ): Promise<AuthorityEvaluationResponseDto> {
-    const result = await this.evaluateConsequentialAction(session, metadata, request);
+    return (await this.assertConsequentialActionAllowedWithAudit(session, metadata, request))
+      .evaluation;
+  }
+
+  async assertConsequentialActionAllowedWithAudit(
+    session: SessionContextDto,
+    metadata: ConsequentialActionMetadata,
+    request: ConsequentialActionContext['request'],
+  ): Promise<{
+    evaluation: AuthorityEvaluationResponseDto;
+    actorResolutionAudit?: ActorContextResolutionAudit;
+  }> {
+    const context = this.buildContext(session, request);
+    const result = await this.evaluateConsequentialActionContext(context, metadata);
 
     if (result.outcome !== AuthorityEvaluationOutcome.ALLOW) {
       throw new ForbiddenException(buildConsequentialActionDenial(result));
     }
 
-    return result;
+    return { evaluation: result, actorResolutionAudit: context.actorResolutionAudit };
   }
 
   /** Backward-compatible adapter for legacy `@RequiresAuthority` metadata. */

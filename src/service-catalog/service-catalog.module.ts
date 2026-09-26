@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
 import { ActivationGovernanceModule } from './activation-governance/activation-governance.module';
 import { ServiceCatalogCommonModule } from './common/service-catalog-common.module';
 import { FormsModule } from './forms/forms.module';
@@ -17,7 +16,7 @@ import { ServicePackDeploymentModule } from './service-packs/service-pack-deploy
 @Module({
   imports: [
     ServiceCatalogCommonModule,
-    SessionsModule,
+    SessionAuthGuardModule,
     GovernmentServiceVersionsModule,
     ActivationGovernanceModule,
     ServicePackModule,
@@ -29,7 +28,7 @@ import { ServicePackDeploymentModule } from './service-packs/service-pack-deploy
     PublicServiceDiscoveryController,
     PublicServiceFamiliesController,
   ],
-  providers: [GovernmentServicesService, PublicServiceDiscoveryService, SessionAuthGuard],
+  providers: [GovernmentServicesService, PublicServiceDiscoveryService],
   exports: [
     PublicServiceDiscoveryService,
     ActivationGovernanceModule,
