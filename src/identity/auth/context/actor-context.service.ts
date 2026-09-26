@@ -27,7 +27,9 @@ import {
   type ActorInstitutionalSelectors,
   CLIENT_ACTOR_IDENTITY_FIELDS,
   CLIENT_ADMIN_ACTOR_FIELD_ALIASES,
+  CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS,
   type InstitutionalCaseAccessActor,
+  isClientResourceReferenceIdentityPath,
   type ResolvedActorContext,
   type ResolvedActorInstitutionalBinding,
   toResolvedActorContext,
@@ -158,16 +160,27 @@ export class ActorContextService {
   assertNoClientIdentitySubstitution(
     actor: ActorContext,
     clientPayload: Record<string, unknown> | null | undefined,
+    options?: { requestPath?: string },
   ): void {
     if (!clientPayload || typeof clientPayload !== 'object') {
       return;
     }
+
+    const enforceCanonicalIdentityFields =
+      options?.requestPath === undefined ||
+      !isClientResourceReferenceIdentityPath(options.requestPath);
 
     const fieldsToValidate: { clientField: string; actorField: keyof ActorContext }[] = [
       ...CLIENT_ACTOR_IDENTITY_FIELDS.map((field) => ({
         clientField: field,
         actorField: field,
       })),
+      ...(enforceCanonicalIdentityFields
+        ? CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS.map((field) => ({
+            clientField: field,
+            actorField: field,
+          }))
+        : []),
       ...Object.entries(CLIENT_ADMIN_ACTOR_FIELD_ALIASES).map(([clientField, actorField]) => ({
         clientField,
         actorField,

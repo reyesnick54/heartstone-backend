@@ -126,12 +126,48 @@ export const FORBIDDEN_ACTOR_CONTEXT_AUTHORITY_FIELDS = [
   'mayPerformAction',
 ] as const;
 
-/**
- * Client payload keys that must match the authenticated session when present.
- * Resource-reference fields (e.g. subject personId on provisioning DTOs) are validated
- * in domain services — not treated as actor substitution here.
- */
+/** Client payload keys that must match the authenticated session when present. */
 export const CLIENT_ACTOR_IDENTITY_FIELDS = ['sessionId'] as const;
+
+/**
+ * Canonical actor identity fields — enforced on routes where body ids are not
+ * legitimate subject references (see {@link isClientResourceReferenceIdentityPath}).
+ */
+export const CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS = [
+  'identityId',
+  'userAccountId',
+  'personId',
+] as const;
+
+/** Routes where identityId / personId / userAccountId refer to provisioned subjects. */
+export const CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES = [
+  '/identity/user-accounts',
+  '/identity/persons',
+  '/identity/identities',
+  '/identity/memberships',
+  '/identity/organizations',
+  '/identity/credentials',
+  '/identity/authentication-methods',
+  '/identity/representative-authorities',
+  '/identity/officeholder-links',
+] as const;
+
+export function normalizeActorGuardRequestPath(rawUrl: string): string {
+  const pathOnly = rawUrl.split('?')[0] ?? rawUrl;
+  const withoutGlobalPrefix = pathOnly.replace(/^\/api\/v1(?=\/|$)/, '');
+  if (!withoutGlobalPrefix || withoutGlobalPrefix === '/') {
+    return '/';
+  }
+  return withoutGlobalPrefix.startsWith('/')
+    ? withoutGlobalPrefix
+    : `/${withoutGlobalPrefix}`;
+}
+
+export function isClientResourceReferenceIdentityPath(normalizedPath: string): boolean {
+  return CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES.some(
+    (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+  );
+}
 
 /**
  * Client payload keys that must not identify a different administrator than the session actor.
