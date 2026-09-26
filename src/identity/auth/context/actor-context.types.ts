@@ -158,9 +158,7 @@ export function normalizeActorGuardRequestPath(rawUrl: string): string {
   if (!withoutGlobalPrefix || withoutGlobalPrefix === '/') {
     return '/';
   }
-  return withoutGlobalPrefix.startsWith('/')
-    ? withoutGlobalPrefix
-    : `/${withoutGlobalPrefix}`;
+  return withoutGlobalPrefix.startsWith('/') ? withoutGlobalPrefix : `/${withoutGlobalPrefix}`;
 }
 
 export function isClientResourceReferenceIdentityPath(normalizedPath: string): boolean {

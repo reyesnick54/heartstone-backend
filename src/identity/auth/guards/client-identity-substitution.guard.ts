@@ -1,10 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 import { ActorContextService } from '../context/actor-context.service';
-import {
-  type ActorContext,
-  normalizeActorGuardRequestPath,
-} from '../context/actor-context.types';
+import { type ActorContext, normalizeActorGuardRequestPath } from '../context/actor-context.types';
 
 /**
  * Rejects requests where the client attempts to substitute identity fields
