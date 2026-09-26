@@ -10,9 +10,7 @@ import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { hashSecret } from '../../src/identity/common/crypto.util';
-import {
-  INTEGRATION_ADMIN_PERMISSION_CODES,
-} from '../../src/security/technical-permission/technical-permission.constants';
+import { INTEGRATION_ADMIN_PERMISSION_CODES } from '../../src/security/technical-permission/technical-permission.constants';
 import { asLoginResponseBody } from './identity-test-types';
 
 export interface ProvisionedTestIdentity {
@@ -120,26 +118,45 @@ export function authHeader(sessionToken: string): { Authorization: string } {
 const INTEGRATION_ADMIN_LOGIN = 'integration-admin@test.gov';
 const INTEGRATION_ADMIN_PASSWORD = 'IntegrationAdmin123!';
 
-export async function ensureIntegrationAdminTechnicalPermissions(
+export async function ensureTechnicalPermissionsForIdentity(
   prisma: PrismaClient,
   identityId: string,
+  options?: { institutionIds?: string[] },
 ): Promise<void> {
   for (const permissionCode of INTEGRATION_ADMIN_PERMISSION_CODES) {
     const existing = await prisma.technicalAccessPolicy.findFirst({
       where: { identityId, permissionCode, institutionId: null },
     });
-    if (existing) {
-      continue;
+    if (!existing) {
+      await prisma.technicalAccessPolicy.create({
+        data: {
+          identityId,
+          permissionCode,
+          scope: 'PLATFORM_WIDE',
+        },
+      });
     }
-    await prisma.technicalAccessPolicy.create({
-      data: {
-        identityId,
-        permissionCode,
-        scope: 'PLATFORM_WIDE',
-      },
-    });
+
+    for (const institutionId of options?.institutionIds ?? []) {
+      const scoped = await prisma.technicalAccessPolicy.findFirst({
+        where: { identityId, permissionCode, institutionId },
+      });
+      if (!scoped) {
+        await prisma.technicalAccessPolicy.create({
+          data: {
+            identityId,
+            permissionCode,
+            institutionId,
+            scope: 'INSTITUTION',
+          },
+        });
+      }
+    }
   }
 }
+
+/** @deprecated Prefer {@link ensureTechnicalPermissionsForIdentity} */
+export const ensureIntegrationAdminTechnicalPermissions = ensureTechnicalPermissionsForIdentity;
 
 export async function provisionIntegrationAdminSession(
   app: INestApplication<App>,

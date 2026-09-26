@@ -14,7 +14,8 @@ export class CreateOfficeholderLinkDto {
   @ApiPropertyOptional({
     format: 'uuid',
     deprecated: true,
-    description: 'Ignored — linking administrator identity is derived from the authenticated session',
+    description:
+      'Ignored — linking administrator identity is derived from the authenticated session',
   })
   @IsOptional()
   @IsUUID()

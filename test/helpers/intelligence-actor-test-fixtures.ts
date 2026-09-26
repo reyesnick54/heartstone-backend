@@ -21,6 +21,7 @@ import { INTELLIGENCE_CONSEQUENTIAL_REVIEW_FUNCTION_CODE } from '../../src/intel
 import {
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
+  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
 
@@ -88,6 +89,8 @@ async function createPasswordSession(
   await createPasswordCredentialViaPrisma(prisma, identity.id, 'Phase8123!');
   await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
   const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, 'Phase8123!');
+
+  await ensureTechnicalPermissionsForIdentity(prisma, identity.id);
 
   return {
     identityId: identity.id,

@@ -24,6 +24,7 @@ import { type PrismaService } from '../../src/database/prisma.service';
 import {
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
+  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
 
@@ -113,6 +114,9 @@ export async function seedPhase12BFixture(
     const password = 'Phase12B123!';
     await createPasswordCredentialViaPrisma(prisma, identityId, password);
     await createPasswordAuthenticationMethodViaPrisma(prisma, identityId);
+    await ensureTechnicalPermissionsForIdentity(prisma, identityId, {
+      institutionIds: [institution.id],
+    });
     return loginAndGetSessionToken(app, loginIdentifier, password);
   };
 

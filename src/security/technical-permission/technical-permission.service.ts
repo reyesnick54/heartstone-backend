@@ -82,7 +82,10 @@ export class TechnicalPermissionService {
       );
     }
 
-    if (policy.scope === TechnicalAccessPolicyScope.PLATFORM_WIDE && policy.institutionId === null) {
+    if (
+      policy.scope === TechnicalAccessPolicyScope.PLATFORM_WIDE &&
+      policy.institutionId === null
+    ) {
       return true;
     }
 

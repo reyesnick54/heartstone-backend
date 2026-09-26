@@ -98,12 +98,13 @@ describe('S4 administrative route lockdown must-fail (integration)', () => {
       .expect(403);
   });
 
-  it('rejects citizen workflow definition listing', async () => {
+  it('rejects citizen workflow definition creation', async () => {
     const citizen = await provisionCitizen();
 
     await request(app.getHttpServer())
-      .get('/api/v1/workflow-definitions')
+      .post('/api/v1/workflow-definitions')
       .set(authHeader(citizen.sessionToken))
+      .send({ code: 'citizen-workflow', name: 'Citizen Workflow' })
       .expect(403);
   });
 

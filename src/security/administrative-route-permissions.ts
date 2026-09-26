@@ -169,18 +169,17 @@ export function normalizeApiPath(rawUrl: string): string {
   if (!withoutGlobalPrefix || withoutGlobalPrefix === '/') {
     return '/';
   }
-  return withoutGlobalPrefix.startsWith('/')
-    ? withoutGlobalPrefix
-    : `/${withoutGlobalPrefix}`;
+  return withoutGlobalPrefix.startsWith('/') ? withoutGlobalPrefix : `/${withoutGlobalPrefix}`;
 }
 
 export function resolveAdministrativeRoutePermission(
   rawUrl: string,
 ): ResolvedAdministrativeRoutePermission | undefined {
   const normalizedPath = normalizeApiPath(rawUrl);
-  const rule = ADMINISTRATIVE_ROUTE_PERMISSION_RULES.find((candidate) =>
-    normalizedPath === candidate.pathPrefix ||
-    normalizedPath.startsWith(`${candidate.pathPrefix}/`),
+  const rule = ADMINISTRATIVE_ROUTE_PERMISSION_RULES.find(
+    (candidate) =>
+      normalizedPath === candidate.pathPrefix ||
+      normalizedPath.startsWith(`${candidate.pathPrefix}/`),
   );
 
   if (!rule) {

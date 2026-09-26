@@ -7,6 +7,7 @@ import { type PrismaService } from '../src/database/prisma.service';
 import {
   authHeader,
   createPasswordAuthenticationMethodViaPrisma,
+  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
   provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
@@ -44,6 +45,7 @@ describe('Phase 3 Identity & Access (integration)', () => {
       password: 'BootstrapPass123!',
     });
     await createPasswordAuthenticationMethodViaPrisma(prisma, bootstrap.identityId);
+    await ensureTechnicalPermissionsForIdentity(prisma, bootstrap.identityId);
     return loginAndGetSessionToken(app, bootstrap.loginIdentifier, bootstrap.password);
   }
 

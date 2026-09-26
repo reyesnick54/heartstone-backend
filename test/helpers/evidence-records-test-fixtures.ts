@@ -15,6 +15,7 @@ import { MALWARE_SCANNING_PORT } from '../../src/evidence-records/ports/malware-
 import { asDocumentRecordBody, asDocumentVersionBody } from './evidence-records-test-types';
 import {
   createPasswordAuthenticationMethodViaPrisma,
+  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
   provisionIdentityViaPrisma,
 } from './identity-provisioning.fixture';
@@ -33,6 +34,7 @@ async function createIdentityWithSession(
   prisma: PrismaService,
   loginIdentifier: string,
   displayName: string,
+  options?: { grantTechnicalPermissions?: boolean },
 ): Promise<{ identityId: string; sessionToken: string }> {
   const password = 'SecurePass123!';
   const identity = await provisionIdentityViaPrisma(prisma, {
@@ -43,6 +45,9 @@ async function createIdentityWithSession(
     displayName,
   });
   await createPasswordAuthenticationMethodViaPrisma(prisma, identity.identityId);
+  if (options?.grantTechnicalPermissions) {
+    await ensureTechnicalPermissionsForIdentity(prisma, identity.identityId);
+  }
   const sessionToken = await loginAndGetSessionToken(app, loginIdentifier, password);
   return { identityId: identity.identityId, sessionToken };
 }
@@ -68,6 +73,7 @@ export async function seedEvidenceRecordsFixture(
     prisma,
     'evidence-official@test.gov',
     'Evidence Official',
+    { grantTechnicalPermissions: true },
   );
 
   return {

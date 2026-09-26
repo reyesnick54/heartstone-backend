@@ -24,6 +24,7 @@ import { buildServiceConfigurationFingerprint } from '../../src/service-catalog/
 import {
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
+  ensureTechnicalPermissionsForIdentity,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
 
@@ -268,6 +269,10 @@ export async function seedApplicationProcessingFixture(
 
   let applicantSessionToken = '';
   let officialSessionToken = '';
+
+  await ensureTechnicalPermissionsForIdentity(prisma, officialIdentity.id, {
+    institutionIds: [institution.id],
+  });
 
   for (const [identityId, password, login] of [
     [applicantIdentity.id, 'Applicant123!', `${marker}-applicant@test.gov`],
