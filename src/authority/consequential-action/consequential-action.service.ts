@@ -15,6 +15,7 @@ import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority
 import { FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
 import { InstitutionalActorResolver } from '../institutional-actor/institutional-actor-resolver.service';
 import { type AuthorityPolicyMetadata } from '../policy/authority-policy.decorator';
+import { buildActorBindingConsequentialDenial } from './actor-binding-denial.util';
 import {
   type ConsequentialActionContext,
   type ConsequentialActionMetadata,
@@ -24,7 +25,6 @@ import {
   readEvaluationResourceScope,
   readInstitutionalContext,
 } from './consequential-action-context.util';
-import { buildActorBindingConsequentialDenial } from './actor-binding-denial.util';
 import { buildConsequentialActionDenial } from './consequential-action-denial.util';
 import { validateInstitutionalResourceScope } from './consequential-action-resolvers';
 

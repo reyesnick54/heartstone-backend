@@ -21,8 +21,8 @@ import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../src/authority/authori
 import { ConsequentialActionService } from '../src/authority/consequential-action/consequential-action.service';
 import { type ConsequentialActionDenial } from '../src/authority/consequential-action/consequential-action.types';
 import { PrismaService } from '../src/database/prisma.service';
-import { hashToken } from '../src/identity/common/crypto.util';
 import { seedPhase8bDecisionFixture } from '../src/decisions/fixtures/phase-8b-test-fixtures';
+import { hashToken } from '../src/identity/common/crypto.util';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import { grantAuthorityFunctionLifecycleOperator } from './helpers/technical-access.fixture';
 

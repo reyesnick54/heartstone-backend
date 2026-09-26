@@ -1,8 +1,4 @@
-import {
-  type PrismaClient,
-  TechnicalAccessLevel,
-  TechnicalAccessScopeType,
-} from '@prisma/client';
+import { type PrismaClient, TechnicalAccessLevel, TechnicalAccessScopeType } from '@prisma/client';
 
 import { TechnicalRoleCodes } from '../../src/technical-access/config/technical-access-bootstrap.config';
 
