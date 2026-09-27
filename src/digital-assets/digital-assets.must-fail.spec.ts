@@ -281,7 +281,10 @@ describe('Digital assets must-fail gates', () => {
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
-        providers: [DigitalAssetsRegulatedEntityService, { provide: PrismaService, useValue: prisma }],
+        providers: [
+          DigitalAssetsRegulatedEntityService,
+          { provide: PrismaService, useValue: prisma },
+        ],
       }).compile();
       service = module.get(DigitalAssetsRegulatedEntityService);
     });
@@ -337,7 +340,10 @@ describe('Digital assets must-fail gates', () => {
 
     beforeEach(async () => {
       const module = await Test.createTestingModule({
-        providers: [DigitalAssetsConfigurationService, { provide: PrismaService, useValue: prisma }],
+        providers: [
+          DigitalAssetsConfigurationService,
+          { provide: PrismaService, useValue: prisma },
+        ],
       }).compile();
       service = module.get(DigitalAssetsConfigurationService);
     });

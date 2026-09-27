@@ -1,8 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import {
-  DigitalAssetsActorPersona,
-  DigitalAssetsExternalDependencyStatus,
-} from '@prisma/client';
+import { DigitalAssetsActorPersona, DigitalAssetsExternalDependencyStatus } from '@prisma/client';
 
 import {
   DIGITAL_ASSETS_REASON_CODES,
@@ -42,7 +39,9 @@ export class DigitalAssetsBoundaryService {
 
   assertPaymentDoesNotApproveAuthorization(actorPersona: DigitalAssetsActorPersona): void {
     if (actorPersona === DigitalAssetsActorPersona.PAYMENT_SYSTEM) {
-      throw new ForbiddenException('Payment receipt does not approve or issue digital-asset authorization');
+      throw new ForbiddenException(
+        'Payment receipt does not approve or issue digital-asset authorization',
+      );
     }
   }
 
@@ -83,7 +82,9 @@ export class DigitalAssetsBoundaryService {
     officialInstrumentId?: string | null;
   }): void {
     if (!input.governmentDecisionId || !input.officialInstrumentId) {
-      throw new BadRequestException(DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED);
+      throw new BadRequestException(
+        DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED,
+      );
     }
   }
 

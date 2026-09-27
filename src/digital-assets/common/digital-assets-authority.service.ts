@@ -26,7 +26,9 @@ export class DigitalAssetsAuthorityService {
       functionRecord = await this.functionRecords.findByCode(DIGITAL_ASSETS_AUTHORITY.issue);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new ForbiddenException(DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED);
+        throw new ForbiddenException(
+          DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED,
+        );
       }
       throw error;
     }
@@ -40,7 +42,9 @@ export class DigitalAssetsAuthorityService {
     });
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {
-      throw new ForbiddenException(DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED);
+      throw new ForbiddenException(
+        DIGITAL_ASSETS_REASON_CODES.AUTHORIZATION_AUTHORITY_NOT_CONFIGURED,
+      );
     }
   }
 }

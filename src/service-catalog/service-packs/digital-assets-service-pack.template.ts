@@ -267,7 +267,9 @@ function digitalAssetsTemplateService(
     lifecycle: {
       supportsRenewal: definition.serviceType === 'RENEWAL',
       renewalServiceCode:
-        definition.serviceType === 'RENEWAL' ? `${DIGITAL_ASSETS_SERVICE_CODE_PREFIX}VASP-LICENCE-RENEWAL` : undefined,
+        definition.serviceType === 'RENEWAL'
+          ? `${DIGITAL_ASSETS_SERVICE_CODE_PREFIX}VASP-LICENCE-RENEWAL`
+          : undefined,
       validityPeriodDays: 365,
     },
     redress: [],

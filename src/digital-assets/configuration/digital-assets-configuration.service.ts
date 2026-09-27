@@ -19,10 +19,9 @@ export class DigitalAssetsConfigurationService {
       where: { jurisdictionId: input.jurisdictionId },
       create: {
         jurisdictionId: input.jurisdictionId,
-        activityCategoryTaxonomy: (input.activityCategoryTaxonomy ?? []),
-        applicantCategoryTaxonomy: (input.applicantCategoryTaxonomy ?? []),
-        technicalReviewCategoryTaxonomy: (input.technicalReviewCategoryTaxonomy ??
-          []),
+        activityCategoryTaxonomy: input.activityCategoryTaxonomy ?? [],
+        applicantCategoryTaxonomy: input.applicantCategoryTaxonomy ?? [],
+        technicalReviewCategoryTaxonomy: input.technicalReviewCategoryTaxonomy ?? [],
       },
       update: {
         activityCategoryTaxonomy: input.activityCategoryTaxonomy,

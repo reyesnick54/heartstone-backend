@@ -50,7 +50,11 @@ export class DigitalAssetsController {
   @Post('regulated-entities/:regulatedEntityId/application-references')
   linkApplicationReference(
     @Param('regulatedEntityId', ParseUUIDPipe) regulatedEntityId: string,
-    @Body() body: Omit<Parameters<DigitalAssetsRegulatedEntityService['linkApplicationReference']>[0], 'regulatedEntityId'>,
+    @Body()
+    body: Omit<
+      Parameters<DigitalAssetsRegulatedEntityService['linkApplicationReference']>[0],
+      'regulatedEntityId'
+    >,
   ) {
     return this.regulatedEntityService.linkApplicationReference({
       regulatedEntityId,
@@ -62,7 +66,10 @@ export class DigitalAssetsController {
   openTechnicalReview(
     @Param('regulatedEntityId', ParseUUIDPipe) regulatedEntityId: string,
     @Body()
-    body: Omit<Parameters<DigitalAssetsTechnicalReviewService['openReview']>[0], 'regulatedEntityId'>,
+    body: Omit<
+      Parameters<DigitalAssetsTechnicalReviewService['openReview']>[0],
+      'regulatedEntityId'
+    >,
   ) {
     return this.technicalReviewService.openReview({ regulatedEntityId, ...body });
   }

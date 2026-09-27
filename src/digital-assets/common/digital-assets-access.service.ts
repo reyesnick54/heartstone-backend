@@ -28,9 +28,7 @@ export class DigitalAssetsAccessService {
       if (!granted) {
         reasonCode = DIGITAL_ASSETS_REASON_CODES.CROSS_ORGANIZATION_ACCESS_DENIED;
       }
-    } else if (
-      context.classification === DigitalAssetsDataClassification.CONFIDENTIAL_TECHNICAL
-    ) {
+    } else if (context.classification === DigitalAssetsDataClassification.CONFIDENTIAL_TECHNICAL) {
       granted = context.hasRegulatoryOfficerScope;
       if (!granted) {
         reasonCode = DIGITAL_ASSETS_REASON_CODES.CONFIDENTIAL_TECHNICAL_ACCESS_DENIED;
@@ -54,7 +52,9 @@ export class DigitalAssetsAccessService {
     });
 
     if (!granted) {
-      throw new ForbiddenException(reasonCode ?? DIGITAL_ASSETS_REASON_CODES.CROSS_ORGANIZATION_ACCESS_DENIED);
+      throw new ForbiddenException(
+        reasonCode ?? DIGITAL_ASSETS_REASON_CODES.CROSS_ORGANIZATION_ACCESS_DENIED,
+      );
     }
   }
 }
