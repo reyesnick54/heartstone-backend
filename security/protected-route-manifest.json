@@ -1,13 +1,12 @@
 {
-  "generatedAt": "2026-09-27T15:01:29.317Z",
+  "generatedAt": "2026-09-27T11:16:19.833Z",
   "routeCount": 678,
   "summary": {
     "public": 27,
-    "authenticatedSelfService": 77,
-    "authenticatedInstitutional": 168,
+    "authenticatedSelfService": 79,
+    "authenticatedInstitutional": 165,
     "restrictedAdministrative": 224,
-    "consequentialAuthorityControlled": 177,
-    "systemHealth": 5
+    "consequentialAuthorityControlled": 178
   },
   "routes": [
     {
@@ -932,7 +931,7 @@
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard"
       ],
-      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
@@ -957,7 +956,7 @@
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard"
       ],
-      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
@@ -1057,7 +1056,7 @@
         "SessionAuthGuard",
         "ClientIdentitySubstitutionGuard"
       ],
-      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
@@ -2559,6 +2558,31 @@
       "requiresConsequentialGuard": false
     },
     {
+      "path": "/documents/versions/*path/download",
+      "method": "GET",
+      "domain": "evidence",
+      "controller": "DocumentsController",
+      "sourceFile": "src/evidence-records/documents/documents.controller.ts",
+      "handler": "rejectStorageKeyDownload",
+      "technicalPermissionRequired": false,
+      "permissionCode": null,
+      "guardCoverage": [
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
+      ],
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
+      "authenticationRequired": true,
+      "isPublic": false,
+      "scopeRequirement": "Evidence governance, document custody, or applicant document scope",
+      "authorityRequirement": "Document/evidence access guard or institutional evidence role",
+      "actorSource": "Session identity with applicant or official actor context",
+      "primarySecurityInvariant": "Evidence quality and verification cannot be client-asserted",
+      "hasRouteAccessMetadata": true,
+      "hasConsequentialAction": false,
+      "hasConsequentialActionGuard": false,
+      "requiresConsequentialGuard": false
+    },
+    {
       "path": "/documents/versions/:versionId",
       "method": "GET",
       "domain": "evidence",
@@ -2615,31 +2639,6 @@
       "controller": "DocumentsController",
       "sourceFile": "src/evidence-records/documents/documents.controller.ts",
       "handler": "downloadVersion",
-      "technicalPermissionRequired": false,
-      "permissionCode": null,
-      "guardCoverage": [
-        "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard"
-      ],
-      "routeClass": "AUTHENTICATED_SELF_SERVICE",
-      "authenticationRequired": true,
-      "isPublic": false,
-      "scopeRequirement": "Evidence governance, document custody, or applicant document scope",
-      "authorityRequirement": "Document/evidence access guard or institutional evidence role",
-      "actorSource": "Session identity with applicant or official actor context",
-      "primarySecurityInvariant": "Evidence quality and verification cannot be client-asserted",
-      "hasRouteAccessMetadata": true,
-      "hasConsequentialAction": false,
-      "hasConsequentialActionGuard": false,
-      "requiresConsequentialGuard": false
-    },
-    {
-      "path": "/documents/versions/*path/download",
-      "method": "GET",
-      "domain": "evidence",
-      "controller": "DocumentsController",
-      "sourceFile": "src/evidence-records/documents/documents.controller.ts",
-      "handler": "rejectStorageKeyDownload",
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
@@ -11544,9 +11543,10 @@
       "permissionCode": null,
       "guardCoverage": [
         "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard"
+        "ClientIdentitySubstitutionGuard",
+        "AuthorityPolicyGuard"
       ],
-      "routeClass": "AUTHENTICATED_SELF_SERVICE",
+      "routeClass": "CONSEQUENTIAL_AUTHORITY_CONTROLLED",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
@@ -11555,7 +11555,7 @@
       "primarySecurityInvariant": "Issuance requires explicit authority evaluation, not authentication alone",
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": false,
-      "hasConsequentialActionGuard": false,
+      "hasConsequentialActionGuard": true,
       "requiresConsequentialGuard": false
     },
     {
@@ -14748,12 +14748,11 @@
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
-        "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard"
+        "SessionAuthGuard"
       ],
       "routeClass": "PUBLIC",
-      "authenticationRequired": true,
-      "isPublic": false,
+      "authenticationRequired": false,
+      "isPublic": true,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
       "authorityRequirement": "Function authority ISSUE evaluation via ConsequentialActionGuard",
       "actorSource": "Session identity with evaluated issuer authority context",
