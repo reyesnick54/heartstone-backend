@@ -25,7 +25,13 @@ import { TaxReturnService } from './returns/tax-return.service';
 import { RevenueController } from './revenue.controller';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, CitizenExperienceModule, OfficialModule, AuthorityModule],
+  imports: [
+    DatabaseModule,
+    SessionsModule,
+    CitizenExperienceModule,
+    OfficialModule,
+    AuthorityModule,
+  ],
   controllers: [RevenueController, CitizenRevenueController, OfficialRevenueController],
   providers: [
     RevenueBoundaryService,

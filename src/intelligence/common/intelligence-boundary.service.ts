@@ -11,6 +11,7 @@ import {
   RiskEvidenceBasis,
 } from '@prisma/client';
 
+import { isInstitutionControlledProcessingTime } from '../../platform-core/institution-neutral-enums.util';
 import {
   AI_ACTOR_IDENTITY_PREFIX,
   AI_ACTOR_ROLE_MARKER,
@@ -462,28 +463,36 @@ export class IntelligenceBoundaryService {
     hasApprovedRule: boolean,
   ): void {
     if (
-      fromClassification === MetricDependencyTimeClassification.ABSEZ_CONTROLLED_TIME &&
+      isInstitutionControlledProcessingTime(fromClassification) &&
       toClassification === MetricDependencyTimeClassification.EXTERNAL_DEPENDENCY_TIME &&
       !hasApprovedRule
     ) {
       throw new BadRequestException(
-        'ABSEZ delay cannot be relabeled as external dependency time without an approved rule',
+        'Institution-controlled delay cannot be relabeled as external dependency time without an approved rule',
       );
     }
   }
 
+  assertExternalDelayNotAttributedToInstitution(
+    classification: MetricDependencyTimeClassification,
+    attributedToOperatingInstitution: boolean,
+  ): void {
+    if (
+      classification === MetricDependencyTimeClassification.EXTERNAL_DEPENDENCY_TIME &&
+      attributedToOperatingInstitution
+    ) {
+      throw new BadRequestException(
+        'External dependency delay must not be attributed to the operating institution automatically',
+      );
+    }
+  }
+
+  /** @deprecated Use assertExternalDelayNotAttributedToInstitution */
   assertExternalDelayNotAttributedToAbsez(
     classification: MetricDependencyTimeClassification,
     attributedToAbsez: boolean,
   ): void {
-    if (
-      classification === MetricDependencyTimeClassification.EXTERNAL_DEPENDENCY_TIME &&
-      attributedToAbsez
-    ) {
-      throw new BadRequestException(
-        'External dependency delay must not be attributed to ABSEZ automatically',
-      );
-    }
+    this.assertExternalDelayNotAttributedToInstitution(classification, attributedToAbsez);
   }
 
   assertNoConflation(sourceLabel: string, targetLabel: string): void {

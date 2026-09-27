@@ -172,7 +172,7 @@ async function setupIssuanceCatalog(
     data: {
       code: `${marker}-ISSUE-FUNC`,
       name: 'Phase 8 Issue Function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.LICENSING,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: base.institutionId,

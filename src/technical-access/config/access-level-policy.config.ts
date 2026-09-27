@@ -3,7 +3,7 @@ import { type TechnicalAccessLevel } from '@prisma/client';
 import { type PermissionCode, PermissionCodes } from '../constants/permission-codes.constants';
 
 /**
- * ABSEZ / HeartStone access-level framework (Appendix I style mapping).
+ * Institution-configured / HeartStone access-level framework (Appendix I style mapping).
  * Levels describe configured technical permission bundles — not legal authority.
  */
 export const ACCESS_LEVEL_LABELS: Record<

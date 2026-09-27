@@ -132,7 +132,7 @@ export async function seedPhase8bDecisionFixture(
     data: {
       code: `${marker}-DECIDE`,
       name: 'Phase 8B Decision Function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.APPROVAL,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: institution.id,

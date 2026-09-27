@@ -75,5 +75,5 @@ export class RegisterExternalDeterminationDto {
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  effectOnAbsezAction?: string;
+  effectOnInstitutionAction?: string;
 }

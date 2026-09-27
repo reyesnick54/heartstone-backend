@@ -43,7 +43,7 @@ export class AuthorityDependenciesService {
         retainedQuestion: dto.retainedQuestion,
         requiredDetermination: dto.requiredDetermination,
         referralBasis: dto.referralBasis,
-        effectOnAbsezAction: dto.effectOnAbsezAction,
+        effectOnInstitutionAction: dto.effectOnInstitutionAction,
       },
     });
 
@@ -60,7 +60,7 @@ export class AuthorityDependenciesService {
       retainedQuestion: record.retainedQuestion ?? undefined,
       requiredDetermination: record.requiredDetermination ?? undefined,
       referralBasis: record.referralBasis ?? undefined,
-      effectOnAbsezAction: record.effectOnAbsezAction ?? undefined,
+      effectOnInstitutionAction: record.effectOnInstitutionAction ?? undefined,
     };
   }
 

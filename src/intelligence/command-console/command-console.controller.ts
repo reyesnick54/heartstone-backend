@@ -33,10 +33,10 @@ const COMMAND_CONSOLE_GUARDS = [
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Analytics, metrics, and command-console institutional scope",
-  authorityRequirement: "Intelligence module access; analytics do not create authority",
-  actorSource: "Authenticated institutional analyst or administrator",
-  primarySecurityInvariant: "Analytics and AI outputs are advisory, not official decisions",
+  scopeRequirement: 'Analytics, metrics, and command-console institutional scope',
+  authorityRequirement: 'Intelligence module access; analytics do not create authority',
+  actorSource: 'Authenticated institutional analyst or administrator',
+  primarySecurityInvariant: 'Analytics and AI outputs are advisory, not official decisions',
 })
 @Controller('intelligence/command-console')
 export class CommandConsoleController {

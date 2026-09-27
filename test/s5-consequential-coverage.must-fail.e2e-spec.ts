@@ -1,9 +1,5 @@
 import { type INestApplication } from '@nestjs/common';
-import {
-  AuthorityClassification,
-  ControlledFunctionClass,
-  IdentityType,
-} from '@prisma/client';
+import { AuthorityClassification, ControlledFunctionClass, IdentityType } from '@prisma/client';
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
@@ -11,13 +7,12 @@ import { FunctionAuthorityRecordsService } from '../src/authority/function-autho
 import { CUSTOMS_TRADE_AUTHORITY_FUNCTION_CODES } from '../src/customs-trade/customs-trade.constants';
 import { PrismaService } from '../src/database/prisma.service';
 import { CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES } from '../src/healthcare/research/clinical-research.constants';
+import { hashToken } from '../src/identity/common/crypto.util';
 import { LABOUR_AUTHORITY_FUNCTION_CODES } from '../src/labour/labour.constants';
 import { REVENUE_AUTHORITY_FUNCTION_CODES } from '../src/revenue/revenue.constants';
 import { SOCIAL_PROTECTION_AUTHORITY_FUNCTION_CODES } from '../src/social-protection/social-protection.constants';
 import {
   authHeader,
-  createPasswordCredentialViaPrisma,
-  loginAndGetSessionToken,
   provisionAuthenticatedIdentity,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
@@ -50,26 +45,31 @@ describe('S5 consequential coverage must-fail (e2e)', () => {
       code,
       name: code,
       description: 'S5 test function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.APPROVAL,
     });
     return record.id;
   }
 
   async function provisionServiceSession() {
-    const account = await prisma.userAccount.create({
-      data: { loginIdentifier: 's5-service@test.gov', status: 'ACTIVE' },
-    });
+    const clientId = 's5-service-bot';
     const identity = await prisma.identity.create({
       data: {
         type: IdentityType.SERVICE,
-        displayName: 'S5 Service Bot',
-        userAccountId: account.id,
+        displayName: clientId,
       },
     });
-    await createPasswordCredentialViaPrisma(prisma, identity.id, 'ServiceIdentity123!');
-    const token = await loginAndGetSessionToken(app, 's5-service@test.gov', 'ServiceIdentity123!');
-    return token;
+    const sessionToken = 's5-service-session-token';
+    await prisma.session.create({
+      data: {
+        identityId: identity.id,
+        tokenHash: hashToken(sessionToken),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
+    return sessionToken;
   }
 
   it('denies service identity from benefit award (human-reserved)', async () => {

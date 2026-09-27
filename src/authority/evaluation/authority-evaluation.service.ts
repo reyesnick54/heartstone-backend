@@ -225,7 +225,7 @@ export class AuthorityEvaluationService {
       ];
       if (decidingActions.includes(request.action)) {
         codes.push(
-          AUTHORITY_EVALUATION_EXPLANATION_CODES.ABSEZ_CANNOT_SUBSTITUTE_RETAINED_NATIONAL,
+          AUTHORITY_EVALUATION_EXPLANATION_CODES.INSTITUTION_CANNOT_SUBSTITUTE_RETAINED_NATIONAL,
         );
         return this.finalize(
           request,

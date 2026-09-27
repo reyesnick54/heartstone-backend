@@ -18,10 +18,10 @@ import { WorkflowDefinitionsService } from './workflow-definitions.service';
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
   authenticationRequired: true,
-  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
-  authorityRequirement: "Case access guard; official routes require institutional actor context",
-  actorSource: "Session identity with applicant or official case access resolution",
-  primarySecurityInvariant: "Access to a case does not confer decision authority",
+  scopeRequirement: 'Applicant-owned case/application scope or official institutional case scope',
+  authorityRequirement: 'Case access guard; official routes require institutional actor context',
+  actorSource: 'Session identity with applicant or official case access resolution',
+  primarySecurityInvariant: 'Access to a case does not confer decision authority',
 })
 @Controller('workflow-definitions')
 @DenyByDefaultAdministrative()
