@@ -39,10 +39,10 @@ export class ProtectedProfileResponseDto {
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Identity administration or authenticated self-service session",
-  authorityRequirement: "No government authority inferred from identity alone",
-  actorSource: "Session identity or institutional administrator",
-  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+  scopeRequirement: 'Identity administration or authenticated self-service session',
+  authorityRequirement: 'No government authority inferred from identity alone',
+  actorSource: 'Session identity or institutional administrator',
+  primarySecurityInvariant: 'User != Officeholder != Role != Permission != Authority',
 })
 @Controller('identity/me')
 @UseGuards(SessionAuthGuard)

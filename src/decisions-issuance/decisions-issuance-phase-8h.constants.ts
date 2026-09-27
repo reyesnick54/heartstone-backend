@@ -129,7 +129,8 @@ export const PHASE_8H_INVARIANTS: readonly Phase8HInvariant[] = [
   {
     id: 34,
     category: 'authority',
-    description: 'Retained national determination cannot be substituted by the operating institution',
+    description:
+      'Retained national determination cannot be substituted by the operating institution',
   },
   {
     id: 35,

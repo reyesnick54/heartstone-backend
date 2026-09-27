@@ -1,13 +1,4 @@
--- S10: institution-neutral core enums and backfill (additive; historical enum labels retained)
-
-ALTER TYPE "AuthorityClassification" ADD VALUE IF NOT EXISTS 'INSTITUTION_OWNED';
-ALTER TYPE "AuthorityClassification" ADD VALUE IF NOT EXISTS 'INSTITUTION_DELEGATED';
-
-ALTER TYPE "InstrumentIssuerSource" ADD VALUE IF NOT EXISTS 'INSTITUTION_ISSUED';
-
-ALTER TYPE "InstrumentJurisdictionScope" ADD VALUE IF NOT EXISTS 'OPERATING_JURISDICTION';
-
-ALTER TYPE "MetricDependencyTimeClassification" ADD VALUE IF NOT EXISTS 'INSTITUTION_CONTROLLED_TIME';
+-- S10 part 2: backfill and rename after enum values are committed
 
 UPDATE "function_authority_records"
 SET "classification" = 'INSTITUTION_OWNED'

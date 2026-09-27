@@ -7,10 +7,7 @@ import {
   resolveControllerDomain,
   type RouteAccessDomainKey,
 } from './route-access/resolve-controller-domain';
-import {
-  profileForDomain,
-  type RouteAccessProfile,
-} from './route-access/route-access-profiles';
+import { profileForDomain, type RouteAccessProfile } from './route-access/route-access-profiles';
 import { RouteClass } from './route-class.enum';
 
 const HTTP_METHODS = ['Get', 'Post', 'Put', 'Patch', 'Delete', 'Head', 'Options'] as const;
@@ -102,9 +99,7 @@ function hasDenyByDefaultAdministrative(decoratorBlock: string): boolean {
 }
 
 function extractRequirePermissionsCode(decoratorBlock: string): string | null {
-  const match = /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/.exec(
-    decoratorBlock,
-  );
+  const match = /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/.exec(decoratorBlock);
   if (!match?.[1]) {
     return null;
   }
@@ -112,10 +107,7 @@ function extractRequirePermissionsCode(decoratorBlock: string): string | null {
   return PermissionCodes[key];
 }
 
-function resolveTechnicalAccessMetadata(input: {
-  classHeader: string;
-  decoratorBlock: string;
-}): {
+function resolveTechnicalAccessMetadata(input: { classHeader: string; decoratorBlock: string }): {
   technicalPermissionRequired: boolean;
   permissionCode: string | null;
 } {
@@ -152,7 +144,9 @@ function hasRouteAccessDecorator(decoratorBlock: string): boolean {
 }
 
 function parseRouteAccessMetadataBlock(decoratorBlock: string): RouteAccessOverride | undefined {
-  const match = /@(?:RouteAccess|ControllerRouteAccess)\s*\(\s*(\{[\s\S]*\})\s*\)/.exec(decoratorBlock);
+  const match = /@(?:RouteAccess|ControllerRouteAccess)\s*\(\s*(\{[\s\S]*\})\s*\)/.exec(
+    decoratorBlock,
+  );
   if (!match?.[1]) {
     return undefined;
   }
@@ -220,7 +214,7 @@ function collectDecoratorLinesBeforeIndex(content: string, endIndex: number): st
   const lines = content.slice(0, endIndex).split('\n');
   let index = lines.length - 1;
 
-  while (index >= 0 && !(lines[index]?.trim())) {
+  while (index >= 0 && !lines[index]?.trim()) {
     index -= 1;
   }
 
@@ -232,7 +226,7 @@ function collectDecoratorLinesBeforeIndex(content: string, endIndex: number): st
 
     if (!trimmed) {
       let look = index - 1;
-      while (look >= 0 && !(lines[look]?.trim())) {
+      while (look >= 0 && !lines[look]?.trim()) {
         look -= 1;
       }
       if (look >= 0 && isDecoratorLine(lines[look]?.trim() ?? '')) {
@@ -279,7 +273,11 @@ function collectTrailingDecorators(classBody: string, startIndex: number): strin
   return decoratorLines.length > 0 ? `${decoratorLines.join('\n')}\n` : '';
 }
 
-function collectDecoratorBlock(classBody: string, methodMatchIndex: number, methodDecoratorLine: string): string {
+function collectDecoratorBlock(
+  classBody: string,
+  methodMatchIndex: number,
+  methodDecoratorLine: string,
+): string {
   const endIndex = methodMatchIndex + methodDecoratorLine.length;
   const before = collectDecoratorLinesBeforeIndex(classBody, endIndex);
   const after = collectTrailingDecorators(classBody, endIndex);
@@ -500,7 +498,9 @@ function classifyRoute(input: {
 
 function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRoute[] {
   const content = fs.readFileSync(sourceFile, 'utf8');
-  const relativeFromSrc = path.relative(path.join(projectRoot, 'src'), sourceFile).replace(/\\/g, '/');
+  const relativeFromSrc = path
+    .relative(path.join(projectRoot, 'src'), sourceFile)
+    .replace(/\\/g, '/');
   const domain = resolveControllerDomain(relativeFromSrc);
   const relativeSource = path.relative(projectRoot, sourceFile).replace(/\\/g, '/');
   const routes: ScannedRoute[] = [];
@@ -517,9 +517,12 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
     const nextClassAlt = content.indexOf('@Controller()', classStart + 1);
     const nextClassWithQuote = content.indexOf("@Controller('", classStart + 1);
     const nextClassWithDoubleQuote = content.indexOf('@Controller("', classStart + 1);
-    const nextCandidates = [nextClass, nextClassAlt, nextClassWithQuote, nextClassWithDoubleQuote].filter(
-      (candidate) => candidate !== -1,
-    );
+    const nextCandidates = [
+      nextClass,
+      nextClassAlt,
+      nextClassWithQuote,
+      nextClassWithDoubleQuote,
+    ].filter((candidate) => candidate !== -1);
     const nextClassIndex = nextCandidates.length > 0 ? Math.min(...nextCandidates) : -1;
     const classBody = content.slice(
       classStart,
@@ -542,10 +545,7 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
       nearestControllerRouteAccessIndex > previousClassIndex;
     const controllerRouteAccess = parseRouteAccessMetadataBlock(classHeader);
 
-    const methodPattern = new RegExp(
-      `@(${HTTP_METHODS.join('|')})\\(([^)]*)\\)`,
-      'g',
-    );
+    const methodPattern = new RegExp(`@(${HTTP_METHODS.join('|')})\\(([^)]*)\\)`, 'g');
     let methodMatch: RegExpExecArray | null;
 
     while ((methodMatch = methodPattern.exec(classBody)) !== null) {
@@ -646,9 +646,9 @@ export function scanControllerRoutes(projectRoot?: string): ScannedRoute[] {
     .sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
 }
 
-export function validateRouteSecurityMetadata(
-  scan: ScannedRoute[] | RouteScanResult,
-): { violations: string[] } {
+export function validateRouteSecurityMetadata(scan: ScannedRoute[] | RouteScanResult): {
+  violations: string[];
+} {
   const routes = Array.isArray(scan) ? scan : scan.routes;
   const violations: string[] = [];
 

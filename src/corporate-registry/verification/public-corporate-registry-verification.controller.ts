@@ -15,10 +15,10 @@ import {
 @ControllerRouteAccess({
   routeClass: RouteClass.SYSTEM_HEALTH,
   authenticationRequired: false,
-  scopeRequirement: "Process and dependency health probes",
-  authorityRequirement: "None",
-  actorSource: "Anonymous monitor",
-  primarySecurityInvariant: "Health endpoints expose no protected domain data",
+  scopeRequirement: 'Process and dependency health probes',
+  authorityRequirement: 'None',
+  actorSource: 'Anonymous monitor',
+  primarySecurityInvariant: 'Health endpoints expose no protected domain data',
 })
 @Controller('public/corporate-registry')
 export class PublicCorporateRegistryVerificationController {

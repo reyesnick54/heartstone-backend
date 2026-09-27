@@ -15,10 +15,10 @@ import { StudentEducationProfileService } from './students/student-education-pro
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Government service domain actor scope with institutional boundaries",
-  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
-  actorSource: "Session identity with domain access resolution",
-  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+  scopeRequirement: 'Government service domain actor scope with institutional boundaries',
+  authorityRequirement: 'ConsequentialActionGuard for final government outcomes',
+  actorSource: 'Session identity with domain access resolution',
+  primarySecurityInvariant: 'Application and submission endpoints do not confer official outcomes',
 })
 @Controller('education')
 export class EducationController {

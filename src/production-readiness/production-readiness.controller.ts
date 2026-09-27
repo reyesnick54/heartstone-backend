@@ -11,10 +11,10 @@ import {
 @ControllerRouteAccess({
   routeClass: RouteClass.PUBLIC,
   authenticationRequired: false,
-  scopeRequirement: "Public boundary disclaimer consumption",
-  authorityRequirement: "None",
-  actorSource: "Anonymous reader",
-  primarySecurityInvariant: "Boundary disclaimers are informational only",
+  scopeRequirement: 'Public boundary disclaimer consumption',
+  authorityRequirement: 'None',
+  actorSource: 'Anonymous reader',
+  primarySecurityInvariant: 'Boundary disclaimers are informational only',
 })
 @Controller('production-readiness')
 export class ProductionReadinessController {

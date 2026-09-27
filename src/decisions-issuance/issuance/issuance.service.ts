@@ -123,10 +123,7 @@ export class IssuanceService {
     }
 
     const issuerSource = resolveDefaultInstrumentIssuerSource(input.issuerSource);
-    if (
-      typeVersion.retainedNationalBoundary &&
-      isOperatingInstitutionIssuedSource(issuerSource)
-    ) {
+    if (typeVersion.retainedNationalBoundary && isOperatingInstitutionIssuedSource(issuerSource)) {
       throw new RetainedNationalIssuanceException(
         'Retained-national instruments cannot be issued by the operating institution without coordinated national or external issuer source',
       );

@@ -19,9 +19,7 @@ export function normalizeAuthorityClassification(
   }
 }
 
-export function isInstitutionOwnedClassification(
-  classification: AuthorityClassification,
-): boolean {
+export function isInstitutionOwnedClassification(classification: AuthorityClassification): boolean {
   const normalized = normalizeAuthorityClassification(classification);
   return normalized === AuthorityClassification.INSTITUTION_OWNED;
 }

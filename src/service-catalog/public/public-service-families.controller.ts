@@ -12,10 +12,10 @@ import { PublicServiceDiscoveryService } from './public-service-discovery.servic
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Service catalog administration or public discovery opt-out",
-  authorityRequirement: "Catalog configuration authority for protected routes",
-  actorSource: "Administrator or anonymous reader for explicitly public catalog routes",
-  primarySecurityInvariant: "Published catalog visibility does not grant case or decision access",
+  scopeRequirement: 'Service catalog administration or public discovery opt-out',
+  authorityRequirement: 'Catalog configuration authority for protected routes',
+  actorSource: 'Administrator or anonymous reader for explicitly public catalog routes',
+  primarySecurityInvariant: 'Published catalog visibility does not grant case or decision access',
 })
 @Controller('public/service-families')
 export class PublicServiceFamiliesController {
