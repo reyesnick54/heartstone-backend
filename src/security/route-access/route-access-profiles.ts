@@ -209,6 +209,7 @@ export const ROUTE_ACCESS_PROFILES: Record<RouteAccessDomainKey, RouteAccessProf
   'planning-construction': governmentServiceDomainProfile,
   'public-safety': governmentServiceDomainProfile,
   education: governmentServiceDomainProfile,
+  'digital-assets': governmentServiceDomainProfile,
   'civil-registry': governmentServiceDomainProfile,
   'service-packs': {
     ...governmentServiceDomainProfile,

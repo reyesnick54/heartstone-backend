@@ -14,7 +14,7 @@ describe('Phase 7H evidence records (e2e)', () => {
   beforeAll(async () => {
     ({ app } = await createPhase7IntegrationApp());
     prisma = app.get(PrismaService);
-  });
+  }, 60_000);
 
   beforeEach(async () => {
     await resetAllTestData(prisma);

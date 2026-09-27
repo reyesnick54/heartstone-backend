@@ -134,6 +134,8 @@ model Jurisdiction {
   benefitApplicantProfiles            BenefitApplicantProfile[]
   householdRecords                    HouseholdRecord[]
   educationConfiguration              EducationConfiguration?
+  digitalAssetsConfiguration          DigitalAssetsConfiguration?
+  digitalAssetsRegulatedEntities      DigitalAssetsRegulatedEntityReference[]
   educationInstitutions               EducationInstitution[]
   studentEducationProfiles            StudentEducationProfile[]
   qualificationReferences             QualificationReference[]
@@ -487,6 +489,7 @@ model ExternalAuthority {
   driverMedicalRequirementReferences DriverMedicalRequirementReference[]
   customsExternalDependencies        CustomsExternalDependency[]
   educationExternalDependencies      EducationExternalDependency[]
+  digitalAssetsExternalDependencies  DigitalAssetsExternalDependency[]
   restrictedGoodsRequirements        RestrictedGoodsRequirement[]
   externalEligibilityDeterminations  ExternalEligibilityDeterminationReference[]
 
@@ -938,6 +941,11 @@ model Identity {
   enrollmentHistoryEvents                           EnrollmentHistory[]                         @relation("EnrollmentHistoryActor")
   transcriptCorrectionEvents                        TranscriptRecordCorrectionHistory[]         @relation("TranscriptCorrectionActor")
   educationExternalDependenciesRecorded             EducationExternalDependency[]               @relation("EducationExternalDependencyRecorder")
+  digitalAssetsExternalDependenciesRecorded         DigitalAssetsExternalDependency[]           @relation("DigitalAssetsExternalDependencyRecorder")
+  digitalAssetsResponsibleParties                   DigitalAssetsResponsiblePartyReference[]    @relation("DigitalAssetsResponsiblePartyIdentity")
+  digitalAssetsTechnicalReviewsConducted            DigitalAssetsTechnicalReviewRecord[]        @relation("DigitalAssetsTechnicalReviewReviewer")
+  digitalAssetsOperatingStatusHistoryEvents         DigitalAssetsOperatingStatusHistory[]       @relation("DigitalAssetsOperatingStatusActor")
+  digitalAssetsDataAccessAudits                     DigitalAssetsDataAccessAudit[]              @relation("DigitalAssetsDataAccessAuditAccessor")
   publicSafetyEngagementsAsReporter                 PublicSafetyEngagement[]                    @relation("PublicSafetyEngagementReporter")
   publicSafetyIncidentReportsAsReporter             PublicSafetyIncidentReport[]                @relation("PublicSafetyIncidentReporter")
   clinicalResearchParticipantProfiles               ClinicalResearchParticipantProfile[]        @relation("ClinicalResearchParticipantSubject")
@@ -1034,6 +1042,7 @@ model Organization {
   healthcareRegulatedEntities     HealthcareRegulatedEntityReference[] @relation("HealthcareRegulatedEntityOrganization")
   healthcareOrganizationProfiles  HealthcareOrganization[]             @relation("HealthcareOrganizationPlatformOrg")
   publicSafetyEngagements         PublicSafetyEngagement[]
+  digitalAssetsRegulatedEntities  DigitalAssetsRegulatedEntityReference[] @relation("DigitalAssetsRegulatedEntityOrganization")
 
   treatmentProgramProviders        TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
@@ -2076,6 +2085,8 @@ model GovernmentServiceVersion {
   checklistItems                      GovernmentServiceChecklistItem[]
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
+  slaRules                            GovernmentServiceSlaRule[]
+  escalationLadders                   GovernmentServiceEscalationLadder[]
   formDefinitions                     FormDefinition[]
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
@@ -2324,6 +2335,59 @@ model GovernmentServiceRedressRoute {
   @@map("government_service_redress_routes")
 }
 
+model GovernmentServiceSlaRule {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
+  ruleCode                   String
+  label                      String
+  targetDurationMs           Int
+  clockStartsAtStageKey      String?
+  pauseOnRfi                 Boolean                  @default(true)
+  escalationLadderCode       String?
+  configuration              Json                     @default("{}")
+  sortOrder                  Int                      @default(0)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, ruleCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_sla_rules")
+}
+
+model GovernmentServiceEscalationLadder {
+  id                         String                                @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                                @db.Uuid
+  ladderCode                 String
+  label                      String
+  slaRuleCode                String?
+  createdAt                  DateTime                              @default(now())
+  updatedAt                  DateTime                              @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion              @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  steps                      GovernmentServiceEscalationLadderStep[]
+
+  @@unique([governmentServiceVersionId, ladderCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_escalation_ladders")
+}
+
+model GovernmentServiceEscalationLadderStep {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  escalationLadderId            String                            @db.Uuid
+  level                         Int
+  label                         String
+  triggerOverdueMs              Int                               @default(0)
+  responsibleDepartmentId       String?                           @db.Uuid
+  responsibleInstitutionId      String?                           @db.Uuid
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  escalationLadder   GovernmentServiceEscalationLadder @relation(fields: [escalationLadderId], references: [id], onDelete: Cascade)
+
+  @@unique([escalationLadderId, level])
+  @@index([escalationLadderId])
+  @@map("government_service_escalation_ladder_steps")
+}
+
 // ─── Phase 5F: Service Activation & Publication Governance ───────────────────
 
 enum ServiceTestReadinessStatus {
@@ -2560,6 +2624,30 @@ enum CaseEscalationStatus {
   WITHDRAWN
 }
 
+enum WorkflowDurableJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  DEAD
+}
+
+enum WorkflowDurableJobKind {
+  SLA_DEADLINE_EVALUATION
+  ESCALATION_EVALUATION
+  REMINDER
+  TIMEOUT_ACTION
+  RENEWAL_SCHEDULE_HOOK
+}
+
+enum SafeHaltReasonCode {
+  AUTHORITY_DEPENDENCY_UNAVAILABLE
+  EXTERNAL_DECISION_REQUIRED
+  GOVERNING_SOURCE_INACTIVE
+  REQUIRED_EVIDENCE_UNRESOLVED
+  MANDATORY_INTEGRATION_UNAVAILABLE
+}
+
 enum CaseIssueSeverity {
   LOW
   MEDIUM
@@ -2601,6 +2689,9 @@ enum CaseEventType {
   SLA_CLOCK_RESUMED
   SLA_BREACHED
   ESCALATION_CREATED
+  RFI_ISSUED
+  WORKFLOW_BRANCH
+  RESUME_FROM_HALT
   ISSUE_CREATED
   ISSUE_ESCALATED
   STATUS_CHANGED
@@ -2749,6 +2840,7 @@ model Application {
   educationInstitutionRegistrations    EducationInstitutionRegistration[]
   educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
+  digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
 
   treatmentApplicationProfile TreatmentApplication?
 
@@ -2829,6 +2921,7 @@ model Case {
   referrals                            CaseReferral[]
   slaClocks                            CaseSlaClock[]
   escalations                          CaseEscalation[]
+  applicantInformationRequests         ApplicantInformationRequest[]
   issues                               CaseIssue[]
   events                               CaseEvent[]
   communications                       CaseCommunication[]
@@ -2900,6 +2993,7 @@ model Case {
   educationInstitutionRegistrations    EducationInstitutionRegistration[]
   educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
+  digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
 
   treatmentApplicationProfile TreatmentApplication?
   treatmentReferrals          TreatmentReferral[]
@@ -3054,6 +3148,8 @@ model CaseWorkflowInstance {
   completedAt       DateTime?
   haltedAt          DateTime?
   haltReason        String?
+  haltReasonCode    SafeHaltReasonCode?
+  requiredResolution String?
   createdAt         DateTime                   @default(now())
   updatedAt         DateTime                   @updatedAt
   case              Case                       @relation(fields: [caseId], references: [id], onDelete: Cascade)
@@ -3131,19 +3227,29 @@ model DeficiencyNotice {
 }
 
 model ApplicantInformationRequest {
-  id                      String                            @id @default(uuid()) @db.Uuid
-  applicationSubmissionId String                            @db.Uuid
-  status                  ApplicantInformationRequestStatus @default(ISSUED)
-  requestedItems          Json                              @default("[]")
-  instructions            String
-  issuedAt                DateTime                          @default(now())
-  respondedAt             DateTime?
-  expiresAt               DateTime?
-  createdAt               DateTime                          @default(now())
-  updatedAt               DateTime                          @updatedAt
-  applicationSubmission   ApplicationSubmission             @relation(fields: [applicationSubmissionId], references: [id])
+  id                           String                            @id @default(uuid()) @db.Uuid
+  applicationSubmissionId      String                            @db.Uuid
+  caseId                       String?                           @db.Uuid
+  status                       ApplicantInformationRequestStatus @default(ISSUED)
+  requestedItems               Json                              @default("[]")
+  instructions                 String
+  issuedAt                     DateTime                          @default(now())
+  respondedAt                  DateTime?
+  expiresAt                    DateTime?
+  issuedByIdentityId           String?                           @db.Uuid
+  issuedByOfficeholderId       String?                           @db.Uuid
+  functionAuthorityRecordId    String?                           @db.Uuid
+  authorityEvaluationRecordId  String?                           @db.Uuid
+  pausedClockKey               String?
+  overrideResumedAt            DateTime?
+  overrideByIdentityId         String?                           @db.Uuid
+  createdAt                    DateTime                          @default(now())
+  updatedAt                    DateTime                          @updatedAt
+  applicationSubmission        ApplicationSubmission             @relation(fields: [applicationSubmissionId], references: [id])
+  case                         Case?                             @relation(fields: [caseId], references: [id])
 
   @@index([applicationSubmissionId])
+  @@index([caseId])
   @@index([status])
   @@map("applicant_information_requests")
 }
@@ -3210,43 +3316,84 @@ model CaseReferralResponse {
 }
 
 model CaseSlaClock {
-  id               String             @id @default(uuid()) @db.Uuid
-  caseId           String             @db.Uuid
-  clockKey         String
-  status           CaseSlaClockStatus @default(RUNNING)
-  startedAt        DateTime           @default(now())
-  pausedAt         DateTime?
-  resumedAt        DateTime?
-  breachedAt       DateTime?
-  completedAt      DateTime?
-  targetDurationMs Int?
-  elapsedMs        Int                @default(0)
-  pausedDurationMs Int                @default(0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  case             Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                         String             @id @default(uuid()) @db.Uuid
+  caseId                     String             @db.Uuid
+  clockKey                   String
+  status                     CaseSlaClockStatus @default(RUNNING)
+  startedAt                  DateTime           @default(now())
+  dueAt                      DateTime?
+  pausedAt                   DateTime?
+  resumedAt                  DateTime?
+  breachedAt                 DateTime?
+  completedAt                DateTime?
+  targetDurationMs           Int?
+  elapsedMs                  Int                @default(0)
+  pausedDurationMs           Int                @default(0)
+  serviceStandardRuleCode    String?
+  governmentServiceVersionId String?            @db.Uuid
+  standardConfiguration      Json               @default("{}")
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  case                       Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@unique([caseId, clockKey])
   @@index([caseId])
   @@index([status])
+  @@index([dueAt])
   @@map("case_sla_clocks")
 }
 
 model CaseEscalation {
-  id               String               @id @default(uuid()) @db.Uuid
-  caseId           String               @db.Uuid
-  status           CaseEscalationStatus @default(OPEN)
-  reason           String
-  escalatedAt      DateTime             @default(now())
-  resolvedAt       DateTime?
-  retainsAuthority Boolean              @default(true)
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  case             Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                           String               @id @default(uuid()) @db.Uuid
+  caseId                       String               @db.Uuid
+  status                       CaseEscalationStatus @default(OPEN)
+  reason                       String
+  escalationLevel              Int                  @default(1)
+  escalationLadderCode         String?
+  idempotencyKey               String?              @unique
+  slaClockKey                  String?
+  responsibleDepartmentId      String?              @db.Uuid
+  responsibleInstitutionId     String?              @db.Uuid
+  escalatedAt                  DateTime             @default(now())
+  resolvedAt                   DateTime?
+  retainsAuthority             Boolean              @default(true)
+  createdAt                    DateTime             @default(now())
+  updatedAt                    DateTime             @updatedAt
+  case                         Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@index([caseId])
   @@index([status])
+  @@index([caseId, escalationLevel])
   @@map("case_escalations")
+}
+
+model WorkflowDurableJob {
+  id             String                   @id @default(uuid()) @db.Uuid
+  jobKind        WorkflowDurableJobKind
+  status         WorkflowDurableJobStatus @default(PENDING)
+  idempotencyKey String                   @unique
+  payload        Json                     @default("{}")
+  scheduledFor   DateTime
+  startedAt      DateTime?
+  completedAt    DateTime?
+  attemptCount   Int                      @default(0)
+  maxAttempts    Int                      @default(5)
+  lastError      String?
+  leaseToken     String?
+  leaseExpiresAt DateTime?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([jobKind])
+  @@map("workflow_durable_jobs")
+}
+
+model GovernmentDecisionNumberSequence {
+  year      Int @id
+  nextValue Int @default(1)
+
+  @@map("government_decision_number_sequences")
 }
 
 model CaseIssue {
@@ -3516,6 +3663,7 @@ model MasterAdministrativeFile {
   benefitApplicantProfiles             BenefitApplicantProfile[]
   educationInstitutions                EducationInstitution[]
   studentEducationProfiles             StudentEducationProfile[]
+  digitalAssetsRegulatedEntities       DigitalAssetsRegulatedEntityReference[]
 
   patientHealthcareProfiles PatientHealthcareProfile[]
 
@@ -3948,6 +4096,8 @@ model EvidenceRecord {
   householdRelationships          HouseholdRelationship[]
   educationCertificateRecords     CertificateRecord[]
   academicCredentials             AcademicCredential[]
+  digitalAssetsTechnicalReviews   DigitalAssetsTechnicalReviewRecord[]
+  digitalAssetsTechnologyProfiles DigitalAssetsTechnologyProfile[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5419,6 +5569,8 @@ model GovernmentDecision {
   academicCredentials                 AcademicCredential[]
   educatorLicenseRecords              EducatorLicenseRecord[]
   treatmentProgramAuthorizations      TreatmentProgramAuthorization[]
+  digitalAssetsAuthorizationRecords   DigitalAssetsAuthorizationRecord[] @relation("DigitalAssetsAuthorizationDecision")
+  digitalAssetsOperatingStatusHistory DigitalAssetsOperatingStatusHistory[] @relation("DigitalAssetsOperatingStatusDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -5910,6 +6062,7 @@ model OfficialInstrument {
   educationInstitutionLicenses      EducationInstitutionLicense[]
   academicCredentials               AcademicCredential[]
   educatorLicenseRecords            EducatorLicenseRecord[]
+  digitalAssetsAuthorizationRecords DigitalAssetsAuthorizationRecord[] @relation("DigitalAssetsAuthorizationInstrument")
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -6535,6 +6688,7 @@ model ComplianceMatter {
   complianceSubmissions                ComplianceSubmission[]
   labourComplianceMatterReferences     LabourComplianceMatterReference[]
   educationComplianceReference         EducationComplianceReference?
+  digitalAssetsComplianceReference     DigitalAssetsComplianceReference?
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
 
@@ -16358,6 +16512,7 @@ model CorporateBeneficialOwnershipDeclaration {
   createdAt            DateTime                      @default(now())
   updatedAt            DateTime                      @updatedAt
   profile              CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  digitalAssetsBeneficialOwnershipReferences DigitalAssetsBeneficialOwnershipReference[]
 
   @@index([profileId])
   @@map("corporate_beneficial_ownership_declarations")
@@ -24991,4 +25146,344 @@ model GovernedConfigurationEffectiveVersion {
   @@unique([institutionId, configurationDomain, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_uniq")
   @@index([institutionId, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_lookup_idx")
   @@map("governed_configuration_effective_versions")
+}
+
+// ─── Digital Assets & Blockchain Administration (S18B) ───────────────────────
+
+enum DigitalAssetsActorPersona {
+  APPLICANT
+  AUTHORIZED_REPRESENTATIVE
+  REGULATORY_OFFICER
+  TECHNICAL_REVIEWER
+  PROFESSIONAL_REVIEWER
+  EXTERNAL_AUTHORITY_LIAISON
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  BLOCKCHAIN_VERIFICATION_SERVICE
+  TECHNICAL_ADMIN
+}
+
+enum DigitalAssetsDataClassification {
+  PUBLIC_SUMMARY
+  REGULATORY_ACCESS
+  CONFIDENTIAL_TECHNICAL
+  BENEFICIAL_OWNERSHIP_RESTRICTED
+}
+
+enum DigitalAssetsOperatingStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  CEASED
+}
+
+enum DigitalAssetsExternalDependencyType {
+  NATIONAL_FINANCIAL_REGULATOR
+  NATIONAL_SECURITY_REVIEW
+  PROFESSIONAL_REVIEWER
+  OTHER_COMPETENT_AUTHORITY
+  CONFIGURED_AUTHORITY
+}
+
+enum DigitalAssetsExternalDependencyRecordedBy {
+  REGULATORY_OFFICER
+  INTEGRATION_SYSTEM
+  EXTERNAL_AUTHORITY_LIAISON
+  SYSTEM
+}
+
+enum DigitalAssetsExternalDependencyStatus {
+  PENDING
+  RESOLVED
+  WAIVED
+}
+
+enum DigitalAssetsTechnicalReviewCategory {
+  ARCHITECTURE_DOCUMENTATION
+  CUSTODY_CONTROL
+  CYBERSECURITY_EVIDENCE
+  OPERATIONAL_CONTROLS
+  BUSINESS_CONTINUITY
+  PROFESSIONAL_ATTESTATION
+  CONFIGURED_CATEGORY
+}
+
+enum DigitalAssetsTechnicalReviewStatus {
+  PENDING
+  UNDER_REVIEW
+  COMPLETE
+  REQUIRES_RESUBMISSION
+}
+
+enum DigitalAssetsAuthorizationStatus {
+  NOT_ISSUED
+  PENDING_DECISION
+  ISSUED
+  EFFECTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum DigitalAssetsResponsiblePartyRole {
+  COMPLIANCE_OFFICER
+  TECHNOLOGY_OFFICER
+  DIRECTOR
+  AUTHORIZED_REPRESENTATIVE
+  CONFIGURED_ROLE
+}
+
+model DigitalAssetsConfiguration {
+  id                                 String       @id @default(uuid()) @db.Uuid
+  jurisdictionId                     String       @unique @db.Uuid
+  activityCategoryTaxonomy           Json         @default("[]")
+  applicantCategoryTaxonomy          Json         @default("[]")
+  technicalReviewCategoryTaxonomy    Json         @default("[]")
+  publicVerificationModeCode         String       @default("MINIMAL")
+  consumesPlatformBlockchainVerification Boolean  @default(true)
+  createdAt                          DateTime     @default(now())
+  updatedAt                          DateTime     @updatedAt
+  jurisdiction                       Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+
+  @@map("digital_assets_configurations")
+}
+
+model DigitalAssetsRegulatedEntityReference {
+  id                           String                         @id @default(uuid()) @db.Uuid
+  entityReferenceNumber        String                         @unique
+  organizationId               String                         @db.Uuid
+  jurisdictionId               String?                        @db.Uuid
+  activityCategoryCode         String
+  operatingStatus              DigitalAssetsOperatingStatus   @default(DRAFT)
+  dataClassification           DigitalAssetsDataClassification @default(REGULATORY_ACCESS)
+  masterAdministrativeFileId   String?                        @db.Uuid
+  effectiveFrom                DateTime?
+  effectiveUntil               DateTime?
+  doesNotDuplicateOrganization Boolean                        @default(true)
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+  organization                 Organization                   @relation("DigitalAssetsRegulatedEntityOrganization", fields: [organizationId], references: [id])
+  jurisdiction                 Jurisdiction?                  @relation(fields: [jurisdictionId], references: [id])
+  masterAdministrativeFile     MasterAdministrativeFile?      @relation(fields: [masterAdministrativeFileId], references: [id])
+  applicationReferences        DigitalAssetsApplicationReference[]
+  technologyProfiles           DigitalAssetsTechnologyProfile[]
+  responsibleParties           DigitalAssetsResponsiblePartyReference[]
+  beneficialOwnershipReferences DigitalAssetsBeneficialOwnershipReference[]
+  conditions                   DigitalAssetsConditionRecord[]
+  statusHistory                DigitalAssetsOperatingStatusHistory[]
+  authorizations               DigitalAssetsAuthorizationRecord[]
+  technicalReviews             DigitalAssetsTechnicalReviewRecord[]
+  externalDependencies         DigitalAssetsExternalDependency[]
+  complianceReferences         DigitalAssetsComplianceReference[]
+  dataAccessAudits             DigitalAssetsDataAccessAudit[]
+
+  @@index([organizationId])
+  @@index([jurisdictionId])
+  @@index([operatingStatus])
+  @@index([activityCategoryCode])
+  @@map("digital_assets_regulated_entity_references")
+}
+
+model DigitalAssetsApplicationReference {
+  id                String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                                @db.Uuid
+  applicationId     String?                               @db.Uuid
+  caseId            String?                               @db.Uuid
+  licenceTypeCode   String?
+  serviceCode       String?
+  createdAt         DateTime                              @default(now())
+  updatedAt         DateTime                              @updatedAt
+  regulatedEntity   DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  application       Application?                          @relation(fields: [applicationId], references: [id])
+  case              Case?                                 @relation(fields: [caseId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@index([applicationId])
+  @@index([caseId])
+  @@map("digital_assets_application_references")
+}
+
+model DigitalAssetsTechnologyProfile {
+  id                       String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId        String                                @db.Uuid
+  platformName             String?
+  technologyStackSummary   String?
+  custodyModelCode         String?
+  evidenceRecordId         String?                               @db.Uuid
+  dataClassification       DigitalAssetsDataClassification       @default(CONFIDENTIAL_TECHNICAL)
+  createdAt                DateTime                              @default(now())
+  updatedAt                DateTime                              @updatedAt
+  regulatedEntity          DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  evidenceRecord           EvidenceRecord?                       @relation(fields: [evidenceRecordId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_technology_profiles")
+}
+
+model DigitalAssetsResponsiblePartyReference {
+  id                String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                                @db.Uuid
+  identityId        String?                               @db.Uuid
+  roleCode          DigitalAssetsResponsiblePartyRole
+  configuredRoleCode String?
+  effectiveFrom     DateTime?
+  effectiveUntil    DateTime?
+  createdAt         DateTime                              @default(now())
+  regulatedEntity   DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  identity          Identity?                             @relation("DigitalAssetsResponsiblePartyIdentity", fields: [identityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_responsible_party_references")
+}
+
+model DigitalAssetsBeneficialOwnershipReference {
+  id                                        String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId                         String                                @db.Uuid
+  corporateBeneficialOwnershipDeclarationId String?                               @db.Uuid
+  restrictedSummary                         String?
+  dataClassification                        DigitalAssetsDataClassification       @default(BENEFICIAL_OWNERSHIP_RESTRICTED)
+  createdAt                                 DateTime                              @default(now())
+  regulatedEntity                           DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  corporateBeneficialOwnershipDeclaration   CorporateBeneficialOwnershipDeclaration? @relation(fields: [corporateBeneficialOwnershipDeclarationId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_beneficial_ownership_references")
+}
+
+model DigitalAssetsConditionRecord {
+  id                String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                                @db.Uuid
+  conditionCode     String
+  conditionSummary  String
+  effectiveFrom     DateTime?
+  effectiveUntil    DateTime?
+  createdAt         DateTime                              @default(now())
+  regulatedEntity   DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_condition_records")
+}
+
+model DigitalAssetsOperatingStatusHistory {
+  id                   String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId    String                                @db.Uuid
+  fromStatusCode       String?
+  toStatusCode         String
+  changedAt            DateTime                              @default(now())
+  actorIdentityId      String?                               @db.Uuid
+  actorPersona         DigitalAssetsActorPersona?
+  governmentDecisionId String?                               @db.Uuid
+  reasonSummary        String?
+  regulatedEntity      DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  actorIdentity        Identity?                             @relation("DigitalAssetsOperatingStatusActor", fields: [actorIdentityId], references: [id])
+  governmentDecision   GovernmentDecision?                   @relation("DigitalAssetsOperatingStatusDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_operating_status_history")
+}
+
+model DigitalAssetsAuthorizationRecord {
+  id                                  String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId                   String                                @db.Uuid
+  authorizationReference              String                                @unique
+  status                              DigitalAssetsAuthorizationStatus      @default(NOT_ISSUED)
+  authorizationTypeCode               String?
+  applicationId                       String?                               @db.Uuid
+  caseId                              String?                               @db.Uuid
+  governmentDecisionId                String?                               @db.Uuid
+  officialInstrumentId                String?                               @db.Uuid
+  effectiveFrom                       DateTime?
+  effectiveUntil                      DateTime?
+  renewalOfAuthorizationId            String?                               @unique @db.Uuid
+  doesNotSubstituteGovernmentDecision Boolean                               @default(true)
+  createdAt                           DateTime                              @default(now())
+  updatedAt                           DateTime                              @updatedAt
+  regulatedEntity                     DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  governmentDecision                  GovernmentDecision?                   @relation("DigitalAssetsAuthorizationDecision", fields: [governmentDecisionId], references: [id])
+  officialInstrument                  OfficialInstrument?                   @relation("DigitalAssetsAuthorizationInstrument", fields: [officialInstrumentId], references: [id])
+  renewalOfAuthorization              DigitalAssetsAuthorizationRecord?     @relation("DigitalAssetsAuthorizationRenewal", fields: [renewalOfAuthorizationId], references: [id])
+  renewedByAuthorization              DigitalAssetsAuthorizationRecord?     @relation("DigitalAssetsAuthorizationRenewal")
+
+  @@index([regulatedEntityId])
+  @@index([status])
+  @@map("digital_assets_authorization_records")
+}
+
+model DigitalAssetsTechnicalReviewRecord {
+  id                 String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId  String                                @db.Uuid
+  reviewCategory     DigitalAssetsTechnicalReviewCategory
+  configuredCategoryCode String?
+  status             DigitalAssetsTechnicalReviewStatus    @default(PENDING)
+  evidenceRecordId   String?                               @db.Uuid
+  reviewerIdentityId String?                               @db.Uuid
+  reviewerPersona    DigitalAssetsActorPersona?
+  isOfficialApproval Boolean                               @default(false)
+  summaryNotes       String?
+  createdAt          DateTime                              @default(now())
+  updatedAt          DateTime                              @updatedAt
+  regulatedEntity    DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  evidenceRecord     EvidenceRecord?                       @relation(fields: [evidenceRecordId], references: [id])
+  reviewerIdentity   Identity?                             @relation("DigitalAssetsTechnicalReviewReviewer", fields: [reviewerIdentityId], references: [id])
+  dataAccessAudits   DigitalAssetsDataAccessAudit[]
+
+  @@index([regulatedEntityId])
+  @@index([status])
+  @@map("digital_assets_technical_review_records")
+}
+
+model DigitalAssetsExternalDependency {
+  id                         String                                    @id @default(uuid()) @db.Uuid
+  regulatedEntityId          String                                    @db.Uuid
+  dependencyType             DigitalAssetsExternalDependencyType
+  externalAuthorityId        String?                                   @db.Uuid
+  blocksFinalDecision        Boolean                                   @default(false)
+  status                     DigitalAssetsExternalDependencyStatus     @default(PENDING)
+  isAuthenticated            Boolean                                   @default(false)
+  authenticatedPayloadHash   String?
+  recordedBy                 DigitalAssetsExternalDependencyRecordedBy
+  recordedByIdentityId       String?                                   @db.Uuid
+  responseAttributionSummary String?
+  createdAt                  DateTime                                  @default(now())
+  updatedAt                  DateTime                                  @updatedAt
+  regulatedEntity            DigitalAssetsRegulatedEntityReference     @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  externalAuthority          ExternalAuthority?                        @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity         Identity?                                 @relation("DigitalAssetsExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@index([status])
+  @@map("digital_assets_external_dependencies")
+}
+
+model DigitalAssetsComplianceReference {
+  id                String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                                @db.Uuid
+  complianceMatterId String                               @unique @db.Uuid
+  createdAt         DateTime                              @default(now())
+  updatedAt         DateTime                              @updatedAt
+  regulatedEntity   DigitalAssetsRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  complianceMatter  ComplianceMatter                      @relation(fields: [complianceMatterId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("digital_assets_compliance_references")
+}
+
+model DigitalAssetsDataAccessAudit {
+  id                 String                                 @id @default(uuid()) @db.Uuid
+  accessorIdentityId String?                                @db.Uuid
+  regulatedEntityId  String?                                @db.Uuid
+  technicalReviewId  String?                                @db.Uuid
+  classification     DigitalAssetsDataClassification?
+  endpoint           String
+  granted            Boolean
+  reasonCode         String?
+  recordedAt         DateTime                               @default(now())
+  accessorIdentity   Identity?                              @relation("DigitalAssetsDataAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+  regulatedEntity    DigitalAssetsRegulatedEntityReference? @relation(fields: [regulatedEntityId], references: [id])
+  technicalReview    DigitalAssetsTechnicalReviewRecord?    @relation(fields: [technicalReviewId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([regulatedEntityId])
+  @@map("digital_assets_data_access_audits")
 }

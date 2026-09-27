@@ -59,15 +59,7 @@ export class ServiceAppointmentsService {
     let appointmentSlotId = dto.appointmentSlotId;
 
     if (dto.appointmentSlotId) {
-      const slot = await this.prisma.appointmentSlot.findUnique({
-        where: { id: dto.appointmentSlotId },
-      });
-      if (!slot || !slot.isAvailable || slot.bookedCount >= slot.capacity) {
-        throw new BadRequestException('Selected appointment slot is unavailable');
-      }
-      scheduledStartsAt = slot.startsAt;
-      scheduledEndsAt = slot.endsAt;
-      appointmentSlotId = slot.id;
+      appointmentSlotId = dto.appointmentSlotId;
     }
 
     const participantRole = dto.representativeOrganizationId
@@ -75,7 +67,27 @@ export class ServiceAppointmentsService {
       : AppointmentParticipantRole.APPLICANT;
 
     const appointment = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.serviceAppointment.create({
+      if (appointmentSlotId) {
+        const slot = await tx.appointmentSlot.findUnique({ where: { id: appointmentSlotId } });
+        if (!slot || !slot.isAvailable || slot.bookedCount >= slot.capacity) {
+          throw new BadRequestException('Selected appointment slot is unavailable');
+        }
+        const reserved = await tx.appointmentSlot.updateMany({
+          where: {
+            id: appointmentSlotId,
+            isAvailable: true,
+            bookedCount: slot.bookedCount,
+          },
+          data: { bookedCount: { increment: 1 } },
+        });
+        if (reserved.count !== 1) {
+          throw new BadRequestException('Selected appointment slot is unavailable');
+        }
+        scheduledStartsAt = slot.startsAt;
+        scheduledEndsAt = slot.endsAt;
+      }
+
+      return tx.serviceAppointment.create({
         data: {
           appointmentReference: generateReferenceNumber(SERVICE_APPOINTMENT_REFERENCE_PREFIX),
           status: scheduledStartsAt
@@ -110,15 +122,6 @@ export class ServiceAppointmentsService {
         },
         include: ACTIVE_APPOINTMENT_INCLUDE,
       });
-
-      if (appointmentSlotId) {
-        await tx.appointmentSlot.update({
-          where: { id: appointmentSlotId },
-          data: { bookedCount: { increment: 1 } },
-        });
-      }
-
-      return created;
     });
 
     await this.audit.record({
