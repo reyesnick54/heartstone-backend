@@ -7,7 +7,10 @@ import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import { ObligationRecurrenceService } from './common/obligation-recurrence.service';
 import { ComplianceController } from './compliance.controller';
-import { ComplianceCorrectiveActionBoundaryService, ComplianceCorrectiveActionService } from './corrective-action/compliance-corrective-action.service';
+import {
+  ComplianceCorrectiveActionBoundaryService,
+  ComplianceCorrectiveActionService,
+} from './corrective-action/compliance-corrective-action.service';
 import { JointInspectionService } from './inspection/joint-inspection.service';
 import { OperationalInspectionLifecycleService } from './inspection/operational-inspection-lifecycle.service';
 import { ComplianceMatterService } from './matters/compliance-matter.service';
