@@ -13,10 +13,10 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Government structure administration",
-  authorityRequirement: "Institutional configuration authority (not self-granted)",
-  actorSource: "Authenticated institutional administrator",
-  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+  scopeRequirement: 'Government structure administration',
+  authorityRequirement: 'Institutional configuration authority (not self-granted)',
+  actorSource: 'Authenticated institutional administrator',
+  primarySecurityInvariant: 'Government structure facts remain separate from identity privilege',
 })
 @Controller('departments')
 export class DepartmentsController {

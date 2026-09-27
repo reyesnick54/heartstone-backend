@@ -30,10 +30,10 @@ import { CapabilityRevalidationService } from './revalidation/capability-revalid
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Operational readiness assessment administration",
-  authorityRequirement: "Institutional readiness configuration authority",
-  actorSource: "Authenticated institutional administrator",
-  primarySecurityInvariant: "Readiness metadata does not confer production authority",
+  scopeRequirement: 'Operational readiness assessment administration',
+  authorityRequirement: 'Institutional readiness configuration authority',
+  actorSource: 'Authenticated institutional administrator',
+  primarySecurityInvariant: 'Readiness metadata does not confer production authority',
 })
 @Controller('operational-readiness')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)

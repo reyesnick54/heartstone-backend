@@ -59,7 +59,7 @@ describe('Civil Identity & Vital Records service pack (integration)', () => {
       create: {
         code: templateIssueFunctionCode,
         name: 'Template civil certificate issuance',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.REGISTRATION,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: fixture.institutionId,

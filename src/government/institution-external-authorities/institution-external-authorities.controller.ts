@@ -13,10 +13,10 @@ import { InstitutionExternalAuthoritiesService } from './institution-external-au
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Government structure administration",
-  authorityRequirement: "Institutional configuration authority (not self-granted)",
-  actorSource: "Authenticated institutional administrator",
-  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+  scopeRequirement: 'Government structure administration',
+  authorityRequirement: 'Institutional configuration authority (not self-granted)',
+  actorSource: 'Authenticated institutional administrator',
+  primarySecurityInvariant: 'Government structure facts remain separate from identity privilege',
 })
 @Controller('institution-external-authorities')
 export class InstitutionExternalAuthoritiesController {

@@ -107,13 +107,13 @@ describe('InstrumentLifecycleService', () => {
       }).toThrow(ForbiddenException);
     });
 
-    it('rejects ABSEZ revocation represented as national', () => {
+    it('rejects operating-jurisdiction revocation represented as national', () => {
       expect(() => {
-        boundary.assertAbsezRevocationNotNational({
-          jurisdictionScope: InstrumentJurisdictionScope.ABSEZ,
+        boundary.assertOperatingJurisdictionRevocationNotNational({
+          jurisdictionScope: InstrumentJurisdictionScope.OPERATING_JURISDICTION,
           representsNationalRevocation: true,
         });
-      }).toThrow(/ABSEZ/i);
+      }).toThrow(/Operating-jurisdiction/i);
     });
   });
 

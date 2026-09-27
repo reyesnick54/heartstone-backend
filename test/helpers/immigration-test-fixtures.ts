@@ -74,7 +74,7 @@ export async function seedImmigrationFixture(
     data: {
       code: 'TEMPLATE-AUTH-IMMIGRATION-DECIDE',
       name: 'Template immigration decision',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.APPROVAL,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: base.institutionId,
@@ -118,7 +118,7 @@ export async function seedImmigrationFixture(
     data: {
       code: 'TEMPLATE-AUTH-IMMIGRATION-REVIEW',
       name: 'Template immigration review',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.ADMINISTRATIVE,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: base.institutionId,

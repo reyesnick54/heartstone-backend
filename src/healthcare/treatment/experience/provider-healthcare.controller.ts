@@ -12,10 +12,12 @@ import { ProviderHealthcareProjectionService } from './services/provider-healthc
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
   authenticationRequired: true,
-  scopeRequirement: "Patient-owned healthcare profile or provider policy-scoped access",
-  authorityRequirement: "HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority",
-  actorSource: "Session identity with patient or governed provider context",
-  primarySecurityInvariant: "Program discovery != medical recommendation; application != clinical authorization",
+  scopeRequirement: 'Patient-owned healthcare profile or provider policy-scoped access',
+  authorityRequirement:
+    'HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority',
+  actorSource: 'Session identity with patient or governed provider context',
+  primarySecurityInvariant:
+    'Program discovery != medical recommendation; application != clinical authorization',
 })
 @Controller('experience/provider/healthcare')
 @UseGuards(SessionAuthGuard)
