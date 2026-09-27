@@ -3,6 +3,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AuthorityModule } from '../../authority/authority.module';
 import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { RecordsModule } from '../../records/records.module';
+import { S12WorkflowRuntimeModule } from '../../remediation/s12/s12-workflow-runtime.module';
 import { ApplicationsModule } from '../applications/applications.module';
 import { ApplicationProcessingCommonModule } from '../common/application-processing-common.module';
 import { CompletenessReviewsService } from '../completeness/completeness-reviews.service';
@@ -31,6 +32,7 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     AuthorityModule,
     RecordsModule,
     forwardRef(() => ApplicationsModule),
+    forwardRef(() => S12WorkflowRuntimeModule),
   ],
   controllers: [CasesController, CaseTimelineController],
   providers: [
@@ -59,6 +61,7 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CasePublicStatusProjectionService,
     WorkflowDefinitionsService,
     WorkflowRuntimeService,
+    CaseCommunicationService,
   ],
 })
 export class CasesModule {}

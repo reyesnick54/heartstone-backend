@@ -1,74 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CaseEventType, CaseSlaClockStatus } from '@prisma/client';
+import { type CaseSlaClock } from '@prisma/client';
 
-import { PrismaService } from '../../database/prisma.service';
-import { CaseEventsService } from '../cases/case-events.service';
+import { SlaClockAuthorityService } from '../../remediation/s12/sla/sla-clock-authority.service';
 
+/** Backward-compatible facade over authoritative S12 SLA clock service. */
 @Injectable()
 export class CaseSlaService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly caseEvents: CaseEventsService,
-  ) {}
+  constructor(private readonly authority: SlaClockAuthorityService) {}
 
-  async pauseClock(caseId: string, clockKey: string, reason: string) {
-    const clock = await this.prisma.caseSlaClock.update({
-      where: { caseId_clockKey: { caseId, clockKey } },
-      data: { status: CaseSlaClockStatus.PAUSED, pausedAt: new Date() },
-    });
-
-    await this.caseEvents.record(caseId, CaseEventType.SLA_CLOCK_PAUSED, { clockKey, reason });
-    return clock;
+  pauseClock(caseId: string, clockKey: string, reason: string): Promise<CaseSlaClock | null> {
+    return this.authority.pauseClock(caseId, clockKey, reason);
   }
 
-  async resumeClock(caseId: string, clockKey: string) {
-    const clock = await this.prisma.caseSlaClock.findUnique({
-      where: { caseId_clockKey: { caseId, clockKey } },
-    });
-
-    if (!clock?.pausedAt) {
-      return clock;
-    }
-
-    const pausedDuration = Date.now() - clock.pausedAt.getTime();
-
-    const updated = await this.prisma.caseSlaClock.update({
-      where: { caseId_clockKey: { caseId, clockKey } },
-      data: {
-        status: CaseSlaClockStatus.RUNNING,
-        resumedAt: new Date(),
-        pausedDurationMs: clock.pausedDurationMs + pausedDuration,
-      },
-    });
-
-    await this.caseEvents.record(caseId, CaseEventType.SLA_CLOCK_RESUMED, { clockKey });
-    return updated;
+  resumeClock(caseId: string, clockKey: string): Promise<CaseSlaClock | null> {
+    return this.authority.resumeClock(caseId, clockKey);
   }
 
-  async checkBreach(caseId: string, clockKey: string) {
-    const clock = await this.prisma.caseSlaClock.findUnique({
-      where: { caseId_clockKey: { caseId, clockKey } },
-    });
-
-    if (!clock?.targetDurationMs || clock.status !== CaseSlaClockStatus.RUNNING) {
-      return clock;
-    }
-
-    const elapsed = Date.now() - clock.startedAt.getTime() - clock.pausedDurationMs;
-    if (elapsed <= clock.targetDurationMs) {
-      return clock;
-    }
-
-    const breached = await this.prisma.caseSlaClock.update({
-      where: { caseId_clockKey: { caseId, clockKey } },
-      data: {
-        status: CaseSlaClockStatus.BREACHED,
-        breachedAt: new Date(),
-        elapsedMs: elapsed,
-      },
-    });
-
-    await this.caseEvents.record(caseId, CaseEventType.SLA_BREACHED, { clockKey, elapsed });
-    return breached;
+  checkBreach(caseId: string, clockKey: string): Promise<CaseSlaClock | null> {
+    return this.authority.evaluateBreach(caseId, clockKey);
   }
 }
