@@ -23,9 +23,9 @@ import { AuthorityEvaluationService } from '../../authority/evaluation/authority
 import { InstitutionalActorResolver } from '../../authority/institutional-actor/institutional-actor-resolver.service';
 import { PrismaService } from '../../database/prisma.service';
 import { isAppointmentCurrent } from '../../government/common/appointment-current.util';
+import { GovernmentDecisionNumberService } from '../../remediation/s12/decision/government-decision-number.service';
 import { hashGovernmentDecisionSnapshot } from '../common/decision-hash.util';
 import {
-  DECISION_NUMBER_PREFIX,
   DECISION_READINESS_REASON_CODES,
   PHASE_8B_BOUNDARY_DISCLAIMER,
 } from '../decisions.constants';
@@ -48,6 +48,7 @@ export class DecisionExecutionService {
     private readonly authorityEvaluation: AuthorityEvaluationService,
     private readonly actorResolver: InstitutionalActorResolver,
     private readonly caseStatus: CaseStatusService,
+    private readonly decisionNumbers: GovernmentDecisionNumberService,
   ) {}
 
   async executeDecision(input: DecisionExecutionInput): Promise<GovernmentDecision> {
@@ -167,7 +168,7 @@ export class DecisionExecutionService {
       throw new ConflictException(DECISION_READINESS_REASON_CODES.MASTER_FILE_MISSING);
     }
 
-    const decisionNumber = await this.generateDecisionNumber();
+    const decisionNumber = await this.decisionNumbers.allocateNextDecisionNumber();
     const decidedAt = at;
 
     const snapshot = {
@@ -231,11 +232,5 @@ export class DecisionExecutionService {
         );
       }
     }
-  }
-
-  private async generateDecisionNumber(): Promise<string> {
-    const count = await this.prisma.governmentDecision.count();
-    const year = new Date().getFullYear();
-    return `${DECISION_NUMBER_PREFIX}-${String(year)}-${String(count + 1).padStart(6, '0')}`;
   }
 }

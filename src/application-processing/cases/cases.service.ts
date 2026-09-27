@@ -13,6 +13,7 @@ import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../../institutional-scope/resource-access.service';
 import { MasterAdministrativeFileService } from '../../records/master-administrative-file.service';
+import { SlaClockAuthorityService } from '../../remediation/s12/sla/sla-clock-authority.service';
 import { CASE_NUMBER_PREFIX } from '../application-processing.constants';
 import { CaseAccessDeniedException } from '../common/exceptions/application-processing.exceptions';
 import { generateReferenceNumber } from '../common/reference-number.util';
@@ -33,6 +34,7 @@ export class CasesService {
     private readonly publicStatus: CasePublicStatusService,
     private readonly masterFileService: MasterAdministrativeFileService,
     private readonly resourceAccess: ResourceAccessService,
+    private readonly slaClockAuthority: SlaClockAuthorityService,
   ) {}
 
   async createFromSubmission(application: Application, submission: ApplicationSubmission) {
@@ -88,17 +90,11 @@ export class CasesService {
     await this.caseStatus.transition(caseRecord.id, CaseStatus.INTAKE);
     await this.workflowRuntime.startWorkflow(caseRecord.id, workflowVersion.id);
 
-    await this.prisma.caseSlaClock.create({
-      data: {
-        caseId: caseRecord.id,
-        clockKey: 'PROCESSING',
-        targetDurationMs: 24 * 24 * 60 * 60 * 1000,
-      },
-    });
-
-    await this.caseEvents.record(caseRecord.id, CaseEventType.SLA_CLOCK_STARTED, {
-      clockKey: 'PROCESSING',
-    });
+    await this.slaClockAuthority.startClockForCase(
+      caseRecord.id,
+      'PROCESSING',
+      application.governmentServiceVersionId,
+    );
 
     await this.masterFileService.initializeForCase({ caseId: caseRecord.id });
 

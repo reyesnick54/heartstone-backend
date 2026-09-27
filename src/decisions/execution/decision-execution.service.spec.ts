@@ -14,6 +14,7 @@ import { CaseStatusService } from '../../application-processing/cases/case-statu
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { InstitutionalActorResolver } from '../../authority/institutional-actor/institutional-actor-resolver.service';
 import { PrismaService } from '../../database/prisma.service';
+import { GovernmentDecisionNumberService } from '../../remediation/s12/decision/government-decision-number.service';
 import { DecisionExecutionService } from './decision-execution.service';
 
 describe('DecisionExecutionService', () => {
@@ -86,6 +87,10 @@ describe('DecisionExecutionService', () => {
         { provide: AuthorityEvaluationService, useValue: authorityEvaluation },
         { provide: InstitutionalActorResolver, useValue: actorResolver },
         { provide: CaseStatusService, useValue: caseStatus },
+        {
+          provide: GovernmentDecisionNumberService,
+          useValue: { allocateNextDecisionNumber: jest.fn().mockResolvedValue('DEC-2026-000001') },
+        },
       ],
     }).compile();
 

@@ -2076,6 +2076,8 @@ model GovernmentServiceVersion {
   checklistItems                      GovernmentServiceChecklistItem[]
   outputs                             GovernmentServiceOutputDefinition[]
   redressRoutes                       GovernmentServiceRedressRoute[]
+  slaRules                            GovernmentServiceSlaRule[]
+  escalationLadders                   GovernmentServiceEscalationLadder[]
   formDefinitions                     FormDefinition[]
   applications                        Application[]
   applicationSubmissions              ApplicationSubmission[]
@@ -2324,6 +2326,59 @@ model GovernmentServiceRedressRoute {
   @@map("government_service_redress_routes")
 }
 
+model GovernmentServiceSlaRule {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                   @db.Uuid
+  ruleCode                   String
+  label                      String
+  targetDurationMs           Int
+  clockStartsAtStageKey      String?
+  pauseOnRfi                 Boolean                  @default(true)
+  escalationLadderCode       String?
+  configuration              Json                     @default("{}")
+  sortOrder                  Int                      @default(0)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([governmentServiceVersionId, ruleCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_sla_rules")
+}
+
+model GovernmentServiceEscalationLadder {
+  id                         String                                @id @default(uuid()) @db.Uuid
+  governmentServiceVersionId String                                @db.Uuid
+  ladderCode                 String
+  label                      String
+  slaRuleCode                String?
+  createdAt                  DateTime                              @default(now())
+  updatedAt                  DateTime                              @updatedAt
+  governmentServiceVersion   GovernmentServiceVersion              @relation(fields: [governmentServiceVersionId], references: [id], onDelete: Cascade)
+  steps                      GovernmentServiceEscalationLadderStep[]
+
+  @@unique([governmentServiceVersionId, ladderCode])
+  @@index([governmentServiceVersionId])
+  @@map("government_service_escalation_ladders")
+}
+
+model GovernmentServiceEscalationLadderStep {
+  id                            String                            @id @default(uuid()) @db.Uuid
+  escalationLadderId            String                            @db.Uuid
+  level                         Int
+  label                         String
+  triggerOverdueMs              Int                               @default(0)
+  responsibleDepartmentId       String?                           @db.Uuid
+  responsibleInstitutionId      String?                           @db.Uuid
+  createdAt                     DateTime                          @default(now())
+  updatedAt                     DateTime                          @updatedAt
+  escalationLadder   GovernmentServiceEscalationLadder @relation(fields: [escalationLadderId], references: [id], onDelete: Cascade)
+
+  @@unique([escalationLadderId, level])
+  @@index([escalationLadderId])
+  @@map("government_service_escalation_ladder_steps")
+}
+
 // ─── Phase 5F: Service Activation & Publication Governance ───────────────────
 
 enum ServiceTestReadinessStatus {
@@ -2560,6 +2615,30 @@ enum CaseEscalationStatus {
   WITHDRAWN
 }
 
+enum WorkflowDurableJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  DEAD
+}
+
+enum WorkflowDurableJobKind {
+  SLA_DEADLINE_EVALUATION
+  ESCALATION_EVALUATION
+  REMINDER
+  TIMEOUT_ACTION
+  RENEWAL_SCHEDULE_HOOK
+}
+
+enum SafeHaltReasonCode {
+  AUTHORITY_DEPENDENCY_UNAVAILABLE
+  EXTERNAL_DECISION_REQUIRED
+  GOVERNING_SOURCE_INACTIVE
+  REQUIRED_EVIDENCE_UNRESOLVED
+  MANDATORY_INTEGRATION_UNAVAILABLE
+}
+
 enum CaseIssueSeverity {
   LOW
   MEDIUM
@@ -2601,6 +2680,9 @@ enum CaseEventType {
   SLA_CLOCK_RESUMED
   SLA_BREACHED
   ESCALATION_CREATED
+  RFI_ISSUED
+  WORKFLOW_BRANCH
+  RESUME_FROM_HALT
   ISSUE_CREATED
   ISSUE_ESCALATED
   STATUS_CHANGED
@@ -2830,6 +2912,7 @@ model Case {
   referrals                            CaseReferral[]
   slaClocks                            CaseSlaClock[]
   escalations                          CaseEscalation[]
+  applicantInformationRequests         ApplicantInformationRequest[]
   issues                               CaseIssue[]
   events                               CaseEvent[]
   communications                       CaseCommunication[]
@@ -3056,6 +3139,8 @@ model CaseWorkflowInstance {
   completedAt       DateTime?
   haltedAt          DateTime?
   haltReason        String?
+  haltReasonCode    SafeHaltReasonCode?
+  requiredResolution String?
   createdAt         DateTime                   @default(now())
   updatedAt         DateTime                   @updatedAt
   case              Case                       @relation(fields: [caseId], references: [id], onDelete: Cascade)
@@ -3133,19 +3218,29 @@ model DeficiencyNotice {
 }
 
 model ApplicantInformationRequest {
-  id                      String                            @id @default(uuid()) @db.Uuid
-  applicationSubmissionId String                            @db.Uuid
-  status                  ApplicantInformationRequestStatus @default(ISSUED)
-  requestedItems          Json                              @default("[]")
-  instructions            String
-  issuedAt                DateTime                          @default(now())
-  respondedAt             DateTime?
-  expiresAt               DateTime?
-  createdAt               DateTime                          @default(now())
-  updatedAt               DateTime                          @updatedAt
-  applicationSubmission   ApplicationSubmission             @relation(fields: [applicationSubmissionId], references: [id])
+  id                           String                            @id @default(uuid()) @db.Uuid
+  applicationSubmissionId      String                            @db.Uuid
+  caseId                       String?                           @db.Uuid
+  status                       ApplicantInformationRequestStatus @default(ISSUED)
+  requestedItems               Json                              @default("[]")
+  instructions                 String
+  issuedAt                     DateTime                          @default(now())
+  respondedAt                  DateTime?
+  expiresAt                    DateTime?
+  issuedByIdentityId           String?                           @db.Uuid
+  issuedByOfficeholderId       String?                           @db.Uuid
+  functionAuthorityRecordId    String?                           @db.Uuid
+  authorityEvaluationRecordId  String?                           @db.Uuid
+  pausedClockKey               String?
+  overrideResumedAt            DateTime?
+  overrideByIdentityId         String?                           @db.Uuid
+  createdAt                    DateTime                          @default(now())
+  updatedAt                    DateTime                          @updatedAt
+  applicationSubmission        ApplicationSubmission             @relation(fields: [applicationSubmissionId], references: [id])
+  case                         Case?                             @relation(fields: [caseId], references: [id])
 
   @@index([applicationSubmissionId])
+  @@index([caseId])
   @@index([status])
   @@map("applicant_information_requests")
 }
@@ -3212,43 +3307,84 @@ model CaseReferralResponse {
 }
 
 model CaseSlaClock {
-  id               String             @id @default(uuid()) @db.Uuid
-  caseId           String             @db.Uuid
-  clockKey         String
-  status           CaseSlaClockStatus @default(RUNNING)
-  startedAt        DateTime           @default(now())
-  pausedAt         DateTime?
-  resumedAt        DateTime?
-  breachedAt       DateTime?
-  completedAt      DateTime?
-  targetDurationMs Int?
-  elapsedMs        Int                @default(0)
-  pausedDurationMs Int                @default(0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  case             Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                         String             @id @default(uuid()) @db.Uuid
+  caseId                     String             @db.Uuid
+  clockKey                   String
+  status                     CaseSlaClockStatus @default(RUNNING)
+  startedAt                  DateTime           @default(now())
+  dueAt                      DateTime?
+  pausedAt                   DateTime?
+  resumedAt                  DateTime?
+  breachedAt                 DateTime?
+  completedAt                DateTime?
+  targetDurationMs           Int?
+  elapsedMs                  Int                @default(0)
+  pausedDurationMs           Int                @default(0)
+  serviceStandardRuleCode    String?
+  governmentServiceVersionId String?            @db.Uuid
+  standardConfiguration      Json               @default("{}")
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  case                       Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@unique([caseId, clockKey])
   @@index([caseId])
   @@index([status])
+  @@index([dueAt])
   @@map("case_sla_clocks")
 }
 
 model CaseEscalation {
-  id               String               @id @default(uuid()) @db.Uuid
-  caseId           String               @db.Uuid
-  status           CaseEscalationStatus @default(OPEN)
-  reason           String
-  escalatedAt      DateTime             @default(now())
-  resolvedAt       DateTime?
-  retainsAuthority Boolean              @default(true)
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  case             Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  id                           String               @id @default(uuid()) @db.Uuid
+  caseId                       String               @db.Uuid
+  status                       CaseEscalationStatus @default(OPEN)
+  reason                       String
+  escalationLevel              Int                  @default(1)
+  escalationLadderCode         String?
+  idempotencyKey               String?              @unique
+  slaClockKey                  String?
+  responsibleDepartmentId      String?              @db.Uuid
+  responsibleInstitutionId     String?              @db.Uuid
+  escalatedAt                  DateTime             @default(now())
+  resolvedAt                   DateTime?
+  retainsAuthority             Boolean              @default(true)
+  createdAt                    DateTime             @default(now())
+  updatedAt                    DateTime             @updatedAt
+  case                         Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@index([caseId])
   @@index([status])
+  @@index([caseId, escalationLevel])
   @@map("case_escalations")
+}
+
+model WorkflowDurableJob {
+  id             String                   @id @default(uuid()) @db.Uuid
+  jobKind        WorkflowDurableJobKind
+  status         WorkflowDurableJobStatus @default(PENDING)
+  idempotencyKey String                   @unique
+  payload        Json                     @default("{}")
+  scheduledFor   DateTime
+  startedAt      DateTime?
+  completedAt    DateTime?
+  attemptCount   Int                      @default(0)
+  maxAttempts    Int                      @default(5)
+  lastError      String?
+  leaseToken     String?
+  leaseExpiresAt DateTime?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([jobKind])
+  @@map("workflow_durable_jobs")
+}
+
+model GovernmentDecisionNumberSequence {
+  year      Int @id
+  nextValue Int @default(1)
+
+  @@map("government_decision_number_sequences")
 }
 
 model CaseIssue {
