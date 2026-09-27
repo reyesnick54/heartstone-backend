@@ -57,7 +57,14 @@ import { TransportationModule } from './transportation/transportation.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, redisConfig, securityConfig, identityConfig, oidcConfig, documentTrustConfig],
+      load: [
+        appConfig,
+        redisConfig,
+        securityConfig,
+        identityConfig,
+        oidcConfig,
+        documentTrustConfig,
+      ],
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: true,

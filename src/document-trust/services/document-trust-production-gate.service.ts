@@ -45,9 +45,7 @@ export class DocumentTrustProductionGateService implements OnModuleInit {
 
     const evaluation = this.evaluateProhibitedAdapters();
     if (!evaluation.allowed) {
-      throw new Error(
-        `Production document trust gate failed: ${evaluation.reasons.join('; ')}`,
-      );
+      throw new Error(`Production document trust gate failed: ${evaluation.reasons.join('; ')}`);
     }
   }
 

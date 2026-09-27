@@ -271,11 +271,9 @@ export class IssuanceService {
           signatureStatus: trustOutcome.signatureStatus,
           sealStatus: trustOutcome.sealStatus,
           signatureEvidence: (trustOutcome.signatureEvidence ?? undefined) as
-            | Prisma.InputJsonValue
-            | undefined,
+            Prisma.InputJsonValue | undefined,
           sealEvidence: (trustOutcome.sealEvidence ?? undefined) as
-            | Prisma.InputJsonValue
-            | undefined,
+            Prisma.InputJsonValue | undefined,
           malwareScanStatus: MalwareScanStatus.CLEAN,
         },
       });

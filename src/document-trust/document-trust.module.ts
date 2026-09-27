@@ -54,7 +54,11 @@ import { InstrumentDocumentTrustService } from './services/instrument-document-t
         }
         return inMemory;
       },
-      inject: [ConfigService, InMemoryDocumentStorageAdapter, FilesystemEncryptedDocumentStorageAdapter],
+      inject: [
+        ConfigService,
+        InMemoryDocumentStorageAdapter,
+        FilesystemEncryptedDocumentStorageAdapter,
+      ],
     },
     {
       provide: MALWARE_SCANNING_PORT,

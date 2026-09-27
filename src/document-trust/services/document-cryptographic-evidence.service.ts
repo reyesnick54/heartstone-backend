@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DocumentSealStatus, DocumentSignatureStatus, Prisma } from '@prisma/client';
 
-import {
-  type StoredSealEvidence,
-  type StoredSignatureEvidence,
-} from '../document-trust.constants';
+import { type StoredSealEvidence, type StoredSignatureEvidence } from '../document-trust.constants';
 import {
   DigitalSealEvidence,
   DigitalSignatureEvidence,
@@ -49,7 +46,9 @@ export class DocumentCryptographicEvidenceService {
           : undefined,
       detached: record.detached !== false,
       certificateChainReferences: Array.isArray(record.certificateChainReferences)
-        ? record.certificateChainReferences.filter((item): item is string => typeof item === 'string')
+        ? record.certificateChainReferences.filter(
+            (item): item is string => typeof item === 'string',
+          )
         : undefined,
     };
   }

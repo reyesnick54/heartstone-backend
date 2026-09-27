@@ -118,7 +118,10 @@ describe('S13 document trust remediation', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         DocumentTrustProductionGateService,
-        { provide: ConfigService, useValue: { get: () => ({ nodeEnv: 'production' }), getOrThrow: () => ({}) } },
+        {
+          provide: ConfigService,
+          useValue: { get: () => ({ nodeEnv: 'production' }), getOrThrow: () => ({}) },
+        },
         { provide: DOCUMENT_STORAGE_PORT, useClass: InMemoryDocumentStorageAdapter },
         { provide: MALWARE_SCANNING_PORT, useClass: NoopMalwareScanningAdapter },
         { provide: DIGITAL_SIGNING_PORT, useClass: TestDigitalSigningAdapter },

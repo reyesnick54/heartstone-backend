@@ -251,7 +251,8 @@ export async function seedSignedSealedDocuments(
 ): Promise<{ signatureDocumentVersionId: string; sealDocumentVersionId: string }> {
   const marker = NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER;
   const { attachTestCryptographicEvidence } = await import('./document-trust-test-fixtures');
-  const { hashDocumentContent } = await import('../../src/evidence-records/common/document-hash.util');
+  const { hashDocumentContent } =
+    await import('../../src/evidence-records/common/document-hash.util');
   const fixtureContent = Buffer.from('fixture-document-content', 'utf8');
   const fixtureSha256 = hashDocumentContent(fixtureContent);
 

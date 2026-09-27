@@ -122,11 +122,7 @@ export class InstrumentVerificationService {
       record.instrumentVersion,
       record.instrumentVersion.documentVersion,
     );
-    const response = this.buildPublicResponse(
-      record,
-      verificationStatus,
-      cryptoVerification,
-    );
+    const response = this.buildPublicResponse(record, verificationStatus, cryptoVerification);
 
     await this.recordVerificationEvent({
       verificationRecordId: record.id,
@@ -182,11 +178,7 @@ export class InstrumentVerificationService {
       record.instrumentVersion,
       record.instrumentVersion.documentVersion,
     );
-    const publicResponse = this.buildPublicResponse(
-      record,
-      verificationStatus,
-      cryptoVerification,
-    );
+    const publicResponse = this.buildPublicResponse(record, verificationStatus, cryptoVerification);
 
     await this.recordVerificationEvent({
       verificationRecordId: record.id,

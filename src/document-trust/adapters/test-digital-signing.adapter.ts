@@ -46,9 +46,7 @@ export class TestDigitalSigningAdapter implements DigitalSigningPort {
     });
   }
 
-  verifySignature(
-    input: DigitalSignatureVerificationInput,
-  ): Promise<DigitalVerificationResult> {
+  verifySignature(input: DigitalSignatureVerificationInput): Promise<DigitalVerificationResult> {
     const digest = createHash('sha256').update(input.content).digest('hex');
     if (digest !== input.evidence.contentHashSha256) {
       return Promise.resolve({ valid: false, reason: 'Content hash mismatch' });

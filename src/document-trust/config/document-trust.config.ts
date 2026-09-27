@@ -10,9 +10,7 @@ import {
 } from '../document-trust.constants';
 
 export type DocumentTrustOperationalReadinessState =
-  | 'BLOCKED'
-  | 'CONFIGURED_PENDING_SOVEREIGNTY'
-  | 'READY';
+  'BLOCKED' | 'CONFIGURED_PENDING_SOVEREIGNTY' | 'READY';
 
 export interface DocumentTrustConfig {
   storageProvider: string;
@@ -113,7 +111,10 @@ export default registerAs(DOCUMENT_TRUST_CONFIG_KEY, (): DocumentTrustConfig => 
   return {
     storageProvider: resolveStorageProvider(nodeEnv),
     storageRootPath: process.env.DOCUMENT_STORAGE_ROOT_PATH?.trim() ?? '',
-    storageEncryptionEnabled: parseBooleanEnv(process.env.DOCUMENT_STORAGE_ENCRYPTION_ENABLED, true),
+    storageEncryptionEnabled: parseBooleanEnv(
+      process.env.DOCUMENT_STORAGE_ENCRYPTION_ENABLED,
+      true,
+    ),
     storageDataEncryptionKeyBase64:
       process.env.DOCUMENT_STORAGE_DATA_ENCRYPTION_KEY?.trim() ?? null,
     storageRegion: process.env.DOCUMENT_STORAGE_REGION?.trim() ?? null,
@@ -129,7 +130,6 @@ export default registerAs(DOCUMENT_TRUST_CONFIG_KEY, (): DocumentTrustConfig => 
     digitalSigningTrustServiceEndpoint:
       process.env.DOCUMENT_SIGNING_TRUST_SERVICE_ENDPOINT?.trim() ?? null,
     digitalSigningKeyReference: process.env.DOCUMENT_SIGNING_KEY_REFERENCE?.trim() ?? null,
-    digitalSigningSealKeyReference:
-      process.env.DOCUMENT_SIGNING_SEAL_KEY_REFERENCE?.trim() ?? null,
+    digitalSigningSealKeyReference: process.env.DOCUMENT_SIGNING_SEAL_KEY_REFERENCE?.trim() ?? null,
   };
 });

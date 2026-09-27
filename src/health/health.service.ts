@@ -43,9 +43,7 @@ export class HealthService {
 
     return {
       status:
-        databaseUp && redisUp && identityAuthReady && documentTrustReady
-          ? 'ready'
-          : 'not_ready',
+        databaseUp && redisUp && identityAuthReady && documentTrustReady ? 'ready' : 'not_ready',
       checks: {
         database: databaseUp ? 'up' : 'down',
         redis: redisUp ? 'up' : 'down',

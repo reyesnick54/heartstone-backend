@@ -22,7 +22,9 @@ export interface ApplyInstrumentDocumentTrustInput {
 export interface InstrumentDocumentTrustOutcome {
   signatureStatus: DocumentSignatureStatus;
   sealStatus: DocumentSealStatus;
-  signatureEvidence: ReturnType<DocumentCryptographicEvidenceService['toJsonSignatureEvidence']> | null;
+  signatureEvidence: ReturnType<
+    DocumentCryptographicEvidenceService['toJsonSignatureEvidence']
+  > | null;
   sealEvidence: ReturnType<DocumentCryptographicEvidenceService['toJsonSealEvidence']> | null;
   instrumentSignatureRecord?: Record<string, unknown>;
   instrumentSealRecord?: Record<string, unknown>;
@@ -38,7 +40,9 @@ export class InstrumentDocumentTrustService {
     private readonly evidence: DocumentCryptographicEvidenceService,
   ) {}
 
-  async applyTrust(input: ApplyInstrumentDocumentTrustInput): Promise<InstrumentDocumentTrustOutcome> {
+  async applyTrust(
+    input: ApplyInstrumentDocumentTrustInput,
+  ): Promise<InstrumentDocumentTrustOutcome> {
     const integrity = await this.storage.verifyContentIntegrity(
       input.storageObjectKey,
       input.contentHash,

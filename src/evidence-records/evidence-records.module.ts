@@ -15,8 +15,6 @@ import { DocumentsController } from './documents/documents.controller';
 import { EvidenceRecordsController } from './evidence-records.controller';
 import { ExternalRecordsRepositoriesService } from './external-repositories/external-records-repositories.service';
 import { LegalHoldsService } from './legal-hold/legal-holds.service';
-import { DOCUMENT_STORAGE_PORT } from './ports/document-storage.port';
-import { MALWARE_SCANNING_PORT } from './ports/malware-scanning.port';
 import { PreservationCollectionsService } from './preservation/preservation-collections.service';
 import { RetentionSchedulesService } from './retention/retention-schedules.service';
 
@@ -54,8 +52,6 @@ import { RetentionSchedulesService } from './retention/retention-schedules.servi
     ArchivalTransfersService,
     ExternalRecordsRepositoriesService,
     RecordDispositionService,
-    DOCUMENT_STORAGE_PORT,
-    MALWARE_SCANNING_PORT,
   ],
 })
 export class EvidenceRecordsModule {}

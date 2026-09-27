@@ -28,8 +28,7 @@ export const SIGNING_ALGORITHM_IDS = {
   RESERVED_POST_QUANTUM: 'RESERVED-PQ-UNSPECIFIED',
 } as const;
 
-export type SigningAlgorithmId =
-  (typeof SIGNING_ALGORITHM_IDS)[keyof typeof SIGNING_ALGORITHM_IDS];
+export type SigningAlgorithmId = (typeof SIGNING_ALGORITHM_IDS)[keyof typeof SIGNING_ALGORITHM_IDS];
 
 export interface StoredSignatureEvidence {
   algorithmId: SigningAlgorithmId;
