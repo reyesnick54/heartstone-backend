@@ -1,0 +1,138 @@
+name: Resolve S5 merge conflicts
+
+on:
+  push:
+    branches:
+      - cursor/s5-route-classification-ccfd
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: '22'
+  DATABASE_URL: postgresql://heartstone:heartstone@localhost:5432/heartstone?schema=public
+  REDIS_HOST: localhost
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
+
+jobs:
+  resolve-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: heartstone
+          POSTGRES_PASSWORD: heartstone
+          POSTGRES_DB: heartstone
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U heartstone -d heartstone"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout S5 branch
+        uses: actions/checkout@v4
+        with:
+          ref: cursor/s5-route-classification-ccfd
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge current main preserving newer hardening
+        run: |
+          git fetch origin main
+          git merge --no-ff --no-commit -X theirs origin/main
+          unresolved="$(git diff --name-only --diff-filter=U)"
+          if [ -n "$unresolved" ]; then
+            echo "Unresolved conflicts remain:"
+            echo "$unresolved"
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Re-apply S5 controller route metadata to current main
+        run: npx ts-node scripts/apply-controller-route-access.ts
+
+      - name: Ensure S5 validation script is registered
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.scripts = p.scripts || {};
+          p.scripts['security:validate-routes'] = 'jest --runInBand src/security/route-security-metadata.spec.ts';
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+
+      - name: Regenerate protected route manifest
+        run: npm run security:manifest
+
+      - name: Format touched TypeScript
+        run: npm run format
+
+      - name: Apply database migrations
+        run: npm run prisma:migrate:deploy
+
+      - name: S5 route security validation
+        run: npm run security:validate-routes
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Integration tests
+        run: npm run test:integration
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Remove temporary resolver workflow
+        run: git rm .github/workflows/s5-conflict-resolution.yml
+
+      - name: Commit resolved branch
+        run: |
+          git add -A
+          git commit -m "merge main into S5 and resolve route security conflicts"
+          git push origin HEAD:cursor/s5-route-classification-ccfd
