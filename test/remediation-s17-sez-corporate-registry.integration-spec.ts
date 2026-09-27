@@ -252,6 +252,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
 
     await request(app.getHttpServer())
       .post(`/api/v1/absez/sez-licences/${licenceId}/payments`)
+      .set('Authorization', `Bearer ${fixture.memberSessionToken}`)
       .send({
         paymentReference: 'PAY-SEZ-1',
         amount: 750,
