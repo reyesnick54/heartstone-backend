@@ -76,7 +76,11 @@ export class RequestForInformationService {
     });
 
     if (standard?.pauseOnRfi !== false) {
-      await this.slaClocks.pauseClock(input.caseId, clockKey, 'RFI issued under Protocol Article 31');
+      await this.slaClocks.pauseClock(
+        input.caseId,
+        clockKey,
+        'RFI issued under Protocol Article 31',
+      );
     }
 
     await this.caseEvents.record(

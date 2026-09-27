@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CaseEventType, type CaseSlaClock,CaseSlaClockStatus, Prisma } from '@prisma/client';
+import { CaseEventType, type CaseSlaClock, CaseSlaClockStatus, Prisma } from '@prisma/client';
 
 import { CaseEventsService } from '../../../application-processing/cases/case-events.service';
 import { PrismaService } from '../../../database/prisma.service';
 import { ServerClockService } from '../clock/server-clock.service';
 import { WorkflowDurableJobService } from '../jobs/workflow-durable-job.service';
-import { type ResolvedSlaStandard, SlaStandardResolverService } from './sla-standard-resolver.service';
+import {
+  type ResolvedSlaStandard,
+  SlaStandardResolverService,
+} from './sla-standard-resolver.service';
 
 @Injectable()
 export class SlaClockAuthorityService {

@@ -8,9 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { IdentityType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import {
-  CONTROLLER_ROUTE_ACCESS_KEY,
-} from '../decorators/controller-route-access.decorator';
+import { CONTROLLER_ROUTE_ACCESS_KEY } from '../decorators/controller-route-access.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ROUTE_ACCESS_KEY, type RouteAccessMetadata } from '../decorators/route-access.decorator';
 import { isNonHumanMutationAllowed } from '../route-access/non-human-actor-allowlist';
@@ -38,9 +36,10 @@ export class RouteAccessEnforcementGuard implements CanActivate {
       ROUTE_ACCESS_KEY,
       [context.getHandler(), context.getClass()],
     );
-    const controllerRouteAccess = this.reflector.getAllAndOverride<
-      RouteAccessMetadata | undefined
-    >(CONTROLLER_ROUTE_ACCESS_KEY, [context.getHandler(), context.getClass()]);
+    const controllerRouteAccess = this.reflector.getAllAndOverride<RouteAccessMetadata | undefined>(
+      CONTROLLER_ROUTE_ACCESS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     const metadata = routeAccess ?? controllerRouteAccess;
     if (!metadata) {
@@ -61,10 +60,7 @@ export class RouteAccessEnforcementGuard implements CanActivate {
       return true;
     }
 
-    if (
-      metadata.routeClass === RouteClass.PUBLIC &&
-      MUTATING_METHODS.has(method)
-    ) {
+    if (metadata.routeClass === RouteClass.PUBLIC && MUTATING_METHODS.has(method)) {
       throw new ForbiddenException(
         'Public routes must not perform sensitive mutating government operations.',
       );

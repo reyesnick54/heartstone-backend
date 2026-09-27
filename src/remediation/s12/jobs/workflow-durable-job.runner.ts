@@ -22,10 +22,8 @@ export class WorkflowDurableJobRunner {
     for (const job of claimed) {
       try {
         const payload = job.payload as Record<string, unknown>;
-        const caseId =
-          typeof payload.caseId === 'string' ? payload.caseId : '';
-        const clockKey =
-          typeof payload.clockKey === 'string' ? payload.clockKey : 'PROCESSING';
+        const caseId = typeof payload.caseId === 'string' ? payload.caseId : '';
+        const clockKey = typeof payload.clockKey === 'string' ? payload.clockKey : 'PROCESSING';
         if (!caseId) {
           continue;
         }

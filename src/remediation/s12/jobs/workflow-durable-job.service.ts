@@ -1,11 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  Prisma,
-  WorkflowDurableJobKind,
-  WorkflowDurableJobStatus,
-} from '@prisma/client';
+import { Prisma, WorkflowDurableJobKind, WorkflowDurableJobStatus } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
 import { RedisService } from '../../../redis/redis.service';
@@ -87,7 +83,9 @@ export class WorkflowDurableJobService {
 
       let redisAcquired = true;
       if (this.redis.isConnected()) {
-        const result = await this.redis.getClient().set(redisKey, leaseToken, 'EX', LEASE_SECONDS, 'NX');
+        const result = await this.redis
+          .getClient()
+          .set(redisKey, leaseToken, 'EX', LEASE_SECONDS, 'NX');
         redisAcquired = result === 'OK';
       }
 
@@ -110,7 +108,9 @@ export class WorkflowDurableJobService {
       });
 
       if (updated.count === 1) {
-        claimed.push(await this.prisma.workflowDurableJob.findUniqueOrThrow({ where: { id: job.id } }));
+        claimed.push(
+          await this.prisma.workflowDurableJob.findUniqueOrThrow({ where: { id: job.id } }),
+        );
       } else if (this.redis.isConnected()) {
         await this.redis.getClient().del(redisKey);
       }

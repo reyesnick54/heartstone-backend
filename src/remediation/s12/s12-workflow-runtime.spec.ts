@@ -120,25 +120,25 @@ describe('S12 workflow runtime', () => {
     const { standards } = buildModule();
     prisma.governmentServiceSlaRule.findUnique.mockImplementation(
       (args: { where: { governmentServiceVersionId_ruleCode: { ruleCode: string } } }) => {
-      const code = args.where.governmentServiceVersionId_ruleCode.ruleCode;
-      const durations: Record<string, number> = {
-        [PROTOCOL_SLA_RULE_CODES.INITIAL_RESPONSE_72H]: PROTOCOL_TIME_STANDARD_MS.HOURS_72,
-        [PROTOCOL_SLA_RULE_CODES.URGENT_24H]: PROTOCOL_TIME_STANDARD_MS.HOURS_24,
-        [PROTOCOL_SLA_RULE_CODES.SUBSTANTIVE_5D]: PROTOCOL_TIME_STANDARD_MS.DAYS_5,
-      };
-      const ms = durations[code];
-      if (!ms) {
-        return null;
-      }
-      return {
-        ruleCode: code,
-        label: code,
-        targetDurationMs: ms,
-        escalationLadderCode: null,
-        pauseOnRfi: true,
-        configuration: {},
-      };
-    },
+        const code = args.where.governmentServiceVersionId_ruleCode.ruleCode;
+        const durations: Record<string, number> = {
+          [PROTOCOL_SLA_RULE_CODES.INITIAL_RESPONSE_72H]: PROTOCOL_TIME_STANDARD_MS.HOURS_72,
+          [PROTOCOL_SLA_RULE_CODES.URGENT_24H]: PROTOCOL_TIME_STANDARD_MS.HOURS_24,
+          [PROTOCOL_SLA_RULE_CODES.SUBSTANTIVE_5D]: PROTOCOL_TIME_STANDARD_MS.DAYS_5,
+        };
+        const ms = durations[code];
+        if (!ms) {
+          return null;
+        }
+        return {
+          ruleCode: code,
+          label: code,
+          targetDurationMs: ms,
+          escalationLadderCode: null,
+          pauseOnRfi: true,
+          configuration: {},
+        };
+      },
     );
 
     const versionId = '00000000-0000-4000-8000-000000000001';

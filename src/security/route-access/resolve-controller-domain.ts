@@ -45,7 +45,8 @@ export function resolveControllerDomain(relativeSourcePath: string): RouteAccess
   if (relative.startsWith('service-catalog/')) return 'service-catalog';
   if (relative.startsWith('application-processing/')) return 'application-processing';
   if (relative.startsWith('records/')) return 'records';
-  if (relative.startsWith('evidence-records/') || relative.startsWith('evidence/')) return 'evidence';
+  if (relative.startsWith('evidence-records/') || relative.startsWith('evidence/'))
+    return 'evidence';
   if (relative.startsWith('decisions-issuance/')) return 'decisions-issuance';
   if (relative.startsWith('decisions/')) return 'decisions';
   if (relative.startsWith('compliance/')) return 'compliance';

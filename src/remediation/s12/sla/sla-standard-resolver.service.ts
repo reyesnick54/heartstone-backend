@@ -68,7 +68,10 @@ export class SlaStandardResolverService {
     };
   }
 
-  protocolFallback(ruleCode: string, governmentServiceVersionId: string): ResolvedSlaStandard | null {
+  protocolFallback(
+    ruleCode: string,
+    governmentServiceVersionId: string,
+  ): ResolvedSlaStandard | null {
     const mapping: Record<string, { label: string; ms: number }> = {
       [PROTOCOL_SLA_RULE_CODES.INITIAL_RESPONSE_72H]: {
         label: '72-hour initial response',

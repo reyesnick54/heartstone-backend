@@ -119,10 +119,7 @@ export class WorkflowEscalationService {
     return rule?.escalationLadderCode ?? null;
   }
 
-  private defaultProtocolSteps(
-    responsibleDepartmentId: string,
-    responsibleInstitutionId: string,
-  ) {
+  private defaultProtocolSteps(responsibleDepartmentId: string, responsibleInstitutionId: string) {
     return [
       {
         level: 1,
@@ -182,10 +179,7 @@ export class WorkflowEscalationService {
       update: {},
     });
 
-    const steps = this.defaultProtocolSteps(
-      responsibleDepartmentId,
-      responsibleInstitutionId,
-    );
+    const steps = this.defaultProtocolSteps(responsibleDepartmentId, responsibleInstitutionId);
     for (const step of steps) {
       await this.prisma.governmentServiceEscalationLadderStep.upsert({
         where: {
