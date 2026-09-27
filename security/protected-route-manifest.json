@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-27T11:16:19.833Z",
-  "routeCount": 675,
+  "generatedAt": "2026-09-27T15:01:29.317Z",
+  "routeCount": 678,
   "summary": {
     "public": 27,
-    "authenticatedSelfService": 76,
-    "authenticatedInstitutional": 165,
+    "authenticatedSelfService": 77,
+    "authenticatedInstitutional": 168,
     "restrictedAdministrative": 224,
-    "consequentialAuthorityControlled": 178,
+    "consequentialAuthorityControlled": 177,
     "systemHealth": 5
   },
   "routes": [
@@ -920,6 +920,56 @@
       "requiresConsequentialGuard": false
     },
     {
+      "path": "/cases/:id/case-manager/assign",
+      "method": "POST",
+      "domain": "application-processing",
+      "controller": "CasesController",
+      "sourceFile": "src/application-processing/cases/cases.controller.ts",
+      "handler": "assignCaseManager",
+      "technicalPermissionRequired": false,
+      "permissionCode": null,
+      "guardCoverage": [
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
+      ],
+      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "authenticationRequired": true,
+      "isPublic": false,
+      "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
+      "authorityRequirement": "Case access guard; official routes require institutional actor context",
+      "actorSource": "Session identity with applicant or official case access resolution",
+      "primarySecurityInvariant": "Access to a case does not confer decision authority",
+      "hasRouteAccessMetadata": true,
+      "hasConsequentialAction": false,
+      "hasConsequentialActionGuard": false,
+      "requiresConsequentialGuard": false
+    },
+    {
+      "path": "/cases/:id/case-manager/history",
+      "method": "GET",
+      "domain": "application-processing",
+      "controller": "CasesController",
+      "sourceFile": "src/application-processing/cases/cases.controller.ts",
+      "handler": "getCaseManagerHistory",
+      "technicalPermissionRequired": false,
+      "permissionCode": null,
+      "guardCoverage": [
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
+      ],
+      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "authenticationRequired": true,
+      "isPublic": false,
+      "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
+      "authorityRequirement": "Case access guard; official routes require institutional actor context",
+      "actorSource": "Session identity with applicant or official case access resolution",
+      "primarySecurityInvariant": "Access to a case does not confer decision authority",
+      "hasRouteAccessMetadata": true,
+      "hasConsequentialAction": false,
+      "hasConsequentialActionGuard": false,
+      "requiresConsequentialGuard": false
+    },
+    {
       "path": "/cases/:id/completeness-reviews",
       "method": "POST",
       "domain": "application-processing",
@@ -976,6 +1026,31 @@
       "controller": "CasesController",
       "sourceFile": "src/application-processing/cases/cases.controller.ts",
       "handler": "completeStep",
+      "technicalPermissionRequired": false,
+      "permissionCode": null,
+      "guardCoverage": [
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
+      ],
+      "routeClass": "AUTHENTICATED_INSTITUTIONAL",
+      "authenticationRequired": true,
+      "isPublic": false,
+      "scopeRequirement": "Applicant-owned case/application scope or official institutional case scope",
+      "authorityRequirement": "Case access guard; official routes require institutional actor context",
+      "actorSource": "Session identity with applicant or official case access resolution",
+      "primarySecurityInvariant": "Access to a case does not confer decision authority",
+      "hasRouteAccessMetadata": true,
+      "hasConsequentialAction": false,
+      "hasConsequentialActionGuard": false,
+      "requiresConsequentialGuard": false
+    },
+    {
+      "path": "/cases/case-manager/workload",
+      "method": "GET",
+      "domain": "application-processing",
+      "controller": "CasesController",
+      "sourceFile": "src/application-processing/cases/cases.controller.ts",
+      "handler": "getCaseManagerWorkload",
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
@@ -11469,10 +11544,9 @@
       "permissionCode": null,
       "guardCoverage": [
         "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard",
-        "AuthorityPolicyGuard"
+        "ClientIdentitySubstitutionGuard"
       ],
-      "routeClass": "CONSEQUENTIAL_AUTHORITY_CONTROLLED",
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
@@ -11481,7 +11555,7 @@
       "primarySecurityInvariant": "Issuance requires explicit authority evaluation, not authentication alone",
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": false,
-      "hasConsequentialActionGuard": true,
+      "hasConsequentialActionGuard": false,
       "requiresConsequentialGuard": false
     },
     {
@@ -14674,11 +14748,12 @@
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
-        "SessionAuthGuard"
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
       ],
       "routeClass": "PUBLIC",
-      "authenticationRequired": false,
-      "isPublic": true,
+      "authenticationRequired": true,
+      "isPublic": false,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
       "authorityRequirement": "Function authority ISSUE evaluation via ConsequentialActionGuard",
       "actorSource": "Session identity with evaluated issuer authority context",

@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CaseEventType, CaseManagerAssignmentStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
-import { CaseEventsService } from '../case-events.service';
 import { CASE_MANAGER_ASSIGNMENT_ROLE } from '../../../operational-lifecycle/operational-lifecycle.constants';
+import { CaseEventsService } from '../case-events.service';
 import { CaseManagerBoundaryService } from './case-manager-boundary.service';
 
 export interface AssignCaseManagerInput {
