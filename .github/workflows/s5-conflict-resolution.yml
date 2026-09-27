@@ -94,6 +94,26 @@ jobs:
           git add scripts/generate-protected-route-manifest.ts
 
 
+      - name: Restore S5 consequential controller coverage after merge
+        run: |
+          git checkout HEAD -- \
+            src/customs-trade/customs-trade.controller.ts \
+            src/evidence/evidence.controller.ts \
+            src/healthcare/research/clinical-research.controller.ts \
+            src/labour/labour.controller.ts \
+            src/operational-readiness/operational-readiness.controller.ts \
+            src/revenue/revenue.controller.ts \
+            src/social-protection/social-protection.controller.ts
+          git add \
+            src/customs-trade/customs-trade.controller.ts \
+            src/evidence/evidence.controller.ts \
+            src/healthcare/research/clinical-research.controller.ts \
+            src/labour/labour.controller.ts \
+            src/operational-readiness/operational-readiness.controller.ts \
+            src/revenue/revenue.controller.ts \
+            src/social-protection/social-protection.controller.ts
+
+
       - name: Repair inherited S1 test syntax
         run: |
           node <<'NODE'
