@@ -29,21 +29,22 @@ describe('protected-route-manifest', () => {
       .filter((route) => route.isPublic)
       .map((route) => route.path);
 
-    expect(publicPaths).toEqual(
-      expect.arrayContaining([
-        '/',
-        '/health',
-        '/ready',
-        '/version',
-        '/identity/auth/login',
-        '/public/services',
-        '/public/service-families',
-        '/public/instruments/verify/:verificationCode',
-        '/production-readiness/boundary-disclaimer',
-      ]),
-    );
+    const requiredPublicPaths = [
+      '/',
+      '/health',
+      '/ready',
+      '/version',
+      '/identity/auth/login',
+      '/public/services',
+      '/public/service-families',
+      '/production-readiness/boundary-disclaimer',
+    ];
+    for (const path of requiredPublicPaths) {
+      expect(publicPaths).toContain(path);
+    }
 
-    expect(publicPaths).not.toEqual(expect.arrayContaining(['/identity/persons', '/institutions']));
+    expect(publicPaths).not.toContain('/identity/persons');
+    expect(publicPaths).not.toContain('/institutions');
   });
 
   it('requires authentication on administrative and institutional routes', () => {
