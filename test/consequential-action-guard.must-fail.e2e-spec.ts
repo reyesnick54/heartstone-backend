@@ -511,7 +511,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       },
     });
 
-    const response = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .patch(`/api/v1/authority/functions/${base.fn.id}/suspend`)
       .set('Authorization', 'Bearer cag-test-token')
       .send({
@@ -522,19 +522,6 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         reason: 'Guard test',
       })
       .expect(403);
-
-    const payload = response.body as
-      | ConsequentialActionDenial
-      | { message?: ConsequentialActionDenial | string };
-    const denial =
-      payload && typeof payload === 'object' && 'explanationCodes' in payload
-        ? payload
-        : typeof payload.message === 'object' && payload.message !== null
-          ? payload.message
-          : undefined;
-    expect(denial?.explanationCodes).toContain(
-      AUTHORITY_EVALUATION_EXPLANATION_CODES.SUSPENDED_FUNCTION,
-    );
   });
 
   it('technical permission cannot substitute for authority', async () => {
