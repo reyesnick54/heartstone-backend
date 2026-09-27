@@ -3,6 +3,7 @@
   "rootDir": ".",
   "testTimeout": 120000,
   "testEnvironment": "node",
+  "testTimeout": 120000,
   "testRegex": ".e2e-spec.ts$",
   "testTimeout": 60000,
   "transform": {

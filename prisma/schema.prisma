@@ -3862,6 +3862,11 @@ model DocumentVersion {
   privacyClassification            DocumentPrivacyClassification            @default(NOT_APPLICABLE)
   confidentialityOrPrivilegeStatus DocumentConfidentialityOrPrivilegeStatus @default(NOT_EVALUATED)
   malwareScanStatus                MalwareScanStatus                        @default(NOT_SCANNED)
+  malwareScanEngineId              String?
+  malwareScanEngineVersion         String?
+  malwareScanResultSummary         String?
+  signatureEvidence                Json?
+  sealEvidence                     Json?
   supersededById                   String?                                  @unique @db.Uuid
   receivedFromIdentityId           String?                                  @db.Uuid
   receivedFromExternalAuthorityId  String?                                  @db.Uuid

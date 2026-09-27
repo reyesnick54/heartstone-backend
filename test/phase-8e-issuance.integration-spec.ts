@@ -196,7 +196,7 @@ describe('Phase 8E official instrument issuance (integration)', () => {
 
   it('blocks issuance when signature and seal are required but invalid', async () => {
     const fixture = await seedPhase8eIssuanceFixture(prisma);
-    const docs = await seedSignedSealedDocuments(prisma, fixture.institutionId);
+    const docs = await seedSignedSealedDocuments(app, prisma, fixture.institutionId);
 
     await prisma.instrumentTypeVersion.update({
       where: { id: fixture.instrumentTypeVersionId },

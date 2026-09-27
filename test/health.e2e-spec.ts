@@ -36,6 +36,7 @@ describe('Readiness endpoints (e2e)', () => {
             database: 'up',
             redis: 'up',
             identityAuth: 'ready',
+            documentTrust: 'ready',
           },
         });
     } finally {
@@ -69,6 +70,7 @@ describe('Readiness endpoints (e2e)', () => {
             database: 'up',
             redis: 'down',
             identityAuth: 'ready',
+            documentTrust: 'ready',
           },
         });
     } finally {
