@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetEducationData } from '../../src/database/education-test-reset';
+import { resetFinancialServicesData } from '../../src/database/financial-services-test-reset';
 import { resetHealthcareFoundationData } from '../../src/database/healthcare-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
 import { resetLabourData } from '../../src/database/labour-test-reset';
@@ -204,6 +205,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetFinancialServicesData(prisma);
   await resetHealthcareFoundationData(prisma);
   await resetImmigrationData(prisma);
   await resetEducationData(prisma);
