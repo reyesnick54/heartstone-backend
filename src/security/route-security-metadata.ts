@@ -533,7 +533,14 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
     const classHasAuthorityGuard = hasAuthorityPolicyGuard(classHeader);
     const classHasConsequentialGuard = hasConsequentialActionGuardDecorator(classHeader);
     const classHasConsequentialAction = hasConsequentialActionDecorator(classHeader);
-    const classHasRouteAccessMetadata = hasControllerRouteAccessDecorator(classHeader);
+    const previousClassIndex = content.lastIndexOf('export class ', Math.max(0, classStart - 1));
+    const nearestControllerRouteAccessIndex = content.lastIndexOf(
+      '@ControllerRouteAccess',
+      classStart,
+    );
+    const classHasRouteAccessMetadata =
+      hasControllerRouteAccessDecorator(classHeader) ||
+      nearestControllerRouteAccessIndex > previousClassIndex;
     const controllerRouteAccess = parseRouteAccessMetadataBlock(classHeader);
 
     const methodPattern = new RegExp(
