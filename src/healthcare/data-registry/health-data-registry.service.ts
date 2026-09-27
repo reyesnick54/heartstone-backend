@@ -7,7 +7,7 @@ import {
 
 import { PrismaService } from '../../database/prisma.service';
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
-import { HealthcareFoundationAccessPolicyService } from '../common/healthcare-data-access-policy.service';
+import { HealthcareCanonicalAccessPolicyService } from '../common/healthcare-canonical-access-policy.service';
 
 export interface RegisterHealthDataRecordInput {
   recordReference: string;
@@ -23,7 +23,7 @@ export interface RegisterHealthDataRecordInput {
 export class HealthDataRegistryService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly accessPolicy: HealthcareFoundationAccessPolicyService,
+    private readonly accessPolicy: HealthcareCanonicalAccessPolicyService,
   ) {}
 
   async registerRecordReference(

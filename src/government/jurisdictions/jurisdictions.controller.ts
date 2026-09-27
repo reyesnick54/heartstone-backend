@@ -3,6 +3,9 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { JurisdictionStructureDto } from '../structure/dto/government-structure.dto';
 import { GovernmentStructureService } from '../structure/government-structure.service';
 import { CreateJurisdictionDto } from './dto/create-jurisdiction.dto';
@@ -21,6 +24,7 @@ import { JurisdictionsService } from './jurisdictions.service';
   primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
 })
 @Controller('jurisdictions')
+@DenyByDefaultAdministrative()
 export class JurisdictionsController {
   constructor(
     private readonly jurisdictionsService: JurisdictionsService,
@@ -28,6 +32,7 @@ export class JurisdictionsController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_JURISDICTION_CREATE)
   @ApiOperation({ summary: 'Create a jurisdiction' })
   @ApiCreatedResponse({ type: JurisdictionResponseDto })
   create(@Body() dto: CreateJurisdictionDto): Promise<JurisdictionResponseDto> {
@@ -35,6 +40,7 @@ export class JurisdictionsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_JURISDICTION_READ)
   @ApiOperation({ summary: 'List jurisdictions' })
   @ApiOkResponse({ type: JurisdictionResponseDto, isArray: true })
   findAll(@Query() query: QueryJurisdictionsDto): Promise<JurisdictionResponseDto[]> {
@@ -42,6 +48,7 @@ export class JurisdictionsController {
   }
 
   @Get(':id/structure')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_JURISDICTION_READ)
   @ApiOperation({ summary: 'Get organizational structure for a jurisdiction' })
   @ApiOkResponse({ type: JurisdictionStructureDto })
   getStructure(@Param('id', ParseUUIDPipe) id: string): Promise<JurisdictionStructureDto> {
@@ -49,6 +56,7 @@ export class JurisdictionsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_JURISDICTION_READ)
   @ApiOperation({ summary: 'Get a jurisdiction by id' })
   @ApiOkResponse({ type: JurisdictionResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<JurisdictionResponseDto> {
@@ -56,6 +64,9 @@ export class JurisdictionsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_JURISDICTION_UPDATE, {
+    scope: { jurisdictionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Update a jurisdiction' })
   @ApiOkResponse({ type: JurisdictionResponseDto })
   update(

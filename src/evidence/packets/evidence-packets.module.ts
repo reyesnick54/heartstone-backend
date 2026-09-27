@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { EvidencePacketsController } from './evidence-packets.controller';
 import { EvidencePacketsService } from './evidence-packets.service';
 
 @Module({
-  imports: [SessionsModule],
+  imports: [SessionAuthGuardModule],
   controllers: [EvidencePacketsController],
-  providers: [EvidencePacketsService, SessionAuthGuard],
+  providers: [EvidencePacketsService],
   exports: [EvidencePacketsService],
 })
 export class EvidencePacketsModule {}

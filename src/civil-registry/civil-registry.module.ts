@@ -11,6 +11,7 @@ import { CivilRegistryVitalRecordCertificateService } from './certificates/civil
 import { CivilRegistryController } from './civil-registry.controller';
 import { CivilRegistryClassificationAccessService } from './common/civil-registry-access.service';
 import { CivilRegistryBoundaryService } from './common/civil-registry-boundary.service';
+import { CivilRegistryCanonicalPathService } from './common/civil-registry-canonical-path.service';
 import { CivilRecordCorrectionService } from './corrections/civil-record-correction.service';
 import { VitalEventIntakeService } from './intake/vital-event-intake.service';
 import { CivilRegistryReadService } from './queries/civil-registry-read.service';
@@ -24,6 +25,7 @@ import { PublicCivilRegistryVerificationController } from './verification/public
   controllers: [CivilRegistryController, PublicCivilRegistryVerificationController],
   providers: [
     CivilRegistryBoundaryService,
+    CivilRegistryCanonicalPathService,
     CivilRegistryClassificationAccessService,
     CivilRegistryAccessService,
     CivilRegistryAuditService,
@@ -39,6 +41,7 @@ import { PublicCivilRegistryVerificationController } from './verification/public
   ],
   exports: [
     CivilRegistryBoundaryService,
+    CivilRegistryCanonicalPathService,
     CivilRegistryClassificationAccessService,
     CivilRegistryAccessService,
     CivilRegistryRegistrationService,

@@ -1,1 +1,0 @@
-Trigger improved S5 conflict resolver.

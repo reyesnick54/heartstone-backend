@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ServicePackCanonicalGovernanceService } from '../../service-packs/common/service-pack-canonical-governance.service';
 import { ServicePackAcceptanceService } from '../../service-packs/governance/service-pack-acceptance.service';
 import { ServiceActivationService } from '../activation-governance/service-activation.service';
 import { ServicePackActivationService } from './service-pack-activation.service';
@@ -174,6 +175,14 @@ describe('Service pack deployment lifecycle', () => {
           provide: ServicePackAcceptanceService,
           useValue: {
             assertActiveAcceptanceForDeployment: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: ServicePackCanonicalGovernanceService,
+          useValue: {
+            assertPackRegistered: jest.fn().mockResolvedValue(undefined),
+            assertVersionBelongsToPack: jest.fn().mockResolvedValue(undefined),
+            assertNoDuplicatePackCode: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

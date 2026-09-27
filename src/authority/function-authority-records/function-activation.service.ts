@@ -2,9 +2,17 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { FunctionAuthorityLifecycleStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { ActivateFunctionAuthorityRecordDto } from './dto/activate-function-authority-record.dto';
 import { FunctionAuthorityRecordResponseDto } from './dto/function-authority-record-response.dto';
 import { FunctionAuthorityRecordsService } from './function-authority-records.service';
+
+export interface FunctionAuthorityActivationCommand {
+  actorIdentityId: string;
+  officeholderId?: string;
+  officeId?: string;
+  appointmentId?: string;
+  delegationId?: string;
+  reason?: string;
+}
 
 @Injectable()
 export class FunctionActivationService {
@@ -15,7 +23,7 @@ export class FunctionActivationService {
 
   async activate(
     id: string,
-    dto: ActivateFunctionAuthorityRecordDto,
+    dto: FunctionAuthorityActivationCommand,
   ): Promise<FunctionAuthorityRecordResponseDto> {
     const existing = await this.prisma.functionAuthorityRecord.findUnique({ where: { id } });
     if (!existing) {
@@ -84,7 +92,7 @@ export class FunctionActivationService {
 
   async suspend(
     id: string,
-    dto: ActivateFunctionAuthorityRecordDto,
+    dto: FunctionAuthorityActivationCommand,
   ): Promise<FunctionAuthorityRecordResponseDto> {
     const existing = await this.prisma.functionAuthorityRecord.findUnique({ where: { id } });
     if (!existing) {

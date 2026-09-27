@@ -36,3 +36,19 @@ export function generateOpaqueToken(): string {
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
+
+export function hashApiKeySecret(secret: string, pepper: string): string {
+  return createHash('sha256').update(`${pepper}:${secret}`).digest('hex');
+}
+
+export function verifyApiKeySecret(secret: string, storedHash: string, pepper: string): boolean {
+  const computed = hashApiKeySecret(secret, pepper);
+  const expected = Buffer.from(storedHash, 'hex');
+  const actual = Buffer.from(computed, 'hex');
+
+  if (actual.length !== expected.length) {
+    return false;
+  }
+
+  return timingSafeEqual(actual, expected);
+}

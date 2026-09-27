@@ -3,8 +3,7 @@ import { Module } from '@nestjs/common';
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { CustomsTradeModule } from '../../customs-trade/customs-trade.module';
 import { EducationModule } from '../../education/education.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { LabourModule } from '../../labour/labour.module';
 import { PlanningConstructionModule } from '../../planning-construction/planning-construction.module';
 import { PropertyRegistryModule } from '../../property-registry/property-registry.module';
@@ -45,7 +44,7 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
 
 @Module({
   imports: [
-    SessionsModule,
+    SessionAuthGuardModule,
     SchedulingModule,
     CorporateRegistryModule,
     RevenueModule,
@@ -69,7 +68,6 @@ import { BusinessWorkforceService } from './services/business-workforce.service'
     BusinessTransportationController,
   ],
   providers: [
-    SessionAuthGuard,
     BusinessAccessService,
     BusinessOrganizationsService,
     BusinessOrganizationDetailService,

@@ -4,8 +4,7 @@ import { AuthorityModule } from '../../authority/authority.module';
 import { CivilRegistryModule } from '../../civil-registry/civil-registry.module';
 import { CorporateRegistryModule } from '../../corporate-registry/corporate-registry.module';
 import { DatabaseModule } from '../../database/database.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { SchedulingModule } from '../../scheduling/scheduling.module';
 import { OfficialExperienceGuard } from './guards/official-experience.guard';
 import { OfficialController } from './official.controller';
@@ -24,7 +23,7 @@ import { OfficialWorkspaceService } from './services/official-workspace.service'
 @Module({
   imports: [
     DatabaseModule,
-    SessionsModule,
+    SessionAuthGuardModule,
     AuthorityModule,
     SchedulingModule,
     CivilRegistryModule,
@@ -32,7 +31,6 @@ import { OfficialWorkspaceService } from './services/official-workspace.service'
   ],
   controllers: [OfficialController, OfficialCorporateRegistryController],
   providers: [
-    SessionAuthGuard,
     OfficialExperienceGuard,
     OfficialContextService,
     OfficialScopeService,

@@ -1,5 +1,11 @@
 import { type AuthorityActionType, type ProfessionalAttestationSource } from '@prisma/client';
 
+import { type AuthorityEvaluationResourceScope } from './authority-evaluation-trust.types';
+
+/**
+ * Internal authority evaluation request.
+ * Category-A fields may be supplied by HTTP or guards; authority facts are always resolved server-side.
+ */
 export interface AuthorityEvaluationRequest {
   identityId: string;
   functionAuthorityRecordId: string;
@@ -8,19 +14,11 @@ export interface AuthorityEvaluationRequest {
   officeId?: string;
   appointmentId?: string;
   delegationId?: string;
-  evidenceProvided?: string[];
-  qualificationCodes?: string[];
+  resourceScope?: AuthorityEvaluationResourceScope;
   transactionAmount?: number;
   scopeValue?: string;
-  hasSecondApproval?: boolean;
-  hasConsultation?: boolean;
-  hasSupervision?: boolean;
-  hasLiaison?: boolean;
-  isSelfApproval?: boolean;
-  isConflicted?: boolean;
-  isRecused?: boolean;
-  priorActions?: AuthorityActionType[];
   externalDataAccessOnly?: boolean;
   attestationSource?: ProfessionalAttestationSource;
-  at?: Date;
+  /** Audited internal replay only — never set from public HTTP. */
+  privilegedHistoricalAt?: Date;
 }

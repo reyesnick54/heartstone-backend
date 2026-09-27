@@ -19,7 +19,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { InstrumentLifecycleBoundaryService } from '../common/instrument-lifecycle-boundary.service';
 import { GovernmentDecisionService } from './government-decision.service';
 import { InstrumentLifecycleGuardService } from './instrument-lifecycle-guard.service';
-import { InstrumentVerificationService } from './instrument-verification.service';
+import { InstrumentPublicVerificationCacheService } from './instrument-public-verification-cache.service';
 
 export interface IssueInstrumentInput {
   instrumentNumber: string;
@@ -190,7 +190,7 @@ export class InstrumentLifecycleService {
     private readonly prisma: PrismaService,
     private readonly boundary: InstrumentLifecycleBoundaryService,
     private readonly guard: InstrumentLifecycleGuardService,
-    private readonly verification: InstrumentVerificationService,
+    private readonly verification: InstrumentPublicVerificationCacheService,
     private readonly decisionService: GovernmentDecisionService,
   ) {}
 

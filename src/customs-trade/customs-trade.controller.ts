@@ -4,6 +4,8 @@ import { AuthorityActionType, CustomsActorPersona, CustomsDeclarationType } from
 
 import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
@@ -46,10 +48,11 @@ export class CustomsTradeController {
   @Post('declarations/:id/amendments')
   @ApiOkResponse({ description: 'Amendment creates a new locked version; prior version preserved' })
   amendDeclaration(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { submissionPayload?: Record<string, unknown> },
   ) {
-    return this.declarationService.amendDeclaration({
+    return this.declarationService.amendDeclaration(session, {
       customsDeclarationId: id,
       submissionPayload: body.submissionPayload,
     });

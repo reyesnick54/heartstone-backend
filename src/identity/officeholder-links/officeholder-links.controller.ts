@@ -3,6 +3,11 @@ import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
+import { CurrentSession } from '../auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../auth/dto/session-context.dto';
 import { CreateOfficeholderLinkDto } from './dto/create-officeholder-link.dto';
 import { OfficeholderLinkResponseDto } from './dto/officeholder-link-response.dto';
 import { OfficeholderLinksService } from './officeholder-links.service';
@@ -17,15 +22,20 @@ import { OfficeholderLinksService } from './officeholder-links.service';
   primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
 })
 @Controller('identity/officeholder-links')
+@DenyByDefaultAdministrative()
 export class OfficeholderLinksController {
   constructor(private readonly officeholderLinksService: OfficeholderLinksService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.IDENTITY_OFFICEHOLDER_LINK_CREATE)
   @ApiOperation({
     summary: 'Link an identity to an officeholder (controlled path, no authority conferred)',
   })
   @ApiCreatedResponse({ type: OfficeholderLinkResponseDto })
-  create(@Body() dto: CreateOfficeholderLinkDto): Promise<OfficeholderLinkResponseDto> {
-    return this.officeholderLinksService.create(dto);
+  create(
+    @CurrentSession() session: SessionContextDto,
+    @Body() dto: CreateOfficeholderLinkDto,
+  ): Promise<OfficeholderLinkResponseDto> {
+    return this.officeholderLinksService.create(dto, session.identityId);
   }
 }

@@ -3,6 +3,9 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { AuthenticationMethodsService } from './authentication-methods.service';
 import { AuthenticationMethodResponseDto } from './dto/authentication-method-response.dto';
 import { CreateAuthenticationMethodDto } from './dto/create-authentication-method.dto';
@@ -19,10 +22,12 @@ import { UpdateAuthenticationMethodDto } from './dto/update-authentication-metho
   primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
 })
 @Controller('identity/authentication-methods')
+@DenyByDefaultAdministrative()
 export class AuthenticationMethodsController {
   constructor(private readonly authenticationMethodsService: AuthenticationMethodsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_CREATE)
   @ApiOperation({ summary: 'Configure an authentication method for an identity' })
   @ApiCreatedResponse({ type: AuthenticationMethodResponseDto })
   create(@Body() dto: CreateAuthenticationMethodDto): Promise<AuthenticationMethodResponseDto> {
@@ -30,6 +35,7 @@ export class AuthenticationMethodsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_READ)
   @ApiOperation({ summary: 'List authentication methods' })
   @ApiOkResponse({ type: AuthenticationMethodResponseDto, isArray: true })
   findAll(
@@ -39,6 +45,7 @@ export class AuthenticationMethodsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_READ)
   @ApiOperation({ summary: 'Get an authentication method by id' })
   @ApiOkResponse({ type: AuthenticationMethodResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<AuthenticationMethodResponseDto> {
@@ -46,6 +53,7 @@ export class AuthenticationMethodsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_UPDATE)
   @ApiOperation({ summary: 'Update authentication method metadata' })
   @ApiOkResponse({ type: AuthenticationMethodResponseDto })
   update(
@@ -56,6 +64,7 @@ export class AuthenticationMethodsController {
   }
 
   @Patch(':id/activate')
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_UPDATE)
   @ApiOperation({ summary: 'Enable an authentication method' })
   @ApiOkResponse({ type: AuthenticationMethodResponseDto })
   activate(@Param('id', ParseUUIDPipe) id: string): Promise<AuthenticationMethodResponseDto> {
@@ -63,6 +72,7 @@ export class AuthenticationMethodsController {
   }
 
   @Patch(':id/suspend')
+  @RequirePermissions(PermissionCodes.IDENTITY_AUTHENTICATION_METHOD_UPDATE)
   @ApiOperation({ summary: 'Disable an authentication method' })
   @ApiOkResponse({ type: AuthenticationMethodResponseDto })
   suspend(@Param('id', ParseUUIDPipe) id: string): Promise<AuthenticationMethodResponseDto> {

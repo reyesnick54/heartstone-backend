@@ -32,6 +32,7 @@ import {
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
+import { ensureIntegrationTestTechnicalRoles } from './technical-access.fixture';
 
 export interface Phase6FixtureContext {
   jurisdictionId: string;
@@ -484,6 +485,10 @@ export async function seedPhase6Fixture(
 
   await createPasswordCredentialViaPrisma(prisma, officialIdentity.id, 'Official123!');
   await createPasswordAuthenticationMethodViaPrisma(prisma, officialIdentity.id);
+
+  await ensureIntegrationTestTechnicalRoles(prisma, officialIdentity.id, {
+    institutionIds: [institution.id],
+  });
 
   const officialSessionToken = await loginAndGetSessionToken(
     app,

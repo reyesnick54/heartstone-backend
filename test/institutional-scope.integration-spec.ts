@@ -15,7 +15,10 @@ import {
   ScopedResourceType,
 } from '../src/institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../src/institutional-scope/resource-access.service';
-import { provisionAuthenticatedIdentity } from './helpers/identity-provisioning.fixture';
+import {
+  provisionAuthenticatedIdentity,
+  sessionContextFromToken,
+} from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   type Phase6FixtureContext,
@@ -169,12 +172,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'test-session',
-      identityId: fixture.officialIdentityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, fixture.officialSessionToken);
 
     const dashboardAccess = await resourceAccess.evaluateWithoutThrow({
       session,
@@ -222,12 +220,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'rep-session',
-      identityId: representative.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, representative.sessionToken);
 
     const result = await resourceAccess.evaluateWithoutThrow({
       session,
@@ -273,12 +266,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'inactive-rep-session',
-      identityId: representative.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, representative.sessionToken);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({
@@ -312,12 +300,7 @@ describe('Institutional scope enforcement (integration)', () => {
       data: { code: 'SCOPE-OTHER-ORG', name: 'Other Org' },
     });
 
-    const session = {
-      sessionId: 'org-member-session',
-      identityId: member.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, member.sessionToken);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({
@@ -354,12 +337,7 @@ describe('Institutional scope enforcement (integration)', () => {
       },
     });
 
-    const session = {
-      sessionId: 'unresolved-session',
-      identityId: actor.identityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, actor.sessionToken);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({
@@ -378,12 +356,7 @@ describe('Institutional scope enforcement (integration)', () => {
     const owner = await createCitizenSession('tech-admin-owner');
     const submitted = await submitApplicationForApplicant(owner.sessionToken);
 
-    const session = {
-      sessionId: 'tech-admin-session',
-      identityId: fixture.officialIdentityId,
-      userAccountId: null,
-      assuranceLevel: 'NONE' as const,
-    };
+    const session = await sessionContextFromToken(prisma, fixture.officialSessionToken);
 
     await expect(
       resourceAccess.evaluateWithoutThrow({

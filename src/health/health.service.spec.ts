@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../database/prisma.service';
@@ -22,6 +23,23 @@ describe('HealthService', () => {
         HealthService,
         { provide: PrismaService, useValue: prismaService },
         { provide: RedisService, useValue: redisService },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'app') {
+                return { nodeEnv: 'development' };
+              }
+              if (key === 'identity') {
+                return { localPasswordAuthEnabled: true, serviceCredentialPepper: 'test-pepper' };
+              }
+              if (key === 'oidc') {
+                return { enabled: false, providers: [] };
+              }
+              return undefined;
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -37,6 +55,7 @@ describe('HealthService', () => {
       checks: {
         database: 'up',
         redis: 'up',
+        identityAuth: 'ready',
       },
     });
   });
@@ -50,6 +69,7 @@ describe('HealthService', () => {
       checks: {
         database: 'down',
         redis: 'up',
+        identityAuth: 'ready',
       },
     });
   });
@@ -63,6 +83,7 @@ describe('HealthService', () => {
       checks: {
         database: 'up',
         redis: 'down',
+        identityAuth: 'ready',
       },
     });
   });

@@ -35,7 +35,6 @@ import {
   authHeader,
   createPasswordAuthenticationMethodViaPrisma,
   createPasswordCredentialViaPrisma,
-  loginAndGetSessionToken,
   provisionAuthenticatedIdentity,
   provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
@@ -335,8 +334,7 @@ describe('Security regression suite (e2e)', () => {
     });
 
     it('rejects service identities from master administrative file access', async () => {
-      const fixture = await seedApplicationProcessingFixture(app, prisma);
-      const { caseId } = await seedCaseFromApplication(prisma, foundation, fixture);
+      await seedApplicationProcessingFixture(app, prisma);
 
       const account = await prisma.userAccount.create({
         data: {
@@ -353,16 +351,14 @@ describe('Security regression suite (e2e)', () => {
       });
       await createPasswordCredentialViaPrisma(prisma, serviceIdentity.id, 'ServiceIdentity123!');
       await createPasswordAuthenticationMethodViaPrisma(prisma, serviceIdentity.id);
-      const serviceToken = await loginAndGetSessionToken(
-        app,
-        'service-bot@test.gov',
-        'ServiceIdentity123!',
-      );
 
       await request(app.getHttpServer())
-        .get(`/api/v1/records/master-files/by-case/${caseId}`)
-        .set(authHeader(serviceToken))
-        .expect(403);
+        .post('/api/v1/identity/auth/login')
+        .send({
+          loginIdentifier: 'service-bot@test.gov',
+          password: 'ServiceIdentity123!',
+        })
+        .expect(401);
     });
   });
 

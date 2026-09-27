@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { SubjectRecordAccessService } from '../../institutional-scope/subject-record-access.service';
 import {
   CITIZENSHIP_APPLICATION_PROFILE_NUMBER_PREFIX,
   RESIDENCY_APPLICATION_PROFILE_NUMBER_PREFIX,
@@ -11,7 +13,10 @@ import {
 
 @Injectable()
 export class ImmigrationApplicationProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
+  ) {}
 
   async linkVisaApplicationProfile(input: {
     immigrationProfileId: string;
@@ -82,11 +87,16 @@ export class ImmigrationApplicationProfileService {
     return { profile, citizenshipStatusRecordsCreated: 0 };
   }
 
-  async getVisaApplicationProfile(id: string) {
+  async getVisaApplicationProfile(session: SessionContextDto, id: string) {
     const profile = await this.prisma.visaApplicationProfile.findUnique({ where: { id } });
     if (!profile) {
       throw new NotFoundException(`Visa application profile "${id}" was not found`);
     }
+
+    await this.subjectRecordAccess.assertApplicationLinkedRecord(session, profile.applicationId, {
+      maskEnumeration: true,
+    });
+
     return profile;
   }
 }

@@ -7,13 +7,13 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../../../database/prisma.service';
-import { HealthcareDataAccessPolicyService } from '../../access/healthcare-data-access-policy.service';
+import { TreatmentPatientDataAccessPolicyService } from '../../access/healthcare-data-access-policy.service';
 
 @Injectable()
 export class ProviderHealthcareProjectionService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly accessPolicy: HealthcareDataAccessPolicyService,
+    private readonly accessPolicy: TreatmentPatientDataAccessPolicyService,
   ) {}
 
   async getWorkspace(providerIdentityId: string, organizationId?: string | null) {

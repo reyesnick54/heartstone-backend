@@ -47,6 +47,10 @@ describe('Property registry cadastre schema guard', () => {
     });
   }
 
+  it('links legacy property parcels to cadastre land parcels', () => {
+    expect(schema).toMatch(/model PropertyParcel[\s\S]*landParcelId/);
+  });
+
   it('requires authority evaluation for official property registry entries', () => {
     expect(schema).toMatch(
       /model PropertyRegistryEntry[\s\S]*authorityEvaluationRecordId String\s+@db\.Uuid/,

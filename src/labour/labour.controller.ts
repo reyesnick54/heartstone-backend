@@ -4,7 +4,10 @@ import { AuthorityActionType, LabourActorPersona, WorkPermitLifecycleStatus } fr
 
 import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
+import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { SubjectAccessQueryDto } from '../institutional-scope/dto/subject-access-query.dto';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
 import { EmploymentComplaintService } from './complaints/employment-complaint.service';
@@ -56,10 +59,11 @@ export class LabourController {
 
   @Get('workers/profile-references/:id')
   getWorkerProfile(
+    @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('requesterIdentityId', ParseUUIDPipe) requesterIdentityId: string,
+    @Query() query: SubjectAccessQueryDto,
   ) {
-    return this.workerProfileService.getWorkerProfileForSubject(id, requesterIdentityId);
+    return this.workerProfileService.getWorkerProfileForSubject(session, id, query);
   }
 
   @Post('work-permit-application-profiles')

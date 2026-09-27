@@ -3,6 +3,9 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateUserAccountDto } from './dto/create-user-account.dto';
 import { QueryUserAccountsDto } from './dto/query-user-accounts.dto';
 import { UpdateUserAccountDto } from './dto/update-user-account.dto';
@@ -19,10 +22,12 @@ import { UserAccountsService } from './user-accounts.service';
   primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
 })
 @Controller('identity/user-accounts')
+@DenyByDefaultAdministrative()
 export class UserAccountsController {
   constructor(private readonly userAccountsService: UserAccountsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_CREATE)
   @ApiOperation({ summary: 'Create a user account' })
   @ApiCreatedResponse({ type: UserAccountResponseDto })
   create(@Body() dto: CreateUserAccountDto): Promise<UserAccountResponseDto> {
@@ -30,6 +35,7 @@ export class UserAccountsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_READ)
   @ApiOperation({ summary: 'List user accounts' })
   @ApiOkResponse({ type: UserAccountResponseDto, isArray: true })
   findAll(@Query() query: QueryUserAccountsDto): Promise<UserAccountResponseDto[]> {
@@ -37,6 +43,7 @@ export class UserAccountsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_READ)
   @ApiOperation({ summary: 'Get a user account by id' })
   @ApiOkResponse({ type: UserAccountResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserAccountResponseDto> {
@@ -44,6 +51,7 @@ export class UserAccountsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_UPDATE)
   @ApiOperation({ summary: 'Update user account metadata' })
   @ApiOkResponse({ type: UserAccountResponseDto })
   update(
@@ -54,6 +62,7 @@ export class UserAccountsController {
   }
 
   @Patch(':id/activate')
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_ACTIVATE)
   @ApiOperation({ summary: 'Activate a user account' })
   @ApiOkResponse({ type: UserAccountResponseDto })
   activate(@Param('id', ParseUUIDPipe) id: string): Promise<UserAccountResponseDto> {
@@ -61,6 +70,7 @@ export class UserAccountsController {
   }
 
   @Patch(':id/suspend')
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_SUSPEND)
   @ApiOperation({ summary: 'Suspend a user account' })
   @ApiOkResponse({ type: UserAccountResponseDto })
   suspend(@Param('id', ParseUUIDPipe) id: string): Promise<UserAccountResponseDto> {
@@ -68,6 +78,7 @@ export class UserAccountsController {
   }
 
   @Patch(':id/revoke')
+  @RequirePermissions(PermissionCodes.IDENTITY_USER_ACCOUNT_REVOKE)
   @ApiOperation({ summary: 'Revoke a user account' })
   @ApiOkResponse({ type: UserAccountResponseDto })
   revoke(@Param('id', ParseUUIDPipe) id: string): Promise<UserAccountResponseDto> {

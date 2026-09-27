@@ -8,6 +8,9 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { ScopedResourceType } from '../../institutional-scope/institutional-scope.types';
+import { SubjectRecordAccessService } from '../../institutional-scope/subject-record-access.service';
 import { CustomsTradeBoundaryService } from '../common/customs-trade-boundary.service';
 
 @Injectable()
@@ -15,6 +18,7 @@ export class CustomsDeclarationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: CustomsTradeBoundaryService,
+    private readonly subjectRecordAccess: SubjectRecordAccessService,
   ) {}
 
   async submitDeclaration(input: {
@@ -77,10 +81,20 @@ export class CustomsDeclarationService {
     };
   }
 
-  async amendDeclaration(input: {
-    customsDeclarationId: string;
-    submissionPayload?: Record<string, unknown>;
-  }) {
+  async amendDeclaration(
+    session: SessionContextDto,
+    input: {
+      customsDeclarationId: string;
+      submissionPayload?: Record<string, unknown>;
+    },
+  ) {
+    await this.subjectRecordAccess.assertModification(
+      session,
+      ScopedResourceType.CUSTOMS_DECLARATION,
+      input.customsDeclarationId,
+      { maskEnumeration: true },
+    );
+
     const existing = await this.prisma.customsDeclaration.findUnique({
       where: { id: input.customsDeclarationId },
       include: { currentVersion: true },

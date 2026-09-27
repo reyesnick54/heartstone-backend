@@ -12,7 +12,7 @@ export interface HealthcareDataAccessContext {
 }
 
 @Injectable()
-export class HealthcareDataAccessPolicyService {
+export class TreatmentPatientDataAccessPolicyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boundary: TreatmentBoundaryService,

@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
+  AssuranceLevel,
   CustomsActorPersona,
   CustomsClassificationReferenceKind,
   CustomsDeclarationType,
@@ -11,6 +12,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../database/prisma.service';
+import { SubjectRecordAccessService } from '../institutional-scope/subject-record-access.service';
 import { CustomsTradeAccessService } from './access/customs-trade-access.service';
 import { CustomsAssessmentService } from './assessments/customs-assessment.service';
 import { CustomsTradeBoundaryService } from './common/customs-trade-boundary.service';
@@ -200,6 +202,10 @@ describe('Customs trade must-fail gates', () => {
           CustomsDeclarationService,
           CustomsTradeBoundaryService,
           { provide: PrismaService, useValue: prisma },
+          {
+            provide: SubjectRecordAccessService,
+            useValue: { assertModification: jest.fn() },
+          },
         ],
       }).compile();
       service = module.get(CustomsDeclarationService);
@@ -233,7 +239,12 @@ describe('Customs trade must-fail gates', () => {
       tx.customsDeclarationVersion.create.mockResolvedValue({ id: 'ver-2', versionNumber: 2 });
       tx.customsDeclaration.update.mockResolvedValue({});
 
-      const result = await service.amendDeclaration({ customsDeclarationId: 'dec-1' });
+      const session = {
+        sessionId: '11111111-1111-4111-8111-111111111111',
+        identityId: '22222222-2222-4222-8222-222222222222',
+        assuranceLevel: AssuranceLevel.HIGH,
+      };
+      const result = await service.amendDeclaration(session, { customsDeclarationId: 'dec-1' });
 
       expect(result.priorVersionPreserved).toBe(true);
       expect(result.priorVersionId).toBe('ver-1');

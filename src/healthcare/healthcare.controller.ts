@@ -23,7 +23,7 @@ import { ClinicalSafetyService } from './safety/clinical-safety.service';
   actorSource: "Session identity with patient or governed provider context",
   primarySecurityInvariant: "Program discovery != medical recommendation; application != clinical authorization",
 })
-@Controller('api/v1/healthcare')
+@Controller('healthcare')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
 export class HealthcareController {

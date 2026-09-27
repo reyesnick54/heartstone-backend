@@ -2,8 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../../authority/authority.module';
 import { DatabaseModule } from '../../database/database.module';
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../../identity/auth/session-auth-guard.module';
 import { CitizenExperienceModule } from '../citizen/citizen-experience.module';
 import { OfficialModule } from '../official/official.module';
 import { ExperienceCommonController } from './controllers/experience-common.controller';
@@ -19,14 +18,13 @@ import { UnifiedExperienceSearchService } from './services/unified-experience-se
 @Module({
   imports: [
     DatabaseModule,
-    SessionsModule,
+    SessionAuthGuardModule,
     AuthorityModule,
     CitizenExperienceModule,
     OfficialModule,
   ],
   controllers: [ExperienceCommonController],
   providers: [
-    SessionAuthGuard,
     ExperienceLocalizationContract,
     ExperienceResponseMetadataService,
     ExperienceActorResolverService,

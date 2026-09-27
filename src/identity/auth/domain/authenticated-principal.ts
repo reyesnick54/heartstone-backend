@@ -1,4 +1,8 @@
-import { type AssuranceLevel } from '@prisma/client';
+import {
+  type AssuranceLevel,
+  type AuthenticationMethodType,
+  type IdentityType,
+} from '@prisma/client';
 
 /**
  * Technical actor identity for authenticated requests.
@@ -9,4 +13,10 @@ export interface AuthenticatedPrincipal {
   identityId: string;
   userAccountId?: string | null;
   assuranceLevel: AssuranceLevel;
+  authMethod?: AuthenticationMethodType;
+  mfaSatisfied?: boolean;
+  authenticatedAt?: Date;
+  oidcProviderCode?: string | null;
+  identityType?: IdentityType;
+  isServicePrincipal?: boolean;
 }

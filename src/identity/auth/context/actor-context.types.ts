@@ -9,6 +9,8 @@ import {
   type SessionStatus,
 } from '@prisma/client';
 
+import { type AuthenticatedPrincipal } from '../domain/authenticated-principal';
+
 /**
  * Server-derived authenticated actor context.
  *
@@ -82,13 +84,21 @@ export interface ActorContextInstitutionContext {
   officeIds: string[];
 }
 
-export interface ActorContext {
+/** Lightweight institutional actor profile for case and document access checks. */
+export interface InstitutionalCaseAccessActor {
   identityId: string;
-  userAccountId: string | null;
-  personId: string | null;
-  sessionId: string;
   identityType: IdentityType;
-  assuranceLevel: AssuranceLevel;
+  userAccountId: string | null;
+  officeholderId?: string;
+  linkedOfficeIds: string[];
+  hasActiveOfficeholderLink: boolean;
+  linkedInstitutionIds: string[];
+}
+
+export interface ActorContext extends AuthenticatedPrincipal {
+  userAccountId: string | null;
+  identityType: IdentityType;
+  personId: string | null;
 
   session: ActorContextSessionMetadata;
   organizationMemberships: ActorContextOrganizationMembership[];
@@ -116,10 +126,151 @@ export const FORBIDDEN_ACTOR_CONTEXT_AUTHORITY_FIELDS = [
   'mayPerformAction',
 ] as const;
 
-/** Client payload keys that must not override server-derived actor identity. */
-export const CLIENT_ACTOR_IDENTITY_FIELDS = [
+/** Client payload keys that must match the authenticated session when present. */
+export const CLIENT_ACTOR_IDENTITY_FIELDS = ['sessionId'] as const;
+
+/**
+ * Canonical actor identity fields — enforced on routes where body ids are not
+ * legitimate subject references (see {@link isClientResourceReferenceIdentityPath}).
+ */
+export const CLIENT_CANONICAL_ACTOR_IDENTITY_FIELDS = [
   'identityId',
   'userAccountId',
   'personId',
-  'sessionId',
 ] as const;
+
+/** Routes where identityId / personId / userAccountId refer to provisioned subjects. */
+export const CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES = [
+  '/identity/user-accounts',
+  '/identity/persons',
+  '/identity/identities',
+  '/identity/memberships',
+  '/identity/organizations',
+  '/identity/credentials',
+  '/identity/authentication-methods',
+  '/identity/representative-authorities',
+  '/identity/officeholder-links',
+] as const;
+
+export function normalizeActorGuardRequestPath(rawUrl: string): string {
+  const pathOnly = rawUrl.split('?')[0] ?? rawUrl;
+  const withoutGlobalPrefix = pathOnly.replace(/^\/api\/v1(?=\/|$)/, '');
+  if (!withoutGlobalPrefix || withoutGlobalPrefix === '/') {
+    return '/';
+  }
+  return withoutGlobalPrefix.startsWith('/') ? withoutGlobalPrefix : `/${withoutGlobalPrefix}`;
+}
+
+export function isClientResourceReferenceIdentityPath(normalizedPath: string): boolean {
+  return CLIENT_RESOURCE_REFERENCE_IDENTITY_PATH_PREFIXES.some(
+    (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+  );
+}
+
+/**
+ * Client payload keys that must not identify a different administrator than the session actor.
+ * Each entry maps to the canonical ActorContext field used for comparison.
+ */
+export const CLIENT_ADMIN_ACTOR_FIELD_ALIASES: Readonly<
+  Record<string, keyof Pick<ActorContext, 'identityId' | 'userAccountId'>>
+> = {
+  actorIdentityId: 'identityId',
+  linkedByIdentityId: 'identityId',
+  actingUserId: 'userAccountId',
+  administratorIdentityId: 'identityId',
+  performedByIdentityId: 'identityId',
+};
+
+/** Client payload keys that identify the acting institutional binding for an action. */
+export const CLIENT_INSTITUTIONAL_SELECTOR_FIELDS = [
+  'officeholderId',
+  'appointmentId',
+  'delegationId',
+  'officeId',
+  'departmentId',
+  'institutionId',
+] as const;
+
+export const ACTOR_BINDING_FAILURE_CODES = {
+  OFFICEHOLDER_NOT_LINKED: 'ACTOR_OFFICEHOLDER_NOT_LINKED',
+  APPOINTMENT_NOT_OWNED: 'ACTOR_APPOINTMENT_NOT_OWNED',
+  APPOINTMENT_NOT_CURRENT: 'ACTOR_APPOINTMENT_NOT_CURRENT',
+  APPOINTMENT_FUTURE: 'ACTOR_APPOINTMENT_FUTURE',
+  APPOINTMENT_SUSPENDED: 'ACTOR_APPOINTMENT_SUSPENDED',
+  APPOINTMENT_REVOKED: 'ACTOR_APPOINTMENT_REVOKED',
+  DELEGATION_NOT_OWNED: 'ACTOR_DELEGATION_NOT_OWNED',
+  DELEGATION_NOT_CURRENT: 'ACTOR_DELEGATION_NOT_CURRENT',
+  NO_CURRENT_APPOINTMENT: 'ACTOR_NO_CURRENT_APPOINTMENT',
+  AMBIGUOUS_APPOINTMENT: 'ACTOR_AMBIGUOUS_APPOINTMENT',
+  SERVICE_CANNOT_IMPERSONATE: 'ACTOR_SERVICE_CANNOT_IMPERSONATE',
+} as const;
+
+export type ActorBindingFailureCode =
+  (typeof ACTOR_BINDING_FAILURE_CODES)[keyof typeof ACTOR_BINDING_FAILURE_CODES];
+
+export interface ActorInstitutionalSelectors {
+  officeholderId?: string;
+  appointmentId?: string;
+  delegationId?: string;
+  officeId?: string;
+  departmentId?: string;
+  institutionId?: string;
+}
+
+export interface ResolvedActorInstitutionalBinding {
+  officeholderId: string;
+  officeholderLinkId: string;
+  appointment: ActorContextAppointment;
+  delegation?: ActorContextDelegation | undefined;
+  resolvedAt: Date;
+}
+
+/**
+ * Audit-friendly snapshot of server-verified actor institutional context.
+ * Suitable for persistence alongside consequential action records.
+ */
+export interface ActorContextResolutionAudit {
+  sessionId: string;
+  identityId: string;
+  personId: string | null;
+  userAccountId: string | null;
+  identityType: IdentityType;
+  officeholderId?: string;
+  officeholderLinkId?: string;
+  appointmentId?: string;
+  delegationId?: string;
+  institutionId?: string;
+  departmentId?: string;
+  officeId?: string;
+  effectiveAt: Date;
+}
+
+/** Legacy summary shape; prefer {@link ActorContext} for new code. */
+export interface ResolvedActorContext {
+  identityId: string;
+  identityType: IdentityType;
+  userAccountId?: string | null;
+  officeholderId?: string;
+  linkedOfficeIds: string[];
+  hasActiveOfficeholderLink: boolean;
+  linkedInstitutionIds: string[];
+}
+
+export function toResolvedActorContext(actor: ActorContext): ResolvedActorContext {
+  const officeIds = [
+    ...new Set(actor.activeAppointments.map((appointment) => appointment.officeId)),
+  ];
+  const institutionIds = [
+    ...new Set(actor.activeAppointments.map((appointment) => appointment.institutionId)),
+  ];
+
+  return {
+    identityId: actor.identityId,
+    identityType: actor.identityType,
+    userAccountId: actor.userAccountId,
+    officeholderId: actor.officeholderLinks[0]?.officeholderId,
+    linkedOfficeIds: officeIds,
+    hasActiveOfficeholderLink: actor.officeholderLinks.length > 0,
+    linkedInstitutionIds: institutionIds,
+  };
+}

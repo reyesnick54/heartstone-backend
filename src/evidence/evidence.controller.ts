@@ -144,6 +144,14 @@ export class EvidenceController {
   actorSource: "Session identity with applicant or official actor context",
   primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
 })
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
+  authorityRequirement: "Document/evidence access guard or institutional evidence role",
+  actorSource: "Session identity with applicant or official actor context",
+  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+})
 @Controller('evidence/ai')
 export class EvidenceAiController {
   constructor(private readonly evidenceVerification: EvidenceVerificationService) {}

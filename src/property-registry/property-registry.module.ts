@@ -9,6 +9,7 @@ import { PropertyCertificateService } from './certificates/property-certificate.
 import { PropertyRegistryAccessService } from './common/property-registry-access.service';
 import { PropertyRegistryBoundaryService } from './common/property-registry-boundary.service';
 import { PropertyRegistryCadastreBoundaryService } from './common/property-registry-cadastre-boundary.service';
+import { PropertyRegistryCanonicalPathService } from './common/property-registry-canonical-path.service';
 import { PropertyRegistryClassificationAccessService } from './common/property-registry-classification-access.service';
 import { PropertyRegistryConfigurationService } from './configuration/property-registry-configuration.service';
 import { PropertyRegistryCorrectionService } from './corrections/property-registry-correction.service';
@@ -45,6 +46,7 @@ import { PropertyRegistryOfficialWorkspaceService } from './workspace/property-r
   ],
   providers: [
     PropertyRegistryBoundaryService,
+    PropertyRegistryCanonicalPathService,
     PropertyRegistryCadastreBoundaryService,
     PropertyRegistryAccessService,
     PropertyRegistryClassificationAccessService,
@@ -71,6 +73,7 @@ import { PropertyRegistryOfficialWorkspaceService } from './workspace/property-r
   ],
   exports: [
     PropertyRegistryBoundaryService,
+    PropertyRegistryCanonicalPathService,
     PropertyRegistryCadastreBoundaryService,
     PropertyRegistryAccessService,
     PropertyRegistryClassificationAccessService,

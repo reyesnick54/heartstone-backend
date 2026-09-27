@@ -6,10 +6,14 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { ActorContextService } from '../context/actor-context.service';
 import { type ActorContext } from '../context/actor-context.types';
 import { SessionContextDto } from '../dto/session-context.dto';
+import { StepUpAuthService } from '../step-up/step-up-auth.service';
+import { AUTH_REQUIREMENTS_KEY, type AuthRequirementsOptions } from './auth-requirements.decorator';
 
 export interface AuthenticatedRequest {
   headers: Record<string, string | string[] | undefined>;
   body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query?: Record<string, string>;
   session?: SessionContextDto;
   actor?: ActorContext;
 }
@@ -20,6 +24,7 @@ export class SessionAuthGuard implements CanActivate {
     private readonly sessionsService: SessionsService,
     private readonly actorContextService: ActorContextService,
     private readonly reflector: Reflector,
+    private readonly stepUpAuth: StepUpAuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,6 +36,11 @@ export class SessionAuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
+
+    const requirements = this.reflector.getAllAndOverride<AuthRequirementsOptions | undefined>(
+      AUTH_REQUIREMENTS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
@@ -45,10 +55,42 @@ export class SessionAuthGuard implements CanActivate {
     }
 
     const session = await this.sessionsService.validateSessionToken(token);
-    request.session = session;
+    await this.enforceRequirements(requirements, session);
 
+    request.session = session;
     request.actor = await this.actorContextService.resolveFromSessionContext({ session });
 
     return true;
+  }
+
+  private async enforceRequirements(
+    requirements: AuthRequirementsOptions | undefined,
+    session: SessionContextDto,
+  ): Promise<void> {
+    if (!requirements) {
+      return;
+    }
+
+    if (requirements.servicePrincipal && !session.isServicePrincipal) {
+      throw new UnauthorizedException('Service principal authentication is required');
+    }
+
+    if (session.isServicePrincipal && !requirements.servicePrincipal) {
+      throw new UnauthorizedException('Human user session cannot access this endpoint');
+    }
+
+    if (requirements.trustedProvider && session.oidcProviderCode !== requirements.trustedProvider) {
+      throw new UnauthorizedException('Authentication from the required provider is required');
+    }
+
+    await this.stepUpAuth.enforce(
+      {
+        required: requirements.mfaVerified === true,
+        minimumAssuranceLevel: requirements.minimumAssuranceLevel,
+        requireRecentAuthentication: requirements.requireRecentAuthentication,
+        maxAuthenticationAgeSeconds: requirements.maxAuthenticationAgeSeconds,
+      },
+      session,
+    );
   }
 }

@@ -16,13 +16,13 @@ import { TECHNICAL_ADMIN_ROLE_MARKER } from '../instruments.constants';
 import { GovernmentDecisionService } from './government-decision.service';
 import { InstrumentLifecycleService } from './instrument-lifecycle.service';
 import { InstrumentLifecycleGuardService } from './instrument-lifecycle-guard.service';
-import { InstrumentVerificationService } from './instrument-verification.service';
+import { InstrumentPublicVerificationCacheService } from './instrument-public-verification-cache.service';
 
 describe('InstrumentLifecycleService', () => {
   let service: InstrumentLifecycleService;
   let boundary: InstrumentLifecycleBoundaryService;
   let guard: InstrumentLifecycleGuardService;
-  let verification: InstrumentVerificationService;
+  let verification: InstrumentPublicVerificationCacheService;
 
   const prisma = {
     officialInstrument: {
@@ -70,7 +70,7 @@ describe('InstrumentLifecycleService', () => {
         InstrumentLifecycleService,
         InstrumentLifecycleBoundaryService,
         InstrumentLifecycleGuardService,
-        InstrumentVerificationService,
+        InstrumentPublicVerificationCacheService,
         { provide: PrismaService, useValue: prisma },
         { provide: GovernmentDecisionService, useValue: decisionService },
       ],
@@ -79,7 +79,7 @@ describe('InstrumentLifecycleService', () => {
     service = module.get(InstrumentLifecycleService);
     boundary = module.get(InstrumentLifecycleBoundaryService);
     guard = module.get(InstrumentLifecycleGuardService);
-    verification = module.get(InstrumentVerificationService);
+    verification = module.get(InstrumentPublicVerificationCacheService);
     jest.clearAllMocks();
   });
 

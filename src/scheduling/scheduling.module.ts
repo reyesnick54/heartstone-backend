@@ -2,8 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
 import { CitizenAccessService } from '../experience/common/citizen-access.service';
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../identity/sessions/sessions.module';
+import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
 import { OperationalSupportModule } from '../operational-support/operational-support.module';
 import { ProductionReadinessModule } from '../production-readiness/production-readiness.module';
 import { ServiceAppointmentAccessService } from './access/service-appointment-access.service';
@@ -22,7 +21,12 @@ import { AppointmentSlotsController } from './slots/appointment-slots.controller
 import { AppointmentSlotsService } from './slots/appointment-slots.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, OperationalSupportModule, ProductionReadinessModule],
+  imports: [
+    DatabaseModule,
+    SessionAuthGuardModule,
+    OperationalSupportModule,
+    ProductionReadinessModule,
+  ],
   controllers: [
     ServiceAppointmentsController,
     AppointmentSlotsController,
@@ -31,7 +35,6 @@ import { AppointmentSlotsService } from './slots/appointment-slots.service';
     AppointmentReasonsController,
   ],
   providers: [
-    SessionAuthGuard,
     CitizenAccessService,
     SchedulingBoundaryService,
     ServiceAppointmentAuditService,

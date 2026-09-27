@@ -87,8 +87,6 @@ export class TransportationAvailableActionsService {
         officeId: context.scope.primaryAppointment?.officeId,
         appointmentId: context.scope.primaryAppointment?.appointmentId,
         delegationId: context.scope.activeDelegations[0]?.delegationId,
-        priorActions: [],
-        hasSecondApproval: false,
       });
 
       actions.push({

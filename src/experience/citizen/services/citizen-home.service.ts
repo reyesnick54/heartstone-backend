@@ -7,11 +7,11 @@ import {
   GovernmentServicePublicAvailability,
   InvoiceStatus,
   OfficialInstrumentStatus,
-  RedressMatterStatus,
   ServiceAppointmentStatus,
 } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
+import { ACTIVE_REDRESS_MATTER_STATUSES } from '../../../redress/common/active-redress-matter-statuses.constants';
 import { CitizenAccessService } from '../../common/citizen-access.service';
 import { type CitizenHomeResponseDto } from '../dto/citizen-home-response.dto';
 
@@ -25,15 +25,6 @@ const OUTSTANDING_INVOICE_STATUSES: InvoiceStatus[] = [
   InvoiceStatus.ISSUED,
   InvoiceStatus.PARTIALLY_PAID,
   InvoiceStatus.OVERDUE,
-];
-
-const OPEN_REDRESS_STATUSES: RedressMatterStatus[] = [
-  RedressMatterStatus.FILED,
-  RedressMatterStatus.UNDER_REVIEW,
-  RedressMatterStatus.INTERIM_RELIEF_PENDING,
-  RedressMatterStatus.DECISION_PENDING,
-  RedressMatterStatus.IMPLEMENTATION_PENDING,
-  RedressMatterStatus.IMPLEMENTATION_IN_PROGRESS,
 ];
 
 const PENDING_GOVERNMENT_CASE_STATUSES: CaseStatus[] = [
@@ -155,7 +146,7 @@ export class CitizenHomeService {
       this.prisma.redressMatter.count({
         where: {
           appellantIdentityId: identityId,
-          status: { in: OPEN_REDRESS_STATUSES },
+          status: { in: [...ACTIVE_REDRESS_MATTER_STATUSES] },
         },
       }),
       this.prisma.serviceAppointment.count({

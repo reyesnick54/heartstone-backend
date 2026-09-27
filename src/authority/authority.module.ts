@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
-import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
-import { SessionsModule } from '../identity/sessions/sessions.module';
+import { ActorContextModule } from '../identity/auth/context/actor-context.module';
+import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
 import { AuthorityValidationService } from './common/authority-validation.service';
 import { AuthorityConditionEvaluator } from './conditions/authority-condition-evaluator.service';
 import { ConsequentialActionGuard } from './consequential-action/consequential-action.guard';
@@ -12,6 +12,7 @@ import { AuthorityDependenciesService } from './dependencies/authority-dependenc
 import { AuthorityDependencyEvaluator } from './dependencies/authority-dependency-evaluator.service';
 import { AuthorityEvaluationController } from './evaluation/authority-evaluation.controller';
 import { AuthorityEvaluationService } from './evaluation/authority-evaluation.service';
+import { AuthorityFactsResolver } from './evaluation/authority-facts-resolver.service';
 import { AuthorityExplanationService } from './explanation/authority-explanation.service';
 import { FunctionActivationService } from './function-authority-records/function-activation.service';
 import { FunctionAuthorityRecordsController } from './function-authority-records/function-authority-records.controller';
@@ -24,7 +25,7 @@ import { AuthorityPolicyService } from './policy/authority-policy.service';
 import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.service';
 
 @Module({
-  imports: [SessionsModule, DatabaseModule],
+  imports: [SessionAuthGuardModule, DatabaseModule, ActorContextModule],
   controllers: [
     GoverningSourcesController,
     FunctionAuthorityRecordsController,
@@ -36,6 +37,7 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     FunctionAuthorityRecordsService,
     FunctionActivationService,
     AuthorityEvaluationService,
+    AuthorityFactsResolver,
     AuthorityExplanationService,
     InstitutionalActorResolver,
     AuthorityConditionEvaluator,
@@ -47,7 +49,6 @@ import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.
     ConsequentialActionGuard,
     AuthorityPolicyGuard,
     AuthorityPolicyService,
-    SessionAuthGuard,
   ],
   exports: [
     AuthorityEvaluationService,

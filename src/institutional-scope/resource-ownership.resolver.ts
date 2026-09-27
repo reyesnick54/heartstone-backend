@@ -57,6 +57,20 @@ export class ResourceOwnershipResolver {
         return this.resolveStrategicProject(resourceId);
       case ScopedResourceType.GOVERNMENT_DECISION:
         return this.resolveGovernmentDecision(resourceId);
+      case ScopedResourceType.IMMIGRATION_PROFILE:
+        return this.resolveImmigrationProfile(resourceId);
+      case ScopedResourceType.DRIVER_PROFILE:
+        return this.resolveDriverProfile(resourceId);
+      case ScopedResourceType.WORKER_PROFILE_REFERENCE:
+        return this.resolveWorkerProfileReference(resourceId);
+      case ScopedResourceType.STUDENT_EDUCATION_PROFILE:
+        return this.resolveStudentEducationProfile(resourceId);
+      case ScopedResourceType.VEHICLE_RECORD:
+        return this.resolveVehicleRecord(resourceId);
+      case ScopedResourceType.BENEFIT_AWARD:
+        return this.resolveBenefitAward(resourceId);
+      case ScopedResourceType.CUSTOMS_DECLARATION:
+        return this.resolveCustomsDeclaration(resourceId);
       default:
         return { found: false, denialReason: ScopeDenialReason.UNRESOLVED_OWNERSHIP };
     }
@@ -570,6 +584,254 @@ export class ResourceOwnershipResolver {
       institutionId: decision.case.responsibleInstitutionId,
       departmentId: decision.case.responsibleDepartmentId,
       isRestricted: true,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveImmigrationProfile(resourceId: string): Promise<OwnershipResolution> {
+    const profile = await this.prisma.immigrationProfile.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        subjectIdentityId: true,
+        masterAdministrativeFileId: true,
+        masterAdministrativeFile: {
+          select: {
+            caseId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+            case: { select: { applicantIdentityId: true } },
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicantIdentityId: profile.subjectIdentityId,
+      holderIdentityId: profile.subjectIdentityId,
+      masterAdministrativeFileId: profile.masterAdministrativeFileId ?? undefined,
+      caseId: profile.masterAdministrativeFile?.caseId,
+      institutionId: profile.masterAdministrativeFile?.responsibleInstitutionId,
+      departmentId: profile.masterAdministrativeFile?.responsibleDepartmentId,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveDriverProfile(resourceId: string): Promise<OwnershipResolution> {
+    const profile = await this.prisma.driverProfile.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        subjectIdentityId: true,
+        masterAdministrativeFileId: true,
+        masterAdministrativeFile: {
+          select: {
+            caseId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicantIdentityId: profile.subjectIdentityId,
+      holderIdentityId: profile.subjectIdentityId,
+      masterAdministrativeFileId: profile.masterAdministrativeFileId ?? undefined,
+      caseId: profile.masterAdministrativeFile?.caseId,
+      institutionId: profile.masterAdministrativeFile?.responsibleInstitutionId,
+      departmentId: profile.masterAdministrativeFile?.responsibleDepartmentId,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveWorkerProfileReference(resourceId: string): Promise<OwnershipResolution> {
+    const profile = await this.prisma.workerProfileReference.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        workerIdentityId: true,
+        masterAdministrativeFileId: true,
+        masterAdministrativeFile: {
+          select: {
+            caseId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicantIdentityId: profile.workerIdentityId,
+      holderIdentityId: profile.workerIdentityId,
+      masterAdministrativeFileId: profile.masterAdministrativeFileId ?? undefined,
+      caseId: profile.masterAdministrativeFile?.caseId,
+      institutionId: profile.masterAdministrativeFile?.responsibleInstitutionId,
+      departmentId: profile.masterAdministrativeFile?.responsibleDepartmentId,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveStudentEducationProfile(resourceId: string): Promise<OwnershipResolution> {
+    const profile = await this.prisma.studentEducationProfile.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        studentIdentityId: true,
+        masterAdministrativeFileId: true,
+        masterAdministrativeFile: {
+          select: {
+            caseId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicantIdentityId: profile.studentIdentityId,
+      holderIdentityId: profile.studentIdentityId,
+      masterAdministrativeFileId: profile.masterAdministrativeFileId ?? undefined,
+      caseId: profile.masterAdministrativeFile?.caseId,
+      institutionId: profile.masterAdministrativeFile?.responsibleInstitutionId,
+      departmentId: profile.masterAdministrativeFile?.responsibleDepartmentId,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveVehicleRecord(resourceId: string): Promise<OwnershipResolution> {
+    const vehicle = await this.prisma.vehicleRecord.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        masterAdministrativeFileId: true,
+        masterAdministrativeFile: {
+          select: {
+            caseId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+            case: { select: { applicantIdentityId: true } },
+          },
+        },
+        currentOwnershipRecord: {
+          select: { ownerIdentityId: true, ownerOrganizationId: true },
+        },
+      },
+    });
+
+    if (!vehicle) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicantIdentityId:
+        vehicle.currentOwnershipRecord?.ownerIdentityId ??
+        vehicle.masterAdministrativeFile?.case.applicantIdentityId,
+      holderIdentityId: vehicle.currentOwnershipRecord?.ownerIdentityId ?? undefined,
+      organizationId: vehicle.currentOwnershipRecord?.ownerOrganizationId ?? undefined,
+      masterAdministrativeFileId: vehicle.masterAdministrativeFileId ?? undefined,
+      caseId: vehicle.masterAdministrativeFile?.caseId,
+      institutionId: vehicle.masterAdministrativeFile?.responsibleInstitutionId,
+      departmentId: vehicle.masterAdministrativeFile?.responsibleDepartmentId,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveBenefitAward(resourceId: string): Promise<OwnershipResolution> {
+    const award = await this.prisma.benefitAward.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        benefitApplicationProfile: {
+          select: {
+            applicationId: true,
+            caseId: true,
+            benefitApplicantProfile: { select: { primaryApplicantIdentityId: true } },
+            case: {
+              select: {
+                responsibleInstitutionId: true,
+                responsibleDepartmentId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!award) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const profile = award.benefitApplicationProfile;
+    if (!profile) {
+      return { found: true, denialReason: ScopeDenialReason.UNRESOLVED_OWNERSHIP };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicationId: profile.applicationId,
+      caseId: profile.caseId,
+      applicantIdentityId: profile.benefitApplicantProfile.primaryApplicantIdentityId,
+      institutionId: profile.case.responsibleInstitutionId,
+      departmentId: profile.case.responsibleDepartmentId,
+      isRestricted: true,
+    };
+
+    return { found: true, ownership };
+  }
+
+  private async resolveCustomsDeclaration(resourceId: string): Promise<OwnershipResolution> {
+    const declaration = await this.prisma.customsDeclaration.findUnique({
+      where: { id: resourceId },
+      select: {
+        id: true,
+        applicationId: true,
+        caseId: true,
+        traderAccount: { select: { organizationId: true } },
+        case: {
+          select: {
+            applicantIdentityId: true,
+            responsibleInstitutionId: true,
+            responsibleDepartmentId: true,
+          },
+        },
+      },
+    });
+
+    if (!declaration) {
+      return { found: false, denialReason: ScopeDenialReason.RESOURCE_NOT_FOUND };
+    }
+
+    const ownership: InstitutionalOwnership = {
+      applicationId: declaration.applicationId ?? undefined,
+      caseId: declaration.caseId ?? undefined,
+      organizationId: declaration.traderAccount.organizationId ?? undefined,
+      applicantIdentityId: declaration.case?.applicantIdentityId,
+      institutionId: declaration.case?.responsibleInstitutionId,
+      departmentId: declaration.case?.responsibleDepartmentId,
     };
 
     return { found: true, ownership };

@@ -14,7 +14,7 @@ import { PublicEducationVerificationService } from './public-education-verificat
   actorSource: "Session identity with domain access resolution",
   primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
 })
-@Controller('api/v1/public/education')
+@Controller('public/education')
 export class PublicEducationVerificationController {
   constructor(private readonly verificationService: PublicEducationVerificationService) {}
 

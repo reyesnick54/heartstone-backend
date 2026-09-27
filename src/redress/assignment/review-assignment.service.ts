@@ -117,7 +117,7 @@ export class ReviewAssignmentService {
       delegationId: input.delegationId,
       functionAuthorityRecordId: input.functionAuthorityRecordId,
       action: AuthorityActionType.HEAR_REVIEW,
-      at,
+      privilegedHistoricalAt: at,
     });
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {

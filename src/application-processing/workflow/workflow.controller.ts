@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   AuthorityActionType,
@@ -7,9 +7,11 @@ import {
   WorkflowTransitionJoinType,
 } from '@prisma/client';
 
-import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { WorkflowDefinitionsService } from './workflow-definitions.service';
 
 @ApiTags('application-processing-workflow')
@@ -22,12 +24,13 @@ import { WorkflowDefinitionsService } from './workflow-definitions.service';
   primarySecurityInvariant: "Access to a case does not confer decision authority",
 })
 @Controller('workflow-definitions')
-@UseGuards(SessionAuthGuard)
+@DenyByDefaultAdministrative()
 @ApiBearerAuth()
 export class WorkflowController {
   constructor(private readonly workflowDefinitions: WorkflowDefinitionsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.WORKFLOW_DEFINITION_CREATE)
   createDefinition(
     @Body()
     body: {
@@ -41,6 +44,7 @@ export class WorkflowController {
   }
 
   @Post(':id/versions')
+  @RequirePermissions(PermissionCodes.WORKFLOW_DEFINITION_CREATE)
   createVersion(
     @Param('id', ParseUUIDPipe) id: string,
     @Body()
@@ -74,6 +78,7 @@ export class WorkflowController {
   }
 
   @Post('versions/:versionId/approve')
+  @RequirePermissions(PermissionCodes.WORKFLOW_DEFINITION_APPROVE)
   approveVersion(@Param('versionId', ParseUUIDPipe) versionId: string) {
     return this.workflowDefinitions.approveVersion(versionId);
   }

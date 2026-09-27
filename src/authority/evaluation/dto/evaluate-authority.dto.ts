@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsISO8601,
   IsNumber,
   IsOptional,
   IsString,
@@ -39,17 +40,49 @@ export class EvaluateAuthorityDto {
   @IsUUID()
   delegationId?: string;
 
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Case context for server-derived evidence, conflict, and SoD facts.',
+  })
+  @IsOptional()
+  @IsUUID()
+  caseId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Evidence packet version used to resolve evidence completeness server-side.',
+  })
+  @IsOptional()
+  @IsUUID()
+  evidencePacketVersionId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Decision readiness assessment used to resolve approvals and conflict state.',
+  })
+  @IsOptional()
+  @IsUUID()
+  decisionReadinessAssessmentId?: string;
+
+  /** @deprecated Ignored for authorization; retained for compatibility only. */
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   evidenceProvided?: string[];
 
+  /** @deprecated Ignored for authorization; retained for compatibility only. */
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   qualificationCodes?: string[];
+
+  /** @deprecated Ignored for live authorization; server time is always used. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsISO8601()
+  at?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

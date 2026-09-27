@@ -8,6 +8,7 @@ import {
   resolveFunctionFromDecisionTypeVersion,
   resolveResourceFromCase,
 } from '../authority/consequential-action/consequential-action-resolvers';
+import { ActorContextService } from '../identity/auth/context/actor-context.service';
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
@@ -15,7 +16,6 @@ import { ScopedResourceType } from '../institutional-scope/institutional-scope.t
 import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
-import { ActorContextService } from '../security/services/actor-context.service';
 import { AssessDecisionReadinessDto } from './dto/assess-decision-readiness.dto';
 import { CreateDecisionPreparationDto } from './dto/create-decision-preparation.dto';
 import { ExecuteGovernmentDecisionDto } from './dto/execute-government-decision.dto';

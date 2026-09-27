@@ -44,6 +44,12 @@ describe('Civil registry schema guard', () => {
     expect(schema).toMatch(/civilPersonRecords\s+CivilPersonRecord\[\]/);
   });
 
+  it('links service-pack vital records to foundation vital events and entries', () => {
+    expect(schema).toMatch(
+      /model CivilRegistryVitalRecord[\s\S]*vitalEventId[\s\S]*civilRegistryEntryId/,
+    );
+  });
+
   it('requires authority evaluation for official civil registry entries', () => {
     expect(schema).toMatch(
       /model CivilRegistryEntry[\s\S]*authorityEvaluationRecordId String\s+@db\.Uuid/,

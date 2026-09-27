@@ -3,6 +3,9 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { InstitutionStructureDto } from '../structure/dto/government-structure.dto';
 import { GovernmentStructureService } from '../structure/government-structure.service';
 import { CreateInstitutionDto } from './dto/create-institution.dto';
@@ -21,6 +24,7 @@ import { InstitutionsService } from './institutions.service';
   primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
 })
 @Controller('institutions')
+@DenyByDefaultAdministrative()
 export class InstitutionsController {
   constructor(
     private readonly institutionsService: InstitutionsService,
@@ -28,6 +32,7 @@ export class InstitutionsController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_CREATE)
   @ApiOperation({ summary: 'Create an institution' })
   @ApiCreatedResponse({ type: InstitutionResponseDto })
   create(@Body() dto: CreateInstitutionDto): Promise<InstitutionResponseDto> {
@@ -35,6 +40,7 @@ export class InstitutionsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ)
   @ApiOperation({ summary: 'List institutions' })
   @ApiOkResponse({ type: InstitutionResponseDto, isArray: true })
   findAll(@Query() query: QueryInstitutionsDto): Promise<InstitutionResponseDto[]> {
@@ -42,6 +48,9 @@ export class InstitutionsController {
   }
 
   @Get(':id/structure')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ, {
+    scope: { institutionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Get organizational structure for an institution' })
   @ApiOkResponse({ type: InstitutionStructureDto })
   getStructure(@Param('id', ParseUUIDPipe) id: string): Promise<InstitutionStructureDto> {
@@ -49,6 +58,9 @@ export class InstitutionsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ, {
+    scope: { institutionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Get an institution by id' })
   @ApiOkResponse({ type: InstitutionResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<InstitutionResponseDto> {
@@ -56,6 +68,9 @@ export class InstitutionsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_UPDATE, {
+    scope: { institutionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Update an institution' })
   @ApiOkResponse({ type: InstitutionResponseDto })
   update(

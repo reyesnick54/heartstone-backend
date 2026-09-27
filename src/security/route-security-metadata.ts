@@ -2,7 +2,6 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
-
 import { matchesConsequentialRouteRequirement } from './route-access/consequential-route-registry';
 import {
   resolveControllerDomain,
@@ -110,7 +109,7 @@ function extractRequirePermissionsCode(decoratorBlock: string): string | null {
     return null;
   }
   const key = match[1] as keyof typeof PermissionCodes;
-  return PermissionCodes[key] ?? null;
+  return PermissionCodes[key];
 }
 
 function resolveTechnicalAccessMetadata(input: {

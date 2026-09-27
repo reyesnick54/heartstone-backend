@@ -1,6 +1,7 @@
 import { type AuthorityActionType } from '@prisma/client';
 
 import { type PrismaService } from '../../database/prisma.service';
+import { type ActorContextResolutionAudit } from '../../identity/auth/context/actor-context.types';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { type FunctionAuthorityRecordsService } from '../function-authority-records/function-authority-records.service';
 
@@ -15,7 +16,10 @@ export interface ConsequentialActionContext {
   request: ConsequentialActionRequest;
   prisma: PrismaService;
   functionRecords: FunctionAuthorityRecordsService;
+  actorResolutionAudit?: ActorContextResolutionAudit;
 }
+
+export const ACTOR_CONTEXT_RESOLUTION_AUDIT_KEY = 'actorContextResolutionAudit';
 
 export interface ConsequentialResourceScope {
   institutionId?: string;

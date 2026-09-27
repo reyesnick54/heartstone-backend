@@ -284,11 +284,12 @@ export class DecisionReadinessService {
       officeholderId: input.proposedDecisionMakerOfficeholderId,
       appointmentId: input.appointmentId,
       delegationId: input.delegationId,
-      isConflicted: input.isConflicted,
-      isRecused: input.isRecused,
-      hasSecondApproval: input.hasSecondApproval,
-      priorActions: input.priorActions as AuthorityActionType[] | undefined,
-      at,
+      resourceScope: {
+        caseId: input.caseId,
+        evidencePacketVersionId: packetVersion?.id,
+        decisionReadinessAssessmentId: undefined,
+      },
+      privilegedHistoricalAt: input.at,
     });
 
     const authorityEvaluationRecordId = authorityResult.evaluationId;

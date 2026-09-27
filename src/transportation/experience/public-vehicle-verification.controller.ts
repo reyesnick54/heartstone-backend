@@ -14,7 +14,7 @@ import { PublicVehicleVerificationService } from '../verification/public-vehicle
   actorSource: "Session identity with domain access resolution",
   primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
 })
-@Controller('api/v1/transportation/public')
+@Controller('transportation/public')
 export class PublicVehicleVerificationController {
   constructor(private readonly verificationService: PublicVehicleVerificationService) {}
 

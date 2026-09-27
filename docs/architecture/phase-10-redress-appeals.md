@@ -70,6 +70,12 @@ External review packages pin frozen `EvidencePacketVersion` records and generate
 11. AI cannot determine external outcome
 12. Technical admin cannot fabricate external determination
 
+### Canonical redress vs domain appeal references
+
+`RedressMatter` in `src/redress/` is the only active redress/appeals coordination engine. Experience-layer “appeals” views (citizen home counts, department appeals dashboards) query `RedressMatter` via shared `ACTIVE_REDRESS_MATTER_STATUSES` in `src/redress/common/active-redress-matter-statuses.constants.ts`.
+
+Domain modules may maintain appeal **reference** records (for example social protection benefit appeals, development planning appeals) that link to `RedressMatter` and pin original decision versions. Those references must not mutate or replace `GovernmentDecision` history.
+
 ### API surface
 
 Module: `src/redress/`

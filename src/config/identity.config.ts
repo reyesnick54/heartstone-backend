@@ -16,14 +16,30 @@ export default registerAs(IDENTITY_CONFIG, (): IdentityConfig => {
 
   return {
     sessionTtlSeconds: parseInt(process.env.SESSION_TTL_SECONDS ?? '3600', 10),
+    sessionAbsoluteTtlSeconds: parseInt(process.env.SESSION_ABSOLUTE_TTL_SECONDS ?? '43200', 10),
+    sessionIdleTimeoutSeconds: parseInt(process.env.SESSION_IDLE_TIMEOUT_SECONDS ?? '1800', 10),
     sessionTokenBytes: parseInt(process.env.SESSION_TOKEN_BYTES ?? '32', 10),
     sessionRenewalThresholdSeconds: parseInt(
       process.env.SESSION_RENEWAL_THRESHOLD_SECONDS ?? '900',
       10,
     ),
+    maxActiveSessionsPerAccount: parseInt(process.env.MAX_ACTIVE_SESSIONS_PER_ACCOUNT ?? '10', 10),
     localPasswordAuthEnabled: parseBoolean(
       process.env.AUTH_LOCAL_PASSWORD_ENABLED,
       localPasswordDefault,
     ),
+    lockoutMaxAttempts: parseInt(process.env.AUTH_LOCKOUT_MAX_ATTEMPTS ?? '5', 10),
+    lockoutDurationSeconds: parseInt(process.env.AUTH_LOCKOUT_DURATION_SECONDS ?? '900', 10),
+    stepUpMaxAuthenticationAgeSeconds: parseInt(
+      process.env.STEP_UP_MAX_AUTHENTICATION_AGE_SECONDS ?? '900',
+      10,
+    ),
+    serviceCredentialPepper: (() => {
+      const configured = process.env.SERVICE_CREDENTIAL_PEPPER?.trim();
+      if (configured && configured.length >= 16) {
+        return configured;
+      }
+      return nodeEnv === 'production' ? '' : 'test-pepper-not-production';
+    })(),
   };
 });

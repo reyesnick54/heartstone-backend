@@ -109,6 +109,7 @@ export class HealthcareFoundationAccessPolicyService {
       await this.consentPolicy.assertActiveConsentForPurpose({
         patientReferenceId: request.patientReferenceId,
         purposeCode: request.consentPurposeCode ?? request.purposeCode,
+        accessorIdentityId: actor.identityId,
       });
     }
 

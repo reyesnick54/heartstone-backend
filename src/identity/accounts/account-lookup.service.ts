@@ -6,6 +6,7 @@ import { PrismaService } from '../../database/prisma.service';
 export type AccountWithIdentities = UserAccount & {
   identities: {
     id: string;
+    type: string;
     credentials: { id: string; type: string; status: string; secretHash: string | null }[];
   }[];
 };

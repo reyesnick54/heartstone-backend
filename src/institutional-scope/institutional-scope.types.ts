@@ -21,6 +21,14 @@ export enum ScopedResourceType {
   DASHBOARD = 'dashboard',
   STRATEGIC_PROJECT = 'strategic_project',
   GOVERNMENT_DECISION = 'government_decision',
+  /** Domain subject profiles (immigration, transport, labour, education). */
+  IMMIGRATION_PROFILE = 'immigration_profile',
+  DRIVER_PROFILE = 'driver_profile',
+  WORKER_PROFILE_REFERENCE = 'worker_profile_reference',
+  STUDENT_EDUCATION_PROFILE = 'student_education_profile',
+  VEHICLE_RECORD = 'vehicle_record',
+  BENEFIT_AWARD = 'benefit_award',
+  CUSTOMS_DECLARATION = 'customs_declaration',
 }
 
 /** Distinguishes visibility, modification, and consequential government action intent. */
