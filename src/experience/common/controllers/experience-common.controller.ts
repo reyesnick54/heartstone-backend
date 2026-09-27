@@ -33,10 +33,12 @@ import { UnifiedExperienceSearchService } from '../services/unified-experience-s
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Experience layer navigation and institutional workspace scope",
-  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
-  actorSource: "Session identity with resolved official or citizen context",
-  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+  scopeRequirement: 'Experience layer navigation and institutional workspace scope',
+  authorityRequirement:
+    'OfficialExperienceGuard for substantive routes; no authority from navigation',
+  actorSource: 'Session identity with resolved official or citizen context',
+  primarySecurityInvariant:
+    'Experience projections do not execute consequential government actions',
 })
 @Controller('experience')
 @UseGuards(SessionAuthGuard)

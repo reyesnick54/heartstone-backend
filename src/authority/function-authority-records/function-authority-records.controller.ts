@@ -33,10 +33,10 @@ import { FunctionAuthorityRecordsService } from './function-authority-records.se
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Authority configuration or evaluated institutional action scope",
-  authorityRequirement: "Explicit function authority evaluation for consequential actions",
-  actorSource: "Session identity with officeholder linkage when evaluating authority",
-  primarySecurityInvariant: "Technical permission does not create legal authority",
+  scopeRequirement: 'Authority configuration or evaluated institutional action scope',
+  authorityRequirement: 'Explicit function authority evaluation for consequential actions',
+  actorSource: 'Session identity with officeholder linkage when evaluating authority',
+  primarySecurityInvariant: 'Technical permission does not create legal authority',
 })
 @Controller('authority/functions')
 @DenyByDefaultAdministrative()

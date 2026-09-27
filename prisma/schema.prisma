@@ -1310,6 +1310,8 @@ model SecurityAuditEvent {
 enum AuthorityClassification {
   ABSEZ_OWNED
   ABSEZ_DELEGATED
+  INSTITUTION_OWNED
+  INSTITUTION_DELEGATED
   EXPRESSLY_RETAINED_NATIONAL
   SHARED_OR_COORDINATED
   RESERVED_PROFESSIONAL
@@ -1705,7 +1707,7 @@ model ExternalDependencyDetermination {
   retainedQuestion       String?
   requiredDetermination  String?
   referralBasis          String?
-  effectOnAbsezAction    String?
+  effectOnInstitutionAction String?
   createdAt              DateTime                    @default(now())
   updatedAt              DateTime                    @updatedAt
   authorityDependency    AuthorityDependency         @relation(fields: [authorityDependencyId], references: [id])
@@ -5502,6 +5504,7 @@ enum DecisionConditionStatus {
 
 enum InstrumentIssuerSource {
   ABSEZ_ISSUED
+  INSTITUTION_ISSUED
   RETAINED_NATIONAL_COORDINATED
   EXTERNAL_AUTHENTICATED
 }
@@ -5526,6 +5529,7 @@ enum OfficialInstrumentType {
 enum InstrumentJurisdictionScope {
   NATIONAL
   ABSEZ
+  OPERATING_JURISDICTION
   INSTITUTIONAL
   OTHER
 }
@@ -5875,7 +5879,7 @@ model OfficialInstrument {
   governmentServiceVersionId        String?                           @db.Uuid
   issuerInstitutionId               String                            @db.Uuid
   issuerOfficeholderId              String?                           @db.Uuid
-  issuerSource                      InstrumentIssuerSource            @default(ABSEZ_ISSUED)
+  issuerSource                      InstrumentIssuerSource            @default(INSTITUTION_ISSUED)
   externalIssuerReference           String?
   scope                             Json
   status                            OfficialInstrumentStatus          @default(PENDING_ISSUANCE)
@@ -10714,6 +10718,7 @@ enum MetricBaselineMethod {
 
 enum MetricDependencyTimeClassification {
   ABSEZ_CONTROLLED_TIME
+  INSTITUTION_CONTROLLED_TIME
   APPLICANT_TIME
   EXTERNAL_DEPENDENCY_TIME
   PROFESSIONAL_DEPENDENCY_TIME

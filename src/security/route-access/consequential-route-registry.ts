@@ -131,7 +131,6 @@ export function matchesConsequentialRouteRequirement(
 ): ConsequentialRouteRequirement | undefined {
   const normalizedMethod = method.toUpperCase();
   return CONSEQUENTIAL_ROUTE_REQUIREMENTS.find(
-    (requirement) =>
-      requirement.method === normalizedMethod && requirement.pathPattern.test(path),
+    (requirement) => requirement.method === normalizedMethod && requirement.pathPattern.test(path),
   );
 }

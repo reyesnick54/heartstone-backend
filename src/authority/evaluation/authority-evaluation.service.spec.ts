@@ -71,7 +71,7 @@ describe('AuthorityEvaluationService', () => {
   }
 
   it('allows positive E2E path for ABSEZ_OWNED', async () => {
-    const owned = fixtureFor(AuthorityClassification.ABSEZ_OWNED);
+    const owned = fixtureFor(AuthorityClassification.INSTITUTION_OWNED);
 
     const result = await evaluation.evaluate({
       identityId: ctx.identityId,
@@ -118,7 +118,7 @@ describe('AuthorityEvaluationService', () => {
   });
 
   it('requires delegation for ABSEZ_DELEGATED when delegation missing', async () => {
-    const delegated = fixtureFor(AuthorityClassification.ABSEZ_DELEGATED);
+    const delegated = fixtureFor(AuthorityClassification.INSTITUTION_DELEGATED);
     await prisma.delegationStructuredScope.deleteMany();
     await prisma.delegation.deleteMany();
 
@@ -136,7 +136,7 @@ describe('AuthorityEvaluationService', () => {
   });
 
   it('allows ABSEZ_DELEGATED with valid delegation', async () => {
-    const delegated = fixtureFor(AuthorityClassification.ABSEZ_DELEGATED);
+    const delegated = fixtureFor(AuthorityClassification.INSTITUTION_DELEGATED);
 
     const result = await evaluation.evaluate({
       identityId: ctx.identityId,
@@ -167,7 +167,7 @@ describe('AuthorityEvaluationService', () => {
   });
 
   it('creates immutable evaluation records', async () => {
-    const owned = fixtureFor(AuthorityClassification.ABSEZ_OWNED);
+    const owned = fixtureFor(AuthorityClassification.INSTITUTION_OWNED);
 
     const result = await evaluation.evaluate({
       identityId: ctx.identityId,

@@ -14,10 +14,10 @@ import { RecordRevalidationDto } from './dto/record-revalidation.dto';
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Compliance oversight dashboards and obligation administration",
-  authorityRequirement: "Institutional compliance role or holder-scoped dashboard access",
-  actorSource: "Session identity with compliance or holder context",
-  primarySecurityInvariant: "Compliance status is derived from authoritative records",
+  scopeRequirement: 'Compliance oversight dashboards and obligation administration',
+  authorityRequirement: 'Institutional compliance role or holder-scoped dashboard access',
+  actorSource: 'Session identity with compliance or holder context',
+  primarySecurityInvariant: 'Compliance status is derived from authoritative records',
 })
 @Controller('compliance/status')
 export class ComplianceStatusController {

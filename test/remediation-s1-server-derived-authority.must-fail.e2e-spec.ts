@@ -135,7 +135,7 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
       data: {
         code: 'S1-FN',
         name: 'Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,
@@ -210,10 +210,10 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
       appointmentId: base.appointment.id,
       at: '2020-03-01T00:00:00.000Z',
     });
-    expect(result.explanationCodes).not.toContain(
+    expect(result.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.EXPIRED_APPOINTMENT,
     );
-    expect(result.outcome).toBe(AuthorityEvaluationOutcome.ALLOW);
+    expect(result.outcome).not.toBe(AuthorityEvaluationOutcome.ALLOW);
   });
 
   it('2. ignores claimed second approval without stored co-approver records', async () => {

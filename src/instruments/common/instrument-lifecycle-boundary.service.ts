@@ -6,6 +6,7 @@ import {
   OfficialInstrumentStatus,
 } from '@prisma/client';
 
+import { isOperatingJurisdictionScope } from '../../platform-core/institution-neutral-enums.util';
 import {
   PROTECTED_INSTRUMENT_STATUS_FIELDS,
   TECHNICAL_ADMIN_ROLE_MARKER,
@@ -74,18 +75,26 @@ export class InstrumentLifecycleBoundaryService {
     }
   }
 
-  assertAbsezRevocationNotNational(input: {
+  assertOperatingJurisdictionRevocationNotNational(input: {
     jurisdictionScope: InstrumentJurisdictionScope;
     representsNationalRevocation: boolean;
   }): void {
     if (
-      input.jurisdictionScope === InstrumentJurisdictionScope.ABSEZ &&
+      isOperatingJurisdictionScope(input.jurisdictionScope) &&
       input.representsNationalRevocation
     ) {
       throw new BadRequestException(
-        'ABSEZ status revocation cannot be represented as revocation of a national government license',
+        'Operating-jurisdiction status revocation cannot be represented as revocation of a national government license',
       );
     }
+  }
+
+  /** @deprecated Use assertOperatingJurisdictionRevocationNotNational */
+  assertAbsezRevocationNotNational(input: {
+    jurisdictionScope: InstrumentJurisdictionScope;
+    representsNationalRevocation: boolean;
+  }): void {
+    this.assertOperatingJurisdictionRevocationNotNational(input);
   }
 
   assertDecisionTypeMatchesLifecycleAction(

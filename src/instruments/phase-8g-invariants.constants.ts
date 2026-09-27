@@ -14,7 +14,10 @@ export const PHASE_8G_INVARIANTS: Phase8GInvariant[] = [
   { id: 8, description: 'Suspension preserves historical instrument' },
   { id: 9, description: 'Suspension may be scoped where authorized' },
   { id: 10, description: 'Revocation requires decision and authority' },
-  { id: 11, description: 'ABSEZ revocation cannot masquerade as national revocation' },
+  {
+    id: 11,
+    description: 'Operating-jurisdiction revocation cannot masquerade as national revocation',
+  },
   { id: 12, description: 'Expired suspension does not auto-reinstate' },
   { id: 13, description: 'Reinstatement requires new decision' },
   { id: 14, description: 'Expiration preserves record' },

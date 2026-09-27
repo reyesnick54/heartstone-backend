@@ -19,10 +19,11 @@ import { IssuanceReadinessService } from '../issuance/issuance-readiness.service
 @ControllerRouteAccess({
   routeClass: RouteClass.CONSEQUENTIAL_AUTHORITY_CONTROLLED,
   authenticationRequired: true,
-  scopeRequirement: "Issuance readiness and official instrument issuance scope",
-  authorityRequirement: "Function authority ISSUE evaluation via ConsequentialActionGuard",
-  actorSource: "Session identity with evaluated issuer authority context",
-  primarySecurityInvariant: "Issuance requires explicit authority evaluation, not authentication alone",
+  scopeRequirement: 'Issuance readiness and official instrument issuance scope',
+  authorityRequirement: 'Function authority ISSUE evaluation via ConsequentialActionGuard',
+  actorSource: 'Session identity with evaluated issuer authority context',
+  primarySecurityInvariant:
+    'Issuance requires explicit authority evaluation, not authentication alone',
 })
 @Controller('decisions-issuance')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
