@@ -7,6 +7,7 @@ import { ServicePackActivationService } from './service-pack-activation.service'
 import { ServicePackDeploymentService } from './service-pack-deployment.service';
 import { ServicePackDeploymentAuditService } from './service-pack-deployment-audit.service';
 import { ServicePackRollbackService } from './service-pack-rollback.service';
+import { ServicePackRuntimeCompilerService } from './service-pack-runtime-compiler.service';
 
 @Module({
   imports: [ActivationGovernanceModule, ServicePackGovernanceModule, ServicePacksCommonModule],
@@ -15,12 +16,14 @@ import { ServicePackRollbackService } from './service-pack-rollback.service';
     ServicePackDeploymentService,
     ServicePackRollbackService,
     ServicePackActivationService,
+    ServicePackRuntimeCompilerService,
   ],
   exports: [
     ServicePackDeploymentAuditService,
     ServicePackDeploymentService,
     ServicePackRollbackService,
     ServicePackActivationService,
+    ServicePackRuntimeCompilerService,
   ],
 })
 export class ServicePackDeploymentModule {}

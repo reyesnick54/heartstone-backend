@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
+import { ServicePackDeploymentModule } from '../service-catalog/service-packs/service-pack-deployment.module';
 import { ServicePacksCommonModule } from './common/service-packs-common.module';
 import { ServicePackGovernanceModule } from './governance/service-pack-governance.module';
 import { ServicePackJurisdictionBindingService } from './jurisdiction/service-pack-jurisdiction-binding.service';
@@ -24,6 +25,7 @@ import { ServicePackVersionService } from './versions/service-pack-version.servi
     SessionAuthGuardModule,
     ServicePacksCommonModule,
     ServicePackGovernanceModule,
+    ServicePackDeploymentModule,
   ],
   controllers: [ServicePacksRegistryController, ServicePacksController],
   providers: [
@@ -46,6 +48,7 @@ import { ServicePackVersionService } from './versions/service-pack-version.servi
     ServicePackRegistryService,
     ServicePackExportService,
     ServicePackImportService,
+    ServicePackDeploymentModule,
   ],
 })
 export class ServicePacksModule {}

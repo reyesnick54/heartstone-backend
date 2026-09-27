@@ -7,6 +7,7 @@ import { configureApplication } from '../../src/bootstrap/configure-application'
 import { resetAuditGovernanceData as truncateAuditGovernanceTables } from '../../src/database/audit-governance-test-reset';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetEducationData } from '../../src/database/education-test-reset';
+import { resetFinancialServicesData } from '../../src/database/financial-services-test-reset';
 import { resetHealthcareFoundationData } from '../../src/database/healthcare-test-reset';
 import { resetImmigrationData } from '../../src/database/immigration-test-reset';
 import { resetLabourData } from '../../src/database/labour-test-reset';
@@ -24,6 +25,7 @@ import { resetCorporateRegistryData } from './corporate-registry-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
+import { resetServicePackData } from './service-pack-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
@@ -167,6 +169,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.governmentBody.deleteMany();
   await prisma.externalAuthority.deleteMany();
   await resetOperationalSupportData(prisma);
+  await resetServicePackData(prisma);
   await prisma.institution.deleteMany();
   await prisma.jurisdiction.deleteMany();
 }
@@ -209,6 +212,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 }
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
+  await resetFinancialServicesData(prisma);
   await resetHealthcareFoundationData(prisma);
   await resetImmigrationData(prisma);
   await resetEducationData(prisma);

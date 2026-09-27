@@ -6,6 +6,7 @@ import { type App } from 'supertest/types';
 import { FunctionAuthorityRecordsService } from '../src/authority/function-authority-records/function-authority-records.service';
 import { CUSTOMS_TRADE_AUTHORITY_FUNCTION_CODES } from '../src/customs-trade/customs-trade.constants';
 import { PrismaService } from '../src/database/prisma.service';
+import { FINANCIAL_SERVICES_AUTHORITY_FUNCTION_CODES } from '../src/financial-services/financial-services.constants';
 import { CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES } from '../src/healthcare/research/clinical-research.constants';
 import { hashToken } from '../src/identity/common/crypto.util';
 import { LABOUR_AUTHORITY_FUNCTION_CODES } from '../src/labour/labour.constants';
@@ -125,6 +126,22 @@ describe('S5 consequential coverage must-fail (e2e)', () => {
       .post('/api/v1/customs-trade/shipments/00000000-0000-0000-0000-000000000010/release')
       .set(authHeader(serviceToken))
       .send({ authorizedByOfficeholderId: '00000000-0000-0000-0000-000000000011' })
+      .expect(403);
+  });
+
+  it('denies service identity from financial licence issuance', async () => {
+    await seedFunctionCode(FINANCIAL_SERVICES_AUTHORITY_FUNCTION_CODES.LICENCE_ISSUE);
+    const serviceToken = await provisionServiceSession();
+
+    await request(app.getHttpServer())
+      .post('/api/v1/financial-services/licence-records/issue')
+      .set(authHeader(serviceToken))
+      .send({
+        regulatedEntityProfileId: '00000000-0000-0000-0000-000000000016',
+        actorPersona: 'FINANCIAL_SERVICES_OFFICER',
+        issuerIdentityId: '00000000-0000-0000-0000-000000000017',
+        issuedByOfficeholderId: '00000000-0000-0000-0000-000000000018',
+      })
       .expect(403);
   });
 
