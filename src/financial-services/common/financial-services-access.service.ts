@@ -48,7 +48,9 @@ export class FinancialServicesAccessService {
       context.financialOfficerAuthorized
     ) {
       granted = true;
-    } else if (context.actorPersona === FinancialServicesActorPersona.REGULATED_ENTITY_REPRESENTATIVE) {
+    } else if (
+      context.actorPersona === FinancialServicesActorPersona.REGULATED_ENTITY_REPRESENTATIVE
+    ) {
       if (!context.representativeAuthorityId) {
         throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.REGULATORY_FILE_ACCESS_DENIED);
       }
@@ -83,7 +85,9 @@ export class FinancialServicesAccessService {
     });
 
     if (!granted) {
-      throw new ForbiddenException(reasonCode ?? FINANCIAL_SERVICES_REASON_CODES.REGULATORY_FILE_ACCESS_DENIED);
+      throw new ForbiddenException(
+        reasonCode ?? FINANCIAL_SERVICES_REASON_CODES.REGULATORY_FILE_ACCESS_DENIED,
+      );
     }
   }
 }

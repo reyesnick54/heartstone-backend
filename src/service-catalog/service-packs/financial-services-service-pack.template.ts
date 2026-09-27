@@ -231,7 +231,8 @@ export const FINANCIAL_SERVICES_SERVICES: ServicePackServiceDefinition[] =
       ['BUSINESS', 'COMPANY', 'INDIVIDUAL'],
       {
         requiresExternal: Boolean(definition.requiresExternal),
-        requiresDelegatedIssue: definition.serviceType === 'APPLICATION' || definition.serviceType === 'RENEWAL',
+        requiresDelegatedIssue:
+          definition.serviceType === 'APPLICATION' || definition.serviceType === 'RENEWAL',
       },
     ),
   );

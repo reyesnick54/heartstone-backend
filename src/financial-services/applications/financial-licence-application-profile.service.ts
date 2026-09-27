@@ -22,10 +22,7 @@ export class FinancialLicenceApplicationProfileService {
     requiresNationalDetermination?: boolean;
     licencesCreated?: number;
   }) {
-    this.boundary.assertApplicationProfileDoesNotIssueLicence(
-      true,
-      input.licencesCreated ?? 0,
-    );
+    this.boundary.assertApplicationProfileDoesNotIssueLicence(true, input.licencesCreated ?? 0);
 
     const entity = await this.prisma.financialRegulatedEntityProfile.findUnique({
       where: { id: input.regulatedEntityProfileId },

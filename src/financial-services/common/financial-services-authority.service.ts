@@ -31,7 +31,9 @@ export class FinancialServicesAuthorityService {
     });
   }
 
-  async assertLicenceSuspensionAuthority(input: AssertFinancialLicenceAuthorityInput): Promise<void> {
+  async assertLicenceSuspensionAuthority(
+    input: AssertFinancialLicenceAuthorityInput,
+  ): Promise<void> {
     await this.assertAuthorityForFunction({
       ...input,
       functionCode: input.functionCode ?? FINANCIAL_SERVICES_AUTHORITY.suspend,
@@ -50,7 +52,9 @@ export class FinancialServicesAuthorityService {
       functionRecord = await this.functionRecords.findByCode(input.functionCode);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED);
+        throw new ForbiddenException(
+          FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED,
+        );
       }
       throw error;
     }
@@ -64,7 +68,9 @@ export class FinancialServicesAuthorityService {
     });
 
     if (evaluation.outcome !== AuthorityEvaluationOutcome.ALLOW) {
-      throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED);
+      throw new ForbiddenException(
+        FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED,
+      );
     }
   }
 }

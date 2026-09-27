@@ -14,7 +14,11 @@ import { FINANCIAL_OPERATIONAL_SNAPSHOT_PREFIX } from '../financial-services.con
 export class FinancialServicesOperationalMetricsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async computeJurisdictionSnapshot(input: { jurisdictionId: string; periodStart: Date; periodEnd: Date }) {
+  async computeJurisdictionSnapshot(input: {
+    jurisdictionId: string;
+    periodStart: Date;
+    periodEnd: Date;
+  }) {
     const registeredEntityCount = await this.prisma.financialRegulatedEntityProfile.count({
       where: { jurisdictionId: input.jurisdictionId },
     });
@@ -34,10 +38,7 @@ export class FinancialServicesOperationalMetricsService {
     const issuedLicenceCount = await this.prisma.financialLicenceRecord.count({
       where: {
         lifecycleStatus: {
-          in: [
-            FinancialLicenceLifecycleStatus.ISSUED,
-            FinancialLicenceLifecycleStatus.EFFECTIVE,
-          ],
+          in: [FinancialLicenceLifecycleStatus.ISSUED, FinancialLicenceLifecycleStatus.EFFECTIVE],
         },
         regulatedEntityProfile: { jurisdictionId: input.jurisdictionId },
       },

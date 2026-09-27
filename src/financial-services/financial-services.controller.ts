@@ -1,12 +1,10 @@
 import { Body, Controller, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import {
-  AuthorityActionType,
-  FinancialServicesActorPersona,
-} from '@prisma/client';
+import { AuthorityActionType, FinancialServicesActorPersona } from '@prisma/client';
 
 import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
+import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
 import { FinancialLicenceApplicationProfileService } from './applications/financial-licence-application-profile.service';
@@ -29,7 +27,7 @@ import { FinancialServicesOperationalMetricsService } from './reporting/financia
   primarySecurityInvariant: 'Application and submission endpoints do not confer official outcomes',
 })
 @Controller('financial-services')
-@UseGuards(ConsequentialActionGuard)
+@UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 @ApiBearerAuth()
 export class FinancialServicesController {
   constructor(
@@ -44,7 +42,9 @@ export class FinancialServicesController {
   ) {}
 
   @Post('regulated-entities')
-  @ApiOkResponse({ description: 'Financial regulated entity profile registered (canonical organization)' })
+  @ApiOkResponse({
+    description: 'Financial regulated entity profile registered (canonical organization)',
+  })
   registerRegulatedEntity(
     @Body() body: Parameters<FinancialRegulatedEntityProfileService['registerRegulatedEntity']>[0],
   ) {
@@ -106,7 +106,10 @@ export class FinancialServicesController {
   suspendLicence(
     @Param('id', ParseUUIDPipe) financialLicenceRecordId: string,
     @Body()
-    body: Omit<Parameters<FinancialLicenceSuspensionService['suspendLicence']>[0], 'financialLicenceRecordId'>,
+    body: Omit<
+      Parameters<FinancialLicenceSuspensionService['suspendLicence']>[0],
+      'financialLicenceRecordId'
+    >,
   ) {
     return this.licenceSuspensions.suspendLicence({ financialLicenceRecordId, ...body });
   }
@@ -116,7 +119,9 @@ export class FinancialServicesController {
     @Body()
     body: {
       actorPersona: FinancialServicesActorPersona;
-      payload: Parameters<FinancialExternalRegulatoryDependencyService['recordExternalDependency']>[1];
+      payload: Parameters<
+        FinancialExternalRegulatoryDependencyService['recordExternalDependency']
+      >[1];
     },
   ) {
     return this.externalDependencies.recordExternalDependency(body.actorPersona, body.payload);

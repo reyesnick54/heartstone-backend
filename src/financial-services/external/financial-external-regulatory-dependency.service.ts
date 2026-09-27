@@ -59,7 +59,9 @@ export class FinancialExternalRegulatoryDependencyService {
         externalAuthorityId: input.externalAuthorityId,
         dependencyCode: input.dependencyCode,
         dependencyLabel: input.dependencyLabel,
-        status: input.status ?? FinancialExternalRegulatoryDependencyStatus.AWAITING_EXTERNAL_DETERMINATION,
+        status:
+          input.status ??
+          FinancialExternalRegulatoryDependencyStatus.AWAITING_EXTERNAL_DETERMINATION,
         blocksAbsezLicenceDecision: input.blocksAbsezLicenceDecision ?? true,
         blocksAbsezIssuance: input.blocksAbsezIssuance ?? true,
         isAuthenticated: input.isAuthenticated,

@@ -30,8 +30,7 @@ export class FinancialRegulatedEntityProfileService {
         externalRegulatorReference: input.externalRegulatorReference,
         governingDelegationReference: input.governingDelegationReference,
         delegatedLicenceFunctionActivation:
-          input.delegatedLicenceFunctionActivation ??
-          FinancialDelegatedFunctionActivation.INACTIVE,
+          input.delegatedLicenceFunctionActivation ?? FinancialDelegatedFunctionActivation.INACTIVE,
       },
     });
   }

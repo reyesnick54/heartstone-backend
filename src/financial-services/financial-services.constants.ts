@@ -79,7 +79,11 @@ export interface FinancialTemplateServiceDefinition {
 }
 
 export const FINANCIAL_TEMPLATE_SERVICE_DEFINITIONS: FinancialTemplateServiceDefinition[] = [
-  { key: 'REGULATED-ENTITY-PROFILE', name: 'Regulated Entity Profile', serviceType: 'REGISTRATION' },
+  {
+    key: 'REGULATED-ENTITY-PROFILE',
+    name: 'Regulated Entity Profile',
+    serviceType: 'REGISTRATION',
+  },
   { key: 'LICENCE-APPLICATION', name: 'Financial Licence Application', serviceType: 'APPLICATION' },
   { key: 'LICENCE-RENEWAL', name: 'Financial Licence Renewal', serviceType: 'RENEWAL' },
   { key: 'LICENCE-AMENDMENT', name: 'Financial Licence Amendment', serviceType: 'AMENDMENT' },

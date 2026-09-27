@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  FinancialLicenceLifecycleStatus,
-  FinancialServicesActorPersona,
-} from '@prisma/client';
+import { FinancialLicenceLifecycleStatus, FinancialServicesActorPersona } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { FinancialServicesAuthorityService } from '../common/financial-services-authority.service';

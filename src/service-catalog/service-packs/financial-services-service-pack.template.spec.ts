@@ -1,7 +1,5 @@
 import { formatServicePackManifest } from './canonical-json.util';
-import {
-  FINANCIAL_SERVICES_SERVICE_PACK_TEMPLATE,
-} from './financial-services-service-pack.template';
+import { FINANCIAL_SERVICES_SERVICE_PACK_TEMPLATE } from './financial-services-service-pack.template';
 import { validateServicePackManifest } from './validate-service-pack';
 
 describe('Financial services service pack template', () => {

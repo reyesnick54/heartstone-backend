@@ -56,13 +56,17 @@ export class FinancialServicesBoundaryService {
         action as (typeof FORBIDDEN_AI_FINANCIAL_SERVICES_ACTIONS)[number],
       )
     ) {
-      throw new ForbiddenException(`${FINANCIAL_SERVICES_REASON_CODES.AI_CANNOT_ISSUE_LICENCE}: ${action}`);
+      throw new ForbiddenException(
+        `${FINANCIAL_SERVICES_REASON_CODES.AI_CANNOT_ISSUE_LICENCE}: ${action}`,
+      );
     }
   }
 
   assertTechnicalAdminCannotIssueLicence(actorPersona: FinancialServicesActorPersona): void {
     if (actorPersona === FinancialServicesActorPersona.TECHNICAL_ADMIN) {
-      throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED);
+      throw new ForbiddenException(
+        FINANCIAL_SERVICES_REASON_CODES.LICENCE_AUTHORITY_NOT_CONFIGURED,
+      );
     }
   }
 
@@ -70,10 +74,7 @@ export class FinancialServicesBoundaryService {
     activation: FinancialDelegatedFunctionActivation,
     requiresDelegatedIssuance: boolean,
   ): void {
-    if (
-      requiresDelegatedIssuance &&
-      activation !== FinancialDelegatedFunctionActivation.ACTIVE
-    ) {
+    if (requiresDelegatedIssuance && activation !== FinancialDelegatedFunctionActivation.ACTIVE) {
       throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.DELEGATED_FUNCTION_INACTIVE);
     }
   }
@@ -101,10 +102,18 @@ export class FinancialServicesBoundaryService {
     spoofedAbsezApprovalAttempt?: boolean;
   }): void {
     if (input.spoofedAbsezApprovalAttempt) {
-      throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.NATIONAL_APPROVAL_CANNOT_BE_SPOOFED);
+      throw new ForbiddenException(
+        FINANCIAL_SERVICES_REASON_CODES.NATIONAL_APPROVAL_CANNOT_BE_SPOOFED,
+      );
     }
-    if (input.requiresNationalDetermination && input.absezIssuanceAuthorized && !input.externalResolved) {
-      throw new ForbiddenException(FINANCIAL_SERVICES_REASON_CODES.NATIONAL_APPROVAL_CANNOT_BE_SPOOFED);
+    if (
+      input.requiresNationalDetermination &&
+      input.absezIssuanceAuthorized &&
+      !input.externalResolved
+    ) {
+      throw new ForbiddenException(
+        FINANCIAL_SERVICES_REASON_CODES.NATIONAL_APPROVAL_CANNOT_BE_SPOOFED,
+      );
     }
   }
 
@@ -113,10 +122,14 @@ export class FinancialServicesBoundaryService {
     licencesCreated: number,
   ): void {
     if (!doesNotIssueLicence && licencesCreated > 0) {
-      throw new BadRequestException('Licence application profile must not issue licences at link time');
+      throw new BadRequestException(
+        'Licence application profile must not issue licences at link time',
+      );
     }
     if (licencesCreated > 0) {
-      throw new BadRequestException('Linking an application profile cannot create a financial licence');
+      throw new BadRequestException(
+        'Linking an application profile cannot create a financial licence',
+      );
     }
   }
 

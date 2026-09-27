@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-27T11:47:32.351Z",
+  "generatedAt": "2026-09-27T15:02:22.764Z",
   "routeCount": 686,
   "summary": {
     "public": 27,
-    "authenticatedSelfService": 76,
+    "authenticatedSelfService": 77,
     "authenticatedInstitutional": 165,
     "restrictedAdministrative": 224,
-    "consequentialAuthorityControlled": 189,
+    "consequentialAuthorityControlled": 188,
     "systemHealth": 5
   },
   "routes": [
@@ -9131,7 +9131,7 @@
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": true,
       "hasConsequentialActionGuard": true,
-      "requiresConsequentialGuard": false
+      "requiresConsequentialGuard": true
     },
     {
       "path": "/financial-services/licence-records/issue",
@@ -9157,7 +9157,7 @@
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": true,
       "hasConsequentialActionGuard": true,
-      "requiresConsequentialGuard": false
+      "requiresConsequentialGuard": true
     },
     {
       "path": "/financial-services/organizations/:organizationId/regulatory-profile/query",
@@ -11755,10 +11755,9 @@
       "permissionCode": null,
       "guardCoverage": [
         "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard",
-        "AuthorityPolicyGuard"
+        "ClientIdentitySubstitutionGuard"
       ],
-      "routeClass": "CONSEQUENTIAL_AUTHORITY_CONTROLLED",
+      "routeClass": "AUTHENTICATED_SELF_SERVICE",
       "authenticationRequired": true,
       "isPublic": false,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
@@ -11767,7 +11766,7 @@
       "primarySecurityInvariant": "Issuance requires explicit authority evaluation, not authentication alone",
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": false,
-      "hasConsequentialActionGuard": true,
+      "hasConsequentialActionGuard": false,
       "requiresConsequentialGuard": false
     },
     {
@@ -14960,11 +14959,12 @@
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
-        "SessionAuthGuard"
+        "SessionAuthGuard",
+        "ClientIdentitySubstitutionGuard"
       ],
       "routeClass": "PUBLIC",
-      "authenticationRequired": false,
-      "isPublic": true,
+      "authenticationRequired": true,
+      "isPublic": false,
       "scopeRequirement": "Issuance readiness and official instrument issuance scope",
       "authorityRequirement": "Function authority ISSUE evaluation via ConsequentialActionGuard",
       "actorSource": "Session identity with evaluated issuer authority context",
