@@ -36,6 +36,16 @@ export const PROTECTED_HISTORY_RELATIONS = [
     onDelete: 'Restrict',
   },
   {
+    model: 'GovernmentAuditLedgerEntry',
+    field: 'institution',
+    onDelete: 'Restrict',
+  },
+  {
+    model: 'GovernedConfigurationChange',
+    field: 'institution',
+    onDelete: 'Restrict',
+  },
+  {
     model: 'CivilRegistryVitalRecordVersion',
     field: 'vitalRecord',
     onDelete: 'Restrict',

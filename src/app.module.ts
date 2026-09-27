@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
+import { AuditGovernanceModule } from './audit-governance/audit-governance.module';
 import { AuthorityModule } from './authority/authority.module';
 import { CivilRegistryModule } from './civil-registry/civil-registry.module';
 import { createPinoConfig } from './common/logging/pino-config';
@@ -75,6 +76,7 @@ import { TransportationModule } from './transportation/transportation.module';
       },
     }),
     LoggerModule.forRoot(createPinoConfig()),
+    AuditGovernanceModule,
     SecurityModule,
     TechnicalAccessModule,
     DatabaseModule,

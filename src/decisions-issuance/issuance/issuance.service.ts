@@ -23,6 +23,7 @@ import {
 } from '@prisma/client';
 
 import { CaseStatusService } from '../../application-processing/cases/case-status.service';
+import { CanonicalAuditRecorderService } from '../../audit-governance/ledger/canonical-audit-recorder.service';
 import { PrismaService } from '../../database/prisma.service';
 import { InstrumentDocumentTrustService } from '../../document-trust/services/instrument-document-trust.service';
 import {
@@ -64,6 +65,7 @@ export class IssuanceService {
     private readonly readiness: IssuanceReadinessService,
     private readonly numbering: InstrumentNumberingService,
     private readonly caseStatus: CaseStatusService,
+    private readonly canonicalAudit: CanonicalAuditRecorderService,
     @Inject(DOCUMENT_STORAGE_PORT)
     private readonly storage: DocumentStoragePort,
     private readonly instrumentDocumentTrust: InstrumentDocumentTrustService,
@@ -381,6 +383,18 @@ export class IssuanceService {
       'Official instrument issued',
       input.issuerIdentityId,
     );
+
+    await this.canonicalAudit.recordIssuance({
+      issuanceEventId: result.issuanceEvent.id,
+      issuerIdentityId: input.issuerIdentityId,
+      institutionId: result.instrument.issuerInstitutionId,
+      authorityEvaluationRecordId,
+      metadata: {
+        instrumentId: result.instrument.id,
+        instrumentNumber: result.issuanceEvent.instrumentNumber,
+        caseId: input.caseId,
+      },
+    });
 
     return result;
   }

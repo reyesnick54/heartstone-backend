@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, SecurityAuditEvent, SecurityAuditEventType } from '@prisma/client';
 
+import { CanonicalAuditRecorderService } from '../../audit-governance/ledger/canonical-audit-recorder.service';
 import { PrismaService } from '../../database/prisma.service';
 
 export interface AuditEventInput {
@@ -15,10 +16,13 @@ export interface AuditEventInput {
 
 @Injectable()
 export class SecurityAuditService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly canonicalAudit: CanonicalAuditRecorderService,
+  ) {}
 
   async record(input: AuditEventInput): Promise<SecurityAuditEvent> {
-    return this.prisma.securityAuditEvent.create({
+    const event = await this.prisma.securityAuditEvent.create({
       data: {
         eventType: input.eventType,
         identityId: input.identityId,
@@ -29,6 +33,10 @@ export class SecurityAuditService {
         ipAddress: input.ipAddress,
       },
     });
+
+    await this.canonicalAudit.recordSecurityAuditEvent(event);
+
+    return event;
   }
 
   async findByIdentity(identityId: string): Promise<SecurityAuditEvent[]> {

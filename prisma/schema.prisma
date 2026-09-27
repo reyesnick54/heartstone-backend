@@ -151,6 +151,8 @@ model Jurisdiction {
   patientHealthcareProfiles           PatientHealthcareProfile[]
   treatmentPrograms                   TreatmentProgram[]
   technicalRoleAssignments            TechnicalRoleAssignment[]
+  governmentAuditLedgerEntries        GovernmentAuditLedgerEntry[]
+  governedConfigurationChanges        GovernedConfigurationChange[]
   financialRegulatedEntityProfiles      FinancialRegulatedEntityProfile[]
   financialServicesOperationalSnapshots FinancialServicesOperationalSnapshot[]
   setupConfigurationInstallations     SetupConfigurationInstallation[]
@@ -244,11 +246,14 @@ model Institution {
 
   treatmentPrograms     TreatmentProgram[]
   treatmentProgramSites TreatmentProgramSite[]
-  setupConfigurationInstallations     SetupConfigurationInstallation[]
-  institutionCaseCategories           InstitutionCaseCategory[]
-  institutionServiceStandards         InstitutionServiceStandard[]
-  institutionEscalationLevels           InstitutionEscalationLevel[]
-  setupVocabularyEntries              SetupVocabularyEntry[]
+  governmentAuditLedgerEntries             GovernmentAuditLedgerEntry[]
+  governedConfigurationChanges             GovernedConfigurationChange[]
+  governedConfigurationEffectiveVersions   GovernedConfigurationEffectiveVersion[]
+  setupConfigurationInstallations          SetupConfigurationInstallation[]
+  institutionCaseCategories                InstitutionCaseCategory[]
+  institutionServiceStandards              InstitutionServiceStandard[]
+  institutionEscalationLevels              InstitutionEscalationLevel[]
+  setupVocabularyEntries                   SetupVocabularyEntry[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -982,6 +987,9 @@ model Identity {
   financialRegulatoryAccessAudits                  FinancialRegulatoryAccessAudit[]    @relation("FinancialRegulatoryAccessAuditAccessor")
   technicalRoleAssignments                         TechnicalRoleAssignment[]
   technicalAccessAuditEvents                       TechnicalAccessAuditEvent[]
+  governmentAuditLedgerEntriesAsActor              GovernmentAuditLedgerEntry[]     @relation("GovernmentAuditLedgerActor")
+  governedConfigurationChangesProposed             GovernedConfigurationChange[]  @relation("GovernedConfigProposer")
+  governedConfigurationChangesApproved             GovernedConfigurationChange[]  @relation("GovernedConfigApprover")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1798,6 +1806,7 @@ model AuthorityEvaluationRecord {
   decisionReadinessAssessments    DecisionReadinessAssessment[]   @relation("DecisionReadinessAuthority")
   governmentDecisions             GovernmentDecision[]            @relation("GovernmentDecisionAuthority")
   issuanceEvents                  IssuanceEvent[]
+  governmentAuditLedgerEntries    GovernmentAuditLedgerEntry[]
   complianceProjectionEvaluations ComplianceStatusProjection[]    @relation("ComplianceProjectionAuthority")
   complianceReviews               ComplianceReview[]              @relation("ComplianceReviewAuthorityEvaluation")
   servicePackAcceptanceRecords    ServicePackAcceptanceRecord[]   @relation("ServicePackAcceptanceAuthorityEvaluation")
@@ -25027,6 +25036,147 @@ model HealthcareDataAccessAudit {
   @@index([accessorIdentityId])
   @@index([patientReferenceId])
   @@map("healthcare_data_access_audits")
+}
+
+// ─── Remediation S14: Tamper-evident audit ledger & governed configuration ───
+
+enum GovernmentAuditActorType {
+  HUMAN_IDENTITY
+  SERVICE_IDENTITY
+  SYSTEM
+  OFFICEHOLDER
+  UNKNOWN
+}
+
+enum GovernedConfigurationDomain {
+  SERVICE_CONFIGURATION
+  SLA_RULES
+  ESCALATION
+  RETENTION
+  AUTHORITY_CONFIGURATION
+  WORKFLOW_ACTIVATION
+  INTEGRATION_REFERENCE
+  SERVICE_PACK_ACTIVATION
+  OTHER
+}
+
+enum GovernedConfigurationChangeStatus {
+  DRAFT
+  PROPOSED
+  IN_REVIEW
+  APPROVED
+  SCHEDULED
+  EFFECTIVE
+  SUPERSEDED
+  ROLLED_BACK
+}
+
+/// Append-only tamper-evident government audit ledger. Hash chains are scoped per `ledgerStreamKey`
+/// (typically `institution:<uuid>` or `platform`). Application logs are not a substitute for this ledger.
+model GovernmentAuditLedgerEntry {
+  id                          String                   @id @default(uuid()) @db.Uuid
+  ledgerStreamKey             String
+  sequenceNumber              BigInt
+  eventType                   String
+  occurredAt                  DateTime
+  recordedAt                  DateTime                 @default(now())
+  actorType                   GovernmentAuditActorType @default(HUMAN_IDENTITY)
+  actorIdentityId             String?                  @db.Uuid
+  actorOfficeholderId         String?                  @db.Uuid
+  sessionId                   String?                  @db.Uuid
+  jurisdictionId              String?                  @db.Uuid
+  institutionId               String?                  @db.Uuid
+  departmentId                String?                  @db.Uuid
+  officeId                    String?                  @db.Uuid
+  resourceType                String?
+  resourceId                  String?
+  action                      String
+  outcome                     String?
+  authorityEvaluationRecordId String?                  @db.Uuid
+  permissionDecisionReference String?
+  priorStateHash              String?
+  newStateHash                String?
+  metadata                    Json                     @default("{}")
+  correlationId               String?
+  traceId                     String?
+  previousLedgerHash          String?
+  currentLedgerHash           String
+  payloadHash                 String
+  sourceDomainEventType       String?
+  sourceDomainEventId         String?
+  actorIdentity               Identity?                @relation("GovernmentAuditLedgerActor", fields: [actorIdentityId], references: [id], onDelete: Restrict)
+  jurisdiction                Jurisdiction?            @relation(fields: [jurisdictionId], references: [id], onDelete: Restrict)
+  institution                 Institution?             @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+  authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id], onDelete: Restrict)
+
+  @@unique([ledgerStreamKey, sequenceNumber], map: "gov_audit_ledger_stream_seq_uniq")
+  @@unique([sourceDomainEventType, sourceDomainEventId], map: "gov_audit_ledger_source_event_uniq")
+  @@index([ledgerStreamKey, recordedAt], map: "gov_audit_ledger_stream_recorded_idx")
+  @@index([institutionId, occurredAt], map: "gov_audit_ledger_inst_occurred_idx")
+  @@index([eventType], map: "gov_audit_ledger_event_type_idx")
+  @@index([correlationId], map: "gov_audit_ledger_correlation_idx")
+  @@map("government_audit_ledger_entries")
+}
+
+model GovernedConfigurationChange {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  institutionId         String                            @db.Uuid
+  jurisdictionId        String                            @db.Uuid
+  configurationDomain   GovernedConfigurationDomain
+  configurationKey      String
+  status                GovernedConfigurationChangeStatus @default(DRAFT)
+  proposedPayload       Json
+  proposedPayloadHash   String
+  effectivePayload      Json?
+  effectivePayloadHash  String?
+  proposerIdentityId    String                            @db.Uuid
+  approverIdentityId    String?                           @db.Uuid
+  proposedAt            DateTime?
+  submittedForReviewAt  DateTime?
+  approvedAt            DateTime?
+  scheduledEffectiveAt  DateTime?
+  effectiveAt           DateTime?
+  supersededAt          DateTime?
+  rolledBackAt          DateTime?
+  supersedesChangeId    String?                           @db.Uuid
+  rollbackOfChangeId    String?                           @db.Uuid
+  reviewNotes           String?
+  approvalNotes         String?
+  correlationId         String?
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  institution           Institution                       @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+  jurisdiction          Jurisdiction                      @relation(fields: [jurisdictionId], references: [id], onDelete: Restrict)
+  proposer              Identity                          @relation("GovernedConfigProposer", fields: [proposerIdentityId], references: [id], onDelete: Restrict)
+  approver              Identity?                         @relation("GovernedConfigApprover", fields: [approverIdentityId], references: [id], onDelete: Restrict)
+  supersedesChange      GovernedConfigurationChange?      @relation("GovernedConfigSupersedes", fields: [supersedesChangeId], references: [id], onDelete: Restrict)
+  supersededBy          GovernedConfigurationChange[]     @relation("GovernedConfigSupersedes")
+  rollbackOfChange      GovernedConfigurationChange?      @relation("GovernedConfigRollback", fields: [rollbackOfChangeId], references: [id], onDelete: Restrict)
+  rollbackChildren      GovernedConfigurationChange[]     @relation("GovernedConfigRollback")
+  effectiveVersions     GovernedConfigurationEffectiveVersion[]
+
+  @@index([institutionId, configurationKey, status], map: "gov_cfg_chg_inst_key_status_idx")
+  @@index([institutionId, configurationDomain], map: "gov_cfg_chg_inst_domain_idx")
+  @@map("governed_configuration_changes")
+}
+
+model GovernedConfigurationEffectiveVersion {
+  id                  String                      @id @default(uuid()) @db.Uuid
+  changeId            String                      @db.Uuid
+  institutionId       String                      @db.Uuid
+  configurationDomain GovernedConfigurationDomain
+  configurationKey    String
+  effectiveFrom       DateTime
+  effectiveUntil      DateTime?
+  payload             Json
+  payloadHash         String
+  createdAt           DateTime                    @default(now())
+  change              GovernedConfigurationChange @relation(fields: [changeId], references: [id], onDelete: Restrict)
+  institution         Institution                 @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+
+  @@unique([institutionId, configurationDomain, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_uniq")
+  @@index([institutionId, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_lookup_idx")
+  @@map("governed_configuration_effective_versions")
 }
 
 // ─── Remediation S11: Layered institution setup configuration ─────────────────

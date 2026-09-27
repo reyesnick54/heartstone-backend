@@ -20,6 +20,7 @@ import identityConfig from '../config/identity.config';
 import redisConfig from '../config/redis.config';
 import securityConfig from '../config/security.config';
 import { resetApplicationProcessingData } from '../database/application-processing-test-reset';
+import { resetAuditGovernanceData } from '../database/audit-governance-test-reset';
 import { DatabaseModule } from '../database/database.module';
 import { PrismaService } from '../database/prisma.service';
 import { AuthorityBoundaryService } from './common/authority-boundary.service';
@@ -63,6 +64,7 @@ describe('Phase 3 architectural must-fail invariants', () => {
 
   beforeEach(async () => {
     await resetApplicationProcessingData(prisma);
+    await resetAuditGovernanceData(prisma);
     await prisma.securityAuditEvent.deleteMany();
     await prisma.session.deleteMany();
     await prisma.identityOfficeholderLink.deleteMany();

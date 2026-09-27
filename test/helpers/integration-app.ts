@@ -4,6 +4,7 @@ import { type App } from 'supertest/types';
 
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
+import { resetAuditGovernanceData as truncateAuditGovernanceTables } from '../../src/database/audit-governance-test-reset';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetEducationData } from '../../src/database/education-test-reset';
 import { resetFinancialServicesData } from '../../src/database/financial-services-test-reset';
@@ -48,6 +49,7 @@ export async function createIntegrationApp(): Promise<{
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await resetCorporateRegistryData(prisma);
+  await resetAuditGovernanceData(prisma);
   await prisma.technicalAccessAuditEvent.deleteMany();
   await prisma.technicalRoleAssignment.deleteMany();
   await prisma.platformAdministrativeAccessAudit.deleteMany();
@@ -134,7 +136,12 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.performanceClaim.deleteMany();
 }
 
+export async function resetAuditGovernanceData(prisma: PrismaService): Promise<void> {
+  await truncateAuditGovernanceTables(prisma);
+}
+
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetAuditGovernanceData(prisma);
   await resetOperationalSupportData(prisma);
   await resetIntelligenceData(prisma);
   await resetApplicationProcessingData(prisma);

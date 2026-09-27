@@ -14,6 +14,7 @@ import {
   Prisma,
 } from '@prisma/client';
 
+import { CanonicalAuditRecorderService } from '../../audit-governance/ledger/canonical-audit-recorder.service';
 import { PrismaService } from '../../database/prisma.service';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { type AuthorityExplanationCode } from '../authority.constants';
@@ -43,6 +44,7 @@ export class AuthorityEvaluationService {
     private readonly sodEvaluator: SegregationOfDutyEvaluator,
     private readonly explanationService: AuthorityExplanationService,
     private readonly factsResolver: AuthorityFactsResolver,
+    private readonly canonicalAudit: CanonicalAuditRecorderService,
   ) {}
 
   async evaluate(request: AuthorityEvaluationRequest): Promise<AuthorityEvaluationResponseDto> {
@@ -512,6 +514,34 @@ export class AuthorityEvaluationService {
           outcome,
           codes: uniqueCodes,
         } as unknown as Prisma.InputJsonObject,
+        explanationCodes: uniqueCodes,
+        requestHash,
+      },
+    });
+
+    const functionScope = await this.prisma.functionAuthorityRecord.findUnique({
+      where: { id: request.functionAuthorityRecordId },
+      select: { institutionId: true },
+    });
+
+    let jurisdictionId: string | undefined;
+    if (functionScope?.institutionId) {
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: functionScope.institutionId },
+        select: { jurisdictionId: true },
+      });
+      jurisdictionId = institution?.jurisdictionId;
+    }
+
+    await this.canonicalAudit.recordAuthorityEvaluation({
+      recordId: record.id,
+      identityId: request.identityId,
+      institutionId: functionScope?.institutionId ?? undefined,
+      jurisdictionId,
+      action: request.action,
+      outcome,
+      authorityEvaluationRecordId: record.id,
+      metadata: {
         explanationCodes: uniqueCodes,
         requestHash,
       },

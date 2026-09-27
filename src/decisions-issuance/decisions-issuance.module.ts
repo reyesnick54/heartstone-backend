@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { CasesModule } from '../application-processing/cases/cases.module';
+import { AuditGovernanceModule } from '../audit-governance/audit-governance.module';
 import { AuthorityModule } from '../authority/authority.module';
 import { EvidenceRecordsModule } from '../evidence-records/evidence-records.module';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
@@ -23,7 +24,13 @@ import { InstrumentVerificationRateLimiterService } from './verification/instrum
 import { PublicInstrumentVerificationController } from './verification/public-instrument-verification.controller';
 
 @Module({
-  imports: [SessionAuthGuardModule, AuthorityModule, CasesModule, EvidenceRecordsModule],
+  imports: [
+    SessionAuthGuardModule,
+    AuditGovernanceModule,
+    AuthorityModule,
+    CasesModule,
+    EvidenceRecordsModule,
+  ],
   controllers: [
     IssuanceController,
     PublicInstrumentVerificationController,
