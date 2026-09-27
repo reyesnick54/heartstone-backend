@@ -48,6 +48,7 @@ import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
 import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { ServicePacksModule } from './service-packs/service-packs.module';
+import { SetupModule } from './setup/setup.module';
 import { SocialProtectionModule } from './social-protection/social-protection.module';
 import { SystemModule } from './system/system.module';
 import { TechnicalAccessModule } from './technical-access/technical-access.module';
@@ -72,6 +73,7 @@ import { TransportationModule } from './transportation/transportation.module';
     HealthModule,
     HealthcareModule,
     SystemModule,
+    SetupModule,
     GovernmentModule,
     IdentityModule,
     InstitutionalScopeModule,
