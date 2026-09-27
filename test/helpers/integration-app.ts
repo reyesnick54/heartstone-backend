@@ -51,6 +51,7 @@ export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await prisma.technicalRoleAssignment.deleteMany();
   await prisma.platformAdministrativeAccessAudit.deleteMany();
   await prisma.platformAdministrativeAccessPolicy.deleteMany();
+  await prisma.governmentAuditLedgerEntry.deleteMany();
   await prisma.securityAuditEvent.deleteMany();
   await prisma.session.deleteMany();
   await prisma.identityOfficeholderLink.deleteMany();
