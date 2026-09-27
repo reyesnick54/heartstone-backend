@@ -12,9 +12,9 @@ import { REVENUE_AUTHORITY_FUNCTION_CODES } from '../src/revenue/revenue.constan
 import { SOCIAL_PROTECTION_AUTHORITY_FUNCTION_CODES } from '../src/social-protection/social-protection.constants';
 import {
   authHeader,
-  createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
   provisionAuthenticatedIdentity,
+  provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -53,19 +53,16 @@ describe('S5 consequential coverage must-fail (e2e)', () => {
   }
 
   async function provisionServiceSession() {
-    const account = await prisma.userAccount.create({
-      data: { loginIdentifier: 's5-service@test.gov', status: 'ACTIVE' },
+    const provisioned = await provisionIdentityViaPrisma(prisma, {
+      loginIdentifier: 's5-service@test.gov',
+      password: 'ServiceIdentity123!',
+      displayName: 'S5 Service Bot',
     });
-    const identity = await prisma.identity.create({
-      data: {
-        type: IdentityType.SERVICE,
-        displayName: 'S5 Service Bot',
-        userAccountId: account.id,
-      },
+    await prisma.identity.update({
+      where: { id: provisioned.identityId },
+      data: { type: IdentityType.SERVICE },
     });
-    await createPasswordCredentialViaPrisma(prisma, identity.id, 'ServiceIdentity123!');
-    const token = await loginAndGetSessionToken(app, 's5-service@test.gov', 'ServiceIdentity123!');
-    return token;
+    return loginAndGetSessionToken(app, provisioned.loginIdentifier, provisioned.password);
   }
 
   it('denies service identity from benefit award (human-reserved)', async () => {

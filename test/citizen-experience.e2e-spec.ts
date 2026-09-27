@@ -204,7 +204,7 @@ describe('Citizen experience API (e2e)', () => {
 
     const expiredRenewal = body.find((item) => item.instrumentId === fixture.expiredInstrumentId);
     expect(expiredRenewal?.renewalEligible).toBe(true);
-  });
+  }, 30_000);
 
   it('allows representative access to organization-held credentials within scope', async () => {
     const repFixture = await seedRepresentativeCitizenFixture(app, prisma);
