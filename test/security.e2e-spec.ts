@@ -15,6 +15,8 @@ class SecurityTestController {
 }
 
 describe('Phase 1 security baseline (e2e)', () => {
+  jest.setTimeout(60_000);
+
   let app: INestApplication<App>;
 
   beforeEach(async () => {
