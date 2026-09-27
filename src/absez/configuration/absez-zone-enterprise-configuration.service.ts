@@ -46,7 +46,8 @@ export class AbsezZoneEnterpriseConfigurationService {
 
   async listActivityCategories(): Promise<AbsezActivityCategoryDefinition[]> {
     const configuration = await this.ensureDefaultConfiguration();
-    const categories = configuration.activityCategories as unknown as AbsezActivityCategoryDefinition[];
+    const categories =
+      configuration.activityCategories as unknown as AbsezActivityCategoryDefinition[];
     return categories;
   }
 

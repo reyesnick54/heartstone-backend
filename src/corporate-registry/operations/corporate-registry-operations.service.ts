@@ -51,11 +51,7 @@ export class CorporateRegistryOperationsService {
     return { profile: updated, filing };
   }
 
-  async submitAmendment(input: {
-    organizationId: string;
-    actorIdentityId: string;
-    label: string;
-  }) {
+  async submitAmendment(input: { organizationId: string; actorIdentityId: string; label: string }) {
     const profile = await this.lifecycle.ensureProfileForOrganization(input.organizationId);
     const filing = await this.prisma.corporateFiling.create({
       data: {
@@ -103,7 +99,9 @@ export class CorporateRegistryOperationsService {
   async submitBeneficialOwnership(input: {
     organizationId: string;
     actorIdentityId: string;
-    owners: Parameters<CorporateBeneficialOwnershipService['submitStructuredDeclaration']>[0]['owners'];
+    owners: Parameters<
+      CorporateBeneficialOwnershipService['submitStructuredDeclaration']
+    >[0]['owners'];
   }) {
     const profile = await this.lifecycle.ensureProfileForOrganization(input.organizationId);
     return this.beneficialOwnership.submitStructuredDeclaration({

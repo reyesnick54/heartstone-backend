@@ -1,6 +1,7 @@
 import { type PrismaService } from '../../src/database/prisma.service';
 
-export async function resetCorporateRegistryData(prisma: PrismaService): Promise<void> {
+export async function resetAbsezLicensingData(prisma: PrismaService): Promise<void> {
+  await prisma.absezZoneEnterprise.updateMany({ data: { currentSezLicenceId: null } });
   await prisma.sezBusinessLicencePaymentEvent.deleteMany();
   await prisma.sezBusinessLicenceStatusHistory.deleteMany();
   await prisma.absezZoneEnterpriseStatusHistory.deleteMany();
@@ -8,6 +9,10 @@ export async function resetCorporateRegistryData(prisma: PrismaService): Promise
   await prisma.sezBusinessLicenceRecord.deleteMany();
   await prisma.absezZoneEnterprise.deleteMany();
   await prisma.absezZoneEnterpriseConfiguration.deleteMany();
+}
+
+export async function resetCorporateRegistryData(prisma: PrismaService): Promise<void> {
+  await resetAbsezLicensingData(prisma);
   await prisma.corporateBeneficialOwnershipChangeHistory.deleteMany();
   await prisma.corporateBeneficialOwnerRecord.deleteMany();
   await prisma.corporateRegistryStatusHistory.deleteMany();

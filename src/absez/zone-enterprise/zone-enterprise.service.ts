@@ -9,9 +9,7 @@ import {
 
 import { CorporateRegistryLifecycleService } from '../../corporate-registry/lifecycle/corporate-registry-lifecycle.service';
 import { PrismaService } from '../../database/prisma.service';
-import {
-  ABSEZ_ZONE_ENTERPRISE_REFERENCE_PREFIX,
-} from '../absez.constants';
+import { ABSEZ_ZONE_ENTERPRISE_REFERENCE_PREFIX } from '../absez.constants';
 import { AbsezZoneEnterpriseConfigurationService } from '../configuration/absez-zone-enterprise-configuration.service';
 
 export interface EnsureZoneEnterpriseInput {
@@ -31,7 +29,9 @@ export class ZoneEnterpriseService {
   ) {}
 
   async ensureZoneEnterprise(input: EnsureZoneEnterpriseInput): Promise<AbsezZoneEnterprise> {
-    const profile = await this.corporateLifecycle.ensureProfileForOrganization(input.organizationId);
+    const profile = await this.corporateLifecycle.ensureProfileForOrganization(
+      input.organizationId,
+    );
 
     const existing = await this.prisma.absezZoneEnterprise.findUnique({
       where: {

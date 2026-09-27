@@ -98,7 +98,9 @@ export class SezBusinessLicenceService {
     return licence;
   }
 
-  async recordPaymentReceived(input: RecordSezLicencePaymentInput): Promise<SezBusinessLicenceRecord> {
+  async recordPaymentReceived(
+    input: RecordSezLicencePaymentInput,
+  ): Promise<SezBusinessLicenceRecord> {
     this.boundary.assertPaymentDoesNotIssueLicence(input.actorPersona);
 
     const licence = await this.prisma.sezBusinessLicenceRecord.findUnique({
@@ -130,7 +132,9 @@ export class SezBusinessLicenceService {
     });
   }
 
-  async issueLicenceAfterDecision(input: IssueSezBusinessLicenceInput): Promise<SezBusinessLicenceRecord> {
+  async issueLicenceAfterDecision(
+    input: IssueSezBusinessLicenceInput,
+  ): Promise<SezBusinessLicenceRecord> {
     this.boundary.assertAiCannotIssueLicence(input.actorPersona);
     this.boundary.assertLicenceRequiresHumanDecision(input);
 

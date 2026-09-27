@@ -21,7 +21,10 @@ import { resetTransportationData } from '../../src/database/transportation-test-
 import { overrideRedisService } from '../redis-test-utils';
 import { resetApplicationProcessingData } from './application-processing-test-reset';
 import { resetAuthorityData } from './authority-test-reset';
-import { resetCorporateRegistryData } from './corporate-registry-test-reset';
+import {
+  resetAbsezLicensingData,
+  resetCorporateRegistryData,
+} from './corporate-registry-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
@@ -170,6 +173,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.externalAuthority.deleteMany();
   await resetOperationalSupportData(prisma);
   await resetServicePackData(prisma);
+  await resetAbsezLicensingData(prisma);
   await prisma.institution.deleteMany();
   await prisma.jurisdiction.deleteMany();
 }

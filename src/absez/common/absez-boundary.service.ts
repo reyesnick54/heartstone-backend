@@ -14,7 +14,9 @@ export class AbsezBoundaryService {
 
   assertPaymentDoesNotIssueLicence(actorPersona: AbsezZoneEnterpriseActorPersona): void {
     if (actorPersona === AbsezZoneEnterpriseActorPersona.PAYMENT_SYSTEM) {
-      throw new ForbiddenException('Payment receipt does not approve or issue an SEZ business licence');
+      throw new ForbiddenException(
+        'Payment receipt does not approve or issue an SEZ business licence',
+      );
     }
   }
 
@@ -48,7 +50,10 @@ export class AbsezBoundaryService {
     }
   }
 
-  async assertAuthorityFunctionIsEffective(functionCode: string, institutionId: string): Promise<void> {
+  async assertAuthorityFunctionIsEffective(
+    functionCode: string,
+    institutionId: string,
+  ): Promise<void> {
     const record = await this.prisma.functionAuthorityRecord.findFirst({
       where: { code: functionCode, institutionId },
     });
@@ -59,7 +64,10 @@ export class AbsezBoundaryService {
     }
   }
 
-  assertCrossInstitutionBlocked(requestedInstitutionId: string, resourceInstitutionId: string): void {
+  assertCrossInstitutionBlocked(
+    requestedInstitutionId: string,
+    resourceInstitutionId: string,
+  ): void {
     if (requestedInstitutionId !== resourceInstitutionId) {
       throw new ForbiddenException('Cross-institution access to SEZ licensing records is denied');
     }

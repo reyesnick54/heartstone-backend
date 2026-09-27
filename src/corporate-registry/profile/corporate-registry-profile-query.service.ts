@@ -136,7 +136,8 @@ export class CorporateRegistryProfileQueryService {
             }
           : profile.beneficialOwnershipDeclarations[0]
             ? {
-                declarationReference: profile.beneficialOwnershipDeclarations[0].declarationReference,
+                declarationReference:
+                  profile.beneficialOwnershipDeclarations[0].declarationReference,
                 status: profile.beneficialOwnershipDeclarations[0].status,
                 restrictedSummary: profile.beneficialOwnershipDeclarations[0].restrictedSummary,
               }

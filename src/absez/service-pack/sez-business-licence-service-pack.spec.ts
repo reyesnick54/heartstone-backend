@@ -14,7 +14,9 @@ describe('ABSEZ SEZ business licence service pack', () => {
   });
 
   it('includes apply, renewal, suspension, revocation, and appeal services', () => {
-    const codes = ABSEZ_SEZ_BUSINESS_LICENCE_SERVICE_PACK.services.map((service) => service.serviceCode);
+    const codes = ABSEZ_SEZ_BUSINESS_LICENCE_SERVICE_PACK.services.map(
+      (service) => service.serviceCode,
+    );
     expect(codes).toContain(ABSEZ_SEZ_TEMPLATE_SERVICE_CODES.APPLY);
     expect(codes).toContain(ABSEZ_SEZ_TEMPLATE_SERVICE_CODES.RENEW);
     expect(codes).toContain(ABSEZ_SEZ_TEMPLATE_SERVICE_CODES.SUSPEND);

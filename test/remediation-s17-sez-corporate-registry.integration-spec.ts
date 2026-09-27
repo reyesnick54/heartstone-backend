@@ -101,14 +101,16 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
 
   it('company registration intake creates canonical organization profile state without activation', async () => {
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/corporate-registry/organizations/${fixture.organizationId}/registration-intake`)
+      .post(
+        `/api/v1/corporate-registry/organizations/${fixture.organizationId}/registration-intake`,
+      )
       .set('Authorization', `Bearer ${fixture.memberSessionToken}`)
       .send({
         registeredName: 'S17 Test Co',
         entityType: CorporateEntityType.COMPANY,
         jurisdictionCode: 'ABSEZ',
       })
-      .expect(200);
+      .expect(201);
 
     const body = response.body as { profile: { registrationStatus: string } };
     expect(body.profile.registrationStatus).toBe(CorporateRegistrationStatus.DRAFT);
@@ -122,7 +124,9 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
 
   it('denies unauthorized user from altering corporate registry records', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/corporate-registry/organizations/${fixture.organizationId}/registration-intake`)
+      .post(
+        `/api/v1/corporate-registry/organizations/${fixture.organizationId}/registration-intake`,
+      )
       .set('Authorization', `Bearer ${fixture.outsiderSessionToken}`)
       .send({ registeredName: 'Hostile Takeover Ltd' })
       .expect(403);
@@ -133,10 +137,12 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
       .post(`/api/v1/corporate-registry/organizations/${fixture.organizationId}/amendments`)
       .set('Authorization', `Bearer ${fixture.representativeSessionToken}`)
       .send({ label: 'Representative amendment filing' })
-      .expect(200);
+      .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/corporate-registry/organizations/${fixture.organizationId}/beneficial-ownership`)
+      .post(
+        `/api/v1/corporate-registry/organizations/${fixture.organizationId}/beneficial-ownership`,
+      )
       .set('Authorization', `Bearer ${fixture.representativeSessionToken}`)
       .send({
         owners: [
@@ -153,7 +159,9 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
 
   it('stores structured beneficial ownership and preserves superseded history', async () => {
     const submit = await request(app.getHttpServer())
-      .post(`/api/v1/corporate-registry/organizations/${fixture.organizationId}/beneficial-ownership`)
+      .post(
+        `/api/v1/corporate-registry/organizations/${fixture.organizationId}/beneficial-ownership`,
+      )
       .set('Authorization', `Bearer ${fixture.memberSessionToken}`)
       .send({
         owners: [
@@ -165,7 +173,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
           },
         ],
       })
-      .expect(200);
+      .expect(201);
 
     const submitBody = submit.body as { records: { id: string }[] };
     const firstRecord = submitBody.records[0];
@@ -188,9 +196,11 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
 
     const beneficialService = app.get(CorporateBeneficialOwnershipService);
     await beneficialService.supersedeOwnerRecord({
-      profileId: (await prisma.corporateRegistryProfile.findUniqueOrThrow({
-        where: { organizationId: fixture.organizationId },
-      })).id,
+      profileId: (
+        await prisma.corporateRegistryProfile.findUniqueOrThrow({
+          where: { organizationId: fixture.organizationId },
+        })
+      ).id,
       beneficialOwnerRecordId: firstRecord.id,
       changedByIdentityId: fixture.memberIdentityId,
       replacement: {
@@ -204,13 +214,17 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
     const historyAfter = await prisma.corporateBeneficialOwnershipChangeHistory.count();
     expect(historyAfter).toBeGreaterThan(historyBefore);
     const superseded = await prisma.corporateBeneficialOwnerRecord.findMany({
-      where: { profileId: (await prisma.corporateRegistryProfile.findUniqueOrThrow({
-        where: { organizationId: fixture.organizationId },
-      })).id },
+      where: {
+        profileId: (
+          await prisma.corporateRegistryProfile.findUniqueOrThrow({
+            where: { organizationId: fixture.organizationId },
+          })
+        ).id,
+      },
     });
-    expect(superseded.some((record) => record.ownerReference === 'BO-STRUCT-1' && record.supersededAt)).toBe(
-      true,
-    );
+    expect(
+      superseded.some((record) => record.ownerReference === 'BO-STRUCT-1' && record.supersededAt),
+    ).toBe(true);
   });
 
   it('SEZ licence workflow: payment does not issue; decision + instrument required', async () => {
@@ -232,7 +246,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
       )
       .set('Authorization', `Bearer ${fixture.memberSessionToken}`)
       .send({ approvedActivityCategoryCodes: ['MANUFACTURING'] })
-      .expect(200);
+      .expect(201);
 
     const licenceId = (intake.body as { id: string }).id;
 
@@ -243,7 +257,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
         amount: 750,
         currencyCode: 'USD',
       })
-      .expect(200);
+      .expect(201);
 
     const afterPayment = await prisma.sezBusinessLicenceRecord.findUniqueOrThrow({
       where: { id: licenceId },
@@ -268,9 +282,11 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
         governmentDecisionId: fixture.governmentDecisionId,
         officialInstrumentId: instrument.id,
       })
-      .expect(200);
+      .expect(201);
 
-    const issued = await prisma.sezBusinessLicenceRecord.findUniqueOrThrow({ where: { id: licenceId } });
+    const issued = await prisma.sezBusinessLicenceRecord.findUniqueOrThrow({
+      where: { id: licenceId },
+    });
     expect(issued.lifecycleStatus).toBe(SezBusinessLicenceLifecycleStatus.ACTIVE);
     expect(issued.officialInstrumentId).toBe(instrument.id);
   });
@@ -294,7 +310,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
       )
       .set('Authorization', `Bearer ${fixture.memberSessionToken}`)
       .send({ approvedActivityCategoryCodes: ['LOGISTICS'] })
-      .expect(200);
+      .expect(201);
     const licenceId = (intake.body as { id: string }).id;
 
     await request(app.getHttpServer())

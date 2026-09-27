@@ -1,9 +1,6 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import {
-  AbsezZoneEnterpriseActorPersona,
-  AuthorityActionType,
-} from '@prisma/client';
+import { AbsezZoneEnterpriseActorPersona, AuthorityActionType } from '@prisma/client';
 
 import { ConsequentialAction } from '../authority/consequential-action/consequential-action.decorator';
 import { ConsequentialActionGuard } from '../authority/consequential-action/consequential-action.guard';
@@ -23,7 +20,8 @@ import { ZoneEnterpriseService } from './zone-enterprise/zone-enterprise.service
   scopeRequirement: 'Government service domain actor scope with institutional boundaries',
   authorityRequirement: 'ConsequentialActionGuard for SEZ licence outcomes',
   actorSource: 'Session identity with domain access resolution',
-  primarySecurityInvariant: 'Intake and payment do not issue SEZ licences without authorized decisions',
+  primarySecurityInvariant:
+    'Intake and payment do not issue SEZ licences without authorized decisions',
 })
 @Controller('absez')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
@@ -40,7 +38,10 @@ export class AbsezController {
     @Param('organizationId', ParseUUIDPipe) organizationId: string,
     @Param('institutionId', ParseUUIDPipe) institutionId: string,
   ) {
-    return this.zoneEnterpriseService.getZoneEnterpriseForOrganization(organizationId, institutionId);
+    return this.zoneEnterpriseService.getZoneEnterpriseForOrganization(
+      organizationId,
+      institutionId,
+    );
   }
 
   @Post('organizations/:organizationId/institutions/:institutionId/sez-licences/intake')

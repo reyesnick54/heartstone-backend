@@ -2,7 +2,10 @@ import {
   SERVICE_PACK_NON_PRODUCTION_LABEL,
   SERVICE_PACK_SCHEMA_VERSION,
 } from '../../service-catalog/service-packs/service-pack.constants';
-import { type ServicePackManifest, type ServicePackServiceDefinition } from '../../service-catalog/service-packs/service-pack.types';
+import {
+  type ServicePackManifest,
+  type ServicePackServiceDefinition,
+} from '../../service-catalog/service-packs/service-pack.types';
 import {
   ABSEZ_SEZ_AUTHORITY_FUNCTION_CODES,
   ABSEZ_SEZ_DEPARTMENT_CODE,
