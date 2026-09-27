@@ -110,6 +110,25 @@ jobs:
           NODE
           git add test/remediation-s1-server-derived-authority.must-fail.e2e-spec.ts
 
+
+      - name: Repair inherited consequential guard test syntax
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'test/consequential-action-guard.must-fail.e2e-spec.ts';
+          let s = fs.readFileSync(file, 'utf8');
+          const start = s.indexOf('  function sessionContext(');
+          const marker = "  it('authenticated official with no authority cannot approve'";
+          const end = s.indexOf(marker, start);
+          if (start < 0 || end < 0) {
+            throw new Error('Expected corrupted sessionContext/assertBlocked section was not found');
+          }
+          const good = "  async function sessionContext(identityId: string, userAccountId?: string | null) {\n    const existing = await prisma.session.findFirst({\n      where: { identityId, status: 'ACTIVE' },\n      orderBy: { issuedAt: 'desc' },\n    });\n    const session =\n      existing ??\n      (await prisma.session.create({\n        data: {\n          identityId,\n          userAccountId: userAccountId ?? null,\n          tokenHash: hashToken(`cag-session-${identityId}-${String(Date.now())}`),\n          status: 'ACTIVE',\n          assuranceLevel: 'HIGH',\n          expiresAt: new Date('2099-01-01'),\n        },\n      }));\n\n    return {\n      sessionId: session.id,\n      identityId: session.identityId,\n      userAccountId: session.userAccountId,\n      assuranceLevel: session.assuranceLevel,\n    };\n  }\n\n  async function assertBlocked(\n    identityId: string,\n    body: Record<string, unknown>,\n    expectedCodes: string[],\n  ) {\n    try {\n      await consequentialActionService.assertConsequentialActionAllowed(\n        await sessionContext(identityId),\n        {\n          action: AuthorityActionType.APPROVE,\n          functionAuthorityRecordId: body.functionAuthorityRecordId as string,\n          requireHumanActor: true,\n        },\n        { body },\n      );\n      throw new Error('Expected consequential action to be blocked');\n    } catch (error) {\n      const blocked =\n        error instanceof ForbiddenException || error instanceof UnauthorizedException;\n      expect(blocked).toBe(true);\n      if (error instanceof UnauthorizedException) {\n        return;\n      }\n      const response = (error as ForbiddenException).getResponse() as ConsequentialActionDenial;\n      for (const code of expectedCodes) {\n        expect(response.explanationCodes).toContain(code);\n      }\n      expect(response.outcome).not.toBe(AuthorityEvaluationOutcome.ALLOW);\n      expect(response.evaluationId).toBeDefined();\n    }\n  }\n\n";
+          s = s.slice(0, start) + good + s.slice(end);
+          fs.writeFileSync(file, s);
+          NODE
+          git add test/consequential-action-guard.must-fail.e2e-spec.ts
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
