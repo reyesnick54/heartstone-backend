@@ -58,12 +58,33 @@ jobs:
       - name: Merge current main preserving newer hardening
         run: |
           git fetch origin main
+          set +e
           git merge --no-ff --no-commit -X theirs origin/main
+          merge_status=$?
+          set -e
+
           unresolved="$(git diff --name-only --diff-filter=U)"
           if [ -n "$unresolved" ]; then
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              if git ls-files -u -- "$file" | awk '$3 == 3 { found=1 } END { exit !found }'; then
+                git checkout --theirs -- "$file"
+                git add "$file"
+              else
+                git rm -f -- "$file"
+              fi
+            done <<< "$unresolved"
+          fi
+
+          remaining="$(git diff --name-only --diff-filter=U)"
+          if [ -n "$remaining" ]; then
             echo "Unresolved conflicts remain:"
-            echo "$unresolved"
+            echo "$remaining"
             exit 1
+          fi
+
+          if [ "$merge_status" -ne 0 ]; then
+            echo "Merge reported conflicts, but all were resolved in favor of current main where required."
           fi
 
       - name: Set up Node.js
