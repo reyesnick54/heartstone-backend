@@ -1,6 +1,8 @@
+import { resetAuditGovernanceData } from '../../src/database/audit-governance-test-reset';
 import { type PrismaService } from '../../src/database/prisma.service';
 
 export async function resetAuthorityData(prisma: PrismaService): Promise<void> {
+  await resetAuditGovernanceData(prisma);
   await prisma.serviceActivationRecord.deleteMany();
   await prisma.serviceFunctionMapping.deleteMany();
   await prisma.delegationStructuredScope.deleteMany();

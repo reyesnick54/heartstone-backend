@@ -27,8 +27,16 @@ export interface DocumentStorageExportResult {
   sizeBytes: number;
 }
 
+export interface DocumentStorageIntegrityResult {
+  valid: boolean;
+  expectedSha256: string;
+  actualSha256: string;
+}
+
 export interface DocumentStoragePort {
   readonly providerName: string;
+  /** When false, production startup must fail if this adapter is active for official documents. */
+  readonly isProductionAdapter: boolean;
 
   put(input: DocumentStoragePutInput): Promise<DocumentStoragePutResult>;
 
@@ -39,4 +47,12 @@ export interface DocumentStoragePort {
   copy(sourceKey: string, destinationKey: string): Promise<DocumentStoragePutResult>;
 
   exportControlled(objectKey: string): Promise<DocumentStorageExportResult>;
+
+  verifyContentIntegrity(
+    objectKey: string,
+    expectedSha256: string,
+  ): Promise<DocumentStorageIntegrityResult>;
+
+  /** Move object out of normal retrieval paths (malware quarantine). */
+  quarantineObject?(storageObjectKey: string): Promise<void>;
 }

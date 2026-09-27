@@ -69,6 +69,8 @@ export const PermissionCodes = {
   WORKFLOW_DEFINITION_APPROVE: 'workflow:definition:approve',
   RECORDS_LEGAL_HOLD_RELEASE: 'records:legal-hold:release',
   CONFIGURATION_ACTIVATE: 'configuration:activate',
+  CONFIGURATION_CHANGE_PROPOSE: 'configuration:change:propose',
+  CONFIGURATION_CHANGE_APPROVE: 'configuration:change:approve',
   AUDIT_READ: 'audit:read',
 } as const;
 

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
+import { AuditGovernanceModule } from './audit-governance/audit-governance.module';
 import { AuthorityModule } from './authority/authority.module';
 import { CivilRegistryModule } from './civil-registry/civil-registry.module';
 import { createPinoConfig } from './common/logging/pino-config';
@@ -19,10 +20,13 @@ import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
 import { DigitalAssetsModule } from './digital-assets/digital-assets.module';
+import documentTrustConfig from './document-trust/config/document-trust.config';
+import { DocumentTrustModule } from './document-trust/document-trust.module';
 import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { ExperienceModule } from './experience/experience.module';
+import { FinancialServicesModule } from './financial-services/financial-services.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { HealthcareModule } from './healthcare/healthcare.module';
@@ -58,13 +62,21 @@ import { TransportationModule } from './transportation/transportation.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, redisConfig, securityConfig, identityConfig, oidcConfig],
+      load: [
+        appConfig,
+        redisConfig,
+        securityConfig,
+        identityConfig,
+        oidcConfig,
+        documentTrustConfig,
+      ],
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: true,
       },
     }),
     LoggerModule.forRoot(createPinoConfig()),
+    AuditGovernanceModule,
     SecurityModule,
     TechnicalAccessModule,
     DatabaseModule,
@@ -94,6 +106,7 @@ import { TransportationModule } from './transportation/transportation.module';
     HealthcareModule,
     CivilRegistryModule,
     RecordsModule,
+    DocumentTrustModule,
     EvidenceRecordsModule,
     EvidenceModule,
     InstrumentsModule,
@@ -106,6 +119,7 @@ import { TransportationModule } from './transportation/transportation.module';
     HealthcareModule,
     RedressModule,
     RevenueModule,
+    FinancialServicesModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
     PublicSafetyModule,

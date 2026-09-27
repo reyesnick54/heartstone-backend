@@ -89,6 +89,18 @@ export const CONSEQUENTIAL_ROUTE_REQUIREMENTS: ConsequentialRouteRequirement[] =
   },
   {
     method: 'POST',
+    pathPattern: /^\/financial-services\/licence-records\/issue$/,
+    action: AuthorityActionType.ISSUE,
+    description: 'Financial services licence issuance',
+  },
+  {
+    method: 'POST',
+    pathPattern: /^\/financial-services\/licence-records\/[^/]+\/suspend$/,
+    action: AuthorityActionType.SUSPEND,
+    description: 'Financial services licence suspension',
+  },
+  {
+    method: 'POST',
     pathPattern: /^\/property-registry\/transfers\/[^/]+\/register-title$/,
     action: AuthorityActionType.APPROVE,
     description: 'Property title registration',

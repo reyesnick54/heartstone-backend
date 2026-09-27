@@ -103,6 +103,9 @@ export class DocumentVersionsService {
         securityClassification: input.dto.securityClassification ?? 'INTERNAL',
         privacyClassification: input.dto.privacyClassification ?? 'NOT_APPLICABLE',
         malwareScanStatus: scanResult.status,
+        malwareScanEngineId: scanResult.engineId,
+        malwareScanEngineVersion: scanResult.engineVersion,
+        malwareScanResultSummary: scanResult.details,
         receivedFromIdentityId: input.actorIdentityId,
         receivedFromExternalAuthorityId: input.dto.receivedFromExternalAuthorityId,
       },
@@ -134,6 +137,9 @@ export class DocumentVersionsService {
       scanResult.status === MalwareScanStatus.SUSPICIOUS
     ) {
       await this.malwareScanner.quarantine(stored.storageObjectKey);
+      if (this.storage.quarantineObject) {
+        await this.storage.quarantineObject(stored.storageObjectKey);
+      }
       await this.prisma.documentVersion.update({
         where: { id: version.id },
         data: { malwareScanStatus: MalwareScanStatus.QUARANTINED },

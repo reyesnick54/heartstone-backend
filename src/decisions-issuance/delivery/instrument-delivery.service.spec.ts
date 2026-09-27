@@ -88,7 +88,22 @@ describe('InstrumentVerificationService', () => {
     assertAllowed: jest.fn(),
   } as unknown as InstrumentVerificationRateLimiterService;
 
-  const service = new InstrumentVerificationService(prisma as never, audit, rateLimiter);
+  const cryptographicVerification = {
+    verifyIssuedInstrument: jest.fn().mockResolvedValue({
+      overallCryptographicTrust: true,
+      details: [],
+      contentHashValid: true,
+      signatureValid: true,
+      sealValid: true,
+    }),
+  };
+
+  const service = new InstrumentVerificationService(
+    prisma as never,
+    audit,
+    rateLimiter,
+    cryptographicVerification as never,
+  );
 
   it('does not report CURRENT based solely on existence when instrument is revoked', () => {
     const status = service.resolveVerificationStatus({

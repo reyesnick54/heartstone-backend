@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 
 import { SessionsModule } from '../identity/sessions/sessions.module';
-import { InMemoryDocumentStorageAdapter } from './adapters/in-memory-document-storage.adapter';
-import { NoopMalwareScanningAdapter } from './adapters/noop-malware-scanning.adapter';
-import { TestMalwareScanningAdapter } from './adapters/test-malware-scanning.adapter';
 import { ArchivalTransfersService } from './archival/archival-transfers.service';
 import { DocumentAuditService } from './audit/document-audit.service';
 import { RecordsClassificationsService } from './classifications/records-classifications.service';
@@ -18,8 +15,6 @@ import { DocumentsController } from './documents/documents.controller';
 import { EvidenceRecordsController } from './evidence-records.controller';
 import { ExternalRecordsRepositoriesService } from './external-repositories/external-records-repositories.service';
 import { LegalHoldsService } from './legal-hold/legal-holds.service';
-import { DOCUMENT_STORAGE_PORT } from './ports/document-storage.port';
-import { MALWARE_SCANNING_PORT } from './ports/malware-scanning.port';
 import { PreservationCollectionsService } from './preservation/preservation-collections.service';
 import { RetentionSchedulesService } from './retention/retention-schedules.service';
 
@@ -41,21 +36,6 @@ import { RetentionSchedulesService } from './retention/retention-schedules.servi
     ArchivalTransfersService,
     ExternalRecordsRepositoriesService,
     RecordDispositionService,
-    InMemoryDocumentStorageAdapter,
-    NoopMalwareScanningAdapter,
-    TestMalwareScanningAdapter,
-    {
-      provide: DOCUMENT_STORAGE_PORT,
-      useExisting: InMemoryDocumentStorageAdapter,
-    },
-    {
-      provide: MALWARE_SCANNING_PORT,
-      useFactory: (
-        testScanner: TestMalwareScanningAdapter,
-        noopScanner: NoopMalwareScanningAdapter,
-      ) => (process.env.NODE_ENV === 'test' ? testScanner : noopScanner),
-      inject: [TestMalwareScanningAdapter, NoopMalwareScanningAdapter],
-    },
   ],
   exports: [
     EvidenceRecordsBoundaryService,
@@ -72,8 +52,6 @@ import { RetentionSchedulesService } from './retention/retention-schedules.servi
     ArchivalTransfersService,
     ExternalRecordsRepositoriesService,
     RecordDispositionService,
-    DOCUMENT_STORAGE_PORT,
-    MALWARE_SCANNING_PORT,
   ],
 })
 export class EvidenceRecordsModule {}

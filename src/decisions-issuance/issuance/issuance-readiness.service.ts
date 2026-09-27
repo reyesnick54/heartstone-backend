@@ -6,8 +6,6 @@ import {
   CatalogLifecycleStatus,
   DecisionConditionStatus,
   DecisionConditionType,
-  DocumentSealStatus,
-  DocumentSignatureStatus,
   GovernmentDecisionStatus,
   InstrumentIssuerSource,
   IssuanceReadinessOutcome,
@@ -16,6 +14,7 @@ import {
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../database/prisma.service';
+import { DocumentCryptographicEvidenceService } from '../../document-trust/services/document-cryptographic-evidence.service';
 import {
   ISSUANCE_APPROVING_OUTCOMES,
   ISSUANCE_READINESS_CHECK_CODES,
@@ -72,6 +71,7 @@ export class IssuanceReadinessService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorityEvaluation: AuthorityEvaluationService,
+    private readonly cryptographicEvidence: DocumentCryptographicEvidenceService,
   ) {}
 
   async assess(input: IssuanceReadinessInput): Promise<IssuanceReadinessResult> {
@@ -236,7 +236,12 @@ export class IssuanceReadinessService {
           where: { id: input.signatureDocumentVersionId },
         });
         signaturePresent = !!signatureDoc;
-        signatureValid = signatureDoc?.signatureStatus === DocumentSignatureStatus.SIGNED;
+        signatureValid =
+          !!signatureDoc &&
+          this.cryptographicEvidence.signatureStatusFromEvidence(
+            signatureDoc.signatureStatus,
+            signatureDoc.signatureEvidence,
+          );
       }
     }
     check(ISSUANCE_READINESS_CHECK_CODES.SIGNATURE_PRESENT, signaturePresent);
@@ -253,7 +258,12 @@ export class IssuanceReadinessService {
           where: { id: input.sealDocumentVersionId },
         });
         sealPresent = !!sealDoc;
-        sealValid = sealDoc?.sealStatus === DocumentSealStatus.SEALED;
+        sealValid =
+          !!sealDoc &&
+          this.cryptographicEvidence.sealStatusFromEvidence(
+            sealDoc.sealStatus,
+            sealDoc.sealEvidence,
+          );
       }
     }
     check(ISSUANCE_READINESS_CHECK_CODES.SEAL_PRESENT, sealPresent);

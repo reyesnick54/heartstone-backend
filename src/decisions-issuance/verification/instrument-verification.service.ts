@@ -11,6 +11,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { InstrumentCryptographicVerificationService } from '../../document-trust/services/instrument-cryptographic-verification.service';
 import { InstrumentDeliveryAuditService } from '../audit/instrument-delivery-audit.service';
 import {
   InstrumentNotFoundException,
@@ -28,6 +29,8 @@ export interface PublicInstrumentVerificationResponse {
   verificationTimestamp: string;
   verificationUri: string;
   qrReferenceDisclaimer: string;
+  cryptographicVerificationPassed?: boolean;
+  cryptographicVerificationDetails?: string[];
   issuer?: string;
   instrumentType?: string;
   instrumentNumber?: string;
@@ -58,6 +61,7 @@ export class InstrumentVerificationService {
     private readonly prisma: PrismaService,
     private readonly audit: InstrumentDeliveryAuditService,
     private readonly rateLimiter: InstrumentVerificationRateLimiterService,
+    private readonly cryptographicVerification: InstrumentCryptographicVerificationService,
   ) {}
 
   async createVerificationRecord(
@@ -102,7 +106,9 @@ export class InstrumentVerificationService {
             currentVersion: true,
           },
         },
-        instrumentVersion: true,
+        instrumentVersion: {
+          include: { documentVersion: true },
+        },
       },
     });
 
@@ -111,7 +117,12 @@ export class InstrumentVerificationService {
     }
 
     const verificationStatus = this.resolveVerificationStatus(record.officialInstrument);
-    const response = this.buildPublicResponse(record, verificationStatus);
+    const cryptoVerification = await this.cryptographicVerification.verifyIssuedInstrument(
+      record.officialInstrument,
+      record.instrumentVersion,
+      record.instrumentVersion.documentVersion,
+    );
+    const response = this.buildPublicResponse(record, verificationStatus, cryptoVerification);
 
     await this.recordVerificationEvent({
       verificationRecordId: record.id,
@@ -151,7 +162,9 @@ export class InstrumentVerificationService {
             receiptAcknowledgments: true,
           },
         },
-        instrumentVersion: true,
+        instrumentVersion: {
+          include: { documentVersion: true },
+        },
       },
     });
 
@@ -160,7 +173,12 @@ export class InstrumentVerificationService {
     }
 
     const verificationStatus = this.resolveVerificationStatus(record.officialInstrument);
-    const publicResponse = this.buildPublicResponse(record, verificationStatus);
+    const cryptoVerification = await this.cryptographicVerification.verifyIssuedInstrument(
+      record.officialInstrument,
+      record.instrumentVersion,
+      record.instrumentVersion.documentVersion,
+    );
+    const publicResponse = this.buildPublicResponse(record, verificationStatus, cryptoVerification);
 
     await this.recordVerificationEvent({
       verificationRecordId: record.id,
@@ -233,6 +251,10 @@ export class InstrumentVerificationService {
       };
     }>,
     verificationStatus: InstrumentVerificationStatus,
+    cryptoVerification?: {
+      overallCryptographicTrust: boolean;
+      details: string[];
+    },
   ): PublicInstrumentVerificationResponse {
     const instrument = record.officialInstrument;
     const typeVersion = instrument.instrumentTypeVersion;
@@ -276,6 +298,8 @@ export class InstrumentVerificationService {
       verificationStatus,
       verificationTimestamp,
       verificationUri: record.verificationUri,
+      cryptographicVerificationPassed: cryptoVerification?.overallCryptographicTrust,
+      cryptographicVerificationDetails: cryptoVerification?.details,
       qrReferenceDisclaimer:
         'A QR code or verification reference alone does not prove authenticity. Authenticity is established by the verification service against the signed or sealed official record.',
       issuer: instrument.issuerInstitution.name,

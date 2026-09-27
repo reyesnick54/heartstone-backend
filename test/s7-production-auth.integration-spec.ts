@@ -16,6 +16,7 @@ import identityConfig from '../src/config/identity.config';
 import oidcConfig from '../src/config/oidc.config';
 import redisConfig from '../src/config/redis.config';
 import securityConfig from '../src/config/security.config';
+import { purgeAuditLedgerForActorIdentities } from '../src/database/audit-governance-test-reset';
 import { DatabaseModule } from '../src/database/database.module';
 import { PrismaService } from '../src/database/prisma.service';
 import { ClaimMapperService } from '../src/identity/auth/oidc/claim-mapper.service';
@@ -52,6 +53,7 @@ describe('S7 production authentication boundary (integration)', () => {
     const personIds = accounts.map((account) => account.personId).filter(Boolean) as string[];
 
     if (identityIds.length > 0) {
+      await purgeAuditLedgerForActorIdentities(prisma, identityIds);
       await prisma.securityAuditEvent.deleteMany({ where: { identityId: { in: identityIds } } });
       await prisma.session.deleteMany({ where: { identityId: { in: identityIds } } });
       await prisma.credential.deleteMany({ where: { identityId: { in: identityIds } } });
