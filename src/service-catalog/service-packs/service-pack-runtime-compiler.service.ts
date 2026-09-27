@@ -212,6 +212,7 @@ export class ServicePackRuntimeCompilerService {
 
     const serviceCode = `${pack.packId}-${service.serviceCode}`.toUpperCase();
     const serviceSlug = `${pack.packId}-${service.serviceSlug}`.toLowerCase();
+    const versionScope = `${pack.packVersion}`.replace(/\./g, '-');
 
     const governmentService =
       (await tx.governmentService.findUnique({ where: { code: serviceCode } })) ??
@@ -257,7 +258,7 @@ export class ServicePackRuntimeCompilerService {
 
     const formDefinition = await tx.formDefinition.create({
       data: {
-        code: `${serviceCode}-${primaryForm.formCode}`,
+        code: `${serviceCode}-${versionScope}-${primaryForm.formCode}`,
         name: primaryForm.formName,
         purpose: service.description,
         governmentServiceVersionId: serviceVersion.id,
@@ -377,7 +378,7 @@ export class ServicePackRuntimeCompilerService {
 
     const workflowDefinition = await tx.workflowDefinition.create({
       data: {
-        code: `${serviceCode}-WF`,
+        code: `${serviceCode}-WF-${versionScope}`,
         name: `${service.serviceName} Workflow`,
         governmentServiceId: governmentService.id,
         status: WorkflowDefinitionStatus.DRAFT,

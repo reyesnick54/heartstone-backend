@@ -203,19 +203,19 @@ describe('remediation S15 service pack runtime compiler (integration)', () => {
     const deployment = await deploymentService.createDeployment({
       servicePackVersionId: version.id,
       deploymentReference: 's15-rollback',
-      actor: { identityId: 'system-actor' },
+      actor: { identityId: actor.identityId },
     });
 
     await deploymentService.deploy({
       deploymentId: deployment.deploymentId,
-      actor: { identityId: 'system-actor' },
+      actor: { identityId: actor.identityId },
     });
 
     const bindingCountBefore = await prisma.servicePackDeploymentBinding.count();
 
     const rollback = await rollbackService.rollback({
       deploymentId: deployment.deploymentId,
-      actor: { identityId: 'system-actor' },
+      actor: { identityId: actor.identityId },
       reason: 'Revert draft deployment',
     });
 
