@@ -14,6 +14,7 @@ concurrency:
 
 env:
   NODE_VERSION: '22'
+  NODE_OPTIONS: --max-old-space-size=8192
   DATABASE_URL: postgresql://heartstone:heartstone@localhost:5432/heartstone?schema=public
   REDIS_HOST: localhost
   REDIS_PORT: '6379'
@@ -80,7 +81,7 @@ jobs:
           --health-retries 5
     env:
       NODE_ENV: test
-      NODE_OPTIONS: --max-old-space-size=8192
+      NODE_OPTIONS: --max-old-space-size=12288
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
