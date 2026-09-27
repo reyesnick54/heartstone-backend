@@ -103,10 +103,6 @@ function insertAfterLastImport(content: string, importLine: string): string {
 
 function applyControllerRouteAccess(sourceFile: string): boolean {
   const original = fs.readFileSync(sourceFile, 'utf8');
-  if (/@ControllerRouteAccess\s*\(/.test(original)) {
-    return false;
-  }
-
   const relativeFromSrc = path.relative(SRC_ROOT, sourceFile).replace(/\\/g, '/');
   const domain = resolveControllerDomain(relativeFromSrc);
   const decoratorLiteral = controllerRouteAccessDecoratorLiteral(domain);
