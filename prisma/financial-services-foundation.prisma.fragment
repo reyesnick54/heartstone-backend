@@ -106,6 +106,7 @@ model FinancialRegulatedEntityProfile {
   complianceMatterReferences       FinancialComplianceMatterReference[]
   reportingRequirements            FinancialReportingRequirementReference[]
   operationalSnapshots             FinancialServicesOperationalSnapshot[]
+  regulatoryAccessAudits           FinancialRegulatoryAccessAudit[]
 
   @@index([organizationId])
   @@index([jurisdictionId])
