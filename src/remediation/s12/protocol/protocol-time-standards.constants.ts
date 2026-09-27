@@ -1,0 +1,14 @@
+/** Canonical Protocol Article time standards (milliseconds). */
+export const PROTOCOL_TIME_STANDARD_MS = {
+  HOURS_24: 24 * 60 * 60 * 1000,
+  HOURS_72: 72 * 60 * 60 * 1000,
+  DAYS_5: 5 * 24 * 60 * 60 * 1000,
+} as const;
+
+export const PROTOCOL_SLA_RULE_CODES = {
+  INITIAL_RESPONSE_72H: 'PROTOCOL-72H-INITIAL-RESPONSE',
+  URGENT_24H: 'PROTOCOL-24H-URGENT',
+  SUBSTANTIVE_5D: 'PROTOCOL-5D-SUBSTANTIVE',
+} as const;
+
+export const DEFAULT_ESCALATION_LADDER_CODE = 'PROTOCOL-FIVE-LEVEL';

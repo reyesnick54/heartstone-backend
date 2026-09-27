@@ -18,6 +18,7 @@ import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import { DigitalAssetsModule } from './digital-assets/digital-assets.module';
 import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
@@ -40,6 +41,7 @@ import { PublicSafetyModule } from './public-safety/public-safety.module';
 import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
+import { S12WorkflowRuntimeModule } from './remediation/s12/s12-workflow-runtime.module';
 import { RevenueModule } from './revenue/revenue.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
@@ -82,6 +84,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ServicePacksModule,
     ExperienceModule,
     ApplicationProcessingModule,
+    S12WorkflowRuntimeModule,
     ImmigrationModule,
     LabourModule,
     EducationModule,
@@ -99,6 +102,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ComplianceModule,
     CorporateRegistryModule,
     CustomsTradeModule,
+    DigitalAssetsModule,
     HealthcareModule,
     RedressModule,
     RevenueModule,
