@@ -93,6 +93,23 @@ jobs:
           git checkout HEAD -- scripts/generate-protected-route-manifest.ts
           git add scripts/generate-protected-route-manifest.ts
 
+
+      - name: Repair inherited S1 test syntax
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'test/remediation-s1-server-derived-authority.must-fail.e2e-spec.ts';
+          let s = fs.readFileSync(file, 'utf8');
+          const bad = "    const packetItems = await prisma.evidencePacketItem.findMany({\n    let packetItems = await prisma.evidencePacketItem.findMany({";
+          const good = "    let packetItems = await prisma.evidencePacketItem.findMany({";
+          if (!s.includes(bad)) {
+            throw new Error('Expected inherited duplicate packetItems syntax was not found');
+          }
+          s = s.replace(bad, good);
+          fs.writeFileSync(file, s);
+          NODE
+          git add test/remediation-s1-server-derived-authority.must-fail.e2e-spec.ts
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
