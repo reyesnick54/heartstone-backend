@@ -3,6 +3,7 @@ import {
   AuthorityActionType,
   AuthorityClassification,
   ControlledFunctionClass,
+  FunctionAssignmentStatus,
   CorporateEntityType,
   CorporateRegistrationStatus,
   CorporateRegistryDecisionType,
@@ -46,7 +47,11 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
     await app.close();
   });
 
-  async function seedSezAuthorityFunctions(institutionId: string, officeId: string) {
+  async function seedSezAuthorityFunctions(
+    institutionId: string,
+    officeId: string,
+    officeholderId: string,
+  ) {
     const governingSource = await prisma.governingSource.findFirstOrThrow();
     for (const code of [
       ABSEZ_SEZ_AUTHORITY_FUNCTION_CODES.DECIDE,
@@ -54,7 +59,7 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
       ABSEZ_SEZ_AUTHORITY_FUNCTION_CODES.SUSPEND,
       ABSEZ_SEZ_AUTHORITY_FUNCTION_CODES.REVOKE,
     ]) {
-      await prisma.functionAuthorityRecord.upsert({
+      const record = await prisma.functionAuthorityRecord.upsert({
         where: { code },
         create: {
           code,
@@ -87,6 +92,20 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
           lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
           institutionId,
           officeId,
+        },
+      });
+
+      await prisma.functionAuthorityAssignment.deleteMany({
+        where: { functionAuthorityRecordId: record.id, officeholderId },
+      });
+      await prisma.functionAuthorityAssignment.create({
+        data: {
+          functionAuthorityRecordId: record.id,
+          officeholderId,
+          officeId,
+          institutionId,
+          status: FunctionAssignmentStatus.ACTIVE,
+          effectiveFrom: new Date('2020-01-01'),
         },
       });
     }
@@ -228,7 +247,11 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
   });
 
   it('SEZ licence workflow: payment does not issue; decision + instrument required', async () => {
-    await seedSezAuthorityFunctions(fixture.institutionId, fixture.phase11Base.officeId);
+    await seedSezAuthorityFunctions(
+      fixture.institutionId,
+      fixture.phase11Base.officeId,
+      fixture.phase11Base.officialOfficeholderId,
+    );
 
     const profile = await lifecycle.ensureProfileForOrganization(fixture.organizationId);
     await lifecycle.applyOfficialDecision({
@@ -282,6 +305,9 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
       .send({
         governmentDecisionId: fixture.governmentDecisionId,
         officialInstrumentId: instrument.id,
+        officeholderId: fixture.phase11Base.officialOfficeholderId,
+        officeId: fixture.phase11Base.officeId,
+        appointmentId: fixture.phase11Base.appointmentId,
       })
       .expect(201);
 
@@ -293,7 +319,11 @@ describe('Remediation S17 — SEZ licensing and corporate registry (integration)
   });
 
   it('denies cross-institution SEZ licence suspension', async () => {
-    await seedSezAuthorityFunctions(fixture.institutionId, fixture.phase11Base.officeId);
+    await seedSezAuthorityFunctions(
+      fixture.institutionId,
+      fixture.phase11Base.officeId,
+      fixture.phase11Base.officialOfficeholderId,
+    );
     const otherInstitution = await prisma.institution.create({
       data: {
         jurisdictionId: (
