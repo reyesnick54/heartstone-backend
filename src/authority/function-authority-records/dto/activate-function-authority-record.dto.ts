@@ -1,10 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ActivateFunctionAuthorityRecordDto {
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    deprecated: true,
+    description: 'Ignored — administrator identity is derived from the authenticated session',
+  })
+  @IsOptional()
   @IsUUID()
-  actorIdentityId!: string;
+  actorIdentityId?: string;
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

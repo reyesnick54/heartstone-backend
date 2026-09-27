@@ -17,6 +17,8 @@ import {
 } from '@nestjs/swagger';
 
 import { ActorContextService } from '../../../identity/auth/context/actor-context.service';
+import { type ActorContext } from '../../../identity/auth/context/actor-context.types';
+import { CurrentActor } from '../../../identity/auth/decorators/current-actor.decorator';
 import { CurrentSession } from '../../../identity/auth/decorators/current-session.decorator';
 import { type SessionContextDto } from '../../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
@@ -48,10 +50,9 @@ export class CaseTimelineController {
   @ApiOperation({ summary: 'Official case event timeline' })
   @ApiOkResponse({ description: 'Append-only operational event history' })
   async getOfficialTimeline(
-    @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.caseEventService.listOfficialTimeline(caseId);
   }
@@ -70,10 +71,9 @@ export class CaseTimelineController {
   @Get(':caseId/communications')
   @ApiOperation({ summary: 'Official case communications' })
   async getOfficialCommunications(
-    @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.communicationService.listOfficialCommunications(caseId);
   }
@@ -93,10 +93,10 @@ export class CaseTimelineController {
   @ApiCreatedResponse({ description: 'Communication recorded with optional outbox enqueue' })
   async createCommunication(
     @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseCommunicationDto,
   ) {
-    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertApplicantOrOfficialAccess(caseId, actor);
     this.actorContext.assertActorIdentityMatchesSession(
       session.identityId,
@@ -124,10 +124,9 @@ export class CaseTimelineController {
   @Get(':caseId/milestones')
   @ApiOperation({ summary: 'Case milestones' })
   async getMilestones(
-    @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.listForCase(caseId);
   }
@@ -136,11 +135,10 @@ export class CaseTimelineController {
   @ApiOperation({ summary: 'Create a case milestone' })
   @ApiCreatedResponse({ description: 'Milestone created' })
   async createMilestone(
-    @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
     @Body() dto: CreateCaseMilestoneDto,
   ) {
-    const actor = await this.actorContext.resolveInstitutionalCaseAccessActor(session.identityId);
     await this.caseAccess.assertOfficialInstitutionalAccess(caseId, actor);
     return this.milestoneService.create({
       caseId,
@@ -174,9 +172,9 @@ export class CaseTimelineController {
   @Get(':caseId/dashboard')
   @ApiOperation({ summary: 'Official case dashboard read model' })
   getDashboard(
-    @CurrentSession() session: SessionContextDto,
+    @CurrentActor() actor: ActorContext,
     @Param('caseId', ParseUUIDPipe) caseId: string,
   ) {
-    return this.dashboardService.buildDashboard(caseId, session.identityId);
+    return this.dashboardService.buildDashboard(caseId, actor);
   }
 }

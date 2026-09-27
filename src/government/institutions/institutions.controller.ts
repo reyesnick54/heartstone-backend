@@ -38,7 +38,9 @@ export class InstitutionsController {
   }
 
   @Get(':id/structure')
-  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ)
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ, {
+    scope: { institutionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Get organizational structure for an institution' })
   @ApiOkResponse({ type: InstitutionStructureDto })
   getStructure(@Param('id', ParseUUIDPipe) id: string): Promise<InstitutionStructureDto> {
@@ -46,7 +48,9 @@ export class InstitutionsController {
   }
 
   @Get(':id')
-  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ)
+  @RequirePermissions(PermissionCodes.GOVERNMENT_INSTITUTION_READ, {
+    scope: { institutionIdParam: 'id' },
+  })
   @ApiOperation({ summary: 'Get an institution by id' })
   @ApiOkResponse({ type: InstitutionResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<InstitutionResponseDto> {

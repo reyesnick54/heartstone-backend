@@ -43,11 +43,6 @@ export class ImmigrationProfileService {
     subjectIdentityId: string,
     query: SubjectAccessQueryDto,
   ) {
-    await this.subjectRecordAccess.assertSubjectIdentityVisible(session, subjectIdentityId, {
-      representativeAuthorityId: query.representativeAuthorityId,
-      maskEnumeration: true,
-    });
-
     const profile = await this.prisma.immigrationProfile.findFirst({
       where: { subjectIdentityId },
       orderBy: { createdAt: 'desc' },
@@ -55,6 +50,15 @@ export class ImmigrationProfileService {
     if (!profile) {
       throw new NotFoundException('Immigration profile not found');
     }
+
+    if (session.identityId === subjectIdentityId) {
+      return profile;
+    }
+
+    await this.subjectRecordAccess.assertSubjectIdentityVisible(session, subjectIdentityId, {
+      representativeAuthorityId: query.representativeAuthorityId,
+      maskEnumeration: true,
+    });
 
     return profile;
   }

@@ -54,7 +54,18 @@ export const PermissionCodes = {
   GOVERNMENT_INSTITUTION_READ: 'government:institution:read',
   GOVERNMENT_INSTITUTION_UPDATE: 'government:institution:update',
 
+  GOVERNMENT_APPOINTMENT_CREATE: 'government:appointment:create',
+  GOVERNMENT_APPOINTMENT_READ: 'government:appointment:read',
+  GOVERNMENT_APPOINTMENT_UPDATE: 'government:appointment:update',
+
+  GOVERNMENT_DELEGATION_CREATE: 'government:delegation:create',
+  GOVERNMENT_DELEGATION_READ: 'government:delegation:read',
+  GOVERNMENT_DELEGATION_UPDATE: 'government:delegation:update',
+
+  AUTHORITY_FUNCTION_RECORD_CREATE: 'authority:function-record:create',
+  AUTHORITY_FUNCTION_RECORD_READ: 'authority:function-record:read',
   AUTHORITY_FUNCTION_RECORD_ACTIVATE: 'authority:function-record:activate',
+  WORKFLOW_DEFINITION_CREATE: 'workflow:definition:create',
   WORKFLOW_DEFINITION_APPROVE: 'workflow:definition:approve',
   RECORDS_LEGAL_HOLD_RELEASE: 'records:legal-hold:release',
   CONFIGURATION_ACTIVATE: 'configuration:activate',

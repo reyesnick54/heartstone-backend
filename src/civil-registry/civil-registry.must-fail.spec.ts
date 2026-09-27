@@ -135,7 +135,13 @@ describe('Civil registry must-fail gates', () => {
           CivilRegistryRegistrationService,
           CivilRegistryBoundaryService,
           CivilRegistryAuditService,
-          CivilRegistryCanonicalPathService,
+          {
+            provide: CivilRegistryCanonicalPathService,
+            useValue: {
+              syncServicePackRecordsForOfficialEntry: jest.fn().mockResolvedValue(undefined),
+              linkServicePackRecordToFoundation: jest.fn().mockResolvedValue(undefined),
+            },
+          },
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();

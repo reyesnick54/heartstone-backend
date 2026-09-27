@@ -4,7 +4,6 @@ import {
   ControlledFunctionClass,
   CredentialStatus,
   FormDefinitionStatus,
-  FunctionAuthorityLifecycleStatus,
   GovernmentDecisionStatus,
   GovernmentServiceMaturityStatus,
   IdentityType,
@@ -357,14 +356,12 @@ describe('Platform Admin Experience API (e2e)', () => {
         classification: AuthorityClassification.ABSEZ_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
       })
-      .expect(201);
+      .expect(403);
 
     const created = await prisma.functionAuthorityRecord.findFirst({
       where: { code: 'PA-AUTH' },
     });
 
-    if (created) {
-      expect(created.lifecycleStatus).not.toBe(FunctionAuthorityLifecycleStatus.ACTIVE);
-    }
+    expect(created).toBeNull();
   });
 });

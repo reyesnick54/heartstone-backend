@@ -21,7 +21,7 @@ describe('ActorContextService', () => {
     organizationMembership: { findMany: jest.fn() },
     representativeAuthority: { findMany: jest.fn() },
     identityOfficeholderLink: { findMany: jest.fn() },
-    appointment: { findMany: jest.fn() },
+    appointment: { findMany: jest.fn(), findUnique: jest.fn() },
     delegation: { findMany: jest.fn() },
   };
 
@@ -306,5 +306,95 @@ describe('ActorContextService', () => {
     expect(() => {
       service.assertServerDerivedSession(null);
     }).toThrow('Actor context requires authenticated server-derived session context');
+  });
+
+  it('rejects appointment ids that are not owned by the authenticated actor', async () => {
+    mockSession();
+    mockIdentity();
+    prisma.organizationMembership.findMany.mockResolvedValue([]);
+    prisma.representativeAuthority.findMany.mockResolvedValue([]);
+    prisma.identityOfficeholderLink.findMany.mockResolvedValue([
+      {
+        id: 'link-a',
+        officeholderId: 'oh-a',
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+        linkedAt: new Date('2026-01-01'),
+      },
+    ]);
+    prisma.appointment.findMany.mockResolvedValue([
+      {
+        id: 'appt-a',
+        officeholderId: 'oh-a',
+        officeId: 'office-a',
+        status: AppointmentStatus.ACTIVE,
+        effectiveFrom: new Date('2026-01-01'),
+        effectiveUntil: null,
+        office: { departmentId: 'dept-a', department: { institutionId: 'inst-a' } },
+      },
+    ]);
+    prisma.delegation.findMany.mockResolvedValue([]);
+    prisma.appointment.findUnique.mockResolvedValue({
+      id: 'appt-b',
+      officeholderId: 'oh-b',
+      officeId: 'office-b',
+      status: AppointmentStatus.ACTIVE,
+      effectiveFrom: new Date('2026-01-01'),
+      effectiveUntil: null,
+    });
+
+    const actor = await service.resolveFromSessionContext({
+      session: {
+        sessionId: 'session-1',
+        identityId: 'identity-1',
+        assuranceLevel: AssuranceLevel.LOW,
+      },
+      at,
+    });
+
+    await expect(
+      service.resolveBoundAppointment(actor, { appointmentId: 'appt-b' }),
+    ).rejects.toThrow(
+      'Appointment belongs to a different officeholder than the authenticated actor',
+    );
+  });
+
+  it('resolves a valid bound appointment for the authenticated actor', async () => {
+    mockSession();
+    mockIdentity();
+    prisma.organizationMembership.findMany.mockResolvedValue([]);
+    prisma.representativeAuthority.findMany.mockResolvedValue([]);
+    prisma.identityOfficeholderLink.findMany.mockResolvedValue([
+      {
+        id: 'link-a',
+        officeholderId: 'oh-a',
+        status: IdentityOfficeholderLinkStatus.ACTIVE,
+        linkedAt: new Date('2026-01-01'),
+      },
+    ]);
+    prisma.appointment.findMany.mockResolvedValue([
+      {
+        id: 'appt-a',
+        officeholderId: 'oh-a',
+        officeId: 'office-a',
+        status: AppointmentStatus.ACTIVE,
+        effectiveFrom: new Date('2026-01-01'),
+        effectiveUntil: null,
+        office: { departmentId: 'dept-a', department: { institutionId: 'inst-a' } },
+      },
+    ]);
+    prisma.delegation.findMany.mockResolvedValue([]);
+
+    const actor = await service.resolveFromSessionContext({
+      session: {
+        sessionId: 'session-1',
+        identityId: 'identity-1',
+        assuranceLevel: AssuranceLevel.LOW,
+      },
+      at,
+    });
+
+    const binding = await service.resolveBoundAppointment(actor, { appointmentId: 'appt-a' });
+    expect(binding.officeholderId).toBe('oh-a');
+    expect(binding.appointment.appointmentId).toBe('appt-a');
   });
 });

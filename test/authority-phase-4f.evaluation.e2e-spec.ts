@@ -215,6 +215,11 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
     });
 
     const token = await authenticate(ctx.identityId, 'sod-token');
+    const phase8Case = await seedPhase8bDecisionFixture(prisma);
+    await prisma.case.update({
+      where: { id: phase8Case.caseId },
+      data: { applicantIdentityId: ctx.identityId },
+    });
 
     const phase8Case = await seedPhase8bDecisionFixture(prisma);
     await prisma.case.update({

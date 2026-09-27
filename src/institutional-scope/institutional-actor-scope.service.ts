@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { PrismaService } from '../database/prisma.service';
 import { ActorContextService } from '../identity/auth/context/actor-context.service';
 import {
   type ActorRepresentativeAuthority,
@@ -13,7 +14,10 @@ import {
  */
 @Injectable()
 export class InstitutionalActorScopeService {
-  constructor(private readonly canonicalActorContext: ActorContextService) {}
+  constructor(
+    private readonly canonicalActorContext: ActorContextService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async buildFromSession(input: BuildActorContextInput): Promise<ActorScopeContext> {
     this.canonicalActorContext.assertServerDerivedSession(input.session);
@@ -28,15 +32,19 @@ export class InstitutionalActorScopeService {
       return this.buildOfficialContext(link.officeholderId, appointments);
     });
 
-    const representativeAuthorities: ActorRepresentativeAuthority[] =
-      actor.representativeAuthorities.map((authority) => ({
-        id: authority.representativeAuthorityId,
+    const authorityRows = await this.prisma.representativeAuthority.findMany({
+      where: { identityId: actor.identityId },
+    });
+    const representativeAuthorities: ActorRepresentativeAuthority[] = authorityRows.map(
+      (authority) => ({
+        id: authority.id,
         organizationId: authority.organizationId,
         identityId: actor.identityId,
         status: authority.status,
         effectiveFrom: authority.effectiveFrom,
         effectiveUntil: authority.effectiveUntil,
-      }));
+      }),
+    );
 
     return {
       identityId: actor.identityId,
