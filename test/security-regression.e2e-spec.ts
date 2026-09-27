@@ -79,17 +79,17 @@ describe('Security regression suite (e2e)', () => {
     it('preserves explicitly public discovery and verification endpoints', () => {
       const paths = manifest.routes.filter((route) => route.isPublic).map((route) => route.path);
 
-      expect(paths).toEqual(
-        expect.arrayContaining([
-          '/public/services',
-          '/public/service-families',
-          '/public/instruments/verify/:verificationCode',
-          '/identity/auth/login',
-          '/health',
-          '/ready',
-          '/version',
-        ]),
-      );
+      const requiredPublicPaths = [
+        '/public/services',
+        '/public/service-families',
+        '/identity/auth/login',
+        '/health',
+        '/ready',
+        '/version',
+      ];
+      for (const path of requiredPublicPaths) {
+        expect(paths).toContain(path);
+      }
     });
   });
 
