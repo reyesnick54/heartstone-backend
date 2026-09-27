@@ -210,6 +210,15 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     };
   }
 
+  function sessionContext(
+    identityId: string,
+    session: { id: string; userAccountId: string | null },
+  ) {
+    return {
+      sessionId: session.id,
+      identityId,
+      userAccountId: session.userAccountId ?? undefined,
+      assuranceLevel: 'HIGH' as const,
   async function sessionContext(identityId: string, userAccountId?: string | null) {
     const existing = await prisma.session.findFirst({
       where: { identityId, status: 'ACTIVE' },
@@ -238,11 +247,13 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
   async function assertBlocked(
     identityId: string,
+    session: { id: string; userAccountId: string | null },
     body: Record<string, unknown>,
     expectedCodes: string[],
   ) {
     try {
       await consequentialActionService.assertConsequentialActionAllowed(
+        sessionContext(identityId, session),
         await sessionContext(identityId),
         {
           action: AuthorityActionType.APPROVE,
@@ -294,9 +305,20 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         status: IdentityOfficeholderLinkStatus.ACTIVE,
       },
     });
+    const unassignedSession = await prisma.session.create({
+      data: {
+        identityId: unassignedIdentity.id,
+        userAccountId: unassignedAccount.id,
+        tokenHash: hashToken('unassigned-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
 
     await assertBlocked(
       unassignedIdentity.id,
+      unassignedSession,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.wrongOfficeholder.id,
@@ -311,6 +333,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.wrongOfficeholder.id,
@@ -329,6 +352,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -358,6 +382,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -384,6 +409,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -405,6 +431,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -422,6 +449,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       data: { classification: AuthorityClassification.EXPRESSLY_RETAINED_NATIONAL },
     });
     const result = await consequentialActionService.evaluateConsequentialAction(
+      sessionContext(base.identity.id, base.session),
       await sessionContext(base.identity.id, base.session.userAccountId),
       {
         action: AuthorityActionType.APPROVE,
@@ -441,8 +469,18 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
   it('service identity cannot make final decision', async () => {
     const base = await seedBase();
+    const serviceSession = await prisma.session.create({
+      data: {
+        identityId: base.serviceIdentity.id,
+        tokenHash: hashToken('service-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
+        sessionContext(base.serviceIdentity.id, serviceSession),
         await sessionContext(base.serviceIdentity.id),
         {
           action: AuthorityActionType.APPROVE,
@@ -455,8 +493,18 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
   it('AI agent cannot make final decision', async () => {
     const base = await seedBase();
+    const aiSession = await prisma.session.create({
+      data: {
+        identityId: base.aiIdentity.id,
+        tokenHash: hashToken('ai-test-token'),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
+    });
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
+        sessionContext(base.aiIdentity.id, aiSession),
         await sessionContext(base.aiIdentity.id),
         {
           action: AuthorityActionType.APPROVE,
@@ -475,6 +523,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     });
     await assertBlocked(
       base.identity.id,
+      base.session,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -528,7 +577,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         personId: loginAccount.personId,
       },
     });
-    await prisma.session.create({
+    const loginOnlySession = await prisma.session.create({
       data: {
         identityId: loginOnly.id,
         tokenHash: hashToken('login-only-token'),
@@ -540,6 +589,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
 
     await assertBlocked(
       loginOnly.id,
+      loginOnlySession,
       {
         functionAuthorityRecordId: base.fn.id,
         officeholderId: base.officeholder.id,
@@ -554,6 +604,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     const base = await seedBase();
     await expect(
       consequentialActionService.assertConsequentialActionAllowed(
+        sessionContext(base.identity.id, base.session),
         await sessionContext(base.identity.id, base.session.userAccountId),
         {
           action: AuthorityActionType.APPROVE,
