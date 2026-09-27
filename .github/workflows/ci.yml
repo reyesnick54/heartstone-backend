@@ -110,8 +110,11 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
-      - name: Integration tests
-        run: npm run test:integration
+      - name: Integration tests (shard 1/2)
+        run: npm run test:integration -- --shard=1/2
+
+      - name: Integration tests (shard 2/2)
+        run: npm run test:integration -- --shard=2/2
 
       - name: End-to-end tests
         run: npm run test:e2e

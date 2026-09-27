@@ -14,6 +14,8 @@ import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.ser
 import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
 import { CaseEventsService } from './case-events.service';
 import { CaseFoundationService } from './case-foundation.service';
+import { CaseManagerAssignmentService } from './case-manager/case-manager-assignment.service';
+import { CaseManagerBoundaryService } from './case-manager/case-manager-boundary.service';
 import { CaseStatusService } from './case-status.service';
 import { CasesController } from './cases.controller';
 import { CasesService } from './cases.service';
@@ -52,6 +54,8 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CompletenessReviewsService,
     CaseReferralsService,
     CaseSlaService,
+    CaseManagerAssignmentService,
+    CaseManagerBoundaryService,
   ],
   exports: [
     CasesService,
@@ -62,6 +66,8 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CasePublicStatusProjectionService,
     WorkflowDefinitionsService,
     WorkflowRuntimeService,
+    CaseManagerAssignmentService,
+    CaseManagerBoundaryService,
     CaseCommunicationService,
   ],
 })

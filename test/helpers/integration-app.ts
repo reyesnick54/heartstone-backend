@@ -130,6 +130,12 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.infrastructureDeliveryRecord.deleteMany();
   await prisma.employmentEvidenceRecord.deleteMany();
   await prisma.capitalEvidenceRecord.deleteMany();
+  await prisma.strategicProjectInstitutionCoordination.deleteMany();
+  await prisma.strategicProjectReferralLink.deleteMany();
+  await prisma.strategicProjectInstrumentLink.deleteMany();
+  await prisma.strategicProjectServiceLink.deleteMany();
+  await prisma.strategicProjectOrganizationLink.deleteMany();
+  await prisma.strategicProjectCaseLink.deleteMany();
   await prisma.strategicProjectEconomicClaim.deleteMany();
   await prisma.strategicProjectRisk.deleteMany();
   await prisma.strategicProjectDependency.deleteMany();

@@ -2,10 +2,17 @@ import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
+import { EvidenceModule } from '../evidence/evidence.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import { ObligationRecurrenceService } from './common/obligation-recurrence.service';
 import { ComplianceController } from './compliance.controller';
+import {
+  ComplianceCorrectiveActionBoundaryService,
+  ComplianceCorrectiveActionService,
+} from './corrective-action/compliance-corrective-action.service';
+import { JointInspectionService } from './inspection/joint-inspection.service';
+import { OperationalInspectionLifecycleService } from './inspection/operational-inspection-lifecycle.service';
 import { ComplianceMatterService } from './matters/compliance-matter.service';
 import { ContinuingObligationService } from './obligations/continuing-obligation.service';
 import { ComplianceDashboardService } from './oversight/compliance-dashboard.service';
@@ -18,7 +25,7 @@ import { ComplianceReviewService } from './reviews/compliance-review.service';
 import { ComplianceSubmissionService } from './submissions/compliance-submission.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthorityModule],
+  imports: [DatabaseModule, SessionsModule, AuthorityModule, EvidenceModule],
   controllers: [ComplianceController, ComplianceStatusController],
   providers: [
     ComplianceBoundaryService,
@@ -32,6 +39,10 @@ import { ComplianceSubmissionService } from './submissions/compliance-submission
     ComplianceMonitoringService,
     ComplianceDashboardService,
     ComplianceRevalidationService,
+    ComplianceCorrectiveActionService,
+    ComplianceCorrectiveActionBoundaryService,
+    OperationalInspectionLifecycleService,
+    JointInspectionService,
   ],
   exports: [
     ComplianceBoundaryService,
@@ -45,6 +56,9 @@ import { ComplianceSubmissionService } from './submissions/compliance-submission
     ComplianceMonitoringService,
     ComplianceDashboardService,
     ComplianceRevalidationService,
+    ComplianceCorrectiveActionService,
+    OperationalInspectionLifecycleService,
+    JointInspectionService,
   ],
 })
 export class ComplianceModule {}

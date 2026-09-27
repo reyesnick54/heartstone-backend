@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CaseReferralType } from '@prisma/client';
 
@@ -10,6 +19,7 @@ import { RouteClass } from '../../security/route-class.enum';
 import { CompletenessReviewsService } from '../completeness/completeness-reviews.service';
 import { CaseReferralsService } from '../referrals/case-referrals.service';
 import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
+import { CaseManagerAssignmentService } from './case-manager/case-manager-assignment.service';
 import { CasesService } from './cases.service';
 
 @ApiTags('application-processing-cases')
@@ -30,7 +40,16 @@ export class CasesController {
     private readonly workflowRuntime: WorkflowRuntimeService,
     private readonly completenessReviews: CompletenessReviewsService,
     private readonly referrals: CaseReferralsService,
+    private readonly caseManagerAssignments: CaseManagerAssignmentService,
   ) {}
+
+  @Get('case-manager/workload')
+  getCaseManagerWorkload(
+    @Query('institutionId') institutionId?: string,
+    @Query('departmentId') departmentId?: string,
+  ) {
+    return this.caseManagerAssignments.getWorkloadByOfficeholder({ institutionId, departmentId });
+  }
 
   @Get(':id')
   findOne(@CurrentSession() session: SessionContextDto, @Param('id', ParseUUIDPipe) id: string) {
@@ -85,6 +104,35 @@ export class CasesController {
       checklistResults: body.checklistResults,
       notes: body.notes,
     });
+  }
+
+  @Post(':id/case-manager/assign')
+  assignCaseManager(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) caseId: string,
+    @Body()
+    body: {
+      officeholderId: string;
+      institutionId: string;
+      departmentId: string;
+      reason: string;
+      effectiveFrom?: string;
+    },
+  ) {
+    return this.caseManagerAssignments.assign({
+      caseId,
+      officeholderId: body.officeholderId,
+      institutionId: body.institutionId,
+      departmentId: body.departmentId,
+      reason: body.reason,
+      effectiveFrom: body.effectiveFrom ? new Date(body.effectiveFrom) : undefined,
+      assignedByIdentityId: session.identityId,
+    });
+  }
+
+  @Get(':id/case-manager/history')
+  getCaseManagerHistory(@Param('id', ParseUUIDPipe) caseId: string) {
+    return this.caseManagerAssignments.getAssignmentHistory(caseId);
   }
 
   @Post(':id/referrals')
