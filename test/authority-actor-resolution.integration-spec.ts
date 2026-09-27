@@ -100,7 +100,7 @@ describe('Phase 4C institutional actor resolution (integration)', () => {
       data: {
         code: 'LICENSE.ISSUE',
         name: 'Issue License',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.LICENSING,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,

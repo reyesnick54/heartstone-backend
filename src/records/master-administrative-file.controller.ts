@@ -28,10 +28,10 @@ import { MasterAdministrativeFileIndexService } from './master-administrative-fi
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Master administrative file institutional read scope",
-  authorityRequirement: "Institutional records access; service identities excluded",
-  actorSource: "Authenticated human institutional actor",
-  primarySecurityInvariant: "Records access is institutional and attributable",
+  scopeRequirement: 'Master administrative file institutional read scope',
+  authorityRequirement: 'Institutional records access; service identities excluded',
+  actorSource: 'Authenticated human institutional actor',
+  primarySecurityInvariant: 'Records access is institutional and attributable',
 })
 @Controller('records/master-files')
 @UseGuards(SessionAuthGuard)

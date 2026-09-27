@@ -121,7 +121,7 @@ export async function seedPhase6Fixture(
     data: {
       code: `${marker}-FUNC`,
       name: 'Phase 6 Review Function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.APPROVAL,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: institution.id,

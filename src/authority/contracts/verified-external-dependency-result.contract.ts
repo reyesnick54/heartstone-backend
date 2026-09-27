@@ -17,5 +17,5 @@ export interface VerifiedExternalDependencyResult {
   retainedQuestion?: string;
   requiredDetermination?: string;
   referralBasis?: string;
-  effectOnAbsezAction?: string;
+  effectOnInstitutionAction?: string;
 }

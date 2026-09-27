@@ -61,7 +61,7 @@ describe('Authority Engine (e2e)', () => {
   it('positive E2E: authenticated human through evaluation ALLOW', async () => {
     const ctx = await fixtures.seedStructuralContext();
     const classifications = await fixtures.seedEightClassifications(ctx);
-    const owned = classificationFixture(classifications, AuthorityClassification.ABSEZ_OWNED);
+    const owned = classificationFixture(classifications, AuthorityClassification.INSTITUTION_OWNED);
     expect(owned.marker).toBe(NON_PRODUCTION_FIXTURE_MARKER);
 
     const token = hashToken('authority-e2e-token');
@@ -116,7 +116,7 @@ describe('Authority Engine (e2e)', () => {
     const classifications = await fixtures.seedEightClassifications(ctx);
     const delegated = classificationFixture(
       classifications,
-      AuthorityClassification.ABSEZ_DELEGATED,
+      AuthorityClassification.INSTITUTION_DELEGATED,
     );
 
     const token = hashToken('delegation-e2e-token');
@@ -175,7 +175,7 @@ describe('Authority Engine (e2e)', () => {
       .send({
         code: `${NON_PRODUCTION_FIXTURE_MARKER}-DRAFT`,
         name: 'Draft Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: 'OTHER',
       })
       .expect(201);
