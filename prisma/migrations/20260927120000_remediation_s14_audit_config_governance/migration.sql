@@ -60,22 +60,22 @@ CREATE TABLE "government_audit_ledger_entries" (
   CONSTRAINT "government_audit_ledger_entries_pkey" PRIMARY KEY ("id")
 );
 
-CREATE UNIQUE INDEX "government_audit_ledger_entries_ledgerStreamKey_sequenceNumber_key"
+CREATE UNIQUE INDEX "gov_audit_ledger_stream_seq_uniq"
   ON "government_audit_ledger_entries"("ledgerStreamKey", "sequenceNumber");
 
-CREATE UNIQUE INDEX "government_audit_ledger_entries_sourceDomainEventType_sourceDomain_key"
+CREATE UNIQUE INDEX "gov_audit_ledger_source_event_uniq"
   ON "government_audit_ledger_entries"("sourceDomainEventType", "sourceDomainEventId");
 
-CREATE INDEX "government_audit_ledger_entries_ledgerStreamKey_recordedAt_idx"
+CREATE INDEX "gov_audit_ledger_stream_recorded_idx"
   ON "government_audit_ledger_entries"("ledgerStreamKey", "recordedAt");
 
-CREATE INDEX "government_audit_ledger_entries_institutionId_occurredAt_idx"
+CREATE INDEX "gov_audit_ledger_inst_occurred_idx"
   ON "government_audit_ledger_entries"("institutionId", "occurredAt");
 
-CREATE INDEX "government_audit_ledger_entries_eventType_idx"
+CREATE INDEX "gov_audit_ledger_event_type_idx"
   ON "government_audit_ledger_entries"("eventType");
 
-CREATE INDEX "government_audit_ledger_entries_correlationId_idx"
+CREATE INDEX "gov_audit_ledger_correlation_idx"
   ON "government_audit_ledger_entries"("correlationId");
 
 ALTER TABLE "government_audit_ledger_entries"
@@ -125,10 +125,10 @@ CREATE TABLE "governed_configuration_changes" (
   CONSTRAINT "governed_configuration_changes_pkey" PRIMARY KEY ("id")
 );
 
-CREATE INDEX "governed_configuration_changes_institutionId_configurationKey__idx"
+CREATE INDEX "gov_cfg_chg_inst_key_status_idx"
   ON "governed_configuration_changes"("institutionId", "configurationKey", "status");
 
-CREATE INDEX "governed_configuration_changes_institutionId_configurationDom_idx"
+CREATE INDEX "gov_cfg_chg_inst_domain_idx"
   ON "governed_configuration_changes"("institutionId", "configurationDomain");
 
 ALTER TABLE "governed_configuration_changes"
@@ -170,10 +170,10 @@ CREATE TABLE "governed_configuration_effective_versions" (
   CONSTRAINT "governed_configuration_effective_versions_pkey" PRIMARY KEY ("id")
 );
 
-CREATE UNIQUE INDEX "governed_configuration_effective_versions_institutionId_config_key"
+CREATE UNIQUE INDEX "gov_cfg_eff_ver_uniq"
   ON "governed_configuration_effective_versions"("institutionId", "configurationDomain", "configurationKey", "effectiveFrom");
 
-CREATE INDEX "governed_configuration_effective_versions_institutionId_config_idx"
+CREATE INDEX "gov_cfg_eff_ver_lookup_idx"
   ON "governed_configuration_effective_versions"("institutionId", "configurationKey", "effectiveFrom");
 
 ALTER TABLE "governed_configuration_effective_versions"

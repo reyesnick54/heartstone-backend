@@ -24918,12 +24918,12 @@ model GovernmentAuditLedgerEntry {
   institution                 Institution?             @relation(fields: [institutionId], references: [id], onDelete: Restrict)
   authorityEvaluationRecord   AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id], onDelete: Restrict)
 
-  @@unique([ledgerStreamKey, sequenceNumber])
-  @@unique([sourceDomainEventType, sourceDomainEventId])
-  @@index([ledgerStreamKey, recordedAt])
-  @@index([institutionId, occurredAt])
-  @@index([eventType])
-  @@index([correlationId])
+  @@unique([ledgerStreamKey, sequenceNumber], map: "gov_audit_ledger_stream_seq_uniq")
+  @@unique([sourceDomainEventType, sourceDomainEventId], map: "gov_audit_ledger_source_event_uniq")
+  @@index([ledgerStreamKey, recordedAt], map: "gov_audit_ledger_stream_recorded_idx")
+  @@index([institutionId, occurredAt], map: "gov_audit_ledger_inst_occurred_idx")
+  @@index([eventType], map: "gov_audit_ledger_event_type_idx")
+  @@index([correlationId], map: "gov_audit_ledger_correlation_idx")
   @@map("government_audit_ledger_entries")
 }
 
@@ -24964,8 +24964,8 @@ model GovernedConfigurationChange {
   rollbackChildren      GovernedConfigurationChange[]     @relation("GovernedConfigRollback")
   effectiveVersions     GovernedConfigurationEffectiveVersion[]
 
-  @@index([institutionId, configurationKey, status])
-  @@index([institutionId, configurationDomain])
+  @@index([institutionId, configurationKey, status], map: "gov_cfg_chg_inst_key_status_idx")
+  @@index([institutionId, configurationDomain], map: "gov_cfg_chg_inst_domain_idx")
   @@map("governed_configuration_changes")
 }
 
@@ -24983,7 +24983,7 @@ model GovernedConfigurationEffectiveVersion {
   change              GovernedConfigurationChange @relation(fields: [changeId], references: [id], onDelete: Restrict)
   institution         Institution                 @relation(fields: [institutionId], references: [id], onDelete: Restrict)
 
-  @@unique([institutionId, configurationDomain, configurationKey, effectiveFrom])
-  @@index([institutionId, configurationKey, effectiveFrom])
+  @@unique([institutionId, configurationDomain, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_uniq")
+  @@index([institutionId, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_lookup_idx")
   @@map("governed_configuration_effective_versions")
 }

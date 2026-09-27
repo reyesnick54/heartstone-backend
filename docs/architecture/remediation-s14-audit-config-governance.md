@@ -4,11 +4,11 @@
 
 Provide an authoritative **government audit ledger** separate from application logs, plus a governed configuration change lifecycle with segregation of duties and effective dating.
 
-| Concern | Canonical artifact |
-|---------|-------------------|
-| Administrative / security audit | `GovernmentAuditLedgerEntry` (hash-chained per stream) |
-| Domain-specific operational audit | Existing domain tables (normalized into ledger where high-value) |
-| High-impact configuration | `GovernedConfigurationChange` + `GovernedConfigurationEffectiveVersion` |
+| Concern                           | Canonical artifact                                                      |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| Administrative / security audit   | `GovernmentAuditLedgerEntry` (hash-chained per stream)                  |
+| Domain-specific operational audit | Existing domain tables (normalized into ledger where high-value)        |
+| High-impact configuration         | `GovernedConfigurationChange` + `GovernedConfigurationEffectiveVersion` |
 
 ## Module location
 

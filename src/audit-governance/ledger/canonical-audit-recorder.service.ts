@@ -29,9 +29,7 @@ export class CanonicalAuditRecorderService {
       sourceDomainEventType: 'SecurityAuditEvent',
       sourceDomainEventId: event.id,
       institutionId:
-        typeof metadata.scopeInstitutionId === 'string'
-          ? metadata.scopeInstitutionId
-          : undefined,
+        typeof metadata.scopeInstitutionId === 'string' ? metadata.scopeInstitutionId : undefined,
     });
   }
 

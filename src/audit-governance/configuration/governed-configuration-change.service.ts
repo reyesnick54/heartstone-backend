@@ -57,7 +57,9 @@ export class GovernedConfigurationChangeService {
     private readonly canonicalAudit: CanonicalAuditRecorderService,
   ) {}
 
-  async createDraft(input: CreateGovernedConfigurationDraftInput): Promise<GovernedConfigurationChange> {
+  async createDraft(
+    input: CreateGovernedConfigurationDraftInput,
+  ): Promise<GovernedConfigurationChange> {
     const proposedPayloadHash = hashAuditPayload(input.proposedPayload);
 
     const change = await this.prisma.governedConfigurationChange.create({
@@ -124,7 +126,10 @@ export class GovernedConfigurationChangeService {
     return updated;
   }
 
-  async beginReview(changeId: string, actorIdentityId: string): Promise<GovernedConfigurationChange> {
+  async beginReview(
+    changeId: string,
+    actorIdentityId: string,
+  ): Promise<GovernedConfigurationChange> {
     const change = await this.getChangeOrThrow(changeId);
 
     if (change.status !== GovernedConfigurationChangeStatus.PROPOSED) {

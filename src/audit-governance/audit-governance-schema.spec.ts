@@ -17,7 +17,7 @@ describe('S14 audit governance schema', () => {
   }
 
   it('keeps the government audit ledger append-only (no updatedAt)', () => {
-    const block = (/model GovernmentAuditLedgerEntry \{[\s\S]*?\n\}/.exec(schema))?.[0] ?? '';
+    const block = /model GovernmentAuditLedgerEntry \{[\s\S]*?\n\}/.exec(schema)?.[0] ?? '';
     expect(block).not.toContain('updatedAt');
   });
 

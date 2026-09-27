@@ -1,9 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import {
-  GovernedConfigurationChangeStatus,
-  GovernedConfigurationDomain,
-} from '@prisma/client';
+import { GovernedConfigurationChangeStatus, GovernedConfigurationDomain } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { CanonicalAuditRecorderService } from '../ledger/canonical-audit-recorder.service';
