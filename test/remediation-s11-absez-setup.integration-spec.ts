@@ -33,6 +33,7 @@ describe('Remediation S11 — ABSEZ layered setup (integration)', () => {
   });
 
   afterAll(async () => {
+    await resetAllTestData(prisma);
     await app.close();
   });
 
@@ -70,9 +71,9 @@ describe('Remediation S11 — ABSEZ layered setup (integration)', () => {
       }),
     ).toBe(1);
 
-    expect(
-      await prisma.department.count({ where: { institutionId: institution.id } }),
-    ).toBe(ABSEZ_ARTICLE9_DEPARTMENTS.length);
+    expect(await prisma.department.count({ where: { institutionId: institution.id } })).toBe(
+      ABSEZ_ARTICLE9_DEPARTMENTS.length,
+    );
 
     expect(
       await prisma.institutionExternalAuthority.count({
@@ -92,7 +93,9 @@ describe('Remediation S11 — ABSEZ layered setup (integration)', () => {
       await prisma.institutionEscalationLevel.count({ where: { institutionId: institution.id } }),
     ).toBe(ABSEZ_ESCALATION_LEVELS.length);
 
-    expect(await prisma.setupVocabularyEntry.count({ where: { institutionId: institution.id } })).toBeGreaterThan(0);
+    expect(
+      await prisma.setupVocabularyEntry.count({ where: { institutionId: institution.id } }),
+    ).toBeGreaterThan(0);
     expect(await prisma.retentionSchedule.count()).toBeGreaterThan(0);
 
     const governingSources = await prisma.governingSource.findMany({
