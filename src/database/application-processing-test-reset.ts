@@ -105,8 +105,12 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.caseCommunication.deleteMany();
   await prisma.caseEvent.deleteMany();
   await prisma.caseIssue.deleteMany();
+  await prisma.workflowDurableJob.deleteMany();
   await prisma.caseEscalation.deleteMany();
   await prisma.caseSlaClock.deleteMany();
+  await prisma.governmentServiceEscalationLadderStep.deleteMany();
+  await prisma.governmentServiceEscalationLadder.deleteMany();
+  await prisma.governmentServiceSlaRule.deleteMany();
   await prisma.caseReferralResponse.deleteMany();
   await prisma.caseReferral.deleteMany();
   await prisma.caseManagerAssignment.deleteMany();
