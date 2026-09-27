@@ -1,3 +1,4 @@
+export * from '../../absez/service-pack/sez-business-licence-service-pack';
 export * from './calculate-service-pack-fingerprint';
 export * from './canonical-json.util';
 export * from './canonical-templates';

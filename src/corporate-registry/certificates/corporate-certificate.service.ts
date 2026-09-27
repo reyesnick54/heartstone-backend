@@ -16,6 +16,7 @@ export class CorporateCertificateService {
     profileId: string;
     certificateReference: string;
     label: string;
+    officialInstrumentId?: string;
   }) {
     const profile = await this.prisma.corporateRegistryProfile.findUnique({
       where: { id: input.profileId },
@@ -59,6 +60,7 @@ export class CorporateCertificateService {
         status: CorporateCertificateStatus.ISSUED,
         issuedAt: new Date(),
         sourceRecordStatus: CorporateRegistryRecordStatus.APPROVED,
+        officialInstrumentId: input.officialInstrumentId,
       },
     });
   }

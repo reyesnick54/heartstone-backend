@@ -243,6 +243,8 @@ model Institution {
   clinicalTrialSponsors                 ClinicalTrialSponsor[]
   clinicalTrialSites                    ClinicalTrialSite[]
   researchEthicsCommitteeApprovals      ResearchEthicsApprovalVersion[]        @relation("ResearchEthicsCommitteeInstitution")
+  absezZoneEnterprises                  AbsezZoneEnterprise[]
+  sezBusinessLicenceRecords             SezBusinessLicenceRecord[]
 
   treatmentPrograms     TreatmentProgram[]
   treatmentProgramSites TreatmentProgramSite[]
@@ -261,15 +263,15 @@ model Institution {
 }
 
 model GovernmentBody {
-  id            String                    @id @default(uuid()) @db.Uuid
-  institutionId String                    @db.Uuid
-  code          String
-  name          String
-  description   String?
-  type          GovernmentBodyType
-  status        StructuralLifecycleStatus @default(ACTIVE)
-  createdAt     DateTime                  @default(now())
-  updatedAt     DateTime                  @updatedAt
+  id                       String                    @id @default(uuid()) @db.Uuid
+  institutionId            String                    @db.Uuid
+  code                     String
+  name                     String
+  description              String?
+  type                     GovernmentBodyType
+  status                   StructuralLifecycleStatus @default(ACTIVE)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
   institution              Institution               @relation(fields: [institutionId], references: [id])
   technicalRoleAssignments TechnicalRoleAssignment[]
 
@@ -653,35 +655,36 @@ enum SecurityAuditEventType {
 }
 
 model Person {
-  id                              String                           @id @default(uuid()) @db.Uuid
-  givenName                       String
-  familyName                      String
-  displayName                     String?
-  createdAt                       DateTime                         @default(now())
-  updatedAt                       DateTime                         @updatedAt
-  userAccount                     UserAccount?
-  identities                      Identity[]
-  civilPersonRecords              CivilPersonRecord[]
-  cadastrePropertyInterestHolders CadastrePropertyInterestHolder[]
-  transferParties                 TransferParty[]
-  patientHealthIdentities         PatientHealthIdentity[]
-  healthcareProfessionals         HealthcareProfessional[]
+  id                               String                           @id @default(uuid()) @db.Uuid
+  givenName                        String
+  familyName                       String
+  displayName                      String?
+  createdAt                        DateTime                         @default(now())
+  updatedAt                        DateTime                         @updatedAt
+  userAccount                      UserAccount?
+  identities                       Identity[]
+  civilPersonRecords               CivilPersonRecord[]
+  cadastrePropertyInterestHolders  CadastrePropertyInterestHolder[]
+  transferParties                  TransferParty[]
+  patientHealthIdentities          PatientHealthIdentity[]
+  healthcareProfessionals          HealthcareProfessional[]
+  corporateBeneficialOwnerSubjects CorporateBeneficialOwnerRecord[] @relation("CorporateBeneficialOwnerSubjectPerson")
 
   @@map("persons")
 }
 
 model UserAccount {
-  id                   String        @id @default(uuid()) @db.Uuid
-  personId             String?       @unique @db.Uuid
-  loginIdentifier      String        @unique
-  status               AccountStatus @default(PENDING)
-  failedLoginAttempts  Int           @default(0)
-  lockedUntil          DateTime?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  person          Person?       @relation(fields: [personId], references: [id])
-  identities      Identity[]
-  sessions        Session[]
+  id                  String        @id @default(uuid()) @db.Uuid
+  personId            String?       @unique @db.Uuid
+  loginIdentifier     String        @unique
+  status              AccountStatus @default(PENDING)
+  failedLoginAttempts Int           @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  person              Person?       @relation(fields: [personId], references: [id])
+  identities          Identity[]
+  sessions            Session[]
 
   @@index([status])
   @@map("user_accounts")
@@ -904,6 +907,9 @@ model Identity {
   labourWorkerProfiles                              WorkerProfileReference[]                    @relation("LabourWorkerProfile")
   employmentRelationshipHistoryEvents               EmploymentRelationshipHistory[]             @relation("EmploymentRelationshipHistoryActor")
   workPermitStatusHistoryEvents                     WorkPermitStatusHistory[]                   @relation("WorkPermitStatusHistoryActor")
+  corporateBeneficialOwnershipChanges               CorporateBeneficialOwnershipChangeHistory[] @relation("CorporateBeneficialOwnershipChangeActor")
+  absezZoneEnterpriseStatusHistoryEvents            AbsezZoneEnterpriseStatusHistory[]          @relation("AbsezZoneEnterpriseStatusActor")
+  sezBusinessLicenceStatusHistoryEvents             SezBusinessLicenceStatusHistory[]           @relation("SezBusinessLicenceStatusActor")
   labourExternalDependenciesRecorded                LabourExternalDependency[]                  @relation("LabourExternalDependencyRecorder")
   developmentProjectsAsPrimaryApplicant             DevelopmentProject[]                        @relation("DevelopmentProjectPrimaryApplicant")
   developmentProjectProfessionals                   DevelopmentProjectProfessional[]            @relation("DevelopmentProjectProfessionalIdentity")
@@ -1058,6 +1064,8 @@ model Organization {
   publicSafetyEngagements         PublicSafetyEngagement[]
   digitalAssetsRegulatedEntities  DigitalAssetsRegulatedEntityReference[] @relation("DigitalAssetsRegulatedEntityOrganization")
   financialRegulatedEntityProfiles FinancialRegulatedEntityProfile[] @relation("FinancialRegulatedEntityOrganization")
+  absezZoneEnterprises            AbsezZoneEnterprise[]
+  corporateBeneficialOwnerSubjectOrganizations CorporateBeneficialOwnerRecord[] @relation("CorporateBeneficialOwnerSubjectOrganization")
 
   treatmentProgramProviders        TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
@@ -1200,12 +1208,12 @@ enum TechnicalAccessAuditResult {
 }
 
 model TechnicalPermission {
-  id          String   @id @default(uuid()) @db.Uuid
-  code        String   @unique
-  description String?
-  domain      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                     String                           @id @default(uuid()) @db.Uuid
+  code                   String                           @unique
+  description            String?
+  domain                 String?
+  createdAt              DateTime                         @default(now())
+  updatedAt              DateTime                         @updatedAt
   rolePermissions        TechnicalRolePermission[]
   accessLevelPermissions TechnicalAccessLevelPermission[]
 
@@ -1214,14 +1222,14 @@ model TechnicalPermission {
 }
 
 model TechnicalRole {
-  id           String                @id @default(uuid()) @db.Uuid
-  code         String                @unique
+  id           String                    @id @default(uuid()) @db.Uuid
+  code         String                    @unique
   name         String
   description  String?
   accessLevel  TechnicalAccessLevel?
-  isSystemRole Boolean               @default(true)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  isSystemRole Boolean                   @default(true)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
   permissions  TechnicalRolePermission[]
   assignments  TechnicalRoleAssignment[]
 
@@ -1241,27 +1249,27 @@ model TechnicalRolePermission {
 }
 
 model TechnicalRoleAssignment {
-  id               String                   @id @default(uuid()) @db.Uuid
-  identityId       String                   @db.Uuid
-  roleId           String                   @db.Uuid
-  scopeType        TechnicalAccessScopeType @default(PLATFORM)
-  jurisdictionId   String?                  @db.Uuid
-  institutionId    String?                  @db.Uuid
-  governmentBodyId String?                  @db.Uuid
-  departmentId     String?                  @db.Uuid
-  officeId         String?                  @db.Uuid
-  effectiveFrom    DateTime?
-  effectiveUntil   DateTime?
-  assignedByIdentityId String?              @db.Uuid
-  createdAt        DateTime                 @default(now())
-  updatedAt        DateTime                 @updatedAt
-  identity         Identity                 @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  role             TechnicalRole            @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  jurisdiction     Jurisdiction?            @relation(fields: [jurisdictionId], references: [id])
-  institution      Institution?             @relation(fields: [institutionId], references: [id])
-  governmentBody   GovernmentBody?          @relation(fields: [governmentBodyId], references: [id])
-  department       Department?              @relation(fields: [departmentId], references: [id])
-  office           Office?                  @relation(fields: [officeId], references: [id])
+  id                   String                   @id @default(uuid()) @db.Uuid
+  identityId           String                   @db.Uuid
+  roleId               String                   @db.Uuid
+  scopeType            TechnicalAccessScopeType @default(PLATFORM)
+  jurisdictionId       String?                  @db.Uuid
+  institutionId        String?                  @db.Uuid
+  governmentBodyId     String?                  @db.Uuid
+  departmentId         String?                  @db.Uuid
+  officeId             String?                  @db.Uuid
+  effectiveFrom        DateTime?
+  effectiveUntil       DateTime?
+  assignedByIdentityId String?                  @db.Uuid
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  identity             Identity                 @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  role                 TechnicalRole            @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  jurisdiction         Jurisdiction?            @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution?             @relation(fields: [institutionId], references: [id])
+  governmentBody       GovernmentBody?          @relation(fields: [governmentBodyId], references: [id])
+  department           Department?              @relation(fields: [departmentId], references: [id])
+  office               Office?                  @relation(fields: [officeId], references: [id])
 
   @@index([identityId])
   @@index([roleId])
@@ -1271,28 +1279,28 @@ model TechnicalRoleAssignment {
 }
 
 model TechnicalAccessLevelPermission {
-  id           String                @id @default(uuid()) @db.Uuid
+  id           String               @id @default(uuid()) @db.Uuid
   accessLevel  TechnicalAccessLevel
-  permissionId String                @db.Uuid
-  createdAt    DateTime              @default(now())
-  permission   TechnicalPermission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permissionId String               @db.Uuid
+  createdAt    DateTime             @default(now())
+  permission   TechnicalPermission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([accessLevel, permissionId])
   @@map("technical_access_level_permissions")
 }
 
 model TechnicalAccessAuditEvent {
-  id                   String                     @id @default(uuid()) @db.Uuid
-  identityId           String                     @db.Uuid
-  sessionId            String?                    @db.Uuid
-  permissionCode       String?
-  endpoint             String
-  accessResult         TechnicalAccessAuditResult
-  scopeType            TechnicalAccessScopeType?
-  scopeInstitutionId   String?                    @db.Uuid
-  metadata             Json                       @default("{}")
-  createdAt            DateTime                   @default(now())
-  identity             Identity                   @relation(fields: [identityId], references: [id])
+  id                 String                     @id @default(uuid()) @db.Uuid
+  identityId         String                     @db.Uuid
+  sessionId          String?                    @db.Uuid
+  permissionCode     String?
+  endpoint           String
+  accessResult       TechnicalAccessAuditResult
+  scopeType          TechnicalAccessScopeType?
+  scopeInstitutionId String?                    @db.Uuid
+  metadata           Json                       @default("{}")
+  createdAt          DateTime                   @default(now())
+  identity           Identity                   @relation(fields: [identityId], references: [id])
 
   @@index([identityId])
   @@index([accessResult])
@@ -2862,6 +2870,7 @@ model Application {
 
   treatmentApplicationProfile TreatmentApplication?
   financialLicenceApplicationProfiles FinancialLicenceApplicationProfile[]
+  sezBusinessLicenceRecords   SezBusinessLicenceRecord[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -3014,6 +3023,7 @@ model Case {
   educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
+  sezBusinessLicenceRecords            SezBusinessLicenceRecord[]
 
   treatmentApplicationProfile TreatmentApplication?
   treatmentReferrals          TreatmentReferral[]
@@ -5562,6 +5572,8 @@ model GovernmentDecision {
   workPermitStatusHistory             WorkPermitStatusHistory[]
   financialLicenceRecords             FinancialLicenceRecord[]
   financialLicenceStatusHistory       FinancialLicenceStatusHistory[]
+  sezBusinessLicenceRecords           SezBusinessLicenceRecord[]
+  sezBusinessLicenceStatusHistory     SezBusinessLicenceStatusHistory[]    @relation("SezBusinessLicenceStatusDecision")
   labourMarketDeterminationReferences LabourMarketDeterminationReference[]
   developmentOccupancyCertificates    DevelopmentOccupancyCertificate[]
   driverLicenseRecords                DriverLicenseRecord[]
@@ -6092,6 +6104,8 @@ model OfficialInstrument {
   academicCredentials               AcademicCredential[]
   educatorLicenseRecords            EducatorLicenseRecord[]
   digitalAssetsAuthorizationRecords DigitalAssetsAuthorizationRecord[] @relation("DigitalAssetsAuthorizationInstrument")
+  corporateCertificate              CorporateCertificate?             @relation("CorporateCertificateOfficialInstrument")
+  sezBusinessLicenceRecord          SezBusinessLicenceRecord?         @relation("SezBusinessLicenceOfficialInstrument")
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -16435,6 +16449,60 @@ enum CorporatePublicVerificationMode {
   MINIMAL_FACTS
 }
 
+enum CorporateBeneficialOwnerControlNature {
+  OWNERSHIP
+  CONTROL
+  BOTH
+}
+
+enum CorporateBeneficialOwnerVerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum CorporateBeneficialOwnershipChangeType {
+  CREATE
+  AMEND
+  SUPERSEDE
+  VERIFY
+}
+
+enum ZoneEnterpriseZoneStatus {
+  DRAFT
+  PENDING_LICENCE
+  LICENSED
+  SUSPENDED
+  EXITED
+}
+
+enum ZoneEnterpriseOperatingStatus {
+  NOT_OPERATING
+  OPERATING
+  SUSPENDED
+  CEASED
+}
+
+enum SezBusinessLicenceLifecycleStatus {
+  PENDING
+  ACTIVE
+  AMENDMENT_PENDING
+  RENEWAL_PENDING
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum AbsezZoneEnterpriseActorPersona {
+  BUSINESS_REPRESENTATIVE
+  REGISTRY_OFFICER
+  LICENSING_OFFICER
+  PAYMENT_SYSTEM
+  AI_ASSISTANCE
+  TECHNICAL_ADMIN
+}
+
 model CorporateRegistryConfiguration {
   id                             String                          @id @default(uuid()) @db.Uuid
   configurationKey               String                          @unique
@@ -16447,29 +16515,32 @@ model CorporateRegistryConfiguration {
 }
 
 model CorporateRegistryProfile {
-  id                              String                                    @id @default(uuid()) @db.Uuid
-  organizationId                  String                                    @unique @db.Uuid
-  registeredName                  String?
-  registrationReference           String?                                   @unique
-  registrationStatus              CorporateRegistrationStatus               @default(DRAFT)
-  entityType                      CorporateEntityType?
-  registrationDate                DateTime?
-  jurisdictionCode                String?
-  filingStatusSummary             String?
-  publicVerificationReference     String?                                   @unique
-  recordApprovalStatus            CorporateRegistryRecordStatus             @default(DRAFT)
-  createdAt                       DateTime                                  @default(now())
-  updatedAt                       DateTime                                  @updatedAt
-  organization                    Organization                              @relation(fields: [organizationId], references: [id])
-  registeredOffices               CorporateRegisteredOffice[]
-  officers                        CorporateOfficerDisclosure[]
-  filings                         CorporateFiling[]
-  beneficialOwnershipDeclarations CorporateBeneficialOwnershipDeclaration[]
-  certificates                    CorporateCertificate[]
-  actions                         CorporateRegistryAction[]
-  statusHistory                   CorporateRegistryStatusHistory[]
-  officialDecisions               CorporateRegistryOfficialDecision[]
-  paymentEvents                   CorporateRegistryPaymentEvent[]
+  id                               String                                      @id @default(uuid()) @db.Uuid
+  organizationId                   String                                      @unique @db.Uuid
+  registeredName                   String?
+  registrationReference            String?                                     @unique
+  registrationStatus               CorporateRegistrationStatus                 @default(DRAFT)
+  entityType                       CorporateEntityType?
+  registrationDate                 DateTime?
+  jurisdictionCode                 String?
+  filingStatusSummary              String?
+  publicVerificationReference      String?                                     @unique
+  recordApprovalStatus             CorporateRegistryRecordStatus               @default(DRAFT)
+  createdAt                        DateTime                                    @default(now())
+  updatedAt                        DateTime                                    @updatedAt
+  organization                     Organization                                @relation(fields: [organizationId], references: [id])
+  registeredOffices                CorporateRegisteredOffice[]
+  officers                         CorporateOfficerDisclosure[]
+  filings                          CorporateFiling[]
+  beneficialOwnershipDeclarations  CorporateBeneficialOwnershipDeclaration[]
+  beneficialOwnerRecords           CorporateBeneficialOwnerRecord[]
+  beneficialOwnershipChangeHistory CorporateBeneficialOwnershipChangeHistory[]
+  certificates                     CorporateCertificate[]
+  actions                          CorporateRegistryAction[]
+  statusHistory                    CorporateRegistryStatusHistory[]
+  officialDecisions                CorporateRegistryOfficialDecision[]
+  paymentEvents                    CorporateRegistryPaymentEvent[]
+  absezZoneEnterprises             AbsezZoneEnterprise[]
 
   @@index([registrationStatus])
   @@index([registrationReference])
@@ -16532,21 +16603,69 @@ model CorporateFiling {
 }
 
 model CorporateBeneficialOwnershipDeclaration {
-  id                   String                        @id @default(uuid()) @db.Uuid
-  profileId            String                        @db.Uuid
-  declarationReference String                        @unique
-  status               CorporateFilingStatus         @default(DRAFT)
-  restrictedSummary    String
-  recordApprovalStatus CorporateRegistryRecordStatus @default(DRAFT)
+  id                   String                           @id @default(uuid()) @db.Uuid
+  profileId            String                           @db.Uuid
+  declarationReference String                           @unique
+  status               CorporateFilingStatus            @default(DRAFT)
+  restrictedSummary    String?
+  recordApprovalStatus CorporateRegistryRecordStatus    @default(DRAFT)
   submittedAt          DateTime?
   createdAt            DateTime                      @default(now())
   updatedAt            DateTime                      @updatedAt
   profile              CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
   digitalAssetsBeneficialOwnershipReferences DigitalAssetsBeneficialOwnershipReference[]
   financialBeneficialOwnershipLinkages FinancialBeneficialOwnershipLinkage[]
+  ownerRecords         CorporateBeneficialOwnerRecord[]
 
   @@index([profileId])
   @@map("corporate_beneficial_ownership_declarations")
+}
+
+model CorporateBeneficialOwnerRecord {
+  id                    String                                      @id @default(uuid()) @db.Uuid
+  profileId             String                                      @db.Uuid
+  declarationId         String?                                     @db.Uuid
+  subjectPersonId       String?                                     @db.Uuid
+  subjectOrganizationId String?                                     @db.Uuid
+  ownerReference        String
+  controlNature         CorporateBeneficialOwnerControlNature
+  ownershipPercentage   Decimal?                                    @db.Decimal(7, 4)
+  effectiveFrom         DateTime                                    @default(now())
+  effectiveUntil        DateTime?
+  verificationStatus    CorporateBeneficialOwnerVerificationStatus  @default(UNVERIFIED)
+  provenanceSource      String
+  recordStatus          CorporateRegistryRecordStatus               @default(DRAFT)
+  supersededAt          DateTime?
+  createdAt             DateTime                                    @default(now())
+  updatedAt             DateTime                                    @updatedAt
+  profile               CorporateRegistryProfile                    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  declaration           CorporateBeneficialOwnershipDeclaration?    @relation(fields: [declarationId], references: [id], onDelete: SetNull)
+  subjectPerson         Person?                                     @relation("CorporateBeneficialOwnerSubjectPerson", fields: [subjectPersonId], references: [id])
+  subjectOrganization   Organization?                               @relation("CorporateBeneficialOwnerSubjectOrganization", fields: [subjectOrganizationId], references: [id])
+  changeHistory         CorporateBeneficialOwnershipChangeHistory[]
+
+  @@index([profileId])
+  @@index([declarationId])
+  @@index([recordStatus])
+  @@map("corporate_beneficial_owner_records")
+}
+
+model CorporateBeneficialOwnershipChangeHistory {
+  id                      String                                 @id @default(uuid()) @db.Uuid
+  profileId               String                                 @db.Uuid
+  beneficialOwnerRecordId String                                 @db.Uuid
+  changeType              CorporateBeneficialOwnershipChangeType
+  priorSnapshot           Json
+  newSnapshot             Json
+  changedByIdentityId     String?                                @db.Uuid
+  changedAt               DateTime                               @default(now())
+  profile                 CorporateRegistryProfile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  beneficialOwnerRecord   CorporateBeneficialOwnerRecord         @relation(fields: [beneficialOwnerRecordId], references: [id], onDelete: Cascade)
+  changedBy               Identity?                              @relation("CorporateBeneficialOwnershipChangeActor", fields: [changedByIdentityId], references: [id])
+
+  @@index([profileId])
+  @@index([beneficialOwnerRecordId])
+  @@map("corporate_beneficial_ownership_change_history")
 }
 
 model CorporateCertificate {
@@ -16557,9 +16676,11 @@ model CorporateCertificate {
   label                String
   issuedAt             DateTime?
   sourceRecordStatus   CorporateRegistryRecordStatus @default(DRAFT)
+  officialInstrumentId String?                       @unique @db.Uuid
   createdAt            DateTime                      @default(now())
   updatedAt            DateTime                      @updatedAt
   profile              CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  officialInstrument   OfficialInstrument?           @relation("CorporateCertificateOfficialInstrument", fields: [officialInstrumentId], references: [id])
 
   @@index([profileId])
   @@index([status])
@@ -16631,6 +16752,142 @@ model CorporateRegistryPaymentEvent {
 
   @@index([profileId])
   @@map("corporate_registry_payment_events")
+}
+
+model AbsezZoneEnterpriseConfiguration {
+  id                     String   @id @default(uuid()) @db.Uuid
+  configurationKey       String   @unique
+  activityCategories     Json
+  zoneStatusCatalog      Json
+  operatingStatusCatalog Json
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("absez_zone_enterprise_configurations")
+}
+
+model AbsezZoneEnterprise {
+  id                            String                             @id @default(uuid()) @db.Uuid
+  organizationId                String                             @db.Uuid
+  institutionId                 String                             @db.Uuid
+  corporateRegistryProfileId    String                             @db.Uuid
+  zoneEnterpriseReference       String                             @unique
+  zoneStatus                    ZoneEnterpriseZoneStatus           @default(DRAFT)
+  operatingStatus               ZoneEnterpriseOperatingStatus      @default(NOT_OPERATING)
+  currentSezLicenceId           String?                            @unique @db.Uuid
+  approvedActivityCategoryCodes String[]                           @default([])
+  effectiveFrom                 DateTime                           @default(now())
+  effectiveUntil                DateTime?
+  developmentProjectId          String?                            @db.Uuid
+  createdAt                     DateTime                           @default(now())
+  updatedAt                     DateTime                           @updatedAt
+  organization                  Organization                       @relation(fields: [organizationId], references: [id])
+  institution                   Institution                        @relation(fields: [institutionId], references: [id])
+  corporateRegistryProfile      CorporateRegistryProfile           @relation(fields: [corporateRegistryProfileId], references: [id])
+  currentSezLicence             SezBusinessLicenceRecord?          @relation("ZoneEnterpriseCurrentLicence", fields: [currentSezLicenceId], references: [id])
+  developmentProject            DevelopmentProject?                @relation(fields: [developmentProjectId], references: [id])
+  conditions                    AbsezZoneEnterpriseCondition[]
+  statusHistory                 AbsezZoneEnterpriseStatusHistory[]
+  sezLicences                   SezBusinessLicenceRecord[]         @relation("ZoneEnterpriseLicences")
+
+  @@unique([organizationId, institutionId])
+  @@index([institutionId])
+  @@index([zoneStatus])
+  @@map("absez_zone_enterprises")
+}
+
+model AbsezZoneEnterpriseCondition {
+  id               String              @id @default(uuid()) @db.Uuid
+  zoneEnterpriseId String              @db.Uuid
+  conditionCode    String
+  label            String
+  effectiveFrom    DateTime            @default(now())
+  supersededAt     DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  zoneEnterprise   AbsezZoneEnterprise @relation(fields: [zoneEnterpriseId], references: [id], onDelete: Cascade)
+
+  @@index([zoneEnterpriseId])
+  @@map("absez_zone_enterprise_conditions")
+}
+
+model AbsezZoneEnterpriseStatusHistory {
+  id                  String                         @id @default(uuid()) @db.Uuid
+  zoneEnterpriseId    String                         @db.Uuid
+  fromZoneStatus      ZoneEnterpriseZoneStatus?
+  toZoneStatus        ZoneEnterpriseZoneStatus?
+  fromOperatingStatus ZoneEnterpriseOperatingStatus?
+  toOperatingStatus   ZoneEnterpriseOperatingStatus?
+  summary             String
+  actorIdentityId     String?                        @db.Uuid
+  recordedAt          DateTime                       @default(now())
+  zoneEnterprise      AbsezZoneEnterprise            @relation(fields: [zoneEnterpriseId], references: [id], onDelete: Cascade)
+  actor               Identity?                      @relation("AbsezZoneEnterpriseStatusActor", fields: [actorIdentityId], references: [id])
+
+  @@index([zoneEnterpriseId])
+  @@map("absez_zone_enterprise_status_history")
+}
+
+model SezBusinessLicenceRecord {
+  id                       String                            @id @default(uuid()) @db.Uuid
+  zoneEnterpriseId         String                            @db.Uuid
+  institutionId            String                            @db.Uuid
+  licenceReference         String                            @unique
+  lifecycleStatus          SezBusinessLicenceLifecycleStatus @default(PENDING)
+  governmentDecisionId     String?                           @db.Uuid
+  officialInstrumentId     String?                           @unique @db.Uuid
+  caseId                   String?                           @db.Uuid
+  applicationId            String?                           @db.Uuid
+  effectiveFrom            DateTime?
+  effectiveUntil           DateTime?
+  conditions               Json                              @default("[]")
+  createdAt                DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+  zoneEnterprise           AbsezZoneEnterprise               @relation("ZoneEnterpriseLicences", fields: [zoneEnterpriseId], references: [id], onDelete: Cascade)
+  institution              Institution                       @relation(fields: [institutionId], references: [id])
+  governmentDecision       GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument       OfficialInstrument?               @relation("SezBusinessLicenceOfficialInstrument", fields: [officialInstrumentId], references: [id])
+  case                     Case?                             @relation(fields: [caseId], references: [id])
+  application              Application?                      @relation(fields: [applicationId], references: [id])
+  currentForZoneEnterprise AbsezZoneEnterprise?              @relation("ZoneEnterpriseCurrentLicence")
+  statusHistory            SezBusinessLicenceStatusHistory[]
+  paymentEvents            SezBusinessLicencePaymentEvent[]
+
+  @@index([zoneEnterpriseId])
+  @@index([institutionId])
+  @@index([lifecycleStatus])
+  @@map("sez_business_licence_records")
+}
+
+model SezBusinessLicenceStatusHistory {
+  id                   String                             @id @default(uuid()) @db.Uuid
+  sezBusinessLicenceId String                             @db.Uuid
+  fromStatus           SezBusinessLicenceLifecycleStatus?
+  toStatus             SezBusinessLicenceLifecycleStatus
+  summary              String
+  actorIdentityId      String?                            @db.Uuid
+  governmentDecisionId String?                            @db.Uuid
+  recordedAt           DateTime                           @default(now())
+  sezBusinessLicence   SezBusinessLicenceRecord           @relation(fields: [sezBusinessLicenceId], references: [id], onDelete: Cascade)
+  actor                Identity?                          @relation("SezBusinessLicenceStatusActor", fields: [actorIdentityId], references: [id])
+  governmentDecision   GovernmentDecision?                @relation("SezBusinessLicenceStatusDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([sezBusinessLicenceId])
+  @@map("sez_business_licence_status_history")
+}
+
+model SezBusinessLicencePaymentEvent {
+  id                   String                   @id @default(uuid()) @db.Uuid
+  sezBusinessLicenceId String                   @db.Uuid
+  paymentReference     String                   @unique
+  amount               Decimal                  @db.Decimal(18, 2)
+  currencyCode         String
+  receivedAt           DateTime                 @default(now())
+  activatesLicence     Boolean                  @default(false)
+  sezBusinessLicence   SezBusinessLicenceRecord @relation(fields: [sezBusinessLicenceId], references: [id], onDelete: Cascade)
+
+  @@index([sezBusinessLicenceId])
+  @@map("sez_business_licence_payment_events")
 }
 
 // ─── Revenue & Tax Administration Foundation ───────────────────────────────
@@ -18950,6 +19207,7 @@ model DevelopmentProject {
   occupancyCertificates      DevelopmentOccupancyCertificate[]
   appeals                    DevelopmentPlanningAppeal[]
   accessAudits               DevelopmentAccessAudit[]
+  absezZoneEnterprises       AbsezZoneEnterprise[]
 
   @@index([jurisdictionId])
   @@index([primaryApplicantIdentityId])
