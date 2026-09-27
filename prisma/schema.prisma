@@ -153,6 +153,7 @@ model Jurisdiction {
   technicalRoleAssignments            TechnicalRoleAssignment[]
   governmentAuditLedgerEntries        GovernmentAuditLedgerEntry[]
   governedConfigurationChanges        GovernedConfigurationChange[]
+  setupConfigurationInstallations     SetupConfigurationInstallation[]
 
   @@map("jurisdictions")
 }
@@ -246,6 +247,11 @@ model Institution {
   governmentAuditLedgerEntries             GovernmentAuditLedgerEntry[]
   governedConfigurationChanges             GovernedConfigurationChange[]
   governedConfigurationEffectiveVersions   GovernedConfigurationEffectiveVersion[]
+  setupConfigurationInstallations          SetupConfigurationInstallation[]
+  institutionCaseCategories                InstitutionCaseCategory[]
+  institutionServiceStandards              InstitutionServiceStandard[]
+  institutionEscalationLevels              InstitutionEscalationLevel[]
+  setupVocabularyEntries                   SetupVocabularyEntry[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -25146,6 +25152,165 @@ model GovernedConfigurationEffectiveVersion {
   @@unique([institutionId, configurationDomain, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_uniq")
   @@index([institutionId, configurationKey, effectiveFrom], map: "gov_cfg_eff_ver_lookup_idx")
   @@map("governed_configuration_effective_versions")
+}
+
+// ─── Remediation S11: Layered institution setup configuration ─────────────────
+
+enum SetupConfigurationLayer {
+  PLATFORM
+  JURISDICTION
+  INSTITUTION
+}
+
+enum SetupConfigurationInstallationStatus {
+  INSTALLED
+  SUPERSEDED
+}
+
+enum SetupVocabularyKind {
+  CASE_STATUS
+  SERVICE_STATUS
+  READINESS_LABEL
+  WORKFLOW_LABEL
+  INSTITUTIONAL_LABEL
+}
+
+model SetupConfigurationPackage {
+  id              String                           @id @default(uuid()) @db.Uuid
+  packageKey      String
+  version         String
+  layer           SetupConfigurationLayer
+  title           String
+  sourceLabel     String
+  contentChecksum String
+  manifest        Json                             @default("{}")
+  createdAt       DateTime                         @default(now())
+  updatedAt       DateTime                         @updatedAt
+  installations   SetupConfigurationInstallation[]
+
+  @@unique([packageKey, version])
+  @@index([layer])
+  @@map("setup_configuration_packages")
+}
+
+model SetupConfigurationInstallation {
+  id                   String                             @id @default(uuid()) @db.Uuid
+  packageId            String                             @db.Uuid
+  layer                SetupConfigurationLayer
+  scopeKey             String
+  jurisdictionId       String?                            @db.Uuid
+  institutionId        String?                            @db.Uuid
+  parentInstallationId String?                            @db.Uuid
+  status               SetupConfigurationInstallationStatus @default(INSTALLED)
+  installedAt          DateTime                           @default(now())
+  installationChecksum String
+  effectiveStatus      String
+  metadata             Json                               @default("{}")
+  package              SetupConfigurationPackage          @relation(fields: [packageId], references: [id])
+  jurisdiction         Jurisdiction?                      @relation(fields: [jurisdictionId], references: [id])
+  institution          Institution?                       @relation(fields: [institutionId], references: [id])
+  parentInstallation   SetupConfigurationInstallation?    @relation("SetupConfigurationInheritance", fields: [parentInstallationId], references: [id])
+  childInstallations   SetupConfigurationInstallation[]   @relation("SetupConfigurationInheritance")
+  overrides            SetupConfigurationOverride[]
+
+  @@unique([packageId, scopeKey])
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([parentInstallationId])
+  @@map("setup_configuration_installations")
+}
+
+model SetupConfigurationOverride {
+  id                      String                         @id @default(uuid()) @db.Uuid
+  installationId          String                         @db.Uuid
+  configurationKey        String
+  overrideValue           Json
+  inheritedFromLayer      SetupConfigurationLayer
+  inheritedFromPackageKey String?
+  auditNote               String?
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+  installation            SetupConfigurationInstallation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@unique([installationId, configurationKey])
+  @@index([installationId])
+  @@map("setup_configuration_overrides")
+}
+
+model InstitutionCaseCategory {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  institutionId        String                    @db.Uuid
+  code                 String
+  name                 String
+  description          String?
+  displayOrder         Int
+  protocolReference    String?
+  routingConfiguration Json                      @default("{}")
+  status               StructuralLifecycleStatus @default(ACTIVE)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  institution          Institution               @relation(fields: [institutionId], references: [id])
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("institution_case_categories")
+}
+
+model InstitutionServiceStandard {
+  id                  String                    @id @default(uuid()) @db.Uuid
+  institutionId       String                    @db.Uuid
+  code                String
+  label               String
+  targetDurationHours Int?
+  targetDurationDays  Int?
+  businessDaysOnly    Boolean                   @default(true)
+  protocolReference   String?
+  policyConfiguration Json                      @default("{}")
+  status              StructuralLifecycleStatus @default(ACTIVE)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  institution         Institution               @relation(fields: [institutionId], references: [id])
+
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("institution_service_standards")
+}
+
+model InstitutionEscalationLevel {
+  id                  String                    @id @default(uuid()) @db.Uuid
+  institutionId       String                    @db.Uuid
+  levelNumber         Int
+  code                String
+  label               String
+  policyConfiguration Json                      @default("{}")
+  status              StructuralLifecycleStatus @default(ACTIVE)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  institution         Institution               @relation(fields: [institutionId], references: [id])
+
+  @@unique([institutionId, levelNumber])
+  @@unique([institutionId, code])
+  @@index([institutionId])
+  @@map("institution_escalation_levels")
+}
+
+model SetupVocabularyEntry {
+  id            String                    @id @default(uuid()) @db.Uuid
+  institutionId String?                   @db.Uuid
+  vocabularyKind SetupVocabularyKind
+  code          String
+  label         String
+  meaning       String?
+  layer         SetupConfigurationLayer
+  configuration Json                      @default("{}")
+  status        StructuralLifecycleStatus @default(ACTIVE)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  institution   Institution?              @relation(fields: [institutionId], references: [id])
+
+  @@unique([vocabularyKind, code, institutionId])
+  @@index([institutionId])
+  @@map("setup_vocabulary_entries")
 }
 
 // ─── Digital Assets & Blockchain Administration (S18B) ───────────────────────
