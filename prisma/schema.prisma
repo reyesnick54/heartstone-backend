@@ -151,6 +151,8 @@ model Jurisdiction {
   patientHealthcareProfiles           PatientHealthcareProfile[]
   treatmentPrograms                   TreatmentProgram[]
   technicalRoleAssignments            TechnicalRoleAssignment[]
+  financialRegulatedEntityProfiles      FinancialRegulatedEntityProfile[]
+  financialServicesOperationalSnapshots FinancialServicesOperationalSnapshot[]
 
   @@map("jurisdictions")
 }
@@ -489,6 +491,8 @@ model ExternalAuthority {
   externalEligibilityDeterminations  ExternalEligibilityDeterminationReference[]
 
   treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
+
+  financialExternalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
 
   @@map("external_authorities")
 }
@@ -966,6 +970,10 @@ model Identity {
   treatmentPatientDataAccessGrantsAsGrantee        TreatmentPatientDataAccessGrant[]    @relation("TreatmentPatientDataAccessGrantee")
   treatmentPatientDataAccessGrantsAsPatientSubject TreatmentPatientDataAccessGrant[]    @relation("TreatmentPatientDataAccessPatientSubject")
   treatmentProgramProviderLinks                    TreatmentProgramProvider[]           @relation("TreatmentProgramProviderIdentity")
+  financialResponsiblePersonReferences             FinancialResponsiblePersonReference[] @relation("FinancialResponsiblePersonIdentity")
+  financialExternalDependenciesRecorded            FinancialExternalRegulatoryDependency[] @relation("FinancialExternalDependencyRecorder")
+  financialLicenceStatusHistoryEvents              FinancialLicenceStatusHistory[]       @relation("FinancialLicenceStatusHistoryActor")
+  financialRegulatoryAccessAudits                  FinancialRegulatoryAccessAudit[]    @relation("FinancialRegulatoryAccessAuditAccessor")
   technicalRoleAssignments                         TechnicalRoleAssignment[]
   technicalAccessAuditEvents                       TechnicalAccessAuditEvent[]
 
@@ -1035,6 +1043,7 @@ model Organization {
   healthcareOrganizationProfiles  HealthcareOrganization[]             @relation("HealthcareOrganizationPlatformOrg")
   publicSafetyEngagements         PublicSafetyEngagement[]
   digitalAssetsRegulatedEntities  DigitalAssetsRegulatedEntityReference[] @relation("DigitalAssetsRegulatedEntityOrganization")
+  financialRegulatedEntityProfiles FinancialRegulatedEntityProfile[] @relation("FinancialRegulatedEntityOrganization")
 
   treatmentProgramProviders        TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
@@ -1522,6 +1531,7 @@ model FunctionAuthorityRecord {
   continuityDecisions           ContinuityDecision[]
   resumptionAuthorizations      ResumptionAuthorization[]
   benefitSuspensions            BenefitSuspension[]
+  financialLicenceRecords       FinancialLicenceRecord[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1753,6 +1763,7 @@ model RetainedNationalDetermination {
   createdAt                 DateTime                            @default(now())
   updatedAt                 DateTime                            @updatedAt
   functionAuthorityRecord   FunctionAuthorityRecord             @relation(fields: [functionAuthorityRecordId], references: [id])
+  financialExternalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
 
   @@index([functionAuthorityRecordId])
   @@map("retained_national_determinations")
@@ -1805,6 +1816,7 @@ model AuthorityEvaluationRecord {
   healthcareProfessionalLicenses  HealthcareProfessionalLicense[] @relation("HealthcareProfessionalLicenseAuthority")
   healthcareFacilityLicenses      HealthcareFacilityLicense[]     @relation("HealthcareFacilityLicenseAuthority")
   benefitSuspensions              BenefitSuspension[]
+  financialLicenceRecords         FinancialLicenceRecord[]
 
   treatmentEligibilityGovernmentAdminEvals TreatmentEligibilityReview[] @relation("TreatmentEligibilityGovernmentAdminEval")
 
@@ -2834,6 +2846,7 @@ model Application {
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
 
   treatmentApplicationProfile TreatmentApplication?
+  financialLicenceApplicationProfiles FinancialLicenceApplicationProfile[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -2966,6 +2979,7 @@ model Case {
   employmentComplaints                 EmploymentComplaint[]
   employmentDisputes                   EmploymentDispute[]
   labourExternalDependencies           LabourExternalDependency[]
+  financialLicenceApplicationProfiles  FinancialLicenceApplicationProfile[]
   driverLicenseApplicationProfile      DriverLicenseApplicationProfile?
   driverTestRecords                    DriverTestRecord[]
   driverMedicalRequirementReferences   DriverMedicalRequirementReference[]
@@ -4466,6 +4480,7 @@ model InspectionRecord {
   vehicleInspection             VehicleInspection?
   customsInspection             CustomsInspection?
   healthcareInspectionReference HealthcareInspectionReference?
+  financialInspectionReference  FinancialInspectionReference?
 
   @@index([caseId])
   @@index([status])
@@ -5525,6 +5540,8 @@ model GovernmentDecision {
   civilRegistryRestrictions           CivilRegistryRestriction[]           @relation("CivilRegistryRestrictionDecision")
   workPermitRecords                   WorkPermitRecord[]
   workPermitStatusHistory             WorkPermitStatusHistory[]
+  financialLicenceRecords             FinancialLicenceRecord[]
+  financialLicenceStatusHistory       FinancialLicenceStatusHistory[]
   labourMarketDeterminationReferences LabourMarketDeterminationReference[]
   developmentOccupancyCertificates    DevelopmentOccupancyCertificate[]
   driverLicenseRecords                DriverLicenseRecord[]
@@ -6043,6 +6060,7 @@ model OfficialInstrument {
   residencyPermitRecords            ResidencyPermitRecord[]
   civilRegistryCertificateExtracts  CivilRegistryCertificateExtract[]
   workPermitRecords                 WorkPermitRecord[]
+  financialLicenceRecords           FinancialLicenceRecord[]
   driverLicenseRecords              DriverLicenseRecord[]
   vehicleRegistrations              VehicleRegistration[]
   commercialVehiclePermits          CommercialVehiclePermit[]
@@ -6680,6 +6698,7 @@ model ComplianceMatter {
   labourComplianceMatterReferences     LabourComplianceMatterReference[]
   educationComplianceReference         EducationComplianceReference?
   digitalAssetsComplianceReference     DigitalAssetsComplianceReference?
+  financialComplianceMatterReferences  FinancialComplianceMatterReference[]
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
 
@@ -16504,6 +16523,7 @@ model CorporateBeneficialOwnershipDeclaration {
   updatedAt            DateTime                      @updatedAt
   profile              CorporateRegistryProfile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
   digitalAssetsBeneficialOwnershipReferences DigitalAssetsBeneficialOwnershipReference[]
+  financialBeneficialOwnershipLinkages FinancialBeneficialOwnershipLinkage[]
 
   @@index([profileId])
   @@map("corporate_beneficial_ownership_declarations")
@@ -25336,4 +25356,347 @@ model DigitalAssetsDataAccessAudit {
   @@index([accessorIdentityId])
   @@index([regulatedEntityId])
   @@map("digital_assets_data_access_audits")
+}
+
+// ─── Financial Services Administration Foundation ─────────────────────────────
+// Appended to schema.prisma — keep in sync via merge / migrate diff.
+
+enum FinancialServicesDataClassification {
+  PUBLIC
+  OFFICIAL
+  OFFICIAL_SENSITIVE
+  PROTECTED_REGULATORY
+  PROTECTED_ENFORCEMENT
+  RESTRICTED
+}
+
+enum FinancialServicesActorPersona {
+  APPLICANT
+  REGULATED_ENTITY_REPRESENTATIVE
+  FINANCIAL_SERVICES_OFFICER
+  SENIOR_DECISION_OFFICER
+  COMPLIANCE_OFFICER
+  EXTERNAL_REGULATOR_LIAISON
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum FinancialRegulatedEntityProfileStatus {
+  DRAFT
+  REGISTERED
+  UNDER_SUPERVISION
+  SUSPENDED
+  CLOSED
+}
+
+enum FinancialDelegatedFunctionActivation {
+  INACTIVE
+  ACTIVE
+}
+
+enum FinancialLicenceApplicationProfileStatus {
+  DRAFT
+  LINKED
+  UNDER_REVIEW
+  WITHDRAWN
+  CLOSED
+}
+
+enum FinancialLicenceLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  AMENDED
+  SUPERSEDED
+}
+
+enum FinancialExternalRegulatoryDependencyStatus {
+  PENDING
+  AWAITING_EXTERNAL_DETERMINATION
+  REFERRED
+  RESOLVED
+  BLOCKED
+}
+
+enum FinancialExternalRegulatoryDependencyRecordedBy {
+  EXTERNAL_REGULATOR_LIAISON
+  INTEGRATION_SYSTEM
+  FINANCIAL_SERVICES_OFFICER
+  SYSTEM
+}
+
+enum FinancialReportingRequirementStatus {
+  REQUIRED
+  SUBMITTED
+  ACCEPTED
+  OVERDUE
+  WAIVED
+}
+
+model FinancialRegulatedEntityProfile {
+  id                               String                                @id @default(uuid()) @db.Uuid
+  entityReference                  String                                @unique
+  organizationId                   String                                @db.Uuid
+  jurisdictionId                   String?                               @db.Uuid
+  activityCategoryCode             String
+  regulatoryStatus                 FinancialRegulatedEntityProfileStatus   @default(DRAFT)
+  delegatedLicenceFunctionActivation FinancialDelegatedFunctionActivation @default(INACTIVE)
+  governingDelegationReference     String?
+  externalRegulatorReference       String?
+  effectiveFrom                    DateTime?
+  effectiveUntil                   DateTime?
+  dataClassification               FinancialServicesDataClassification   @default(PROTECTED_REGULATORY)
+  ruleEnvironment                  String                                @default("NON_PRODUCTION")
+  createdAt                        DateTime                              @default(now())
+  updatedAt                        DateTime                              @updatedAt
+  organization                     Organization                          @relation("FinancialRegulatedEntityOrganization", fields: [organizationId], references: [id])
+  jurisdiction                     Jurisdiction?                         @relation(fields: [jurisdictionId], references: [id])
+  licenceApplicationProfiles       FinancialLicenceApplicationProfile[]
+  licenceRecords                   FinancialLicenceRecord[]
+  responsiblePersons               FinancialResponsiblePersonReference[]
+  beneficialOwnershipLinkages      FinancialBeneficialOwnershipLinkage[]
+  externalRegulatoryDependencies   FinancialExternalRegulatoryDependency[]
+  inspectionReferences             FinancialInspectionReference[]
+  complianceMatterReferences       FinancialComplianceMatterReference[]
+  reportingRequirements            FinancialReportingRequirementReference[]
+  operationalSnapshots             FinancialServicesOperationalSnapshot[]
+
+  @@index([organizationId])
+  @@index([jurisdictionId])
+  @@index([regulatoryStatus])
+  @@map("financial_regulated_entity_profiles")
+}
+
+model FinancialLicenceApplicationProfile {
+  id                       String                                 @id @default(uuid()) @db.Uuid
+  applicationReference     String                                 @unique
+  regulatedEntityProfileId String                                 @db.Uuid
+  applicationId            String?                                @db.Uuid
+  caseId                   String?                                @db.Uuid
+  activityCategoryCode     String
+  status                   FinancialLicenceApplicationProfileStatus @default(DRAFT)
+  doesNotIssueLicence      Boolean                                @default(true)
+  requiresNationalDetermination Boolean                             @default(false)
+  createdAt                DateTime                               @default(now())
+  updatedAt                DateTime                               @updatedAt
+  regulatedEntityProfile   FinancialRegulatedEntityProfile        @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  application              Application?                           @relation(fields: [applicationId], references: [id])
+  case                     Case?                                  @relation(fields: [caseId], references: [id])
+  licenceRecords           FinancialLicenceRecord[]
+  externalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
+
+  @@index([regulatedEntityProfileId])
+  @@index([status])
+  @@map("financial_licence_application_profiles")
+}
+
+model FinancialLicenceRecord {
+  id                             String                          @id @default(uuid()) @db.Uuid
+  licenceNumber                  String                          @unique
+  regulatedEntityProfileId       String                          @db.Uuid
+  licenceApplicationProfileId    String?                         @db.Uuid
+  lifecycleStatus                FinancialLicenceLifecycleStatus @default(NOT_ISSUED)
+  governmentDecisionId           String?                         @db.Uuid
+  officialInstrumentId           String?                         @db.Uuid
+  authorityEvaluationRecordId    String?                         @db.Uuid
+  functionAuthorityRecordId      String?                         @db.Uuid
+  requiresNationalDetermination  Boolean                         @default(false)
+  absezIssuanceAuthorized        Boolean                         @default(false)
+  validFrom                      DateTime?
+  validUntil                     DateTime?
+  dataClassification             FinancialServicesDataClassification @default(PROTECTED_REGULATORY)
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  regulatedEntityProfile         FinancialRegulatedEntityProfile @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  licenceApplicationProfile      FinancialLicenceApplicationProfile? @relation(fields: [licenceApplicationProfileId], references: [id])
+  governmentDecision             GovernmentDecision?             @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument             OfficialInstrument?             @relation(fields: [officialInstrumentId], references: [id])
+  authorityEvaluationRecord      AuthorityEvaluationRecord?      @relation(fields: [authorityEvaluationRecordId], references: [id])
+  functionAuthorityRecord        FunctionAuthorityRecord?        @relation(fields: [functionAuthorityRecordId], references: [id])
+  conditions                     FinancialLicenceCondition[]
+  statusHistory                  FinancialLicenceStatusHistory[]
+
+  @@index([regulatedEntityProfileId])
+  @@index([lifecycleStatus])
+  @@map("financial_licence_records")
+}
+
+model FinancialLicenceCondition {
+  id                   String               @id @default(uuid()) @db.Uuid
+  financialLicenceRecordId String           @db.Uuid
+  conditionCode        String
+  conditionSummary     String?
+  effectiveFrom        DateTime             @default(now())
+  effectiveUntil       DateTime?
+  createdAt            DateTime             @default(now())
+  financialLicenceRecord FinancialLicenceRecord @relation(fields: [financialLicenceRecordId], references: [id], onDelete: Cascade)
+
+  @@index([financialLicenceRecordId])
+  @@map("financial_licence_conditions")
+}
+
+model FinancialLicenceStatusHistory {
+  id                     String                          @id @default(uuid()) @db.Uuid
+  financialLicenceRecordId String                        @db.Uuid
+  fromStatus             FinancialLicenceLifecycleStatus?
+  toStatus               FinancialLicenceLifecycleStatus
+  actorIdentityId        String?                         @db.Uuid
+  actorPersona           FinancialServicesActorPersona
+  reason                 String?
+  governmentDecisionId   String?                         @db.Uuid
+  createdAt              DateTime                        @default(now())
+  financialLicenceRecord FinancialLicenceRecord            @relation(fields: [financialLicenceRecordId], references: [id], onDelete: Cascade)
+  actorIdentity          Identity?                         @relation("FinancialLicenceStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  governmentDecision     GovernmentDecision?               @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([financialLicenceRecordId])
+  @@map("financial_licence_status_history")
+}
+
+model FinancialResponsiblePersonReference {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId String                          @db.Uuid
+  identityId               String                          @db.Uuid
+  roleCode                 String
+  effectiveFrom            DateTime                        @default(now())
+  effectiveUntil           DateTime?
+  createdAt                DateTime                        @default(now())
+  updatedAt                DateTime                        @updatedAt
+  regulatedEntityProfile   FinancialRegulatedEntityProfile @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  identity                 Identity                        @relation("FinancialResponsiblePersonIdentity", fields: [identityId], references: [id])
+
+  @@index([regulatedEntityProfileId])
+  @@index([identityId])
+  @@map("financial_responsible_person_references")
+}
+
+model FinancialBeneficialOwnershipLinkage {
+  id                                      String                                @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId                String                                @db.Uuid
+  corporateBeneficialOwnershipDeclarationId String                              @db.Uuid
+  linkageRole                             String                                @default("REGULATORY_REFERENCE")
+  createdAt                               DateTime                              @default(now())
+  regulatedEntityProfile                  FinancialRegulatedEntityProfile       @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  corporateBeneficialOwnershipDeclaration CorporateBeneficialOwnershipDeclaration @relation(fields: [corporateBeneficialOwnershipDeclarationId], references: [id])
+
+  @@unique([regulatedEntityProfileId, corporateBeneficialOwnershipDeclarationId])
+  @@map("financial_beneficial_ownership_linkages")
+}
+
+model FinancialExternalRegulatoryDependency {
+  id                         String                                        @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId   String?                                       @db.Uuid
+  licenceApplicationProfileId String?                                      @db.Uuid
+  externalAuthorityId        String                                        @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String
+  status                     FinancialExternalRegulatoryDependencyStatus   @default(PENDING)
+  blocksAbsezLicenceDecision Boolean                                       @default(true)
+  blocksAbsezIssuance        Boolean                                       @default(true)
+  isAuthenticated            Boolean                                       @default(false)
+  authenticatedPayloadHash   String?
+  spoofedAbsezApprovalAttempt Boolean                                      @default(false)
+  recordedBy                 FinancialExternalRegulatoryDependencyRecordedBy
+  recordedByIdentityId       String?                                       @db.Uuid
+  retainedNationalDeterminationId String?                                  @db.Uuid
+  resolvedAt                 DateTime?
+  createdAt                  DateTime                                      @default(now())
+  updatedAt                  DateTime                                      @updatedAt
+  regulatedEntityProfile     FinancialRegulatedEntityProfile?              @relation(fields: [regulatedEntityProfileId], references: [id])
+  licenceApplicationProfile  FinancialLicenceApplicationProfile?           @relation(fields: [licenceApplicationProfileId], references: [id])
+  externalAuthority          ExternalAuthority                             @relation(fields: [externalAuthorityId], references: [id])
+  recordedByIdentity         Identity?                                     @relation("FinancialExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+  retainedNationalDetermination RetainedNationalDetermination?             @relation(fields: [retainedNationalDeterminationId], references: [id])
+
+  @@index([regulatedEntityProfileId])
+  @@index([licenceApplicationProfileId])
+  @@index([externalAuthorityId])
+  @@index([status])
+  @@map("financial_external_regulatory_dependencies")
+}
+
+model FinancialInspectionReference {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId String                          @db.Uuid
+  inspectionRecordId       String                          @unique @db.Uuid
+  linkageRole              String                          @default("SUBJECT")
+  createdAt                DateTime                        @default(now())
+  regulatedEntityProfile   FinancialRegulatedEntityProfile @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  inspectionRecord         InspectionRecord                @relation(fields: [inspectionRecordId], references: [id])
+
+  @@index([regulatedEntityProfileId])
+  @@map("financial_inspection_references")
+}
+
+model FinancialComplianceMatterReference {
+  id                       String                          @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId String                          @db.Uuid
+  complianceMatterId       String                          @db.Uuid
+  linkageRole              String                          @default("SUBJECT")
+  createdAt                DateTime                        @default(now())
+  regulatedEntityProfile   FinancialRegulatedEntityProfile @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+  complianceMatter         ComplianceMatter                @relation(fields: [complianceMatterId], references: [id])
+
+  @@index([complianceMatterId])
+  @@map("financial_compliance_matter_references")
+}
+
+model FinancialReportingRequirementReference {
+  id                       String                            @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId String                            @db.Uuid
+  requirementCode          String
+  requirementLabel         String
+  status                   FinancialReportingRequirementStatus @default(REQUIRED)
+  dueAt                    DateTime?
+  submittedAt              DateTime?
+  createdAt                DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+  regulatedEntityProfile   FinancialRegulatedEntityProfile   @relation(fields: [regulatedEntityProfileId], references: [id], onDelete: Cascade)
+
+  @@index([regulatedEntityProfileId])
+  @@index([status])
+  @@map("financial_reporting_requirement_references")
+}
+
+model FinancialRegulatoryAccessAudit {
+  id                       String                        @id @default(uuid()) @db.Uuid
+  accessorIdentityId       String?                       @db.Uuid
+  regulatedEntityProfileId String?                       @db.Uuid
+  actorPersona             FinancialServicesActorPersona
+  endpoint                 String
+  granted                  Boolean
+  reasonCode               String?
+  recordedAt               DateTime                      @default(now())
+  accessorIdentity         Identity?                     @relation("FinancialRegulatoryAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+  regulatedEntityProfile   FinancialRegulatedEntityProfile? @relation(fields: [regulatedEntityProfileId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([regulatedEntityProfileId])
+  @@map("financial_regulatory_access_audits")
+}
+
+model FinancialServicesOperationalSnapshot {
+  id                       String   @id @default(uuid()) @db.Uuid
+  regulatedEntityProfileId String?  @db.Uuid
+  jurisdictionId           String?  @db.Uuid
+  snapshotReference        String   @unique
+  periodStart              DateTime
+  periodEnd                DateTime
+  registeredEntityCount    Int      @default(0)
+  openApplicationCount     Int      @default(0)
+  issuedLicenceCount       Int      @default(0)
+  awaitingExternalCount    Int      @default(0)
+  suspendedLicenceCount    Int      @default(0)
+  computedAt               DateTime @default(now())
+  regulatedEntityProfile   FinancialRegulatedEntityProfile? @relation(fields: [regulatedEntityProfileId], references: [id])
+  jurisdiction             Jurisdiction? @relation(fields: [jurisdictionId], references: [id])
+
+  @@index([jurisdictionId])
+  @@map("financial_services_operational_snapshots")
 }
