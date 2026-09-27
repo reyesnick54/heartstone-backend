@@ -17,7 +17,11 @@ export class StrategicProjectDossierService {
     });
   }
 
-  async linkOrganization(profileId: string, organizationId: string, participationRole = 'PARTICIPANT') {
+  async linkOrganization(
+    profileId: string,
+    organizationId: string,
+    participationRole = 'PARTICIPANT',
+  ) {
     await this.assertProfile(profileId);
     return this.prisma.strategicProjectOrganizationLink.upsert({
       where: { profileId_organizationId: { profileId, organizationId } },
@@ -126,7 +130,9 @@ export class StrategicProjectDossierService {
   }
 
   private async assertProfile(profileId: string) {
-    const profile = await this.prisma.strategicProjectProfile.findUnique({ where: { id: profileId } });
+    const profile = await this.prisma.strategicProjectProfile.findUnique({
+      where: { id: profileId },
+    });
     if (!profile) {
       throw new NotFoundException(`StrategicProjectProfile ${profileId} not found`);
     }

@@ -45,7 +45,9 @@ export class ComplianceCorrectiveActionBoundaryService {
       input.reviewerIdentityId && input.reviewerIdentityId === input.actorIdentityId;
 
     if (!isAssignedReviewer && !isAssignedReviewerIdentity) {
-      throw new ForbiddenException('Only the assigned reviewer may verify and close corrective action');
+      throw new ForbiddenException(
+        'Only the assigned reviewer may verify and close corrective action',
+      );
     }
   }
 }
@@ -151,7 +153,9 @@ export class ComplianceCorrectiveActionService {
   }
 
   private async getOrThrow(id: string) {
-    const action = await this.prisma.complianceCorrectiveActionRegister.findUnique({ where: { id } });
+    const action = await this.prisma.complianceCorrectiveActionRegister.findUnique({
+      where: { id },
+    });
     if (!action) {
       throw new NotFoundException(`Corrective action ${id} not found`);
     }

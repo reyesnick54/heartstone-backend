@@ -20,11 +20,12 @@ describe('Remediation S16 operational lifecycle invariants', () => {
   const lifecycleGuard = new InstrumentLifecycleGuardService({} as never);
 
   it('case manager assignment does not grant decision authority', () => {
-    expect(() => { caseManagerBoundary.assertCaseManagerIsNotDecisionAuthority({
+    expect(() => {
+      caseManagerBoundary.assertCaseManagerIsNotDecisionAuthority({
         isCaseManager: true,
         isProposedDecisionMaker: true,
-      }); },
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
     expect(DECISION_READINESS_REASON_CODES.CASE_MANAGER_NOT_DECISION_AUTHORITY).toBe(
       'CASE_MANAGER_NOT_DECISION_AUTHORITY',
     );
@@ -35,22 +36,24 @@ describe('Remediation S16 operational lifecycle invariants', () => {
   });
 
   it('corrective action cannot close without required evidence', () => {
-    expect(() => { correctiveBoundary.assertClosureRequiresEvidence({
+    expect(() => {
+      correctiveBoundary.assertClosureRequiresEvidence({
         remediationEvidenceRecordIds: [],
         verificationEvidenceRecordIds: ['ev-1'],
         verifiedAt: new Date(),
-      }); },
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
   });
 
   it('unauthorized actor cannot close corrective action', () => {
-    expect(() => { correctiveBoundary.assertReviewerAuthorized({
+    expect(() => {
+      correctiveBoundary.assertReviewerAuthorized({
         actorIdentityId: 'identity-a',
         actorOfficeholderId: 'oh-a',
         reviewerOfficeholderId: 'oh-b',
         reviewerIdentityId: 'identity-b',
-      }); },
-    ).toThrow(ForbiddenException);
+      });
+    }).toThrow(ForbiddenException);
   });
 
   it('expiration is calculated correctly', () => {
@@ -62,13 +65,15 @@ describe('Remediation S16 operational lifecycle invariants', () => {
   });
 
   it('payment does not renew license without finalized decision', () => {
-    expect(() => { renewalMonitoring.assertPaymentDoesNotRenewInstrument({
+    expect(() => {
+      renewalMonitoring.assertPaymentDoesNotRenewInstrument({
         paymentReceived: true,
         decisionFinalized: false,
-      }); },
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
 
-    expect(() => { lifecycleGuard.assertRenewalEligibility({
+    expect(() => {
+      lifecycleGuard.assertRenewalEligibility({
         currentEvidenceIds: ['ev-1'],
         identityVerified: true,
         ownershipVerified: true,
@@ -76,8 +81,8 @@ describe('Remediation S16 operational lifecycle invariants', () => {
         priorApprovalReliedUpon: false,
         paymentReceived: true,
         decisionFinalized: false,
-      }); },
-    ).toThrow(BadRequestException);
+      });
+    }).toThrow(BadRequestException);
   });
 
   it('consequential enforcement remains guarded by dedicated guard', () => {

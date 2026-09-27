@@ -39,7 +39,9 @@ export class InstrumentRenewalMonitoringService {
       throw new NotFoundException(`Instrument ${input.instrumentId} not found`);
     }
     if (!instrument.effectiveUntil && !input.expirationDate) {
-      throw new BadRequestException('Instrument expiration must be explicit for renewal monitoring');
+      throw new BadRequestException(
+        'Instrument expiration must be explicit for renewal monitoring',
+      );
     }
 
     const expirationDate = input.expirationDate ?? instrument.effectiveUntil!;
@@ -168,7 +170,9 @@ export class InstrumentRenewalMonitoringService {
       where: { instrumentId },
     });
     if (!schedule) {
-      throw new NotFoundException(`Renewal monitoring schedule for instrument ${instrumentId} not found`);
+      throw new NotFoundException(
+        `Renewal monitoring schedule for instrument ${instrumentId} not found`,
+      );
     }
 
     return this.prisma.instrumentRenewalMonitoringSchedule.update({
@@ -180,8 +184,15 @@ export class InstrumentRenewalMonitoringService {
     });
   }
 
-  isInstrumentExpired(instrumentStatus: OfficialInstrumentStatus, expirationDate: Date, asOf = new Date()): boolean {
-    return instrumentStatus === OfficialInstrumentStatus.EXPIRED || expirationDate.getTime() <= asOf.getTime();
+  isInstrumentExpired(
+    instrumentStatus: OfficialInstrumentStatus,
+    expirationDate: Date,
+    asOf = new Date(),
+  ): boolean {
+    return (
+      instrumentStatus === OfficialInstrumentStatus.EXPIRED ||
+      expirationDate.getTime() <= asOf.getTime()
+    );
   }
 }
 
@@ -200,8 +211,12 @@ export class OperationalJobRunnerService {
       },
     });
 
-    const results: { jobCode: string; status: OperationalJobRunStatus; summary?: string; error?: string }[] =
-      [];
+    const results: {
+      jobCode: string;
+      status: OperationalJobRunStatus;
+      summary?: string;
+      error?: string;
+    }[] = [];
 
     for (const definition of definitions) {
       const run = await this.prisma.operationalJobRun.create({
@@ -232,7 +247,11 @@ export class OperationalJobRunnerService {
           },
         });
 
-        results.push({ jobCode: definition.jobCode, status: OperationalJobRunStatus.SUCCEEDED, summary });
+        results.push({
+          jobCode: definition.jobCode,
+          status: OperationalJobRunStatus.SUCCEEDED,
+          summary,
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown job failure';
         await this.prisma.operationalJobRun.update({
@@ -243,7 +262,11 @@ export class OperationalJobRunnerService {
             errorMessage: message,
           },
         });
-        results.push({ jobCode: definition.jobCode, status: OperationalJobRunStatus.FAILED, error: message });
+        results.push({
+          jobCode: definition.jobCode,
+          status: OperationalJobRunStatus.FAILED,
+          error: message,
+        });
       }
     }
 
