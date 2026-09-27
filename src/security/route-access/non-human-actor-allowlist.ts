@@ -4,8 +4,9 @@ import { type AuthorityActionType } from '@prisma/client';
  * Explicit allowlist of non-human-permitted consequential actions.
  * All final human-reserved actions fail closed unless listed here.
  */
-export const NON_HUMAN_ALLOWED_CONSEQUENTIAL_ACTIONS: ReadonlySet<AuthorityActionType> =
-  new Set([]);
+export const NON_HUMAN_ALLOWED_CONSEQUENTIAL_ACTIONS: ReadonlySet<AuthorityActionType> = new Set(
+  [],
+);
 
 /** Route keys (METHOD + space + path) where non-human identities may invoke mutating handlers. */
 export const NON_HUMAN_ALLOWED_MUTATION_ROUTE_KEYS: ReadonlySet<string> = new Set([

@@ -1,8 +1,5 @@
 import { RouteClass } from './route-class.enum';
-import {
-  scanControllerRoutes,
-  validateRouteSecurityMetadata,
-} from './route-security-metadata';
+import { scanControllerRoutes, validateRouteSecurityMetadata } from './route-security-metadata';
 
 describe('route-security-metadata', () => {
   const routes = scanControllerRoutes();
@@ -36,7 +33,9 @@ describe('route-security-metadata', () => {
 
   it('validateRouteSecurityMetadata reports missing metadata until codemod completes', () => {
     const { violations } = validateRouteSecurityMetadata({ routes });
-    const missingMetadata = violations.filter((message) => message.includes('missing @RouteAccess'));
+    const missingMetadata = violations.filter((message) =>
+      message.includes('missing @RouteAccess'),
+    );
     if (missingMetadata.length > 0) {
       expect(missingMetadata.length).toBeGreaterThan(0);
     } else {

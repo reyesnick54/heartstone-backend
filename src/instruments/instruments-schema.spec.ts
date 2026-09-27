@@ -54,8 +54,8 @@ describe('Phase 8G instrument lifecycle schema', () => {
     expect(instrumentBlock).toContain('publicVerificationUpdatedAt');
   });
 
-  it('distinguishes ABSEZ jurisdiction scope', () => {
-    expect(schema).toContain('ABSEZ');
+  it('distinguishes operating-jurisdiction scope from national', () => {
+    expect(schema).toContain('OPERATING_JURISDICTION');
   });
 
   it('records review stay status without auto-stay default', () => {

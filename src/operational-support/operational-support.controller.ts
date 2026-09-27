@@ -39,10 +39,10 @@ import { OPERATIONAL_SUPPORT_BOUNDARY_DISCLAIMER } from './operational-support.c
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Operational support and platform administration",
-  authorityRequirement: "Restricted platform operations authority",
-  actorSource: "Authenticated platform administrator",
-  primarySecurityInvariant: "Operational tooling cannot mutate authoritative government decisions",
+  scopeRequirement: 'Operational support and platform administration',
+  authorityRequirement: 'Restricted platform operations authority',
+  actorSource: 'Authenticated platform administrator',
+  primarySecurityInvariant: 'Operational tooling cannot mutate authoritative government decisions',
 })
 @Controller('operational-support')
 @UseGuards(SessionAuthGuard)

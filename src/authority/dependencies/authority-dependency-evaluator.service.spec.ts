@@ -211,7 +211,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
   });
 
   it('consultation does not satisfy concurrence', async () => {
-    const record = await createFunction(AuthorityClassification.ABSEZ_OWNED);
+    const record = await createFunction(AuthorityClassification.INSTITUTION_OWNED);
     const dependency = await records.createDependency({
       functionAuthorityRecordId: record.id,
       dependencyType: AuthorityDependencyType.GOVERNMENT_CONCURRENCE,
@@ -232,7 +232,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
   });
 
   it('supervision does not automatically block an otherwise ABSEZ-owned function', async () => {
-    const record = await createFunction(AuthorityClassification.ABSEZ_OWNED);
+    const record = await createFunction(AuthorityClassification.INSTITUTION_OWNED);
     const dependency = await records.createDependency({
       functionAuthorityRecordId: record.id,
       dependencyType: AuthorityDependencyType.SUPERVISORY_REVIEW,
@@ -246,7 +246,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
   });
 
   it('liaison does not create delegation', async () => {
-    const record = await createFunction(AuthorityClassification.ABSEZ_OWNED);
+    const record = await createFunction(AuthorityClassification.INSTITUTION_OWNED);
     const dependency = await records.createDependency({
       functionAuthorityRecordId: record.id,
       dependencyType: AuthorityDependencyType.LIAISON,
@@ -339,7 +339,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
     const record = await createFunction(AuthorityClassification.EXPRESSLY_RETAINED_NATIONAL);
 
     await expect(
-      records.updateClassification(record.id, AuthorityClassification.ABSEZ_OWNED),
+      records.updateClassification(record.id, AuthorityClassification.INSTITUTION_OWNED),
     ).rejects.toThrow('cannot be silently converted');
   });
 });

@@ -71,7 +71,8 @@ const decisionsProfile: RouteAccessProfile = {
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
   scopeRequirement: 'Case-bound decision preparation and execution scope',
-  authorityRequirement: 'Explicit decision-maker identity match and institutional authority for execution',
+  authorityRequirement:
+    'Explicit decision-maker identity match and institutional authority for execution',
   actorSource: 'Session identity; decisionMakerIdentityId must match session',
   primarySecurityInvariant: 'Recommendations and preparation do not equal official decisions',
 };
@@ -82,7 +83,8 @@ const decisionsIssuanceProfile: RouteAccessProfile = {
   scopeRequirement: 'Issuance readiness and official instrument issuance scope',
   authorityRequirement: 'Function authority ISSUE evaluation via ConsequentialActionGuard',
   actorSource: 'Session identity with evaluated issuer authority context',
-  primarySecurityInvariant: 'Issuance requires explicit authority evaluation, not authentication alone',
+  primarySecurityInvariant:
+    'Issuance requires explicit authority evaluation, not authentication alone',
 };
 
 const complianceProfile: RouteAccessProfile = {
@@ -134,7 +136,8 @@ const healthcareProfile: RouteAccessProfile = {
   routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
   authenticationRequired: true,
   scopeRequirement: 'Patient-owned healthcare profile or provider policy-scoped access',
-  authorityRequirement: 'HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority',
+  authorityRequirement:
+    'HealthcareDataAccessPolicy for provider routes; no autonomous clinical authority',
   actorSource: 'Session identity with patient or governed provider context',
   primarySecurityInvariant:
     'Program discovery != medical recommendation; application != clinical authorization',
@@ -171,9 +174,11 @@ const experienceProfile: RouteAccessProfile = {
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
   scopeRequirement: 'Experience layer navigation and institutional workspace scope',
-  authorityRequirement: 'OfficialExperienceGuard for substantive routes; no authority from navigation',
+  authorityRequirement:
+    'OfficialExperienceGuard for substantive routes; no authority from navigation',
   actorSource: 'Session identity with resolved official or citizen context',
-  primarySecurityInvariant: 'Experience projections do not execute consequential government actions',
+  primarySecurityInvariant:
+    'Experience projections do not execute consequential government actions',
 };
 
 export const ROUTE_ACCESS_PROFILES: Record<RouteAccessDomainKey, RouteAccessProfile> = {

@@ -178,7 +178,7 @@ describe('Actor appointment binding must-fail invariants (integration)', () => {
       data: {
         code: 'S2-FN',
         name: 'S2 Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,

@@ -29,10 +29,10 @@ import { PHASE_10F_BOUNDARY_DISCLAIMER, PHASE_10G_BOUNDARY_DISCLAIMER } from './
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
   authenticationRequired: true,
-  scopeRequirement: "Redress and appeals administration",
-  authorityRequirement: "Institutional redress handling authority",
-  actorSource: "Authenticated institutional actor",
-  primarySecurityInvariant: "Redress access does not bypass original decision authority chain",
+  scopeRequirement: 'Redress and appeals administration',
+  authorityRequirement: 'Institutional redress handling authority',
+  actorSource: 'Authenticated institutional actor',
+  primarySecurityInvariant: 'Redress access does not bypass original decision authority chain',
 })
 @Controller('redress')
 export class RedressController {

@@ -71,7 +71,7 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
   it('returns structured status on ALLOW without universal permission', async () => {
     const ctx = await fixtures.seedStructuralContext();
     const classifications = await fixtures.seedEightClassifications(ctx);
-    const owned = classificationFixture(classifications, AuthorityClassification.ABSEZ_OWNED);
+    const owned = classificationFixture(classifications, AuthorityClassification.INSTITUTION_OWNED);
 
     const token = await authenticate(ctx.identityId);
 
@@ -205,7 +205,7 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
   it('blocks SoD violation via self-approval', async () => {
     const ctx = await fixtures.seedStructuralContext();
     const classifications = await fixtures.seedEightClassifications(ctx);
-    const owned = classificationFixture(classifications, AuthorityClassification.ABSEZ_OWNED);
+    const owned = classificationFixture(classifications, AuthorityClassification.INSTITUTION_OWNED);
 
     await prisma.authorityCondition.create({
       data: {
@@ -243,7 +243,7 @@ describe('Phase 4F runtime authority evaluation (e2e)', () => {
   it('blocks conflict of interest when flagged', async () => {
     const ctx = await fixtures.seedStructuralContext();
     const classifications = await fixtures.seedEightClassifications(ctx);
-    const owned = classificationFixture(classifications, AuthorityClassification.ABSEZ_OWNED);
+    const owned = classificationFixture(classifications, AuthorityClassification.INSTITUTION_OWNED);
 
     await prisma.authorityCondition.create({
       data: {

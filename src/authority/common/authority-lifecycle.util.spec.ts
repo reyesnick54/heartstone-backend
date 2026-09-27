@@ -33,7 +33,7 @@ describe('authority lifecycle utilities', () => {
     expect(
       canSupportOperationalAuthorityEvaluation(
         FunctionAuthorityLifecycleStatus.SUSPENDED,
-        AuthorityClassification.ABSEZ_OWNED,
+        AuthorityClassification.INSTITUTION_OWNED,
       ),
     ).toBe(false);
   });

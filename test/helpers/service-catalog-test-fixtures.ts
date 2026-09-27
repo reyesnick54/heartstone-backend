@@ -115,7 +115,7 @@ export async function seedFunctionAuthorityRecord(
     data: {
       code: `${NON_PRODUCTION_SERVICE_CATALOG_FIXTURE_MARKER}-FUNC`,
       name: 'NON_PRODUCTION Sample Licensing Function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.LICENSING,
       institutionId,
       officeId,

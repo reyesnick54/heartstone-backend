@@ -124,7 +124,7 @@ describe('Phase 8 decisions and issuance lifecycle (e2e)', () => {
       holderIdentityId: fixture.applicantIdentityId,
       scope: { activity: 'Import/export' },
       effectiveFrom: new Date('2026-01-01'),
-      issuerSource: InstrumentIssuerSource.ABSEZ_ISSUED,
+      issuerSource: InstrumentIssuerSource.INSTITUTION_ISSUED,
     });
 
     expect(readiness.outcome).toBe('BLOCKED');

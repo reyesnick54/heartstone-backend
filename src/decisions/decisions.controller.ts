@@ -27,10 +27,11 @@ import { DecisionReadinessService } from './readiness/decision-readiness.service
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Case-bound decision preparation and execution scope",
-  authorityRequirement: "Explicit decision-maker identity match and institutional authority for execution",
-  actorSource: "Session identity; decisionMakerIdentityId must match session",
-  primarySecurityInvariant: "Recommendations and preparation do not equal official decisions",
+  scopeRequirement: 'Case-bound decision preparation and execution scope',
+  authorityRequirement:
+    'Explicit decision-maker identity match and institutional authority for execution',
+  actorSource: 'Session identity; decisionMakerIdentityId must match session',
+  primarySecurityInvariant: 'Recommendations and preparation do not equal official decisions',
 })
 @Controller('decisions')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)

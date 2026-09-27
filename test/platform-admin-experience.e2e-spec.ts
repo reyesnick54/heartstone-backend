@@ -353,7 +353,7 @@ describe('Platform Admin Experience API (e2e)', () => {
       .send({
         code: 'PA-AUTH',
         name: 'Platform Admin Authority Attempt',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
       })
       .expect(403);

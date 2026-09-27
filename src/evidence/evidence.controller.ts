@@ -19,7 +19,10 @@ import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
 import { EvidenceClientAssertionForbiddenException } from './common/exceptions/evidence.exceptions';
-import { EVIDENCE_AUTHORITY_FUNCTION_CODES, FORBIDDEN_CLIENT_EVIDENCE_FIELDS } from './evidence.constants';
+import {
+  EVIDENCE_AUTHORITY_FUNCTION_CODES,
+  FORBIDDEN_CLIENT_EVIDENCE_FIELDS,
+} from './evidence.constants';
 import { ReceiveEvidenceDto } from './records/dto/receive-evidence.dto';
 import { EvidenceRecordsService } from './records/evidence-records.service';
 import {
@@ -41,10 +44,10 @@ import { EvidenceVerificationService } from './verification/evidence-verificatio
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
-  authorityRequirement: "Document/evidence access guard or institutional evidence role",
-  actorSource: "Session identity with applicant or official actor context",
-  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+  scopeRequirement: 'Evidence governance, document custody, or applicant document scope',
+  authorityRequirement: 'Document/evidence access guard or institutional evidence role',
+  actorSource: 'Session identity with applicant or official actor context',
+  primarySecurityInvariant: 'Evidence quality and verification cannot be client-asserted',
 })
 @Controller('evidence')
 export class EvidenceController {
@@ -139,18 +142,18 @@ export class EvidenceController {
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
-  authorityRequirement: "Document/evidence access guard or institutional evidence role",
-  actorSource: "Session identity with applicant or official actor context",
-  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+  scopeRequirement: 'Evidence governance, document custody, or applicant document scope',
+  authorityRequirement: 'Document/evidence access guard or institutional evidence role',
+  actorSource: 'Session identity with applicant or official actor context',
+  primarySecurityInvariant: 'Evidence quality and verification cannot be client-asserted',
 })
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
-  authorityRequirement: "Document/evidence access guard or institutional evidence role",
-  actorSource: "Session identity with applicant or official actor context",
-  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+  scopeRequirement: 'Evidence governance, document custody, or applicant document scope',
+  authorityRequirement: 'Document/evidence access guard or institutional evidence role',
+  actorSource: 'Session identity with applicant or official actor context',
+  primarySecurityInvariant: 'Evidence quality and verification cannot be client-asserted',
 })
 @Controller('evidence/ai')
 export class EvidenceAiController {
