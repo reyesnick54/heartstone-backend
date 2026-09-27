@@ -26,7 +26,7 @@ describe('Phase 8 decisions and issuance concurrency (e2e)', () => {
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-  });
+  }, 60_000);
 
   afterAll(async () => {
     await app.close();

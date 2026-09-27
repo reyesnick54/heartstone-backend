@@ -143,6 +143,17 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await resetIntelligenceData(prisma);
   await resetApplicationProcessingData(prisma);
   await resetServiceCatalogData(prisma);
+  await prisma.setupConfigurationOverride.deleteMany();
+  await prisma.setupConfigurationInstallation.deleteMany();
+  await prisma.setupConfigurationPackage.deleteMany();
+  await prisma.institutionCaseCategory.deleteMany();
+  await prisma.institutionServiceStandard.deleteMany();
+  await prisma.institutionEscalationLevel.deleteMany();
+  await prisma.setupVocabularyEntry.deleteMany();
+  await prisma.recordRetentionAssignment.deleteMany();
+  await prisma.retentionRule.deleteMany();
+  await prisma.retentionSchedule.deleteMany();
+  await prisma.recordsClassification.deleteMany();
   await resetAuthorityData(prisma);
   await prisma.delegationStructuredScope.deleteMany();
   await prisma.delegation.deleteMany();
