@@ -8,6 +8,7 @@ import {
   CaseWorkflowStepInstanceStatus,
   GovernmentDecisionStatus,
   OfficialInstrumentStatus,
+  SafeHaltReasonCode,
   WorkflowStepConsequenceLevel,
   WorkflowStepType,
   WorkflowTransitionJoinType,
@@ -16,6 +17,8 @@ import {
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../database/prisma.service';
+import { WorkflowConditionEvaluatorService } from '../../remediation/s12/branching/workflow-condition-evaluator.service';
+import { SafeHaltWorkflowService } from '../../remediation/s12/halt/safe-halt-workflow.service';
 import { CaseEventsService } from '../cases/case-events.service';
 import { CaseStatusService } from '../cases/case-status.service';
 import {
@@ -45,6 +48,8 @@ export class WorkflowRuntimeService {
     private readonly authorityEvaluation: AuthorityEvaluationService,
     private readonly caseStatus: CaseStatusService,
     private readonly caseEvents: CaseEventsService,
+    private readonly conditionEvaluator: WorkflowConditionEvaluatorService,
+    private readonly safeHaltWorkflow: SafeHaltWorkflowService,
   ) {}
 
   async startWorkflow(caseId: string, workflowVersionId: string) {
@@ -150,15 +155,24 @@ export class WorkflowRuntimeService {
 
     await this.enforceStepGates(stepDef, input);
 
-    await this.prisma.caseWorkflowStepInstance.update({
-      where: { id: stepInstance.id },
+    const completedOutcome = input.outcome ?? 'COMPLETED';
+    const completion = await this.prisma.caseWorkflowStepInstance.updateMany({
+      where: {
+        id: stepInstance.id,
+        status: CaseWorkflowStepInstanceStatus.ACTIVE,
+      },
       data: {
         status: CaseWorkflowStepInstanceStatus.COMPLETED,
         completedAt: new Date(),
         completedByIdentityId: input.actorIdentityId,
-        outcome: input.outcome ?? 'COMPLETED',
+        outcome: completedOutcome,
+        version: { increment: 1 },
       },
     });
+
+    if (completion.count !== 1) {
+      throw new WorkflowStepAlreadyCompletedException();
+    }
 
     await this.caseEvents.record(
       input.caseId,
@@ -195,6 +209,7 @@ export class WorkflowRuntimeService {
         workflowInstance: refreshedInstance,
       },
       stepDef.id,
+      completedOutcome,
     );
 
     return this.prisma.caseWorkflowInstance.findUnique({
@@ -307,6 +322,9 @@ export class WorkflowRuntimeService {
             fromStepId: string;
             toStepId: string;
             joinType: WorkflowTransitionJoinType;
+            transitionKey: string;
+            conditionConfig: unknown;
+            isDefault: boolean;
           }[];
         };
         stepInstances: {
@@ -318,6 +336,7 @@ export class WorkflowRuntimeService {
       };
     },
     completedStepId: string,
+    completedStepOutcome?: string,
   ) {
     const { workflowInstance } = caseRecord;
     const { workflowVersion } = workflowInstance;
@@ -336,9 +355,33 @@ export class WorkflowRuntimeService {
       return;
     }
 
+    const eligibleTransitions = outgoing.filter((transition) =>
+      this.conditionEvaluator.evaluate(transition.conditionConfig, {
+        caseStatus: caseRecord.status,
+        stepOutcome: completedStepOutcome,
+      }),
+    );
+
+    let selectedTransitions = eligibleTransitions;
+    if (selectedTransitions.length === 0 && outgoing.some((t) => t.isDefault)) {
+      selectedTransitions = outgoing.filter((t) => t.isDefault);
+    }
+
+    if (selectedTransitions.length > 1) {
+      await this.caseEvents.record(caseRecord.id, CaseEventType.WORKFLOW_BRANCH, {
+        fromStepId: completedStepId,
+        transitionKeys: selectedTransitions.map((t) => t.transitionKey),
+      });
+    } else if (selectedTransitions.length === 1 && outgoing.length > 1) {
+      await this.caseEvents.record(caseRecord.id, CaseEventType.WORKFLOW_BRANCH, {
+        fromStepId: completedStepId,
+        transitionKey: selectedTransitions[0]?.transitionKey,
+      });
+    }
+
     const nextStepIds: string[] = [];
 
-    for (const transition of outgoing) {
+    for (const transition of selectedTransitions) {
       const fromStep = workflowVersion.steps.find((s) => s.id === transition.fromStepId);
       const parallelGroupKey = fromStep?.parallelGroupKey;
 
@@ -386,13 +429,22 @@ export class WorkflowRuntimeService {
         (si) => si.workflowStepDefinitionId === nextStepId,
       );
       if (stepInstance) {
-        await this.prisma.caseWorkflowStepInstance.update({
-          where: { id: stepInstance.id },
+        const activated = await this.prisma.caseWorkflowStepInstance.updateMany({
+          where: {
+            id: stepInstance.id,
+            status: CaseWorkflowStepInstanceStatus.PENDING,
+          },
           data: {
             status: CaseWorkflowStepInstanceStatus.ACTIVE,
             startedAt: new Date(),
           },
         });
+        if (activated.count === 1) {
+          const stepKey = workflowVersion.steps.find((s) => s.id === nextStepId)?.stepKey;
+          if (stepKey) {
+            await this.caseEvents.record(caseRecord.id, CaseEventType.STEP_STARTED, { stepKey });
+          }
+        }
       }
     }
 
@@ -417,23 +469,31 @@ export class WorkflowRuntimeService {
   }
 
   async safeHalt(caseId: string, reason: string, actorIdentityId?: string) {
-    const instance = await this.prisma.caseWorkflowInstance.findUnique({ where: { caseId } });
-    if (!instance) {
-      return null;
-    }
-
-    await this.prisma.caseWorkflowInstance.update({
-      where: { id: instance.id },
-      data: {
-        status: CaseWorkflowInstanceStatus.SAFE_HALTED,
-        haltedAt: new Date(),
-        haltReason: reason,
-      },
+    return this.safeHaltWorkflow.halt({
+      caseId,
+      reasonCode: SafeHaltReasonCode.REQUIRED_EVIDENCE_UNRESOLVED,
+      reason,
+      requiredResolution: reason,
+      actorIdentityId,
     });
+  }
 
-    await this.caseStatus.transition(caseId, CaseStatus.SAFE_HALTED, reason, actorIdentityId);
-    await this.caseEvents.record(caseId, CaseEventType.SAFE_HALT, { reason }, actorIdentityId);
+  async safeHaltForMissingDependency(
+    caseId: string,
+    reason: string,
+    requiredResolution: string,
+    actorIdentityId?: string,
+  ) {
+    return this.safeHaltWorkflow.halt({
+      caseId,
+      reasonCode: SafeHaltReasonCode.AUTHORITY_DEPENDENCY_UNAVAILABLE,
+      reason,
+      requiredResolution,
+      actorIdentityId,
+    });
+  }
 
-    return instance;
+  async resumeFromSafeHalt(caseId: string, actorIdentityId?: string, resolutionNote?: string) {
+    return this.safeHaltWorkflow.resumeFromHalt(caseId, actorIdentityId, resolutionNote);
   }
 }

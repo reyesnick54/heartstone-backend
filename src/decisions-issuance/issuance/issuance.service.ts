@@ -15,7 +15,6 @@ import {
   DocumentAssociationRole,
   DocumentAssociationTargetType,
   DocumentSourceType,
-  InstrumentIssuerSource,
   IssuanceEventStatus,
   IssuanceReadinessOutcome,
   MalwareScanStatus,
@@ -30,6 +29,10 @@ import {
   DOCUMENT_STORAGE_PORT,
   DocumentStoragePort,
 } from '../../evidence-records/ports/document-storage.port';
+import {
+  isOperatingInstitutionIssuedSource,
+  resolveDefaultInstrumentIssuerSource,
+} from '../../platform-core/institution-neutral-enums.util';
 import { InstrumentNumberingService } from '../catalog/instrument-numbering.service';
 import {
   IssuanceBlockedException,
@@ -122,13 +125,10 @@ export class IssuanceService {
       throw new NotFoundException('Instrument type version not found');
     }
 
-    if (
-      typeVersion.retainedNationalBoundary &&
-      input.issuerSource !== InstrumentIssuerSource.RETAINED_NATIONAL_COORDINATED &&
-      input.issuerSource !== InstrumentIssuerSource.EXTERNAL_AUTHENTICATED
-    ) {
+    const issuerSource = resolveDefaultInstrumentIssuerSource(input.issuerSource);
+    if (typeVersion.retainedNationalBoundary && isOperatingInstitutionIssuedSource(issuerSource)) {
       throw new RetainedNationalIssuanceException(
-        'Retained-national instruments cannot be issued as ABSEZ-issued instruments',
+        'Retained-national instruments cannot be issued by the operating institution without coordinated national or external issuer source',
       );
     }
 
@@ -212,7 +212,7 @@ export class IssuanceService {
           holderOrganizationId: input.holderOrganizationId,
           issuerInstitutionId: typeVersion.issuingInstitutionId,
           issuerOfficeholderId: input.issuerOfficeholderId,
-          issuerSource: input.issuerSource ?? InstrumentIssuerSource.ABSEZ_ISSUED,
+          issuerSource,
           externalIssuerReference: input.externalIssuerReference,
           scope: (input.scope ?? {}) as Prisma.InputJsonValue,
           status: OfficialInstrumentStatus.PENDING_ISSUANCE,

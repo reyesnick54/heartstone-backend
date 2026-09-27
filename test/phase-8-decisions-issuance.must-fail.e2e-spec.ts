@@ -446,7 +446,7 @@ describe('Phase 8 must-fail invariants (e2e)', () => {
       holderIdentityId: fixture.applicantIdentityId,
       scope: { activity: 'test' },
       effectiveFrom: new Date('2026-01-01'),
-      issuerSource: 'ABSEZ_ISSUED',
+      issuerSource: 'INSTITUTION_ISSUED',
     });
 
     expect(result.outcome).toBe('BLOCKED');

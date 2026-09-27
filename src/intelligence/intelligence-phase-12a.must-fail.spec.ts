@@ -65,16 +65,16 @@ describe('Phase 12A must-fail gates', () => {
     it('blocks ABSEZ delay relabeling without rule', () => {
       expect(() => {
         boundary.assertDependencyRelabelRequiresRule(
-          MetricDependencyTimeClassification.ABSEZ_CONTROLLED_TIME,
+          MetricDependencyTimeClassification.INSTITUTION_CONTROLLED_TIME,
           MetricDependencyTimeClassification.EXTERNAL_DEPENDENCY_TIME,
           false,
         );
       }).toThrow(BadRequestException);
     });
 
-    it('blocks external delay attributed to ABSEZ automatically', () => {
+    it('blocks external delay attributed to the operating institution automatically', () => {
       expect(() => {
-        boundary.assertExternalDelayNotAttributedToAbsez(
+        boundary.assertExternalDelayNotAttributedToInstitution(
           MetricDependencyTimeClassification.EXTERNAL_DEPENDENCY_TIME,
           true,
         );

@@ -246,7 +246,7 @@ describe('Phase 8E official instrument issuance (integration)', () => {
       holderIdentityId: fixture.applicantIdentityId,
       scope: { activity: 'Import/export' },
       effectiveFrom: new Date('2026-01-01'),
-      issuerSource: 'ABSEZ_ISSUED',
+      issuerSource: 'INSTITUTION_ISSUED',
     });
 
     expect(readiness.outcome).toBe('BLOCKED');

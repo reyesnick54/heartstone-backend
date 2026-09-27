@@ -62,7 +62,7 @@ describe('Authority domain (integration)', () => {
       .send({
         code: `${NON_PRODUCTION_FIXTURE_MARKER}-INT-FN`,
         name: 'Integration Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.OTHER,
       })
       .expect(201);

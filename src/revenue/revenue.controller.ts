@@ -20,10 +20,10 @@ import { REVENUE_AUTHORITY_FUNCTION_CODES } from './revenue.constants';
 @ControllerRouteAccess({
   routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
   authenticationRequired: true,
-  scopeRequirement: "Government service domain actor scope with institutional boundaries",
-  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
-  actorSource: "Session identity with domain access resolution",
-  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+  scopeRequirement: 'Government service domain actor scope with institutional boundaries',
+  authorityRequirement: 'ConsequentialActionGuard for final government outcomes',
+  actorSource: 'Session identity with domain access resolution',
+  primarySecurityInvariant: 'Application and submission endpoints do not confer official outcomes',
 })
 @Controller('revenue')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
@@ -104,10 +104,7 @@ export class RevenueController {
   @ApiOperation({ summary: 'Issue an authoritative tax assessment (consequential)' })
   async issueTaxAssessment(
     @Body()
-    body: Omit<
-      Parameters<TaxAssessmentService['issueAssessment']>[0],
-      'actorIdentityType'
-    >,
+    body: Omit<Parameters<TaxAssessmentService['issueAssessment']>[0], 'actorIdentityType'>,
   ) {
     return this.taxAssessments.issueAssessment({
       ...body,

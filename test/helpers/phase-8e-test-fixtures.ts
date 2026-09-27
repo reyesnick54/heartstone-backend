@@ -55,7 +55,7 @@ export async function seedPhase8eIssuanceFixture(
     data: {
       code: `${marker}-ISSUE-FUNC`,
       name: 'Phase 8E Issue Function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.LICENSING,
       lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
       institutionId: base.institutionId,

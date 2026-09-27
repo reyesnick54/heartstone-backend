@@ -182,14 +182,14 @@ export class Phase4TestFixtures {
       extra?: (functionId: string) => Promise<void>;
     }[] = [
       {
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         code: 'ABSEZ-OWNED',
         requiresDelegation: false,
         permitted: [AuthorityActionType.DECIDE, AuthorityActionType.ISSUE],
         denied: [],
       },
       {
-        classification: AuthorityClassification.ABSEZ_DELEGATED,
+        classification: AuthorityClassification.INSTITUTION_DELEGATED,
         code: 'ABSEZ-DELEGATED',
         requiresDelegation: true,
         permitted: [AuthorityActionType.APPROVE],

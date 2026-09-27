@@ -264,7 +264,7 @@ describe('Phase 12B command console actor-context must-fail invariants (integrat
       data: {
         code: `EXEC-COMMAND-${randomUUID().slice(0, 8)}`,
         name: 'Executive Command Authority',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.ADMINISTRATIVE,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: fixture.institutionId,
