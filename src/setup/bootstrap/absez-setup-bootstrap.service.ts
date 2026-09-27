@@ -248,7 +248,8 @@ export class AbsezSetupBootstrapService {
         jurisdictionId: jurisdiction.id,
         code: ABSEZ_INSTITUTION_CODE,
         name: 'Antigua and Barbuda Special Economic Zone Authority',
-        description: 'ABSEZ institution configuration (structural offices only; no officeholders seeded).',
+        description:
+          'ABSEZ institution configuration (structural offices only; no officeholders seeded).',
         type: InstitutionType.SPECIAL_ECONOMIC_ZONE_AUTHORITY,
         status: StructuralLifecycleStatus.ACTIVE,
       },

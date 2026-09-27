@@ -81,7 +81,8 @@ export const ABSEZ_ARTICLE9_DEPARTMENTS: readonly AbsezArticle9DepartmentDefinit
   {
     code: 'ABSEZ-ART9-11',
     name: 'Security and Safety Coordination',
-    description: 'Article 9 category — security and safety liaison (not national policing authority).',
+    description:
+      'Article 9 category — security and safety liaison (not national policing authority).',
     officeCode: 'ABSEZ-ART9-11-OFFICE',
     officeName: 'Security and Safety Coordination — Head of Office',
   },
@@ -116,14 +117,16 @@ export const ABSEZ_ARTICLE9_DEPARTMENTS: readonly AbsezArticle9DepartmentDefinit
   {
     code: 'ABSEZ-ART9-16',
     name: 'Internal Audit and Assurance',
-    description: 'Article 9 category — internal audit (advisory assurance, not external enforcement).',
+    description:
+      'Article 9 category — internal audit (advisory assurance, not external enforcement).',
     officeCode: 'ABSEZ-ART9-16-OFFICE',
     officeName: 'Internal Audit and Assurance — Head of Office',
   },
   {
     code: 'ABSEZ-ART9-17',
     name: 'Immigration Coordination Unit',
-    description: 'Article 9 category — immigration liaison (national immigration authority retained).',
+    description:
+      'Article 9 category — immigration liaison (national immigration authority retained).',
     officeCode: 'ABSEZ-ART9-17-OFFICE',
     officeName: 'Immigration Coordination — Liaison Office',
   },

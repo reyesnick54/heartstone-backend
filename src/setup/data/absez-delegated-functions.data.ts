@@ -22,7 +22,8 @@ export const ABSEZ_DELEGATED_FUNCTIONS: readonly AbsezDelegatedFunctionDefinitio
   {
     code: 'ABSEZ-FN-CUSTOMS-FACILITATION',
     name: 'Customs facilitation (delegated)',
-    description: 'Customs facilitation pursuant to delegated powers — inactive until instrument authenticated.',
+    description:
+      'Customs facilitation pursuant to delegated powers — inactive until instrument authenticated.',
     functionClass: ControlledFunctionClass.ADMINISTRATIVE,
     governingSourceCode: 'ABSEZ-IMPL-PROTOCOL-UNEXEC',
     delegatingInstrumentCode: 'ABSEZ-ORDER-DELEG-POWERS-UNEXEC',
@@ -55,7 +56,8 @@ export const ABSEZ_DELEGATED_FUNCTIONS: readonly AbsezDelegatedFunctionDefinitio
   {
     code: 'ABSEZ-FN-FINANCIAL-LICENSING-FACILITATION',
     name: 'Financial services licensing facilitation (delegated)',
-    description: 'Financial licensing coordination — inactive until delegating instrument authenticated.',
+    description:
+      'Financial licensing coordination — inactive until delegating instrument authenticated.',
     functionClass: ControlledFunctionClass.LICENSING,
     governingSourceCode: 'ABSEZ-IMPL-PROTOCOL-UNEXEC',
     delegatingInstrumentCode: 'ABSEZ-ORDER-DELEG-POWERS-UNEXEC',
@@ -66,7 +68,8 @@ export const ABSEZ_DELEGATED_FUNCTIONS: readonly AbsezDelegatedFunctionDefinitio
   {
     code: 'ABSEZ-FN-CITIZENSHIP-RESIDENCY-FACILITATION',
     name: 'Citizenship and residency facilitation (delegated)',
-    description: 'Citizenship/residency coordination — inactive until delegating instrument authenticated.',
+    description:
+      'Citizenship/residency coordination — inactive until delegating instrument authenticated.',
     functionClass: ControlledFunctionClass.ADMINISTRATIVE,
     governingSourceCode: 'ABSEZ-IMPL-PROTOCOL-UNEXEC',
     delegatingInstrumentCode: 'ABSEZ-ORDER-DELEG-POWERS-UNEXEC',

@@ -12,7 +12,8 @@ export const ABSEZ_ADVISORY_AGENCIES: readonly AbsezAdvisoryAgencyDefinition[] =
   {
     code: 'AG-NATL-ADV-CUSTOMS',
     name: 'Comptroller of Customs (Antigua and Barbuda)',
-    description: 'National customs authority — advisory/participating agency for zone coordination.',
+    description:
+      'National customs authority — advisory/participating agency for zone coordination.',
     type: ExternalAuthorityType.GOVERNMENT,
   },
   {
