@@ -212,7 +212,7 @@ export class ServicePackRuntimeCompilerService {
 
     const serviceCode = `${pack.packId}-${service.serviceCode}`.toUpperCase();
     const serviceSlug = `${pack.packId}-${service.serviceSlug}`.toLowerCase();
-    const versionScope = `${pack.packVersion}`.replace(/\./g, '-');
+    const versionScope = pack.packVersion.replace(/\./g, '-');
 
     const governmentService =
       (await tx.governmentService.findUnique({ where: { code: serviceCode } })) ??
