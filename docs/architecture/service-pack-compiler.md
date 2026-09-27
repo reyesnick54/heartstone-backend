@@ -4,15 +4,14 @@
 
 Take a validated ServicePack manifest and determine whether it can safely map to existing HeartStone government domains before any persistent operational deployment occurs.
 
-Compilation is **dry-run only**. It does not mutate production configuration, create authority, or activate services.
+Compilation is **dry-run only** when invoked through the authoring CLI (`npm run service-pack:compile`). Persisted compilation is performed by `ServicePackRuntimeCompilerService`, which materializes validated manifests into DRAFT domain configuration without activation.
 
-## Canonical module
-
-All service pack compiler logic lives under `src/service-catalog/service-pack/`.
+## Runtime compilation module
 
 | Component | Role |
 |---|---|
-| `ServicePackCompilerService` | Orchestrates dry-run compilation and produces immutable results |
+| `ServicePackRuntimeCompilerService` | Validates authoring manifests and materializes DRAFT catalog, form, workflow, fee, evidence, and binding metadata in one transaction |
+| `ServicePackCompilerService` | Pre-deploy dry-run validation against live references (no persistence) |
 | `ServicePackValidationService` | Runs structural and cross-domain validation checks |
 | `ServicePackDependencyResolver` | Resolves manifest references against existing database entities |
 | `ServicePackConflictDetector` | Detects slug collisions, fee conflicts, and output type conflicts |

@@ -8,6 +8,7 @@ import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { ServicePackRuntimeCompilerService } from '../service-catalog/service-packs/service-pack-runtime-compiler.service';
 import { ServicePacksBoundaryService } from './common/service-packs-boundary.service';
 import { CreateServicePackDto } from './packs/dto/create-service-pack.dto';
 import { ImportServicePackManifestDto } from './packs/dto/import-service-pack-manifest.dto';
@@ -46,6 +47,7 @@ export class ServicePacksController {
     private readonly importService: ServicePackImportService,
     private readonly templateCloneService: ServicePackTemplateCloneService,
     private readonly upgradePlanService: ServicePackUpgradePlanService,
+    private readonly runtimeCompiler: ServicePackRuntimeCompilerService,
   ) {}
 
   @Get('boundary')
@@ -160,6 +162,22 @@ export class ServicePacksController {
       },
       session.identityId,
     );
+  }
+
+  @Post('versions/:versionId/compile')
+  @ApiOperation({
+    summary:
+      'Compile a validated authoring manifest into DRAFT runtime configuration (no activation)',
+  })
+  compileVersion(
+    @Param('versionId') versionId: string,
+    @CurrentSession() session: SessionContextDto,
+  ) {
+    this.boundary.assertValidationDoesNotActivateServices(undefined);
+    return this.runtimeCompiler.compileVersion({
+      servicePackVersionId: versionId,
+      compiledByIdentityId: session.identityId,
+    });
   }
 
   @Get('versions/:versionId')
