@@ -6,15 +6,14 @@ import { type App } from 'supertest/types';
 import { FunctionAuthorityRecordsService } from '../src/authority/function-authority-records/function-authority-records.service';
 import { CUSTOMS_TRADE_AUTHORITY_FUNCTION_CODES } from '../src/customs-trade/customs-trade.constants';
 import { PrismaService } from '../src/database/prisma.service';
+import { hashToken } from '../src/identity/common/crypto.util';
 import { CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES } from '../src/healthcare/research/clinical-research.constants';
 import { LABOUR_AUTHORITY_FUNCTION_CODES } from '../src/labour/labour.constants';
 import { REVENUE_AUTHORITY_FUNCTION_CODES } from '../src/revenue/revenue.constants';
 import { SOCIAL_PROTECTION_AUTHORITY_FUNCTION_CODES } from '../src/social-protection/social-protection.constants';
 import {
   authHeader,
-  loginAndGetSessionToken,
   provisionAuthenticatedIdentity,
-  provisionIdentityViaPrisma,
 } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
@@ -53,16 +52,24 @@ describe('S5 consequential coverage must-fail (e2e)', () => {
   }
 
   async function provisionServiceSession() {
-    const provisioned = await provisionIdentityViaPrisma(prisma, {
-      loginIdentifier: 's5-service@test.gov',
-      password: 'ServiceIdentity123!',
-      displayName: 'S5 Service Bot',
+    const clientId = 's5-service-bot';
+    const identity = await prisma.identity.create({
+      data: {
+        type: IdentityType.SERVICE,
+        displayName: clientId,
+      },
     });
-    await prisma.identity.update({
-      where: { id: provisioned.identityId },
-      data: { type: IdentityType.SERVICE },
+    const sessionToken = 's5-service-session-token';
+    await prisma.session.create({
+      data: {
+        identityId: identity.id,
+        tokenHash: hashToken(sessionToken),
+        status: 'ACTIVE',
+        assuranceLevel: 'HIGH',
+        expiresAt: new Date('2099-01-01'),
+      },
     });
-    return loginAndGetSessionToken(app, provisioned.loginIdentifier, provisioned.password);
+    return sessionToken;
   }
 
   it('denies service identity from benefit award (human-reserved)', async () => {

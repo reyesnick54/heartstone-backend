@@ -382,12 +382,24 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
     );
   });
 
-  it('SoD/self-approval rule blocks', async () => {
+  it('SoD rule blocks when server-derived prior actions conflict', async () => {
     const base = await seedBase();
     await prisma.segregationOfDutyRule.create({
       data: {
         functionAuthorityRecordId: base.fn.id,
-        ruleType: SodRuleType.SELF_APPROVAL,
+        ruleType: SodRuleType.SEGREGATION_OF_DUTY,
+        conflictingAction: AuthorityActionType.PREPARE,
+      },
+    });
+    await prisma.authorityEvaluationRecord.create({
+      data: {
+        functionAuthorityRecordId: base.fn.id,
+        identityId: base.identity.id,
+        officeholderId: base.officeholder.id,
+        action: AuthorityActionType.PREPARE,
+        outcome: AuthorityEvaluationOutcome.ALLOW,
+        contextSnapshot: {},
+        requestHash: 'cag-sod-prior-prepare',
       },
     });
     await assertBlocked(
@@ -397,9 +409,8 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
         officeholderId: base.officeholder.id,
         officeId: base.office.id,
         appointmentId: base.appointment.id,
-        isSelfApproval: true,
       },
-      [AUTHORITY_EVALUATION_EXPLANATION_CODES.SELF_APPROVAL_PROHIBITED],
+      [AUTHORITY_EVALUATION_EXPLANATION_CODES.SOD_VIOLATION],
     );
   });
 
@@ -512,8 +523,16 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       })
       .expect(403);
 
-    const body = response.body as ConsequentialActionDenial;
-    expect(body.explanationCodes).toContain(
+    const payload = response.body as
+      | ConsequentialActionDenial
+      | { message?: ConsequentialActionDenial | string };
+    const denial =
+      payload && typeof payload === 'object' && 'explanationCodes' in payload
+        ? payload
+        : typeof payload.message === 'object' && payload.message !== null
+          ? payload.message
+          : undefined;
+    expect(denial?.explanationCodes).toContain(
       AUTHORITY_EVALUATION_EXPLANATION_CODES.SUSPENDED_FUNCTION,
     );
   });
