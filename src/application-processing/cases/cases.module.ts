@@ -56,6 +56,7 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
   exports: [
     CasesService,
     CaseFoundationService,
+    CaseEventsService,
     CaseEventService,
     CaseStatusService,
     CasePublicStatusProjectionService,

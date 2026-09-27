@@ -1,4 +1,4 @@
-import { forwardRef,Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 import { CasesModule } from '../../application-processing/cases/cases.module';
 import { RedisModule } from '../../redis/redis.module';
