@@ -37,6 +37,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "setup:bootstrap:absez": "ts-node scripts/bootstrap-absez-setup.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
