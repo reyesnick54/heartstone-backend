@@ -298,10 +298,16 @@ async function setupIssuanceCatalog(
 }
 
 export async function seedSignedSealedDocuments(
+  app: INestApplication<App>,
   prisma: PrismaService,
   institutionId: string,
   marker = NON_PRODUCTION_DECISIONS_ISSUANCE_FIXTURE_MARKER,
 ): Promise<{ signatureDocumentVersionId: string; sealDocumentVersionId: string }> {
+  const { attachTestCryptographicEvidence } = await import('./document-trust-test-fixtures');
+  const { hashDocumentContent } = await import('../../src/evidence-records/common/document-hash.util');
+  const fixtureContent = Buffer.from('fixture-document-content', 'utf8');
+  const fixtureSha256 = hashDocumentContent(fixtureContent);
+
   const signatureRecord = await prisma.documentRecord.create({
     data: {
       documentNumber: `${marker}-SIG-DOC`,
@@ -317,8 +323,8 @@ export async function seedSignedSealedDocuments(
           sizeBytes: 10,
           storageProvider: 'inline',
           storageObjectKey: 'sig/key',
-          sha256: 'abc123',
-          signatureStatus: DocumentSignatureStatus.SIGNED,
+          sha256: fixtureSha256,
+          signatureStatus: DocumentSignatureStatus.UNSIGNED,
         },
       },
     },
@@ -340,8 +346,8 @@ export async function seedSignedSealedDocuments(
           sizeBytes: 10,
           storageProvider: 'inline',
           storageObjectKey: 'seal/key',
-          sha256: 'def456',
-          sealStatus: DocumentSealStatus.SEALED,
+          sha256: fixtureSha256,
+          sealStatus: DocumentSealStatus.UNSEALED,
         },
       },
     },
@@ -353,6 +359,9 @@ export async function seedSignedSealedDocuments(
   if (!signatureVersion || !sealVersion) {
     throw new Error('Expected document versions in signed/sealed fixture');
   }
+
+  await attachTestCryptographicEvidence(app, prisma, signatureVersion.id, { signature: true });
+  await attachTestCryptographicEvidence(app, prisma, sealVersion.id, { seal: true });
 
   return {
     signatureDocumentVersionId: signatureVersion.id,
@@ -373,7 +382,7 @@ export async function seedPhase8Fixture(
   });
 
   const catalog = await setupIssuanceCatalog(prisma, base, marker);
-  const docs = await seedSignedSealedDocuments(prisma, base.institutionId, marker);
+  const docs = await seedSignedSealedDocuments(app, prisma, base.institutionId, marker);
 
   const actions = [
     AuthorityActionType.DECIDE,

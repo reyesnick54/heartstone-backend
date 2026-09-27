@@ -18,6 +18,8 @@ import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import documentTrustConfig from './document-trust/config/document-trust.config';
+import { DocumentTrustModule } from './document-trust/document-trust.module';
 import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
@@ -55,7 +57,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, redisConfig, securityConfig, identityConfig, oidcConfig],
+      load: [appConfig, redisConfig, securityConfig, identityConfig, oidcConfig, documentTrustConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: true,
@@ -89,6 +91,7 @@ import { TransportationModule } from './transportation/transportation.module';
     HealthcareModule,
     CivilRegistryModule,
     RecordsModule,
+    DocumentTrustModule,
     EvidenceRecordsModule,
     EvidenceModule,
     InstrumentsModule,

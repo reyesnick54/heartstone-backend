@@ -18,6 +18,7 @@ describe('Phase 8F delivery/receipt/verification invariants (must-fail)', () => 
     {} as never,
     { record: jest.fn() } as never,
     { assertAllowed: jest.fn() } as never,
+    { verifyIssuedInstrument: jest.fn() } as never,
   );
 
   it('documents that issuance status is distinct from delivery status', () => {

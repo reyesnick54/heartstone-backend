@@ -17,6 +17,9 @@ export interface DocumentAccessContext {
 }
 
 const BLOCKED_SCAN_STATUSES: MalwareScanStatus[] = [
+  MalwareScanStatus.NOT_SCANNED,
+  MalwareScanStatus.SCAN_PENDING,
+  MalwareScanStatus.SCAN_FAILED,
   MalwareScanStatus.MALICIOUS,
   MalwareScanStatus.QUARANTINED,
   MalwareScanStatus.SUSPICIOUS,

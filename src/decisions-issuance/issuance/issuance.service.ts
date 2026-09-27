@@ -18,12 +18,14 @@ import {
   InstrumentIssuerSource,
   IssuanceEventStatus,
   IssuanceReadinessOutcome,
+  MalwareScanStatus,
   OfficialInstrumentStatus,
   Prisma,
 } from '@prisma/client';
 
 import { CaseStatusService } from '../../application-processing/cases/case-status.service';
 import { PrismaService } from '../../database/prisma.service';
+import { InstrumentDocumentTrustService } from '../../document-trust/services/instrument-document-trust.service';
 import {
   DOCUMENT_STORAGE_PORT,
   DocumentStoragePort,
@@ -61,6 +63,7 @@ export class IssuanceService {
     private readonly caseStatus: CaseStatusService,
     @Inject(DOCUMENT_STORAGE_PORT)
     private readonly storage: DocumentStoragePort,
+    private readonly instrumentDocumentTrust: InstrumentDocumentTrustService,
   ) {}
 
   rejectClientIssuanceFields(payload: Record<string, unknown>): void {
@@ -242,6 +245,19 @@ export class IssuanceService {
         },
       });
 
+      const trustOutcome = await this.instrumentDocumentTrust.applyTrust({
+        content: contentBuffer,
+        contentHash,
+        storageObjectKey: stored.storageObjectKey,
+        signatureRequired: typeVersion.signatureRequired,
+        sealRequired: typeVersion.sealRequired,
+        signerContext: {
+          issuerOfficeholderId: input.issuerOfficeholderId,
+          issuerIdentityId: input.issuerIdentityId,
+        },
+        institutionReference: typeVersion.issuingInstitutionId,
+      });
+
       const documentVersion = await tx.documentVersion.create({
         data: {
           documentRecordId: documentRecord.id,
@@ -252,10 +268,31 @@ export class IssuanceService {
           storageProvider: stored.storageProvider,
           storageObjectKey: stored.storageObjectKey,
           sha256: contentHash,
-          signatureStatus: typeVersion.signatureRequired ? 'SIGNED' : 'NOT_EVALUATED',
-          sealStatus: typeVersion.sealRequired ? 'SEALED' : 'NOT_EVALUATED',
+          signatureStatus: trustOutcome.signatureStatus,
+          sealStatus: trustOutcome.sealStatus,
+          signatureEvidence: (trustOutcome.signatureEvidence ?? undefined) as
+            | Prisma.InputJsonValue
+            | undefined,
+          sealEvidence: (trustOutcome.sealEvidence ?? undefined) as
+            | Prisma.InputJsonValue
+            | undefined,
+          malwareScanStatus: MalwareScanStatus.CLEAN,
         },
       });
+
+      const signatureRecordPayload = input.signatureDocumentVersionId
+        ? {
+            documentVersionId: input.signatureDocumentVersionId,
+            ...(trustOutcome.instrumentSignatureRecord ?? {}),
+          }
+        : trustOutcome.instrumentSignatureRecord;
+
+      const sealRecordPayload = input.sealDocumentVersionId
+        ? {
+            documentVersionId: input.sealDocumentVersionId,
+            ...(trustOutcome.instrumentSealRecord ?? {}),
+          }
+        : trustOutcome.instrumentSealRecord;
 
       const instrumentVersion = await tx.officialInstrumentVersion.create({
         data: {
@@ -267,12 +304,8 @@ export class IssuanceService {
           contentHash,
           governmentDecisionId: input.governmentDecisionId,
           conditionsSnapshot: decision.conditions,
-          signatureRecord: input.signatureDocumentVersionId
-            ? { documentVersionId: input.signatureDocumentVersionId }
-            : undefined,
-          sealRecord: input.sealDocumentVersionId
-            ? { documentVersionId: input.sealDocumentVersionId }
-            : undefined,
+          signatureRecord: signatureRecordPayload as Prisma.InputJsonValue,
+          sealRecord: sealRecordPayload as Prisma.InputJsonValue,
         },
       });
 

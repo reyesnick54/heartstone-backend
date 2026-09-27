@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../database/prisma.service';
+import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
 import { RedisService } from '../redis/redis.service';
 import { HealthService } from './health.service';
 
@@ -18,11 +19,16 @@ describe('HealthService', () => {
       ping: jest.fn(),
     };
 
+    const documentTrustGate = {
+      evaluateProhibitedAdapters: jest.fn().mockReturnValue({ allowed: true, reasons: [] }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HealthService,
         { provide: PrismaService, useValue: prismaService },
         { provide: RedisService, useValue: redisService },
+        { provide: DocumentTrustProductionGateService, useValue: documentTrustGate },
         {
           provide: ConfigService,
           useValue: {
@@ -56,6 +62,7 @@ describe('HealthService', () => {
         database: 'up',
         redis: 'up',
         identityAuth: 'ready',
+        documentTrust: 'ready',
       },
     });
   });
@@ -70,6 +77,7 @@ describe('HealthService', () => {
         database: 'down',
         redis: 'up',
         identityAuth: 'ready',
+        documentTrust: 'ready',
       },
     });
   });
@@ -84,6 +92,7 @@ describe('HealthService', () => {
         database: 'up',
         redis: 'down',
         identityAuth: 'ready',
+        documentTrust: 'ready',
       },
     });
   });
