@@ -87,6 +87,12 @@ jobs:
             echo "Merge reported conflicts, but all were resolved in favor of current main where required."
           fi
 
+
+      - name: Restore S5 manifest generator after merge
+        run: |
+          git checkout HEAD -- scripts/generate-protected-route-manifest.ts
+          git add scripts/generate-protected-route-manifest.ts
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -149,8 +155,10 @@ jobs:
           NODE_ENV: test
           NODE_OPTIONS: --max-old-space-size=8192
 
-      - name: Remove temporary resolver workflow
-        run: git rm .github/workflows/s5-conflict-resolution.yml
+      - name: Remove temporary resolver files
+        run: |
+          git rm .github/workflows/s5-conflict-resolution.yml
+          git rm -f .github/s5-resolver-trigger.txt || true
 
       - name: Commit resolved branch
         run: |
