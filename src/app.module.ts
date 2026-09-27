@@ -18,6 +18,7 @@ import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { DecisionsIssuanceModule } from './decisions-issuance/decisions-issuance.module';
+import { DigitalAssetsModule } from './digital-assets/digital-assets.module';
 import { EducationModule } from './education/education.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
@@ -97,6 +98,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ComplianceModule,
     CorporateRegistryModule,
     CustomsTradeModule,
+    DigitalAssetsModule,
     HealthcareModule,
     RedressModule,
     RevenueModule,
