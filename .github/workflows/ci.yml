@@ -80,7 +80,7 @@ jobs:
           --health-retries 5
     env:
       NODE_ENV: test
-      NODE_OPTIONS: --max-old-space-size=8192
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -107,8 +107,11 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
-      - name: Integration tests
-        run: npm run test:integration
+      - name: Integration tests (shard 1/2)
+        run: npm run test:integration -- --shard=1/2
+
+      - name: Integration tests (shard 2/2)
+        run: npm run test:integration -- --shard=2/2
 
       - name: End-to-end tests
         run: npm run test:e2e
