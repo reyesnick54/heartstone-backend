@@ -44,6 +44,10 @@ export class CorporateRegistryProfileQueryService {
           },
         },
         beneficialOwnershipDeclarations: { orderBy: { createdAt: 'desc' }, take: 1 },
+        beneficialOwnerRecords: {
+          where: { supersededAt: null },
+          orderBy: { effectiveFrom: 'asc' },
+        },
       },
     });
 
@@ -117,13 +121,26 @@ export class CorporateRegistryProfileQueryService {
         dueDate: action.dueDate?.toISOString() ?? null,
       })),
       beneficialOwnershipSummary: includeBeneficialOwnership
-        ? profile.beneficialOwnershipDeclarations[0]
+        ? profile.beneficialOwnerRecords.length > 0
           ? {
-              declarationReference: profile.beneficialOwnershipDeclarations[0].declarationReference,
-              status: profile.beneficialOwnershipDeclarations[0].status,
-              restrictedSummary: profile.beneficialOwnershipDeclarations[0].restrictedSummary,
+              declarationReference:
+                profile.beneficialOwnershipDeclarations[0]?.declarationReference ?? null,
+              structuredOwners: profile.beneficialOwnerRecords.map((owner) => ({
+                beneficialOwnerRecordId: owner.id,
+                ownerReference: owner.ownerReference,
+                controlNature: owner.controlNature,
+                ownershipPercentage: owner.ownershipPercentage?.toString() ?? null,
+                verificationStatus: owner.verificationStatus,
+                provenanceSource: owner.provenanceSource,
+              })),
             }
-          : null
+          : profile.beneficialOwnershipDeclarations[0]
+            ? {
+                declarationReference: profile.beneficialOwnershipDeclarations[0].declarationReference,
+                status: profile.beneficialOwnershipDeclarations[0].status,
+                restrictedSummary: profile.beneficialOwnershipDeclarations[0].restrictedSummary,
+              }
+            : null
         : null,
       representativeAccessLimited: !access.hasFullOrganizationVisibility,
       disclaimer:

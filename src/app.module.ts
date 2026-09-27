@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AbsezModule } from './absez/absez.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuditGovernanceModule } from './audit-governance/audit-governance.module';
 import { AuthorityModule } from './authority/authority.module';
@@ -114,6 +115,7 @@ import { TransportationModule } from './transportation/transportation.module';
     DecisionsIssuanceModule,
     ComplianceModule,
     CorporateRegistryModule,
+    AbsezModule,
     CustomsTradeModule,
     DigitalAssetsModule,
     HealthcareModule,
