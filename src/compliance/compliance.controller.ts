@@ -11,6 +11,8 @@ import {
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { ComplianceBoundaryService } from './common/compliance-boundary.service';
 import { CreateComplianceMatterDto } from './dto/create-compliance-matter.dto';
 import { CreateObligationFromConditionDto } from './dto/create-obligation-from-condition.dto';
@@ -25,6 +27,14 @@ import { ComplianceReviewService } from './reviews/compliance-review.service';
 import { ComplianceSubmissionService } from './submissions/compliance-submission.service';
 
 @ApiTags('compliance')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Compliance oversight dashboards and obligation administration",
+  authorityRequirement: "Institutional compliance role or holder-scoped dashboard access",
+  actorSource: "Session identity with compliance or holder context",
+  primarySecurityInvariant: "Compliance status is derived from authoritative records",
+})
 @Controller('compliance')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 @ApiBearerAuth()

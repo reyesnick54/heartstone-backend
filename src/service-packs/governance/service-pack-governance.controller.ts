@@ -9,6 +9,8 @@ import { type AuthorityEvaluationResponseDto } from '../../authority/evaluation/
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import {
   resolveFunctionFromServicePackRoute,
   resolveResourceFromServicePackRoute,
@@ -25,6 +27,14 @@ import { ServicePackGovernanceBoundaryService } from './service-pack-governance-
 import { ServicePackReviewService } from './service-pack-review.service';
 
 @ApiTags('service-packs-governance')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('service-packs')
 @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
 @ApiBearerAuth()

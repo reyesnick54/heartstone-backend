@@ -7,12 +7,22 @@ import {
   WorkflowTransitionJoinType,
 } from '@prisma/client';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
 import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { WorkflowDefinitionsService } from './workflow-definitions.service';
 
 @ApiTags('application-processing-workflow')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('workflow-definitions')
 @DenyByDefaultAdministrative()
 @ApiBearerAuth()

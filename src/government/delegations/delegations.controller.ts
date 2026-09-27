@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
 import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
@@ -11,6 +13,14 @@ import { QueryDelegationsDto } from './dto/query-delegations.dto';
 import { UpdateDelegationDto } from './dto/update-delegation.dto';
 
 @ApiTags('delegations')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government structure administration",
+  authorityRequirement: "Institutional configuration authority (not self-granted)",
+  actorSource: "Authenticated institutional administrator",
+  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+})
 @Controller('delegations')
 @DenyByDefaultAdministrative()
 export class DelegationsController {

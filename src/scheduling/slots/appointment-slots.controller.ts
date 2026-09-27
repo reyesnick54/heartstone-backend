@@ -4,6 +4,8 @@ import { Type } from 'class-transformer';
 import { IsDate, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { SCHEDULING_API_TAG } from '../scheduling.constants';
 import { AppointmentSlotsService } from './appointment-slots.service';
 
@@ -43,6 +45,14 @@ class CreateAppointmentSlotDto {
 
 @ApiTags(SCHEDULING_API_TAG)
 @ApiBearerAuth()
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('scheduling/slots')
 @UseGuards(SessionAuthGuard)
 export class AppointmentSlotsController {

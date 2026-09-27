@@ -4,6 +4,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { DenyByDefaultAdministrative } from './authorization/deny-by-default-administrative.decorator';
 import { RequirePermissions } from './authorization/require-permissions.decorator';
 import { PermissionCodes } from './constants/permission-codes.constants';
@@ -12,6 +14,14 @@ import { TechnicalRoleAssignmentResponseDto } from './dto/technical-role-assignm
 import { TechnicalRoleAssignmentService } from './services/technical-role-assignment.service';
 
 @ApiTags('identity-technical-access')
+@ControllerRouteAccess({
+  routeClass: RouteClass.SYSTEM_HEALTH,
+  authenticationRequired: false,
+  scopeRequirement: "Process and dependency health probes",
+  authorityRequirement: "None",
+  actorSource: "Anonymous monitor",
+  primarySecurityInvariant: "Health endpoints expose no protected domain data",
+})
 @Controller('identity/technical-access')
 @DenyByDefaultAdministrative()
 @UseGuards(SessionAuthGuard)

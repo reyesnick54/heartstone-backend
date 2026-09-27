@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { DenyByDefaultAdministrative } from '../../technical-access/authorization/deny-by-default-administrative.decorator';
 import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
@@ -11,6 +13,14 @@ import { UpdateIdentityDto } from './dto/update-identity.dto';
 import { IdentitiesService } from './identities.service';
 
 @ApiTags('identity-identities')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Identity administration or authenticated self-service session",
+  authorityRequirement: "No government authority inferred from identity alone",
+  actorSource: "Session identity or institutional administrator",
+  primarySecurityInvariant: "User != Officeholder != Role != Permission != Authority",
+})
 @Controller('identity/identities')
 @DenyByDefaultAdministrative()
 export class IdentitiesController {

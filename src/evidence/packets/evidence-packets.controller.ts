@@ -19,6 +19,8 @@ import {
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { AddPacketItemDto } from './dto/add-packet-item.dto';
 import { AssemblePacketDto } from './dto/assemble-packet.dto';
 import { CreateEvidencePacketDto } from './dto/create-evidence-packet.dto';
@@ -27,6 +29,14 @@ import { FreezePacketDto } from './dto/freeze-packet.dto';
 import { EvidencePacketsService } from './evidence-packets.service';
 
 @ApiTags('evidence-packets')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Evidence governance, document custody, or applicant document scope",
+  authorityRequirement: "Document/evidence access guard or institutional evidence role",
+  actorSource: "Session identity with applicant or official actor context",
+  primarySecurityInvariant: "Evidence quality and verification cannot be client-asserted",
+})
 @Controller('evidence/packets')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()

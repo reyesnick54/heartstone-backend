@@ -8,6 +8,8 @@ import {
 } from '../../experience/official/guards/official-experience.guard';
 import { type ResolvedOfficialContext } from '../../experience/official/types/official-context.types';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import {
   OfficialImmigrationAvailableActionsResponseDto,
   OfficialImmigrationWorkspaceResponseDto,
@@ -15,6 +17,14 @@ import {
 import { OfficialImmigrationProjectionService } from './services/official-immigration-projection.service';
 
 @ApiTags('official-immigration-experience')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('experience/official/immigration')
 @UseGuards(SessionAuthGuard, OfficialExperienceGuard)
 @ApiBearerAuth()

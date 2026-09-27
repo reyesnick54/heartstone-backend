@@ -2,12 +2,22 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { type VerifiedExternalDependencyResult } from '../contracts/verified-external-dependency-result.contract';
 import { AuthorityDependenciesService } from './authority-dependencies.service';
 import { RecordInstitutionalActDto } from './dto/record-institutional-act.dto';
 import { RegisterExternalDeterminationDto } from './dto/register-external-determination.dto';
 
 @ApiTags('authority-dependencies')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Authority configuration or evaluated institutional action scope",
+  authorityRequirement: "Explicit function authority evaluation for consequential actions",
+  actorSource: "Session identity with officeholder linkage when evaluating authority",
+  primarySecurityInvariant: "Technical permission does not create legal authority",
+})
 @Controller('authority-dependencies')
 @UseGuards(SessionAuthGuard)
 export class AuthorityDependenciesController {

@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateExternalAuthorityDto } from './dto/create-external-authority.dto';
 import { ExternalAuthorityResponseDto } from './dto/external-authority-response.dto';
 import { QueryExternalAuthoritiesDto } from './dto/query-external-authorities.dto';
@@ -8,6 +10,14 @@ import { UpdateExternalAuthorityDto } from './dto/update-external-authority.dto'
 import { ExternalAuthoritiesService } from './external-authorities.service';
 
 @ApiTags('external-authorities')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government structure administration",
+  authorityRequirement: "Institutional configuration authority (not self-granted)",
+  actorSource: "Authenticated institutional administrator",
+  primarySecurityInvariant: "Government structure facts remain separate from identity privilege",
+})
 @Controller('external-authorities')
 export class ExternalAuthoritiesController {
   constructor(private readonly service: ExternalAuthoritiesService) {}

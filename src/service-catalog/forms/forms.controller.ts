@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CreateFormDefinitionDto } from './dto/create-form-definition.dto';
 import {
   CreateFormVersionDto,
@@ -14,6 +16,14 @@ import { FormResponseValidationService } from './form-response-validation.servic
 import { FormVersionsService } from './form-versions.service';
 
 @ApiTags('forms')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Service catalog administration or public discovery opt-out",
+  authorityRequirement: "Catalog configuration authority for protected routes",
+  actorSource: "Administrator or anonymous reader for explicitly public catalog routes",
+  primarySecurityInvariant: "Published catalog visibility does not grant case or decision access",
+})
 @Controller('forms')
 export class FormsController {
   constructor(

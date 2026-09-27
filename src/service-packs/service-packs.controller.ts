@@ -6,6 +6,8 @@ import { CurrentActor } from '../identity/auth/decorators/current-actor.decorato
 import { CurrentSession } from '../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../security/route-class.enum';
 import { ServicePacksBoundaryService } from './common/service-packs-boundary.service';
 import { CreateServicePackDto } from './packs/dto/create-service-pack.dto';
 import { ImportServicePackManifestDto } from './packs/dto/import-service-pack-manifest.dto';
@@ -24,6 +26,14 @@ import { ServicePackValidationService } from './validation/service-pack-validati
 import { ServicePackVersionService } from './versions/service-pack-version.service';
 
 @ApiTags('service-packs')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Government service domain actor scope with institutional boundaries",
+  authorityRequirement: "ConsequentialActionGuard for final government outcomes",
+  actorSource: "Session identity with domain access resolution",
+  primarySecurityInvariant: "Application and submission endpoints do not confer official outcomes",
+})
 @Controller('service-packs')
 @UseGuards(SessionAuthGuard)
 export class ServicePacksController {

@@ -5,6 +5,10 @@ export const NON_PRODUCTION_EVIDENCE_FIXTURE_MARKER = 'NON_PRODUCTION_PHASE_7C';
 export const EVIDENCE_BOUNDARY_DISCLAIMER =
   'Evidence records represent what was received and what verification or acceptance steps have been recorded. They do not by themselves constitute a government decision.';
 
+export const EVIDENCE_AUTHORITY_FUNCTION_CODES = {
+  QUALITY_ASSESSMENT_FINALIZE: 'EVIDENCE-QUALITY-ASSESSMENT-FINALIZE',
+} as const;
+
 export const FORBIDDEN_CLIENT_EVIDENCE_FIELDS = [
   'verified',
   'isVerified',

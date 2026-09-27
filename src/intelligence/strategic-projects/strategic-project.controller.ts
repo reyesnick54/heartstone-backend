@@ -13,6 +13,8 @@ import { Prisma } from '@prisma/client';
 
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { IntelligenceForbiddenClientFieldsInterceptor } from '../common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
@@ -30,6 +32,14 @@ const STRATEGIC_PROJECT_GUARDS = [IntelligenceSuspendedAiGuard] as const;
 @ApiBearerAuth()
 @UseGuards(...STRATEGIC_PROJECT_GUARDS)
 @UseInterceptors(IntelligenceForbiddenClientFieldsInterceptor)
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Analytics, metrics, and command-console institutional scope",
+  authorityRequirement: "Intelligence module access; analytics do not create authority",
+  actorSource: "Authenticated institutional analyst or administrator",
+  primarySecurityInvariant: "Analytics and AI outputs are advisory, not official decisions",
+})
 @Controller('intelligence/strategic-projects')
 export class StrategicProjectController {
   constructor(

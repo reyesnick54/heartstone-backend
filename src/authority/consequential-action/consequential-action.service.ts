@@ -8,6 +8,7 @@ import {
 } from '../../identity/auth/context/actor-context.service';
 import { type ActorContextResolutionAudit } from '../../identity/auth/context/actor-context.types';
 import { type SessionContextDto } from '../../identity/auth/dto/session-context.dto';
+import { isNonHumanConsequentialActionAllowed } from '../../security/route-access/non-human-actor-allowlist';
 import { AUTHORITY_EVALUATION_EXPLANATION_CODES } from '../authority.constants';
 import { AuthorityEvaluationService } from '../evaluation/authority-evaluation.service';
 import { type AuthorityEvaluationRequest } from '../evaluation/authority-evaluation.types';
@@ -236,7 +237,7 @@ export class ConsequentialActionService {
   ): Promise<void> {
     const requireHuman = metadata.requireHumanActor ?? FINAL_DECISION_ACTIONS.has(metadata.action);
 
-    if (!requireHuman) {
+    if (!requireHuman || isNonHumanConsequentialActionAllowed(metadata.action)) {
       return;
     }
 

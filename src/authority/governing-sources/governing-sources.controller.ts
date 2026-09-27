@@ -2,12 +2,22 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from 
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GoverningSourceStatus } from '@prisma/client';
 
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { AuthenticateGoverningSourceDto } from './dto/authenticate-governing-source.dto';
 import { CreateGoverningSourceDto } from './dto/create-governing-source.dto';
 import { GoverningSourceResponseDto } from './dto/governing-source-response.dto';
 import { GoverningSourcesService } from './governing-sources.service';
 
 @ApiTags('authority-governing-sources')
+@ControllerRouteAccess({
+  routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
+  authenticationRequired: true,
+  scopeRequirement: "Authority configuration or evaluated institutional action scope",
+  authorityRequirement: "Explicit function authority evaluation for consequential actions",
+  actorSource: "Session identity with officeholder linkage when evaluating authority",
+  primarySecurityInvariant: "Technical permission does not create legal authority",
+})
 @Controller('authority/governing-sources')
 export class GoverningSourcesController {
   constructor(private readonly service: GoverningSourcesService) {}

@@ -4,6 +4,8 @@ import { AppointmentLocationKind } from '@prisma/client';
 import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { SCHEDULING_API_TAG } from '../scheduling.constants';
 import { AppointmentLocationsService } from './appointment-locations.service';
 
@@ -33,6 +35,14 @@ class CreateAppointmentLocationDto {
 
 @ApiTags(SCHEDULING_API_TAG)
 @ApiBearerAuth()
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('scheduling/locations')
 @UseGuards(SessionAuthGuard)
 export class AppointmentLocationsController {

@@ -101,6 +101,9 @@ jobs:
       - name: Apply database migrations
         run: npm run prisma:migrate:deploy
 
+      - name: Route security metadata validation
+        run: npm run security:validate-routes
+
       - name: Unit tests
         run: npm run test:unit
 

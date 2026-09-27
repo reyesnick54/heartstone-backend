@@ -25,6 +25,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "security:manifest": "ts-node scripts/generate-protected-route-manifest.ts",
+    "security:validate-routes": "jest --runInBand src/security/route-security-metadata.spec.ts",
     "service-pack:validate": "ts-node scripts/service-pack-cli.ts validate",
     "service-pack:format": "ts-node scripts/service-pack-cli.ts format",
     "service-pack:fingerprint": "ts-node scripts/service-pack-cli.ts fingerprint",

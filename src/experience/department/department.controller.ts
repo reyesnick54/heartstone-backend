@@ -10,6 +10,8 @@ import {
 
 import { type ActorContext } from '../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { DEPARTMENT_EXPERIENCE_API_TAG } from './department-experience.constants';
 import { DepartmentAlertsResponseDto } from './dto/department-alerts-response.dto';
 import { DepartmentAppealsResponseDto } from './dto/department-appeals-response.dto';
@@ -36,6 +38,14 @@ import { DepartmentWorkloadService } from './services/department-workload.servic
 
 @ApiTags(DEPARTMENT_EXPERIENCE_API_TAG)
 @ApiBearerAuth()
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+  authenticationRequired: true,
+  scopeRequirement: "Experience layer navigation and institutional workspace scope",
+  authorityRequirement: "OfficialExperienceGuard for substantive routes; no authority from navigation",
+  actorSource: "Session identity with resolved official or citizen context",
+  primarySecurityInvariant: "Experience projections do not execute consequential government actions",
+})
 @Controller('experience/department')
 export class DepartmentController {
   constructor(

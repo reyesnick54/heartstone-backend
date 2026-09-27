@@ -76,3 +76,7 @@ export const PUBLIC_TRIAL_DISCOVERY_FORBIDDEN_RESPONSE_KEYS = [
   'screenings',
   'interests',
 ] as const;
+
+export const CLINICAL_RESEARCH_AUTHORITY_FUNCTION_CODES = {
+  ETHICS_APPROVAL: 'CLINICAL-RESEARCH-ETHICS-APPROVE',
+} as const;

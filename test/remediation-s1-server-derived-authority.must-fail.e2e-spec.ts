@@ -491,7 +491,6 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
       },
     });
 
-    const packetItems = await prisma.evidencePacketItem.findMany({
     let packetItems = await prisma.evidencePacketItem.findMany({
       where: { packetVersionId: fixture.evidencePacketVersionId },
       include: { evidenceRecord: true },

@@ -5,12 +5,22 @@ import { CaseReferralType } from '@prisma/client';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
+import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { CompletenessReviewsService } from '../completeness/completeness-reviews.service';
 import { CaseReferralsService } from '../referrals/case-referrals.service';
 import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
 import { CasesService } from './cases.service';
 
 @ApiTags('application-processing-cases')
+@ControllerRouteAccess({
+  routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+  authenticationRequired: true,
+  scopeRequirement: "Applicant-owned case/application scope or official institutional case scope",
+  authorityRequirement: "Case access guard; official routes require institutional actor context",
+  actorSource: "Session identity with applicant or official case access resolution",
+  primarySecurityInvariant: "Access to a case does not confer decision authority",
+})
 @Controller('cases')
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
