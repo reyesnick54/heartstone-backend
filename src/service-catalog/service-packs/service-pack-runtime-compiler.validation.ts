@@ -7,13 +7,8 @@ import {
 import { type PrismaService } from '../../database/prisma.service';
 import { type ServicePackManifest } from './service-pack.types';
 import { SERVICE_PACK_RUNTIME_COMPILER_REASON_CODES } from './service-pack-runtime-compiler.constants';
-import {
-  type ResolvedCompileScope,
-} from './service-pack-runtime-compiler.types';
-import {
-  parseServicePackManifest,
-  validateServicePackManifest,
-} from './validate-service-pack';
+import { type ResolvedCompileScope } from './service-pack-runtime-compiler.types';
+import { parseServicePackManifest, validateServicePackManifest } from './validate-service-pack';
 
 export interface CompileValidationIssue {
   code: string;
@@ -166,9 +161,7 @@ export async function resolveCompileScope(
   });
 
   const departmentCode =
-    authoringManifest.departmentCode ??
-    authoringManifest.services[0]?.serviceCode ??
-    'DEFAULT';
+    authoringManifest.departmentCode ?? authoringManifest.services[0]?.serviceCode ?? 'DEFAULT';
 
   const department =
     (await prisma.department.findFirst({

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   ApplicantCategory,
   AuthorityActionType,
@@ -27,10 +23,7 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import { ServicePacksBoundaryService } from '../../service-packs/common/service-packs-boundary.service';
 import { calculateServicePackFingerprint } from './calculate-service-pack-fingerprint';
-import {
-  type ServicePackManifest,
-  type ServicePackServiceDefinition,
-} from './service-pack.types';
+import { type ServicePackManifest, type ServicePackServiceDefinition } from './service-pack.types';
 import { buildServicePackConfigurationFingerprintFromManifest } from './service-pack-configuration-fingerprint.util';
 import { SERVICE_PACK_RUNTIME_COMPILER_REASON_CODES } from './service-pack-runtime-compiler.constants';
 import {
@@ -89,9 +82,7 @@ export class ServicePackRuntimeCompilerService {
     });
 
     if (!version) {
-      throw new NotFoundException(
-        SERVICE_PACK_RUNTIME_COMPILER_REASON_CODES.VERSION_NOT_FOUND,
-      );
+      throw new NotFoundException(SERVICE_PACK_RUNTIME_COMPILER_REASON_CODES.VERSION_NOT_FOUND);
     }
 
     this.boundary.assertAcceptedVersionImmutable(version.immutable, version.status);

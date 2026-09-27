@@ -23,6 +23,7 @@ import { resetCorporateRegistryData } from './corporate-registry-test-reset';
 import { resetOperationalSupportData } from './operational-support-test-reset';
 import { resetProductionReadinessData } from './production-readiness-test-reset';
 import { resetServiceCatalogData } from './service-catalog-test-reset';
+import { resetServicePackData } from './service-pack-test-reset';
 
 export async function createIntegrationApp(): Promise<{
   app: INestApplication<App>;
@@ -149,6 +150,7 @@ export async function resetGovernmentData(prisma: PrismaService): Promise<void> 
   await prisma.governmentBody.deleteMany();
   await prisma.externalAuthority.deleteMany();
   await resetOperationalSupportData(prisma);
+  await resetServicePackData(prisma);
   await prisma.institution.deleteMany();
   await prisma.jurisdiction.deleteMany();
 }

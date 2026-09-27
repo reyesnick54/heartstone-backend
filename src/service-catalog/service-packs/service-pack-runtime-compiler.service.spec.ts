@@ -178,9 +178,9 @@ describe('ServicePackRuntimeCompilerService', () => {
       servicePack: { id: 'pack-1' },
     });
 
-    await expect(
-      compiler.compileVersion({ servicePackVersionId: 'version-1' }),
-    ).rejects.toThrow(BadRequestException);
+    await expect(compiler.compileVersion({ servicePackVersionId: 'version-1' })).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('returns materialized artifact summary on successful compile', async () => {
@@ -233,9 +233,9 @@ describe('ServicePackRuntimeCompilerService', () => {
 
     expect(result.compilationFingerprint).toBe(fingerprint);
     expect(result.artifacts.governmentServiceVersionIds).toEqual(['gsv-1']);
-    expect(result.entries.some((entry) => entry.domain === ServicePackDeploymentBindingDomain.FORMS)).toBe(
-      true,
-    );
+    expect(
+      result.entries.some((entry) => entry.domain === ServicePackDeploymentBindingDomain.FORMS),
+    ).toBe(true);
     expect(result.message).toMatch(/DRAFT/);
   });
 
@@ -258,9 +258,9 @@ describe('ServicePackRuntimeCompilerService', () => {
 
     prisma.institution.findFirst.mockResolvedValue(null);
 
-    await expect(
-      compiler.compileVersion({ servicePackVersionId: 'version-1' }),
-    ).rejects.toThrow(BadRequestException);
+    await expect(compiler.compileVersion({ servicePackVersionId: 'version-1' })).rejects.toThrow(
+      BadRequestException,
+    );
     expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });

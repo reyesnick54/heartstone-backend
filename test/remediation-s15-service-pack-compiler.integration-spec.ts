@@ -99,9 +99,9 @@ describe('remediation S15 service pack runtime compiler (integration)', () => {
 
     const beforeCount = await prisma.governmentService.count();
 
-    await expect(
-      compiler.compileVersion({ servicePackVersionId: version.id }),
-    ).rejects.toThrow(BadRequestException);
+    await expect(compiler.compileVersion({ servicePackVersionId: version.id })).rejects.toThrow(
+      BadRequestException,
+    );
 
     const afterCount = await prisma.governmentService.count();
     expect(afterCount).toBe(beforeCount);
