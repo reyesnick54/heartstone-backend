@@ -46,6 +46,7 @@ export async function createIntegrationApp(): Promise<{
 
 export async function resetIdentityData(prisma: PrismaService): Promise<void> {
   await resetCorporateRegistryData(prisma);
+  await resetAuditGovernanceData(prisma);
   await prisma.technicalAccessAuditEvent.deleteMany();
   await prisma.technicalRoleAssignment.deleteMany();
   await prisma.platformAdministrativeAccessAudit.deleteMany();
@@ -132,7 +133,14 @@ export async function resetIntelligenceData(prisma: PrismaService): Promise<void
   await prisma.performanceClaim.deleteMany();
 }
 
+export async function resetAuditGovernanceData(prisma: PrismaService): Promise<void> {
+  await prisma.governedConfigurationEffectiveVersion.deleteMany();
+  await prisma.governedConfigurationChange.deleteMany();
+  await prisma.governmentAuditLedgerEntry.deleteMany();
+}
+
 export async function resetGovernmentData(prisma: PrismaService): Promise<void> {
+  await resetAuditGovernanceData(prisma);
   await resetOperationalSupportData(prisma);
   await resetIntelligenceData(prisma);
   await resetApplicationProcessingData(prisma);

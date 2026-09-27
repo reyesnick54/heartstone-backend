@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuditGovernanceModule } from '../audit-governance/audit-governance.module';
 import { DatabaseModule } from '../database/database.module';
 import { ActorContextModule } from '../identity/auth/context/actor-context.module';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
@@ -25,7 +26,7 @@ import { AuthorityPolicyService } from './policy/authority-policy.service';
 import { SegregationOfDutyEvaluator } from './sod/segregation-of-duty-evaluator.service';
 
 @Module({
-  imports: [SessionAuthGuardModule, DatabaseModule, ActorContextModule],
+  imports: [SessionAuthGuardModule, DatabaseModule, ActorContextModule, AuditGovernanceModule],
   controllers: [
     GoverningSourcesController,
     FunctionAuthorityRecordsController,

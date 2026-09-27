@@ -96,6 +96,8 @@ const LEVEL_F: readonly PermissionCode[] = [
   PermissionCodes.WORKFLOW_DEFINITION_APPROVE,
   PermissionCodes.RECORDS_LEGAL_HOLD_RELEASE,
   PermissionCodes.CONFIGURATION_ACTIVATE,
+  PermissionCodes.CONFIGURATION_CHANGE_PROPOSE,
+  PermissionCodes.CONFIGURATION_CHANGE_APPROVE,
   PermissionCodes.AUDIT_READ,
 ];
 
