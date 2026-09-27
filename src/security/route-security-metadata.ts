@@ -1,6 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
+
 import { matchesConsequentialRouteRequirement } from './route-access/consequential-route-registry';
 import {
   resolveControllerDomain,
@@ -45,6 +47,9 @@ export interface ScannedRoute {
   routeClass: RouteClass;
   authenticationRequired: boolean;
   isPublic: boolean;
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+  guardCoverage: string[];
   scopeRequirement: string;
   authorityRequirement: string;
   actorSource: string;
@@ -91,6 +96,41 @@ function hasRequiresAuthority(decoratorBlock: string): boolean {
 
 function hasAuthorityPolicyGuard(decoratorBlock: string): boolean {
   return /@UseGuards\s*\([^)]*AuthorityPolicyGuard/.test(decoratorBlock);
+}
+
+function hasDenyByDefaultAdministrative(decoratorBlock: string): boolean {
+  return /@DenyByDefaultAdministrative\s*\(\s*\)/.test(decoratorBlock);
+}
+
+function extractRequirePermissionsCode(decoratorBlock: string): string | null {
+  const match = /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/.exec(
+    decoratorBlock,
+  );
+  if (!match?.[1]) {
+    return null;
+  }
+  const key = match[1] as keyof typeof PermissionCodes;
+  return PermissionCodes[key] ?? null;
+}
+
+function resolveTechnicalAccessMetadata(input: {
+  classHeader: string;
+  decoratorBlock: string;
+}): {
+  technicalPermissionRequired: boolean;
+  permissionCode: string | null;
+} {
+  const denyByDefault =
+    hasDenyByDefaultAdministrative(input.classHeader) ||
+    hasDenyByDefaultAdministrative(input.decoratorBlock);
+  const permissionCode =
+    extractRequirePermissionsCode(input.decoratorBlock) ??
+    extractRequirePermissionsCode(input.classHeader);
+
+  return {
+    technicalPermissionRequired: denyByDefault || permissionCode !== null,
+    permissionCode,
+  };
 }
 
 function hasConsequentialActionDecorator(decoratorBlock: string): boolean {
@@ -554,6 +594,21 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
         controllerRouteAccess,
       });
 
+      const technicalAccess = resolveTechnicalAccessMetadata({
+        classHeader,
+        decoratorBlock,
+      });
+      const guardCoverage = ['SessionAuthGuard'];
+      if (!classification.isPublic) {
+        guardCoverage.push('ClientIdentitySubstitutionGuard');
+      }
+      if (technicalAccess.technicalPermissionRequired) {
+        guardCoverage.push('PermissionsGuard');
+      }
+      if (requiresAuthority) {
+        guardCoverage.push('AuthorityPolicyGuard');
+      }
+
       routes.push({
         path: fullPath,
         method: normalizedMethod,
@@ -561,6 +616,9 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
         controller: controllerName,
         sourceFile: relativeSource,
         handler,
+        technicalPermissionRequired: technicalAccess.technicalPermissionRequired,
+        permissionCode: technicalAccess.permissionCode,
+        guardCoverage,
         ...classification,
         hasRouteAccessMetadata,
         hasConsequentialAction,
