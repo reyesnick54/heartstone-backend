@@ -11,6 +11,8 @@ import { CaseReferralsService } from '../referrals/case-referrals.service';
 import { CaseSlaService } from '../sla/case-sla.service';
 import { WorkflowDefinitionsService } from '../workflow/workflow-definitions.service';
 import { WorkflowRuntimeService } from '../workflow/workflow-runtime.service';
+import { CaseManagerAssignmentService } from './case-manager/case-manager-assignment.service';
+import { CaseManagerBoundaryService } from './case-manager/case-manager-boundary.service';
 import { CaseEventsService } from './case-events.service';
 import { CaseFoundationService } from './case-foundation.service';
 import { CaseStatusService } from './case-status.service';
@@ -50,6 +52,8 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CompletenessReviewsService,
     CaseReferralsService,
     CaseSlaService,
+    CaseManagerAssignmentService,
+    CaseManagerBoundaryService,
   ],
   exports: [
     CasesService,
@@ -59,6 +63,8 @@ import { CaseTimelineController } from './timeline/case-timeline.controller';
     CasePublicStatusProjectionService,
     WorkflowDefinitionsService,
     WorkflowRuntimeService,
+    CaseManagerAssignmentService,
+    CaseManagerBoundaryService,
   ],
 })
 export class CasesModule {}

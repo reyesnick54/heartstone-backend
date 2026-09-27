@@ -38,6 +38,7 @@ import { ProjectStatusProjectionService } from './strategic-projects/project-sta
 import { SectorDevelopmentObservationService } from './strategic-projects/sector-development-observation.service';
 import { StrategicProjectController } from './strategic-projects/strategic-project.controller';
 import { StrategicProjectDependencyService } from './strategic-projects/strategic-project-dependency.service';
+import { StrategicProjectDossierService } from './strategic-projects/strategic-project-dossier.service';
 import { StrategicProjectEconomicClaimService } from './strategic-projects/strategic-project-economic-claim.service';
 import { StrategicProjectMilestoneService } from './strategic-projects/strategic-project-milestone.service';
 import { StrategicProjectProfileService } from './strategic-projects/strategic-project-profile.service';
@@ -59,6 +60,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     StrategicProjectBoundaryService,
     PerformanceClaimService,
     StrategicProjectProfileService,
+    StrategicProjectDossierService,
     StrategicProjectStageService,
     StrategicProjectMilestoneService,
     StrategicProjectDependencyService,
@@ -96,6 +98,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     StrategicProjectBoundaryService,
     PerformanceClaimService,
     StrategicProjectProfileService,
+    StrategicProjectDossierService,
     StrategicProjectStageService,
     StrategicProjectMilestoneService,
     StrategicProjectDependencyService,

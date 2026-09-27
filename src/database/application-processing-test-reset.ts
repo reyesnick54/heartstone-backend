@@ -15,6 +15,11 @@ export async function resetCivilRegistryData(prisma: PrismaService): Promise<voi
 export async function resetApplicationProcessingData(prisma: PrismaService): Promise<void> {
   await resetCivilRegistryData(prisma);
   await resetImmigrationData(prisma);
+  await prisma.instrumentRenewalReminder.deleteMany();
+  await prisma.instrumentRenewalMonitoringSchedule.deleteMany();
+  await prisma.operationalJobRun.deleteMany();
+  await prisma.complianceCorrectiveActionRegister.deleteMany();
+  await prisma.jointInspectionParticipant.deleteMany();
   await prisma.instrumentLifecycleDecisionLink.deleteMany();
   await prisma.instrumentLifecycleEvent.deleteMany();
   await prisma.decisionReviewReference.deleteMany();
@@ -68,6 +73,7 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.externalRecordsRepository.deleteMany();
   await prisma.evidenceCustodyEvent.deleteMany();
   await prisma.inspectionEvidenceItem.deleteMany();
+  await prisma.jointInspectionParticipant.deleteMany();
   await prisma.inspectionInspector.deleteMany();
   await prisma.inspectionRecord.deleteMany();
   await prisma.professionalReviewEvidence.deleteMany();
@@ -103,6 +109,7 @@ export async function resetApplicationProcessingData(prisma: PrismaService): Pro
   await prisma.caseSlaClock.deleteMany();
   await prisma.caseReferralResponse.deleteMany();
   await prisma.caseReferral.deleteMany();
+  await prisma.caseManagerAssignment.deleteMany();
   await prisma.caseAssignment.deleteMany();
   await prisma.applicantInformationRequest.deleteMany();
   await prisma.deficiencyNotice.deleteMany();

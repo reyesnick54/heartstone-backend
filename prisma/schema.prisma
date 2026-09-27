@@ -213,6 +213,10 @@ model Institution {
   appointmentLocations                  AppointmentLocation[]
   appointmentSlots                      AppointmentSlot[]
   serviceAppointments                   ServiceAppointment[]
+  caseManagerAssignments                CaseManagerAssignment[]
+  jointInspectionParticipations         JointInspectionParticipant[]
+  strategicProjectCoordinationSources   StrategicProjectInstitutionCoordination[] @relation("StrategicProjectCoordinationSource")
+  strategicProjectCoordinationTargets   StrategicProjectInstitutionCoordination[] @relation("StrategicProjectCoordinationTarget")
   servicePacks                          ServicePack[]
   civilRegistryVitalRecords             CivilRegistryVitalRecord[]
   civilRegistryCertificateVerifications CivilRegistryCertificateVerification[] @relation("CivilRegistryVerificationIssuer")
@@ -297,6 +301,10 @@ model Department {
   developmentProjects                  DevelopmentProject[]
   publicSafetyEngagements              PublicSafetyEngagement[]
   technicalRoleAssignments             TechnicalRoleAssignment[]
+  caseManagerAssignments               CaseManagerAssignment[]
+  jointInspectionParticipations        JointInspectionParticipant[]
+  strategicProjectCoordinationSourceDepartments StrategicProjectInstitutionCoordination[] @relation("StrategicProjectCoordinationSourceDepartment")
+  strategicProjectCoordinationTargetDepartments StrategicProjectInstitutionCoordination[] @relation("StrategicProjectCoordinationTargetDepartment")
 
   @@unique([institutionId, code])
   @@index([institutionId])
@@ -403,6 +411,9 @@ model Officeholder {
   researchEthicsApprovalsRecorded                   ResearchEthicsApprovalVersion[]      @relation("ResearchEthicsApprovalRecorder")
   clinicalTrialScreeningReviews                     ClinicalTrialScreeningReview[]       @relation("ClinicalTrialScreeningReviewerOfficeholder")
   clinicalTrialEligibilityAssessments               ClinicalTrialEligibilityAssessment[] @relation("ClinicalTrialEligibilityAssessorOfficeholder")
+  caseManagerAssignments                            CaseManagerAssignment[]              @relation("CaseManagerAssignmentOfficeholder")
+  jointInspectionParticipations                     JointInspectionParticipant[]
+  complianceCorrectiveActionsReviewed               ComplianceCorrectiveActionRegister[] @relation("ComplianceCorrectiveActionReviewer")
 
   @@map("officeholders")
 }
@@ -922,6 +933,11 @@ model Identity {
   safetyReviewsConducted                            SafetyReview[]                              @relation("SafetyReviewReviewer")
   healthcareRegulatedEntities                       HealthcareRegulatedEntityReference[]        @relation("HealthcareRegulatedEntityIdentity")
   healthcareFoundationAccessAudits                  HealthcareDataAccessAudit[]                 @relation("HealthcareDataAccessAuditAccessor")
+  caseManagerAssignmentsAssigned                    CaseManagerAssignment[]                     @relation("CaseManagerAssignmentAssigner")
+  jointInspectionParticipations                     JointInspectionParticipant[]                @relation("JointInspectionParticipantIdentity")
+  complianceCorrectiveActionsResponsible            ComplianceCorrectiveActionRegister[]        @relation("ComplianceCorrectiveActionResponsible")
+  complianceCorrectiveActionsReviewed               ComplianceCorrectiveActionRegister[]        @relation("ComplianceCorrectiveActionReviewerIdentity")
+  complianceCorrectiveActionsCreated                ComplianceCorrectiveActionRegister[]        @relation("ComplianceCorrectiveActionCreator")
   socialProtectionApplicantProfiles                 BenefitApplicantProfile[]                   @relation("SocialProtectionApplicantProfile")
   socialProtectionHouseholdMembers                  HouseholdMember[]                           @relation("SocialProtectionHouseholdMember")
   externalEligibilityDeterminationsRecorded         ExternalEligibilityDeterminationReference[] @relation("ExternalEligibilityDeterminationRecorder")
@@ -1029,6 +1045,9 @@ model Organization {
 
   treatmentProgramProviders        TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants TreatmentPatientDataAccessGrant[] @relation("TreatmentPatientDataAccessGranteeOrganization")
+  strategicProjectInvestorProfiles StrategicProjectProfile[]           @relation("StrategicProjectInvestorOrganization")
+  strategicProjectOrganizationLinks StrategicProjectOrganizationLink[]
+  complianceCorrectiveActionsResponsible ComplianceCorrectiveActionRegister[]
 
   @@index([status])
   @@map("organizations")
@@ -1493,6 +1512,7 @@ model FunctionAuthorityRecord {
   workflowStepDefinitions       WorkflowStepDefinition[]
   departmentalReviews           DepartmentalReviewRecord[]
   inspectionRecords             InspectionRecord[]
+  jointInspectionParticipations JointInspectionParticipant[]
   recordCorrections             RecordCorrection[]
   decisionTypeVersions          DecisionTypeVersion[]
   governmentDecisions           GovernmentDecision[]
@@ -2011,6 +2031,7 @@ model GovernmentService {
   propertyTransfers              PropertyTransfer[]
   healthcareProfessionalLicenses HealthcareProfessionalLicense[]
   healthcareFacilityLicenses     HealthcareFacilityLicense[]
+  strategicProjectServiceLinks     StrategicProjectServiceLink[]
 
   @@index([responsibleInstitutionId])
   @@index([ownerOfficeholderId])
@@ -2568,6 +2589,8 @@ enum CaseEventType {
   CASE_CREATED
   CASE_OPENED
   CASE_ASSIGNED
+  CASE_MANAGER_ASSIGNED
+  CASE_MANAGER_REASSIGNED
   WORKFLOW_STARTED
   STEP_STARTED
   STEP_COMPLETED
@@ -2719,6 +2742,7 @@ model Application {
   formDefinition                       FormDefinition                        @relation(fields: [formDefinitionId], references: [id])
   formVersion                          FormVersion                           @relation(fields: [formVersionId], references: [id])
   submissions                          ApplicationSubmission[]
+  instrumentRenewalMonitoringSchedules InstrumentRenewalMonitoringSchedule[]
   case                                 Case?
   masterAdministrativeFile             MasterAdministrativeFile?
   feeAssessments                       FeeAssessment[]
@@ -2815,6 +2839,7 @@ model Case {
   statusHistory                        CaseStatusHistory[]
   workflowInstance                     CaseWorkflowInstance?
   assignments                          CaseAssignment[]
+  caseManagerAssignments               CaseManagerAssignment[]
   referrals                            CaseReferral[]
   slaClocks                            CaseSlaClock[]
   escalations                          CaseEscalation[]
@@ -2894,6 +2919,7 @@ model Case {
   treatmentReferrals          TreatmentReferral[]
   treatmentScreenings         TreatmentScreening[]
   treatmentEligibilityReviews TreatmentEligibilityReview[]
+  strategicProjectCaseLinks   StrategicProjectCaseLink[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -3176,6 +3202,8 @@ model CaseReferral {
   authorityDependency      AuthorityDependency?            @relation(fields: [authorityDependencyId], references: [id])
   responses                CaseReferralResponse[]
   governmentCommunications GovernmentCommunicationRecord[]
+  strategicProjectReferralLinks StrategicProjectReferralLink[]
+  strategicProjectInstitutionCoordinations StrategicProjectInstitutionCoordination[]
 
   @@index([caseId])
   @@index([status])
@@ -4099,9 +4127,14 @@ enum InspectionType {
 }
 
 enum InspectionStatus {
+  PLANNED
   SCHEDULED
+  ASSIGNED
   IN_PROGRESS
   COMPLETED
+  FINDINGS_RECORDED
+  FOLLOW_UP_REQUIRED
+  CLOSED
   CANCELLED
 }
 
@@ -4302,11 +4335,17 @@ model InspectionRecord {
   limitations                   String?
   followUpRequired              Boolean                        @default(false)
   status                        InspectionStatus               @default(SCHEDULED)
+  scheduledFor                  DateTime?
+  serviceAppointmentId          String?                        @db.Uuid
+  outcome                       String?
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @updatedAt
   case                          Case                           @relation(fields: [caseId], references: [id])
   functionAuthorityRecord       FunctionAuthorityRecord?       @relation(fields: [functionAuthorityRecordId], references: [id])
+  serviceAppointment            ServiceAppointment?            @relation(fields: [serviceAppointmentId], references: [id])
   inspectors                    InspectionInspector[]
+  jointParticipants             JointInspectionParticipant[]
+  correctiveActionRegisters     ComplianceCorrectiveActionRegister[]
   evidenceItems                 InspectionEvidenceItem[]
   packetItems                   EvidencePacketItem[]
   labourInspectionReferences    LabourInspectionReference[]
@@ -4423,6 +4462,7 @@ model EvidencePacket {
   versions                              EvidencePacketVersion[]
   dashboardDrilldownReferences          DashboardDrilldownReference[]
   measuredPerformanceClaimEvidenceLinks MeasuredPerformanceClaimEvidenceLink[]
+  strategicProjectReadinessProfiles     StrategicProjectProfile[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5881,6 +5921,8 @@ model OfficialInstrument {
   externalReviewReferralsChallenged ExternalReviewReferral[]          @relation("ExternalReviewChallengedInstrument")
   complianceMatters                 ComplianceMatter[]
   complianceStatusProjections       ComplianceStatusProjection[]
+  renewalMonitoringSchedule         InstrumentRenewalMonitoringSchedule?
+  strategicProjectInstrumentLinks   StrategicProjectInstrumentLink[]
   civilRegistryCertificate          CivilRegistryCertificate?
   immigrationStatusRecords          ImmigrationStatusRecord[]
   visaPermissionRecords             VisaPermissionRecord[]
@@ -6524,6 +6566,7 @@ model ComplianceMatter {
   educationComplianceReference         EducationComplianceReference?
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
+  correctiveActionRegisters            ComplianceCorrectiveActionRegister[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -9014,6 +9057,7 @@ model CommunicationMessage {
   deliveries                     CommunicationDelivery[]
   mafIndexEntries                CommunicationMafIndexEntry[]
   serviceAppointmentReminders    ServiceAppointmentReminder[]
+  instrumentRenewalReminders     InstrumentRenewalReminder[]
 
   @@index([caseId])
   @@index([masterAdministrativeFileId])
@@ -10360,6 +10404,10 @@ model StrategicProjectProfile {
   caseId                           String?                         @db.Uuid
   sectorCode                       String?
   currentStage                     StrategicProjectLifecycleStage  @default(INQUIRY)
+  operationalStatus                StrategicProjectOperationalStatus @default(ACTIVE)
+  primaryInvestorOrganizationId    String?                         @db.Uuid
+  currentCaseManagerAssignmentId   String?                         @db.Uuid
+  readinessEvidencePacketId        String?                         @db.Uuid
   adverseStatusPreserved           Boolean                         @default(false)
   attributionMetadata              Json                            @default("{}")
   externalFactorNotes              String?
@@ -10370,6 +10418,15 @@ model StrategicProjectProfile {
   sponsoringInstitution            Institution                     @relation(fields: [sponsoringInstitutionId], references: [id])
   responsibleDepartment            Department                      @relation(fields: [responsibleDepartmentId], references: [id])
   case                             Case?                           @relation(fields: [caseId], references: [id])
+  primaryInvestorOrganization      Organization?                   @relation("StrategicProjectInvestorOrganization", fields: [primaryInvestorOrganizationId], references: [id])
+  currentCaseManagerAssignment     CaseManagerAssignment?          @relation(fields: [currentCaseManagerAssignmentId], references: [id])
+  readinessEvidencePacket          EvidencePacket?                 @relation(fields: [readinessEvidencePacketId], references: [id])
+  caseLinks                        StrategicProjectCaseLink[]
+  organizationLinks                StrategicProjectOrganizationLink[]
+  serviceLinks                     StrategicProjectServiceLink[]
+  instrumentLinks                  StrategicProjectInstrumentLink[]
+  referralLinks                    StrategicProjectReferralLink[]
+  institutionCoordinations         StrategicProjectInstitutionCoordination[]
   stageHistory                     StrategicProjectStage[]
   milestones                       StrategicProjectMilestone[]
   dependencies                     StrategicProjectDependency[]
@@ -13849,6 +13906,7 @@ model ServiceAppointment {
   outcomeReferences              AppointmentOutcomeReference[]
   auditEvents                    ServiceAppointmentAuditEvent[]
   reminders                      ServiceAppointmentReminder[]
+  inspectionRecords              InspectionRecord[]
   immigrationInterview           ImmigrationInterview?
   biometricRequirement           BiometricRequirement?
   driverTestRecord               DriverTestRecord?
@@ -24836,4 +24894,284 @@ model HealthcareDataAccessAudit {
   @@index([accessorIdentityId])
   @@index([patientReferenceId])
   @@map("healthcare_data_access_audits")
+}
+// ─── Remediation S16: Operational lifecycle ───────────────────────────────────
+
+enum CaseManagerAssignmentStatus {
+  ACTIVE
+  SUPERSEDED
+}
+
+enum StrategicProjectOperationalStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CLOSED
+}
+
+enum StrategicProjectCoordinationType {
+  DEPENDENCY
+  REFERRAL
+}
+
+enum ComplianceCorrectiveActionRegisterStatus {
+  OPEN
+  IN_PROGRESS
+  REMEDIATION_SUBMITTED
+  VERIFIED
+  ESCALATED
+  CLOSED
+}
+
+enum InstrumentRenewalMonitoringStatus {
+  ACTIVE
+  REMINDER_SENT
+  RENEWAL_IN_PROGRESS
+  OVERDUE
+  CLOSED
+}
+
+enum OperationalJobRunStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+model CaseManagerAssignment {
+  id                     String                      @id @default(uuid()) @db.Uuid
+  caseId                 String                      @db.Uuid
+  officeholderId         String                      @db.Uuid
+  institutionId          String                      @db.Uuid
+  departmentId           String                      @db.Uuid
+  reason                 String
+  effectiveFrom          DateTime
+  effectiveUntil         DateTime?
+  status                 CaseManagerAssignmentStatus @default(ACTIVE)
+  assignedByIdentityId   String                      @db.Uuid
+  supersededById           String?                     @unique @db.Uuid
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  case                   Case                        @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  officeholder           Officeholder                @relation("CaseManagerAssignmentOfficeholder", fields: [officeholderId], references: [id])
+  institution            Institution                 @relation(fields: [institutionId], references: [id])
+  department             Department                  @relation(fields: [departmentId], references: [id])
+  assignedBy             Identity                    @relation("CaseManagerAssignmentAssigner", fields: [assignedByIdentityId], references: [id])
+  supersededBy           CaseManagerAssignment?      @relation("CaseManagerAssignmentSupersession", fields: [supersededById], references: [id])
+  supersedes             CaseManagerAssignment?      @relation("CaseManagerAssignmentSupersession")
+  strategicProjectProfiles StrategicProjectProfile[]
+
+  @@index([caseId, status])
+  @@index([officeholderId, status])
+  @@index([institutionId, departmentId])
+  @@map("case_manager_assignments")
+}
+
+model JointInspectionParticipant {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  inspectionId              String                   @db.Uuid
+  institutionId             String                   @db.Uuid
+  departmentId              String?                  @db.Uuid
+  officeholderId            String                   @db.Uuid
+  identityId                String                   @db.Uuid
+  functionAuthorityRecordId String?                  @db.Uuid
+  mandateSummary            String
+  participantFindings       String?
+  attributionLabel          String
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  inspection                InspectionRecord         @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  institution               Institution              @relation(fields: [institutionId], references: [id])
+  department                Department?              @relation(fields: [departmentId], references: [id])
+  officeholder              Officeholder             @relation(fields: [officeholderId], references: [id])
+  identity                  Identity                 @relation("JointInspectionParticipantIdentity", fields: [identityId], references: [id])
+  functionAuthorityRecord   FunctionAuthorityRecord? @relation(fields: [functionAuthorityRecordId], references: [id])
+
+  @@unique([inspectionId, institutionId, officeholderId])
+  @@index([inspectionId])
+  @@map("joint_inspection_participants")
+}
+
+model ComplianceCorrectiveActionRegister {
+  id                             String                                 @id @default(uuid()) @db.Uuid
+  correctiveActionReference      String                                 @unique
+  complianceMatterId             String?                                @db.Uuid
+  inspectionRecordId             String?                                @db.Uuid
+  originatingFindingReference    String?
+  responsibleIdentityId          String?                                @db.Uuid
+  responsibleOrganizationId      String?                                @db.Uuid
+  requiredAction                 String
+  dueDate                        DateTime
+  status                         ComplianceCorrectiveActionRegisterStatus @default(OPEN)
+  remediationEvidenceRecordIds   String[]                               @default([])
+  reviewerOfficeholderId         String?                                @db.Uuid
+  reviewerIdentityId             String?                                @db.Uuid
+  verifiedAt                     DateTime?
+  verificationEvidenceRecordIds  String[]                               @default([])
+  escalationReference            String?
+  closedAt                       DateTime?
+  createdByIdentityId            String                                 @db.Uuid
+  createdAt                      DateTime                               @default(now())
+  updatedAt                      DateTime                               @updatedAt
+  complianceMatter               ComplianceMatter?                      @relation(fields: [complianceMatterId], references: [id])
+  inspectionRecord               InspectionRecord?                      @relation(fields: [inspectionRecordId], references: [id])
+  responsibleIdentity            Identity?                              @relation("ComplianceCorrectiveActionResponsible", fields: [responsibleIdentityId], references: [id])
+  responsibleOrganization        Organization?                          @relation(fields: [responsibleOrganizationId], references: [id])
+  reviewerOfficeholder           Officeholder?                          @relation("ComplianceCorrectiveActionReviewer", fields: [reviewerOfficeholderId], references: [id])
+  reviewerIdentity               Identity?                              @relation("ComplianceCorrectiveActionReviewerIdentity", fields: [reviewerIdentityId], references: [id])
+  createdBy                      Identity                               @relation("ComplianceCorrectiveActionCreator", fields: [createdByIdentityId], references: [id])
+
+  @@index([status])
+  @@index([complianceMatterId])
+  @@index([inspectionRecordId])
+  @@map("compliance_corrective_action_registers")
+}
+
+model StrategicProjectCaseLink {
+  id        String                @id @default(uuid()) @db.Uuid
+  profileId String                @db.Uuid
+  caseId    String                @db.Uuid
+  linkRole  String                @default("RELATED")
+  createdAt DateTime              @default(now())
+  profile   StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  case      Case                  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, caseId])
+  @@map("strategic_project_case_links")
+}
+
+model StrategicProjectOrganizationLink {
+  id                String                  @id @default(uuid()) @db.Uuid
+  profileId         String                  @db.Uuid
+  organizationId    String                  @db.Uuid
+  participationRole String                  @default("PARTICIPANT")
+  createdAt         DateTime                @default(now())
+  profile           StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  organization      Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, organizationId])
+  @@map("strategic_project_organization_links")
+}
+
+model StrategicProjectServiceLink {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  profileId           String                  @db.Uuid
+  governmentServiceId String                  @db.Uuid
+  createdAt           DateTime                @default(now())
+  profile             StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  governmentService   GovernmentService       @relation(fields: [governmentServiceId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, governmentServiceId])
+  @@map("strategic_project_service_links")
+}
+
+model StrategicProjectInstrumentLink {
+  id                   String                  @id @default(uuid()) @db.Uuid
+  profileId            String                  @db.Uuid
+  officialInstrumentId String                  @db.Uuid
+  createdAt            DateTime                @default(now())
+  profile              StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  officialInstrument   OfficialInstrument      @relation(fields: [officialInstrumentId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, officialInstrumentId])
+  @@map("strategic_project_instrument_links")
+}
+
+model StrategicProjectReferralLink {
+  id             String                  @id @default(uuid()) @db.Uuid
+  profileId      String                  @db.Uuid
+  caseReferralId String                  @db.Uuid
+  createdAt      DateTime                @default(now())
+  profile        StrategicProjectProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  caseReferral   CaseReferral            @relation(fields: [caseReferralId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, caseReferralId])
+  @@map("strategic_project_referral_links")
+}
+
+model StrategicProjectInstitutionCoordination {
+  id                            String                           @id @default(uuid()) @db.Uuid
+  profileId                     String                           @db.Uuid
+  sourceInstitutionId           String                           @db.Uuid
+  targetInstitutionId           String                           @db.Uuid
+  sourceDepartmentId            String?                          @db.Uuid
+  targetDepartmentId            String?                          @db.Uuid
+  coordinationType              StrategicProjectCoordinationType
+  scopeSummary                  String
+  doesNotExtendReceivingMandate Boolean                          @default(true)
+  caseReferralId                String?                          @db.Uuid
+  createdAt                     DateTime                         @default(now())
+  updatedAt                     DateTime                         @updatedAt
+  profile                       StrategicProjectProfile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  sourceInstitution             Institution                      @relation("StrategicProjectCoordinationSource", fields: [sourceInstitutionId], references: [id])
+  targetInstitution             Institution                      @relation("StrategicProjectCoordinationTarget", fields: [targetInstitutionId], references: [id])
+  sourceDepartment              Department?                      @relation("StrategicProjectCoordinationSourceDepartment", fields: [sourceDepartmentId], references: [id])
+  targetDepartment              Department?                      @relation("StrategicProjectCoordinationTargetDepartment", fields: [targetDepartmentId], references: [id])
+  caseReferral                  CaseReferral?                    @relation(fields: [caseReferralId], references: [id])
+
+  @@index([profileId])
+  @@map("strategic_project_institution_coordinations")
+}
+
+model InstrumentRenewalMonitoringSchedule {
+  id                     String                            @id @default(uuid()) @db.Uuid
+  instrumentId           String                            @unique @db.Uuid
+  expirationDate         DateTime
+  eligibilityWindowStart DateTime?
+  eligibilityWindowEnd   DateTime?
+  renewalApplicationId   String?                           @db.Uuid
+  monitoringStatus       InstrumentRenewalMonitoringStatus @default(ACTIVE)
+  lastReminderAt         DateTime?
+  overdueMarkedAt        DateTime?
+  createdAt              DateTime                          @default(now())
+  updatedAt              DateTime                          @updatedAt
+  instrument             OfficialInstrument                @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  renewalApplication     Application?                      @relation(fields: [renewalApplicationId], references: [id])
+  reminders              InstrumentRenewalReminder[]
+
+  @@index([monitoringStatus])
+  @@index([expirationDate])
+  @@map("instrument_renewal_monitoring_schedules")
+}
+
+model InstrumentRenewalReminder {
+  id                     String                              @id @default(uuid()) @db.Uuid
+  scheduleId             String                              @db.Uuid
+  communicationMessageId String?                             @db.Uuid
+  reminderKind           String
+  remindedAt             DateTime                            @default(now())
+  schedule               InstrumentRenewalMonitoringSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  communicationMessage   CommunicationMessage?               @relation(fields: [communicationMessageId], references: [id])
+
+  @@index([scheduleId])
+  @@map("instrument_renewal_reminders")
+}
+
+model OperationalJobDefinition {
+  id          String              @id @default(uuid()) @db.Uuid
+  jobCode     String              @unique
+  description String?
+  enabled     Boolean             @default(true)
+  intervalMs  Int
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  runs        OperationalJobRun[]
+
+  @@map("operational_job_definitions")
+}
+
+model OperationalJobRun {
+  id                String                  @id @default(uuid()) @db.Uuid
+  jobDefinitionId   String                  @db.Uuid
+  startedAt         DateTime                @default(now())
+  completedAt       DateTime?
+  status            OperationalJobRunStatus @default(RUNNING)
+  resultSummary     String?
+  errorMessage      String?
+  jobDefinition     OperationalJobDefinition @relation(fields: [jobDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([jobDefinitionId, startedAt])
+  @@map("operational_job_runs")
 }
