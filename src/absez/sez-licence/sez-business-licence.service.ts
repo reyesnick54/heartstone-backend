@@ -101,8 +101,6 @@ export class SezBusinessLicenceService {
   async recordPaymentReceived(
     input: RecordSezLicencePaymentInput,
   ): Promise<SezBusinessLicenceRecord> {
-    this.boundary.assertPaymentDoesNotIssueLicence(input.actorPersona);
-
     const licence = await this.prisma.sezBusinessLicenceRecord.findUnique({
       where: { id: input.sezBusinessLicenceId },
     });
@@ -135,6 +133,7 @@ export class SezBusinessLicenceService {
   async issueLicenceAfterDecision(
     input: IssueSezBusinessLicenceInput,
   ): Promise<SezBusinessLicenceRecord> {
+    this.boundary.assertPaymentDoesNotIssueLicence(input.actorPersona);
     this.boundary.assertAiCannotIssueLicence(input.actorPersona);
     this.boundary.assertLicenceRequiresHumanDecision(input);
 
