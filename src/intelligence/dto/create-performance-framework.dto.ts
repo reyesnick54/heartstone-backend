@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreatePerformanceFrameworkDto {
-  @ApiProperty({ example: 'ABSEZ-PERF-2026' })
+  @ApiProperty({ example: 'INST-PERF-2026' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(64)

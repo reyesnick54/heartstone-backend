@@ -129,7 +129,7 @@ export const PHASE_8H_INVARIANTS: readonly Phase8HInvariant[] = [
   {
     id: 34,
     category: 'authority',
-    description: 'Retained national determination cannot be substituted by ABSEZ',
+    description: 'Retained national determination cannot be substituted by the operating institution',
   },
   {
     id: 35,
@@ -226,7 +226,7 @@ export const PHASE_8H_INVARIANTS: readonly Phase8HInvariant[] = [
   {
     id: 63,
     category: 'issuance',
-    description: 'Retained-national instrument type forbids ABSEZ issuance',
+    description: 'Retained-national instrument type forbids operating-institution issuance',
   },
   {
     id: 64,

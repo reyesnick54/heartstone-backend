@@ -135,7 +135,7 @@ describe('Remediation S1 — server-derived authority facts (must-fail e2e)', ()
       data: {
         code: 'S1-FN',
         name: 'Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,

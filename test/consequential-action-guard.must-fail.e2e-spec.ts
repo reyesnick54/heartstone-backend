@@ -151,7 +151,7 @@ describe('Consequential Action Guard must-fail invariants (e2e)', () => {
       data: {
         code: 'CAG-FN',
         name: 'Function',
-        classification: AuthorityClassification.ABSEZ_OWNED,
+        classification: AuthorityClassification.INSTITUTION_OWNED,
         functionClass: ControlledFunctionClass.APPROVAL,
         lifecycleStatus: FunctionAuthorityLifecycleStatus.ACTIVE,
         institutionId: institution.id,

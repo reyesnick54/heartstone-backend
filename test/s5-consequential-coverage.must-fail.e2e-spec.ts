@@ -50,7 +50,7 @@ describe('S5 consequential coverage must-fail (e2e)', () => {
       code,
       name: code,
       description: 'S5 test function',
-      classification: AuthorityClassification.ABSEZ_OWNED,
+      classification: AuthorityClassification.INSTITUTION_OWNED,
       functionClass: ControlledFunctionClass.APPROVAL,
     });
     return record.id;

@@ -140,13 +140,13 @@ describe('Phase 8G architectural must-fail invariants', () => {
     }).toThrow(/controlling GovernmentDecision/i);
   });
 
-  it('11. ABSEZ revocation cannot masquerade as national revocation', () => {
+  it('11. operating-jurisdiction revocation cannot masquerade as national revocation', () => {
     expect(() => {
-      boundary.assertAbsezRevocationNotNational({
-        jurisdictionScope: InstrumentJurisdictionScope.ABSEZ,
+      boundary.assertOperatingJurisdictionRevocationNotNational({
+        jurisdictionScope: InstrumentJurisdictionScope.OPERATING_JURISDICTION,
         representsNationalRevocation: true,
       });
-    }).toThrow(/ABSEZ/i);
+    }).toThrow(/Operating-jurisdiction/i);
   });
 
   it('12. expired suspension does not auto-reinstate', () => {
