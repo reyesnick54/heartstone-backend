@@ -23,6 +23,8 @@ jobs:
   quality:
     name: Quality checks
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
