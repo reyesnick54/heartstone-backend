@@ -4,12 +4,10 @@ import {
   ControlledFunctionClass,
   InstrumentIssuerSource,
 } from '@prisma/client';
-import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { NON_PRODUCTION_FIXTURE_MARKER } from '../src/authority/authority.constants';
 import { type PrismaService } from '../src/database/prisma.service';
-import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 import {
   seedReferenceAbsezInstitution,
@@ -19,16 +17,12 @@ import {
 describe('Remediation S10 multi-institution isolation (integration)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
-  let adminSessionToken: string;
-
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
   });
 
   beforeEach(async () => {
     await resetAllTestData(prisma);
-    const admin = await ensureIntegrationAdminSession(app, prisma);
-    adminSessionToken = admin.sessionToken;
   });
 
   afterAll(async () => {
@@ -75,29 +69,52 @@ describe('Remediation S10 multi-institution isolation (integration)', () => {
     const absezServiceCode = `${NON_PRODUCTION_FIXTURE_MARKER}-SVC-ABSEZ`;
     const otherServiceCode = `${NON_PRODUCTION_FIXTURE_MARKER}-SVC-OTHER`;
 
-    await request(app.getHttpServer())
-      .post('/api/v1/service-catalog/government-services')
-      .set(authHeader(adminSessionToken))
-      .send({
+    const serviceFamily = await prisma.serviceFamily.create({
+      data: {
+        code: `${NON_PRODUCTION_FIXTURE_MARKER}-FAMILY`,
+        name: 'Reference service family',
+      },
+    });
+
+    const absezDepartment = await prisma.department.create({
+      data: {
+        institutionId: absez.institutionId,
+        code: `${NON_PRODUCTION_FIXTURE_MARKER}-ABSEZ-DEPT`,
+        name: 'ABSEZ department',
+      },
+    });
+
+    const otherDepartment = await prisma.department.create({
+      data: {
+        institutionId: other.institutionId,
+        code: `${NON_PRODUCTION_FIXTURE_MARKER}-OTHER-DEPT`,
+        name: 'Other institution department',
+      },
+    });
+
+    await prisma.governmentService.create({
+      data: {
         code: absezServiceCode,
         slug: 'absez-configured-service',
         officialName: 'ABSEZ Service',
         publicName: 'ABSEZ Service',
         responsibleInstitutionId: absez.institutionId,
-      })
-      .expect(201);
+        responsibleDepartmentId: absezDepartment.id,
+        serviceFamilyId: serviceFamily.id,
+      },
+    });
 
-    await request(app.getHttpServer())
-      .post('/api/v1/service-catalog/government-services')
-      .set(authHeader(adminSessionToken))
-      .send({
+    await prisma.governmentService.create({
+      data: {
         code: otherServiceCode,
         slug: 'other-institution-service',
         officialName: 'Other Service',
         publicName: 'Other Service',
         responsibleInstitutionId: other.institutionId,
-      })
-      .expect(201);
+        responsibleDepartmentId: otherDepartment.id,
+        serviceFamilyId: serviceFamily.id,
+      },
+    });
 
     const otherOnly = await prisma.governmentService.findMany({
       where: { responsibleInstitutionId: other.institutionId },
