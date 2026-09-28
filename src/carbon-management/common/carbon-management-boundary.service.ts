@@ -1,8 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import {
-  CarbonExternalVerificationStatus,
-  CarbonManagementActorPersona,
-} from '@prisma/client';
+import { CarbonExternalVerificationStatus, CarbonManagementActorPersona } from '@prisma/client';
 
 import {
   CARBON_MANAGEMENT_REASON_CODES,
@@ -36,7 +33,9 @@ export class CarbonManagementBoundaryService {
       actorPersona === CarbonManagementActorPersona.AI_ASSISTANCE &&
       FORBIDDEN_AI_CARBON_MANAGEMENT_ACTIONS.includes(action as never)
     ) {
-      throw new ForbiddenException(`AI assistance cannot perform carbon-management action: ${action}`);
+      throw new ForbiddenException(
+        `AI assistance cannot perform carbon-management action: ${action}`,
+      );
     }
   }
 

@@ -44,7 +44,10 @@ export class CarbonExternalVerificationService {
       markOfficialApproval?: boolean;
     },
   ) {
-    this.boundary.rejectApplicantForgedExternalVerification(actorPersona, Boolean(input.verifierIdentityId));
+    this.boundary.rejectApplicantForgedExternalVerification(
+      actorPersona,
+      Boolean(input.verifierIdentityId),
+    );
     this.boundary.assertAiCannotApproveAuthorization(
       actorPersona,
       'FINALIZE_CARBON_GOVERNMENT_DECISION',

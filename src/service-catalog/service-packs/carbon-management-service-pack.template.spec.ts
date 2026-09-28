@@ -15,7 +15,9 @@ describe('Carbon management service pack template', () => {
 
   it('defines governed carbon-management services', () => {
     expect(CARBON_MANAGEMENT_SERVICES.length).toBeGreaterThan(0);
-    expect(CARBON_MANAGEMENT_SERVICE_PACK_TEMPLATE.packLabel).toBe(SERVICE_PACK_NON_PRODUCTION_LABEL);
+    expect(CARBON_MANAGEMENT_SERVICE_PACK_TEMPLATE.packLabel).toBe(
+      SERVICE_PACK_NON_PRODUCTION_LABEL,
+    );
     for (const service of CARBON_MANAGEMENT_SERVICES) {
       expect(service.workflowStages.some((stage) => stage.stageKey === 'decision')).toBe(true);
     }

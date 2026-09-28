@@ -27,7 +27,9 @@ export class CarbonManagementAccessService {
       if (!granted) {
         reasonCode = CARBON_MANAGEMENT_REASON_CODES.CROSS_ORGANIZATION_ACCESS_DENIED;
       }
-    } else if (context.classification === CarbonManagementDataClassification.COMMERCIAL_CONFIDENTIAL) {
+    } else if (
+      context.classification === CarbonManagementDataClassification.COMMERCIAL_CONFIDENTIAL
+    ) {
       granted = context.hasProgrammeOfficerScope;
       if (!granted) {
         reasonCode = CARBON_MANAGEMENT_REASON_CODES.COMMERCIAL_CONFIDENTIAL_ACCESS_DENIED;

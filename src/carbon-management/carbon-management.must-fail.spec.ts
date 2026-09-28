@@ -49,7 +49,9 @@ describe('Carbon management must-fail gates', () => {
 
     it('blocks payment from approving authorization', () => {
       expect(() => {
-        boundary.assertPaymentDoesNotApproveAuthorization(CarbonManagementActorPersona.PAYMENT_SYSTEM);
+        boundary.assertPaymentDoesNotApproveAuthorization(
+          CarbonManagementActorPersona.PAYMENT_SYSTEM,
+        );
       }).toThrow(ForbiddenException);
     });
 

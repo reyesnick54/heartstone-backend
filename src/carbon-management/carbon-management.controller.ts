@@ -82,13 +82,18 @@ export class CarbonManagementController {
   recordRegistryReference(
     @Param('carbonProjectId', ParseUUIDPipe) carbonProjectId: string,
     @Body()
-    body: Omit<Parameters<CarbonRegistryReferenceService['recordRegistryReference']>[0], 'carbonProjectId'>,
+    body: Omit<
+      Parameters<CarbonRegistryReferenceService['recordRegistryReference']>[0],
+      'carbonProjectId'
+    >,
   ) {
     return this.registryReferenceService.recordRegistryReference({ carbonProjectId, ...body });
   }
 
   @Post('authorizations/issue')
-  @ApiOkResponse({ description: 'Carbon administrative authorization issued under active authority' })
+  @ApiOkResponse({
+    description: 'Carbon administrative authorization issued under active authority',
+  })
   issueAuthorization(
     @Body() body: Parameters<CarbonAdministrativeAuthorizationService['issueAuthorization']>[0],
   ) {

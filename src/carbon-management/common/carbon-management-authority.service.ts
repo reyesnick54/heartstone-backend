@@ -21,7 +21,9 @@ export class CarbonManagementAuthorityService {
     private readonly functionRecords: FunctionAuthorityRecordsService,
   ) {}
 
-  async assertAuthorizationIssuanceAuthority(input: AssertCarbonIssuanceAuthorityInput): Promise<void> {
+  async assertAuthorizationIssuanceAuthority(
+    input: AssertCarbonIssuanceAuthorityInput,
+  ): Promise<void> {
     let functionRecord;
     try {
       functionRecord = await this.functionRecords.findByCode(CARBON_MANAGEMENT_AUTHORITY.issue);
