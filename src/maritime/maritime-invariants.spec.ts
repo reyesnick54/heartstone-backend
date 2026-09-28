@@ -1,7 +1,4 @@
-import {
-  MARITIME_INVARIANTS,
-  MARITIME_TEMPLATE_SERVICE_DEFINITIONS,
-} from './maritime.constants';
+import { MARITIME_INVARIANTS, MARITIME_TEMPLATE_SERVICE_DEFINITIONS } from './maritime.constants';
 
 describe('Maritime invariants', () => {
   it('keeps service definitions configurable without hardcoded national taxonomy', () => {

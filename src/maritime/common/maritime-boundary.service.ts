@@ -1,13 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import {
-  MaritimeActorPersona,
-  MaritimeExternalDependencyStatus,
-} from '@prisma/client';
+import { MaritimeActorPersona, MaritimeExternalDependencyStatus } from '@prisma/client';
 
-import {
-  FORBIDDEN_AI_MARITIME_ACTIONS,
-  MARITIME_REASON_CODES,
-} from '../maritime.constants';
+import { FORBIDDEN_AI_MARITIME_ACTIONS, MARITIME_REASON_CODES } from '../maritime.constants';
 import { FORBIDDEN_CLIENT_INSTRUMENT_FIELDS } from '../maritime-schema.constants';
 
 @Injectable()
@@ -39,7 +33,9 @@ export class MaritimeBoundaryService {
 
   assertPaymentDoesNotIssueInstrument(actorPersona: MaritimeActorPersona): void {
     if (actorPersona === MaritimeActorPersona.PAYMENT_SYSTEM) {
-      throw new ForbiddenException('Payment receipt does not issue maritime administrative instruments');
+      throw new ForbiddenException(
+        'Payment receipt does not issue maritime administrative instruments',
+      );
     }
   }
 
@@ -98,7 +94,9 @@ export class MaritimeBoundaryService {
 
   assertVesselPartyDoesNotDuplicateIdentity(doesNotDuplicatePartyRecord: boolean): void {
     if (!doesNotDuplicatePartyRecord) {
-      throw new BadRequestException('Vessel party relationship must reference canonical party records only');
+      throw new BadRequestException(
+        'Vessel party relationship must reference canonical party records only',
+      );
     }
   }
 }

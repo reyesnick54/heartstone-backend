@@ -102,7 +102,9 @@ export class MaritimeController {
   }
 
   @Post('customs-case-references')
-  linkCustomsCase(@Body() body: Parameters<MaritimeCustomsReferenceService['linkCustomsOrPortCase']>[0]) {
+  linkCustomsCase(
+    @Body() body: Parameters<MaritimeCustomsReferenceService['linkCustomsOrPortCase']>[0],
+  ) {
     return this.customsReferenceService.linkCustomsOrPortCase(body);
   }
 

@@ -53,7 +53,8 @@ export class MaritimeInstrumentService {
       input.vesselRecordId,
     );
     this.boundary.assertCannotSpoofNationalDeterminationAsAbsez({
-      requiresCompetentAuthorityDetermination: input.requiresCompetentAuthorityDetermination ?? false,
+      requiresCompetentAuthorityDetermination:
+        input.requiresCompetentAuthorityDetermination ?? false,
       absezIssuanceAttempt: true,
       externalResolved: awaitingExternal === 0,
     });

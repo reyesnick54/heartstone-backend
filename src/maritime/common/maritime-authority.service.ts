@@ -18,7 +18,9 @@ export class MaritimeAuthorityService {
     private readonly functionRecords: FunctionAuthorityRecordsService,
   ) {}
 
-  async assertInstrumentIssuanceAuthority(input: AssertMaritimeIssuanceAuthorityInput): Promise<void> {
+  async assertInstrumentIssuanceAuthority(
+    input: AssertMaritimeIssuanceAuthorityInput,
+  ): Promise<void> {
     let functionRecord;
     try {
       functionRecord = await this.functionRecords.findByCode(MARITIME_AUTHORITY.issue);

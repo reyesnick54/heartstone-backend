@@ -18,9 +18,9 @@ describe('Maritime service pack template', () => {
     expect(MARITIME_SERVICE_PACK_TEMPLATE.packLabel).toBe(SERVICE_PACK_NON_PRODUCTION_LABEL);
     for (const service of MARITIME_SERVICES) {
       expect(service.serviceCode.startsWith('TEMPLATE-MAR-')).toBe(true);
-      expect(service.forms.some((form) => form.sections.some((s) => s.sectionKey === 'vessel'))).toBe(
-        true,
-      );
+      expect(
+        service.forms.some((form) => form.sections.some((s) => s.sectionKey === 'vessel')),
+      ).toBe(true);
     }
   });
 
