@@ -4,6 +4,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../database/prisma.service';
 import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
 import { RedisService } from '../redis/redis.service';
+import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 import { HealthService } from './health.service';
 
 describe('HealthService', () => {
@@ -22,6 +23,9 @@ describe('HealthService', () => {
     const documentTrustGate = {
       evaluateProhibitedAdapters: jest.fn().mockReturnValue({ allowed: true, reasons: [] }),
     };
+    const operationalProvidersGate = {
+      evaluateProhibitedAdapters: jest.fn().mockReturnValue({ allowed: true, reasons: [] }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -29,6 +33,7 @@ describe('HealthService', () => {
         { provide: PrismaService, useValue: prismaService },
         { provide: RedisService, useValue: redisService },
         { provide: DocumentTrustProductionGateService, useValue: documentTrustGate },
+        { provide: OperationalProvidersProductionGateService, useValue: operationalProvidersGate },
         {
           provide: ConfigService,
           useValue: {
@@ -63,6 +68,7 @@ describe('HealthService', () => {
         redis: 'up',
         identityAuth: 'ready',
         documentTrust: 'ready',
+        operationalProviders: 'ready',
       },
     });
   });
@@ -78,6 +84,7 @@ describe('HealthService', () => {
         redis: 'up',
         identityAuth: 'ready',
         documentTrust: 'ready',
+        operationalProviders: 'ready',
       },
     });
   });
@@ -93,6 +100,7 @@ describe('HealthService', () => {
         redis: 'down',
         identityAuth: 'ready',
         documentTrust: 'ready',
+        operationalProviders: 'ready',
       },
     });
   });

@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ServiceRuntimeGateService } from '../../remediation/s19/activation/service-runtime-gate.service';
 import { APPLICATION_STARTABLE_AVAILABILITY } from '../../service-catalog/common/public-discovery.constants';
 import {
   InvalidFormVersionException,
@@ -18,7 +19,10 @@ import {
 
 @Injectable()
 export class ApplicationProcessingValidationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly serviceRuntimeGate: ServiceRuntimeGateService,
+  ) {}
 
   async assertServiceStartable(governmentServiceVersionId: string): Promise<void> {
     const version = await this.prisma.governmentServiceVersion.findUnique({
@@ -46,6 +50,8 @@ export class ApplicationProcessingValidationService {
     if (version.supersededAt || version.supersededByVersionId) {
       throw new VersionSupersededSubmissionException();
     }
+
+    await this.serviceRuntimeGate.assertIntakeAllowed(governmentServiceVersionId);
   }
 
   async assertFormVersionValid(

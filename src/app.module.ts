@@ -49,6 +49,7 @@ import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
 import { S12WorkflowRuntimeModule } from './remediation/s12/s12-workflow-runtime.module';
+import { S19IntegrationsReportingModule } from './remediation/s19/s19-integrations-reporting.module';
 import { RevenueModule } from './revenue/revenue.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
@@ -100,6 +101,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ExperienceModule,
     ApplicationProcessingModule,
     S12WorkflowRuntimeModule,
+    S19IntegrationsReportingModule,
     ImmigrationModule,
     LabourModule,
     EducationModule,

@@ -4,6 +4,7 @@ import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../identity/auth/auth.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { GovernedAiModule } from './ai/governed-ai.module';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
@@ -47,7 +48,14 @@ import { StrategicProjectRiskService } from './strategic-projects/strategic-proj
 import { StrategicProjectStageService } from './strategic-projects/strategic-project-stage.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthModule, AuthorityModule, GovernedAiModule],
+  imports: [
+    DatabaseModule,
+    SessionsModule,
+    AuthModule,
+    AuthorityModule,
+    S19IntegrationsReportingModule,
+    GovernedAiModule,
+  ],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
     IntelligenceSuspendedAiGuard,
