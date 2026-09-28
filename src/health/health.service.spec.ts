@@ -3,8 +3,8 @@ import { Test, type TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../database/prisma.service';
 import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
-import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 import { RedisService } from '../redis/redis.service';
+import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 import { HealthService } from './health.service';
 
 describe('HealthService', () => {

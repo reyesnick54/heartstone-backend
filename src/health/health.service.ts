@@ -11,8 +11,8 @@ import {
 } from '../config/config.constants';
 import { PrismaService } from '../database/prisma.service';
 import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
-import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 import { RedisService } from '../redis/redis.service';
+import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 
 export interface ReadinessCheckResult {
   status: 'ready' | 'not_ready';

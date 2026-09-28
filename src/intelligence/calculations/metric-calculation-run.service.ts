@@ -3,11 +3,11 @@ import { MetricCalculationMethodType } from '@prisma/client';
 import { type MetricCalculationRun, MetricDefinitionVersionStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ComputedMetricService } from '../../remediation/s19/reporting/computed-metric.service';
+import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 import { hashCalculationIntegrity } from '../common/integrity-hash.util';
 import { IntelligenceBoundaryService } from '../common/intelligence-boundary.service';
 import { RecordMetricCalculationRunDto } from '../dto/record-metric-calculation-run.dto';
-import { ComputedMetricService } from '../../remediation/s19/reporting/computed-metric.service';
-import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 
 @Injectable()
 export class MetricCalculationRunService {

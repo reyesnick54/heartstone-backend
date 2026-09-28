@@ -5,6 +5,7 @@ import { DatabaseModule } from '../database/database.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { RecordsModule } from '../records/records.module';
 import { RedressModule } from '../redress/redress.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { OperationalSupportBoundaryService } from './common/operational-support-boundary.service';
 import { CommunicationDeliveryService } from './communications/communication-delivery.service';
 import { CommunicationMessageService } from './communications/communication-message.service';
@@ -30,7 +31,6 @@ import { RegistryQueryService } from './integrations/registry-query.service';
 import { SourceDiscrepancyService } from './integrations/source-discrepancy.service';
 import { MafIndexingService } from './maf/maf-indexing.service';
 import { OperationalSupportController } from './operational-support.controller';
-import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 
 @Module({
   imports: [

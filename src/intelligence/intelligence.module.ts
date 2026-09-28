@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
-import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { AuthModule } from '../identity/auth/auth.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';

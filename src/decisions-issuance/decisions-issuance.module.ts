@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
 import { CasesModule } from '../application-processing/cases/cases.module';
-import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { AuditGovernanceModule } from '../audit-governance/audit-governance.module';
 import { AuthorityModule } from '../authority/authority.module';
 import { EvidenceRecordsModule } from '../evidence-records/evidence-records.module';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { InstrumentDeliveryAuditService } from './audit/instrument-delivery-audit.service';
 import { InstrumentCatalogService } from './catalog/instrument-catalog.service';
 import { InstrumentNumberingService } from './catalog/instrument-numbering.service';

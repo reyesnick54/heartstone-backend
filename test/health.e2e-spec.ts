@@ -37,6 +37,7 @@ describe('Readiness endpoints (e2e)', () => {
             redis: 'up',
             identityAuth: 'ready',
             documentTrust: 'ready',
+            operationalProviders: 'ready',
           },
         });
     } finally {
@@ -71,6 +72,7 @@ describe('Readiness endpoints (e2e)', () => {
             redis: 'down',
             identityAuth: 'ready',
             documentTrust: 'ready',
+            operationalProviders: 'ready',
           },
         });
     } finally {

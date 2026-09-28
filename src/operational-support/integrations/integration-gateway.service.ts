@@ -10,13 +10,13 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { IntegrationCredentialResolverService } from '../../remediation/s19/integrations/integration-credential-resolver.service';
+import { OperationalDurableRetryService } from '../../remediation/s19/integrations/operational-durable-retry.service';
+import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 import {
   DEFAULT_INTEGRATION_MAX_PAYLOAD_BYTES,
   DEFAULT_INTEGRATION_REQUEST_TIMEOUT_MS,
 } from '../operational-support.constants';
-import { IntegrationCredentialResolverService } from '../../remediation/s19/integrations/integration-credential-resolver.service';
-import { OperationalDurableRetryService } from '../../remediation/s19/integrations/operational-durable-retry.service';
-import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 import { IntegrationOutageService } from './integration-outage.service';
 
 export interface AuthorizedExchangeInput {
