@@ -6,6 +6,7 @@ import { AbsezModule } from './absez/absez.module';
 import { ApplicationProcessingModule } from './application-processing/application-processing.module';
 import { AuditGovernanceModule } from './audit-governance/audit-governance.module';
 import { AuthorityModule } from './authority/authority.module';
+import { CannabisAdministrationModule } from './cannabis-administration/cannabis-administration.module';
 import { CarbonManagementModule } from './carbon-management/carbon-management.module';
 import { CivilRegistryModule } from './civil-registry/civil-registry.module';
 import { createPinoConfig } from './common/logging/pino-config';
@@ -49,6 +50,7 @@ import { RecordsModule } from './records/records.module';
 import { RedisModule } from './redis/redis.module';
 import { RedressModule } from './redress/redress.module';
 import { S12WorkflowRuntimeModule } from './remediation/s12/s12-workflow-runtime.module';
+import { S19IntegrationsReportingModule } from './remediation/s19/s19-integrations-reporting.module';
 import { RevenueModule } from './revenue/revenue.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { SecurityModule } from './security/security.module';
@@ -100,6 +102,7 @@ import { TransportationModule } from './transportation/transportation.module';
     ExperienceModule,
     ApplicationProcessingModule,
     S12WorkflowRuntimeModule,
+    S19IntegrationsReportingModule,
     ImmigrationModule,
     LabourModule,
     EducationModule,
@@ -121,6 +124,7 @@ import { TransportationModule } from './transportation/transportation.module';
     CustomsTradeModule,
     CarbonManagementModule,
     DigitalAssetsModule,
+    CannabisAdministrationModule,
     HealthcareModule,
     RedressModule,
     RevenueModule,

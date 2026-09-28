@@ -89,6 +89,18 @@ export const CONSEQUENTIAL_ROUTE_REQUIREMENTS: ConsequentialRouteRequirement[] =
   },
   {
     method: 'POST',
+    pathPattern: /^\/cannabis-administration\/licence-records\/issue$/,
+    action: AuthorityActionType.ISSUE,
+    description: 'Cannabis administration licence issuance',
+  },
+  {
+    method: 'POST',
+    pathPattern: /^\/cannabis-administration\/licence-records\/[^/]+\/suspend$/,
+    action: AuthorityActionType.SUSPEND,
+    description: 'Cannabis administration licence suspension',
+  },
+  {
+    method: 'POST',
     pathPattern: /^\/financial-services\/licence-records\/issue$/,
     action: AuthorityActionType.ISSUE,
     description: 'Financial services licence issuance',
