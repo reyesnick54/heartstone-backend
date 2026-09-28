@@ -125,7 +125,9 @@ export class AiPolicyGateService {
     if (await this.suspension.isSubjectSuspended(AiSuspensionSubjectType.MODEL, model.id)) {
       reasonCodes.push(AI_POLICY_REASON_CODES.MODEL_SUSPENDED);
     }
-    if (await this.suspension.isSubjectSuspended(AiSuspensionSubjectType.MODEL_PROVIDER, provider.id)) {
+    if (
+      await this.suspension.isSubjectSuspended(AiSuspensionSubjectType.MODEL_PROVIDER, provider.id)
+    ) {
       reasonCodes.push(AI_POLICY_REASON_CODES.PROVIDER_SUSPENDED);
     }
 
@@ -163,10 +165,9 @@ export class AiPolicyGateService {
     policyReference?: string | null,
   ): AiPolicyGateResult {
     return {
-      outcome:
-        reasonCodes.includes(AI_POLICY_REASON_CODES.POLICY_INDETERMINATE)
-          ? AiPolicyDecisionOutcome.INDETERMINATE
-          : AiPolicyDecisionOutcome.DENY,
+      outcome: reasonCodes.includes(AI_POLICY_REASON_CODES.POLICY_INDETERMINATE)
+        ? AiPolicyDecisionOutcome.INDETERMINATE
+        : AiPolicyDecisionOutcome.DENY,
       reasonCodes,
       evaluatedFactors,
       policyReference: policyReference ?? undefined,

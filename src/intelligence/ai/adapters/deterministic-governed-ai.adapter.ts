@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { type AiModelPort, type AiModelRequest, type AiModelResponse } from '../ports/ai-model.port';
+import {
+  type AiModelPort,
+  type AiModelRequest,
+  type AiModelResponse,
+} from '../ports/ai-model.port';
 
 @Injectable()
 export class DeterministicGovernedAiAdapter implements AiModelPort {

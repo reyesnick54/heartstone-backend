@@ -21,7 +21,12 @@ import { AiUserOutputGateService } from './services/ai-user-output-gate.service'
 import { GovernedAiProductionGateService } from './services/governed-ai-production-gate.service';
 
 @Module({
-  imports: [ConfigModule.forFeature(governedAiConfig), DatabaseModule, AuditGovernanceModule, AuthModule],
+  imports: [
+    ConfigModule.forFeature(governedAiConfig),
+    DatabaseModule,
+    AuditGovernanceModule,
+    AuthModule,
+  ],
   controllers: [GovernedAiController],
   providers: [
     DeterministicGovernedAiAdapter,

@@ -32,7 +32,9 @@ export interface GovernedAiFixtureIds {
 export class AiGovernedRegistryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async registerApprovedFixture(input: RegisterGovernedAiFixtureInput): Promise<GovernedAiFixtureIds> {
+  async registerApprovedFixture(
+    input: RegisterGovernedAiFixtureInput,
+  ): Promise<GovernedAiFixtureIds> {
     const provider = await this.prisma.aiModelProviderRegistry.upsert({
       where: { providerCode: input.providerCode },
       create: {

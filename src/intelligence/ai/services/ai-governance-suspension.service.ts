@@ -7,7 +7,10 @@ import { PrismaService } from '../../../database/prisma.service';
 export class AiGovernanceSuspensionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async isSubjectSuspended(subjectType: AiSuspensionSubjectType, subjectId: string): Promise<boolean> {
+  async isSubjectSuspended(
+    subjectType: AiSuspensionSubjectType,
+    subjectId: string,
+  ): Promise<boolean> {
     const now = new Date();
     const active = await this.prisma.aiGovernanceSuspension.findFirst({
       where: {

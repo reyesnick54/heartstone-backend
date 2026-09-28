@@ -19,7 +19,7 @@ import { DatabaseModule } from '../../database/database.module';
 import { resetGovernedAiData } from '../../database/governed-ai-test-reset';
 import { PrismaService } from '../../database/prisma.service';
 import { DeterministicGovernedAiAdapter } from './adapters/deterministic-governed-ai.adapter';
-import { AI_POLICY_REASON_CODES,FORBIDDEN_AI_GOVERNMENT_ACTIONS } from './governed-ai.constants';
+import { AI_POLICY_REASON_CODES, FORBIDDEN_AI_GOVERNMENT_ACTIONS } from './governed-ai.constants';
 import { GovernedAiModule } from './governed-ai.module';
 import { AiCallRuntimeService } from './services/ai-call-runtime.service';
 import { AiConsequentialDefenseService } from './services/ai-consequential-defense.service';
@@ -300,9 +300,9 @@ describe('Remediation S20 governed AI must-fail invariants', () => {
 
   for (const action of ['APPROVE', 'SIGN', 'ISSUE', 'ENFORCE'] as const) {
     it(`14–17. AI cannot ${action}`, () => {
-      expect(() => { consequential.assertAiCannotPerformGovernmentAction(action); }).toThrow(
-        ForbiddenException,
-      );
+      expect(() => {
+        consequential.assertAiCannotPerformGovernmentAction(action);
+      }).toThrow(ForbiddenException);
     });
   }
 

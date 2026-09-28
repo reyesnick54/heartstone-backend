@@ -19,10 +19,7 @@ import {
 import { GOVERNMENT_AUDIT_EVENT_TYPES } from '../../../audit-governance/audit-governance.constants';
 import { GovernmentAuditLedgerService } from '../../../audit-governance/ledger/government-audit-ledger.service';
 import { PrismaService } from '../../../database/prisma.service';
-import {
-  AI_GOVERNANCE_AUDIT_ACTIONS,
-  AI_POLICY_REASON_CODES,
-} from '../governed-ai.constants';
+import { AI_GOVERNANCE_AUDIT_ACTIONS, AI_POLICY_REASON_CODES } from '../governed-ai.constants';
 import { AI_MODEL_PORT, type AiModelPort } from '../ports/ai-model.port';
 import { AiCallAuditService } from './ai-call-audit.service';
 import { AiPolicyGateService } from './ai-policy-gate.service';
@@ -237,10 +234,9 @@ export class AiCallRuntimeService {
       },
     });
 
-    const userDeliveryStatus =
-      agent.humanOversightRequired
-        ? AiCallUserDeliveryStatus.PENDING_REVIEW
-        : AiCallUserDeliveryStatus.BLOCKED;
+    const userDeliveryStatus = agent.humanOversightRequired
+      ? AiCallUserDeliveryStatus.PENDING_REVIEW
+      : AiCallUserDeliveryStatus.BLOCKED;
 
     await this.prisma.aiCallRecord.update({
       where: { id: callRecordId },
@@ -322,7 +318,9 @@ export class AiCallRuntimeService {
     });
   }
 
-  async getUserFacingOutput(callRecordId: string): Promise<{ rawOutput: string; outputHash: string }> {
+  async getUserFacingOutput(
+    callRecordId: string,
+  ): Promise<{ rawOutput: string; outputHash: string }> {
     await this.outputGate.assertDeliverableToUser(callRecordId);
     await this.outputGate.markDelivered(callRecordId);
 

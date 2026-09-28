@@ -109,14 +109,16 @@ export class AiCallAuditService {
     correlationId: string;
     reasonCodes: string[];
   }): Promise<void> {
-    return this.ledger.append({
-      eventType: GOVERNMENT_AUDIT_EVENT_TYPES.AI_CALL,
-      actorIdentityId: input.initiatorIdentityId,
-      institutionId: input.institutionId,
-      action: AI_GOVERNANCE_AUDIT_ACTIONS.AI_CALL_DENIED,
-      outcome: 'DENY',
-      correlationId: input.correlationId,
-      metadata: { reasonCodes: input.reasonCodes },
-    }).then(() => undefined);
+    return this.ledger
+      .append({
+        eventType: GOVERNMENT_AUDIT_EVENT_TYPES.AI_CALL,
+        actorIdentityId: input.initiatorIdentityId,
+        institutionId: input.institutionId,
+        action: AI_GOVERNANCE_AUDIT_ACTIONS.AI_CALL_DENIED,
+        outcome: 'DENY',
+        correlationId: input.correlationId,
+        metadata: { reasonCodes: input.reasonCodes },
+      })
+      .then(() => undefined);
   }
 }
