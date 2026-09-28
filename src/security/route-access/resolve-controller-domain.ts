@@ -33,6 +33,7 @@ export type RouteAccessDomainKey =
   | 'cannabis-administration'
   | 'carbon-management'
   | 'financial-services'
+  | 'maritime'
   | 'civil-registry'
   | 'service-packs'
   | 'scheduling'
@@ -74,6 +75,7 @@ export function resolveControllerDomain(relativeSourcePath: string): RouteAccess
   if (relative.startsWith('cannabis-administration/')) return 'cannabis-administration';
   if (relative.startsWith('carbon-management/')) return 'carbon-management';
   if (relative.startsWith('financial-services/')) return 'financial-services';
+  if (relative.startsWith('maritime/')) return 'maritime';
   if (relative.startsWith('civil-registry/')) return 'civil-registry';
   if (relative.startsWith('service-packs/')) return 'service-packs';
   if (relative.startsWith('scheduling/')) return 'scheduling';

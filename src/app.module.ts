@@ -39,6 +39,7 @@ import { InstitutionalScopeModule } from './institutional-scope/institutional-sc
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { LabourModule } from './labour/labour.module';
+import { MaritimeModule } from './maritime/maritime.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
@@ -128,6 +129,7 @@ import { TransportationModule } from './transportation/transportation.module';
     RedressModule,
     RevenueModule,
     FinancialServicesModule,
+    MaritimeModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
     PublicSafetyModule,

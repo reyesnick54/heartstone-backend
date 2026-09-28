@@ -213,6 +213,7 @@ export const ROUTE_ACCESS_PROFILES: Record<RouteAccessDomainKey, RouteAccessProf
   'cannabis-administration': governmentServiceDomainProfile,
   'carbon-management': governmentServiceDomainProfile,
   'financial-services': governmentServiceDomainProfile,
+  maritime: governmentServiceDomainProfile,
   'civil-registry': governmentServiceDomainProfile,
   'service-packs': {
     ...governmentServiceDomainProfile,
