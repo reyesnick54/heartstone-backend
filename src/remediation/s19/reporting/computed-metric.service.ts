@@ -40,7 +40,9 @@ export class ComputedMetricService {
       return null;
     }
 
-    if (definition.calculationMethod === MetricCalculationMethodType.MANUAL_AUTHORIZED_CALCULATION) {
+    if (
+      definition.calculationMethod === MetricCalculationMethodType.MANUAL_AUTHORIZED_CALCULATION
+    ) {
       return null;
     }
 

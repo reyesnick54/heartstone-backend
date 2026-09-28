@@ -42,7 +42,9 @@ export class MetricCalculationRunService {
     let inputRecordReferences = dto.inputRecordReferences ?? [];
     let calculationTrace = dto.calculationTrace;
 
-    if (definition.calculationMethod !== MetricCalculationMethodType.MANUAL_AUTHORIZED_CALCULATION) {
+    if (
+      definition.calculationMethod !== MetricCalculationMethodType.MANUAL_AUTHORIZED_CALCULATION
+    ) {
       if (dto.resultValue !== undefined) {
         throw new ForbiddenException(S19_REASON_CODES.AUTHORITATIVE_KPI_SUBMISSION_FORBIDDEN);
       }

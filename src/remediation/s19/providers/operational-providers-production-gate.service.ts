@@ -14,7 +14,10 @@ import {
 } from '../config/operational-providers.config';
 import { OPERATIONAL_PROVIDERS_CONFIG_KEY } from '../config/operational-providers.config';
 import { OPERATIONAL_PROVIDER_READINESS_CODES } from '../s19.constants';
-import { HttpEmailProviderAdapter, HttpSmsProviderAdapter } from './http-notification-provider.adapter';
+import {
+  HttpEmailProviderAdapter,
+  HttpSmsProviderAdapter,
+} from './http-notification-provider.adapter';
 
 export interface OperationalProvidersGateResult {
   allowed: boolean;
@@ -44,7 +47,9 @@ export class OperationalProvidersProductionGateService implements OnModuleInit {
 
     const evaluation = this.evaluateProhibitedAdapters();
     if (!evaluation.allowed) {
-      throw new Error(`Production operational providers gate failed: ${evaluation.reasons.join('; ')}`);
+      throw new Error(
+        `Production operational providers gate failed: ${evaluation.reasons.join('; ')}`,
+      );
     }
   }
 
@@ -98,10 +103,16 @@ export class OperationalProvidersProductionGateService implements OnModuleInit {
     );
     const reasons = [...prohibited.reasons];
 
-    if (config.paymentProvider === 'configured' && !isOperationalProviderConfigured(config, 'payment')) {
+    if (
+      config.paymentProvider === 'configured' &&
+      !isOperationalProviderConfigured(config, 'payment')
+    ) {
       reasons.push(OPERATIONAL_PROVIDER_READINESS_CODES.PAYMENT_PROVIDER_NOT_CONFIGURED);
     }
-    if (config.emailProvider === 'configured' && !isOperationalProviderConfigured(config, 'email')) {
+    if (
+      config.emailProvider === 'configured' &&
+      !isOperationalProviderConfigured(config, 'email')
+    ) {
       reasons.push(OPERATIONAL_PROVIDER_READINESS_CODES.EMAIL_PROVIDER_NOT_CONFIGURED);
     }
     if (config.smsProvider === 'configured' && !isOperationalProviderConfigured(config, 'sms')) {

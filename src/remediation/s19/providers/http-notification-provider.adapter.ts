@@ -41,7 +41,9 @@ export class HttpEmailProviderAdapter implements NotificationChannelPort {
     }
   }
 
-  async dispatch(input: NotificationChannelDispatchInput): Promise<NotificationChannelDispatchResult> {
+  async dispatch(
+    input: NotificationChannelDispatchInput,
+  ): Promise<NotificationChannelDispatchResult> {
     this.assertReady();
     const config = this.configService.getOrThrow<OperationalProvidersConfig>(
       OPERATIONAL_PROVIDERS_CONFIG_KEY,
@@ -100,7 +102,9 @@ export class HttpSmsProviderAdapter implements NotificationChannelPort {
     }
   }
 
-  async dispatch(input: NotificationChannelDispatchInput): Promise<NotificationChannelDispatchResult> {
+  async dispatch(
+    input: NotificationChannelDispatchInput,
+  ): Promise<NotificationChannelDispatchResult> {
     this.assertReady();
     const config = this.configService.getOrThrow<OperationalProvidersConfig>(
       OPERATIONAL_PROVIDERS_CONFIG_KEY,

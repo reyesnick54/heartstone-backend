@@ -7,10 +7,7 @@ import { SecurityAuditService } from '../../../identity/audit/security-audit.ser
 export class OperationalSecurityTelemetryService {
   constructor(private readonly securityAudit: SecurityAuditService) {}
 
-  recordAuthenticationFailure(input: {
-    identityId?: string;
-    metadata?: Prisma.InputJsonValue;
-  }) {
+  recordAuthenticationFailure(input: { identityId?: string; metadata?: Prisma.InputJsonValue }) {
     return this.securityAudit.record({
       eventType: SecurityAuditEventType.AUTHENTICATION_FAILURE,
       identityId: input.identityId,
@@ -18,10 +15,7 @@ export class OperationalSecurityTelemetryService {
     });
   }
 
-  recordAuthorizationDenial(input: {
-    identityId?: string;
-    metadata?: Prisma.InputJsonValue;
-  }) {
+  recordAuthorizationDenial(input: { identityId?: string; metadata?: Prisma.InputJsonValue }) {
     return this.securityAudit.record({
       eventType: SecurityAuditEventType.SCOPE_ACCESS_DENIED,
       identityId: input.identityId,
@@ -29,10 +23,7 @@ export class OperationalSecurityTelemetryService {
     });
   }
 
-  recordAuthorityDenial(input: {
-    identityId?: string;
-    metadata?: Prisma.InputJsonValue;
-  }) {
+  recordAuthorityDenial(input: { identityId?: string; metadata?: Prisma.InputJsonValue }) {
     return this.securityAudit.record({
       eventType: SecurityAuditEventType.AUTHORITY_EVALUATION_DENIED,
       identityId: input.identityId,
@@ -40,10 +31,7 @@ export class OperationalSecurityTelemetryService {
     });
   }
 
-  recordSuspiciousRecordAccess(input: {
-    identityId?: string;
-    metadata?: Prisma.InputJsonValue;
-  }) {
+  recordSuspiciousRecordAccess(input: { identityId?: string; metadata?: Prisma.InputJsonValue }) {
     return this.securityAudit.record({
       eventType: SecurityAuditEventType.SUSPICIOUS_RECORD_ACCESS_ATTEMPT,
       identityId: input.identityId,

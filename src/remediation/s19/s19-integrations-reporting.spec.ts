@@ -24,7 +24,10 @@ import { ServiceRuntimeGateService } from './activation/service-runtime-gate.ser
 import { IntegrationCredentialResolverService } from './integrations/integration-credential-resolver.service';
 import { OperationalDurableRetryService } from './integrations/operational-durable-retry.service';
 import { TraceCorrelationService } from './observability/trace-correlation.service';
-import { HttpEmailProviderAdapter, HttpSmsProviderAdapter } from './providers/http-notification-provider.adapter';
+import {
+  HttpEmailProviderAdapter,
+  HttpSmsProviderAdapter,
+} from './providers/http-notification-provider.adapter';
 import { OperationalProvidersProductionGateService } from './providers/operational-providers-production-gate.service';
 import { ComputedMetricService } from './reporting/computed-metric.service';
 import { ExecutiveReportScopeService } from './reporting/executive-report-scope.service';
@@ -60,7 +63,7 @@ describe('S19 integrations, reporting, and activation gates', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (prisma.paymentProviderConfiguration.findUnique).mockResolvedValue(providerConfig);
+      prisma.paymentProviderConfiguration.findUnique.mockResolvedValue(providerConfig);
     });
 
     it('rejects forged payment callback', async () => {
@@ -94,7 +97,7 @@ describe('S19 integrations, reporting, and activation gates', () => {
         providerTransactionReference: 'prov-dup-s19',
       });
 
-      (prisma.paymentProviderWebhookEvent.findUnique).mockResolvedValue({
+      prisma.paymentProviderWebhookEvent.findUnique.mockResolvedValue({
         id: 'event-1',
         processingStatus: PaymentWebhookProcessingStatus.PROCESSED,
       });
@@ -117,7 +120,9 @@ describe('S19 integrations, reporting, and activation gates', () => {
     it('does not allow payment to issue a licence', () => {
       const absezBoundary = new AbsezBoundaryService({} as never);
       expect(() => {
-        absezBoundary.assertPaymentDoesNotIssueLicence(AbsezZoneEnterpriseActorPersona.PAYMENT_SYSTEM);
+        absezBoundary.assertPaymentDoesNotIssueLicence(
+          AbsezZoneEnterpriseActorPersona.PAYMENT_SYSTEM,
+        );
       }).toThrow('Payment receipt does not approve or issue an SEZ business licence');
     });
   });
@@ -163,7 +168,10 @@ describe('S19 integrations, reporting, and activation gates', () => {
         },
       };
       const retryService = new OperationalDurableRetryService(prisma as never);
-      await retryService.enqueueCommunicationDeliveryRetry({ deliveryId: 'delivery-1', attemptNumber: 1 });
+      await retryService.enqueueCommunicationDeliveryRetry({
+        deliveryId: 'delivery-1',
+        attemptNumber: 1,
+      });
       expect(prisma.workflowDurableJob.create).toHaveBeenCalled();
     });
 
@@ -310,7 +318,7 @@ describe('S19 integrations, reporting, and activation gates', () => {
     const gate = new ServiceRuntimeGateService(prisma as never, configService as never);
 
     it('refuses new intake for suspended services', async () => {
-      (prisma.governmentServiceVersion.findUnique).mockResolvedValue({
+      prisma.governmentServiceVersion.findUnique.mockResolvedValue({
         maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
         publicAvailability: GovernmentServicePublicAvailability.SUSPENDED,
         activationRecords: [
@@ -324,7 +332,7 @@ describe('S19 integrations, reporting, and activation gates', () => {
     });
 
     it('blocks issuance for suspended services', async () => {
-      (prisma.case.findUnique).mockResolvedValue({
+      prisma.case.findUnique.mockResolvedValue({
         id: 'case-1',
         governmentServiceVersion: {
           maturityStatus: GovernmentServiceMaturityStatus.ACTIVE,
@@ -338,7 +346,7 @@ describe('S19 integrations, reporting, and activation gates', () => {
     });
 
     it('preserves prior historical records when suspended', async () => {
-      (prisma.case.findUnique).mockResolvedValue({
+      prisma.case.findUnique.mockResolvedValue({
         id: 'case-1',
         status: 'CLOSED',
         governmentServiceVersion: {

@@ -39,8 +39,7 @@ export default registerAs(OPERATIONAL_PROVIDERS_CONFIG_KEY, (): OperationalProvi
       process.env.OPERATIONAL_EMAIL_API_KEY_VAULT_REF?.trim() ?? null,
     emailSenderIdentity: process.env.OPERATIONAL_EMAIL_SENDER_IDENTITY?.trim() ?? null,
     smsProviderEndpoint: process.env.OPERATIONAL_SMS_PROVIDER_ENDPOINT?.trim() ?? null,
-    smsProviderApiKeyVaultReference:
-      process.env.OPERATIONAL_SMS_API_KEY_VAULT_REF?.trim() ?? null,
+    smsProviderApiKeyVaultReference: process.env.OPERATIONAL_SMS_API_KEY_VAULT_REF?.trim() ?? null,
     smsSenderIdentity: process.env.OPERATIONAL_SMS_SENDER_IDENTITY?.trim() ?? null,
     integrationCredentialVaultPrefix:
       process.env.OPERATIONAL_INTEGRATION_CREDENTIAL_VAULT_PREFIX?.trim() ?? null,
@@ -57,20 +56,20 @@ export function isOperationalProviderConfigured(
     case 'payment':
       return Boolean(
         config.paymentProviderEndpoint &&
-          config.paymentProviderApiKeyVaultReference &&
-          config.paymentWebhookSecretVaultReference,
+        config.paymentProviderApiKeyVaultReference &&
+        config.paymentWebhookSecretVaultReference,
       );
     case 'email':
       return Boolean(
         config.emailProviderEndpoint &&
-          config.emailProviderApiKeyVaultReference &&
-          config.emailSenderIdentity,
+        config.emailProviderApiKeyVaultReference &&
+        config.emailSenderIdentity,
       );
     case 'sms':
       return Boolean(
         config.smsProviderEndpoint &&
-          config.smsProviderApiKeyVaultReference &&
-          config.smsSenderIdentity,
+        config.smsProviderApiKeyVaultReference &&
+        config.smsSenderIdentity,
       );
     default:
       return false;

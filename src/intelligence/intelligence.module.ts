@@ -47,7 +47,13 @@ import { StrategicProjectRiskService } from './strategic-projects/strategic-proj
 import { StrategicProjectStageService } from './strategic-projects/strategic-project-stage.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthModule, AuthorityModule, S19IntegrationsReportingModule],
+  imports: [
+    DatabaseModule,
+    SessionsModule,
+    AuthModule,
+    AuthorityModule,
+    S19IntegrationsReportingModule,
+  ],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
     IntelligenceSuspendedAiGuard,
