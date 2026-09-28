@@ -161,6 +161,7 @@ model Jurisdiction {
   financialRegulatedEntityProfiles      FinancialRegulatedEntityProfile[]
   financialServicesOperationalSnapshots FinancialServicesOperationalSnapshot[]
   setupConfigurationInstallations       SetupConfigurationInstallation[]
+  freeZoneCustomsCases                  FreeZoneCustomsCase[]
 
   @@map("jurisdictions")
 }
@@ -270,6 +271,12 @@ model Institution {
   institutionServiceStandards            InstitutionServiceStandard[]
   institutionEscalationLevels            InstitutionEscalationLevel[]
   setupVocabularyEntries                 SetupVocabularyEntry[]
+  bondedWarehouseReferences                BondedWarehouseReference[]
+  freeZoneCustomsCases                     FreeZoneCustomsCase[]
+  immigrationProgramConfigurations         ImmigrationProgramConfiguration[]
+  zoneLandLeaseRecords                     ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords                ZoneLandConcessionRecord[]
+  investorRelationsProfiles                InvestorRelationsProfile[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -527,6 +534,7 @@ model ExternalAuthority {
   treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
 
   financialExternalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
+  freeZoneCustomsExternalDeterminations     FreeZoneCustomsExternalDetermination[]
 
   @@map("external_authorities")
 }
@@ -695,6 +703,7 @@ model Person {
   patientHealthIdentities          PatientHealthIdentity[]
   healthcareProfessionals          HealthcareProfessional[]
   corporateBeneficialOwnerSubjects CorporateBeneficialOwnerRecord[] @relation("CorporateBeneficialOwnerSubjectPerson")
+  zoneLandLeaseRecords             ZoneLandLeaseRecord[]
 
   @@map("persons")
 }
@@ -1039,6 +1048,9 @@ model Identity {
   aiCallsInitiated                                 AiCallRecord[]                          @relation("AiCallInitiator")
   aiCallOutputEdits                                AiCallOutputEdit[]
   aiCallReviews                                    AiCallReviewRecord[]
+  freeZoneCustomsExternalDeterminationsRecorded    FreeZoneCustomsExternalDetermination[] @relation("FreeZoneCustomsExternalDeterminationRecorder")
+  investorCaseManagerAssignments                   InvestorCaseManagerAssignment[]
+  investorInquiryStatusHistoryEvents               InvestorInquiryStatusHistory[] @relation("InvestorInquiryStatusHistoryActor")
 
   @@index([userAccountId])
   @@index([personId])
@@ -1118,6 +1130,10 @@ model Organization {
   strategicProjectInvestorProfiles       StrategicProjectProfile[]            @relation("StrategicProjectInvestorOrganization")
   strategicProjectOrganizationLinks      StrategicProjectOrganizationLink[]
   complianceCorrectiveActionsResponsible ComplianceCorrectiveActionRegister[]
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
+  zoneLandLeaseRecords                 ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords            ZoneLandConcessionRecord[]
+  investorRelationsProfiles            InvestorRelationsProfile[]
 
   @@index([status])
   @@map("organizations")
@@ -1634,6 +1650,10 @@ model GoverningSource {
   recordsClassifications    RecordsClassification[]
   retentionSchedules        RetentionSchedule[]
   continuingObligations     ContinuingObligation[]
+  freeZoneCustomsCases      FreeZoneCustomsCase[]
+  immigrationProgramConfigurations ImmigrationProgramConfiguration[]
+  zoneLandLeaseRecords      ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords ZoneLandConcessionRecord[]
 
   @@index([status])
   @@index([effectiveFrom])
@@ -1837,6 +1857,8 @@ model RetainedNationalDetermination {
   updatedAt                               DateTime                                @updatedAt
   functionAuthorityRecord                 FunctionAuthorityRecord                 @relation(fields: [functionAuthorityRecordId], references: [id])
   financialExternalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
+  freeZoneDutyReliefRequests                FreeZoneDutyReliefRequest[]
+  freeZoneCustomsExternalDeterminations     FreeZoneCustomsExternalDetermination[]
 
   @@index([functionAuthorityRecordId])
   @@map("retained_national_determinations")
@@ -2931,6 +2953,8 @@ model Application {
   treatmentApplicationProfile         TreatmentApplication?
   financialLicenceApplicationProfiles FinancialLicenceApplicationProfile[]
   sezBusinessLicenceRecords           SezBusinessLicenceRecord[]
+  freeZoneCustomsCases                FreeZoneCustomsCase[]
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
 
   @@unique([applicantIdentityId, idempotencyKey])
   @@index([applicantIdentityId])
@@ -3093,6 +3117,9 @@ model Case {
   treatmentScreenings         TreatmentScreening[]
   treatmentEligibilityReviews TreatmentEligibilityReview[]
   strategicProjectCaseLinks   StrategicProjectCaseLink[]
+  freeZoneCustomsCases        FreeZoneCustomsCase[]
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
+  investorInquiryCaseLinks    InvestorInquiryCaseLink[]
 
   @@index([status])
   @@index([applicantIdentityId])
@@ -4201,6 +4228,7 @@ model EvidenceRecord {
   digitalAssetsTechnologyProfiles DigitalAssetsTechnologyProfile[]
   carbonRegistryReferences        CarbonRegistryReference[]
   carbonExternalVerifications     CarbonExternalVerificationRecord[]
+  investorResidencyDueDiligenceReferences InvestorResidencyDueDiligenceReference[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -5694,9 +5722,11 @@ model GovernmentDecision {
   digitalAssetsOperatingStatusHistory      DigitalAssetsOperatingStatusHistory[]     @relation("DigitalAssetsOperatingStatusDecision")
   carbonAdministrativeAuthorizationRecords CarbonAdministrativeAuthorizationRecord[] @relation("CarbonAdministrativeAuthorizationDecision")
   carbonProjectStatusHistory               CarbonProjectStatusHistory[]              @relation("CarbonProjectStatusDecision")
-  cannabisLicenceRecords              CannabisLicenceRecord[]
-  cannabisLicenceStatusHistory        CannabisLicenceStatusHistory[]
-  cannabisOperatingStatusHistory      CannabisOperatingStatusHistory[] @relation("CannabisOperatingStatusDecision")
+  cannabisLicenceRecords                   CannabisLicenceRecord[]
+  cannabisLicenceStatusHistory             CannabisLicenceStatusHistory[]
+  cannabisOperatingStatusHistory           CannabisOperatingStatusHistory[] @relation("CannabisOperatingStatusDecision")
+  zoneLandLeaseRecords                     ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords                ZoneLandConcessionRecord[]
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -10699,6 +10729,10 @@ model StrategicProjectProfile {
   infrastructureRecords            InfrastructureDeliveryRecord[]
   statusProjections                ProjectStatusProjection[]
   carbonProjectReferences          CarbonProjectReference[]
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
+  zoneLandLeaseRecords             ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords        ZoneLandConcessionRecord[]
+  investorInquiryRecords           InvestorInquiryRecord[]
 
   @@index([sponsoringInstitutionId])
   @@index([responsibleDepartmentId])
@@ -15378,6 +15412,7 @@ model ImmigrationProfile {
   workPermitApplicationProfiles  WorkPermitApplicationProfile[]
   workPermitRecords              WorkPermitRecord[]
   employmentSponsorships         EmploymentSponsorship[]
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
 
   @@index([subjectIdentityId])
   @@index([jurisdictionId])
@@ -15469,6 +15504,7 @@ model ResidencyApplicationProfile {
   immigrationProfile       ImmigrationProfile                  @relation(fields: [immigrationProfileId], references: [id])
   case                     Case                                @relation(fields: [caseId], references: [id])
   application              Application                         @relation(fields: [applicationId], references: [id])
+  investorResidencyProgramApplications InvestorResidencyProgramApplication[]
 
   @@index([immigrationProfileId])
   @@map("residency_application_profiles")
@@ -16900,6 +16936,7 @@ model AbsezZoneEnterprise {
   conditions                    AbsezZoneEnterpriseCondition[]
   statusHistory                 AbsezZoneEnterpriseStatusHistory[]
   sezLicences                   SezBusinessLicenceRecord[]         @relation("ZoneEnterpriseLicences")
+  freeZoneCustomsCases          FreeZoneCustomsCase[]
 
   @@unique([organizationId, institutionId])
   @@index([institutionId])
@@ -19681,6 +19718,8 @@ model LandParcel {
   propertyTransfers    PropertyTransfer[]
   legacyPropertyParcel PropertyParcel?                      @relation("PropertyParcelCadastreLink")
   cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
+  zoneLandLeaseRecords           ZoneLandLeaseRecord[]
+  zoneLandConcessionRecords      ZoneLandConcessionRecord[]
 
   @@index([jurisdictionId])
   @@index([institutionId])
@@ -20550,6 +20589,7 @@ model ShipmentReference {
   inspections                     CustomsInspection[]
   externalDependencies            CustomsExternalDependency[]
   statusHistory                   CustomsStatusHistory[]      @relation("CustomsStatusHistoryShipment")
+  freeZoneCustomsCases            FreeZoneCustomsCase[]
 
   @@index([ownerOrganizationId])
   @@index([traderAccountId])
@@ -20616,6 +20656,7 @@ model CustomsDeclaration {
   refundClaims                CustomsRefundClaim[]
   statusHistory               CustomsStatusHistory[]       @relation("CustomsStatusHistoryDeclaration")
   externalDependencies        CustomsExternalDependency[]
+  freeZoneCustomsCases        FreeZoneCustomsCase[]
 
   @@index([traderAccountId])
   @@index([shipmentReferenceId])
@@ -27658,4 +27699,405 @@ model CannabisDataAccessAudit {
   @@index([accessorIdentityId])
   @@index([regulatedEntityId])
   @@map("cannabis_data_access_audits")
+}
+
+// ─── ABSEZ S18F Article 9 capability closure ─────────────────────────────────
+
+enum FreeZoneCustomsCaseStatus {
+  CONFIGURED
+  COORDINATION_ACTIVE
+  AWAITING_NATIONAL_CUSTOMS
+  EXTERNAL_DETERMINATION_RECORDED
+  CLOSED
+}
+
+enum FreeZoneCustomsCoordinationStatus {
+  DRAFT
+  ACTIVE
+  HALTED_PENDING_AUTHORITY
+  AWAITING_EXTERNAL
+}
+
+enum FreeZoneDutyReliefRequestStatus {
+  REFERENCED
+  AWAITING_NATIONAL_DETERMINATION
+  RECORDED
+  WITHDRAWN
+}
+
+enum ImmigrationProgramConfigurationKind {
+  INVESTOR_RESIDENCY
+  GENERAL_RESIDENCY_REFERENCE
+}
+
+enum ImmigrationProgramConfigurationStatus {
+  CONFIGURED
+  SUSPENDED
+  RETIRED
+}
+
+enum InvestorResidencyProgramApplicationStatus {
+  INTAKE
+  DUE_DILIGENCE
+  AWAITING_NATIONAL_DETERMINATION
+  RECORDED
+  CLOSED
+}
+
+enum ZoneLandLeaseLifecycleStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum ZoneLandConcessionLifecycleStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ZoneLandOccupancyUseStatus {
+  PROPOSED
+  ACTIVE
+  ENDED
+}
+
+enum InvestorInquiryStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  CLOSED
+}
+
+enum AbsezArticle9ServicePackReadinessStatus {
+  NOT_COMPILED
+  COMPILED_NON_PRODUCTION
+  ACCEPTED
+  OPERATIONAL_BLOCKED
+}
+
+model BondedWarehouseReference {
+  id              String   @id @default(uuid()) @db.Uuid
+  institutionId   String   @db.Uuid
+  warehouseCode   String
+  facilityLabel   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  institution     Institution @relation(fields: [institutionId], references: [id])
+  bondedWarehouseLinks FreeZoneBondedWarehouseLink[]
+
+  @@unique([institutionId, warehouseCode])
+  @@map("bonded_warehouse_references")
+}
+
+model FreeZoneCustomsCase {
+  id                           String                        @id @default(uuid()) @db.Uuid
+  caseReference                String                        @unique
+  institutionId                String                        @db.Uuid
+  jurisdictionId               String                        @db.Uuid
+  caseId                       String?                       @db.Uuid
+  applicationId                String?                       @db.Uuid
+  shipmentReferenceId          String?                       @db.Uuid
+  customsDeclarationId         String?                       @db.Uuid
+  absezZoneEnterpriseId        String?                       @db.Uuid
+  delegatedFunctionCode        String                        @default("ABSEZ-FN-CUSTOMS-FACILITATION")
+  governingSourceId            String?                       @db.Uuid
+  status                       FreeZoneCustomsCaseStatus     @default(CONFIGURED)
+  coordinationStatus           FreeZoneCustomsCoordinationStatus @default(DRAFT)
+  doesNotImplyCustomsClearance Boolean                       @default(true)
+  createdAt                    DateTime                      @default(now())
+  updatedAt                    DateTime                      @updatedAt
+  institution                  Institution                   @relation(fields: [institutionId], references: [id])
+  jurisdiction                 Jurisdiction                  @relation(fields: [jurisdictionId], references: [id])
+  case                         Case?                         @relation(fields: [caseId], references: [id])
+  application                  Application?                  @relation(fields: [applicationId], references: [id])
+  shipmentReference            ShipmentReference?            @relation(fields: [shipmentReferenceId], references: [id])
+  customsDeclaration           CustomsDeclaration?           @relation(fields: [customsDeclarationId], references: [id])
+  absezZoneEnterprise          AbsezZoneEnterprise?          @relation(fields: [absezZoneEnterpriseId], references: [id])
+  governingSource              GoverningSource?              @relation(fields: [governingSourceId], references: [id])
+  bondedWarehouseLinks         FreeZoneBondedWarehouseLink[]
+  dutyReliefRequests           FreeZoneDutyReliefRequest[]
+  portCoordinations            FreeZonePortCustomsCoordination[]
+  externalDeterminations       FreeZoneCustomsExternalDetermination[]
+
+  @@index([institutionId])
+  @@index([status])
+  @@map("free_zone_customs_cases")
+}
+
+model FreeZoneBondedWarehouseLink {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  freeZoneCustomsCaseId     String                  @db.Uuid
+  bondedWarehouseReferenceId String                 @db.Uuid
+  relationshipLabel         String?
+  createdAt                 DateTime                @default(now())
+  freeZoneCustomsCase       FreeZoneCustomsCase     @relation(fields: [freeZoneCustomsCaseId], references: [id], onDelete: Cascade)
+  bondedWarehouseReference  BondedWarehouseReference @relation(fields: [bondedWarehouseReferenceId], references: [id], onDelete: Cascade)
+
+  @@unique([freeZoneCustomsCaseId, bondedWarehouseReferenceId])
+  @@map("free_zone_bonded_warehouse_links")
+}
+
+model FreeZoneDutyReliefRequest {
+  id                            String                        @id @default(uuid()) @db.Uuid
+  freeZoneCustomsCaseId         String                        @db.Uuid
+  requestReference              String                        @unique
+  status                        FreeZoneDutyReliefRequestStatus @default(REFERENCED)
+  retainedNationalDeterminationId String?                     @db.Uuid
+  createdAt                     DateTime                      @default(now())
+  updatedAt                     DateTime                      @updatedAt
+  freeZoneCustomsCase           FreeZoneCustomsCase           @relation(fields: [freeZoneCustomsCaseId], references: [id], onDelete: Cascade)
+  retainedNationalDetermination RetainedNationalDetermination? @relation(fields: [retainedNationalDeterminationId], references: [id])
+
+  @@map("free_zone_duty_relief_requests")
+}
+
+model FreeZonePortCustomsCoordination {
+  id                    String              @id @default(uuid()) @db.Uuid
+  freeZoneCustomsCaseId String              @db.Uuid
+  portReferenceToken    String
+  coordinationNotes     String?
+  createdAt             DateTime            @default(now())
+  freeZoneCustomsCase   FreeZoneCustomsCase @relation(fields: [freeZoneCustomsCaseId], references: [id], onDelete: Cascade)
+
+  @@map("free_zone_port_customs_coordinations")
+}
+
+model FreeZoneCustomsExternalDetermination {
+  id                            String              @id @default(uuid()) @db.Uuid
+  freeZoneCustomsCaseId         String              @db.Uuid
+  externalAuthorityId           String              @db.Uuid
+  retainedNationalDeterminationId String?           @db.Uuid
+  isAuthenticated               Boolean             @default(false)
+  authenticatedPayloadHash      String?
+  blocksAbsezCoordinationAction Boolean             @default(true)
+  recordedByIdentityId          String?             @db.Uuid
+  spoofedAbsezClearanceAttempt  Boolean             @default(false)
+  createdAt                     DateTime            @default(now())
+  updatedAt                     DateTime            @updatedAt
+  freeZoneCustomsCase           FreeZoneCustomsCase @relation(fields: [freeZoneCustomsCaseId], references: [id], onDelete: Cascade)
+  externalAuthority             ExternalAuthority   @relation(fields: [externalAuthorityId], references: [id])
+  retainedNationalDetermination RetainedNationalDetermination? @relation(fields: [retainedNationalDeterminationId], references: [id])
+  recordedByIdentity            Identity?           @relation("FreeZoneCustomsExternalDeterminationRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@map("free_zone_customs_external_determinations")
+}
+
+model ImmigrationProgramConfiguration {
+  id                                 String                              @id @default(uuid()) @db.Uuid
+  programCode                        String                              @unique
+  programLabel                       String
+  programKind                        ImmigrationProgramConfigurationKind @default(INVESTOR_RESIDENCY)
+  institutionId                      String?                             @db.Uuid
+  governingSourceId                  String?                             @db.Uuid
+  status                             ImmigrationProgramConfigurationStatus @default(CONFIGURED)
+  doesNotGrantResidencyOrCitizenship Boolean                             @default(true)
+  configurationPayload               Json                                @default("{}")
+  createdAt                          DateTime                            @default(now())
+  updatedAt                          DateTime                            @updatedAt
+  institution                        Institution?                        @relation(fields: [institutionId], references: [id])
+  governingSource                    GoverningSource?                    @relation(fields: [governingSourceId], references: [id])
+  investorResidencyApplications      InvestorResidencyProgramApplication[]
+
+  @@map("immigration_program_configurations")
+}
+
+model InvestorResidencyProgramApplication {
+  id                               String                                  @id @default(uuid()) @db.Uuid
+  applicationReference             String                                  @unique
+  immigrationProgramConfigurationId String                                 @db.Uuid
+  immigrationProfileId             String                                  @db.Uuid
+  residencyApplicationProfileId    String?                                 @db.Uuid
+  organizationId                   String?                                 @db.Uuid
+  strategicProjectProfileId        String?                                 @db.Uuid
+  caseId                           String?                                 @db.Uuid
+  applicationId                    String?                                 @db.Uuid
+  status                           InvestorResidencyProgramApplicationStatus @default(INTAKE)
+  paymentDoesNotGrantResidency     Boolean                                 @default(true)
+  createdAt                        DateTime                                @default(now())
+  updatedAt                        DateTime                                @updatedAt
+  immigrationProgramConfiguration  ImmigrationProgramConfiguration         @relation(fields: [immigrationProgramConfigurationId], references: [id])
+  immigrationProfile               ImmigrationProfile                      @relation(fields: [immigrationProfileId], references: [id])
+  residencyApplicationProfile      ResidencyApplicationProfile?            @relation(fields: [residencyApplicationProfileId], references: [id])
+  organization                     Organization?                           @relation(fields: [organizationId], references: [id])
+  strategicProjectProfile          StrategicProjectProfile?                @relation(fields: [strategicProjectProfileId], references: [id])
+  case                             Case?                                   @relation(fields: [caseId], references: [id])
+  application                      Application?                            @relation(fields: [applicationId], references: [id])
+  dueDiligenceReferences           InvestorResidencyDueDiligenceReference[]
+
+  @@index([immigrationProfileId])
+  @@map("investor_residency_program_applications")
+}
+
+model InvestorResidencyDueDiligenceReference {
+  id                                  String                            @id @default(uuid()) @db.Uuid
+  investorResidencyProgramApplicationId String                          @db.Uuid
+  evidenceRecordId                    String?                           @db.Uuid
+  referenceLabel                      String
+  createdAt                           DateTime                          @default(now())
+  investorResidencyProgramApplication InvestorResidencyProgramApplication @relation(fields: [investorResidencyProgramApplicationId], references: [id], onDelete: Cascade)
+  evidenceRecord                      EvidenceRecord?                   @relation(fields: [evidenceRecordId], references: [id])
+
+  @@map("investor_residency_due_diligence_references")
+}
+
+model ZoneLandLeaseRecord {
+  id                             String                     @id @default(uuid()) @db.Uuid
+  leaseReference                 String                     @unique
+  institutionId                  String                     @db.Uuid
+  landParcelId                   String                     @db.Uuid
+  organizationId                 String?                    @db.Uuid
+  personId                       String?                    @db.Uuid
+  strategicProjectProfileId      String?                    @db.Uuid
+  governingSourceId              String?                    @db.Uuid
+  governmentDecisionId           String?                    @db.Uuid
+  effectiveFrom                  DateTime?
+  effectiveUntil                 DateTime?
+  conditionsSummary              String?
+  status                         ZoneLandLeaseLifecycleStatus @default(DRAFT)
+  doesNotImplyPlanningPermission Boolean                    @default(true)
+  createdAt                      DateTime                   @default(now())
+  updatedAt                      DateTime                   @updatedAt
+  institution                    Institution                @relation(fields: [institutionId], references: [id])
+  landParcel                     LandParcel                 @relation(fields: [landParcelId], references: [id])
+  organization                   Organization?              @relation(fields: [organizationId], references: [id])
+  person                         Person?                    @relation(fields: [personId], references: [id])
+  strategicProjectProfile        StrategicProjectProfile?   @relation(fields: [strategicProjectProfileId], references: [id])
+  governingSource                GoverningSource?           @relation(fields: [governingSourceId], references: [id])
+  governmentDecision             GovernmentDecision?        @relation(fields: [governmentDecisionId], references: [id])
+  occupancyUseRelationships      ZoneLandOccupancyUseRelationship[]
+
+  @@index([landParcelId])
+  @@map("zone_land_lease_records")
+}
+
+model ZoneLandConcessionRecord {
+  id                             String                        @id @default(uuid()) @db.Uuid
+  concessionReference            String                        @unique
+  institutionId                  String                        @db.Uuid
+  landParcelId                   String                        @db.Uuid
+  organizationId                 String?                       @db.Uuid
+  strategicProjectProfileId      String?                       @db.Uuid
+  governingSourceId              String?                       @db.Uuid
+  governmentDecisionId           String?                       @db.Uuid
+  effectiveFrom                  DateTime?
+  effectiveUntil                 DateTime?
+  status                         ZoneLandConcessionLifecycleStatus @default(DRAFT)
+  doesNotImplyPlanningPermission Boolean                       @default(true)
+  createdAt                      DateTime                      @default(now())
+  updatedAt                      DateTime                      @updatedAt
+  institution                    Institution                   @relation(fields: [institutionId], references: [id])
+  landParcel                     LandParcel                    @relation(fields: [landParcelId], references: [id])
+  organization                   Organization?                 @relation(fields: [organizationId], references: [id])
+  strategicProjectProfile        StrategicProjectProfile?      @relation(fields: [strategicProjectProfileId], references: [id])
+  governingSource                GoverningSource?              @relation(fields: [governingSourceId], references: [id])
+  governmentDecision             GovernmentDecision?           @relation(fields: [governmentDecisionId], references: [id])
+  occupancyUseRelationships      ZoneLandOccupancyUseRelationship[]
+
+  @@map("zone_land_concession_records")
+}
+
+model ZoneLandOccupancyUseRelationship {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  zoneLandLeaseRecordId     String?                    @db.Uuid
+  zoneLandConcessionRecordId String?                   @db.Uuid
+  useTypeCode               String
+  status                    ZoneLandOccupancyUseStatus @default(PROPOSED)
+  effectiveFrom             DateTime?
+  effectiveUntil            DateTime?
+  createdAt                 DateTime                   @default(now())
+  zoneLandLeaseRecord       ZoneLandLeaseRecord?       @relation(fields: [zoneLandLeaseRecordId], references: [id])
+  zoneLandConcessionRecord  ZoneLandConcessionRecord?  @relation(fields: [zoneLandConcessionRecordId], references: [id])
+
+  @@map("zone_land_occupancy_use_relationships")
+}
+
+model InvestorRelationsProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  institutionId   String   @db.Uuid
+  organizationId  String   @db.Uuid
+  profileReference String  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  institution     Institution @relation(fields: [institutionId], references: [id])
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  inquiries       InvestorInquiryRecord[]
+
+  @@unique([institutionId, organizationId])
+  @@map("investor_relations_profiles")
+}
+
+model InvestorInquiryRecord {
+  id                        String                @id @default(uuid()) @db.Uuid
+  investorRelationsProfileId String               @db.Uuid
+  inquiryReference          String                @unique
+  subjectSummary            String
+  status                    InvestorInquiryStatus @default(OPEN)
+  strategicProjectProfileId String?               @db.Uuid
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  investorRelationsProfile  InvestorRelationsProfile @relation(fields: [investorRelationsProfileId], references: [id], onDelete: Cascade)
+  strategicProjectProfile   StrategicProjectProfile? @relation(fields: [strategicProjectProfileId], references: [id])
+  caseLinks                 InvestorInquiryCaseLink[]
+  caseManagerAssignments    InvestorCaseManagerAssignment[]
+  statusHistory             InvestorInquiryStatusHistory[]
+
+  @@index([investorRelationsProfileId])
+  @@map("investor_inquiry_records")
+}
+
+model InvestorInquiryCaseLink {
+  id                    String              @id @default(uuid()) @db.Uuid
+  investorInquiryRecordId String            @db.Uuid
+  caseId                String              @db.Uuid
+  createdAt             DateTime            @default(now())
+  investorInquiryRecord InvestorInquiryRecord @relation(fields: [investorInquiryRecordId], references: [id], onDelete: Cascade)
+  case                  Case                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([investorInquiryRecordId, caseId])
+  @@map("investor_inquiry_case_links")
+}
+
+model InvestorCaseManagerAssignment {
+  id                    String              @id @default(uuid()) @db.Uuid
+  investorInquiryRecordId String            @db.Uuid
+  managerIdentityId     String              @db.Uuid
+  assignedAt            DateTime            @default(now())
+  endedAt               DateTime?
+  investorInquiryRecord InvestorInquiryRecord @relation(fields: [investorInquiryRecordId], references: [id], onDelete: Cascade)
+  managerIdentity       Identity            @relation(fields: [managerIdentityId], references: [id])
+
+  @@map("investor_case_manager_assignments")
+}
+
+model InvestorInquiryStatusHistory {
+  id                    String              @id @default(uuid()) @db.Uuid
+  investorInquiryRecordId String            @db.Uuid
+  fromStatus            InvestorInquiryStatus?
+  toStatus              InvestorInquiryStatus
+  actorIdentityId       String?             @db.Uuid
+  recordedAt            DateTime            @default(now())
+  investorInquiryRecord InvestorInquiryRecord @relation(fields: [investorInquiryRecordId], references: [id], onDelete: Cascade)
+  actorIdentity         Identity?           @relation("InvestorInquiryStatusHistoryActor", fields: [actorIdentityId], references: [id])
+
+  @@map("investor_inquiry_status_history")
+}
+
+model AbsezArticle9ServicePathState {
+  id                           String                                @id @default(uuid()) @db.Uuid
+  departmentCode               String
+  servicePathKey               String
+  servicePackReadiness         AbsezArticle9ServicePackReadinessStatus @default(COMPILED_NON_PRODUCTION)
+  delegatedFunctionCode        String?
+  isConfigured                 Boolean                               @default(true)
+  isInstitutionallyActive      Boolean                               @default(false)
+  isOperationallyActive        Boolean                               @default(false)
+  governingSourceCode          String?
+  operationalDependencySummary String?
+  updatedAt                    DateTime                              @updatedAt
+
+  @@unique([departmentCode, servicePathKey])
+  @@map("absez_article9_service_path_states")
 }
