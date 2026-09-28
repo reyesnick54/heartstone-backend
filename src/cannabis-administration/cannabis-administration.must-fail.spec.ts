@@ -38,7 +38,9 @@ describe('Cannabis administration must-fail gates', () => {
 
     it('blocks payment from approving licence', () => {
       expect(() => {
-        boundary.assertPaymentDoesNotApproveLicence(CannabisAdministrationActorPersona.PAYMENT_SYSTEM);
+        boundary.assertPaymentDoesNotApproveLicence(
+          CannabisAdministrationActorPersona.PAYMENT_SYSTEM,
+        );
       }).toThrow(ForbiddenException);
     });
 

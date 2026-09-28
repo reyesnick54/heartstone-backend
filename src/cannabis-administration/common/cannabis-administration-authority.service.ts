@@ -3,10 +3,7 @@ import { AuthorityActionType, AuthorityEvaluationOutcome } from '@prisma/client'
 
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { FunctionAuthorityRecordsService } from '../../authority/function-authority-records/function-authority-records.service';
-import {
-  CANNABIS_AUTHORITY,
-  CANNABIS_REASON_CODES,
-} from '../cannabis-administration.constants';
+import { CANNABIS_AUTHORITY, CANNABIS_REASON_CODES } from '../cannabis-administration.constants';
 
 export interface AssertCannabisLicenceAuthorityInput {
   identityId: string;
@@ -31,7 +28,9 @@ export class CannabisAdministrationAuthorityService {
     });
   }
 
-  async assertLicenceSuspensionAuthority(input: AssertCannabisLicenceAuthorityInput): Promise<void> {
+  async assertLicenceSuspensionAuthority(
+    input: AssertCannabisLicenceAuthorityInput,
+  ): Promise<void> {
     await this.assertAuthorityForFunction({
       ...input,
       functionCode: input.functionCode ?? CANNABIS_AUTHORITY.suspend,

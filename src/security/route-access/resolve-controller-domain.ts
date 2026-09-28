@@ -31,6 +31,7 @@ export type RouteAccessDomainKey =
   | 'education'
   | 'digital-assets'
   | 'cannabis-administration'
+  | 'carbon-management'
   | 'financial-services'
   | 'civil-registry'
   | 'service-packs'
@@ -71,6 +72,7 @@ export function resolveControllerDomain(relativeSourcePath: string): RouteAccess
   if (relative.startsWith('education/')) return 'education';
   if (relative.startsWith('digital-assets/')) return 'digital-assets';
   if (relative.startsWith('cannabis-administration/')) return 'cannabis-administration';
+  if (relative.startsWith('carbon-management/')) return 'carbon-management';
   if (relative.startsWith('financial-services/')) return 'financial-services';
   if (relative.startsWith('civil-registry/')) return 'civil-registry';
   if (relative.startsWith('service-packs/')) return 'service-packs';

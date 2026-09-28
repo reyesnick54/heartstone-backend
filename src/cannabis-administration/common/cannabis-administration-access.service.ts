@@ -1,5 +1,8 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CannabisAdministrationActorPersona, CannabisAdministrationDataClassification } from '@prisma/client';
+import {
+  CannabisAdministrationActorPersona,
+  CannabisAdministrationDataClassification,
+} from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { CANNABIS_REASON_CODES } from '../cannabis-administration.constants';
@@ -34,7 +37,10 @@ export class CannabisAdministrationAccessService {
     let granted = context.hasRegulatoryOfficerScope;
     let reasonCode: string | undefined;
 
-    if (entity.dataClassification === CannabisAdministrationDataClassification.BENEFICIAL_OWNERSHIP_RESTRICTED) {
+    if (
+      entity.dataClassification ===
+      CannabisAdministrationDataClassification.BENEFICIAL_OWNERSHIP_RESTRICTED
+    ) {
       granted = context.hasBeneficialOwnershipScope;
       if (!granted) {
         reasonCode = CANNABIS_REASON_CODES.BENEFICIAL_OWNERSHIP_ACCESS_DENIED;

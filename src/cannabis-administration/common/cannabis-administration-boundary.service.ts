@@ -36,7 +36,11 @@ export class CannabisAdministrationBoundaryService {
   }
 
   assertAiCannotIssueLicence(action: string): void {
-    if (FORBIDDEN_AI_CANNABIS_ACTIONS.includes(action as (typeof FORBIDDEN_AI_CANNABIS_ACTIONS)[number])) {
+    if (
+      FORBIDDEN_AI_CANNABIS_ACTIONS.includes(
+        action as (typeof FORBIDDEN_AI_CANNABIS_ACTIONS)[number],
+      )
+    ) {
       throw new ForbiddenException(`${CANNABIS_REASON_CODES.AI_CANNOT_ISSUE_LICENCE}: ${action}`);
     }
   }

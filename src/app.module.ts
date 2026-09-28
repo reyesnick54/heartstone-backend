@@ -7,6 +7,7 @@ import { ApplicationProcessingModule } from './application-processing/applicatio
 import { AuditGovernanceModule } from './audit-governance/audit-governance.module';
 import { AuthorityModule } from './authority/authority.module';
 import { CannabisAdministrationModule } from './cannabis-administration/cannabis-administration.module';
+import { CarbonManagementModule } from './carbon-management/carbon-management.module';
 import { CivilRegistryModule } from './civil-registry/civil-registry.module';
 import { createPinoConfig } from './common/logging/pino-config';
 import { ComplianceModule } from './compliance/compliance.module';
@@ -118,6 +119,7 @@ import { TransportationModule } from './transportation/transportation.module';
     CorporateRegistryModule,
     AbsezModule,
     CustomsTradeModule,
+    CarbonManagementModule,
     DigitalAssetsModule,
     CannabisAdministrationModule,
     HealthcareModule,

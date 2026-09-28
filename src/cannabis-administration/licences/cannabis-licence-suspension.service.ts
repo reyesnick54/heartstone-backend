@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  CannabisAdministrationActorPersona,
-  CannabisLicenceLifecycleStatus,
-} from '@prisma/client';
+import { CannabisAdministrationActorPersona, CannabisLicenceLifecycleStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { CannabisAdministrationAuthorityService } from '../common/cannabis-administration-authority.service';

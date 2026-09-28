@@ -43,7 +43,9 @@ export class CannabisAdministrationConfigurationService {
     if (!configuration.governingAuthorityInstrumentId) {
       throw new ForbiddenException(CANNABIS_REASON_CODES.GOVERNING_AUTHORITY_NOT_CONFIGURED);
     }
-    if (configuration.serviceOperationalActivation !== CannabisServiceOperationalActivation.ACTIVE) {
+    if (
+      configuration.serviceOperationalActivation !== CannabisServiceOperationalActivation.ACTIVE
+    ) {
       throw new ForbiddenException(CANNABIS_REASON_CODES.SERVICE_NOT_OPERATIONALLY_ACTIVE);
     }
   }

@@ -1,6 +1,4 @@
-import {
-  CANNABIS_ADMINISTRATION_SERVICE_PACK_TEMPLATE,
-} from './cannabis-administration-service-pack.template';
+import { CANNABIS_ADMINISTRATION_SERVICE_PACK_TEMPLATE } from './cannabis-administration-service-pack.template';
 import { formatServicePackManifest } from './canonical-json.util';
 import { SERVICE_PACK_NON_PRODUCTION_LABEL } from './service-pack.constants';
 import { validateServicePackManifest } from './validate-service-pack';

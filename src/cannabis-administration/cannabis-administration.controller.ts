@@ -7,9 +7,7 @@ import { ConsequentialActionGuard } from '../authority/consequential-action/cons
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
-import {
-  CANNABIS_AUTHORITY_FUNCTION_CODES,
-} from './cannabis-administration.constants';
+import { CANNABIS_AUTHORITY_FUNCTION_CODES } from './cannabis-administration.constants';
 import { CannabisAdministrationAccessService } from './common/cannabis-administration-access.service';
 import { CannabisAdministrationConfigurationService } from './configuration/cannabis-administration-configuration.service';
 import { CannabisRegulatedEntityService } from './entities/cannabis-regulated-entity.service';
@@ -78,7 +76,10 @@ export class CannabisAdministrationController {
   linkFacilitySite(
     @Param('regulatedEntityId', ParseUUIDPipe) regulatedEntityId: string,
     @Body()
-    body: Omit<Parameters<CannabisFacilitySiteReferenceService['linkFacilitySite']>[0], 'regulatedEntityId'>,
+    body: Omit<
+      Parameters<CannabisFacilitySiteReferenceService['linkFacilitySite']>[0],
+      'regulatedEntityId'
+    >,
   ) {
     return this.siteReferenceService.linkFacilitySite({ regulatedEntityId, ...body });
   }
@@ -100,7 +101,10 @@ export class CannabisAdministrationController {
   suspendLicence(
     @Param('id', ParseUUIDPipe) cannabisLicenceRecordId: string,
     @Body()
-    body: Omit<Parameters<CannabisLicenceSuspensionService['suspendLicence']>[0], 'cannabisLicenceRecordId'>,
+    body: Omit<
+      Parameters<CannabisLicenceSuspensionService['suspendLicence']>[0],
+      'cannabisLicenceRecordId'
+    >,
   ) {
     return this.licenceSuspensions.suspendLicence({ cannabisLicenceRecordId, ...body });
   }

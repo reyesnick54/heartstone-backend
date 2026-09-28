@@ -29,9 +29,7 @@ export class CannabisRegulatoryReferenceService {
     inspectionRecordId: string;
     isFinalSanctionDecision?: boolean;
   }) {
-    this.boundary.assertInspectionFindingIsNotFinalSanction(
-      Boolean(input.isFinalSanctionDecision),
-    );
+    this.boundary.assertInspectionFindingIsNotFinalSanction(Boolean(input.isFinalSanctionDecision));
 
     return this.prisma.cannabisInspectionReference.create({
       data: {

@@ -211,6 +211,7 @@ export const ROUTE_ACCESS_PROFILES: Record<RouteAccessDomainKey, RouteAccessProf
   education: governmentServiceDomainProfile,
   'digital-assets': governmentServiceDomainProfile,
   'cannabis-administration': governmentServiceDomainProfile,
+  'carbon-management': governmentServiceDomainProfile,
   'financial-services': governmentServiceDomainProfile,
   'civil-registry': governmentServiceDomainProfile,
   'service-packs': {
