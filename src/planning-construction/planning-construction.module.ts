@@ -22,6 +22,7 @@ import { DevelopmentExternalDependencyService } from './external/development-ext
 import { DevelopmentFeeService } from './fees/development-fee.service';
 import { DevelopmentInspectionService } from './inspections/development-inspection.service';
 import { DevelopmentOccupancyService } from './occupancy/development-occupancy.service';
+import { DevelopmentApplicationWorkflowService } from './applications/development-application-workflow.service';
 import { DevelopmentPermitService } from './permits/development-permit.service';
 
 @Module({
@@ -38,6 +39,7 @@ import { DevelopmentPermitService } from './permits/development-permit.service';
     PlanningConstructionAuthorityService,
     DevelopmentExternalDependencyService,
     DevelopmentPermitService,
+    DevelopmentApplicationWorkflowService,
     DevelopmentInspectionService,
     DevelopmentFeeService,
     DevelopmentOccupancyService,
@@ -51,6 +53,7 @@ import { DevelopmentPermitService } from './permits/development-permit.service';
     PlanningConstructionAccessService,
     PlanningConstructionAuthorityService,
     DevelopmentPermitService,
+    DevelopmentApplicationWorkflowService,
     DevelopmentInspectionService,
     DevelopmentFeeService,
     DevelopmentOccupancyService,

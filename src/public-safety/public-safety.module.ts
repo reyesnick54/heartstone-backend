@@ -19,6 +19,7 @@ import { ExecutivePublicSafetyProjectionService } from './experience/services/ex
 import { OfficialPublicSafetyProjectionService } from './experience/services/official-public-safety-projection.service';
 import { PublicPublicSafetyNoticeController } from './notices/public-public-safety-notice.controller';
 import { PublicSafetyNoticeService } from './notices/public-safety-notice.service';
+import { PublicSafetyServiceRequestMutationService } from './requests/public-safety-service-request-mutation.service';
 
 @Module({
   imports: [DatabaseModule, SessionsModule, OfficialModule, DepartmentModule, ExecutiveModule],
@@ -34,6 +35,7 @@ import { PublicSafetyNoticeService } from './notices/public-safety-notice.servic
     PublicSafetyBoundaryService,
     PublicSafetyAccessService,
     PublicSafetyNoticeService,
+    PublicSafetyServiceRequestMutationService,
     CitizenPublicSafetyProjectionService,
     BusinessPublicSafetyProjectionService,
     OfficialPublicSafetyProjectionService,
@@ -44,6 +46,7 @@ import { PublicSafetyNoticeService } from './notices/public-safety-notice.servic
     PublicSafetyBoundaryService,
     PublicSafetyAccessService,
     PublicSafetyNoticeService,
+    PublicSafetyServiceRequestMutationService,
     CitizenPublicSafetyProjectionService,
     BusinessPublicSafetyProjectionService,
     OfficialPublicSafetyProjectionService,
