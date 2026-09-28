@@ -5,6 +5,7 @@ import { type App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
 import { resetAuditGovernanceData as truncateAuditGovernanceTables } from '../../src/database/audit-governance-test-reset';
+import { resetCannabisAdministrationData } from '../../src/database/cannabis-administration-test-reset';
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetEducationData } from '../../src/database/education-test-reset';
 import { resetFinancialServicesData } from '../../src/database/financial-services-test-reset';
@@ -223,6 +224,7 @@ export async function resetComplianceOversightData(prisma: PrismaService): Promi
 
 export async function resetAllTestData(prisma: PrismaService): Promise<void> {
   await resetFinancialServicesData(prisma);
+  await resetCannabisAdministrationData(prisma);
   await resetHealthcareFoundationData(prisma);
   await resetImmigrationData(prisma);
   await resetEducationData(prisma);

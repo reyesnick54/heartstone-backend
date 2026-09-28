@@ -16,6 +16,7 @@ import oidcConfig from './config/oidc.config';
 import redisConfig from './config/redis.config';
 import securityConfig from './config/security.config';
 import { CorporateRegistryModule } from './corporate-registry/corporate-registry.module';
+import { CannabisAdministrationModule } from './cannabis-administration/cannabis-administration.module';
 import { CustomsTradeModule } from './customs-trade/customs-trade.module';
 import { DatabaseModule } from './database/database.module';
 import { DecisionsModule } from './decisions/decisions.module';
@@ -118,6 +119,7 @@ import { TransportationModule } from './transportation/transportation.module';
     AbsezModule,
     CustomsTradeModule,
     DigitalAssetsModule,
+    CannabisAdministrationModule,
     HealthcareModule,
     RedressModule,
     RevenueModule,
