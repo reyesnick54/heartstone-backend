@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AuthorityModule } from '../authority/authority.module';
 import { DatabaseModule } from '../database/database.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { AuthModule } from '../identity/auth/auth.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { AnalysisService } from './analysis/analysis.service';
@@ -46,7 +47,7 @@ import { StrategicProjectRiskService } from './strategic-projects/strategic-proj
 import { StrategicProjectStageService } from './strategic-projects/strategic-project-stage.service';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthModule, AuthorityModule],
+  imports: [DatabaseModule, SessionsModule, AuthModule, AuthorityModule, S19IntegrationsReportingModule],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
     IntelligenceSuspendedAiGuard,

@@ -13,6 +13,8 @@ import {
 @Injectable()
 export class TestPaymentProviderAdapter implements PaymentProviderPort {
   readonly providerCode = 'TEST';
+  readonly isProductionAdapter = false;
+  readonly operationalReadinessState = 'TEST_ONLY';
 
   verifyWebhookSignature(input: PaymentWebhookVerificationInput): boolean {
     const secret =

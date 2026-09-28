@@ -15,6 +15,8 @@ import {
 import { AuthorityEvaluationService } from '../../authority/evaluation/authority-evaluation.service';
 import { PrismaService } from '../../database/prisma.service';
 import { DocumentCryptographicEvidenceService } from '../../document-trust/services/document-cryptographic-evidence.service';
+import { ServiceRuntimeGateService } from '../../remediation/s19/activation/service-runtime-gate.service';
+import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 import {
   ISSUANCE_APPROVING_OUTCOMES,
   ISSUANCE_READINESS_CHECK_CODES,
@@ -72,6 +74,7 @@ export class IssuanceReadinessService {
     private readonly prisma: PrismaService,
     private readonly authorityEvaluation: AuthorityEvaluationService,
     private readonly cryptographicEvidence: DocumentCryptographicEvidenceService,
+    private readonly serviceRuntimeGate: ServiceRuntimeGateService,
   ) {}
 
   async assess(input: IssuanceReadinessInput): Promise<IssuanceReadinessResult> {
@@ -322,6 +325,21 @@ export class IssuanceReadinessService {
       input.issuerSource !== InstrumentIssuerSource.RETAINED_NATIONAL_COORDINATED &&
       input.issuerSource !== InstrumentIssuerSource.EXTERNAL_AUTHENTICATED;
     check(ISSUANCE_READINESS_CHECK_CODES.NO_RETAINED_NATIONAL_BLOCK, !retainedBlock);
+
+    let serviceOperationallyActive = true;
+    let serviceOperationalDetail: string | undefined;
+    try {
+      await this.serviceRuntimeGate.assertIssuanceAllowed(input.caseId);
+    } catch (error) {
+      serviceOperationallyActive = false;
+      serviceOperationalDetail =
+        error instanceof Error ? error.message : S19_REASON_CODES.SERVICE_ISSUANCE_BLOCKED;
+    }
+    check(
+      ISSUANCE_READINESS_CHECK_CODES.SERVICE_OPERATIONALLY_ACTIVE,
+      serviceOperationallyActive,
+      serviceOperationalDetail,
+    );
 
     return ISSUANCE_READINESS_CHECK_ORDER.map((code) => {
       const found = results.find((r) => r.code === code);

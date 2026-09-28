@@ -11,6 +11,7 @@ import {
 } from '../config/config.constants';
 import { PrismaService } from '../database/prisma.service';
 import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
+import { OperationalProvidersProductionGateService } from '../remediation/s19/providers/operational-providers-production-gate.service';
 import { RedisService } from '../redis/redis.service';
 
 export interface ReadinessCheckResult {
@@ -20,6 +21,7 @@ export interface ReadinessCheckResult {
     redis: 'up' | 'down';
     identityAuth: 'ready' | 'not_ready';
     documentTrust: 'ready' | 'not_ready';
+    operationalProviders: 'ready' | 'not_ready';
   };
 }
 
@@ -30,6 +32,7 @@ export class HealthService {
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,
     private readonly documentTrustGate: DocumentTrustProductionGateService,
+    private readonly operationalProvidersGate: OperationalProvidersProductionGateService,
   ) {}
 
   async checkReadiness(): Promise<ReadinessCheckResult> {
@@ -40,17 +43,35 @@ export class HealthService {
 
     const identityAuthReady = this.checkIdentityAuthReadiness();
     const documentTrustReady = this.checkDocumentTrustReadiness();
+    const operationalProvidersReady = this.checkOperationalProvidersReadiness();
 
     return {
       status:
-        databaseUp && redisUp && identityAuthReady && documentTrustReady ? 'ready' : 'not_ready',
+        databaseUp &&
+        redisUp &&
+        identityAuthReady &&
+        documentTrustReady &&
+        operationalProvidersReady
+          ? 'ready'
+          : 'not_ready',
       checks: {
         database: databaseUp ? 'up' : 'down',
         redis: redisUp ? 'up' : 'down',
         identityAuth: identityAuthReady ? 'ready' : 'not_ready',
         documentTrust: documentTrustReady ? 'ready' : 'not_ready',
+        operationalProviders: operationalProvidersReady ? 'ready' : 'not_ready',
       },
     };
+  }
+
+  private checkOperationalProvidersReadiness(): boolean {
+    const appConfig = this.configService.get<AppConfig>(APP_CONFIG);
+    const nodeEnv = appConfig?.nodeEnv ?? 'development';
+    if (nodeEnv !== 'production') {
+      return true;
+    }
+
+    return this.operationalProvidersGate.evaluateProhibitedAdapters().allowed;
   }
 
   private checkDocumentTrustReadiness(): boolean {

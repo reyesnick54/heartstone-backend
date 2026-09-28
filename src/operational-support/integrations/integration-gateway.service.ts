@@ -14,6 +14,9 @@ import {
   DEFAULT_INTEGRATION_MAX_PAYLOAD_BYTES,
   DEFAULT_INTEGRATION_REQUEST_TIMEOUT_MS,
 } from '../operational-support.constants';
+import { IntegrationCredentialResolverService } from '../../remediation/s19/integrations/integration-credential-resolver.service';
+import { OperationalDurableRetryService } from '../../remediation/s19/integrations/operational-durable-retry.service';
+import { S19_REASON_CODES } from '../../remediation/s19/s19.constants';
 import { IntegrationOutageService } from './integration-outage.service';
 
 export interface AuthorizedExchangeInput {
@@ -39,11 +42,37 @@ export class IntegrationGatewayService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly outageService: IntegrationOutageService,
+    private readonly credentialResolver: IntegrationCredentialResolverService,
+    private readonly durableRetry: OperationalDurableRetryService,
   ) {}
 
   async executeAuthorizedExchange(
     input: AuthorizedExchangeInput,
   ): Promise<AuthorizedExchangeResult> {
+    const existingRequest = await this.prisma.integrationRequest.findUnique({
+      where: { requestReference: input.requestReference },
+      include: {
+        exchanges: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (existingRequest?.status === IntegrationRequestStatus.COMPLETED) {
+      const latestExchange = existingRequest.exchanges[0];
+      return {
+        requestId: existingRequest.id,
+        exchangeId: latestExchange?.id ?? existingRequest.id,
+        messageId: latestExchange?.id ?? existingRequest.id,
+        externalReference: latestExchange?.externalReference ?? existingRequest.requestReference,
+        responsePayload: {
+          idempotentReplay: true,
+          code: S19_REASON_CODES.INTEGRATION_EXCHANGE_IDEMPOTENT_REPLAY,
+        },
+      };
+    }
+
     const endpoint = await this.resolveEndpoint(input.integrationVersionId, input.endpointCode);
     const definition = await this.prisma.integrationDefinition.findFirst({
       where: {
@@ -97,7 +126,16 @@ export class IntegrationGatewayService {
       },
     });
 
-    const responsePayload = await this.dispatchWithTimeout(resolvedUrl, input.payload);
+    const credentials = await this.credentialResolver.resolveForEndpoint(
+      definition.id,
+      endpoint.authenticationMethod,
+    );
+
+    const responsePayload = await this.dispatchWithTimeout(
+      resolvedUrl,
+      input.payload,
+      credentials?.headers,
+    );
 
     const externalReference =
       typeof responsePayload.externalReference === 'string'
@@ -182,6 +220,7 @@ export class IntegrationGatewayService {
   private async dispatchWithTimeout(
     url: string,
     payload: Record<string, unknown>,
+    authHeaders?: Record<string, string>,
   ): Promise<Record<string, unknown>> {
     const controller = new AbortController();
     const timeout = setTimeout(() => {
@@ -191,7 +230,10 @@ export class IntegrationGatewayService {
     try {
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          ...(authHeaders ?? {}),
+        },
         body: JSON.stringify(payload),
         signal: controller.signal,
       });
@@ -213,6 +255,13 @@ export class IntegrationGatewayService {
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  async scheduleExchangeRetry(integrationRequestId: string, attemptNumber: number) {
+    return this.durableRetry.enqueueIntegrationExchangeRetry({
+      integrationRequestId,
+      attemptNumber,
+    });
   }
 
   verifyWebhookSignature(payload: string, providedSignature: string, secret: string): boolean {

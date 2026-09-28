@@ -6,12 +6,9 @@ import { SessionsModule } from '../identity/sessions/sessions.module';
 import { RecordsModule } from '../records/records.module';
 import { RedressModule } from '../redress/redress.module';
 import { OperationalSupportBoundaryService } from './common/operational-support-boundary.service';
-import { TestEmailAdapter } from './communications/adapters/test-email.adapter';
-import { TestSmsAdapter } from './communications/adapters/test-sms.adapter';
 import { CommunicationDeliveryService } from './communications/communication-delivery.service';
 import { CommunicationMessageService } from './communications/communication-message.service';
 import { CommunicationTemplateService } from './communications/communication-template.service';
-import { TestPaymentProviderAdapter } from './financial/adapters/test-payment-provider.adapter';
 import { FeeAssessmentService } from './financial/fee-assessment.service';
 import { FeeScheduleService } from './financial/fee-schedule.service';
 import { FinancialApprovalService } from './financial/financial-approval.service';
@@ -19,7 +16,6 @@ import { InvoiceService } from './financial/invoice.service';
 import { PaymentIntentService } from './financial/payment-intent.service';
 import { PaymentTransactionService } from './financial/payment-transaction.service';
 import { PaymentWebhookService } from './financial/payment-webhook.service';
-import { PAYMENT_PROVIDER_PORT } from './financial/ports/payment-provider.port';
 import { ReconciliationService } from './financial/reconciliation.service';
 import { RefundService } from './financial/refund.service';
 import { RefundAuthorizationService } from './financial/refund-authorization.service';
@@ -34,9 +30,17 @@ import { RegistryQueryService } from './integrations/registry-query.service';
 import { SourceDiscrepancyService } from './integrations/source-discrepancy.service';
 import { MafIndexingService } from './maf/maf-indexing.service';
 import { OperationalSupportController } from './operational-support.controller';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 
 @Module({
-  imports: [DatabaseModule, SessionsModule, AuthorityModule, RecordsModule, RedressModule],
+  imports: [
+    DatabaseModule,
+    SessionsModule,
+    AuthorityModule,
+    RecordsModule,
+    RedressModule,
+    S19IntegrationsReportingModule,
+  ],
   controllers: [OperationalSupportController],
   providers: [
     OperationalSupportBoundaryService,
@@ -53,8 +57,6 @@ import { OperationalSupportController } from './operational-support.controller';
     CommunicationTemplateService,
     CommunicationMessageService,
     CommunicationDeliveryService,
-    TestEmailAdapter,
-    TestSmsAdapter,
     IntegrationDefinitionService,
     IntegrationGatewayService,
     IntegrationWebhookService,
@@ -65,11 +67,6 @@ import { OperationalSupportController } from './operational-support.controller';
     TestRegistryAdapter,
     RedressRefundBridgeService,
     MafIndexingService,
-    TestPaymentProviderAdapter,
-    {
-      provide: PAYMENT_PROVIDER_PORT,
-      useExisting: TestPaymentProviderAdapter,
-    },
   ],
   exports: [
     OperationalSupportBoundaryService,

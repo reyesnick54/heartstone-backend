@@ -20,5 +20,8 @@ export interface NotificationChannelDispatchResult {
 
 export interface NotificationChannelPort {
   readonly channel: CommunicationChannelType;
+  /** When false, production startup must fail if this adapter is bound for outbound delivery. */
+  readonly isProductionAdapter: boolean;
+  readonly operationalReadinessState: 'READY' | 'BLOCKED' | 'TEST_ONLY';
   dispatch(input: NotificationChannelDispatchInput): Promise<NotificationChannelDispatchResult>;
 }
