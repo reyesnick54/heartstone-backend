@@ -6,10 +6,12 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { PaymentIntentStatus, PaymentWebhookProcessingStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { OperationalSecurityTelemetryService } from '../../remediation/s19/observability/operational-security-telemetry.service';
 import { OperationalSupportBoundaryService } from '../common/operational-support-boundary.service';
 import { OPERATIONAL_SUPPORT_REASON_CODES } from '../operational-support.constants';
 import { PaymentTransactionService } from './payment-transaction.service';
@@ -37,6 +39,8 @@ export class PaymentWebhookService {
     private readonly paymentTransaction: PaymentTransactionService,
     @Inject(PAYMENT_PROVIDER_PORT)
     private readonly paymentProvider: PaymentProviderPort,
+    @Optional()
+    private readonly securityTelemetry?: OperationalSecurityTelemetryService,
   ) {}
 
   async receiveWebhook(input: ReceivePaymentWebhookInput) {
@@ -77,6 +81,12 @@ export class PaymentWebhookService {
 
     if (!signatureValid) {
       await this.recordRejectedEvent(providerConfig.id, input.rawBody, 'Invalid webhook signature');
+      await this.securityTelemetry?.recordRepeatedWebhookFailure({
+        metadata: {
+          paymentProviderConfigurationId: providerConfig.id,
+          reason: 'invalid_signature',
+        },
+      });
       throw new ForbiddenException(OPERATIONAL_SUPPORT_REASON_CODES.WEBHOOK_SIGNATURE_INVALID);
     }
 

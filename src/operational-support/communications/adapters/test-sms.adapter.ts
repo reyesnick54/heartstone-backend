@@ -10,6 +10,8 @@ import {
 @Injectable()
 export class TestSmsAdapter implements NotificationChannelPort {
   readonly channel = CommunicationChannelType.SMS;
+  readonly isProductionAdapter = false;
+  readonly operationalReadinessState = 'TEST_ONLY';
 
   dispatch(input: NotificationChannelDispatchInput): Promise<NotificationChannelDispatchResult> {
     return Promise.resolve({

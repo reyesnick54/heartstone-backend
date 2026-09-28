@@ -10,6 +10,8 @@ import {
 @Injectable()
 export class TestEmailAdapter implements NotificationChannelPort {
   readonly channel = CommunicationChannelType.EMAIL;
+  readonly isProductionAdapter = false;
+  readonly operationalReadinessState = 'TEST_ONLY';
 
   dispatch(input: NotificationChannelDispatchInput): Promise<NotificationChannelDispatchResult> {
     return Promise.resolve({

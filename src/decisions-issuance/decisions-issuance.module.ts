@@ -5,6 +5,7 @@ import { AuditGovernanceModule } from '../audit-governance/audit-governance.modu
 import { AuthorityModule } from '../authority/authority.module';
 import { EvidenceRecordsModule } from '../evidence-records/evidence-records.module';
 import { SessionAuthGuardModule } from '../identity/auth/session-auth-guard.module';
+import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
 import { InstrumentDeliveryAuditService } from './audit/instrument-delivery-audit.service';
 import { InstrumentCatalogService } from './catalog/instrument-catalog.service';
 import { InstrumentNumberingService } from './catalog/instrument-numbering.service';
@@ -30,6 +31,7 @@ import { PublicInstrumentVerificationController } from './verification/public-in
     AuthorityModule,
     CasesModule,
     EvidenceRecordsModule,
+    S19IntegrationsReportingModule,
   ],
   controllers: [
     IssuanceController,

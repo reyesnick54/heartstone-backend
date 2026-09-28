@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CommunicationChannelType,
   CommunicationDelivery,
@@ -9,9 +9,12 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { OperationalDurableRetryService } from '../../remediation/s19/integrations/operational-durable-retry.service';
+import {
+  OPERATIONAL_EMAIL_CHANNEL,
+  OPERATIONAL_SMS_CHANNEL,
+} from '../../remediation/s19/providers/operational-providers.module';
 import { ALTERNATE_CHANNEL_MAP } from '../operational-support.constants';
-import { TestEmailAdapter } from './adapters/test-email.adapter';
-import { TestSmsAdapter } from './adapters/test-sms.adapter';
 import { NotificationChannelPort } from './ports/notification-channel.port';
 
 export interface DeliverMessageInput {
@@ -26,12 +29,13 @@ export class CommunicationDeliveryService {
 
   constructor(
     private readonly prisma: PrismaService,
-    testEmailAdapter: TestEmailAdapter,
-    testSmsAdapter: TestSmsAdapter,
+    private readonly durableRetry: OperationalDurableRetryService,
+    @Inject(OPERATIONAL_EMAIL_CHANNEL) emailAdapter: NotificationChannelPort,
+    @Inject(OPERATIONAL_SMS_CHANNEL) smsAdapter: NotificationChannelPort,
   ) {
     this.channelPorts = new Map<CommunicationChannelType, NotificationChannelPort>([
-      [testEmailAdapter.channel, testEmailAdapter],
-      [testSmsAdapter.channel, testSmsAdapter],
+      [emailAdapter.channel, emailAdapter],
+      [smsAdapter.channel, smsAdapter],
     ]);
   }
 
@@ -293,10 +297,20 @@ export class CommunicationDeliveryService {
       },
     });
 
-    return this.prisma.communicationDelivery.update({
+    const failedDelivery = await this.prisma.communicationDelivery.update({
       where: { id: deliveryId },
       data: { status: CommunicationDeliveryStatus.FAILED },
     });
+
+    const attemptCount = await this.prisma.communicationDeliveryAttempt.count({
+      where: { communicationDeliveryId: deliveryId },
+    });
+    await this.durableRetry.enqueueCommunicationDeliveryRetry({
+      deliveryId,
+      attemptNumber: attemptCount,
+    });
+
+    return failedDelivery;
   }
 
   private deriveMessageStatus(
