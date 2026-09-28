@@ -28,7 +28,6 @@ import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { ExperienceModule } from './experience/experience.module';
 import { FinancialServicesModule } from './financial-services/financial-services.module';
-import { MaritimeModule } from './maritime/maritime.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { HealthcareModule } from './healthcare/healthcare.module';
@@ -38,6 +37,7 @@ import { InstitutionalScopeModule } from './institutional-scope/institutional-sc
 import { InstrumentsModule } from './instruments/instruments.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { LabourModule } from './labour/labour.module';
+import { MaritimeModule } from './maritime/maritime.module';
 import { OperationalReadinessModule } from './operational-readiness/operational-readiness.module';
 import { OperationalSupportModule } from './operational-support/operational-support.module';
 import { PlanningConstructionModule } from './planning-construction/planning-construction.module';
