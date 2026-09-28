@@ -28,6 +28,7 @@ import { EvidenceModule } from './evidence/evidence.module';
 import { EvidenceRecordsModule } from './evidence-records/evidence-records.module';
 import { ExperienceModule } from './experience/experience.module';
 import { FinancialServicesModule } from './financial-services/financial-services.module';
+import { MaritimeModule } from './maritime/maritime.module';
 import { GovernmentModule } from './government/government.module';
 import { HealthModule } from './health/health.module';
 import { HealthcareModule } from './healthcare/healthcare.module';
@@ -122,6 +123,7 @@ import { TransportationModule } from './transportation/transportation.module';
     RedressModule,
     RevenueModule,
     FinancialServicesModule,
+    MaritimeModule,
     PropertyRegistryModule,
     PlanningConstructionModule,
     PublicSafetyModule,

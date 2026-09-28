@@ -136,6 +136,8 @@ model Jurisdiction {
   educationConfiguration              EducationConfiguration?
   digitalAssetsConfiguration          DigitalAssetsConfiguration?
   digitalAssetsRegulatedEntities      DigitalAssetsRegulatedEntityReference[]
+  maritimeConfiguration             MaritimeConfiguration?
+  vesselRecords                       VesselRecord[]
   educationInstitutions               EducationInstitution[]
   studentEducationProfiles            StudentEducationProfile[]
   qualificationReferences             QualificationReference[]
@@ -260,6 +262,8 @@ model Institution {
   institutionServiceStandards              InstitutionServiceStandard[]
   institutionEscalationLevels              InstitutionEscalationLevel[]
   setupVocabularyEntries                   SetupVocabularyEntry[]
+  vesselRecords                            VesselRecord[]
+  maritimeDataAccessAudits                 MaritimeDataAccessAudit[]
 
   @@unique([jurisdictionId, code])
   @@index([jurisdictionId])
@@ -517,6 +521,8 @@ model ExternalAuthority {
   treatmentProgramExternalDependencies TreatmentProgramExternalDependency[]
 
   financialExternalRegulatoryDependencies FinancialExternalRegulatoryDependency[]
+  maritimeExternalDependencies            MaritimeExternalDependency[]
+  vesselOfficialRegistrationReferences   VesselOfficialRegistrationReference[]
 
   @@map("external_authorities")
 }
@@ -978,6 +984,11 @@ model Identity {
   digitalAssetsTechnicalReviewsConducted            DigitalAssetsTechnicalReviewRecord[]        @relation("DigitalAssetsTechnicalReviewReviewer")
   digitalAssetsOperatingStatusHistoryEvents         DigitalAssetsOperatingStatusHistory[]       @relation("DigitalAssetsOperatingStatusActor")
   digitalAssetsDataAccessAudits                     DigitalAssetsDataAccessAudit[]              @relation("DigitalAssetsDataAccessAuditAccessor")
+  maritimeExternalDependenciesRecorded              MaritimeExternalDependency[]              @relation("MaritimeExternalDependencyRecorder")
+  vesselPartyRelationshipsAsIdentity                VesselPartyRelationship[]                 @relation("VesselPartyIdentity")
+  vesselProvenanceRecordsRecorded                   VesselProvenanceRecord[]                  @relation("VesselProvenanceRecorder")
+  vesselStatusHistoryEvents                         VesselStatusHistory[]                     @relation("VesselStatusHistoryActor")
+  maritimeDataAccessAudits                          MaritimeDataAccessAudit[]                 @relation("MaritimeDataAccessAuditAccessor")
   publicSafetyEngagementsAsReporter                 PublicSafetyEngagement[]                    @relation("PublicSafetyEngagementReporter")
   publicSafetyIncidentReportsAsReporter             PublicSafetyIncidentReport[]                @relation("PublicSafetyIncidentReporter")
   clinicalResearchParticipantProfiles               ClinicalResearchParticipantProfile[]        @relation("ClinicalResearchParticipantSubject")
@@ -1080,6 +1091,7 @@ model Organization {
   publicSafetyEngagements         PublicSafetyEngagement[]
   digitalAssetsRegulatedEntities  DigitalAssetsRegulatedEntityReference[] @relation("DigitalAssetsRegulatedEntityOrganization")
   financialRegulatedEntityProfiles FinancialRegulatedEntityProfile[] @relation("FinancialRegulatedEntityOrganization")
+  vesselPartyRelationships         VesselPartyRelationship[]         @relation("VesselPartyOrganization")
   absezZoneEnterprises            AbsezZoneEnterprise[]
   corporateBeneficialOwnerSubjectOrganizations CorporateBeneficialOwnerRecord[] @relation("CorporateBeneficialOwnerSubjectOrganization")
 
@@ -1128,6 +1140,7 @@ model RepresentativeAuthority {
   complianceSubmissions      ComplianceSubmission[]
   transferParties            TransferParty[]
   customsBrokerAuthorization CustomsBrokerAuthorization?
+  vesselPartyRelationships   VesselPartyRelationship[]
 
   @@index([organizationId])
   @@index([identityId])
@@ -2891,6 +2904,7 @@ model Application {
   educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
+  maritimeApplicationReferences        MaritimeApplicationReference[]
 
   treatmentApplicationProfile TreatmentApplication?
   financialLicenceApplicationProfiles FinancialLicenceApplicationProfile[]
@@ -3048,6 +3062,8 @@ model Case {
   educationAdmissionApplicationProfile EducationAdmissionApplicationProfile?
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
+  maritimeApplicationReferences        MaritimeApplicationReference[]
+  maritimeCustomsCaseReferences        MaritimeCustomsCaseReference[]
   sezBusinessLicenceRecords            SezBusinessLicenceRecord[]
 
   treatmentApplicationProfile TreatmentApplication?
@@ -3722,6 +3738,7 @@ model MasterAdministrativeFile {
   educationInstitutions                EducationInstitution[]
   studentEducationProfiles             StudentEducationProfile[]
   digitalAssetsRegulatedEntities       DigitalAssetsRegulatedEntityReference[]
+  vesselRecords                        VesselRecord[]
 
   patientHealthcareProfiles PatientHealthcareProfile[]
 
@@ -4161,6 +4178,7 @@ model EvidenceRecord {
   academicCredentials             AcademicCredential[]
   digitalAssetsTechnicalReviews   DigitalAssetsTechnicalReviewRecord[]
   digitalAssetsTechnologyProfiles DigitalAssetsTechnologyProfile[]
+  maritimeExternalDependencies    MaritimeExternalDependency[]
 
   @@index([masterAdministrativeFileId])
   @@index([caseId])
@@ -4550,6 +4568,7 @@ model InspectionRecord {
   customsInspection             CustomsInspection?
   healthcareInspectionReference HealthcareInspectionReference?
   financialInspectionReference  FinancialInspectionReference?
+  maritimeVesselInspectionReference MaritimeVesselInspectionReference?
 
   @@index([caseId])
   @@index([status])
@@ -5651,6 +5670,8 @@ model GovernmentDecision {
   treatmentProgramAuthorizations      TreatmentProgramAuthorization[]
   digitalAssetsAuthorizationRecords   DigitalAssetsAuthorizationRecord[] @relation("DigitalAssetsAuthorizationDecision")
   digitalAssetsOperatingStatusHistory DigitalAssetsOperatingStatusHistory[] @relation("DigitalAssetsOperatingStatusDecision")
+  vesselStatusHistory                 VesselStatusHistory[]                 @relation("VesselStatusHistoryDecision")
+  maritimeAdministrativeInstruments   MaritimeAdministrativeInstrument[]    @relation("MaritimeInstrumentDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -6146,6 +6167,7 @@ model OfficialInstrument {
   academicCredentials               AcademicCredential[]
   educatorLicenseRecords            EducatorLicenseRecord[]
   digitalAssetsAuthorizationRecords DigitalAssetsAuthorizationRecord[] @relation("DigitalAssetsAuthorizationInstrument")
+  maritimeAdministrativeInstruments MaritimeAdministrativeInstrument[] @relation("MaritimeInstrumentOfficial")
   corporateCertificate              CorporateCertificate?             @relation("CorporateCertificateOfficialInstrument")
   sezBusinessLicenceRecord          SezBusinessLicenceRecord?         @relation("SezBusinessLicenceOfficialInstrument")
 
@@ -6775,6 +6797,7 @@ model ComplianceMatter {
   educationComplianceReference         EducationComplianceReference?
   digitalAssetsComplianceReference     DigitalAssetsComplianceReference?
   financialComplianceMatterReferences  FinancialComplianceMatterReference[]
+  maritimeComplianceReferences         MaritimeComplianceReference[]
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
   correctiveActionRegisters            ComplianceCorrectiveActionRegister[]
@@ -20493,6 +20516,7 @@ model ShipmentReference {
   inspections                     CustomsInspection[]
   externalDependencies            CustomsExternalDependency[]
   statusHistory                   CustomsStatusHistory[]      @relation("CustomsStatusHistoryShipment")
+  maritimeCustomsCaseReferences   MaritimeCustomsCaseReference[]
 
   @@index([ownerOrganizationId])
   @@index([traderAccountId])
@@ -26617,4 +26641,348 @@ model FinancialServicesOperationalSnapshot {
 
   @@index([jurisdictionId])
   @@map("financial_services_operational_snapshots")
+}
+
+// ─── Blue Economy & Maritime Administration (S18D) ───────────────────────────
+
+enum MaritimeActorPersona {
+  APPLICANT
+  VESSEL_OWNER
+  AUTHORIZED_REPRESENTATIVE
+  MARITIME_OFFICER
+  SENIOR_DECISION_OFFICER
+  EXTERNAL_AUTHORITY_LIAISON
+  INSPECTOR
+  TECHNICAL_ADMIN
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  SYSTEM
+}
+
+enum MaritimeDataClassification {
+  PUBLIC_SUMMARY
+  REGULATORY_ACCESS
+  CONFIDENTIAL_COMMERCIAL
+  SECURITY_SENSITIVE
+}
+
+enum VesselAdministrativeStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  SUSPENDED
+  WITHDRAWN
+  ARCHIVED
+}
+
+enum VesselPartyType {
+  IDENTITY
+  ORGANIZATION
+}
+
+enum VesselPartyRelationshipStatus {
+  CURRENT
+  SUPERSEDED
+}
+
+enum MaritimeExternalDependencyType {
+  COMPETENT_REGISTRATION_AUTHORITY
+  COMPETENT_PORT_AUTHORITY
+  OTHER_COMPETENT_AUTHORITY
+  CONFIGURED_AUTHORITY
+}
+
+enum MaritimeExternalDependencyStatus {
+  PENDING
+  RESOLVED
+  WAIVED
+}
+
+enum MaritimeExternalDependencyRecordedBy {
+  MARITIME_OFFICER
+  INTEGRATION_SYSTEM
+  EXTERNAL_AUTHORITY_LIAISON
+  SYSTEM
+}
+
+enum MaritimeAdministrativeInstrumentStatus {
+  NOT_ISSUED
+  PENDING_DECISION
+  ISSUED
+  EFFECTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum VesselProvenanceKind {
+  CONFIGURED_SOURCE
+  OFFICIAL_REGISTER_EXTRACT
+  APPLICANT_DECLARATION
+  INTEGRATION_FEED
+  OFFICER_RECORD
+}
+
+model MaritimeConfiguration {
+  id                         String       @id @default(uuid()) @db.Uuid
+  jurisdictionId             String       @unique @db.Uuid
+  vesselTypeCategoryTaxonomy Json         @default("[]")
+  serviceCategoryTaxonomy    Json         @default("[]")
+  applicantCategoryTaxonomy  Json         @default("[]")
+  publicVerificationModeCode String       @default("MINIMAL")
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+  jurisdiction               Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+
+  @@map("maritime_configurations")
+}
+
+model VesselRecord {
+  id                            String                       @id @default(uuid()) @db.Uuid
+  vesselReferenceNumber         String                       @unique
+  vesselName                    String?
+  vesselTypeCategoryCode        String?
+  registrationJurisdictionCode  String?
+  administrativeStatus            VesselAdministrativeStatus   @default(DRAFT)
+  registrationEffectiveFrom     DateTime?
+  registrationEffectiveUntil    DateTime?
+  jurisdictionId                String?                      @db.Uuid
+  institutionId                 String?                      @db.Uuid
+  masterAdministrativeFileId    String?                      @db.Uuid
+  dataClassification            MaritimeDataClassification @default(REGULATORY_ACCESS)
+  currentPartyRelationshipId    String?                      @unique @db.Uuid
+  doesNotDuplicatePartyIdentity Boolean                      @default(true)
+  createdAt                     DateTime                     @default(now())
+  updatedAt                     DateTime                     @updatedAt
+  jurisdiction                  Jurisdiction?                @relation(fields: [jurisdictionId], references: [id])
+  institution                   Institution?                 @relation(fields: [institutionId], references: [id])
+  masterAdministrativeFile      MasterAdministrativeFile?    @relation(fields: [masterAdministrativeFileId], references: [id])
+  currentPartyRelationship      VesselPartyRelationship?     @relation("VesselRecordCurrentParty", fields: [currentPartyRelationshipId], references: [id])
+  officialRegistrationReferences VesselOfficialRegistrationReference[]
+  provenanceRecords             VesselProvenanceRecord[]
+  partyRelationships            VesselPartyRelationship[]    @relation("VesselRecordPartyRelationships")
+  statusHistory                 VesselStatusHistory[]
+  applicationReferences         MaritimeApplicationReference[]
+  externalDependencies          MaritimeExternalDependency[]
+  administrativeInstruments     MaritimeAdministrativeInstrument[]
+  inspectionReferences          MaritimeVesselInspectionReference[]
+  customsCaseReferences         MaritimeCustomsCaseReference[]
+  complianceReferences          MaritimeComplianceReference[]
+  dataAccessAudits              MaritimeDataAccessAudit[]
+
+  @@index([jurisdictionId])
+  @@index([institutionId])
+  @@index([administrativeStatus])
+  @@map("vessel_records")
+}
+
+model VesselOfficialRegistrationReference {
+  id                           String            @id @default(uuid()) @db.Uuid
+  vesselRecordId               String            @db.Uuid
+  officialRegistrationReference  String
+  registrationAuthorityReference String?
+  externalAuthorityId          String?           @db.Uuid
+  effectiveFrom                DateTime?
+  effectiveUntil               DateTime?
+  provenanceKind               VesselProvenanceKind @default(CONFIGURED_SOURCE)
+  provenanceSummary            String?
+  createdAt                    DateTime          @default(now())
+  vesselRecord                 VesselRecord      @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  externalAuthority            ExternalAuthority? @relation(fields: [externalAuthorityId], references: [id])
+
+  @@index([vesselRecordId])
+  @@map("vessel_official_registration_references")
+}
+
+model VesselProvenanceRecord {
+  id                  String             @id @default(uuid()) @db.Uuid
+  vesselRecordId      String             @db.Uuid
+  provenanceKind      VesselProvenanceKind
+  sourceReference     String?
+  recordedAt          DateTime           @default(now())
+  recordedByIdentityId String?           @db.Uuid
+  summary             String?
+  vesselRecord        VesselRecord       @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  recordedByIdentity  Identity?          @relation("VesselProvenanceRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([vesselRecordId])
+  @@map("vessel_provenance_records")
+}
+
+model VesselPartyRelationship {
+  id                          String                        @id @default(uuid()) @db.Uuid
+  vesselRecordId              String                        @db.Uuid
+  partyType                   VesselPartyType
+  partyRoleCode               String
+  partyIdentityId             String?                       @db.Uuid
+  partyOrganizationId         String?                       @db.Uuid
+  representativeAuthorityId   String?                       @db.Uuid
+  effectiveFrom               DateTime                      @default(now())
+  effectiveUntil              DateTime?
+  isCurrent                   Boolean                       @default(true)
+  status                      VesselPartyRelationshipStatus @default(CURRENT)
+  doesNotDuplicatePartyRecord Boolean                       @default(true)
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  vesselRecord                VesselRecord                  @relation("VesselRecordPartyRelationships", fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  currentForVesselRecord      VesselRecord?                 @relation("VesselRecordCurrentParty")
+  partyIdentity               Identity?                     @relation("VesselPartyIdentity", fields: [partyIdentityId], references: [id])
+  partyOrganization           Organization?                 @relation("VesselPartyOrganization", fields: [partyOrganizationId], references: [id])
+  representativeAuthority     RepresentativeAuthority?      @relation(fields: [representativeAuthorityId], references: [id])
+
+  @@index([vesselRecordId, isCurrent])
+  @@map("vessel_party_relationships")
+}
+
+model VesselStatusHistory {
+  id                   String                @id @default(uuid()) @db.Uuid
+  vesselRecordId       String                @db.Uuid
+  fromStatusCode       String?
+  toStatusCode         String
+  changedAt            DateTime              @default(now())
+  actorIdentityId      String?               @db.Uuid
+  actorPersona         MaritimeActorPersona?
+  governmentDecisionId String?               @db.Uuid
+  reasonSummary        String?
+  vesselRecord         VesselRecord          @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  actorIdentity        Identity?             @relation("VesselStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  governmentDecision   GovernmentDecision?   @relation("VesselStatusHistoryDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([vesselRecordId])
+  @@map("vessel_status_history")
+}
+
+model MaritimeApplicationReference {
+  id              String        @id @default(uuid()) @db.Uuid
+  vesselRecordId  String        @db.Uuid
+  applicationId   String?       @db.Uuid
+  caseId          String?       @db.Uuid
+  serviceCode     String?
+  licenceTypeCode String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  vesselRecord    VesselRecord  @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  application     Application?  @relation(fields: [applicationId], references: [id])
+  case            Case?         @relation(fields: [caseId], references: [id])
+
+  @@index([vesselRecordId])
+  @@index([applicationId])
+  @@index([caseId])
+  @@map("maritime_application_references")
+}
+
+model MaritimeExternalDependency {
+  id                                String                             @id @default(uuid()) @db.Uuid
+  vesselRecordId                    String                             @db.Uuid
+  dependencyType                    MaritimeExternalDependencyType
+  externalAuthorityId               String?                            @db.Uuid
+  blocksAbsezAdministrativeDecision Boolean                            @default(false)
+  status                            MaritimeExternalDependencyStatus   @default(PENDING)
+  externalDecisionReference         String?
+  effectiveAt                       DateTime?
+  evidenceRecordId                  String?                            @db.Uuid
+  recordedBy                        MaritimeExternalDependencyRecordedBy
+  recordedByIdentityId              String?                            @db.Uuid
+  doesNotReplaceExternalDecision    Boolean                            @default(true)
+  responseAttributionSummary        String?
+  createdAt                         DateTime                           @default(now())
+  updatedAt                         DateTime                           @updatedAt
+  vesselRecord                      VesselRecord                       @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  externalAuthority                 ExternalAuthority?                 @relation(fields: [externalAuthorityId], references: [id])
+  evidenceRecord                    EvidenceRecord?                    @relation(fields: [evidenceRecordId], references: [id])
+  recordedByIdentity                Identity?                          @relation("MaritimeExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([vesselRecordId])
+  @@index([status])
+  @@map("maritime_external_dependencies")
+}
+
+model MaritimeAdministrativeInstrument {
+  id                                    String                               @id @default(uuid()) @db.Uuid
+  vesselRecordId                        String                               @db.Uuid
+  instrumentReference                   String                               @unique
+  status                                MaritimeAdministrativeInstrumentStatus @default(NOT_ISSUED)
+  instrumentTypeCode                    String?
+  governmentDecisionId                  String?                              @db.Uuid
+  officialInstrumentId                  String?                              @db.Uuid
+  effectiveFrom                         DateTime?
+  effectiveUntil                        DateTime?
+  doesNotSubstituteExternalRegistration Boolean                              @default(true)
+  createdAt                             DateTime                             @default(now())
+  updatedAt                             DateTime                             @updatedAt
+  vesselRecord                          VesselRecord                         @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  governmentDecision                    GovernmentDecision?                  @relation("MaritimeInstrumentDecision", fields: [governmentDecisionId], references: [id])
+  officialInstrument                    OfficialInstrument?                  @relation("MaritimeInstrumentOfficial", fields: [officialInstrumentId], references: [id])
+  customsCaseReferences                 MaritimeCustomsCaseReference[]
+
+  @@index([vesselRecordId])
+  @@index([status])
+  @@map("maritime_administrative_instruments")
+}
+
+model MaritimeVesselInspectionReference {
+  id                                       String           @id @default(uuid()) @db.Uuid
+  vesselRecordId                           String           @db.Uuid
+  inspectionRecordId                       String           @unique @db.Uuid
+  linkageRole                              String           @default("SUBJECT")
+  inspectionDoesNotAuthorizeCustomsRelease Boolean          @default(true)
+  createdAt                                DateTime         @default(now())
+  vesselRecord                             VesselRecord     @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  inspectionRecord                         InspectionRecord @relation(fields: [inspectionRecordId], references: [id])
+
+  @@index([vesselRecordId])
+  @@map("maritime_vessel_inspection_references")
+}
+
+model MaritimeCustomsCaseReference {
+  id                                           String                          @id @default(uuid()) @db.Uuid
+  vesselRecordId                               String                          @db.Uuid
+  shipmentReferenceId                          String?                         @db.Uuid
+  caseId                                       String?                         @db.Uuid
+  maritimeAdministrativeInstrumentId           String?                         @db.Uuid
+  maritimeApprovalDoesNotAuthorizeCustomsRelease Boolean                       @default(true)
+  referenceSummary                             String?
+  createdAt                                    DateTime                        @default(now())
+  vesselRecord                                 VesselRecord                    @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  shipmentReference                            ShipmentReference?              @relation(fields: [shipmentReferenceId], references: [id])
+  case                                         Case?                           @relation(fields: [caseId], references: [id])
+  maritimeAdministrativeInstrument             MaritimeAdministrativeInstrument? @relation(fields: [maritimeAdministrativeInstrumentId], references: [id])
+
+  @@index([vesselRecordId])
+  @@index([shipmentReferenceId])
+  @@map("maritime_customs_case_references")
+}
+
+model MaritimeComplianceReference {
+  id               String           @id @default(uuid()) @db.Uuid
+  vesselRecordId   String           @db.Uuid
+  complianceMatterId String         @db.Uuid
+  linkageRole      String           @default("SUBJECT")
+  createdAt        DateTime         @default(now())
+  vesselRecord     VesselRecord     @relation(fields: [vesselRecordId], references: [id], onDelete: Cascade)
+  complianceMatter ComplianceMatter @relation(fields: [complianceMatterId], references: [id])
+
+  @@index([vesselRecordId])
+  @@index([complianceMatterId])
+  @@map("maritime_compliance_references")
+}
+
+model MaritimeDataAccessAudit {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  accessorIdentityId String?                     @db.Uuid
+  vesselRecordId     String?                     @db.Uuid
+  institutionId      String?                     @db.Uuid
+  classification     MaritimeDataClassification?
+  endpoint           String
+  granted            Boolean
+  reasonCode         String?
+  recordedAt         DateTime                    @default(now())
+  accessorIdentity   Identity?                   @relation("MaritimeDataAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+  vesselRecord       VesselRecord?               @relation(fields: [vesselRecordId], references: [id])
+  institution        Institution?                @relation(fields: [institutionId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([vesselRecordId])
+  @@index([institutionId])
+  @@map("maritime_data_access_audits")
 }
