@@ -15,7 +15,10 @@ export interface AbsezArticle9ServicePathDefinition {
   operationalDependencySummary?: string;
 }
 
-const DEPARTMENT_SERVICE_PATHS: Record<string, Omit<AbsezArticle9ServicePathDefinition, 'departmentCode'>> = {
+const DEPARTMENT_SERVICE_PATHS: Record<
+  string,
+  Omit<AbsezArticle9ServicePathDefinition, 'departmentCode'>
+> = {
   'ABSEZ-ART9-01': {
     servicePathKey: 'executive-office-coordination',
     heartstoneModule: 'experience/executive',

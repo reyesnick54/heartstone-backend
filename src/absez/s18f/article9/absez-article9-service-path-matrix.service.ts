@@ -80,7 +80,8 @@ export class AbsezArticle9ServicePathMatrixService {
         !definition.delegatedFunctionCode ||
         authorityLifecycleStatus === FunctionAuthorityLifecycleStatus.ACTIVE;
       const governingAuthenticated =
-        !definition.governingSourceCode || governingSourceState === GoverningSourceStatus.AUTHENTICATED;
+        !definition.governingSourceCode ||
+        governingSourceState === GoverningSourceStatus.AUTHENTICATED;
 
       const isInstitutionallyActive =
         persisted?.isInstitutionallyActive ??

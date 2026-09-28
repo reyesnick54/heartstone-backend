@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import {
-  PublicSafetyServiceRequestKind,
-  PublicSafetyServiceRequestStatus,
-} from '@prisma/client';
+import { PublicSafetyServiceRequestKind, PublicSafetyServiceRequestStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { PublicSafetyAccessService } from '../common/public-safety-access.service';

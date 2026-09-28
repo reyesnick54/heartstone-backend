@@ -4,7 +4,10 @@ import { Injectable } from '@nestjs/common';
 import { ZoneLandLeaseLifecycleStatus } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
-import { S18F_BOUNDARY_DISCLAIMERS, ZONE_LAND_LEASE_REFERENCE_PREFIX } from '../absez-s18f.constants';
+import {
+  S18F_BOUNDARY_DISCLAIMERS,
+  ZONE_LAND_LEASE_REFERENCE_PREFIX,
+} from '../absez-s18f.constants';
 
 @Injectable()
 export class ZoneLandLeaseService {

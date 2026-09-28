@@ -133,10 +133,7 @@ describe('Remediation S18F — ABSEZ Article 9 capability closure (integration)'
     expect(opened.paymentDoesNotGrantResidency).toBe(true);
 
     await expect(
-      investorResidency.recordInvestmentPayment(
-        ImmigrationActorPersona.PAYMENT_SYSTEM,
-        opened.id,
-      ),
+      investorResidency.recordInvestmentPayment(ImmigrationActorPersona.PAYMENT_SYSTEM, opened.id),
     ).rejects.toThrow();
   });
 

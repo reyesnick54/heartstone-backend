@@ -113,7 +113,9 @@ export class FreeZoneCustomsService {
       where: { id: freeZoneCustomsCaseId },
     });
     try {
-      await this.authority.assertDelegatedCustomsFacilitationActive(caseRecord.delegatedFunctionCode);
+      await this.authority.assertDelegatedCustomsFacilitationActive(
+        caseRecord.delegatedFunctionCode,
+      );
     } catch {
       return this.prisma.freeZoneCustomsCase.update({
         where: { id: freeZoneCustomsCaseId },
