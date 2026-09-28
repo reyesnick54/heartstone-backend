@@ -5,6 +5,7 @@ import { DatabaseModule } from '../database/database.module';
 import { DepartmentModule } from '../experience/department/department.module';
 import { OfficialModule } from '../experience/official/official.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
+import { DevelopmentApplicationWorkflowService } from './applications/development-application-workflow.service';
 import { PlanningConstructionAccessService } from './common/planning-construction-access.service';
 import { PlanningConstructionAuthorityService } from './common/planning-construction-authority.service';
 import { PlanningConstructionBoundaryService } from './common/planning-construction-boundary.service';
@@ -38,6 +39,7 @@ import { DevelopmentPermitService } from './permits/development-permit.service';
     PlanningConstructionAuthorityService,
     DevelopmentExternalDependencyService,
     DevelopmentPermitService,
+    DevelopmentApplicationWorkflowService,
     DevelopmentInspectionService,
     DevelopmentFeeService,
     DevelopmentOccupancyService,
@@ -51,6 +53,7 @@ import { DevelopmentPermitService } from './permits/development-permit.service';
     PlanningConstructionAccessService,
     PlanningConstructionAuthorityService,
     DevelopmentPermitService,
+    DevelopmentApplicationWorkflowService,
     DevelopmentInspectionService,
     DevelopmentFeeService,
     DevelopmentOccupancyService,
