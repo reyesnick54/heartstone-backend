@@ -156,6 +156,8 @@ model Jurisdiction {
   technicalRoleAssignments              TechnicalRoleAssignment[]
   governmentAuditLedgerEntries          GovernmentAuditLedgerEntry[]
   governedConfigurationChanges          GovernedConfigurationChange[]
+  cannabisAdministrationConfiguration CannabisAdministrationConfiguration?
+  cannabisRegulatedEntityReferences   CannabisRegulatedEntityReference[]
   financialRegulatedEntityProfiles      FinancialRegulatedEntityProfile[]
   financialServicesOperationalSnapshots FinancialServicesOperationalSnapshot[]
   setupConfigurationInstallations       SetupConfigurationInstallation[]
@@ -1019,6 +1021,10 @@ model Identity {
   financialExternalDependenciesRecorded            FinancialExternalRegulatoryDependency[] @relation("FinancialExternalDependencyRecorder")
   financialLicenceStatusHistoryEvents              FinancialLicenceStatusHistory[]         @relation("FinancialLicenceStatusHistoryActor")
   financialRegulatoryAccessAudits                  FinancialRegulatoryAccessAudit[]        @relation("FinancialRegulatoryAccessAuditAccessor")
+  cannabisResponsiblePartyReferences               CannabisResponsiblePartyReference[]     @relation("CannabisResponsiblePartyIdentity")
+  cannabisLicenceStatusHistoryEvents               CannabisLicenceStatusHistory[]        @relation("CannabisLicenceStatusHistoryActor")
+  cannabisDataAccessAudits                         CannabisDataAccessAudit[]             @relation("CannabisDataAccessAuditAccessor")
+  cannabisExternalDependenciesRecorded           CannabisExternalDependency[]          @relation("CannabisExternalDependencyRecorder")
   technicalRoleAssignments                         TechnicalRoleAssignment[]
   technicalAccessAuditEvents                       TechnicalAccessAuditEvent[]
   governmentAuditLedgerEntriesAsActor              GovernmentAuditLedgerEntry[]            @relation("GovernmentAuditLedgerActor")
@@ -1100,6 +1106,7 @@ model Organization {
   financialRegulatedEntityProfiles             FinancialRegulatedEntityProfile[]       @relation("FinancialRegulatedEntityOrganization")
   absezZoneEnterprises                         AbsezZoneEnterprise[]
   corporateBeneficialOwnerSubjectOrganizations CorporateBeneficialOwnerRecord[]        @relation("CorporateBeneficialOwnerSubjectOrganization")
+  cannabisRegulatedEntityReferences CannabisRegulatedEntityReference[] @relation("CannabisRegulatedEntityOrganization")
 
   treatmentProgramProviders              TreatmentProgramProvider[]
   treatmentPatientDataAccessGrants       TreatmentPatientDataAccessGrant[]    @relation("TreatmentPatientDataAccessGranteeOrganization")
@@ -1592,6 +1599,7 @@ model FunctionAuthorityRecord {
   resumptionAuthorizations      ResumptionAuthorization[]
   benefitSuspensions            BenefitSuspension[]
   financialLicenceRecords       FinancialLicenceRecord[]
+  cannabisLicenceRecords        CannabisLicenceRecord[]
 
   @@index([classification])
   @@index([lifecycleStatus])
@@ -1878,6 +1886,7 @@ model AuthorityEvaluationRecord {
   healthcareFacilityLicenses      HealthcareFacilityLicense[]     @relation("HealthcareFacilityLicenseAuthority")
   benefitSuspensions              BenefitSuspension[]
   financialLicenceRecords         FinancialLicenceRecord[]
+  cannabisLicenceRecords          CannabisLicenceRecord[]
 
   treatmentEligibilityGovernmentAdminEvals TreatmentEligibilityReview[] @relation("TreatmentEligibilityGovernmentAdminEval")
 
@@ -2910,6 +2919,7 @@ model Application {
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
   carbonApplicationReferences          CarbonApplicationReference[]
+  cannabisApplicationReferences        CannabisApplicationReference[]
 
   treatmentApplicationProfile         TreatmentApplication?
   financialLicenceApplicationProfiles FinancialLicenceApplicationProfile[]
@@ -3068,6 +3078,7 @@ model Case {
   scholarshipApplicationProfile        ScholarshipApplicationProfile?
   digitalAssetsApplicationReferences   DigitalAssetsApplicationReference[]
   carbonApplicationReferences          CarbonApplicationReference[]
+  cannabisApplicationReferences        CannabisApplicationReference[]
   sezBusinessLicenceRecords            SezBusinessLicenceRecord[]
 
   treatmentApplicationProfile TreatmentApplication?
@@ -4572,6 +4583,7 @@ model InspectionRecord {
   customsInspection             CustomsInspection?
   healthcareInspectionReference HealthcareInspectionReference?
   financialInspectionReference  FinancialInspectionReference?
+  cannabisInspectionReference   CannabisInspectionReference?
 
   @@index([caseId])
   @@index([status])
@@ -5675,6 +5687,9 @@ model GovernmentDecision {
   digitalAssetsOperatingStatusHistory      DigitalAssetsOperatingStatusHistory[]     @relation("DigitalAssetsOperatingStatusDecision")
   carbonAdministrativeAuthorizationRecords CarbonAdministrativeAuthorizationRecord[] @relation("CarbonAdministrativeAuthorizationDecision")
   carbonProjectStatusHistory               CarbonProjectStatusHistory[]              @relation("CarbonProjectStatusDecision")
+  cannabisLicenceRecords              CannabisLicenceRecord[]
+  cannabisLicenceStatusHistory        CannabisLicenceStatusHistory[]
+  cannabisOperatingStatusHistory      CannabisOperatingStatusHistory[] @relation("CannabisOperatingStatusDecision")
 
   @@index([caseId])
   @@index([decisionTypeVersionId])
@@ -6173,6 +6188,8 @@ model OfficialInstrument {
   carbonAdministrativeAuthorizationRecords CarbonAdministrativeAuthorizationRecord[] @relation("CarbonAdministrativeAuthorizationInstrument")
   corporateCertificate                     CorporateCertificate?                     @relation("CorporateCertificateOfficialInstrument")
   sezBusinessLicenceRecord                 SezBusinessLicenceRecord?                 @relation("SezBusinessLicenceOfficialInstrument")
+  cannabisAdministrationConfigurations CannabisAdministrationConfiguration[] @relation("CannabisGoverningAuthorityInstrument")
+  cannabisLicenceRecords            CannabisLicenceRecord[]           @relation("CannabisLicenceOfficialInstrument")
 
   @@index([caseId])
   @@index([governmentDecisionId])
@@ -6801,6 +6818,7 @@ model ComplianceMatter {
   digitalAssetsComplianceReference     DigitalAssetsComplianceReference?
   carbonComplianceReference            CarbonComplianceReference?
   financialComplianceMatterReferences  FinancialComplianceMatterReference[]
+  cannabisComplianceReferences         CannabisComplianceReference[]
   vehicleComplianceRecords             VehicleComplianceRecord[]
   healthcareComplianceMatterReferences HealthcareComplianceMatterReference[]
   correctiveActionRegisters            ComplianceCorrectiveActionRegister[]
@@ -16728,6 +16746,7 @@ model CorporateBeneficialOwnerRecord {
   subjectPerson         Person?                                     @relation("CorporateBeneficialOwnerSubjectPerson", fields: [subjectPersonId], references: [id])
   subjectOrganization   Organization?                               @relation("CorporateBeneficialOwnerSubjectOrganization", fields: [subjectOrganizationId], references: [id])
   changeHistory         CorporateBeneficialOwnershipChangeHistory[]
+  cannabisBeneficialOwnershipReferences CannabisBeneficialOwnershipReference[]
 
   @@index([profileId])
   @@index([declarationId])
@@ -18982,6 +19001,7 @@ model PropertyParcel {
   surveySubmissions            PropertySurveySubmission[]
   certificates                 PropertyRegistryCertificate[]
   entitlements                 PropertyInterestEntitlement[]
+  cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
 
   @@index([jurisdictionId])
   @@index([landParcelId])
@@ -19293,6 +19313,7 @@ model DevelopmentProject {
   appeals                    DevelopmentPlanningAppeal[]
   accessAudits               DevelopmentAccessAudit[]
   absezZoneEnterprises       AbsezZoneEnterprise[]
+  cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
 
   @@index([jurisdictionId])
   @@index([primaryApplicantIdentityId])
@@ -19351,6 +19372,7 @@ model DevelopmentPermit {
   issuedByOfficeholder   Officeholder?              @relation("DevelopmentPermitIssuerOfficeholder", fields: [issuedByOfficeholderId], references: [id])
   versions               DevelopmentPermitVersion[]
   currentVersion         DevelopmentPermitVersion?  @relation("DevelopmentPermitCurrentVersion", fields: [currentVersionId], references: [id])
+  cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
 
   @@index([developmentProjectId])
   @@index([status])
@@ -19651,6 +19673,7 @@ model LandParcel {
   surveyRecords        SurveyRecord[]
   propertyTransfers    PropertyTransfer[]
   legacyPropertyParcel PropertyParcel?                      @relation("PropertyParcelCadastreLink")
+  cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
 
   @@index([jurisdictionId])
   @@index([institutionId])
@@ -23124,6 +23147,7 @@ model PublicSafetyEngagement {
   inspectionRequests      PublicSafetyInspectionRequest[]
   externalDependencies    PublicSafetyExternalDependency[]
   communicationDeliveries PublicSafetyCommunicationDelivery[]
+  cannabisFacilitySiteReferences CannabisFacilitySiteReference[]
 
   @@index([jurisdictionId])
   @@index([reporterIdentityId])
@@ -26935,7 +26959,6 @@ model FinancialServicesOperationalSnapshot {
   @@index([jurisdictionId])
   @@map("financial_services_operational_snapshots")
 }
-
 // ─── Remediation S20: Governed AI registry, policy gate, call audit, provider runtime ───
 
 enum AiAgentIdentityStatus {
@@ -27288,4 +27311,344 @@ model AiCallReviewRecord {
   reviewer                 Identity             @relation(fields: [reviewerIdentityId], references: [id], onDelete: Restrict)
 
   @@map("ai_call_review_records")
+}
+// ─── Cannabis Administration and Licensing (S18E) ───────────────────────────
+
+enum CannabisAdministrationActorPersona {
+  APPLICANT
+  AUTHORIZED_REPRESENTATIVE
+  REGULATORY_OFFICER
+  COMPLIANCE_OFFICER
+  INSPECTOR
+  PROFESSIONAL_REVIEWER
+  EXTERNAL_AUTHORITY_LIAISON
+  AI_ASSISTANCE
+  PAYMENT_SYSTEM
+  TECHNICAL_ADMIN
+  SYSTEM
+}
+
+enum CannabisAdministrationDataClassification {
+  PUBLIC_SUMMARY
+  REGULATORY_ACCESS
+  FACILITY_SITE_RESTRICTED
+  BENEFICIAL_OWNERSHIP_RESTRICTED
+  PROTECTED_COMPLIANCE
+}
+
+enum CannabisOperatingStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  CEASED
+}
+
+enum CannabisDelegatedLicenceFunctionActivation {
+  INACTIVE
+  ACTIVE
+}
+
+enum CannabisServiceOperationalActivation {
+  DRAFT
+  INACTIVE
+  ACTIVE
+}
+
+enum CannabisLicenceLifecycleStatus {
+  NOT_ISSUED
+  PENDING_ISSUANCE
+  ISSUED
+  EFFECTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  AMENDED
+  SUPERSEDED
+}
+
+enum CannabisExternalDependencyStatus {
+  PENDING
+  REFERRED
+  RESOLVED
+  WAIVED
+  BLOCKED
+}
+
+enum CannabisExternalDependencyRecordedBy {
+  REGULATORY_OFFICER
+  EXTERNAL_AUTHORITY_LIAISON
+  INTEGRATION_SYSTEM
+  SYSTEM
+}
+
+enum CannabisResponsiblePartyRole {
+  RESPONSIBLE_PERSON
+  FACILITY_MANAGER
+  COMPLIANCE_OFFICER
+  AUTHORIZED_REPRESENTATIVE
+  CONFIGURED_ROLE
+}
+
+model CannabisAdministrationConfiguration {
+  id                             String                             @id @default(uuid()) @db.Uuid
+  jurisdictionId                 String                             @unique @db.Uuid
+  licenceCategoryTaxonomy        Json                               @default("[]")
+  serviceOperationalActivation   CannabisServiceOperationalActivation @default(INACTIVE)
+  governingAuthorityInstrumentId String?                            @db.Uuid
+  publicVerificationModeCode     String                             @default("MINIMAL")
+  createdAt                      DateTime                           @default(now())
+  updatedAt                      DateTime                           @updatedAt
+  jurisdiction                   Jurisdiction                       @relation(fields: [jurisdictionId], references: [id])
+  governingAuthorityInstrument OfficialInstrument?                @relation("CannabisGoverningAuthorityInstrument", fields: [governingAuthorityInstrumentId], references: [id])
+
+  @@map("cannabis_administration_configurations")
+}
+
+model CannabisRegulatedEntityReference {
+  id                                 String                                   @id @default(uuid()) @db.Uuid
+  entityReferenceNumber              String                                   @unique
+  organizationId                     String                                   @db.Uuid
+  jurisdictionId                     String?                                  @db.Uuid
+  licenceCategoryCode                String
+  operatingStatus                    CannabisOperatingStatus                  @default(DRAFT)
+  delegatedLicenceFunctionActivation CannabisDelegatedLicenceFunctionActivation @default(INACTIVE)
+  dataClassification                 CannabisAdministrationDataClassification @default(REGULATORY_ACCESS)
+  effectiveFrom                      DateTime?
+  effectiveUntil                     DateTime?
+  doesNotDuplicateOrganization       Boolean                                  @default(true)
+  createdAt                          DateTime                                 @default(now())
+  updatedAt                          DateTime                                 @updatedAt
+  organization                       Organization                             @relation("CannabisRegulatedEntityOrganization", fields: [organizationId], references: [id])
+  jurisdiction                       Jurisdiction?                            @relation(fields: [jurisdictionId], references: [id])
+  applicationReferences              CannabisApplicationReference[]
+  facilitySiteReferences             CannabisFacilitySiteReference[]
+  responsibleParties                 CannabisResponsiblePartyReference[]
+  beneficialOwnershipReferences      CannabisBeneficialOwnershipReference[]
+  conditions                         CannabisConditionRecord[]
+  licenceRecords                     CannabisLicenceRecord[]
+  operatingStatusHistory             CannabisOperatingStatusHistory[]
+  externalDependencies               CannabisExternalDependency[]
+  inspectionReferences               CannabisInspectionReference[]
+  complianceReferences               CannabisComplianceReference[]
+  dataAccessAudits                   CannabisDataAccessAudit[]
+
+  @@index([organizationId])
+  @@index([jurisdictionId])
+  @@index([operatingStatus])
+  @@map("cannabis_regulated_entity_references")
+}
+
+model CannabisApplicationReference {
+  id                  String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId   String                           @db.Uuid
+  applicationId       String?                          @db.Uuid
+  caseId              String?                          @db.Uuid
+  licenceCategoryCode String?
+  serviceCode         String?
+  createdAt           DateTime                         @default(now())
+  updatedAt           DateTime                         @updatedAt
+  regulatedEntity     CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  application         Application?                     @relation(fields: [applicationId], references: [id])
+  case                Case?                            @relation(fields: [caseId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@index([applicationId])
+  @@index([caseId])
+  @@map("cannabis_application_references")
+}
+
+model CannabisFacilitySiteReference {
+  id                                   String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId                      String                           @db.Uuid
+  siteLabel                            String?
+  landParcelId                         String?                          @db.Uuid
+  propertyParcelId                     String?                          @db.Uuid
+  developmentProjectId                 String?                          @db.Uuid
+  developmentPermitId                  String?                          @db.Uuid
+  publicSafetyEngagementId             String?                          @db.Uuid
+  doesNotCreateLandOrPlanningRecords   Boolean                          @default(true)
+  createdAt                            DateTime                         @default(now())
+  updatedAt                            DateTime                         @updatedAt
+  regulatedEntity                      CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  landParcel                           LandParcel?                      @relation(fields: [landParcelId], references: [id])
+  propertyParcel                       PropertyParcel?                  @relation(fields: [propertyParcelId], references: [id])
+  developmentProject                   DevelopmentProject?              @relation(fields: [developmentProjectId], references: [id])
+  developmentPermit                    DevelopmentPermit?               @relation(fields: [developmentPermitId], references: [id])
+  publicSafetyEngagement               PublicSafetyEngagement?          @relation(fields: [publicSafetyEngagementId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_facility_site_references")
+}
+
+model CannabisResponsiblePartyReference {
+  id                String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                           @db.Uuid
+  identityId        String?                          @db.Uuid
+  roleCode          CannabisResponsiblePartyRole
+  configuredRoleCode String?
+  effectiveFrom     DateTime?
+  effectiveUntil    DateTime?
+  createdAt         DateTime                         @default(now())
+  regulatedEntity   CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  identity          Identity?                        @relation("CannabisResponsiblePartyIdentity", fields: [identityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_responsible_party_references")
+}
+
+model CannabisBeneficialOwnershipReference {
+  id                             String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId              String                           @db.Uuid
+  corporateBeneficialOwnerRecordId String                         @db.Uuid
+  dataClassification             CannabisAdministrationDataClassification @default(BENEFICIAL_OWNERSHIP_RESTRICTED)
+  createdAt                      DateTime                         @default(now())
+  regulatedEntity                CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  corporateBeneficialOwnerRecord CorporateBeneficialOwnerRecord   @relation(fields: [corporateBeneficialOwnerRecordId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_beneficial_ownership_references")
+}
+
+model CannabisConditionRecord {
+  id                String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                           @db.Uuid
+  conditionCode     String
+  conditionSummary  String?
+  effectiveFrom     DateTime                         @default(now())
+  effectiveUntil    DateTime?
+  createdAt         DateTime                         @default(now())
+  regulatedEntity   CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_condition_records")
+}
+
+model CannabisLicenceRecord {
+  id                              String                         @id @default(uuid()) @db.Uuid
+  licenceNumber                   String                         @unique
+  regulatedEntityId               String                         @db.Uuid
+  licenceCategoryCode             String
+  lifecycleStatus                 CannabisLicenceLifecycleStatus @default(NOT_ISSUED)
+  governmentDecisionId            String?                        @db.Uuid
+  officialInstrumentId            String?                        @db.Uuid
+  authorityEvaluationRecordId     String?                        @db.Uuid
+  functionAuthorityRecordId       String?                        @db.Uuid
+  validFrom                       DateTime?
+  validUntil                      DateTime?
+  renewalOfLicenceId              String?                        @unique @db.Uuid
+  doesNotSubstituteGovernmentDecision Boolean                    @default(true)
+  createdAt                       DateTime                       @default(now())
+  updatedAt                       DateTime                       @updatedAt
+  regulatedEntity                 CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  governmentDecision              GovernmentDecision?            @relation(fields: [governmentDecisionId], references: [id])
+  officialInstrument              OfficialInstrument?            @relation("CannabisLicenceOfficialInstrument", fields: [officialInstrumentId], references: [id])
+  authorityEvaluationRecord       AuthorityEvaluationRecord?     @relation(fields: [authorityEvaluationRecordId], references: [id])
+  functionAuthorityRecord         FunctionAuthorityRecord?       @relation(fields: [functionAuthorityRecordId], references: [id])
+  renewalOfLicence                CannabisLicenceRecord?         @relation("CannabisLicenceRenewal", fields: [renewalOfLicenceId], references: [id])
+  renewedByLicence                CannabisLicenceRecord?         @relation("CannabisLicenceRenewal")
+  statusHistory                   CannabisLicenceStatusHistory[]
+
+  @@index([regulatedEntityId])
+  @@index([lifecycleStatus])
+  @@map("cannabis_licence_records")
+}
+
+model CannabisLicenceStatusHistory {
+  id                    String                          @id @default(uuid()) @db.Uuid
+  cannabisLicenceRecordId String                        @db.Uuid
+  fromStatus            CannabisLicenceLifecycleStatus?
+  toStatus              CannabisLicenceLifecycleStatus
+  actorIdentityId       String?                         @db.Uuid
+  actorPersona          CannabisAdministrationActorPersona
+  reason                String?
+  governmentDecisionId  String?                         @db.Uuid
+  createdAt             DateTime                        @default(now())
+  cannabisLicenceRecord CannabisLicenceRecord           @relation(fields: [cannabisLicenceRecordId], references: [id], onDelete: Cascade)
+  actorIdentity         Identity?                       @relation("CannabisLicenceStatusHistoryActor", fields: [actorIdentityId], references: [id])
+  governmentDecision    GovernmentDecision?             @relation(fields: [governmentDecisionId], references: [id])
+
+  @@index([cannabisLicenceRecordId])
+  @@map("cannabis_licence_status_history")
+}
+
+model CannabisOperatingStatusHistory {
+  id                  String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId   String                           @db.Uuid
+  fromStatus          CannabisOperatingStatus?
+  toStatus            CannabisOperatingStatus
+  actorIdentityId     String?                          @db.Uuid
+  actorPersona        CannabisAdministrationActorPersona?
+  governmentDecisionId String?                         @db.Uuid
+  reason              String?
+  createdAt           DateTime                         @default(now())
+  regulatedEntity     CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  governmentDecision  GovernmentDecision?              @relation("CannabisOperatingStatusDecision", fields: [governmentDecisionId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_operating_status_history")
+}
+
+model CannabisExternalDependency {
+  id                         String                               @id @default(uuid()) @db.Uuid
+  regulatedEntityId          String                               @db.Uuid
+  dependencyCode             String
+  dependencyLabel            String?
+  status                     CannabisExternalDependencyStatus     @default(PENDING)
+  blocksFinalDecision        Boolean                              @default(true)
+  recordedBy                 CannabisExternalDependencyRecordedBy
+  recordedByIdentityId       String?                              @db.Uuid
+  responseAttributionSummary String?
+  createdAt                  DateTime                             @default(now())
+  updatedAt                  DateTime                             @updatedAt
+  regulatedEntity            CannabisRegulatedEntityReference     @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  recordedByIdentity         Identity?                            @relation("CannabisExternalDependencyRecorder", fields: [recordedByIdentityId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@index([status])
+  @@map("cannabis_external_dependencies")
+}
+
+model CannabisInspectionReference {
+  id                String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                           @db.Uuid
+  inspectionRecordId String                          @unique @db.Uuid
+  linkageRole       String                           @default("SUBJECT")
+  createdAt         DateTime                         @default(now())
+  regulatedEntity   CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  inspectionRecord  InspectionRecord                 @relation(fields: [inspectionRecordId], references: [id])
+
+  @@index([regulatedEntityId])
+  @@map("cannabis_inspection_references")
+}
+
+model CannabisComplianceReference {
+  id                String                           @id @default(uuid()) @db.Uuid
+  regulatedEntityId String                           @db.Uuid
+  complianceMatterId String                          @db.Uuid
+  linkageRole       String                           @default("SUBJECT")
+  createdAt         DateTime                         @default(now())
+  regulatedEntity   CannabisRegulatedEntityReference @relation(fields: [regulatedEntityId], references: [id], onDelete: Cascade)
+  complianceMatter  ComplianceMatter                 @relation(fields: [complianceMatterId], references: [id])
+
+  @@unique([complianceMatterId])
+  @@index([regulatedEntityId])
+  @@map("cannabis_compliance_references")
+}
+
+model CannabisDataAccessAudit {
+  id                String                                @id @default(uuid()) @db.Uuid
+  accessorIdentityId String?                              @db.Uuid
+  regulatedEntityId String?                               @db.Uuid
+  classification    CannabisAdministrationDataClassification?
+  endpoint          String
+  granted           Boolean
+  reasonCode        String?
+  recordedAt        DateTime                              @default(now())
+  accessorIdentity  Identity?                             @relation("CannabisDataAccessAuditAccessor", fields: [accessorIdentityId], references: [id])
+  regulatedEntity   CannabisRegulatedEntityReference?     @relation(fields: [regulatedEntityId], references: [id])
+
+  @@index([accessorIdentityId])
+  @@index([regulatedEntityId])
+  @@map("cannabis_data_access_audits")
 }
