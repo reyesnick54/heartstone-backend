@@ -210,6 +210,7 @@ export const ROUTE_ACCESS_PROFILES: Record<RouteAccessDomainKey, RouteAccessProf
   'public-safety': governmentServiceDomainProfile,
   education: governmentServiceDomainProfile,
   'digital-assets': governmentServiceDomainProfile,
+  'cannabis-administration': governmentServiceDomainProfile,
   'carbon-management': governmentServiceDomainProfile,
   'financial-services': governmentServiceDomainProfile,
   'civil-registry': governmentServiceDomainProfile,
