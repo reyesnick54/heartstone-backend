@@ -261,6 +261,11 @@ model Institution {
   governmentAuditLedgerEntries           GovernmentAuditLedgerEntry[]
   governedConfigurationChanges           GovernedConfigurationChange[]
   governedConfigurationEffectiveVersions GovernedConfigurationEffectiveVersion[]
+  aiAgentIdentities                      AiAgentIdentity[]
+  aiModelProviders                       AiModelProviderRegistry[]
+  aiModelDefinitions                     AiModelDefinition[]
+  aiAgentDefinitions                     AiAgentDefinition[]
+  aiCallRecords                          AiCallRecord[]
   setupConfigurationInstallations        SetupConfigurationInstallation[]
   institutionCaseCategories              InstitutionCaseCategory[]
   institutionServiceStandards            InstitutionServiceStandard[]
@@ -1039,6 +1044,10 @@ model Identity {
   governmentAuditLedgerEntriesAsActor              GovernmentAuditLedgerEntry[]            @relation("GovernmentAuditLedgerActor")
   governedConfigurationChangesProposed             GovernedConfigurationChange[]           @relation("GovernedConfigProposer")
   governedConfigurationChangesApproved             GovernedConfigurationChange[]           @relation("GovernedConfigApprover")
+  aiAgentIdentitiesOwned                           AiAgentIdentity[]                       @relation("AiAgentResponsibleOwner")
+  aiCallsInitiated                                 AiCallRecord[]                          @relation("AiCallInitiator")
+  aiCallOutputEdits                                AiCallOutputEdit[]
+  aiCallReviews                                    AiCallReviewRecord[]
   freeZoneCustomsExternalDeterminationsRecorded    FreeZoneCustomsExternalDetermination[] @relation("FreeZoneCustomsExternalDeterminationRecorder")
   investorCaseManagerAssignments                   InvestorCaseManagerAssignment[]
   investorInquiryStatusHistoryEvents               InvestorInquiryStatusHistory[] @relation("InvestorInquiryStatusHistoryActor")
@@ -25730,6 +25739,7 @@ model OperationalJobRun {
 enum GovernmentAuditActorType {
   HUMAN_IDENTITY
   SERVICE_IDENTITY
+  AI_AGENT
   SYSTEM
   OFFICEHOLDER
   UNKNOWN
@@ -26997,7 +27007,359 @@ model FinancialServicesOperationalSnapshot {
   @@index([jurisdictionId])
   @@map("financial_services_operational_snapshots")
 }
+// ─── Remediation S20: Governed AI registry, policy gate, call audit, provider runtime ───
 
+enum AiAgentIdentityStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AiModelProviderStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AiModelStatus {
+  DRAFT
+  EVALUATION
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AiAgentDefinitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+enum AiGovernedDataClass {
+  UNCLASSIFIED
+  OFFICIAL
+  PROTECTED
+  RESTRICTED
+  HIGHLY_RESTRICTED
+  PROHIBITED_EXTERNAL
+}
+
+enum AiPolicyDecisionOutcome {
+  ALLOW
+  DENY
+  INDETERMINATE
+}
+
+enum AiCallStatus {
+  POLICY_DENIED
+  AUDIT_PENDING
+  PROVIDER_FAILED
+  COMPLETED
+  SAFE_HALTED
+  CANCELLED
+}
+
+enum AiCallUserDeliveryStatus {
+  BLOCKED
+  PENDING_REVIEW
+  DELIVERED
+}
+
+enum AiHumanReviewOutcome {
+  ACCEPTED
+  ACCEPTED_WITH_MODIFICATION
+  REJECTED
+  ESCALATED
+  DEFERRED
+  NO_ACTION_REQUIRED
+}
+
+enum AiSuspensionSubjectType {
+  MODEL
+  MODEL_PROVIDER
+  AGENT
+  AGENT_IDENTITY
+}
+
+/// Canonical AI agent identity — distinct from human identity, service account, officeholder, and organization.
+model AiAgentIdentity {
+  id                           String                @id @default(uuid()) @db.Uuid
+  agentCode                    String                @unique
+  displayName                  String
+  ownerInstitutionId           String                @db.Uuid
+  responsibleOwnerIdentityId   String                @db.Uuid
+  purpose                      String
+  status                       AiAgentIdentityStatus @default(DRAFT)
+  approvedCapabilities         Json                  @default("[]")
+  effectiveFrom                DateTime?
+  effectiveUntil               DateTime?
+  configurationPolicyReference String?
+  versionLabel                 String                @default("1.0.0")
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+  ownerInstitution             Institution           @relation(fields: [ownerInstitutionId], references: [id], onDelete: Restrict)
+  responsibleOwner             Identity              @relation("AiAgentResponsibleOwner", fields: [responsibleOwnerIdentityId], references: [id], onDelete: Restrict)
+  agentDefinitions             AiAgentDefinition[]
+  callRecords                  AiCallRecord[]
+
+  @@index([ownerInstitutionId, status])
+  @@map("ai_agent_identities")
+}
+
+model AiModelProviderRegistry {
+  id                          String                @id @default(uuid()) @db.Uuid
+  providerCode                String                @unique
+  displayName                 String
+  ownerInstitutionId          String?               @db.Uuid
+  status                      AiModelProviderStatus @default(DRAFT)
+  hostingSovereigntyReference String?
+  secretConfigurationKey      String?
+  effectiveFrom               DateTime?
+  effectiveUntil              DateTime?
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  ownerInstitution            Institution?          @relation(fields: [ownerInstitutionId], references: [id], onDelete: Restrict)
+  models                      AiModelDefinition[]
+
+  @@index([status])
+  @@map("ai_model_provider_registry")
+}
+
+model AiModelDefinition {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  modelCode               String
+  ownerInstitutionId      String                  @db.Uuid
+  providerRegistryId      String                  @db.Uuid
+  providerModelIdentifier String
+  status                  AiModelStatus           @default(DRAFT)
+  dataPolicyReference     String?
+  allowedUseClasses       Json                    @default("[]")
+  effectiveFrom           DateTime?
+  effectiveUntil          DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  ownerInstitution        Institution             @relation(fields: [ownerInstitutionId], references: [id], onDelete: Restrict)
+  provider                AiModelProviderRegistry @relation(fields: [providerRegistryId], references: [id], onDelete: Restrict)
+  versions                AiModelVersion[]
+  agentDefinitions        AiAgentDefinition[]
+  callRecords             AiCallRecord[]
+
+  @@unique([ownerInstitutionId, modelCode])
+  @@index([providerRegistryId, status])
+  @@map("ai_model_definitions")
+}
+
+model AiModelVersion {
+  id                  String            @id @default(uuid()) @db.Uuid
+  modelDefinitionId   String            @db.Uuid
+  versionLabel        String
+  deploymentReference String?
+  configurationVersion String?
+  status              AiModelStatus     @default(DRAFT)
+  effectiveFrom       DateTime?
+  effectiveUntil      DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  modelDefinition     AiModelDefinition @relation(fields: [modelDefinitionId], references: [id], onDelete: Cascade)
+  callRecords         AiCallRecord[]
+
+  @@unique([modelDefinitionId, versionLabel])
+  @@map("ai_model_versions")
+}
+
+model AiAgentDefinition {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  agentCode                 String
+  ownerInstitutionId        String                  @db.Uuid
+  aiAgentIdentityId         String                  @db.Uuid
+  modelDefinitionId         String                  @db.Uuid
+  modelPolicyReference      String?
+  purpose                   String
+  status                    AiAgentDefinitionStatus @default(DRAFT)
+  allowedUserEnvironments   Json                    @default("[]")
+  humanOversightRequired    Boolean                 @default(true)
+  outputDispositionPolicy   String?
+  versionLabel              String                  @default("1.0.0")
+  effectiveFrom             DateTime?
+  effectiveUntil            DateTime?
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  ownerInstitution          Institution             @relation(fields: [ownerInstitutionId], references: [id], onDelete: Restrict)
+  aiAgentIdentity           AiAgentIdentity         @relation(fields: [aiAgentIdentityId], references: [id], onDelete: Restrict)
+  modelDefinition           AiModelDefinition       @relation(fields: [modelDefinitionId], references: [id], onDelete: Restrict)
+  toolAllowlist             AiAgentToolAllowlist[]
+  dataClassAllowlist        AiAgentDataClassAllowlist[]
+  callRecords               AiCallRecord[]
+
+  @@unique([ownerInstitutionId, agentCode, versionLabel])
+  @@index([aiAgentIdentityId, status])
+  @@map("ai_agent_definitions")
+}
+
+model AiAgentToolAllowlist {
+  id                String            @id @default(uuid()) @db.Uuid
+  agentDefinitionId String            @db.Uuid
+  toolCode          String
+  createdAt         DateTime          @default(now())
+  agentDefinition   AiAgentDefinition @relation(fields: [agentDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([agentDefinitionId, toolCode])
+  @@map("ai_agent_tool_allowlist")
+}
+
+model AiAgentDataClassAllowlist {
+  id                String              @id @default(uuid()) @db.Uuid
+  agentDefinitionId String              @db.Uuid
+  dataClass         AiGovernedDataClass
+  createdAt         DateTime            @default(now())
+  agentDefinition   AiAgentDefinition   @relation(fields: [agentDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([agentDefinitionId, dataClass])
+  @@map("ai_agent_data_class_allowlist")
+}
+
+model AiGovernanceSuspension {
+  id              String                  @id @default(uuid()) @db.Uuid
+  subjectType     AiSuspensionSubjectType
+  subjectId       String                  @db.Uuid
+  reason          String
+  suspendedFrom   DateTime                @default(now())
+  suspendedUntil  DateTime?
+  liftedAt        DateTime?
+  createdAt       DateTime                @default(now())
+
+  @@index([subjectType, subjectId, liftedAt])
+  @@map("ai_governance_suspensions")
+}
+
+model AiCallRecord {
+  id                         String                   @id @default(uuid()) @db.Uuid
+  correlationId              String
+  institutionId              String                   @db.Uuid
+  aiAgentIdentityId          String                   @db.Uuid
+  agentDefinitionId          String                   @db.Uuid
+  modelDefinitionId          String                   @db.Uuid
+  modelVersionId             String                   @db.Uuid
+  providerRegistryId         String                   @db.Uuid
+  initiatorIdentityId        String                   @db.Uuid
+  purpose                    String
+  dataClassification         AiGovernedDataClass
+  policyDecisionId           String?                  @db.Uuid
+  policyOutcome              AiPolicyDecisionOutcome
+  policyReference            String?
+  status                     AiCallStatus             @default(AUDIT_PENDING)
+  userDeliveryStatus         AiCallUserDeliveryStatus @default(BLOCKED)
+  governmentAuditLedgerEntryId String?                @db.Uuid
+  isRecommendatoryOnly       Boolean                  @default(true)
+  requestedAt                DateTime                 @default(now())
+  completedAt                DateTime?
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  institution                Institution              @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+  aiAgentIdentity            AiAgentIdentity          @relation(fields: [aiAgentIdentityId], references: [id], onDelete: Restrict)
+  agentDefinition            AiAgentDefinition        @relation(fields: [agentDefinitionId], references: [id], onDelete: Restrict)
+  modelDefinition            AiModelDefinition        @relation(fields: [modelDefinitionId], references: [id], onDelete: Restrict)
+  modelVersion               AiModelVersion           @relation(fields: [modelVersionId], references: [id], onDelete: Restrict)
+  initiator                  Identity                 @relation("AiCallInitiator", fields: [initiatorIdentityId], references: [id], onDelete: Restrict)
+  policyDecision             AiPolicyDecisionRecord?  @relation(fields: [policyDecisionId], references: [id], onDelete: Restrict)
+  inputRecord                AiCallInputRecord?
+  outputRecord               AiCallOutputRecord?
+  sourceReferences           AiCallSourceReference[]
+  reviewRecord               AiCallReviewRecord?
+
+  @@index([institutionId, requestedAt])
+  @@index([correlationId])
+  @@index([agentDefinitionId, status])
+  @@map("ai_call_records")
+}
+
+model AiPolicyDecisionRecord {
+  id                String                  @id @default(uuid()) @db.Uuid
+  outcome           AiPolicyDecisionOutcome
+  reasonCodes       Json                    @default("[]")
+  evaluatedFactors  Json                    @default("{}")
+  policyReference   String?
+  evaluatedAt       DateTime                @default(now())
+  callRecords       AiCallRecord[]
+
+  @@map("ai_policy_decision_records")
+}
+
+model AiCallInputRecord {
+  id                    String       @id @default(uuid()) @db.Uuid
+  callRecordId          String       @unique @db.Uuid
+  instructions          String
+  promptRetentionClass  String?
+  promptStored          Boolean      @default(true)
+  createdAt             DateTime     @default(now())
+  callRecord            AiCallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+
+  @@map("ai_call_input_records")
+}
+
+model AiCallSourceReference {
+  id           String       @id @default(uuid()) @db.Uuid
+  callRecordId String       @db.Uuid
+  sourceType   String
+  sourceId     String
+  sourceLabel  String?
+  createdAt    DateTime     @default(now())
+  callRecord   AiCallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+
+  @@index([callRecordId])
+  @@map("ai_call_source_references")
+}
+
+model AiCallOutputRecord {
+  id                 String             @id @default(uuid()) @db.Uuid
+  callRecordId       String             @unique @db.Uuid
+  rawOutput          String?
+  outputHash         String
+  outputDisposition  String?
+  policyOutcome      AiPolicyDecisionOutcome?
+  createdAt          DateTime           @default(now())
+  callRecord         AiCallRecord       @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+  edits              AiCallOutputEdit[]
+
+  @@map("ai_call_output_records")
+}
+
+model AiCallOutputEdit {
+  id                 String             @id @default(uuid()) @db.Uuid
+  outputRecordId     String             @db.Uuid
+  editorIdentityId   String             @db.Uuid
+  editedOutput       String
+  editReason         String?
+  createdAt          DateTime           @default(now())
+  outputRecord       AiCallOutputRecord   @relation(fields: [outputRecordId], references: [id], onDelete: Cascade)
+  editor             Identity             @relation(fields: [editorIdentityId], references: [id], onDelete: Restrict)
+
+  @@index([outputRecordId])
+  @@map("ai_call_output_edits")
+}
+
+model AiCallReviewRecord {
+  id                       String               @id @default(uuid()) @db.Uuid
+  callRecordId             String               @unique @db.Uuid
+  reviewerIdentityId       String               @db.Uuid
+  reviewOutcome            AiHumanReviewOutcome
+  governmentRecordReference String?
+  reviewedAt               DateTime             @default(now())
+  createdAt                DateTime             @default(now())
+  callRecord               AiCallRecord         @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+  reviewer                 Identity             @relation(fields: [reviewerIdentityId], references: [id], onDelete: Restrict)
+
+  @@map("ai_call_review_records")
+}
 // ─── Cannabis Administration and Licensing (S18E) ───────────────────────────
 
 enum CannabisAdministrationActorPersona {

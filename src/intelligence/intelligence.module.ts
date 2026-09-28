@@ -5,6 +5,7 @@ import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../identity/auth/auth.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { S19IntegrationsReportingModule } from '../remediation/s19/s19-integrations-reporting.module';
+import { GovernedAiModule } from './ai/governed-ai.module';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
@@ -53,6 +54,7 @@ import { StrategicProjectStageService } from './strategic-projects/strategic-pro
     AuthModule,
     AuthorityModule,
     S19IntegrationsReportingModule,
+    GovernedAiModule,
   ],
   controllers: [CommandConsoleController, StrategicProjectController, IntelligenceController],
   providers: [
