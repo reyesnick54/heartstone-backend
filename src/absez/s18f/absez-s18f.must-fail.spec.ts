@@ -8,19 +8,19 @@ describe('Remediation S18F must-fail invariants', () => {
   const customsBoundary = new FreeZoneCustomsBoundaryService();
 
   it('rejects applicant-forged national customs authentication fields', () => {
-    expect(() =>
+    expect(() => {
       customsBoundary.rejectApplicantForgedNationalCustomsDetermination(
         { isAuthenticated: true },
         false,
-      ),
-    ).toThrow();
+      );
+    }).toThrow();
   });
 
   it('documents lease does not imply planning permission flag', () => {
     const leaseService = new ZoneLandLeaseService({} as never);
-    expect(() =>
-      leaseService.assertLeaseDoesNotImplyPlanning({ doesNotImplyPlanningPermission: false }),
-    ).toThrow();
+    expect(() => {
+      leaseService.assertLeaseDoesNotImplyPlanning({ doesNotImplyPlanningPermission: false });
+    }).toThrow();
   });
 
   it('payment persona cannot approve immigration through residency service boundary', async () => {
@@ -33,13 +33,13 @@ describe('Remediation S18F must-fail invariants', () => {
     };
     const prisma = {
       investorResidencyProgramApplication: {
-        findUniqueOrThrow: async () => ({
+        findUniqueOrThrow: () => ({
           id: 'app-id',
           immigrationProfileId: 'profile-id',
           paymentDoesNotGrantResidency: true,
         }),
       },
-      residencyPermitRecord: { count: async () => 0 },
+      residencyPermitRecord: { count: () => 0 },
     };
     const service = new InvestorResidencyProgramService(
       prisma as never,

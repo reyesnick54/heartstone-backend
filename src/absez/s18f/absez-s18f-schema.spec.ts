@@ -1,6 +1,6 @@
 import { ABSEZ_ARTICLE9_DEPARTMENTS } from '../../setup/data/absez-article9-departments.data';
-import { ABSEZ_ARTICLE9_SERVICE_PATH_DEFINITIONS } from './article9/absez-article9-service-paths.data';
 import { ABSEZ_S18F_SCHEMA_MODELS } from './absez-s18f-schema.constants';
+import { ABSEZ_ARTICLE9_SERVICE_PATH_DEFINITIONS } from './article9/absez-article9-service-paths.data';
 
 describe('Remediation S18F schema constants', () => {
   it('declares S18F prisma models', () => {

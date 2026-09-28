@@ -10,20 +10,20 @@ import {
 import request from 'supertest';
 import { type App } from 'supertest/types';
 
-import { ABSEZ_ARTICLE9_DEPARTMENTS } from '../src/setup/data/absez-article9-departments.data';
-import { AbsezSetupBootstrapService } from '../src/setup/bootstrap/absez-setup-bootstrap.service';
-import { ABSEZ_INSTITUTION_CODE, ANTIGUA_JURISDICTION_CODE } from '../src/setup/setup.constants';
-import { DevelopmentApplicationWorkflowService } from '../src/planning-construction/applications/development-application-workflow.service';
-import { PrismaService } from '../src/database/prisma.service';
-import { FreeZoneCustomsService } from '../src/absez/s18f/customs/free-zone-customs.service';
-import { InvestorResidencyProgramService } from '../src/absez/s18f/immigration/investor-residency-program.service';
 import { AbsezArticle9ServicePathMatrixService } from '../src/absez/s18f/article9/absez-article9-service-path-matrix.service';
-import { PublicSafetyServiceRequestMutationService } from '../src/public-safety/requests/public-safety-service-request-mutation.service';
-import { ZoneLandLeaseService } from '../src/absez/s18f/land/zone-land-lease.service';
-import { InvestorRelationsService } from '../src/absez/s18f/investor-relations/investor-relations.service';
+import { FreeZoneCustomsService } from '../src/absez/s18f/customs/free-zone-customs.service';
 import { FreeZoneCustomsBoundaryService } from '../src/absez/s18f/customs/free-zone-customs-boundary.service';
-import { seedImmigrationFixture } from './helpers/immigration-test-fixtures';
+import { InvestorResidencyProgramService } from '../src/absez/s18f/immigration/investor-residency-program.service';
+import { InvestorRelationsService } from '../src/absez/s18f/investor-relations/investor-relations.service';
+import { ZoneLandLeaseService } from '../src/absez/s18f/land/zone-land-lease.service';
+import { PrismaService } from '../src/database/prisma.service';
+import { DevelopmentApplicationWorkflowService } from '../src/planning-construction/applications/development-application-workflow.service';
+import { PublicSafetyServiceRequestMutationService } from '../src/public-safety/requests/public-safety-service-request-mutation.service';
+import { AbsezSetupBootstrapService } from '../src/setup/bootstrap/absez-setup-bootstrap.service';
+import { ABSEZ_ARTICLE9_DEPARTMENTS } from '../src/setup/data/absez-article9-departments.data';
+import { ABSEZ_INSTITUTION_CODE, ANTIGUA_JURISDICTION_CODE } from '../src/setup/setup.constants';
 import { seedBusinessExperienceFixture } from './helpers/business-experience-test-fixtures';
+import { seedImmigrationFixture } from './helpers/immigration-test-fixtures';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
 
 describe('Remediation S18F — ABSEZ Article 9 capability closure (integration)', () => {
@@ -92,12 +92,12 @@ describe('Remediation S18F — ABSEZ Article 9 capability closure (integration)'
   });
 
   it('rejects spoofed national customs determination from non-official actors', () => {
-    expect(() =>
+    expect(() => {
       customsBoundary.rejectApplicantForgedNationalCustomsDetermination(
         { isAuthenticated: true, retainedNationalDeterminationId: 'fake' },
         false,
-      ),
-    ).toThrow();
+      );
+    }).toThrow();
   });
 
   it('uses canonical immigration structures for investor residency without granting status on payment', async () => {

@@ -311,7 +311,7 @@ ALTER TABLE "investor_residency_due_diligence_references" ADD CONSTRAINT "invest
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "institutions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_landParcelId_fkey" FOREIGN KEY ("landParcelId") REFERENCES "land_parcels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_personId_fkey" FOREIGN KEY ("personId") REFERENCES "people"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_personId_fkey" FOREIGN KEY ("personId") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_strategicProjectProfileId_fkey" FOREIGN KEY ("strategicProjectProfileId") REFERENCES "strategic_project_profiles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_governingSourceId_fkey" FOREIGN KEY ("governingSourceId") REFERENCES "governing_sources"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "zone_land_lease_records" ADD CONSTRAINT "zone_land_lease_records_governmentDecisionId_fkey" FOREIGN KEY ("governmentDecisionId") REFERENCES "government_decisions"("id") ON DELETE SET NULL ON UPDATE CASCADE;

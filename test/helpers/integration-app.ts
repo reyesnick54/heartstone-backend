@@ -4,9 +4,12 @@ import { type App } from 'supertest/types';
 
 import { AppModule } from '../../src/app.module';
 import { configureApplication } from '../../src/bootstrap/configure-application';
-import { resetAuditGovernanceData as truncateAuditGovernanceTables } from '../../src/database/audit-governance-test-reset';
 import { resetAbsezS18fData } from '../../src/database/absez-s18f-test-reset';
+<<<<<<< HEAD
 import { resetCannabisAdministrationData } from '../../src/database/cannabis-administration-test-reset';
+=======
+import { resetAuditGovernanceData as truncateAuditGovernanceTables } from '../../src/database/audit-governance-test-reset';
+>>>>>>> f38068b (fix(S18F): correct persons FK in migration and satisfy ESLint)
 import { resetCustomsTradeData } from '../../src/database/customs-trade-test-reset';
 import { resetEducationData } from '../../src/database/education-test-reset';
 import { resetFinancialServicesData } from '../../src/database/financial-services-test-reset';

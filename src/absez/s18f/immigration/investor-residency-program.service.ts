@@ -8,8 +8,8 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
-import { ImmigrationBoundaryService } from '../../../immigration/common/immigration-boundary.service';
 import { ImmigrationApplicationProfileService } from '../../../immigration/applications/immigration-application-profile.service';
+import { ImmigrationBoundaryService } from '../../../immigration/common/immigration-boundary.service';
 import {
   INVESTOR_RESIDENCY_PROGRAM_CODE_PREFIX,
   S18F_BOUNDARY_DISCLAIMERS,
