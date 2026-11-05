@@ -16,6 +16,7 @@ import {
   createPasswordCredentialViaPrisma,
   loginAndGetSessionToken,
 } from './identity-provisioning.fixture';
+import { grantServiceCatalogAdministrator } from './technical-access.fixture';
 
 export interface ServiceCatalogFixtureContext {
   jurisdictionId: string;
@@ -89,6 +90,7 @@ export async function seedServiceCatalogFixture(
 
   await createPasswordCredentialViaPrisma(prisma, identity.id, 'CatalogAdmin123!');
   await createPasswordAuthenticationMethodViaPrisma(prisma, identity.id);
+  await grantServiceCatalogAdministrator(prisma, identity.id);
 
   const sessionToken = await loginAndGetSessionToken(
     app,

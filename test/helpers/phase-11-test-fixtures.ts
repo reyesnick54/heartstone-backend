@@ -21,6 +21,7 @@ import { PaymentIntentService } from '../../src/operational-support/financial/pa
 import { IntegrationAcceptanceService } from '../../src/operational-support/integrations/integration-acceptance.service';
 import { IntegrationDefinitionService } from '../../src/operational-support/integrations/integration-definition.service';
 import { type Phase8FixtureContext, seedPhase8Fixture } from './phase-8-test-fixtures';
+import { grantIntegrationAdministrator } from './technical-access.fixture';
 
 export const NON_PRODUCTION_PHASE_11_FIXTURE_MARKER = 'NON_PRODUCTION_PHASE_11_OPS';
 
@@ -59,6 +60,8 @@ export async function seedPhase11Fixture(
 ): Promise<Phase11FixtureContext> {
   const marker = NON_PRODUCTION_PHASE_11_FIXTURE_MARKER;
   const phase8 = await seedPhase8Fixture(app, prisma);
+  // The official also operates integrations in these scenarios (S21a technical permission).
+  await grantIntegrationAdministrator(prisma, phase8.officialIdentityId);
 
   const caseRecord = await prisma.case.findUniqueOrThrow({
     where: { id: phase8.caseId },

@@ -11,6 +11,7 @@ import { CurrentSession } from '../../identity/auth/decorators/current-session.d
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteAccess } from '../../security/decorators/route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
@@ -33,8 +34,15 @@ import { EvaluateAuthorityDto } from './dto/evaluate-authority.dto';
 export class AuthorityEvaluationController {
   constructor(private readonly evaluationService: AuthorityEvaluationService) {}
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+    authenticationRequired: true,
+    scopeRequirement: "The signed-in person's own offices, appointments and delegations",
+    authorityRequirement: 'Evaluates authority; confers none',
+    actorSource: 'Session identity only; evaluation is never run for another person',
+    primarySecurityInvariant: 'Technical permission does not create legal authority',
+  })
   @Post()
-  @RequirePermissions(PermissionCodes.AUTHORITY_EVALUATION_RUN)
   @ApiOperation({
     summary: 'Evaluate whether a specific institutional action may proceed',
     description:

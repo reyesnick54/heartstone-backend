@@ -142,3 +142,27 @@ export async function grantPaymentProviderCallback(
     scopeType: TechnicalAccessScopeType.PLATFORM,
   });
 }
+
+/** Service catalogue configuration (services, versions, forms). */
+export async function grantServiceCatalogAdministrator(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<void> {
+  await assignTechnicalRole(prisma, {
+    identityId,
+    roleCode: TechnicalRoleCodes.SERVICE_CATALOG_ADMINISTRATOR,
+    scopeType: TechnicalAccessScopeType.PLATFORM,
+  });
+}
+
+/** Operates external integrations (exchanges, registry queries, webhooks, fallbacks). */
+export async function grantIntegrationAdministrator(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<void> {
+  await assignTechnicalRole(prisma, {
+    identityId,
+    roleCode: TechnicalRoleCodes.INTEGRATION_ADMINISTRATOR,
+    scopeType: TechnicalAccessScopeType.PLATFORM,
+  });
+}
