@@ -1,11 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AssuranceLevel } from '@prisma/client';
 
+import { API_ERROR_CODES, codedErrorBody } from '../../../common/errors/api-error-codes';
 import { IDENTITY_CONFIG, type IdentityConfig } from '../../../config/config.constants';
 import { SecurityAuditService } from '../../audit/security-audit.service';
 import type { SessionContextDto } from '../dto/session-context.dto';
 import { MfaAssuranceService, type MfaRequirement } from '../mfa/mfa-assurance.service';
+
+export const STEP_UP_REQUIRED_MESSAGE = 'Recent stronger authentication is required';
 
 export interface StepUpRequirement extends MfaRequirement {
   /** When true, authentication must be recent per configured max age. */
@@ -57,7 +60,13 @@ export class StepUpAuthService {
           assuranceLevel: session.assuranceLevel,
         },
       });
-      throw new UnauthorizedException('Recent stronger authentication is required');
+      throw new UnauthorizedException(
+        codedErrorBody(
+          HttpStatus.UNAUTHORIZED,
+          STEP_UP_REQUIRED_MESSAGE,
+          API_ERROR_CODES.STEP_UP_REQUIRED,
+        ),
+      );
     }
   }
 }

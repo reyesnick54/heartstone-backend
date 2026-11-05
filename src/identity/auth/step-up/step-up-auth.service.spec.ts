@@ -47,4 +47,35 @@ describe('StepUpAuthService', () => {
       expect.objectContaining({ eventType: 'STEP_UP_REQUIRED' }),
     );
   });
+
+  it('returns a STEP_UP_REQUIRED code with the unchanged 401 message', async () => {
+    const stale = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    const error = await service
+      .enforce(
+        { requireRecentAuthentication: true },
+        {
+          sessionId: 's',
+          identityId: 'i',
+          assuranceLevel: AssuranceLevel.HIGH,
+          authMethod: 'OIDC',
+          mfaSatisfied: true,
+          authenticatedAt: stale,
+          identityType: 'INDIVIDUAL',
+          isServicePrincipal: false,
+        },
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(UnauthorizedException);
+    const exception = error as UnauthorizedException;
+    expect(exception.getStatus()).toBe(401);
+    expect(exception.message).toBe('Recent stronger authentication is required');
+    expect(exception.getResponse()).toEqual({
+      statusCode: 401,
+      message: 'Recent stronger authentication is required',
+      error: 'Unauthorized',
+      code: 'STEP_UP_REQUIRED',
+    });
+  });
 });

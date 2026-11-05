@@ -8,6 +8,10 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import { API_ERROR_CODE_PATTERN, API_ERROR_CODES } from '../errors/api-error-codes';
+
+const KNOWN_API_ERROR_CODES = new Set<string>(Object.values(API_ERROR_CODES));
+
 interface PayloadTooLargeError extends Error {
   type?: string;
   status?: number;
@@ -25,6 +29,8 @@ interface ErrorResponseBody {
   statusCode: number;
   message: string | string[];
   error: string;
+  /** Stable machine-readable code, when the exception carried one. */
+  code?: string;
   path: string;
   timestamp: string;
 }
@@ -87,10 +93,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message = 'Internal server error';
     }
 
+    const code = this.readClientSafeCode(exceptionResponse, status);
+
     const errorBody: ErrorResponseBody = {
       statusCode: status,
       message,
       error: HttpStatus[status] ?? 'Error',
+      ...(code ? { code } : {}),
       path: request.url,
       timestamp: new Date().toISOString(),
     };
@@ -118,5 +127,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     response.status(status).json(errorBody);
+  }
+
+  /**
+   * Returns the `code` from an HttpException payload when it is a well-formed identifier.
+   * Codes are never read from non-HTTP errors (database drivers set `code` too). In production,
+   * a 5xx response only carries codes from the published registry.
+   */
+  private readClientSafeCode(exceptionResponse: unknown, status: number): string | undefined {
+    if (!exceptionResponse || typeof exceptionResponse !== 'object') {
+      return undefined;
+    }
+
+    const code = (exceptionResponse as { code?: unknown }).code;
+    if (typeof code !== 'string' || !API_ERROR_CODE_PATTERN.test(code)) {
+      return undefined;
+    }
+
+    if (status >= 500 && this.nodeEnv === 'production' && !KNOWN_API_ERROR_CODES.has(code)) {
+      return undefined;
+    }
+
+    return code;
   }
 }

@@ -33,12 +33,15 @@ export async function signOidcTestToken(
     audience?: string;
     amr?: string[];
     includeExpired?: boolean;
+    /** Extra payload claims, such as given_name or email. */
+    additionalClaims?: Record<string, unknown>;
   },
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const exp = options.includeExpired ? now - 60 : now + 3600;
 
   return new SignJWT({
+    ...options.additionalClaims,
     amr: options.amr,
   })
     .setProtectedHeader({ alg: 'RS256', typ: 'JWT', kid: 'test-key' })

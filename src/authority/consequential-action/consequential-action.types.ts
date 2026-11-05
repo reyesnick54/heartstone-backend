@@ -64,6 +64,8 @@ export interface ConsequentialActionDenial {
   summary: string;
   safeHalt: boolean;
   requiresRevalidation: boolean;
+  /** Machine-readable code. `SAFE_HALT` when the evaluation halted processing. */
+  code?: string;
 }
 
 export const DEFAULT_INSTITUTIONAL_FIELD_PREFIXES = [

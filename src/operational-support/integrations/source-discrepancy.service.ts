@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { SourceDiscrepancy, SourceDiscrepancyStatus } from '@prisma/client';
 
+import { API_ERROR_CODES, codedErrorBody } from '../../common/errors/api-error-codes';
 import { PrismaService } from '../../database/prisma.service';
 
 export interface RecordSourceDiscrepancyInput {
@@ -56,7 +57,11 @@ export class SourceDiscrepancyService {
 
     if (discrepancy.status === SourceDiscrepancyStatus.SAFE_HALTED) {
       throw new BadRequestException(
-        'Material discrepancies in SAFE_HALTED status require institutional review before resolution',
+        codedErrorBody(
+          HttpStatus.BAD_REQUEST,
+          'Material discrepancies in SAFE_HALTED status require institutional review before resolution',
+          API_ERROR_CODES.SAFE_HALT,
+        ),
       );
     }
 

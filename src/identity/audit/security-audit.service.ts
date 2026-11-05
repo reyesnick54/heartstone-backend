@@ -23,18 +23,25 @@ export class SecurityAuditService {
 
   async record(input: AuditEventInput): Promise<SecurityAuditEvent> {
     const event = await this.prisma.securityAuditEvent.create({
-      data: {
-        eventType: input.eventType,
-        identityId: input.identityId,
-        userAccountId: input.userAccountId,
-        sessionId: input.sessionId,
-        actorIdentityId: input.actorIdentityId,
-        metadata: input.metadata,
-        ipAddress: input.ipAddress,
-      },
+      data: this.toCreateData(input),
     });
 
     await this.canonicalAudit.recordSecurityAuditEvent(event);
+
+    return event;
+  }
+
+  /**
+   * Records the security event and its tamper-evident ledger entry inside the caller's
+   * transaction, so they commit or roll back with the change they describe.
+   */
+  async recordWithinTransaction(
+    tx: Prisma.TransactionClient,
+    input: AuditEventInput,
+  ): Promise<SecurityAuditEvent> {
+    const event = await tx.securityAuditEvent.create({ data: this.toCreateData(input) });
+
+    await this.canonicalAudit.recordSecurityAuditEventWithinTransaction(tx, event);
 
     return event;
   }
@@ -44,5 +51,17 @@ export class SecurityAuditService {
       where: { identityId },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  private toCreateData(input: AuditEventInput): Prisma.SecurityAuditEventUncheckedCreateInput {
+    return {
+      eventType: input.eventType,
+      identityId: input.identityId,
+      userAccountId: input.userAccountId,
+      sessionId: input.sessionId,
+      actorIdentityId: input.actorIdentityId,
+      metadata: input.metadata,
+      ipAddress: input.ipAddress,
+    };
   }
 }

@@ -37,10 +37,30 @@ because they depend on URLs Render assigns:
     "issuer": "https://<keycloak-host>/realms/heartstone",
     "audience": "heartstone-api",
     "jwksUri": "https://<keycloak-host>/realms/heartstone/protocol/openid-connect/certs",
-    "allowedAlgorithms": ["RS256"]
+    "allowedAlgorithms": ["RS256"],
+    "provisioning": { "citizenSelfService": true }
   }
 ]
 ```
+
+`provisioning.citizenSelfService` lets people who register in Keycloak sign in on their first
+visit. When a Keycloak subject has no HeartStone link yet, the backend creates a new person, user
+account (login identifier `<provider code>:<subject>`) and individual identity, links the subject,
+and records `IDENTITY_SELF_PROVISIONED` in the security audit log and the audit ledger. The new
+identity gets the signed-in self-service baseline only: no technical roles, offices, organisation
+memberships or authority to act for anyone else. Leave the setting out, or set it to `false`, to
+require an administrator link for every subject.
+
+Officials are not created this way. An administrator must still create or link the official's
+identity, link it to an officeholder, and assign roles. An official who signs in before that has
+happened gets a citizen identity with no access to official work; that identity is not upgraded or
+merged later. Revoke its OIDC credential and suspend its account, then link the official's
+Keycloak subject to the administrator-created identity. A subject whose link was revoked is not
+provisioned again automatically.
+
+The backend never matches or merges accounts by email, because Keycloak may not have verified it.
+If the email in a first-login token equals an existing login identifier, the backend still creates
+a separate identity and records `IDENTITY_POSSIBLE_DUPLICATE` for review.
 
 The Keycloak bootstrap administrator password is in that service's Environment page. Use it once
 to create named administrator accounts with MFA, then remove the bootstrap account.
@@ -57,6 +77,6 @@ requires.
 
 - Document files are stored under `/tmp` and are lost on redeploy until the object storage (R2)
   adapter lands.
-- The backend accepts sign-in only for identities already linked to a Keycloak account; citizen
-  first-login provisioning is pending.
+- Citizen first-login provisioning creates self-service identities only. Official accounts still
+  have to be linked by an administrator.
 - One API instance; scale `numInstances` once documents move to object storage.

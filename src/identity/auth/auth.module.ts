@@ -12,6 +12,7 @@ import {
   InMemoryJwksResolverService,
   RemoteJwksResolverService,
 } from './oidc/jwks-resolver.service';
+import { OidcCitizenProvisioningService } from './oidc/oidc-citizen-provisioning.service';
 import { OidcIdentityResolverService } from './oidc/oidc-identity-resolver.service';
 import { OidcTokenValidatorService } from './oidc/oidc-token-validator.service';
 import { ServiceIdentityAuthService } from './service-identity/service-identity-auth.service';
@@ -28,6 +29,7 @@ import { SessionAuthGuardModule } from './session-auth-guard.module';
     InMemoryJwksResolverService,
     CompositeJwksResolverService,
     OidcTokenValidatorService,
+    OidcCitizenProvisioningService,
     OidcIdentityResolverService,
     ServiceIdentityAuthService,
   ],

@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from '../../common/errors/api-error-codes';
 import { type AuthorityEvaluationResponseDto } from '../evaluation/dto/authority-evaluation-response.dto';
 import { type ConsequentialActionDenial } from './consequential-action.types';
 
@@ -17,5 +18,6 @@ export function buildConsequentialActionDenial(
     summary: evaluation.summary,
     safeHalt: evaluation.safeHalt,
     requiresRevalidation: evaluation.requiresRevalidation,
+    ...(evaluation.safeHalt ? { code: API_ERROR_CODES.SAFE_HALT } : {}),
   };
 }

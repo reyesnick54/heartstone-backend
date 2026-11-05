@@ -26,6 +26,18 @@ export interface SecurityConfig {
   trustProxy: boolean;
 }
 
+/**
+ * Governed just-in-time provisioning for an OIDC provider. Absent or false means an external
+ * subject must already be linked to a HeartStone identity by an administrator.
+ */
+export interface OidcProviderProvisioningConfig {
+  /**
+   * When true, a first login for an unlinked subject creates a new Person, UserAccount and
+   * INDIVIDUAL Identity with no roles, offices, memberships or representative authority.
+   */
+  citizenSelfService: boolean;
+}
+
 export interface OidcProviderConfig {
   code: string;
   name: string;
@@ -34,6 +46,7 @@ export interface OidcProviderConfig {
   jwksUri: string;
   allowedAlgorithms: string[];
   clockToleranceSeconds?: number;
+  provisioning?: OidcProviderProvisioningConfig;
 }
 
 export interface OidcConfig {

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import {
   RetentionScheduleStatus,
 } from '@prisma/client';
 
+import { API_ERROR_CODES, codedErrorBody } from '../../common/errors/api-error-codes';
 import { PrismaService } from '../../database/prisma.service';
 import { ArchivalTransfersService } from '../archival/archival-transfers.service';
 import {
@@ -170,7 +172,11 @@ export class RecordDispositionService {
       request.status === DispositionRequestStatus.SAFE_HALTED
     ) {
       throw new BadRequestException(
-        'Cannot authorize disposition while safe-halt conditions remain',
+        codedErrorBody(
+          HttpStatus.BAD_REQUEST,
+          'Cannot authorize disposition while safe-halt conditions remain',
+          API_ERROR_CODES.SAFE_HALT,
+        ),
       );
     }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   IdentityType,
   LaunchGateOutcome,
@@ -6,6 +6,7 @@ import {
   ProductionCorrectiveActionStatus,
 } from '@prisma/client';
 
+import { API_ERROR_CODES, codedErrorBody } from '../../common/errors/api-error-codes';
 import {
   FORBIDDEN_CLIENT_ACTIVATION_FIELDS,
   FORBIDDEN_CLIENT_GATE_FIELDS,
@@ -147,7 +148,13 @@ export class ProductionReadinessBoundaryService {
 
   assertAiCannotOverrideSafeHalt(isAiActor: boolean, safeHaltActive: boolean): void {
     if (isAiActor && safeHaltActive) {
-      throw new ForbiddenException(PRODUCTION_READINESS_REASON_CODES.AI_CANNOT_OVERRIDE_SAFE_HALT);
+      throw new ForbiddenException(
+        codedErrorBody(
+          HttpStatus.FORBIDDEN,
+          PRODUCTION_READINESS_REASON_CODES.AI_CANNOT_OVERRIDE_SAFE_HALT,
+          API_ERROR_CODES.SAFE_HALT,
+        ),
+      );
     }
   }
 

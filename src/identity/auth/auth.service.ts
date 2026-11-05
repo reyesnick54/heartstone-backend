@@ -40,7 +40,10 @@ export class AuthService {
       dto.accessToken,
       dto.providerCode,
     );
-    const resolved = await this.oidcIdentityResolver.resolveIdentity(validation.claims);
+    const resolved = await this.oidcIdentityResolver.resolveIdentity(validation.claims, {
+      provider: validation.provider,
+      ipAddress: context?.ipAddress,
+    });
     const { session, sessionToken } = await this.sessionsService.authenticateWithOidc(
       validation.claims,
       resolved,
