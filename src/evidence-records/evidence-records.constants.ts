@@ -78,11 +78,7 @@ export const AUTOMATED_DISPOSITION_OUTCOMES = ['ELIGIBLE_FOR_REVIEW'] as const;
 
 export const FORBIDDEN_AUTOMATED_DISPOSITION_OUTCOMES = ['DESTROY_NOW'] as const;
 
-export const LEGAL_HOLD_RELEASE_AUTHORITY_PERMISSION = 'records.legal_hold.release';
-
 export const DISPOSITION_APPROVAL_PERMISSION = 'records.disposition.authorize';
-
-export const ORDINARY_RECORDS_ADMIN_ROLE = 'records.administrator';
 
 export const PHASE_7G_MODEL_NAMES = [
   'RecordsClassification',

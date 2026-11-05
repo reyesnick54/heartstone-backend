@@ -28,6 +28,7 @@ import {
   asPlatformAdminHomeBody,
   asPlatformAdminListBody,
 } from './helpers/platform-admin-test-types';
+import { grantServiceCatalogAdministrator } from './helpers/technical-access.fixture';
 
 describe('Platform Admin Experience API (e2e)', () => {
   let app: INestApplication<App>;
@@ -180,6 +181,8 @@ describe('Platform Admin Experience API (e2e)', () => {
   it('prevents admin from making suspended service ACTIVE through generic PATCH', async () => {
     const fixture = await seedPlatformAdminFixture(app, prisma);
     const phase6 = await seedPhase6Fixture(app, prisma);
+    // Editing service versions is a service-catalogue capability (S21a).
+    await grantServiceCatalogAdministrator(prisma, fixture.platformAdminIdentityId);
 
     await prisma.governmentServiceVersion.update({
       where: { id: phase6.governmentServiceVersionId },

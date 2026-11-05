@@ -1,16 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { GOVERNMENT_AUDIT_EVENT_TYPES } from '../../audit-governance/audit-governance.constants';
+import { GovernmentAuditLedgerService } from '../../audit-governance/ledger/government-audit-ledger.service';
 import { PrismaService } from '../../database/prisma.service';
 import { type VerifiedExternalDependencyResult } from '../contracts/verified-external-dependency-result.contract';
 import { type RecordInstitutionalActDto } from './dto/record-institutional-act.dto';
 import { type RegisterExternalDeterminationDto } from './dto/register-external-determination.dto';
 
+/** The signed-in officer entering the record; taken from the session, never the request. */
+export interface DependencyRecorder {
+  recordedByIdentityId: string;
+  sessionId?: string;
+}
+
 @Injectable()
 export class AuthorityDependenciesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLedger: GovernmentAuditLedgerService,
+  ) {}
 
   async registerExternalDetermination(
     dto: RegisterExternalDeterminationDto,
+    recorder: DependencyRecorder,
   ): Promise<VerifiedExternalDependencyResult> {
     const dependency = await this.prisma.authorityDependency.findUnique({
       where: { id: dto.authorityDependencyId },
@@ -47,6 +59,25 @@ export class AuthorityDependenciesService {
       },
     });
 
+    await this.auditLedger.append({
+      eventType: GOVERNMENT_AUDIT_EVENT_TYPES.ADMINISTRATIVE_CHANGE,
+      actorIdentityId: recorder.recordedByIdentityId,
+      sessionId: recorder.sessionId,
+      action: 'RECORD_EXTERNAL_DETERMINATION',
+      outcome: 'RECORDED',
+      resourceType: 'ExternalDependencyDetermination',
+      resourceId: record.id,
+      metadata: {
+        authorityDependencyId: dto.authorityDependencyId,
+        externalAuthorityId: dto.externalAuthorityId,
+        determinationReference: dto.determinationReference,
+        determinationStatus: dto.determinationStatus,
+        isAuthenticated: dto.isAuthenticated,
+      },
+      sourceDomainEventType: 'ExternalDependencyDetermination',
+      sourceDomainEventId: record.id,
+    });
+
     return {
       authorityDependencyId: record.authorityDependencyId,
       externalAuthorityId: record.externalAuthorityId,
@@ -64,7 +95,7 @@ export class AuthorityDependenciesService {
     };
   }
 
-  async recordInstitutionalAct(dto: RecordInstitutionalActDto) {
+  async recordInstitutionalAct(dto: RecordInstitutionalActDto, recorder: DependencyRecorder) {
     const functionRecord = await this.prisma.functionAuthorityRecord.findUnique({
       where: { id: dto.functionAuthorityRecordId },
     });
@@ -74,7 +105,7 @@ export class AuthorityDependenciesService {
       );
     }
 
-    return this.prisma.institutionalAuthorityAct.create({
+    const act = await this.prisma.institutionalAuthorityAct.create({
       data: {
         functionAuthorityRecordId: dto.functionAuthorityRecordId,
         institutionId: dto.institutionId,
@@ -88,5 +119,27 @@ export class AuthorityDependenciesService {
         performedAt: dto.performedAt ?? new Date(),
       },
     });
+
+    await this.auditLedger.append({
+      eventType: GOVERNMENT_AUDIT_EVENT_TYPES.ADMINISTRATIVE_CHANGE,
+      actorIdentityId: recorder.recordedByIdentityId,
+      sessionId: recorder.sessionId,
+      action: 'RECORD_INSTITUTIONAL_ACT',
+      outcome: 'RECORDED',
+      resourceType: 'InstitutionalAuthorityAct',
+      resourceId: act.id,
+      metadata: {
+        functionAuthorityRecordId: dto.functionAuthorityRecordId,
+        institutionId: dto.institutionId ?? null,
+        actType: dto.actType,
+        performedByIdentityId: dto.actorIdentityId ?? null,
+        performedByOfficeholderId: dto.actorOfficeholderId ?? null,
+        evidenceReference: dto.evidenceReference ?? null,
+      },
+      sourceDomainEventType: 'InstitutionalAuthorityAct',
+      sourceDomainEventId: act.id,
+    });
+
+    return act;
   }
 }

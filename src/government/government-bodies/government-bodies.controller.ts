@@ -3,6 +3,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateGovernmentBodyDto } from './dto/create-government-body.dto';
 import { GovernmentBodyResponseDto } from './dto/government-body-response.dto';
 import { QueryGovernmentBodiesDto } from './dto/query-government-bodies.dto';
@@ -23,6 +25,7 @@ export class GovernmentBodiesController {
   constructor(private readonly service: GovernmentBodiesService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Create a governmentbody' })
   @ApiCreatedResponse({ type: GovernmentBodyResponseDto })
   create(@Body() dto: CreateGovernmentBodyDto): Promise<GovernmentBodyResponseDto> {
@@ -30,6 +33,7 @@ export class GovernmentBodiesController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'List government-bodies' })
   @ApiOkResponse({ type: GovernmentBodyResponseDto, isArray: true })
   findAll(@Query() query: QueryGovernmentBodiesDto): Promise<GovernmentBodyResponseDto[]> {
@@ -37,6 +41,7 @@ export class GovernmentBodiesController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'Get a governmentbody by id' })
   @ApiOkResponse({ type: GovernmentBodyResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<GovernmentBodyResponseDto> {
@@ -44,6 +49,7 @@ export class GovernmentBodiesController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Update a governmentbody' })
   @ApiOkResponse({ type: GovernmentBodyResponseDto })
   update(

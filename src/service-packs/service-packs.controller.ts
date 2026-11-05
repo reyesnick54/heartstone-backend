@@ -9,6 +9,8 @@ import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
 import { ServicePackRuntimeCompilerService } from '../service-catalog/service-packs/service-pack-runtime-compiler.service';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { ServicePacksBoundaryService } from './common/service-packs-boundary.service';
 import { CreateServicePackDto } from './packs/dto/create-service-pack.dto';
 import { ImportServicePackManifestDto } from './packs/dto/import-service-pack-manifest.dto';
@@ -51,18 +53,21 @@ export class ServicePacksController {
   ) {}
 
   @Get('boundary')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Service pack governance boundary disclaimer' })
   getBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: SERVICE_PACK_BOUNDARY_DISCLAIMER };
   }
 
   @Get('manifest-versions')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'List supported manifest schema versions' })
   listManifestVersions(): { supportedVersions: readonly string[] } {
     return { supportedVersions: this.servicePacksService.supportedManifestVersions() };
   }
 
   @Post()
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Create a service pack identity' })
   @ApiCreatedResponse({ type: ServicePackResponseDto })
   create(@Body() body: CreateServicePackDto) {
@@ -71,12 +76,14 @@ export class ServicePacksController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Get service pack by id' })
   getById(@Param('id') id: string) {
     return this.servicePacksService.findById(id);
   }
 
   @Post('portable-imports')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Import a sanitized portable service pack export package' })
   importPortable(
     @Body() body: ImportPortableServicePackDto,
@@ -94,6 +101,7 @@ export class ServicePacksController {
   }
 
   @Post(':id/imports')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Import a versioned manifest into a service pack' })
   importManifest(
     @Param('id') id: string,
@@ -106,6 +114,7 @@ export class ServicePacksController {
   }
 
   @Post('versions/:versionId/validate')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Validate a service pack version manifest' })
   @ApiOkResponse({ description: 'Validation result; does not deploy or activate services' })
   validateVersion(
@@ -119,6 +128,7 @@ export class ServicePacksController {
   }
 
   @Post(':id/versions/:versionId/exports')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Export a service pack version as a portable configuration package' })
   exportVersion(
     @Param('id') id: string,
@@ -135,6 +145,7 @@ export class ServicePacksController {
   }
 
   @Post(':id/versions/:versionId/upgrade-plan')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Dry-run upgrade analysis for a service pack version' })
   buildUpgradePlan(@Param('id') id: string, @Param('versionId') versionId: string) {
     return this.upgradePlanService.buildUpgradePlan({
@@ -144,6 +155,7 @@ export class ServicePacksController {
   }
 
   @Post(':id/template-clones')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Clone a service pack as a cross-jurisdiction template' })
   cloneTemplate(
     @Param('id') id: string,
@@ -165,6 +177,7 @@ export class ServicePacksController {
   }
 
   @Post('versions/:versionId/compile')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({
     summary:
       'Compile a validated authoring manifest into DRAFT runtime configuration (no activation)',
@@ -181,12 +194,14 @@ export class ServicePacksController {
   }
 
   @Get('versions/:versionId')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Get service pack version detail' })
   getVersion(@Param('versionId') versionId: string) {
     return this.versionService.findById(versionId);
   }
 
   @Patch('versions/:versionId')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Update a draft service pack version' })
   updateVersion(
     @Param('versionId') versionId: string,

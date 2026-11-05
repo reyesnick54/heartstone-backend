@@ -3,6 +3,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateInstitutionExternalAuthorityDto } from './dto/create-institution-external-authority.dto';
 import { InstitutionExternalAuthorityResponseDto } from './dto/institution-external-authority-response.dto';
 import { QueryInstitutionExternalAuthoritiesDto } from './dto/query-institution-external-authorities.dto';
@@ -23,6 +25,7 @@ export class InstitutionExternalAuthoritiesController {
   constructor(private readonly service: InstitutionExternalAuthoritiesService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Link an institution to an external authority' })
   @ApiCreatedResponse({ type: InstitutionExternalAuthorityResponseDto })
   create(
@@ -32,6 +35,7 @@ export class InstitutionExternalAuthoritiesController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'List institution external authority relationships' })
   @ApiOkResponse({ type: InstitutionExternalAuthorityResponseDto, isArray: true })
   findAll(
@@ -41,6 +45,7 @@ export class InstitutionExternalAuthoritiesController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'Get an institution external authority relationship by id' })
   @ApiOkResponse({ type: InstitutionExternalAuthorityResponseDto })
   findOne(
@@ -50,6 +55,7 @@ export class InstitutionExternalAuthoritiesController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Update an institution external authority relationship' })
   @ApiOkResponse({ type: InstitutionExternalAuthorityResponseDto })
   update(

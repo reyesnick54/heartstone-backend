@@ -11,6 +11,8 @@ import { CurrentActor } from '../../identity/auth/decorators/current-actor.decor
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import {
   resolveFunctionFromServicePackRoute,
   resolveResourceFromServicePackRoute,
@@ -46,12 +48,14 @@ export class ServicePackGovernanceController {
   ) {}
 
   @Get(':id/reviews')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'List governance reviews for a service pack' })
   listReviews(@Param('id', ParseUUIDPipe) id: string) {
     return this.reviews.listReviews(id);
   }
 
   @Post(':id/reviews')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Start or list configured governance reviews for a version' })
   createReview(
     @Param('id', ParseUUIDPipe) id: string,
@@ -63,6 +67,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/reviews/:reviewId/findings')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Record a structured governance review finding' })
   addFinding(
     @Param('id', ParseUUIDPipe) id: string,
@@ -78,6 +83,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/reviews/:reviewId/request-revision')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Request manifest revision after governance review' })
   requestRevision(
     @Param('id', ParseUUIDPipe) id: string,
@@ -89,6 +95,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/reviews/:reviewId/resolve-finding')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Resolve a governance review finding' })
   resolveFinding(
     @Param('id', ParseUUIDPipe) id: string,
@@ -114,6 +121,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/submit-for-acceptance')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_MANAGE)
   @ApiOperation({ summary: 'Submit a validated service pack version for institutional acceptance' })
   submitForAcceptance(
     @Param('id', ParseUUIDPipe) id: string,
@@ -125,6 +133,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/accept')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_ACCEPT)
   @ConsequentialAction({
     action: AuthorityActionType.APPROVE,
     functionResolver: resolveFunctionFromServicePackRoute,
@@ -151,6 +160,7 @@ export class ServicePackGovernanceController {
   }
 
   @Post(':id/reject')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_ACCEPT)
   @ApiOperation({ summary: 'Reject a service pack version under governance' })
   reject(
     @Param('id', ParseUUIDPipe) id: string,

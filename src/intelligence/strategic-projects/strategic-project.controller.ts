@@ -15,6 +15,8 @@ import { type ActorContext } from '../../identity/auth/context/actor-context.typ
 import { CurrentActor } from '../../identity/auth/decorators/current-actor.decorator';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { IntelligenceForbiddenClientFieldsInterceptor } from '../common/intelligence-forbidden-client-fields.interceptor';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
@@ -51,6 +53,7 @@ export class StrategicProjectController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_STRATEGIC_PROJECT_MANAGE)
   createProfile(
     @CurrentActor() actor: ActorContext,
     @Body() dto: CreateStrategicProjectProfileDto,
@@ -78,6 +81,7 @@ export class StrategicProjectController {
   }
 
   @Get(':profileId')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   async getProfile(
     @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -92,6 +96,7 @@ export class StrategicProjectController {
   }
 
   @Post(':profileId/stages')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_STRATEGIC_PROJECT_MANAGE)
   async recordStage(
     @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -118,6 +123,7 @@ export class StrategicProjectController {
   }
 
   @Post(':profileId/projections/derive')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_STRATEGIC_PROJECT_MANAGE)
   async deriveProjection(
     @CurrentActor() actor: ActorContext,
     @Param('profileId', ParseUUIDPipe) profileId: string,

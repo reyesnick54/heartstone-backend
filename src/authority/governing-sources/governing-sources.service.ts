@@ -1,15 +1,25 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { GoverningSource, GoverningSourceStatus, Prisma } from '@prisma/client';
 
+import { GOVERNMENT_AUDIT_EVENT_TYPES } from '../../audit-governance/audit-governance.constants';
+import { GovernmentAuditLedgerService } from '../../audit-governance/ledger/government-audit-ledger.service';
 import { PrismaService } from '../../database/prisma.service';
 import { hashContent } from '../common/authority-hash.util';
-import { AuthenticateGoverningSourceDto } from './dto/authenticate-governing-source.dto';
 import { CreateGoverningSourceDto } from './dto/create-governing-source.dto';
 import { GoverningSourceResponseDto } from './dto/governing-source-response.dto';
 
+export interface GoverningSourceActor {
+  /** Always the authenticated session identity; never a request field. */
+  actorIdentityId: string;
+  sessionId?: string;
+}
+
 @Injectable()
 export class GoverningSourcesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLedger: GovernmentAuditLedgerService,
+  ) {}
 
   async create(dto: CreateGoverningSourceDto): Promise<GoverningSourceResponseDto> {
     const contentHash = hashContent(dto.content);
@@ -39,7 +49,7 @@ export class GoverningSourcesService {
 
   async authenticate(
     id: string,
-    dto: AuthenticateGoverningSourceDto,
+    actor: GoverningSourceActor & { verificationReference?: string },
   ): Promise<GoverningSourceResponseDto> {
     const existing = await this.prisma.governingSource.findUnique({ where: { id } });
     if (!existing) {
@@ -49,23 +59,48 @@ export class GoverningSourcesService {
     if (existing.status === GoverningSourceStatus.REVOKED) {
       throw new BadRequestException('Cannot authenticate a revoked governing source');
     }
+    if (existing.status === GoverningSourceStatus.AUTHENTICATED) {
+      throw new BadRequestException('Governing source is already authenticated');
+    }
 
     const source = await this.prisma.governingSource.update({
       where: { id },
       data: {
         status: GoverningSourceStatus.AUTHENTICATED,
         authenticatedAt: new Date(),
-        authenticatedByIdentityId: dto.authenticatedByIdentityId,
+        authenticatedByIdentityId: actor.actorIdentityId,
       },
+    });
+
+    await this.auditLedger.append({
+      eventType: GOVERNMENT_AUDIT_EVENT_TYPES.ADMINISTRATIVE_CHANGE,
+      actorIdentityId: actor.actorIdentityId,
+      sessionId: actor.sessionId,
+      action: 'AUTHENTICATE_GOVERNING_SOURCE',
+      outcome: 'COMPLETED',
+      resourceType: 'GoverningSource',
+      resourceId: source.id,
+      newStateHash: source.contentHash,
+      metadata: {
+        code: source.code,
+        versionLabel: source.versionLabel,
+        priorStatus: existing.status,
+        verificationReference: actor.verificationReference ?? null,
+      },
+      sourceDomainEventType: 'GoverningSource',
+      sourceDomainEventId: `${source.id}:authenticate`,
     });
 
     return this.toResponse(source);
   }
 
-  async revoke(id: string): Promise<GoverningSourceResponseDto> {
+  async revoke(id: string, actor: GoverningSourceActor): Promise<GoverningSourceResponseDto> {
     const existing = await this.prisma.governingSource.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException(`GoverningSource "${id}" was not found`);
+    }
+    if (existing.status === GoverningSourceStatus.REVOKED) {
+      throw new BadRequestException('Governing source is already revoked');
     }
 
     const source = await this.prisma.governingSource.update({
@@ -74,6 +109,19 @@ export class GoverningSourcesService {
         status: GoverningSourceStatus.REVOKED,
         revokedAt: new Date(),
       },
+    });
+
+    await this.auditLedger.append({
+      eventType: GOVERNMENT_AUDIT_EVENT_TYPES.ADMINISTRATIVE_CHANGE,
+      actorIdentityId: actor.actorIdentityId,
+      sessionId: actor.sessionId,
+      action: 'REVOKE_GOVERNING_SOURCE',
+      outcome: 'COMPLETED',
+      resourceType: 'GoverningSource',
+      resourceId: source.id,
+      metadata: { code: source.code, priorStatus: existing.status },
+      sourceDomainEventType: 'GoverningSource',
+      sourceDomainEventId: `${source.id}:revoke`,
     });
 
     return this.toResponse(source);

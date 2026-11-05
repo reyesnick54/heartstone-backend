@@ -9,6 +9,8 @@ import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { ActivationGovernanceService } from './activation/activation-governance.service';
 import { CapabilityDefinitionService } from './capabilities/capability-definition.service';
 import { CapabilityMaturityService } from './capabilities/capability-maturity.service';
@@ -50,33 +52,39 @@ export class OperationalReadinessController {
   ) {}
 
   @Get('boundary')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: PHASE_13A_BOUNDARY_DISCLAIMER };
   }
 
   @Post('capabilities/definitions')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createDefinition(@Body() body: CreateCapabilityDefinitionDto) {
     this.boundary.rejectClientProtectedMaturityFields(body as unknown as Record<string, unknown>);
     return this.definitionService.createDefinition(body);
   }
 
   @Get('capabilities/definitions/:id')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getDefinition(@Param('id') id: string) {
     return this.definitionService.findDefinitionById(id);
   }
 
   @Patch('capabilities/definitions/:id')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   updateDefinition(@Param('id') id: string, @Body() body: Partial<CreateCapabilityDefinitionDto>) {
     this.boundary.rejectClientProtectedMaturityFields(body);
     return this.definitionService.updateDefinition(id, body, body);
   }
 
   @Post('capabilities/versions')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createVersion(@Body() body: CreateCapabilityVersionDto) {
     return this.definitionService.createVersion(body);
   }
 
   @Post('capabilities/maturity-assessments')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createMaturityAssessment(
     @Body() body: CreateMaturityAssessmentDto,
     @CurrentSession() session: SessionContextDto,
@@ -100,6 +108,7 @@ export class OperationalReadinessController {
   }
 
   @Post('capabilities/maturity-assessments/:id/decision')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_DECIDE)
   @ConsequentialAction({
     action: AuthorityActionType.DECIDE,
     functionCode: OPERATIONAL_READINESS_AUTHORITY_FUNCTION_CODES.MATURITY_DECISION,
@@ -118,16 +127,19 @@ export class OperationalReadinessController {
   }
 
   @Get('capabilities/definitions/:id/maturity-history')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getMaturityHistory(@Param('id') id: string) {
     return this.maturityService.getMaturityHistory(id);
   }
 
   @Get('capabilities/definitions/:id/operational-view')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getOperationalView(@Param('id') id: string) {
     return this.definitionService.getOperationalView(id);
   }
 
   @Post('production-readiness/assessments')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createProductionReadinessAssessment(
     @Body() body: { capabilityDefinitionId: string; capabilityVersionId: string; summary?: string },
     @CurrentSession() session: SessionContextDto,
@@ -140,16 +152,19 @@ export class OperationalReadinessController {
   }
 
   @Get('production-readiness/assessments/:id')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getProductionReadinessAssessment(@Param('id') id: string) {
     return this.productionReadinessService.findAssessmentById(id);
   }
 
   @Get('production-readiness/assessments/:id/evidence/replay')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   getReplayableEvidence(@Param('id') id: string) {
     return this.productionReadinessService.getReplayableEvidence(id);
   }
 
   @Post('activation/conditions')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createActivationCondition(
     @Body() body: Parameters<ActivationGovernanceService['createCondition']>[0],
   ) {
@@ -157,6 +172,7 @@ export class OperationalReadinessController {
   }
 
   @Post('activation/restrictions')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createActivationRestriction(
     @Body() body: Parameters<ActivationGovernanceService['createRestriction']>[0],
   ) {
@@ -164,6 +180,7 @@ export class OperationalReadinessController {
   }
 
   @Post('activation/safe-halt-conditions')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createSafeHaltCondition(
     @Body() body: Parameters<ActivationGovernanceService['createSafeHaltCondition']>[0],
   ) {
@@ -171,11 +188,13 @@ export class OperationalReadinessController {
   }
 
   @Get('activation/conditions/:capabilityDefinitionId/evaluation')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   evaluateActivationConditions(@Param('capabilityDefinitionId') capabilityDefinitionId: string) {
     return this.activationGovernanceService.evaluateMandatoryConditions(capabilityDefinitionId);
   }
 
   @Post('dependencies')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   createDependency(@Body() body: Parameters<CapabilityDependencyService['createDependency']>[0]) {
     this.boundary.rejectClientProtectedDependencyFields(body as unknown as Record<string, unknown>);
     return this.dependencyService.createDependency(
@@ -185,11 +204,13 @@ export class OperationalReadinessController {
   }
 
   @Get('dependencies/:capabilityDefinitionId')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_READ)
   listDependencies(@Param('capabilityDefinitionId') capabilityDefinitionId: string) {
     return this.dependencyService.listDependencies(capabilityDefinitionId);
   }
 
   @Post('owners/assignments')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   assignOwners(
     @Body() body: Parameters<CapabilityOwnerService['assignOwners']>[0],
     @CurrentSession() session: SessionContextDto,
@@ -201,6 +222,7 @@ export class OperationalReadinessController {
   }
 
   @Post('revalidation/trigger')
+  @RequirePermissions(PermissionCodes.OPERATIONAL_READINESS_MANAGE)
   triggerRevalidation(
     @Body()
     body: {

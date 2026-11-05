@@ -11,6 +11,8 @@ import {
 } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
+import { TechnicalPermissionEvaluationService } from '../../technical-access/services/technical-permission-evaluation.service';
 import { ArchivalTransfersService } from '../archival/archival-transfers.service';
 import { LegalHoldsService } from '../legal-hold/legal-holds.service';
 import { PreservationCollectionsService } from '../preservation/preservation-collections.service';
@@ -209,6 +211,7 @@ describe('LegalHoldsService (Phase 7G)', () => {
     legalHoldTarget: { count: jest.Mock };
     $transaction: jest.Mock;
   };
+  let permissions: { resolveGrantedPermissions: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -219,40 +222,61 @@ describe('LegalHoldsService (Phase 7G)', () => {
         callback(prisma),
       ),
     };
+    permissions = { resolveGrantedPermissions: jest.fn() };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [LegalHoldsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        LegalHoldsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: TechnicalPermissionEvaluationService, useValue: permissions },
+      ],
     }).compile();
 
     service = moduleRef.get(LegalHoldsService);
   });
 
-  it('prevents ordinary records administrators from self-releasing a hold', async () => {
-    prisma.legalHold.findUnique.mockResolvedValue({
-      id: 'hold-1',
-      status: LegalHoldStatus.ACTIVE,
-      targets: [],
-      releaseRecords: [],
-    });
+  const activeHold = (id: string, issuedByIdentityId = 'issuer-1') => ({
+    id,
+    status: LegalHoldStatus.ACTIVE,
+    issuedByIdentityId,
+    targets: [{ targetType: LegalHoldTargetType.CASE, targetReference: 'CASE-2' }],
+    releaseRecords: [],
+  });
+
+  it('refuses release by an identity without configured release permission', async () => {
+    prisma.legalHold.findUnique.mockResolvedValue(activeHold('hold-1'));
+    permissions.resolveGrantedPermissions.mockResolvedValue(['identity:self:read']);
 
     await expect(
       service.release('hold-1', {
         releasedByIdentityId: 'admin-1',
         releaseAuthorityReference: 'AUTH-2',
         releaseReason: 'Matter closed',
-        actorPermissions: [],
-        actorRoles: ['records.administrator'],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.legalHoldReleaseRecord.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses release by the officer who placed the hold, even with release permission', async () => {
+    prisma.legalHold.findUnique.mockResolvedValue(activeHold('hold-1', 'officer-1'));
+    permissions.resolveGrantedPermissions.mockResolvedValue([
+      PermissionCodes.RECORDS_LEGAL_HOLD_RELEASE,
+    ]);
+
+    await expect(
+      service.release('hold-1', {
+        releasedByIdentityId: 'officer-1',
+        releaseAuthorityReference: 'AUTH-2',
+        releaseReason: 'Matter closed',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
-  it('creates an audited release record when release authority is configured', async () => {
-    prisma.legalHold.findUnique.mockResolvedValue({
-      id: 'hold-2',
-      status: LegalHoldStatus.ACTIVE,
-      targets: [{ targetType: LegalHoldTargetType.CASE, targetReference: 'CASE-2' }],
-      releaseRecords: [],
-    });
+  it('creates an audited release record when release permission is configured', async () => {
+    prisma.legalHold.findUnique.mockResolvedValue(activeHold('hold-2'));
+    permissions.resolveGrantedPermissions.mockResolvedValue([
+      PermissionCodes.RECORDS_LEGAL_HOLD_RELEASE,
+    ]);
     prisma.legalHoldReleaseRecord.create.mockResolvedValue({ id: 'release-1' });
     prisma.legalHold.update.mockResolvedValue({
       id: 'hold-2',
@@ -265,10 +289,9 @@ describe('LegalHoldsService (Phase 7G)', () => {
       releasedByIdentityId: 'authority-1',
       releaseAuthorityReference: 'COURT-ORDER-123',
       releaseReason: 'Hold lifted by order',
-      actorPermissions: ['records.legal_hold.release'],
-      actorRoles: ['records.administrator'],
     });
 
+    expect(permissions.resolveGrantedPermissions).toHaveBeenCalledWith('authority-1');
     expect(prisma.legalHoldReleaseRecord.create).toHaveBeenCalled();
     expect(result.releaseRecord.id).toBe('release-1');
   });

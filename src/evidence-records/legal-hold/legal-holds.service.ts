@@ -7,11 +7,9 @@ import {
 import { LegalHoldStatus, type LegalHoldTargetType } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
+import { TechnicalPermissionEvaluationService } from '../../technical-access/services/technical-permission-evaluation.service';
 import { hashRecordsPayload } from '../common/records-hash.util';
-import {
-  LEGAL_HOLD_RELEASE_AUTHORITY_PERMISSION,
-  ORDINARY_RECORDS_ADMIN_ROLE,
-} from '../evidence-records.constants';
 
 export interface CreateLegalHoldInput {
   holdNumber: string;
@@ -29,16 +27,18 @@ export interface CreateLegalHoldInput {
 }
 
 export interface ReleaseLegalHoldInput {
+  /** The signed-in officer; callers must take this from the session, never a request body. */
   releasedByIdentityId: string;
   releaseAuthorityReference: string;
   releaseReason: string;
-  actorPermissions: string[];
-  actorRoles: string[];
 }
 
 @Injectable()
 export class LegalHoldsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly permissions: TechnicalPermissionEvaluationService,
+  ) {}
 
   async create(input: CreateLegalHoldInput) {
     return this.prisma.legalHold.create({
@@ -90,17 +90,14 @@ export class LegalHoldsService {
       throw new BadRequestException('Only active legal holds can be released');
     }
 
-    const canRelease =
-      input.actorPermissions.includes(LEGAL_HOLD_RELEASE_AUTHORITY_PERMISSION) &&
-      !(
-        input.actorRoles.includes(ORDINARY_RECORDS_ADMIN_ROLE) &&
-        !input.actorPermissions.includes(LEGAL_HOLD_RELEASE_AUTHORITY_PERMISSION)
-      );
-
-    if (!canRelease) {
-      throw new ForbiddenException(
-        'Legal hold release requires configured release authority and cannot be self-released by ordinary records administrators',
-      );
+    // Permissions are resolved from the releaser's role assignments, never from the request.
+    const granted = await this.permissions.resolveGrantedPermissions(input.releasedByIdentityId);
+    if (!granted.includes(PermissionCodes.RECORDS_LEGAL_HOLD_RELEASE)) {
+      throw new ForbiddenException('Legal hold release requires configured release authority');
+    }
+    // Segregation of duties: whoever placed the hold cannot lift it.
+    if (hold.issuedByIdentityId === input.releasedByIdentityId) {
+      throw new ForbiddenException('The officer who placed a legal hold cannot release it');
     }
 
     const auditManifestHash = hashRecordsPayload({

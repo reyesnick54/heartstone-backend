@@ -13,6 +13,8 @@ import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { RedressBoundaryService } from './common/redress-boundary.service';
 import { RedressDecisionService } from './decisions/redress-decision.service';
 import { CreateExternalReviewReferralDto } from './dto/create-external-review-referral.dto';
@@ -49,6 +51,7 @@ export class RedressController {
   ) {}
 
   @Get('boundary')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_READ)
   getBoundaryDisclaimer(): { disclaimer: string; externalDisclaimer: string } {
     return {
       disclaimer: PHASE_10G_BOUNDARY_DISCLAIMER,
@@ -57,11 +60,13 @@ export class RedressController {
   }
 
   @Post('matters')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   fileMatter(@Body() body: Parameters<RedressMatterService['fileMatter']>[0]) {
     return this.matters.fileMatter(body);
   }
 
   @Get('matters/:id')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_READ)
   @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   getMatter(@CurrentSession() session: SessionContextDto, @Param('id') id: string) {
@@ -69,6 +74,7 @@ export class RedressController {
   }
 
   @Post('decisions')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
   @ConsequentialAction({
     action: AuthorityActionType.HEAR_REVIEW,
@@ -90,11 +96,13 @@ export class RedressController {
   }
 
   @Post('interim-relief/requests')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   requestInterimRelief(@Body() body: Parameters<InterimReliefService['requestInterimRelief']>[0]) {
     return this.interimRelief.requestInterimRelief(body);
   }
 
   @Post('interim-relief/decisions')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   @UseGuards(SessionAuthGuard, ConsequentialActionGuard)
   @ConsequentialAction({
     action: AuthorityActionType.HEAR_REVIEW,
@@ -114,6 +122,7 @@ export class RedressController {
   }
 
   @Get('decisions/:id/implementation-status')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_READ)
   async getImplementationStatus(@Param('id') id: string) {
     const status = await this.implementation.getImplementationStatus(id);
     const implemented = await this.implementation.isRemedyFullyImplemented(id);
@@ -121,21 +130,25 @@ export class RedressController {
   }
 
   @Post('notices/prepare')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   prepareNotice(@Body() body: Parameters<RedressNoticeService['prepareNotice']>[0]) {
     return this.notices.prepareNotice(body);
   }
 
   @Post('external-referrals')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   createExternalReferral(@Body() body: CreateExternalReviewReferralDto) {
     return this.externalReferrals.create(body);
   }
 
   @Get('external-referrals/:id')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_READ)
   getExternalReferral(@Param('id') id: string) {
     return this.externalReferrals.getReferral(id);
   }
 
   @Post('external-referrals/:id/packages')
+  @RequirePermissions(PermissionCodes.REDRESS_MATTER_MANAGE)
   createExternalPackage(
     @Param('id') referralId: string,
     @Body('evidencePacketVersionId') evidencePacketVersionId: string,
@@ -147,6 +160,7 @@ export class RedressController {
   }
 
   @Post('external-referrals/:id/determinations')
+  @RequirePermissions(PermissionCodes.REDRESS_DETERMINATION_RECORD)
   recordExternalDetermination(
     @Param('id') referralId: string,
     @Body() body: RecordExternalDeterminationDto,

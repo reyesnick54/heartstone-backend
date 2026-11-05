@@ -3,6 +3,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { DepartmentResponseDto } from './dto/department-response.dto';
@@ -23,6 +25,7 @@ export class DepartmentsController {
   constructor(private readonly service: DepartmentsService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Create a department' })
   @ApiCreatedResponse({ type: DepartmentResponseDto })
   create(@Body() dto: CreateDepartmentDto): Promise<DepartmentResponseDto> {
@@ -30,6 +33,7 @@ export class DepartmentsController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'List departments' })
   @ApiOkResponse({ type: DepartmentResponseDto, isArray: true })
   findAll(@Query() query: QueryDepartmentsDto): Promise<DepartmentResponseDto[]> {
@@ -37,6 +41,7 @@ export class DepartmentsController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'Get a department by id' })
   @ApiOkResponse({ type: DepartmentResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<DepartmentResponseDto> {
@@ -44,6 +49,7 @@ export class DepartmentsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Update a department' })
   @ApiOkResponse({ type: DepartmentResponseDto })
   update(

@@ -20,6 +20,8 @@ import {
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateGovernmentServiceVersionDto } from '../government-service-versions/dto/create-government-service-version.dto';
 import { GovernmentServiceVersionResponseDto } from '../government-service-versions/dto/government-service-version-response.dto';
 import { GovernmentServiceVersionsService } from '../government-service-versions/government-service-versions.service';
@@ -48,6 +50,7 @@ export class GovernmentServicesController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_MANAGE)
   @ApiOperation({ summary: 'Create a government service (stable identity)' })
   @ApiCreatedResponse({ type: GovernmentServiceResponseDto })
   create(@Body() dto: CreateGovernmentServiceDto): Promise<GovernmentServiceResponseDto> {
@@ -55,6 +58,7 @@ export class GovernmentServicesController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_READ)
   @ApiOperation({ summary: 'List government services' })
   @ApiOkResponse({ type: GovernmentServiceResponseDto, isArray: true })
   findAll(@Query() query: QueryGovernmentServicesDto): Promise<GovernmentServiceResponseDto[]> {
@@ -62,6 +66,7 @@ export class GovernmentServicesController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_READ)
   @ApiOperation({ summary: 'Get a government service by id' })
   @ApiOkResponse({ type: GovernmentServiceResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<GovernmentServiceResponseDto> {
@@ -69,6 +74,7 @@ export class GovernmentServicesController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_MANAGE)
   @ApiOperation({ summary: 'Update a government service stable identity' })
   @ApiOkResponse({ type: GovernmentServiceResponseDto })
   update(
@@ -79,6 +85,7 @@ export class GovernmentServicesController {
   }
 
   @Post(':id/versions')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_MANAGE)
   @ApiOperation({ summary: 'Create a new version for a government service' })
   @ApiCreatedResponse({ type: GovernmentServiceVersionResponseDto })
   createVersion(
@@ -89,6 +96,7 @@ export class GovernmentServicesController {
   }
 
   @Get(':id/versions')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_READ)
   @ApiOperation({ summary: 'List all versions for a government service' })
   @ApiOkResponse({ type: GovernmentServiceVersionResponseDto, isArray: true })
   findVersions(

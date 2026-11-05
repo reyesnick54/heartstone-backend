@@ -3,6 +3,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateExternalAuthorityDto } from './dto/create-external-authority.dto';
 import { ExternalAuthorityResponseDto } from './dto/external-authority-response.dto';
 import { QueryExternalAuthoritiesDto } from './dto/query-external-authorities.dto';
@@ -23,6 +25,7 @@ export class ExternalAuthoritiesController {
   constructor(private readonly service: ExternalAuthoritiesService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Create an external authority' })
   @ApiCreatedResponse({ type: ExternalAuthorityResponseDto })
   create(@Body() dto: CreateExternalAuthorityDto): Promise<ExternalAuthorityResponseDto> {
@@ -30,6 +33,7 @@ export class ExternalAuthoritiesController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'List external authorities' })
   @ApiOkResponse({ type: ExternalAuthorityResponseDto, isArray: true })
   findAll(@Query() query: QueryExternalAuthoritiesDto): Promise<ExternalAuthorityResponseDto[]> {
@@ -37,6 +41,7 @@ export class ExternalAuthoritiesController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'Get an external authority by id' })
   @ApiOkResponse({ type: ExternalAuthorityResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ExternalAuthorityResponseDto> {
@@ -44,6 +49,7 @@ export class ExternalAuthoritiesController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Update an external authority' })
   @ApiOkResponse({ type: ExternalAuthorityResponseDto })
   update(

@@ -19,6 +19,8 @@ import {
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateServiceFunctionMappingDto } from '../service-function-mappings/dto/create-service-function-mapping.dto';
 import { ServiceFunctionMappingResponseDto } from '../service-function-mappings/dto/service-function-mapping-response.dto';
 import { ServiceFunctionMappingsService } from '../service-function-mappings/service-function-mappings.service';
@@ -45,6 +47,7 @@ export class GovernmentServiceVersionsController {
   ) {}
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_READ)
   @ApiOperation({ summary: 'Get a government service version by id' })
   @ApiOkResponse({ type: GovernmentServiceVersionResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<GovernmentServiceVersionResponseDto> {
@@ -52,6 +55,7 @@ export class GovernmentServiceVersionsController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_MANAGE)
   @ApiOperation({ summary: 'Update a government service version (draft or status transitions)' })
   @ApiOkResponse({ type: GovernmentServiceVersionResponseDto })
   update(
@@ -62,6 +66,7 @@ export class GovernmentServiceVersionsController {
   }
 
   @Post(':id/functions')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_MANAGE)
   @ApiOperation({ summary: 'Map a Phase 4 function authority record to a service version' })
   @ApiCreatedResponse({ type: ServiceFunctionMappingResponseDto })
   createFunctionMapping(
@@ -72,6 +77,7 @@ export class GovernmentServiceVersionsController {
   }
 
   @Get(':id/functions')
+  @RequirePermissions(PermissionCodes.SERVICE_CATALOG_READ)
   @ApiOperation({ summary: 'List function authority mappings for a service version' })
   @ApiOkResponse({ type: ServiceFunctionMappingResponseDto, isArray: true })
   findFunctionMappings(

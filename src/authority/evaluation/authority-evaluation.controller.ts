@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Optional,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -11,7 +21,10 @@ import { CurrentSession } from '../../identity/auth/decorators/current-session.d
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteAccess } from '../../security/decorators/route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
+import { TechnicalPermissionEvaluationService } from '../../technical-access/services/technical-permission-evaluation.service';
 import { AuthorityEvaluationService } from './authority-evaluation.service';
 import { AuthorityEvaluationResponseDto } from './dto/authority-evaluation-response.dto';
 import { EvaluateAuthorityDto } from './dto/evaluate-authority.dto';
@@ -29,8 +42,20 @@ import { EvaluateAuthorityDto } from './dto/evaluate-authority.dto';
 @UseGuards(SessionAuthGuard)
 @ApiBearerAuth()
 export class AuthorityEvaluationController {
-  constructor(private readonly evaluationService: AuthorityEvaluationService) {}
+  constructor(
+    private readonly evaluationService: AuthorityEvaluationService,
+    // Optional so AuthorityModule can be built alone in tests; absent means fail closed below.
+    @Optional() private readonly permissions?: TechnicalPermissionEvaluationService,
+  ) {}
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+    authenticationRequired: true,
+    scopeRequirement: "The signed-in person's own offices, appointments and delegations",
+    authorityRequirement: 'Evaluates authority; confers none',
+    actorSource: 'Session identity only; evaluation is never run for another person',
+    primarySecurityInvariant: 'Technical permission does not create legal authority',
+  })
   @Post()
   @ApiOperation({
     summary: 'Evaluate whether a specific institutional action may proceed',
@@ -62,10 +87,31 @@ export class AuthorityEvaluationController {
     });
   }
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_INSTITUTIONAL,
+    authenticationRequired: true,
+    scopeRequirement: 'Own evaluation records; others require authority:evaluation:run',
+    authorityRequirement: 'None; records are immutable evidence of past evaluations',
+    actorSource: 'Session identity',
+    primarySecurityInvariant: 'Evaluation records of other people are not visible by default',
+  })
   @Get('records/:id')
   @ApiOperation({ summary: 'Retrieve an immutable authority evaluation record' })
   @ApiOkResponse()
-  getRecord(@Param('id', ParseUUIDPipe) id: string) {
-    return this.evaluationService.getEvaluationRecord(id);
+  async getRecord(
+    @CurrentSession() session: SessionContextDto,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const record = await this.evaluationService.getEvaluationRecord(id);
+    if (record.identityId !== session.identityId) {
+      const granted = this.permissions
+        ? await this.permissions.resolveGrantedPermissions(session.identityId)
+        : [];
+      if (!granted.includes(PermissionCodes.AUTHORITY_EVALUATION_RUN)) {
+        // Same response as a missing record, so ids of other people's evaluations don't leak.
+        throw new NotFoundException(`AuthorityEvaluationRecord "${id}" was not found`);
+      }
+    }
+    return record;
   }
 }

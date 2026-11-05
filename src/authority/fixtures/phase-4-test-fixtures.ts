@@ -287,7 +287,7 @@ export class Phase4TestFixtures {
       });
 
       await this.governingSources.authenticate(source.id, {
-        authenticatedByIdentityId: ctx.actorIdentityId,
+        actorIdentityId: ctx.actorIdentityId,
       });
 
       const record = await this.functions.create({
