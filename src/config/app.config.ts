@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { registerAs } from '@nestjs/config';
 
 import { APP_CONFIG, type AppConfig } from './config.constants';
+import { resolveDeploymentTier } from './deployment-tier';
 
 function resolveBuildVersion(): string | null {
   const fromEnv = process.env.BUILD_VERSION?.trim();
@@ -26,6 +27,7 @@ export default registerAs(APP_CONFIG, (): AppConfig => ({
   name: process.env.APP_NAME ?? 'heartstone-backend',
   port: Number(process.env.PORT ?? 3000),
   nodeEnv: process.env.NODE_ENV ?? 'development',
+  deploymentTier: resolveDeploymentTier(),
   apiVersion: process.env.API_VERSION ?? 'v1',
   buildVersion: resolveBuildVersion(),
 }));

@@ -12,6 +12,7 @@ interface OidcProviderEnvShape {
 
 interface ValidatedEnvironment {
   NODE_ENV: string;
+  HEARTSTONE_DEPLOYMENT_TIER?: string;
   CORS_ORIGINS?: string;
   CORS_ENABLED?: string;
   OIDC_ENABLED?: string;
@@ -56,6 +57,7 @@ export const envValidationSchema = Joi.object({
   APP_NAME: Joi.string().default('heartstone-backend'),
   API_VERSION: Joi.string().default('v1'),
   BUILD_VERSION: Joi.string().allow('').optional(),
+  HEARTSTONE_DEPLOYMENT_TIER: Joi.string().valid('local', 'staging', 'production', '').optional(),
   CORS_ENABLED: Joi.string().valid('true', 'false', '1', '0', '').default('true'),
   CORS_ORIGINS: Joi.string().allow('').default(''),
   CORS_CREDENTIALS: Joi.string().valid('true', 'false', '1', '0', '').default('false'),
@@ -90,6 +92,16 @@ export const envValidationSchema = Joi.object({
   if (nodeEnv === 'production' && corsEnabled && corsOrigins === '*') {
     return helpers.error('any.custom', {
       message: 'CORS_ORIGINS=* is not allowed when NODE_ENV=production',
+    });
+  }
+
+  const deploymentTier = env.HEARTSTONE_DEPLOYMENT_TIER?.trim() ?? '';
+  if (
+    nodeEnv !== 'production' &&
+    (deploymentTier === 'staging' || deploymentTier === 'production')
+  ) {
+    return helpers.error('any.custom', {
+      message: `HEARTSTONE_DEPLOYMENT_TIER=${deploymentTier} requires NODE_ENV=production`,
     });
   }
 

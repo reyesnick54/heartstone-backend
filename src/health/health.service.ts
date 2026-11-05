@@ -9,6 +9,7 @@ import {
   OIDC_CONFIG,
   type OidcConfig,
 } from '../config/config.constants';
+import { enforcesProductionProviderGates } from '../config/deployment-tier';
 import { PrismaService } from '../database/prisma.service';
 import { DocumentTrustProductionGateService } from '../document-trust/services/document-trust-production-gate.service';
 import { RedisService } from '../redis/redis.service';
@@ -66,8 +67,8 @@ export class HealthService {
 
   private checkOperationalProvidersReadiness(): boolean {
     const appConfig = this.configService.get<AppConfig>(APP_CONFIG);
-    const nodeEnv = appConfig?.nodeEnv ?? 'development';
-    if (nodeEnv !== 'production') {
+    // Staging may run sandbox providers; only the production tier requires real ones.
+    if (!appConfig || !enforcesProductionProviderGates(appConfig)) {
       return true;
     }
 
@@ -76,8 +77,8 @@ export class HealthService {
 
   private checkDocumentTrustReadiness(): boolean {
     const appConfig = this.configService.get<AppConfig>(APP_CONFIG);
-    const nodeEnv = appConfig?.nodeEnv ?? 'development';
-    if (nodeEnv !== 'production') {
+    // Staging may run sandbox providers; only the production tier requires real ones.
+    if (!appConfig || !enforcesProductionProviderGates(appConfig)) {
       return true;
     }
 

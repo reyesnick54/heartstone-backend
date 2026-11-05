@@ -66,6 +66,9 @@ jobs:
       - name: Docker image builds
         run: docker build --tag heartstone-backend:ci .
 
+      - name: Keycloak image builds
+        run: docker build --tag heartstone-keycloak:ci deploy/keycloak
+
   test:
     name: Tests
     runs-on: ubuntu-latest

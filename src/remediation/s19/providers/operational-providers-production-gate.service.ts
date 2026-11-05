@@ -1,6 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { APP_CONFIG, type AppConfig } from '../../../config/config.constants';
+import { enforcesProductionProviderGates } from '../../../config/deployment-tier';
 import { TestEmailAdapter } from '../../../operational-support/communications/adapters/test-email.adapter';
 import { TestSmsAdapter } from '../../../operational-support/communications/adapters/test-sms.adapter';
 import { TestPaymentProviderAdapter } from '../../../operational-support/financial/adapters/test-payment-provider.adapter';
@@ -40,8 +42,9 @@ export class OperationalProvidersProductionGateService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    const nodeEnv = this.configService.get<{ nodeEnv: string }>('app')?.nodeEnv ?? 'development';
-    if (nodeEnv !== 'production') {
+    const app = this.configService.get<AppConfig>(APP_CONFIG);
+    if (!app || !enforcesProductionProviderGates(app)) {
+      // Staging keeps production security but may run sandbox providers (reported test-only).
       return;
     }
 
