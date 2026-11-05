@@ -70,8 +70,15 @@ export class AuthorityConditionEvaluator {
           : null;
       }
       case AuthorityConditionType.TRANSACTION_LIMIT: {
-        const limit = Number(config.maxAmount ?? 0);
-        const amount = context.transactionAmount ?? 0;
+        // An unknown amount used to count as 0 and pass any limit. Fail closed instead.
+        const amount = context.transactionAmount;
+        if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+          return AUTHORITY_EVALUATION_EXPLANATION_CODES.TRANSACTION_AMOUNT_UNKNOWN;
+        }
+        const limit = Number(config.maxAmount);
+        if (!Number.isFinite(limit)) {
+          return AUTHORITY_EVALUATION_EXPLANATION_CODES.TRANSACTION_LIMIT_EXCEEDED;
+        }
         return amount > limit
           ? AUTHORITY_EVALUATION_EXPLANATION_CODES.TRANSACTION_LIMIT_EXCEEDED
           : null;
