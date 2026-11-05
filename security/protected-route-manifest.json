@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T06:41:32.164Z",
+  "generatedAt": "2026-11-05T07:22:02.054Z",
   "routeCount": 757,
   "summary": {
     "public": 27,
@@ -837,21 +837,20 @@
       "controller": "AuthorityEvaluationController",
       "sourceFile": "src/authority/evaluation/authority-evaluation.controller.ts",
       "handler": "getRecord",
-      "technicalPermissionRequired": true,
-      "permissionCode": "authority:evaluation:run",
+      "technicalPermissionRequired": false,
+      "permissionCode": null,
       "guardCoverage": [
         "SessionAuthGuard",
-        "ClientIdentitySubstitutionGuard",
-        "PermissionsGuard"
+        "ClientIdentitySubstitutionGuard"
       ],
       "routeClass": "RESTRICTED_ADMINISTRATIVE",
-      "declaredRouteClass": "RESTRICTED_ADMINISTRATIVE",
+      "declaredRouteClass": "AUTHENTICATED_INSTITUTIONAL",
       "authenticationRequired": true,
       "isPublic": false,
-      "scopeRequirement": "Authority configuration or evaluated institutional action scope",
-      "authorityRequirement": "Explicit function authority evaluation for consequential actions",
-      "actorSource": "Session identity with officeholder linkage when evaluating authority",
-      "primarySecurityInvariant": "Technical permission does not create legal authority",
+      "scopeRequirement": "Own evaluation records; others require authority:evaluation:run",
+      "authorityRequirement": "None; records are immutable evidence of past evaluations",
+      "actorSource": "Session identity",
+      "primarySecurityInvariant": "Evaluation records of other people are not visible by default",
       "hasRouteAccessMetadata": true,
       "hasConsequentialAction": false,
       "hasConsequentialActionGuard": false,
