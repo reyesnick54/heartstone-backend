@@ -1,3 +1,5 @@
+import { type DeploymentTier } from './deployment-tier';
+
 export const APP_CONFIG = 'app';
 export const SECURITY_CONFIG = 'security';
 export const IDENTITY_CONFIG = 'identity';
@@ -7,6 +9,8 @@ export interface AppConfig {
   name: string;
   port: number;
   nodeEnv: string;
+  /** See src/config/deployment-tier.ts. */
+  deploymentTier: DeploymentTier;
   apiVersion: string;
   buildVersion: string | null;
 }

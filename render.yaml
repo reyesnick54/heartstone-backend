@@ -1,0 +1,162 @@
+# HeartStone staging on Render (Virginia). Synthetic data only.
+#
+# Production-grade security settings (NODE_ENV=production: OIDC only, no password login,
+# no public API docs) with HEARTSTONE_DEPLOYMENT_TIER=staging, which allows sandbox payment,
+# email, SMS, signing, malware-scanning and AI providers and reports them as test-only.
+# Nothing issued in staging is authoritative.
+#
+# Values marked `sync: false` are entered once at first deploy (see docs/operations/render-staging.md).
+# Secrets use `generateValue`, so Render creates them and they never pass through chat or git.
+
+envVarGroups:
+  - name: heartstone-staging-shared
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HEARTSTONE_DEPLOYMENT_TIER
+        value: staging
+      - key: APP_NAME
+        value: heartstone-backend-staging
+      - key: TRUST_PROXY
+        value: "true"
+      - key: SWAGGER_ENABLED
+        value: "false"
+      # The web apps reach the API through their same-origin gateway, server to server.
+      - key: CORS_ENABLED
+        value: "false"
+      - key: OIDC_ENABLED
+        value: "true"
+      - key: SERVICE_CREDENTIAL_PEPPER
+        generateValue: true
+      # Staging documents are synthetic and ephemeral until object storage (R2) lands.
+      - key: DOCUMENT_STORAGE_ROOT_PATH
+        value: /tmp/heartstone-documents
+      - key: DOCUMENT_STORAGE_DATA_ENCRYPTION_KEY
+        generateValue: true
+      - key: DOCUMENT_STORAGE_REGION
+        value: us-east-virginia
+      - key: DOCUMENT_STORAGE_JURISDICTION
+        value: staging-synthetic-data
+      - key: DOCUMENT_TRUST_SOVEREIGNTY_DECLARATION_REFERENCE
+        value: STAGING-SYNTHETIC-DATA-ONLY
+      - key: WORKER_POLL_INTERVAL_MS
+        value: "30000"
+
+services:
+  - type: web
+    name: heartstone-api-staging
+    runtime: docker
+    region: virginia
+    plan: 1c-2g
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    preDeployCommand: node node_modules/prisma/build/index.js migrate deploy
+    healthCheckPath: /api/v1/health
+    numInstances: 1
+    autoDeployTrigger: checksPass
+    buildFilter:
+      ignoredPaths:
+        - docs/**
+        - test/**
+        - deploy/keycloak/**
+        - "**/*.md"
+    envVars:
+      - fromGroup: heartstone-staging-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: heartstone-db-staging
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: heartstone-redis-staging
+          property: connectionString
+      # JSON array with the Keycloak realm issuer; set after Keycloak's URL is known.
+      - key: OIDC_PROVIDERS_JSON
+        sync: false
+
+  - type: worker
+    name: heartstone-worker-staging
+    runtime: docker
+    region: virginia
+    plan: 1c-2g
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: node dist/worker.js
+    numInstances: 1
+    autoDeployTrigger: checksPass
+    buildFilter:
+      ignoredPaths:
+        - docs/**
+        - test/**
+        - deploy/keycloak/**
+        - "**/*.md"
+    envVars:
+      - fromGroup: heartstone-staging-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: heartstone-db-staging
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: heartstone-redis-staging
+          property: connectionString
+      - key: OIDC_PROVIDERS_JSON
+        sync: false
+
+  - type: web
+    name: heartstone-keycloak-staging
+    runtime: docker
+    region: virginia
+    plan: 1c-2g
+    dockerfilePath: ./deploy/keycloak/Dockerfile
+    dockerContext: ./deploy/keycloak
+    healthCheckPath: /realms/master
+    numInstances: 1
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - deploy/keycloak/**
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: heartstone-keycloak-db-staging
+          property: connectionString
+      - key: KC_BOOTSTRAP_ADMIN_USERNAME
+        value: heartstone-bootstrap-admin
+      - key: KC_BOOTSTRAP_ADMIN_PASSWORD
+        generateValue: true
+      - key: HEARTSTONE_API_AUDIENCE
+        value: heartstone-api
+      # Space-separated https origins of the staging web apps (each gets /auth/callback).
+      - key: HEARTSTONE_WEB_ORIGINS
+        sync: false
+
+  - type: keyvalue
+    name: heartstone-redis-staging
+    region: virginia
+    plan: 256mb
+    # Job queue and session cache: never evict silently.
+    maxmemoryPolicy: noeviction
+    # Empty list: reachable only from services in this workspace's private network.
+    ipAllowList: []
+
+databases:
+  - name: heartstone-db-staging
+    databaseName: heartstone
+    user: heartstone
+    region: virginia
+    plan: 0.5c-1g
+    postgresMajorVersion: "16"
+    diskSizeGB: 10
+    ipAllowList: []
+
+  - name: heartstone-keycloak-db-staging
+    databaseName: keycloak
+    user: keycloak
+    region: virginia
+    plan: 0.1c-256mb
+    postgresMajorVersion: "16"
+    diskSizeGB: 5
+    ipAllowList: []

@@ -1,6 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { APP_CONFIG, type AppConfig } from '../../../config/config.constants';
+import { enforcesProductionProviderGates } from '../../../config/deployment-tier';
 import { type GovernedAiConfig } from '../config/governed-ai.config';
 import { GOVERNED_AI_CONFIG_KEY, GOVERNED_AI_READINESS_CODES } from '../governed-ai.constants';
 import { AI_MODEL_PORT, type AiModelPort } from '../ports/ai-model.port';
@@ -19,8 +21,9 @@ export class GovernedAiProductionGateService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    const nodeEnv = this.configService.get<{ nodeEnv: string }>('app')?.nodeEnv ?? 'development';
-    if (nodeEnv !== 'production') {
+    const app = this.configService.get<AppConfig>(APP_CONFIG);
+    if (!app || !enforcesProductionProviderGates(app)) {
+      // Staging keeps production security but may run sandbox providers (reported test-only).
       return;
     }
 
