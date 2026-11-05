@@ -302,6 +302,38 @@ describe('ActorContextService', () => {
     }).toThrow('Client-supplied identityId does not match authenticated actor context');
   });
 
+  it.each([
+    'issuerIdentityId',
+    'approverIdentityId',
+    'authorizerIdentityId',
+    'authorizingIdentityId',
+    'decidedByIdentityId',
+    'decisionMakerIdentityId',
+    'verifiedByIdentityId',
+    'releasedByIdentityId',
+    'recordedByIdentityId',
+  ])('S21c: rejects a request naming someone else as %s', (field) => {
+    const actor = { identityId: 'identity-1', userAccountId: 'account-1' } as never;
+
+    expect(() => {
+      service.assertNoClientIdentitySubstitution(actor, { [field]: 'identity-2' });
+    }).toThrow(`Client-supplied ${field} does not match authenticated actor context`);
+    expect(() => {
+      service.assertNoClientIdentitySubstitution(actor, { [field]: 'identity-1' });
+    }).not.toThrow();
+  });
+
+  it('S21c: leaves assignment-style reviewer and segregated approver fields to the route', () => {
+    const actor = { identityId: 'identity-1', userAccountId: 'account-1' } as never;
+
+    expect(() => {
+      service.assertNoClientIdentitySubstitution(actor, {
+        reviewerIdentityId: 'identity-2',
+        segregatedApproverIdentityId: 'identity-3',
+      });
+    }).not.toThrow();
+  });
+
   it('assertServerDerivedSession rejects body-only identifiers', () => {
     expect(() => {
       service.assertServerDerivedSession(null);

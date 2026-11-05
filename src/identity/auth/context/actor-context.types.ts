@@ -179,6 +179,28 @@ export const CLIENT_ADMIN_ACTOR_FIELD_ALIASES: Readonly<
   actingUserId: 'userAccountId',
   administratorIdentityId: 'identityId',
   performedByIdentityId: 'identityId',
+  // S21c: fields naming who performs a consequential act. Services evaluate authority for
+  // these identities, so a request must never name anyone but the signed-in actor.
+  // Deliberately absent: reviewerIdentityId (sometimes an assignment) and
+  // segregatedApproverIdentityId (must be a different person by design).
+  issuerIdentityId: 'identityId',
+  issuedByIdentityId: 'identityId',
+  approverIdentityId: 'identityId',
+  approvedByIdentityId: 'identityId',
+  authorizerIdentityId: 'identityId',
+  authorizedByIdentityId: 'identityId',
+  authorizingIdentityId: 'identityId',
+  decidedByIdentityId: 'identityId',
+  decisionMakerIdentityId: 'identityId',
+  verifierIdentityId: 'identityId',
+  verifiedByIdentityId: 'identityId',
+  executedByIdentityId: 'identityId',
+  releasedByIdentityId: 'identityId',
+  assessedByIdentityId: 'identityId',
+  recordedByIdentityId: 'identityId',
+  acceptedByIdentityId: 'identityId',
+  disposedByIdentityId: 'identityId',
+  signedByIdentityId: 'identityId',
 };
 
 /** Client payload keys that identify the acting institutional binding for an action. */

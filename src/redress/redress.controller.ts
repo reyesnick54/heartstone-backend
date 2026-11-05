@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthorityActionType } from '@prisma/client';
 
@@ -81,9 +81,11 @@ export class RedressController {
     @Body() body: Parameters<RedressDecisionService['recordDecision']>[0],
   ) {
     this.boundary.rejectClientProtectedFields(body as unknown as Record<string, unknown>);
+    // The deciding reviewer is the signed-in officer whose authority the guard evaluated.
+    assertReviewerIsActor(body.reviewerIdentityId, session.identityId);
     return this.decisions.recordDecision({
       ...body,
-      reviewerIdentityId: body.reviewerIdentityId || session.identityId,
+      reviewerIdentityId: session.identityId,
     });
   }
 
@@ -104,9 +106,10 @@ export class RedressController {
     @CurrentSession() session: SessionContextDto,
     @Body() body: Parameters<InterimReliefService['decideInterimRelief']>[0],
   ) {
+    assertReviewerIsActor(body.reviewerIdentityId, session.identityId);
     return this.interimRelief.decideInterimRelief({
       ...body,
-      reviewerIdentityId: body.reviewerIdentityId || session.identityId,
+      reviewerIdentityId: session.identityId,
     });
   }
 
@@ -169,5 +172,14 @@ export class RedressController {
       authenticityVerificationRef: body.authenticityVerificationRef,
       isAuthenticated: body.isAuthenticated,
     });
+  }
+}
+
+/** A redress decision cannot be attributed to anyone but the signed-in reviewer. */
+function assertReviewerIsActor(requested: string | undefined, actorIdentityId: string): void {
+  if (requested && requested !== actorIdentityId) {
+    throw new ForbiddenException(
+      'reviewerIdentityId must be the signed-in reviewer; decisions cannot be attributed to others',
+    );
   }
 }
