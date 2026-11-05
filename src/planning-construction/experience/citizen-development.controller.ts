@@ -1,11 +1,16 @@
 import { Controller, Get, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import {
+  CitizenDevelopmentActionsResponseDto,
+  CitizenDevelopmentProjectsResponseDto,
+  DevelopmentProjectPortalViewDto,
+} from './dto/citizen-development-response.dto';
 import { PlanningConstructionScopeService } from './services/planning-construction-scope.service';
 
 @ApiTags('citizen-planning-construction-experience')
@@ -25,12 +30,14 @@ export class CitizenDevelopmentController {
 
   @Get()
   @ApiOperation({ summary: 'List citizen development projects (individual applicant scope)' })
+  @ApiOkResponse({ type: CitizenDevelopmentProjectsResponseDto })
   listProjects(@CurrentSession() session: SessionContextDto) {
     return this.scope.listCitizenProjects(session.identityId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Unified development portal project view for citizen applicant' })
+  @ApiOkResponse({ type: DevelopmentProjectPortalViewDto })
   getProject(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) projectId: string,
@@ -64,6 +71,7 @@ export class CitizenDevelopmentActionsController {
 
   @Get()
   @ApiOperation({ summary: 'Citizen development action center across owned projects' })
+  @ApiOkResponse({ type: CitizenDevelopmentActionsResponseDto })
   listActions(@CurrentSession() session: SessionContextDto) {
     return this.scope.listCitizenActions(session.identityId);
   }

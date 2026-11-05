@@ -8,13 +8,20 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { CancelServiceAppointmentDto } from '../../scheduling/service-appointments/dto/cancel-service-appointment.dto';
 import { RescheduleServiceAppointmentDto } from '../../scheduling/service-appointments/dto/reschedule-service-appointment.dto';
+import { ServiceAppointmentRecordDto } from '../../scheduling/service-appointments/dto/service-appointment-record.dto';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -29,13 +36,22 @@ import {
 } from './dto/citizen-appointment.dto';
 import { CitizenCaseStatusResponseDto } from './dto/citizen-case-status-response.dto';
 import {
+  CitizenBoundaryDisclaimerResponseDto,
+  CitizenCivilCertificateSummaryDto,
+  CitizenCivilRegistryActionDto,
+  CitizenCivilStatusResponseDto,
+  CitizenCredentialDetailDto,
   CitizenCredentialSummaryDto,
+  CitizenDocumentDetailDto,
   CitizenDocumentSummaryDto,
   CitizenMessageAcknowledgmentResponseDto,
+  CitizenMessageDetailDto,
   CitizenMessageSummaryDto,
+  CitizenPaymentDetailDto,
   CitizenPaymentIntentResponseDto,
   CitizenPaymentSummaryDto,
   CitizenRenewalQueueItemDto,
+  CitizenVitalRecordSummaryDto,
 } from './dto/citizen-experience-response.dto';
 import { CitizenHomeResponseDto } from './dto/citizen-home-response.dto';
 import { CitizenMeResponseDto } from './dto/citizen-me-response.dto';
@@ -86,6 +102,7 @@ export class CitizenExperienceController {
 
   @Get('boundary')
   @ApiOperation({ summary: 'Citizen experience boundary disclaimer' })
+  @ApiOkResponse({ type: CitizenBoundaryDisclaimerResponseDto })
   getBoundaryDisclaimer() {
     return this.boundary.boundaryDisclaimer();
   }
@@ -168,6 +185,7 @@ export class CitizenExperienceController {
 
   @Post('appointments/:id/confirm')
   @ApiOperation({ summary: 'Confirm a scheduled service appointment' })
+  @ApiCreatedResponse({ type: ServiceAppointmentRecordDto })
   confirmAppointment(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -177,6 +195,7 @@ export class CitizenExperienceController {
 
   @Post('appointments/:id/reschedule-request')
   @ApiOperation({ summary: 'Request rescheduling of a service appointment' })
+  @ApiCreatedResponse({ type: ServiceAppointmentRecordDto })
   requestReschedule(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -187,6 +206,7 @@ export class CitizenExperienceController {
 
   @Post('appointments/:id/cancel')
   @ApiOperation({ summary: 'Cancel a service appointment' })
+  @ApiCreatedResponse({ type: ServiceAppointmentRecordDto })
   cancelAppointment(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -197,14 +217,14 @@ export class CitizenExperienceController {
 
   @Get('documents')
   @ApiOperation({ summary: 'List citizen-accessible documents (projection)' })
-  @ApiResponse({ status: 200, type: [CitizenDocumentSummaryDto] })
+  @ApiOkResponse({ type: CitizenDocumentSummaryDto, isArray: true })
   listDocuments(@CurrentSession() session: SessionContextDto) {
     return this.documents.listDocuments(session.identityId);
   }
 
   @Get('documents/:id')
   @ApiOperation({ summary: 'Get citizen-accessible document detail (projection)' })
-  @ApiResponse({ status: 200, type: CitizenDocumentSummaryDto })
+  @ApiOkResponse({ type: CitizenDocumentDetailDto })
   getDocument(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -214,14 +234,14 @@ export class CitizenExperienceController {
 
   @Get('credentials')
   @ApiOperation({ summary: 'List citizen-held government credentials/instruments (projection)' })
-  @ApiResponse({ status: 200, type: [CitizenCredentialSummaryDto] })
+  @ApiOkResponse({ type: CitizenCredentialSummaryDto, isArray: true })
   listCredentials(@CurrentSession() session: SessionContextDto) {
     return this.credentials.listCredentials(session.identityId);
   }
 
   @Get('credentials/:id')
   @ApiOperation({ summary: 'Get citizen credential/instrument detail (projection)' })
-  @ApiResponse({ status: 200, type: CitizenCredentialSummaryDto })
+  @ApiOkResponse({ type: CitizenCredentialDetailDto })
   getCredential(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -231,13 +251,14 @@ export class CitizenExperienceController {
 
   @Get('payments')
   @ApiOperation({ summary: 'List citizen payment records (projection)' })
-  @ApiResponse({ status: 200, type: [CitizenPaymentSummaryDto] })
+  @ApiOkResponse({ type: CitizenPaymentSummaryDto, isArray: true })
   listPayments(@CurrentSession() session: SessionContextDto) {
     return this.payments.listPayments(session.identityId);
   }
 
   @Get('payments/:id')
   @ApiOperation({ summary: 'Get citizen payment record detail (projection)' })
+  @ApiOkResponse({ type: CitizenPaymentDetailDto })
   getPayment(@CurrentSession() session: SessionContextDto, @Param('id', ParseUUIDPipe) id: string) {
     return this.payments.getPayment(session.identityId, id);
   }
@@ -248,7 +269,7 @@ export class CitizenExperienceController {
     description:
       'Orchestrates PaymentIntentService. Payment settlement does not alter case or decision status.',
   })
-  @ApiResponse({ status: 201, type: CitizenPaymentIntentResponseDto })
+  @ApiCreatedResponse({ type: CitizenPaymentIntentResponseDto })
   createPaymentIntent(
     @CurrentSession() session: SessionContextDto,
     @Param('invoiceId', ParseUUIDPipe) invoiceId: string,
@@ -258,13 +279,14 @@ export class CitizenExperienceController {
 
   @Get('messages')
   @ApiOperation({ summary: 'List portal-safe government communications (projection)' })
-  @ApiResponse({ status: 200, type: [CitizenMessageSummaryDto] })
+  @ApiOkResponse({ type: CitizenMessageSummaryDto, isArray: true })
   listMessages(@CurrentSession() session: SessionContextDto) {
     return this.messages.listMessages(session.identityId);
   }
 
   @Get('messages/:id')
   @ApiOperation({ summary: 'Get portal-safe government communication detail (projection)' })
+  @ApiOkResponse({ type: CitizenMessageDetailDto })
   getMessage(@CurrentSession() session: SessionContextDto, @Param('id', ParseUUIDPipe) id: string) {
     return this.messages.getMessage(session.identityId, id);
   }
@@ -274,7 +296,7 @@ export class CitizenExperienceController {
     summary: 'Acknowledge a deliverable portal communication where rules permit',
     description: 'Records CommunicationReceipt and security audit event.',
   })
-  @ApiResponse({ status: 201, type: CitizenMessageAcknowledgmentResponseDto })
+  @ApiCreatedResponse({ type: CitizenMessageAcknowledgmentResponseDto })
   acknowledgeMessage(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -286,25 +308,28 @@ export class CitizenExperienceController {
   @ApiOperation({
     summary: 'Derived renewal queue from authoritative instrument lifecycle data',
   })
-  @ApiResponse({ status: 200, type: [CitizenRenewalQueueItemDto] })
+  @ApiOkResponse({ type: CitizenRenewalQueueItemDto, isArray: true })
   listRenewals(@CurrentSession() session: SessionContextDto) {
     return this.renewals.listRenewals(session.identityId);
   }
 
   @Get('civil-status')
   @ApiOperation({ summary: 'Citizen civil status projection (entitlement-scoped)' })
+  @ApiOkResponse({ type: CitizenCivilStatusResponseDto })
   getCivilStatus(@CurrentSession() session: SessionContextDto) {
     return this.civilRegistry.getCivilStatus(session.identityId);
   }
 
   @Get('vital-records')
   @ApiOperation({ summary: 'List entitled vital records (projection)' })
+  @ApiOkResponse({ type: CitizenVitalRecordSummaryDto, isArray: true })
   listVitalRecords(@CurrentSession() session: SessionContextDto) {
     return this.civilRegistry.listVitalRecords(session.identityId);
   }
 
   @Get('vital-records/:id')
   @ApiOperation({ summary: 'Get entitled vital record detail (projection)' })
+  @ApiOkResponse({ type: CitizenVitalRecordSummaryDto })
   getVitalRecord(
     @CurrentSession() session: SessionContextDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -314,6 +339,7 @@ export class CitizenExperienceController {
 
   @Get('certificates')
   @ApiOperation({ summary: 'List civil certificates for entitled records' })
+  @ApiOkResponse({ type: CitizenCivilCertificateSummaryDto, isArray: true })
   listCivilCertificates(@CurrentSession() session: SessionContextDto) {
     return this.civilRegistry.listCertificates(session.identityId);
   }
@@ -324,6 +350,7 @@ export class CitizenExperienceController {
     description:
       'Surfaces template service slugs for certificate requests and registrations — no direct record download bypass.',
   })
+  @ApiOkResponse({ type: CitizenCivilRegistryActionDto, isArray: true })
   listCivilRegistryActions() {
     return this.civilRegistry.listCivilRegistryActions();
   }

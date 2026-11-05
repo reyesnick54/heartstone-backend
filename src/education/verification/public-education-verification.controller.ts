@@ -1,8 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PublicEducationCredentialVerificationResponseDto } from './dto/public-education-credential-verification-response.dto';
 import { PublicEducationVerificationService } from './public-education-verification.service';
 
 @ApiTags('education-public-verification')
@@ -19,7 +20,11 @@ export class PublicEducationVerificationController {
   constructor(private readonly verificationService: PublicEducationVerificationService) {}
 
   @Get('credentials/:credentialReference/verify')
-  @ApiOkResponse({ description: 'Minimal public credential verification' })
+  @ApiOperation({ summary: 'Publicly verify an academic credential by reference (minimal facts)' })
+  @ApiOkResponse({
+    type: PublicEducationCredentialVerificationResponseDto,
+    description: 'Minimal public credential verification',
+  })
   verifyCredential(@Param('credentialReference') credentialReference: string) {
     return this.verificationService.verifyCredentialPublicly(credentialReference);
   }

@@ -14,13 +14,13 @@ export class CitizenAppointmentSummaryDto {
   @ApiProperty()
   status!: string;
 
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, nullable: true })
   scheduledStartsAt!: string | null;
 
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, nullable: true })
   scheduledEndsAt!: string | null;
 
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, nullable: true })
   reasonName!: string | null;
 
   @ApiProperty()
@@ -42,10 +42,10 @@ export class CitizenAppointmentsResponseDto {
 }
 
 export class CitizenAppointmentDetailDto extends CitizenAppointmentSummaryDto {
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, nullable: true })
   virtualMeetingUrl!: string | null;
 
-  @ApiPropertyOptional()
+  @ApiProperty({ type: String, nullable: true })
   locationName!: string | null;
 
   @ApiProperty({ type: [String] })

@@ -6,6 +6,16 @@ import { SessionContextDto } from '../../../identity/auth/dto/session-context.dt
 import { SessionAuthGuard } from '../../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../../security/route-class.enum';
+import {
+  CitizenHealthcareActionsResponseDto,
+  CitizenHealthcareAppointmentsResponseDto,
+  CitizenHealthcareHomeResponseDto,
+  CitizenHealthcareProfileResponseDto,
+  CitizenHealthcareProvidersResponseDto,
+  CitizenTreatmentProgramsResponseDto,
+  CitizenTreatmentReferralsResponseDto,
+  CitizenTreatmentsResponseDto,
+} from './dto/citizen-healthcare-response.dto';
 import { CitizenHealthcareProjectionService } from './services/citizen-healthcare-projection.service';
 
 @ApiTags('citizen-healthcare-experience')
@@ -27,49 +37,59 @@ export class CitizenHealthcareController {
 
   @Get()
   @ApiOperation({ summary: 'Citizen healthcare home — authorized treatment journey summary' })
-  @ApiOkResponse({ description: 'Patient-safe healthcare overview' })
+  @ApiOkResponse({
+    type: CitizenHealthcareHomeResponseDto,
+    description: 'Patient-safe healthcare overview',
+  })
   getHome(@CurrentSession() session: SessionContextDto) {
     return this.projections.getHome(session.identityId);
   }
 
   @Get('profile')
   @ApiOperation({ summary: 'Citizen healthcare profile projection' })
+  @ApiOkResponse({ type: CitizenHealthcareProfileResponseDto })
   getProfile(@CurrentSession() session: SessionContextDto) {
     return this.projections.getProfile(session.identityId);
   }
 
   @Get('providers')
   @ApiOperation({ summary: 'Providers linked to enrolled or active treatment programs' })
+  @ApiOkResponse({ type: CitizenHealthcareProvidersResponseDto })
   listProviders(@CurrentSession() session: SessionContextDto) {
     return this.projections.listProviders(session.identityId);
   }
 
   @Get('programs')
   @ApiOperation({ summary: 'Discover published treatment programs (not medical recommendations)' })
+  @ApiOkResponse({ type: CitizenTreatmentProgramsResponseDto })
   listPrograms(@CurrentSession() session: SessionContextDto) {
     return this.projections.listPrograms(session.identityId);
   }
 
   @Get('treatments')
   @ApiOperation({ summary: 'Screenings and enrolled treatments for the authenticated patient' })
+  @ApiOkResponse({ type: CitizenTreatmentsResponseDto })
   listTreatments(@CurrentSession() session: SessionContextDto) {
     return this.projections.listTreatments(session.identityId);
   }
 
   @Get('referrals')
   @ApiOperation({ summary: 'Treatment referrals for the authenticated patient' })
+  @ApiOkResponse({ type: CitizenTreatmentReferralsResponseDto })
   listReferrals(@CurrentSession() session: SessionContextDto) {
     return this.projections.listReferrals(session.identityId);
   }
 
   @Get('appointments')
   @ApiOperation({ summary: 'Upcoming healthcare appointments linked to treatment enrollments' })
+  @ApiOkResponse({ type: CitizenHealthcareAppointmentsResponseDto })
   listAppointments(@CurrentSession() session: SessionContextDto) {
     return this.projections.listAppointments(session.identityId);
   }
 
   @Get('actions')
   @ApiOperation({ summary: 'Required patient actions and consent state' })
+  @ApiOkResponse({ type: CitizenHealthcareActionsResponseDto })
   listActions(@CurrentSession() session: SessionContextDto) {
     return this.projections.listActions(session.identityId);
   }

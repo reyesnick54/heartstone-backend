@@ -4,6 +4,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PublicCustomsTradeVerificationResponseDto } from './dto/public-customs-trade-verification-response.dto';
 import {
   type PublicCustomsTradeVerificationResponse,
   PublicCustomsTradeVerificationService,
@@ -27,7 +28,10 @@ export class PublicCustomsTradeVerificationController {
   @ApiOperation({
     summary: 'Public customs trade profile verification (non-confidential facts only)',
   })
-  @ApiOkResponse({ description: 'Policy-permitted customs trade facts only' })
+  @ApiOkResponse({
+    type: PublicCustomsTradeVerificationResponseDto,
+    description: 'Policy-permitted customs trade facts only',
+  })
   verify(@Param('reference') reference: string): Promise<PublicCustomsTradeVerificationResponse> {
     return this.verificationService.verify(reference);
   }

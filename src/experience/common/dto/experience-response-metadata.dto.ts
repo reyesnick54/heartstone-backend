@@ -32,10 +32,14 @@ export class ExperienceResponseMetadataDto {
 }
 
 export class ExperienceDeepLinkResolveRequestDto {
-  @ApiProperty()
+  @ApiProperty({ description: 'Stable route identifier', example: 'citizen.application.detail' })
   route!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description: 'Route parameters keyed by parameter name',
+  })
   params!: Record<string, string>;
 }
 
@@ -46,7 +50,7 @@ export class ExperienceDeepLinkResolveResponseDto {
   @ApiProperty()
   route!: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'object', additionalProperties: { type: 'string' } })
   params!: Record<string, string>;
 
   @ApiPropertyOptional()

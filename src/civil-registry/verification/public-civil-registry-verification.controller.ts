@@ -5,6 +5,7 @@ import { ControllerRouteAccess } from '../../security/decorators/controller-rout
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { CivilRegistryVerificationService } from './civil-registry-verification.service';
+import { PublicCivilCertificateVerificationResponseDto } from './dto/public-civil-certificate-verification-response.dto';
 
 @ApiTags('public-civil-registry')
 @Public()
@@ -24,7 +25,10 @@ export class PublicCivilRegistryVerificationController {
   @ApiOperation({
     summary: 'Publicly verify an issued civil certificate by opaque verification code',
   })
-  @ApiOkResponse({ description: 'Minimal non-sensitive verification fields only' })
+  @ApiOkResponse({
+    type: PublicCivilCertificateVerificationResponseDto,
+    description: 'Minimal non-sensitive verification fields only',
+  })
   verifyByCode(@Param('verificationCode') verificationCode: string) {
     return this.verificationService.verifyPublic(verificationCode);
   }
@@ -32,6 +36,10 @@ export class PublicCivilRegistryVerificationController {
   @Get('verify-reference/:verificationReference')
   @ApiOperation({
     summary: 'Publicly verify an issued civil certificate by verification reference',
+  })
+  @ApiOkResponse({
+    type: PublicCivilCertificateVerificationResponseDto,
+    description: 'Minimal non-sensitive verification fields only',
   })
   verifyByReference(@Param('verificationReference') verificationReference: string) {
     return this.verificationService.verifyByReference(verificationReference);

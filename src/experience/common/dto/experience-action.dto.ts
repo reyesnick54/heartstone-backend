@@ -36,7 +36,7 @@ export class ExperienceActionItemDto {
   @ApiProperty({ type: DeepLinkDto })
   deepLink!: DeepLinkDto;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: String, nullable: true })
   dueDate?: string | null;
 
   @ApiPropertyOptional({ type: InstitutionAttributionDto })

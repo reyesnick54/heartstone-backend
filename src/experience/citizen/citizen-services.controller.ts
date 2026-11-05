@@ -1,6 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
+import { ApplicationRecordDto } from '../../application-processing/applications/dto/application-record.dto';
 import { CurrentSession } from '../../identity/auth/decorators/current-session.decorator';
 import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
@@ -15,11 +22,14 @@ import { MatchPublicServicesDto } from '../../service-catalog/public/dto/match-p
 import { PublicServiceEligibilityDto } from '../../service-catalog/public/dto/public-service-eligibility.dto';
 import {
   PaginatedPublicServicesResponseDto,
+  PublicEligibilityResultResponseDto,
+  PublicServiceDetailResponseDto,
   PublicServiceSummaryResponseDto,
 } from '../../service-catalog/public/dto/public-service-response.dto';
 import { QueryPublicServicesDto } from '../../service-catalog/public/dto/query-public-services.dto';
 import { QueryServiceStartPackageDto } from '../../service-catalog/public/dto/query-service-start-package.dto';
 import { CitizenServicesService, type CitizenStartExperience } from './citizen-services.service';
+import { CitizenStartExperienceResponseDto } from './dto/citizen-start-experience-response.dto';
 import { CreateCitizenApplicationDto } from './dto/create-citizen-application.dto';
 
 @ApiTags('citizen-experience')
@@ -52,7 +62,7 @@ export class CitizenServicesController {
   @Public()
   @Post('match')
   @ApiOperation({ summary: 'Match citizen needs to published government services' })
-  @ApiOkResponse({ type: PublicServiceSummaryResponseDto, isArray: true })
+  @ApiCreatedResponse({ type: PublicServiceSummaryResponseDto, isArray: true })
   matchServices(@Body() dto: MatchPublicServicesDto): Promise<PublicServiceSummaryResponseDto[]> {
     return this.citizenServicesService.matchServices(dto);
   }
@@ -60,6 +70,7 @@ export class CitizenServicesController {
   @Public()
   @Get(':slug/start')
   @ApiOperation({ summary: 'Get a version-pinned start package for guided service intake' })
+  @ApiOkResponse({ type: CitizenStartExperienceResponseDto })
   getStartExperience(
     @Param('slug') slug: string,
     @Query() query: QueryServiceStartPackageDto,
@@ -70,6 +81,7 @@ export class CitizenServicesController {
   @Public()
   @Post(':slug/eligibility')
   @ApiOperation({ summary: 'Evaluate nonbinding preliminary eligibility guidance' })
+  @ApiCreatedResponse({ type: PublicEligibilityResultResponseDto })
   evaluateEligibility(
     @Param('slug') slug: string,
     @Body() dto: PublicServiceEligibilityDto,
@@ -81,6 +93,7 @@ export class CitizenServicesController {
   @UseGuards(SessionAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a draft application for a service identified by slug' })
+  @ApiCreatedResponse({ type: ApplicationRecordDto })
   createApplication(
     @Param('slug') slug: string,
     @CurrentSession() session: SessionContextDto,
@@ -92,7 +105,7 @@ export class CitizenServicesController {
   @Public()
   @Get(':slug')
   @ApiOperation({ summary: 'Get citizen-facing detail for a discoverable government service' })
-  @ApiOkResponse({ type: PublicServiceSummaryResponseDto })
+  @ApiOkResponse({ type: PublicServiceDetailResponseDto })
   getServiceBySlug(@Param('slug') slug: string): Promise<PublicServiceDetail> {
     return this.citizenServicesService.getServiceBySlug(slug);
   }

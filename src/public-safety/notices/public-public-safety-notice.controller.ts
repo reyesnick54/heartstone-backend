@@ -1,9 +1,10 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PublicSafetyNoticeResponseDto } from './dto/public-safety-notice-response.dto';
 import { PublicSafetyNoticeService } from './public-safety-notice.service';
 
 @ApiTags('public-public-safety')
@@ -24,6 +25,7 @@ export class PublicPublicSafetyNoticeController {
   @ApiOperation({
     summary: 'Published public safety government notice (approved content only)',
   })
+  @ApiOkResponse({ type: PublicSafetyNoticeResponseDto })
   getPublishedNotice(@Param('noticeReference') noticeReference: string) {
     return this.notices.getPublishedNoticeByReference(noticeReference);
   }

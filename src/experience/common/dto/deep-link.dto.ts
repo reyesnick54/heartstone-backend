@@ -8,6 +8,8 @@ export class DeepLinkDto {
   route!: string;
 
   @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'string' },
     description: 'Route parameters for frontend deep linking',
     example: { applicationId: '00000000-0000-4000-8000-000000000001' },
   })

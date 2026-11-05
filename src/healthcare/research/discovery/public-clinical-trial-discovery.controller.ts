@@ -1,11 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ClinicalTrialRecruitmentStatus } from '@prisma/client';
 
 import { ControllerRouteAccess } from '../../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../../security/decorators/public.decorator';
 import { RouteClass } from '../../../security/route-class.enum';
 import { ClinicalTrialDiscoveryService } from './clinical-trial-discovery.service';
+import { PublicClinicalTrialDiscoveryResponseDto } from './dto/public-clinical-trial-discovery-response.dto';
 
 @ApiTags('public-clinical-trials')
 @ControllerRouteAccess({
@@ -27,7 +28,23 @@ export class PublicClinicalTrialDiscoveryController {
   @ApiOperation({
     summary: 'Discover recruiting clinical trials without participant-identifying data',
   })
-  @ApiOkResponse({ description: 'Public trial discovery listing' })
+  @ApiQuery({ name: 'conditionCategoryCode', required: false, type: String })
+  @ApiQuery({
+    name: 'recruitmentStatus',
+    required: false,
+    enum: ClinicalTrialRecruitmentStatus,
+    description: 'Defaults to RECRUITING',
+  })
+  @ApiQuery({ name: 'phaseCode', required: false, type: String })
+  @ApiQuery({ name: 'jurisdictionId', required: false, type: String })
+  @ApiQuery({ name: 'minimumAgeYears', required: false, type: Number })
+  @ApiQuery({ name: 'maximumAgeYears', required: false, type: Number })
+  @ApiQuery({ name: 'locationContains', required: false, type: String })
+  @ApiQuery({ name: 'sponsorDisplayNameContains', required: false, type: String })
+  @ApiOkResponse({
+    type: PublicClinicalTrialDiscoveryResponseDto,
+    description: 'Public trial discovery listing',
+  })
   discover(
     @Query('conditionCategoryCode') conditionCategoryCode?: string,
     @Query('recruitmentStatus') recruitmentStatus?: ClinicalTrialRecruitmentStatus,

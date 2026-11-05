@@ -4,6 +4,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PublicPropertyRegistryVerificationResponseDto } from './dto/public-property-registry-verification-response.dto';
 import { PublicPropertyRegistryVerificationService } from './public-property-registry-verification.service';
 
 @ApiTags('public-property-registry')
@@ -24,7 +25,10 @@ export class PublicPropertyRegistryVerificationController {
   @ApiOperation({
     summary: 'Controlled public property registry lookup when enabled by jurisdiction',
   })
-  @ApiOkResponse({ description: 'Minimal public verification facts' })
+  @ApiOkResponse({
+    type: PublicPropertyRegistryVerificationResponseDto,
+    description: 'Minimal public verification facts',
+  })
   verify(@Param('reference') reference: string) {
     return this.verificationService.verify(reference);
   }
