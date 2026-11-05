@@ -14,6 +14,7 @@ import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ScopedResourceType } from '../institutional-scope/institutional-scope.types';
 import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
+import { RouteAccess } from '../security/decorators/route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
 import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
@@ -48,8 +49,15 @@ export class MasterAdministrativeFileController {
     private readonly resourceAccess: ResourceAccessService,
   ) {}
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: 'Case visibility: the applicant for the case, or an official in scope',
+    authorityRequirement: "None; returns a view sanitized to the caller's access level",
+    actorSource: 'Session identity',
+    primarySecurityInvariant: 'Applicants see only the minimum-necessary view of their own file',
+  })
   @Get('by-case/:caseId')
-  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Get Master Administrative File by case' })
   async getByCaseId(
     @CurrentSession() session: SessionContextDto,
@@ -122,8 +130,15 @@ export class MasterAdministrativeFileController {
     return this.indexService.buildIndex(id, accessContext);
   }
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: 'Case visibility: the applicant for the case, or an official in scope',
+    authorityRequirement: "None; returns a view sanitized to the caller's access level",
+    actorSource: 'Session identity',
+    primarySecurityInvariant: 'Applicants see only the minimum-necessary view of their own file',
+  })
   @Get(':id')
-  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Get Master Administrative File metadata' })
   @ApiOkResponse({ description: 'Institutional file metadata with minimum-necessary fields' })
   async getById(
