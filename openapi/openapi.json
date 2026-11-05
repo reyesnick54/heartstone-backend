@@ -791,6 +791,7 @@
     },
     "/api/v1/authority/governing-sources/{id}/authenticate": {
       "patch": {
+        "description": "The authenticating officer is the signed-in identity. The request cannot name someone else.",
         "operationId": "GoverningSourcesController_authenticate",
         "parameters": [
           {
@@ -824,7 +825,7 @@
             }
           }
         },
-        "summary": "Authenticate a governing source",
+        "summary": "Record that an authenticated copy of this governing source was verified",
         "tags": [
           "authority-governing-sources"
         ]
@@ -19421,6 +19422,16 @@
       "post": {
         "operationId": "EvidenceRecordsController_createLegalHold",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLegalHoldDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -19444,6 +19455,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseLegalHoldDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -22028,14 +22049,12 @@
       "AuthenticateGoverningSourceDto": {
         "type": "object",
         "properties": {
-          "authenticatedByIdentityId": {
+          "verificationReference": {
             "type": "string",
-            "format": "uuid"
+            "description": "Where the verified, executed copy is held (gazette reference, registry entry, file number)",
+            "maxLength": 500
           }
-        },
-        "required": [
-          "authenticatedByIdentityId"
-        ]
+        }
       },
       "CreateFunctionAuthorityRecordDto": {
         "type": "object",
@@ -34049,6 +34068,95 @@
       "AssociateDocumentDto": {
         "type": "object",
         "properties": {}
+      },
+      "LegalHoldTargetDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "MASTER_ADMINISTRATIVE_FILE",
+              "CASE",
+              "DOCUMENT",
+              "EVIDENCE",
+              "EVIDENCE_PACKET",
+              "RECORD_CLASS",
+              "PRESERVATION_COLLECTION"
+            ]
+          },
+          "targetReference": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "recordsClassificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "targetType",
+          "targetReference"
+        ]
+      },
+      "CreateLegalHoldDto": {
+        "type": "object",
+        "properties": {
+          "holdNumber": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "authorityReference": {
+            "type": "string",
+            "description": "Court order, statute or instruction requiring the hold"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalHoldTargetDto"
+            }
+          }
+        },
+        "required": [
+          "holdNumber",
+          "title",
+          "authorityReference",
+          "reason",
+          "effectiveFrom",
+          "targets"
+        ]
+      },
+      "ReleaseLegalHoldDto": {
+        "type": "object",
+        "properties": {
+          "releaseAuthorityReference": {
+            "type": "string",
+            "description": "Court order or instruction authorising release"
+          },
+          "releaseReason": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "releaseAuthorityReference",
+          "releaseReason"
+        ]
       },
       "AssessDecisionReadinessDto": {
         "type": "object",
