@@ -129,6 +129,12 @@ services:
         generateValue: true
       - key: HEARTSTONE_API_AUDIENCE
         value: heartstone-api
+      # Keycloak listens on 8080; PORT tells Render which port to route to and health-check.
+      - key: PORT
+        value: "8080"
+      # One instance: no cluster discovery between old and new instances during a deploy.
+      - key: KC_CACHE
+        value: local
       # Space-separated https origins of the staging web apps (each gets /auth/callback).
       - key: HEARTSTONE_WEB_ORIGINS
         sync: false
