@@ -55,6 +55,17 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: OpenAPI contract is up to date
+        run: |
+          npm run openapi:export
+          git diff --exit-code -- openapi/openapi.json || {
+            echo "openapi/openapi.json is stale. Run 'npm run openapi:export' and commit it." >&2
+            exit 1
+          }
+
+      - name: Docker image builds
+        run: docker build --tag heartstone-backend:ci .
+
   test:
     name: Tests
     runs-on: ubuntu-latest

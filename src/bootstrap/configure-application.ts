@@ -1,6 +1,6 @@
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { type Express, json, urlencoded } from 'express';
 import helmet from 'helmet';
 
@@ -11,6 +11,7 @@ import {
   SECURITY_CONFIG,
   type SecurityConfig,
 } from '../config/config.constants';
+import { buildOpenApiDocument } from './openapi';
 
 export function configureApplication(app: INestApplication): void {
   const configService = app.get(ConfigService);
@@ -59,14 +60,10 @@ export function configureApplication(app: INestApplication): void {
   app.enableShutdownHooks();
 
   if (securityConfig.swaggerEnabled) {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle(appConfig.name)
-      .setDescription('HeartStone backend API')
-      .setVersion(appConfig.apiVersion)
-      .addBearerAuth()
-      .build();
-
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    const document = buildOpenApiDocument(app, {
+      title: appConfig.name,
+      version: appConfig.apiVersion,
+    });
     SwaggerModule.setup('docs', app, document);
   }
 }

@@ -14,3 +14,13 @@ venv
 README.md
 docker-compose.yml
 docker-compose.*.yml
+node_modules
+dist
+coverage
+test
+tests
+docs
+openapi
+security
+service-packs
+*.log
