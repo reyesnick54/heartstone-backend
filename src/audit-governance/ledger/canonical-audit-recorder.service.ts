@@ -2,16 +2,38 @@ import { Injectable } from '@nestjs/common';
 import { type SecurityAuditEvent, type SecurityAuditEventType } from '@prisma/client';
 
 import { GOVERNMENT_AUDIT_EVENT_TYPES } from '../audit-governance.constants';
+import { resolveLedgerStreamKey } from '../common/resolve-ledger-stream.util';
 import { GovernmentAuditLedgerService } from './government-audit-ledger.service';
+import {
+  type AppendGovernmentAuditLedgerInput,
+  type GovernmentAuditLedgerClient,
+} from './government-audit-ledger.types';
 
 @Injectable()
 export class CanonicalAuditRecorderService {
   constructor(private readonly ledger: GovernmentAuditLedgerService) {}
 
   async recordSecurityAuditEvent(event: SecurityAuditEvent): Promise<void> {
+    await this.ledger.append(this.toSecurityLedgerInput(event));
+  }
+
+  /** Appends the ledger entry for a security event inside the caller's transaction. */
+  async recordSecurityAuditEventWithinTransaction(
+    tx: GovernmentAuditLedgerClient,
+    event: SecurityAuditEvent,
+  ): Promise<void> {
+    const input = this.toSecurityLedgerInput(event);
+    await this.ledger.appendWithinTransaction(
+      tx,
+      input,
+      resolveLedgerStreamKey({ institutionId: input.institutionId ?? null }),
+    );
+  }
+
+  private toSecurityLedgerInput(event: SecurityAuditEvent): AppendGovernmentAuditLedgerInput {
     const metadata = (event.metadata ?? {}) as Record<string, unknown>;
 
-    await this.ledger.append({
+    return {
       eventType: GOVERNMENT_AUDIT_EVENT_TYPES.SECURITY_EVENT,
       occurredAt: event.createdAt,
       actorIdentityId: event.actorIdentityId ?? event.identityId ?? undefined,
@@ -30,7 +52,7 @@ export class CanonicalAuditRecorderService {
       sourceDomainEventId: event.id,
       institutionId:
         typeof metadata.scopeInstitutionId === 'string' ? metadata.scopeInstitutionId : undefined,
-    });
+    };
   }
 
   async recordSecurityAuditInput(input: {

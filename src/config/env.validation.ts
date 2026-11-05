@@ -8,6 +8,7 @@ interface OidcProviderEnvShape {
   jwksUri: string;
   allowedAlgorithms: string[];
   clockToleranceSeconds?: number;
+  provisioning?: unknown;
 }
 
 interface ValidatedEnvironment {
@@ -23,6 +24,30 @@ interface ValidatedEnvironment {
 
 function parseBooleanEnv(value: string | undefined): boolean {
   return value === 'true' || value === '1';
+}
+
+function validateOidcProvisioning(provisioning: unknown): string | null {
+  if (provisioning === undefined) {
+    return null;
+  }
+
+  if (!provisioning || typeof provisioning !== 'object' || Array.isArray(provisioning)) {
+    return 'provisioning must be an object';
+  }
+
+  const allowedKeys = new Set(['citizenSelfService']);
+  for (const key of Object.keys(provisioning)) {
+    if (!allowedKeys.has(key)) {
+      return `provisioning.${key} is not a recognised setting`;
+    }
+  }
+
+  const { citizenSelfService } = provisioning as { citizenSelfService?: unknown };
+  if (citizenSelfService !== undefined && typeof citizenSelfService !== 'boolean') {
+    return 'provisioning.citizenSelfService must be a boolean';
+  }
+
+  return null;
 }
 
 function validateOidcProvidersJson(oidcProvidersJson: string): string | null {
@@ -42,6 +67,11 @@ function validateOidcProvidersJson(oidcProvidersJson: string): string | null {
         provider.allowedAlgorithms.length === 0
       ) {
         return 'Each OIDC provider requires code, issuer, audience, jwksUri, and allowedAlgorithms';
+      }
+
+      const provisioningError = validateOidcProvisioning(provider.provisioning);
+      if (provisioningError) {
+        return `OIDC provider ${provider.code}: ${provisioningError}`;
       }
     }
 

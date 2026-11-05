@@ -1,8 +1,11 @@
 import {
   ConflictException,
   ForbiddenException,
+  HttpStatus,
   UnprocessableEntityException,
 } from '@nestjs/common';
+
+import { API_ERROR_CODES, codedErrorBody } from '../../../common/errors/api-error-codes';
 
 export class ServiceNotStartableException extends UnprocessableEntityException {
   constructor(message = 'Service is not available for new applications') {
@@ -80,6 +83,6 @@ export class WorkflowStepAlreadyCompletedException extends ConflictException {
 
 export class SafeHaltedWorkflowException extends ForbiddenException {
   constructor(message = 'Workflow is safe-halted and cannot continue normal processing') {
-    super(message);
+    super(codedErrorBody(HttpStatus.FORBIDDEN, message, API_ERROR_CODES.SAFE_HALT));
   }
 }

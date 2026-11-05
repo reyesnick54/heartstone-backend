@@ -2,11 +2,13 @@ import {
   type CanActivate,
   type ExecutionContext,
   ForbiddenException,
+  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IdentityType } from '@prisma/client';
 
+import { API_ERROR_CODES, codedErrorBody } from '../../common/errors/api-error-codes';
 import { PrismaService } from '../../database/prisma.service';
 import { CONTROLLER_ROUTE_ACCESS_KEY } from '../decorators/controller-route-access.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
@@ -44,7 +46,11 @@ export class RouteAccessEnforcementGuard implements CanActivate {
     const metadata = routeAccess ?? controllerRouteAccess;
     if (!metadata) {
       throw new ForbiddenException(
-        'Route access classification metadata is required but missing (safe halt).',
+        codedErrorBody(
+          HttpStatus.FORBIDDEN,
+          'Route access classification metadata is required but missing (safe halt).',
+          API_ERROR_CODES.SAFE_HALT,
+        ),
       );
     }
 
@@ -89,7 +95,11 @@ export class RouteAccessEnforcementGuard implements CanActivate {
     }
 
     throw new ForbiddenException(
-      'Non-human identities are not allowlisted for this privileged or consequential route (safe halt).',
+      codedErrorBody(
+        HttpStatus.FORBIDDEN,
+        'Non-human identities are not allowlisted for this privileged or consequential route (safe halt).',
+        API_ERROR_CODES.SAFE_HALT,
+      ),
     );
   }
 }

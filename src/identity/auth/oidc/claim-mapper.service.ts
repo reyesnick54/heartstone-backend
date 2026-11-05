@@ -1,9 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { AssuranceLevel, AuthenticationMethodType } from '@prisma/client';
 
-import type { MappedOidcClaims } from './types/mapped-oidc-claims';
+import type { MappedOidcClaims, MappedOidcProfileClaims } from './types/mapped-oidc-claims';
 
 const MFA_AMR_VALUES = new Set(['mfa', 'otp', 'hwk', 'sms', 'pin']);
+
+/** Upper bound for any self-asserted profile claim copied into HeartStone. */
+const MAX_PROFILE_CLAIM_LENGTH = 200;
+
+function readProfileString(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed.slice(0, MAX_PROFILE_CLAIM_LENGTH);
+}
 
 export interface RawOidcJwtClaims {
   iss: string;
@@ -54,6 +68,17 @@ export class ClaimMapperService {
       amr,
       acr: payload.acr,
       externalContext,
+      profile: this.mapProfile(payload),
+    };
+  }
+
+  private mapProfile(payload: RawOidcJwtClaims): MappedOidcProfileClaims {
+    return {
+      givenName: readProfileString(payload.given_name),
+      familyName: readProfileString(payload.family_name),
+      name: readProfileString(payload.name),
+      email: readProfileString(payload.email)?.toLowerCase(),
+      emailVerified: payload.email_verified === true,
     };
   }
 
