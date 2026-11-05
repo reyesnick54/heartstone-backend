@@ -41,6 +41,11 @@ export interface ScannedRoute {
   sourceFile: string;
   handler: string;
   routeClass: RouteClass;
+  /**
+   * Class declared by @RouteAccess / @ControllerRouteAccess, which is what the runtime guards
+   * read. `routeClass` above can differ because it also applies path heuristics.
+   */
+  declaredRouteClass: RouteClass | null;
   authenticationRequired: boolean;
   isPublic: boolean;
   technicalPermissionRequired: boolean;
@@ -99,7 +104,8 @@ function hasDenyByDefaultAdministrative(decoratorBlock: string): boolean {
 }
 
 function extractRequirePermissionsCode(decoratorBlock: string): string | null {
-  const match = /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*\)/.exec(decoratorBlock);
+  // Matches `@RequirePermissions(PermissionCodes.X)` and `@RequirePermissions(PermissionCodes.X, {…})`.
+  const match = /@RequirePermissions\s*\(\s*PermissionCodes\.(\w+)\s*[,)]/.exec(decoratorBlock);
   if (!match?.[1]) {
     return null;
   }
@@ -448,6 +454,7 @@ function classifyRoute(input: {
 }): Pick<
   ScannedRoute,
   | 'routeClass'
+  | 'declaredRouteClass'
   | 'authenticationRequired'
   | 'isPublic'
   | 'scopeRequirement'
@@ -486,6 +493,7 @@ function classifyRoute(input: {
 
   return {
     routeClass,
+    declaredRouteClass: mergedAccess.routeClass ?? null,
     authenticationRequired,
     isPublic,
     scopeRequirement: mergedAccess.scopeRequirement ?? profile.scopeRequirement,
@@ -604,6 +612,13 @@ function parseControllerFile(sourceFile: string, projectRoot: string): ScannedRo
         classHeader,
         decoratorBlock,
       });
+      // PermissionsGuard denies declared RESTRICTED_ADMINISTRATIVE routes lacking explicit permissions.
+      if (
+        !classification.isPublic &&
+        classification.declaredRouteClass === RouteClass.RESTRICTED_ADMINISTRATIVE
+      ) {
+        technicalAccess.technicalPermissionRequired = true;
+      }
       const guardCoverage = ['SessionAuthGuard'];
       if (!classification.isPublic) {
         guardCoverage.push('ClientIdentitySubstitutionGuard');

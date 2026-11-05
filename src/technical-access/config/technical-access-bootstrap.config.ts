@@ -7,6 +7,12 @@ export const TechnicalRoleCodes = {
   IDENTITY_PLATFORM_ADMINISTRATOR: 'identity-platform-administrator',
   GOVERNMENT_STRUCTURE_ADMINISTRATOR: 'government-structure-administrator',
   INSTITUTION_SCOPED_OPERATOR: 'institution-scoped-operator',
+  AUTHORITY_ASSURANCE_OFFICER: 'authority-assurance-officer',
+  SERVICE_CATALOG_ADMINISTRATOR: 'service-catalog-administrator',
+  INSTITUTIONAL_CASE_OFFICER: 'institutional-case-officer',
+  INTELLIGENCE_ANALYST: 'intelligence-analyst',
+  INTEGRATION_ADMINISTRATOR: 'integration-administrator',
+  PAYMENT_PROVIDER_CALLBACK: 'payment-provider-callback',
 } as const;
 
 export interface BootstrapRoleDefinition {
@@ -89,5 +95,68 @@ export const BOOTSTRAP_TECHNICAL_ROLES: readonly BootstrapRoleDefinition[] = [
       PermissionCodes.GOVERNMENT_INSTITUTION_READ,
       PermissionCodes.GOVERNMENT_INSTITUTION_UPDATE,
     ],
+  },
+  {
+    code: TechnicalRoleCodes.AUTHORITY_ASSURANCE_OFFICER,
+    name: 'Authority assurance officer',
+    description:
+      'Records that governing instruments and external determinations have been verified. ' +
+      'Technical capability only: holding this role does not confer legal authority.',
+    permissionCodes: [
+      PermissionCodes.AUTHORITY_GOVERNING_SOURCE_READ,
+      PermissionCodes.AUTHORITY_GOVERNING_SOURCE_AUTHENTICATE,
+      PermissionCodes.AUTHORITY_GOVERNING_SOURCE_REVOKE,
+      PermissionCodes.AUTHORITY_EXTERNAL_DETERMINATION_RECORD,
+      PermissionCodes.AUTHORITY_INSTITUTIONAL_ACT_RECORD,
+      PermissionCodes.AUTHORITY_FUNCTION_RECORD_READ,
+    ],
+  },
+  {
+    code: TechnicalRoleCodes.SERVICE_CATALOG_ADMINISTRATOR,
+    name: 'Service catalogue administrator',
+    description: 'Configures government services, versions and forms.',
+    permissionCodes: [
+      PermissionCodes.SERVICE_CATALOG_READ,
+      PermissionCodes.SERVICE_CATALOG_MANAGE,
+      PermissionCodes.SERVICE_CATALOG_FORM_PUBLISH,
+      PermissionCodes.GOVERNMENT_STRUCTURE_READ,
+    ],
+  },
+  {
+    code: TechnicalRoleCodes.INSTITUTIONAL_CASE_OFFICER,
+    name: 'Institutional case officer',
+    description:
+      'Works cases inside an institution: administrative files, redress matters, ' +
+      'communications and authority evaluation. Assign with institution scope.',
+    accessLevel: TechnicalAccessLevel.D,
+    permissionCodes: [],
+  },
+  {
+    code: TechnicalRoleCodes.INTELLIGENCE_ANALYST,
+    name: 'Intelligence analyst',
+    description: 'Runs analysis and reviews intelligence claims; cannot approve consequential use.',
+    permissionCodes: [
+      PermissionCodes.INTELLIGENCE_READ,
+      PermissionCodes.INTELLIGENCE_ANALYSIS_RUN,
+      PermissionCodes.INTELLIGENCE_CLAIM_REVIEW,
+      PermissionCodes.INTELLIGENCE_COMMAND_CONSOLE_QUERY,
+      PermissionCodes.AI_ASSISTANCE_USE,
+    ],
+  },
+  {
+    code: TechnicalRoleCodes.INTEGRATION_ADMINISTRATOR,
+    name: 'Integration administrator',
+    description: 'Defines and operates external integrations; acceptance stays at level F.',
+    permissionCodes: [
+      PermissionCodes.INTEGRATION_READ,
+      PermissionCodes.INTEGRATION_MANAGE,
+      PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE,
+    ],
+  },
+  {
+    code: TechnicalRoleCodes.PAYMENT_PROVIDER_CALLBACK,
+    name: 'Payment provider callback',
+    description: 'Assigned only to the payment provider service identity.',
+    permissionCodes: [PermissionCodes.FINANCIAL_PAYMENT_WEBHOOK_INGEST],
   },
 ];

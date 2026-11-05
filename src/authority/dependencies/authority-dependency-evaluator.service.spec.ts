@@ -37,6 +37,7 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
 
   let institutionId: string;
   let nationalAuthorityId: string;
+  let recorder: { recordedByIdentityId: string };
   let wrongAuthorityId: string;
 
   beforeAll(async () => {
@@ -93,6 +94,11 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       },
     });
     wrongAuthorityId = wrong.id;
+
+    const recordingOfficer = await prisma.identity.create({
+      data: { type: IdentityType.INDIVIDUAL, displayName: 'Recording officer' },
+    });
+    recorder = { recordedByIdentityId: recordingOfficer.id };
   });
 
   afterAll(async () => {
@@ -122,13 +128,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       externalAuthorityId: nationalAuthorityId,
     });
 
-    await dependencies.registerExternalDetermination({
-      authorityDependencyId: dependency.id,
-      externalAuthorityId: nationalAuthorityId,
-      determinationReference: 'NAT-2026-0001',
-      determinationStatus: ExternalDeterminationStatus.GRANTED,
-      isAuthenticated: true,
-    });
+    await dependencies.registerExternalDetermination(
+      {
+        authorityDependencyId: dependency.id,
+        externalAuthorityId: nationalAuthorityId,
+        determinationReference: 'NAT-2026-0001',
+        determinationStatus: ExternalDeterminationStatus.GRANTED,
+        isAuthenticated: true,
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -144,13 +153,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       externalAuthorityId: nationalAuthorityId,
     });
 
-    await dependencies.registerExternalDetermination({
-      authorityDependencyId: dependency.id,
-      externalAuthorityId: nationalAuthorityId,
-      determinationReference: 'NAT-UNAUTH',
-      determinationStatus: ExternalDeterminationStatus.GRANTED,
-      isAuthenticated: false,
-    });
+    await dependencies.registerExternalDetermination(
+      {
+        authorityDependencyId: dependency.id,
+        externalAuthorityId: nationalAuthorityId,
+        determinationReference: 'NAT-UNAUTH',
+        determinationStatus: ExternalDeterminationStatus.GRANTED,
+        isAuthenticated: false,
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -168,14 +180,17 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       externalAuthorityId: nationalAuthorityId,
     });
 
-    await dependencies.registerExternalDetermination({
-      authorityDependencyId: dependency.id,
-      externalAuthorityId: nationalAuthorityId,
-      determinationReference: 'NAT-EXPIRED',
-      determinationStatus: ExternalDeterminationStatus.GRANTED,
-      isAuthenticated: true,
-      expiryDate: new Date('2020-01-01'),
-    });
+    await dependencies.registerExternalDetermination(
+      {
+        authorityDependencyId: dependency.id,
+        externalAuthorityId: nationalAuthorityId,
+        determinationReference: 'NAT-EXPIRED',
+        determinationStatus: ExternalDeterminationStatus.GRANTED,
+        isAuthenticated: true,
+        expiryDate: new Date('2020-01-01'),
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -194,13 +209,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       externalAuthorityId: nationalAuthorityId,
     });
 
-    await dependencies.registerExternalDetermination({
-      authorityDependencyId: dependency.id,
-      externalAuthorityId: wrongAuthorityId,
-      determinationReference: 'WRONG-001',
-      determinationStatus: ExternalDeterminationStatus.GRANTED,
-      isAuthenticated: true,
-    });
+    await dependencies.registerExternalDetermination(
+      {
+        authorityDependencyId: dependency.id,
+        externalAuthorityId: wrongAuthorityId,
+        determinationReference: 'WRONG-001',
+        determinationStatus: ExternalDeterminationStatus.GRANTED,
+        isAuthenticated: true,
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -218,12 +236,15 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       externalAuthorityId: nationalAuthorityId,
     });
 
-    await dependencies.recordInstitutionalAct({
-      functionAuthorityRecordId: record.id,
-      externalAuthorityId: nationalAuthorityId,
-      actType: InstitutionalActType.CONSULTATION,
-      decisionOrAction: 'Consulted only',
-    });
+    await dependencies.recordInstitutionalAct(
+      {
+        functionAuthorityRecordId: record.id,
+        externalAuthorityId: nationalAuthorityId,
+        actType: InstitutionalActType.CONSULTATION,
+        decisionOrAction: 'Consulted only',
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -253,13 +274,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       blockingStatus: AuthorityDependencyBlockingStatus.NON_BLOCKING,
     });
 
-    await dependencies.recordInstitutionalAct({
-      functionAuthorityRecordId: record.id,
-      externalAuthorityId: nationalAuthorityId,
-      actType: InstitutionalActType.LIAISON,
-      decisionOrAction: 'Liaison meeting',
-      legalEffect: 'Information exchanged only',
-    });
+    await dependencies.recordInstitutionalAct(
+      {
+        functionAuthorityRecordId: record.id,
+        externalAuthorityId: nationalAuthorityId,
+        actType: InstitutionalActType.LIAISON,
+        decisionOrAction: 'Liaison meeting',
+        legalEffect: 'Information exchanged only',
+      },
+      recorder,
+    );
 
     const failures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -306,13 +330,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       dependencyType: AuthorityDependencyType.SHARED_COORDINATED_ACTION,
     });
 
-    await dependencies.recordInstitutionalAct({
-      functionAuthorityRecordId: record.id,
-      institutionId,
-      actType: InstitutionalActType.COORDINATED_ACTION,
-      decisionOrAction: 'ABSEZ step',
-      legalEffect: 'ABSEZ act only',
-    });
+    await dependencies.recordInstitutionalAct(
+      {
+        functionAuthorityRecordId: record.id,
+        institutionId,
+        actType: InstitutionalActType.COORDINATED_ACTION,
+        decisionOrAction: 'ABSEZ step',
+        legalEffect: 'ABSEZ act only',
+      },
+      recorder,
+    );
 
     const partialFailures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,
@@ -321,13 +348,16 @@ describe('AuthorityDependencyEvaluator (Phase 4E)', () => {
       AUTHORITY_EVALUATION_EXPLANATION_CODES.MISSING_SHARED_COORDINATED_ACTION,
     );
 
-    await dependencies.recordInstitutionalAct({
-      functionAuthorityRecordId: record.id,
-      externalAuthorityId: nationalAuthorityId,
-      actType: InstitutionalActType.COORDINATED_ACTION,
-      decisionOrAction: 'National step',
-      legalEffect: 'National act only',
-    });
+    await dependencies.recordInstitutionalAct(
+      {
+        functionAuthorityRecordId: record.id,
+        externalAuthorityId: nationalAuthorityId,
+        actType: InstitutionalActType.COORDINATED_ACTION,
+        decisionOrAction: 'National step',
+        legalEffect: 'National act only',
+      },
+      recorder,
+    );
 
     const completeFailures = await evaluator.evaluate(record.id, [dependency], {
       identityType: IdentityType.INDIVIDUAL,

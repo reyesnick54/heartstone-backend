@@ -34,6 +34,7 @@ import {
   signIntegrationWebhook,
   signPaymentWebhook,
 } from './helpers/phase-11-test-fixtures';
+import { grantPaymentProviderCallback } from './helpers/technical-access.fixture';
 
 describe('Phase 11 operational support (e2e)', () => {
   let app: INestApplication<App>;
@@ -126,6 +127,8 @@ describe('Phase 11 operational support (e2e)', () => {
 
   it('E2E3. duplicate webhook idempotency returns duplicate without double settlement', async () => {
     const fixture = await seedPhase11Fixture(app, prisma);
+    // Webhook routes require the provider callback permission (S21a).
+    await grantPaymentProviderCallback(prisma, fixture.officialIdentityId);
     const { invoice } = await calculateAndInvoiceFees(app, fixture);
     const paymentIntent = await createPayablePaymentIntent(app, fixture, invoice.id);
 

@@ -3,6 +3,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { CreateOfficeholderDto } from './dto/create-officeholder.dto';
 import { OfficeholderResponseDto } from './dto/officeholder-response.dto';
 import { QueryOfficeholdersDto } from './dto/query-officeholders.dto';
@@ -23,6 +25,7 @@ export class OfficeholdersController {
   constructor(private readonly service: OfficeholdersService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Create a officeholder' })
   @ApiCreatedResponse({ type: OfficeholderResponseDto })
   create(@Body() dto: CreateOfficeholderDto): Promise<OfficeholderResponseDto> {
@@ -30,6 +33,7 @@ export class OfficeholdersController {
   }
 
   @Get()
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'List officeholders' })
   @ApiOkResponse({ type: OfficeholderResponseDto, isArray: true })
   findAll(@Query() query: QueryOfficeholdersDto): Promise<OfficeholderResponseDto[]> {
@@ -37,6 +41,7 @@ export class OfficeholdersController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_READ)
   @ApiOperation({ summary: 'Get a officeholder by id' })
   @ApiOkResponse({ type: OfficeholderResponseDto })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<OfficeholderResponseDto> {
@@ -44,6 +49,7 @@ export class OfficeholdersController {
   }
 
   @Patch(':id')
+  @RequirePermissions(PermissionCodes.GOVERNMENT_STRUCTURE_MANAGE)
   @ApiOperation({ summary: 'Update a officeholder' })
   @ApiOkResponse({ type: OfficeholderResponseDto })
   update(

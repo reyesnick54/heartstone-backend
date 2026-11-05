@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from
 import { AssuranceLevel } from '@prisma/client';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
+import { RouteAccess } from '../../security/decorators/route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
 import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
@@ -85,6 +86,14 @@ export class ProtectedController {
     };
   }
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: "The caller's own session",
+    authorityRequirement: 'None',
+    actorSource: 'Session identity',
+    primarySecurityInvariant: "Step-up checks reveal nothing beyond the caller's own session",
+  })
   @Get('step-up-protected')
   @AuthRequirements({
     minimumAssuranceLevel: AssuranceLevel.HIGH,

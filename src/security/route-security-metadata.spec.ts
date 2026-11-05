@@ -43,6 +43,19 @@ describe('route-security-metadata', () => {
     }
   });
 
+  it('every restricted administrative route declares an explicit technical permission', () => {
+    // PermissionsGuard denies restricted routes without one, so a missing code is a dead route.
+    const unlabelled = routes
+      .filter(
+        (route) =>
+          !route.isPublic &&
+          route.declaredRouteClass === RouteClass.RESTRICTED_ADMINISTRATIVE &&
+          route.permissionCode === null,
+      )
+      .map((route) => `${route.method} ${route.path} (${route.controller}.${route.handler})`);
+    expect(unlabelled).toEqual([]);
+  });
+
   it('classifies system health probes separately from public routes', () => {
     const health = routes.find((route) => route.path === '/health' && route.method === 'GET');
     expect(health?.routeClass).toBe(RouteClass.SYSTEM_HEALTH);

@@ -65,13 +65,79 @@ export const PermissionCodes = {
   AUTHORITY_FUNCTION_RECORD_CREATE: 'authority:function-record:create',
   AUTHORITY_FUNCTION_RECORD_READ: 'authority:function-record:read',
   AUTHORITY_FUNCTION_RECORD_ACTIVATE: 'authority:function-record:activate',
+
+  /** Government structure beyond jurisdictions/institutions (bodies, departments, offices, officeholders, external authorities). */
+  GOVERNMENT_STRUCTURE_READ: 'government:structure:read',
+  GOVERNMENT_STRUCTURE_MANAGE: 'government:structure:manage',
+
+  AUTHORITY_GOVERNING_SOURCE_READ: 'authority:governing-source:read',
+  AUTHORITY_GOVERNING_SOURCE_CREATE: 'authority:governing-source:create',
+  /** Records that an authenticated copy of a governing instrument was verified. Level F. */
+  AUTHORITY_GOVERNING_SOURCE_AUTHENTICATE: 'authority:governing-source:authenticate',
+  AUTHORITY_GOVERNING_SOURCE_REVOKE: 'authority:governing-source:revoke',
+  AUTHORITY_EXTERNAL_DETERMINATION_RECORD: 'authority:external-determination:record',
+  AUTHORITY_INSTITUTIONAL_ACT_RECORD: 'authority:institutional-act:record',
+  AUTHORITY_EVALUATION_RUN: 'authority:evaluation:run',
+
+  SERVICE_CATALOG_READ: 'service-catalog:configuration:read',
+  SERVICE_CATALOG_MANAGE: 'service-catalog:configuration:manage',
+  SERVICE_CATALOG_FORM_PUBLISH: 'service-catalog:form:publish',
+
+  RECORDS_CLASSIFICATION_MANAGE: 'records:classification:manage',
+  RECORDS_RETENTION_SCHEDULE_READ: 'records:retention-schedule:read',
+  RECORDS_RETENTION_SCHEDULE_MANAGE: 'records:retention-schedule:manage',
+  RECORDS_LEGAL_HOLD_PLACE: 'records:legal-hold:place',
+  RECORDS_DISPOSITION_REQUEST: 'records:disposition:request',
+
+  RECORDS_MASTER_FILE_READ: 'records:master-file:read',
+  RECORDS_MASTER_FILE_MANAGE: 'records:master-file:manage',
+
+  REDRESS_MATTER_READ: 'redress:matter:read',
+  REDRESS_MATTER_MANAGE: 'redress:matter:manage',
+  REDRESS_DETERMINATION_RECORD: 'redress:determination:record',
+
+  COMMUNICATIONS_MESSAGE_PREPARE: 'communications:message:prepare',
+  COMMUNICATIONS_MESSAGE_APPROVE: 'communications:message:approve',
+  COMMUNICATIONS_TEMPLATE_MANAGE: 'communications:template:manage',
+
+  FINANCIAL_RECORD_READ: 'financial:record:read',
+  /** Machine permission for payment-provider callbacks; never granted to people. */
+  FINANCIAL_PAYMENT_WEBHOOK_INGEST: 'financial:payment-webhook:ingest',
+
+  INTEGRATION_READ: 'integration:definition:read',
+  INTEGRATION_MANAGE: 'integration:definition:manage',
+  INTEGRATION_ACCEPT: 'integration:definition:accept',
+  INTEGRATION_EXCHANGE_EXECUTE: 'integration:exchange:execute',
+
+  INTELLIGENCE_READ: 'intelligence:record:read',
+  INTELLIGENCE_ANALYSIS_RUN: 'intelligence:analysis:run',
+  INTELLIGENCE_CONFIGURATION_MANAGE: 'intelligence:configuration:manage',
+  INTELLIGENCE_CONFIGURATION_PUBLISH: 'intelligence:configuration:publish',
+  INTELLIGENCE_CLAIM_REVIEW: 'intelligence:claim:review',
+  INTELLIGENCE_CONSEQUENTIAL_USE_APPROVE: 'intelligence:consequential-use:approve',
+  INTELLIGENCE_COMMAND_CONSOLE_QUERY: 'intelligence:command-console:query',
+  INTELLIGENCE_STRATEGIC_PROJECT_MANAGE: 'intelligence:strategic-project:manage',
+
+  OPERATIONAL_READINESS_READ: 'operational-readiness:record:read',
+  OPERATIONAL_READINESS_MANAGE: 'operational-readiness:record:manage',
+  /** Records a maturity decision; level F. */
+  OPERATIONAL_READINESS_DECIDE: 'operational-readiness:maturity:decide',
+
+  SERVICE_PACK_READ: 'service-pack:registry:read',
+  SERVICE_PACK_MANAGE: 'service-pack:authoring:manage',
+  /** Accepts or rejects a service pack for use; level F. */
+  SERVICE_PACK_ACCEPT: 'service-pack:governance:accept',
+
+  AI_ASSISTANCE_USE: 'ai:assistance:use',
+  AI_ASSISTANCE_REVIEW: 'ai:assistance:review',
+
   WORKFLOW_DEFINITION_CREATE: 'workflow:definition:create',
   WORKFLOW_DEFINITION_APPROVE: 'workflow:definition:approve',
   RECORDS_LEGAL_HOLD_RELEASE: 'records:legal-hold:release',
-  CONFIGURATION_ACTIVATE: 'configuration:activate',
+  CONFIGURATION_ACTIVATE: 'configuration:change:activate',
   CONFIGURATION_CHANGE_PROPOSE: 'configuration:change:propose',
   CONFIGURATION_CHANGE_APPROVE: 'configuration:change:approve',
-  AUDIT_READ: 'audit:read',
+  AUDIT_READ: 'audit:ledger:read',
 } as const;
 
 export type PermissionCode = (typeof PermissionCodes)[keyof typeof PermissionCodes];

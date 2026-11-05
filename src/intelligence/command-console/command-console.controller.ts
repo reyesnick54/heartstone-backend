@@ -12,6 +12,8 @@ import { CurrentActor } from '../../identity/auth/decorators/current-actor.decor
 import { ClientIdentitySubstitutionGuard } from '../../identity/auth/guards/client-identity-substitution.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { IntelligenceInstitutionalScopeService } from '../common/intelligence-institutional-scope.service';
 import { IntelligenceSuspendedAiGuard } from '../common/intelligence-suspended-ai.guard';
 import { DashboardBoundaryService } from './dashboard-boundary.service';
@@ -49,6 +51,7 @@ export class CommandConsoleController {
   ) {}
 
   @Post('projections/derive')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @ApiOperation({
     summary: 'Derive dashboard indicator projection from authoritative records',
     description:
@@ -97,6 +100,7 @@ export class CommandConsoleController {
   }
 
   @Post('executive/query')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_COMMAND_CONSOLE_QUERY)
   @ApiOperation({
     summary: 'Query executive command console',
     description:
@@ -123,6 +127,7 @@ export class CommandConsoleController {
   }
 
   @Post('departmental/query')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_COMMAND_CONSOLE_QUERY)
   @ApiOperation({
     summary: 'Query departmental intelligence console',
     description:
@@ -149,6 +154,7 @@ export class CommandConsoleController {
   }
 
   @Post('snapshots/capture')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @ApiOperation({
     summary: 'Capture immutable dashboard snapshot',
     description: 'Snapshot capturer identity is derived from the authenticated session.',
@@ -166,6 +172,7 @@ export class CommandConsoleController {
   }
 
   @Get('snapshots/replay/:replayToken')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @ApiOperation({
     summary: 'Replay immutable dashboard snapshot',
     description: 'Replay requires authenticated actor with verified dashboard access entitlements.',

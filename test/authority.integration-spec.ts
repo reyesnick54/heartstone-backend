@@ -11,11 +11,13 @@ import {
 } from './helpers/authority-test-types';
 import { authHeader, ensureIntegrationAdminSession } from './helpers/identity-provisioning.fixture';
 import { createIntegrationApp, resetAllTestData } from './helpers/integration-app';
+import { grantAuthorityAssuranceOfficer } from './helpers/technical-access.fixture';
 
 describe('Authority domain (integration)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let adminSessionToken: string;
+  let adminIdentityId: string;
 
   beforeAll(async () => {
     ({ app, prisma } = await createIntegrationApp());
@@ -25,6 +27,7 @@ describe('Authority domain (integration)', () => {
     await resetAllTestData(prisma);
     const admin = await ensureIntegrationAdminSession(app, prisma);
     adminSessionToken = admin.sessionToken;
+    adminIdentityId = admin.identityId;
   });
 
   afterAll(async () => {
@@ -50,11 +53,29 @@ describe('Authority domain (integration)', () => {
 
     const source = asGoverningSourceBody(sourceResponse.body);
 
+    // A platform administrator (level E) cannot make a source count as authoritative.
+    await request(app.getHttpServer())
+      .patch(`/api/v1/authority/governing-sources/${source.id}/authenticate`)
+      .set(authHeader(adminSessionToken))
+      .send({ verificationReference: 'Gazette 2026/14' })
+      .expect(403);
+
+    // The request can no longer name someone else as the authenticating officer.
+    await grantAuthorityAssuranceOfficer(prisma, adminIdentityId);
     await request(app.getHttpServer())
       .patch(`/api/v1/authority/governing-sources/${source.id}/authenticate`)
       .set(authHeader(adminSessionToken))
       .send({ authenticatedByIdentityId: actor.id })
+      .expect(400);
+
+    await request(app.getHttpServer())
+      .patch(`/api/v1/authority/governing-sources/${source.id}/authenticate`)
+      .set(authHeader(adminSessionToken))
+      .send({ verificationReference: 'Gazette 2026/14' })
       .expect(200);
+
+    const stored = await prisma.governingSource.findUniqueOrThrow({ where: { id: source.id } });
+    expect(stored.authenticatedByIdentityId).toBe(adminIdentityId);
 
     const functionResponse = await request(app.getHttpServer())
       .post('/api/v1/authority/functions')

@@ -15,6 +15,8 @@ import { ScopedResourceType } from '../institutional-scope/institutional-scope.t
 import { ResourceAccessService } from '../institutional-scope/resource-access.service';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { MasterFileCompletenessAssessmentService } from './completeness/master-file-completeness-assessment.service';
 import { AssessMasterFileCompletenessDto } from './dto/assess-master-file-completeness.dto';
 import { MasterAdministrativeFileService } from './master-administrative-file.service';
@@ -47,6 +49,7 @@ export class MasterAdministrativeFileController {
   ) {}
 
   @Get('by-case/:caseId')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Get Master Administrative File by case' })
   async getByCaseId(
     @CurrentSession() session: SessionContextDto,
@@ -60,6 +63,7 @@ export class MasterAdministrativeFileController {
   }
 
   @Post('initialize/by-case/:caseId')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_MANAGE)
   @ApiOperation({ summary: 'Initialize Master Administrative File for a case' })
   @ApiCreatedResponse({ description: 'Canonical one-to-one Master File created for case' })
   async initializeForCase(
@@ -76,6 +80,7 @@ export class MasterAdministrativeFileController {
   }
 
   @Post(':id/completeness')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_MANAGE)
   @ApiOperation({ summary: 'Assess Master Administrative File evidence completeness' })
   @ApiCreatedResponse({
     description:
@@ -101,6 +106,7 @@ export class MasterAdministrativeFileController {
   }
 
   @Get(':id/index')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Get Master Administrative File index' })
   @ApiOkResponse({ description: 'Section index referencing existing Phase 3–6 records' })
   async getIndex(
@@ -117,6 +123,7 @@ export class MasterAdministrativeFileController {
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Get Master Administrative File metadata' })
   @ApiOkResponse({ description: 'Institutional file metadata with minimum-necessary fields' })
   async getById(

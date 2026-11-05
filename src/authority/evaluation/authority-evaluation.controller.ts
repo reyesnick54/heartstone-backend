@@ -12,6 +12,8 @@ import { SessionContextDto } from '../../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { AuthorityEvaluationService } from './authority-evaluation.service';
 import { AuthorityEvaluationResponseDto } from './dto/authority-evaluation-response.dto';
 import { EvaluateAuthorityDto } from './dto/evaluate-authority.dto';
@@ -32,6 +34,7 @@ export class AuthorityEvaluationController {
   constructor(private readonly evaluationService: AuthorityEvaluationService) {}
 
   @Post()
+  @RequirePermissions(PermissionCodes.AUTHORITY_EVALUATION_RUN)
   @ApiOperation({
     summary: 'Evaluate whether a specific institutional action may proceed',
     description:
@@ -63,6 +66,7 @@ export class AuthorityEvaluationController {
   }
 
   @Get('records/:id')
+  @RequirePermissions(PermissionCodes.AUTHORITY_EVALUATION_RUN)
   @ApiOperation({ summary: 'Retrieve an immutable authority evaluation record' })
   @ApiOkResponse()
   getRecord(@Param('id', ParseUUIDPipe) id: string) {

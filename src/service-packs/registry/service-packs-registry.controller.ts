@@ -4,6 +4,8 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from '../../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { RequirePermissions } from '../../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../../technical-access/constants/permission-codes.constants';
 import { ServicePackRegistryService } from './service-pack-registry.service';
 
 @ApiTags('service-packs')
@@ -21,6 +23,7 @@ export class ServicePacksRegistryController {
   constructor(private readonly registryService: ServicePackRegistryService) {}
 
   @Get()
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Administrative service pack registry inventory' })
   @ApiOkResponse({ description: 'Installed packs and deployment inventory snapshot' })
   listRegistry() {
@@ -28,18 +31,21 @@ export class ServicePacksRegistryController {
   }
 
   @Get('jurisdictions/:jurisdictionId')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Registry inventory for a jurisdiction' })
   listByJurisdiction(@Param('jurisdictionId', ParseUUIDPipe) jurisdictionId: string) {
     return this.registryService.listByJurisdiction(jurisdictionId);
   }
 
   @Get('institutions/:institutionId')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Registry inventory for an institution' })
   listByInstitution(@Param('institutionId', ParseUUIDPipe) institutionId: string) {
     return this.registryService.listByInstitution(institutionId);
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionCodes.SERVICE_PACK_READ)
   @ApiOperation({ summary: 'Registry inventory for a single service pack' })
   getById(@Param('id', ParseUUIDPipe) id: string) {
     return this.registryService.getRegistryEntry(id);

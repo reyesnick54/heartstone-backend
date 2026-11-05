@@ -10,6 +10,7 @@ import { type Request } from 'express';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
+import { RouteAccess } from '../../security/decorators/route-access.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { AuthService } from './auth.service';
 import { CurrentSession } from './decorators/current-session.decorator';
@@ -67,6 +68,14 @@ export class AuthController {
     });
   }
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: "The caller's own sessions",
+    authorityRequirement: 'None',
+    actorSource: 'Session identity',
+    primarySecurityInvariant: 'A session can only end sessions of its own user account',
+  })
   @Post('logout')
   @UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
   @ApiBearerAuth()
@@ -77,6 +86,14 @@ export class AuthController {
     return { revoked: true };
   }
 
+  @RouteAccess({
+    routeClass: RouteClass.AUTHENTICATED_SELF_SERVICE,
+    authenticationRequired: true,
+    scopeRequirement: "The caller's own sessions",
+    authorityRequirement: 'None',
+    actorSource: 'Session identity',
+    primarySecurityInvariant: 'A session can only end sessions of its own user account',
+  })
   @Post('logout-all')
   @UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
   @ApiBearerAuth()

@@ -12,6 +12,8 @@ import { SessionContextDto } from '../identity/auth/dto/session-context.dto';
 import { SessionAuthGuard } from '../identity/auth/guards/session-auth.guard';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { CommunicationDeliveryService } from './communications/communication-delivery.service';
 import { CommunicationMessageService } from './communications/communication-message.service';
 import { CommunicationTemplateService } from './communications/communication-template.service';
@@ -73,18 +75,21 @@ export class OperationalSupportController {
   ) {}
 
   @Get('boundary')
+  @RequirePermissions(PermissionCodes.INTEGRATION_READ)
   @ApiOperation({ summary: 'Operational support boundary disclaimer' })
   getBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: OPERATIONAL_SUPPORT_BOUNDARY_DISCLAIMER };
   }
 
   @Get('maf/:masterAdministrativeFileId/index')
+  @RequirePermissions(PermissionCodes.RECORDS_MASTER_FILE_READ)
   @ApiOperation({ summary: 'Index Phase 11 records to MAF sections 14 and 15' })
   indexMaf(@Param('masterAdministrativeFileId', ParseUUIDPipe) masterAdministrativeFileId: string) {
     return this.mafIndexing.buildOperationalSupportIndex(masterAdministrativeFileId);
   }
 
   @Post('communications/templates')
+  @RequirePermissions(PermissionCodes.COMMUNICATIONS_TEMPLATE_MANAGE)
   createTemplate(
     @Body()
     body: {
@@ -98,6 +103,7 @@ export class OperationalSupportController {
   }
 
   @Post('communications/templates/versions')
+  @RequirePermissions(PermissionCodes.COMMUNICATIONS_TEMPLATE_MANAGE)
   createTemplateVersion(
     @Body()
     body: {
@@ -112,16 +118,19 @@ export class OperationalSupportController {
   }
 
   @Post('communications/messages')
+  @RequirePermissions(PermissionCodes.COMMUNICATIONS_MESSAGE_PREPARE)
   createMessage(@Body() body: Parameters<CommunicationMessageService['createMessage']>[0]) {
     return this.messages.createMessage(body);
   }
 
   @Post('communications/messages/:id/approve')
+  @RequirePermissions(PermissionCodes.COMMUNICATIONS_MESSAGE_APPROVE)
   approveMessage(@Param('id', ParseUUIDPipe) id: string) {
     return this.messages.approveMessage(id);
   }
 
   @Post('communications/messages/:id/deliver')
+  @RequirePermissions(PermissionCodes.COMMUNICATIONS_MESSAGE_APPROVE)
   deliverMessage(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { mandatoryRuleCode?: string },
@@ -133,6 +142,7 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/definitions')
+  @RequirePermissions(PermissionCodes.INTEGRATION_MANAGE)
   createIntegrationDefinition(
     @Body()
     body: {
@@ -147,6 +157,7 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/definitions/:id/endpoints')
+  @RequirePermissions(PermissionCodes.INTEGRATION_MANAGE)
   createIntegrationEndpoint(
     @Param('id', ParseUUIDPipe) id: string,
     @Body()
@@ -163,6 +174,7 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/exchanges')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   executeExchange(
     @Body() body: Parameters<IntegrationGatewayService['executeAuthorizedExchange']>[0],
   ) {
@@ -170,6 +182,7 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/webhooks')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   receiveIntegrationWebhook(
     @Body() body: Parameters<IntegrationWebhookService['receiveWebhook']>[0],
   ) {
@@ -177,16 +190,19 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/registry-queries')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   executeRegistryQuery(@Body() body: Parameters<RegistryQueryService['executeQuery']>[0]) {
     return this.registryQueries.executeQuery(body);
   }
 
   @Post('integrations/discrepancies')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   recordDiscrepancy(@Body() body: Parameters<SourceDiscrepancyService['recordDiscrepancy']>[0]) {
     return this.sourceDiscrepancies.recordDiscrepancy(body);
   }
 
   @Post('integrations/acceptance')
+  @RequirePermissions(PermissionCodes.INTEGRATION_ACCEPT)
   recordAcceptance(
     @CurrentSession() session: SessionContextDto,
     @Body()
@@ -207,6 +223,7 @@ export class OperationalSupportController {
   }
 
   @Post('integrations/redress-refunds')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   executeRedressRefund(
     @CurrentSession() session: SessionContextDto,
     @Body()
@@ -225,16 +242,19 @@ export class OperationalSupportController {
   }
 
   @Get('financial/invoices/:invoiceNumber')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getInvoice(@Param('invoiceNumber') invoiceNumber: string) {
     return this.invoices.findByNumber(invoiceNumber);
   }
 
   @Get('financial/payment-intents/:intentReference')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getPaymentIntent(@Param('intentReference') intentReference: string) {
     return this.paymentIntents.findByReference(intentReference);
   }
 
   @Post('integrations/definitions/:id/status')
+  @RequirePermissions(PermissionCodes.INTEGRATION_MANAGE)
   updateIntegrationStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { status: IntegrationDefinitionStatus },
@@ -243,46 +263,55 @@ export class OperationalSupportController {
   }
 
   @Post('financial/payment-webhooks')
+  @RequirePermissions(PermissionCodes.FINANCIAL_PAYMENT_WEBHOOK_INGEST)
   receivePaymentWebhook(@Body() body: Parameters<PaymentWebhookService['processWebhook']>[0]) {
     return this.paymentWebhooks.processWebhook(body);
   }
 
   @Get('financial/approvals/:id')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getFinancialApproval(@Param('id', ParseUUIDPipe) id: string) {
     return this.financialApprovals.getByIdOrThrow(id);
   }
 
   @Get('financial/reconciliation/:batchReference')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getReconciliationBatch(@Param('batchReference') batchReference: string) {
     return this.reconciliation.getBatchByReferenceOrThrow(batchReference);
   }
 
   @Get('financial/fee-assessments/:id')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getFeeAssessment(@Param('id', ParseUUIDPipe) id: string) {
     return this.feeAssessments.getByIdOrThrow(id);
   }
 
   @Get('financial/refund-authorizations/:authorizationReference')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getRefundAuthorization(@Param('authorizationReference') authorizationReference: string) {
     return this.refundAuthorizations.findByReference(authorizationReference);
   }
 
   @Get('financial/payment-transactions/:id')
+  @RequirePermissions(PermissionCodes.FINANCIAL_RECORD_READ)
   getPaymentTransaction(@Param('id', ParseUUIDPipe) id: string) {
     return this.paymentTransactions.getByIdOrThrow(id);
   }
 
   @Get('integrations/definitions/:id')
+  @RequirePermissions(PermissionCodes.INTEGRATION_READ)
   getIntegrationDefinition(@Param('id', ParseUUIDPipe) id: string) {
     return this.integrationDefinitions.getDefinition(id);
   }
 
   @Get('integrations/definitions/:id/acceptance')
+  @RequirePermissions(PermissionCodes.INTEGRATION_READ)
   getAcceptanceDossier(@Param('id', ParseUUIDPipe) id: string) {
     return this.integrationAcceptance.getAcceptanceDossier(id);
   }
 
   @Post('integrations/outages/:integrationDefinitionId/fallback')
+  @RequirePermissions(PermissionCodes.INTEGRATION_EXCHANGE_EXECUTE)
   activateFallback(
     @Param('integrationDefinitionId', ParseUUIDPipe) integrationDefinitionId: string,
     @Body() body: { fallbackMode: string; impactSummary?: string },

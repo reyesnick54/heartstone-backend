@@ -230,7 +230,7 @@ export async function seedIntelligenceActorFixture(
     });
 
     await app.get(GoverningSourcesService).authenticate(governingSource.id, {
-      authenticatedByIdentityId: official.identityId,
+      actorIdentityId: official.identityId,
     });
 
     const functions = app.get(FunctionAuthorityRecordsService);

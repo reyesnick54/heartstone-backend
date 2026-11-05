@@ -15,6 +15,8 @@ import { type ActorContext } from '../identity/auth/context/actor-context.types'
 import { CurrentActor } from '../identity/auth/decorators/current-actor.decorator';
 import { ControllerRouteAccess } from '../security/decorators/controller-route-access.decorator';
 import { RouteClass } from '../security/route-class.enum';
+import { RequirePermissions } from '../technical-access/authorization/require-permissions.decorator';
+import { PermissionCodes } from '../technical-access/constants/permission-codes.constants';
 import { AnalysisService } from './analysis/analysis.service';
 import { MetricCalculationRunService } from './calculations/metric-calculation-run.service';
 import { MeasuredPerformanceClaimService } from './claims/measured-performance-claim.service';
@@ -72,18 +74,21 @@ export class IntelligenceController {
   ) {}
 
   @Get('boundary')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @ApiOperation({ summary: 'Performance measurement boundary metadata (public)' })
   getBoundary() {
     return this.boundary.boundaryMetadata();
   }
 
   @Get('twin-simulation/boundary')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @ApiOperation({ summary: 'Digital twin and simulation boundary disclaimer (public)' })
   getTwinSimulationBoundaryDisclaimer(): { disclaimer: string } {
     return { disclaimer: PHASE_12F_BOUNDARY_DISCLAIMER };
   }
 
   @Post('frameworks')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createFramework(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceFrameworkDto) {
@@ -93,6 +98,7 @@ export class IntelligenceController {
   }
 
   @Get('frameworks/:id')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async getFramework(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
@@ -102,6 +108,7 @@ export class IntelligenceController {
   }
 
   @Post('metrics')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createMetric(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricDefinitionDto) {
@@ -112,6 +119,7 @@ export class IntelligenceController {
   }
 
   @Post('metrics/:id/versions')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createMetricVersion(
@@ -126,6 +134,7 @@ export class IntelligenceController {
   }
 
   @Post('metrics/:id/publish')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_PUBLISH)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async publishMetric(@CurrentActor() actor: ActorContext, @Param('id', ParseUUIDPipe) id: string) {
@@ -135,6 +144,7 @@ export class IntelligenceController {
   }
 
   @Post('metric-versions/:id/activate')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_PUBLISH)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async activateMetricVersion(
@@ -150,6 +160,7 @@ export class IntelligenceController {
   }
 
   @Post('baselines')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createBaseline(@CurrentActor() actor: ActorContext, @Body() dto: CreateMetricBaselineDto) {
@@ -163,6 +174,7 @@ export class IntelligenceController {
   }
 
   @Post('calculation-runs')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordCalculationRun(
@@ -179,6 +191,7 @@ export class IntelligenceController {
   }
 
   @Post('claims')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createClaim(@CurrentActor() actor: ActorContext, @Body() dto: CreatePerformanceClaimDto) {
@@ -187,6 +200,7 @@ export class IntelligenceController {
   }
 
   @Post('claims/:id/review')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CLAIM_REVIEW)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async reviewClaim(
@@ -202,6 +216,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/definitions')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createDefinition(
@@ -215,6 +230,7 @@ export class IntelligenceController {
   }
 
   @Get('digital-twins/definitions/:id')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async getDefinition(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
@@ -224,6 +240,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/versions')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createVersion(
@@ -237,6 +254,7 @@ export class IntelligenceController {
   }
 
   @Get('digital-twins/versions/:id')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async getVersion(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
@@ -247,6 +265,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/sources')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async addSource(
@@ -261,6 +280,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/relationships')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createRelationship(
@@ -274,6 +294,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/modes')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordMode(
@@ -288,6 +309,7 @@ export class IntelligenceController {
   }
 
   @Post('digital-twins/snapshots')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createSnapshot(
@@ -302,6 +324,7 @@ export class IntelligenceController {
   }
 
   @Post('simulations/scenarios')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createScenario(
@@ -317,6 +340,7 @@ export class IntelligenceController {
   }
 
   @Get('simulations/scenarios/:id')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async getScenario(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
@@ -328,6 +352,7 @@ export class IntelligenceController {
   }
 
   @Post('simulations/runs')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async startRun(
@@ -342,6 +367,7 @@ export class IntelligenceController {
   }
 
   @Post('simulations/runs/:id/outputs')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordOutput(
@@ -358,6 +384,7 @@ export class IntelligenceController {
   }
 
   @Post('simulations/runs/:id/complete')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async completeRun(@CurrentActor() actor: ActorContext, @Param('id') id: string) {
@@ -369,6 +396,7 @@ export class IntelligenceController {
   }
 
   @Post('consequential-use/reviews')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CLAIM_REVIEW)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordReview(
@@ -392,6 +420,7 @@ export class IntelligenceController {
   }
 
   @Post('consequential-use/live-transitions')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONSEQUENTIAL_USE_APPROVE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async proposeLiveTransition(
@@ -410,6 +439,7 @@ export class IntelligenceController {
   }
 
   @Post('analysis/requests')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createAnalysisRequest(
@@ -425,6 +455,7 @@ export class IntelligenceController {
   }
 
   @Post('analysis/runs')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async startAnalysisRun(
@@ -441,6 +472,7 @@ export class IntelligenceController {
   }
 
   @Post('analysis/runs/:runId/complete')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async completeAnalysisRun(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
@@ -450,6 +482,7 @@ export class IntelligenceController {
   }
 
   @Get('analysis/runs/:runId/replay')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_READ)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async getAnalysisReplay(@CurrentActor() actor: ActorContext, @Param('runId') runId: string) {
@@ -463,6 +496,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/rules')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createMonitoringRule(
@@ -483,6 +517,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/rules/:ruleId/activate')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_PUBLISH)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async activateMonitoringRule(
@@ -495,6 +530,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/observations')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async recordObservation(
@@ -508,6 +544,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/alerts')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async generateAlert(
@@ -528,6 +565,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/alerts/verify')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CLAIM_REVIEW)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async verifyAlert(
@@ -553,6 +591,7 @@ export class IntelligenceController {
   }
 
   @Post('monitoring/alerts/dispose')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CLAIM_REVIEW)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async disposeAlert(
@@ -575,6 +614,7 @@ export class IntelligenceController {
   }
 
   @Post('risk/definitions')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_CONFIGURATION_MANAGE)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   createRiskDefinition(
@@ -587,6 +627,7 @@ export class IntelligenceController {
   }
 
   @Post('risk/assessments')
+  @RequirePermissions(PermissionCodes.INTELLIGENCE_ANALYSIS_RUN)
   @UseGuards(...INTELLIGENCE_ACTOR_GUARDS)
   @ApiBearerAuth()
   async createRiskAssessment(

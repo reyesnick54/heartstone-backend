@@ -9,7 +9,13 @@ import { Reflector } from '@nestjs/core';
 import { TechnicalAccessAuditResult } from '@prisma/client';
 
 import { type AuthenticatedRequest } from '../../identity/auth/guards/session-auth.guard';
+import { CONTROLLER_ROUTE_ACCESS_KEY } from '../../security/decorators/controller-route-access.decorator';
 import { IS_PUBLIC_KEY } from '../../security/decorators/public.decorator';
+import {
+  ROUTE_ACCESS_KEY,
+  type RouteAccessMetadata,
+} from '../../security/decorators/route-access.decorator';
+import { RouteClass } from '../../security/route-class.enum';
 import { TechnicalAccessAuditService } from '../services/technical-access-audit.service';
 import { TechnicalPermissionEvaluationService } from '../services/technical-permission-evaluation.service';
 import { resolveRequestPermissionScope } from '../utils/resolve-request-scope.util';
@@ -40,10 +46,11 @@ export class PermissionsGuard implements CanActivate {
       RequirePermissionsMetadata | undefined
     >(REQUIRE_PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
-    const denyByDefault = this.reflector.getAllAndOverride<boolean>(
-      DENY_BY_DEFAULT_ADMINISTRATIVE_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const denyByDefault =
+      this.reflector.getAllAndOverride<boolean>(DENY_BY_DEFAULT_ADMINISTRATIVE_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || this.isRestrictedAdministrativeRoute(context);
 
     if (!permissionMetadata && !denyByDefault) {
       return true;
@@ -117,5 +124,23 @@ export class PermissionsGuard implements CanActivate {
     });
 
     return true;
+  }
+
+  /**
+   * A route classified RESTRICTED_ADMINISTRATIVE (on the handler or its controller) is
+   * deny-by-default: it must declare an explicit technical permission. The route class
+   * alone used to block only machine identities, which let any signed-in person through.
+   */
+  private isRestrictedAdministrativeRoute(context: ExecutionContext): boolean {
+    const routeAccess =
+      this.reflector.getAllAndOverride<RouteAccessMetadata | undefined>(ROUTE_ACCESS_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) ??
+      this.reflector.getAllAndOverride<RouteAccessMetadata | undefined>(
+        CONTROLLER_ROUTE_ACCESS_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+    return routeAccess?.routeClass === RouteClass.RESTRICTED_ADMINISTRATIVE;
   }
 }

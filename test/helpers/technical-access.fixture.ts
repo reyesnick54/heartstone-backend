@@ -115,3 +115,30 @@ export async function grantAuthorityFunctionLifecycleOperator(
     scopeType: TechnicalAccessScopeType.PLATFORM,
   });
 }
+
+/** Level-F assurance capability: authenticate governing sources, record external determinations. */
+export async function grantAuthorityAssuranceOfficer(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<void> {
+  await assignTechnicalRole(prisma, {
+    identityId,
+    roleCode: TechnicalRoleCodes.AUTHORITY_ASSURANCE_OFFICER,
+    scopeType: TechnicalAccessScopeType.PLATFORM,
+  });
+}
+
+/**
+ * Lets a test identity call the payment webhook. Stand-in for the payment provider's
+ * service identity until the webhook is a public, signature-verified route.
+ */
+export async function grantPaymentProviderCallback(
+  prisma: PrismaClient,
+  identityId: string,
+): Promise<void> {
+  await assignTechnicalRole(prisma, {
+    identityId,
+    roleCode: TechnicalRoleCodes.PAYMENT_PROVIDER_CALLBACK,
+    scopeType: TechnicalAccessScopeType.PLATFORM,
+  });
+}
