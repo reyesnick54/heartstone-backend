@@ -23,7 +23,7 @@ export class LoginResponseDto {
   @ApiProperty()
   mfaSatisfied!: boolean;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: String, nullable: true })
   oidcProviderCode?: string | null;
 
   @ApiProperty()

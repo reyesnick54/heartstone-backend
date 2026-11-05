@@ -11,6 +11,8 @@ export class LocalizedLabelDto {
   labelKey?: string;
 
   @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
     description: 'Optional structured labels keyed by locale code',
     example: { en: 'Pay invoice' },
   })

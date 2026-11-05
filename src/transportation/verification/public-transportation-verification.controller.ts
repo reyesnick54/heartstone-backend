@@ -5,6 +5,11 @@ import { ControllerRouteAccess } from '../../security/decorators/controller-rout
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import {
+  PublicLicenseVerificationResponseDto,
+  PublicOperatorVerificationResponseDto,
+  PublicVehicleVerificationResponseDto,
+} from './dto/public-transportation-verification-response.dto';
+import {
   type PublicLicenseVerificationResponse,
   type PublicOperatorVerificationResponse,
   PublicTransportationVerificationService,
@@ -26,19 +31,24 @@ export class PublicTransportationVerificationController {
 
   @Get('verify/license/:reference')
   @ApiOperation({ summary: 'Public driver license status verification (minimal facts)' })
-  @ApiOkResponse({ description: 'Policy-permitted license status only' })
+  @ApiOkResponse({
+    type: PublicLicenseVerificationResponseDto,
+    description: 'Policy-permitted license status only',
+  })
   verifyLicense(@Param('reference') reference: string): Promise<PublicLicenseVerificationResponse> {
     return this.verification.verifyLicenseReference(reference);
   }
 
   @Get('verify/vehicle/:reference')
   @ApiOperation({ summary: 'Public vehicle registration status verification' })
+  @ApiOkResponse({ type: PublicVehicleVerificationResponseDto })
   verifyVehicle(@Param('reference') reference: string): Promise<Record<string, unknown>> {
     return this.verification.verifyVehicleRegistration(reference);
   }
 
   @Get('verify/operator/:reference')
   @ApiOperation({ summary: 'Public commercial transport operator permit status verification' })
+  @ApiOkResponse({ type: PublicOperatorVerificationResponseDto })
   verifyOperator(
     @Param('reference') reference: string,
   ): Promise<PublicOperatorVerificationResponse> {

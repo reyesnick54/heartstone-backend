@@ -5,6 +5,7 @@ import { ControllerRouteAccess } from '../../security/decorators/controller-rout
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
 import { CORPORATE_REGISTRY_API_TAG } from '../corporate-registry.constants';
+import { PublicCorporateRegistryVerificationResponseDto } from './dto/public-corporate-registry-verification-response.dto';
 import {
   type PublicCorporateRegistryVerificationResponse,
   PublicCorporateRegistryVerificationService,
@@ -28,7 +29,10 @@ export class PublicCorporateRegistryVerificationController {
   @ApiOperation({
     summary: 'Publicly verify a corporate registry record by opaque reference',
   })
-  @ApiOkResponse({ description: 'Policy-permitted corporate registry facts only' })
+  @ApiOkResponse({
+    type: PublicCorporateRegistryVerificationResponseDto,
+    description: 'Policy-permitted corporate registry facts only',
+  })
   verify(
     @Param('reference') reference: string,
   ): Promise<PublicCorporateRegistryVerificationResponse> {

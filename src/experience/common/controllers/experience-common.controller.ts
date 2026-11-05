@@ -1,5 +1,12 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { type ActorContext } from '../../../identity/auth/context/actor-context.types';
 import { CurrentActor } from '../../../identity/auth/decorators/current-actor.decorator';
@@ -56,6 +63,7 @@ export class ExperienceCommonController {
 
   @Get('metadata')
   @ApiOperation({ summary: 'Experience response metadata and localization contract' })
+  @ApiQuery({ name: 'locale', required: false, type: String })
   @ApiOkResponse({ type: ExperienceResponseMetadataDto })
   async getMetadata(
     @CurrentActor() actor: ActorContext,
@@ -71,6 +79,7 @@ export class ExperienceCommonController {
     description:
       'Search within actor-visible resources only. Cross-government enumeration is not permitted.',
   })
+  @ApiQuery({ name: 'locale', required: false, type: String })
   @ApiOkResponse({ type: ExperienceSearchResponseDto })
   async search(
     @CurrentActor() actor: ActorContext,
@@ -87,6 +96,7 @@ export class ExperienceCommonController {
     description:
       'Returns navigation items appropriate to the authenticated actor. Does not grant access to protected functionality.',
   })
+  @ApiQuery({ name: 'locale', required: false, type: String })
   @ApiOkResponse({ type: ExperienceNavigationResponseDto })
   async getNavigation(
     @CurrentActor() actor: ActorContext,
@@ -102,6 +112,7 @@ export class ExperienceCommonController {
     description:
       'Aggregates secure messages, notices, and updates without duplicating CommunicationMessage records.',
   })
+  @ApiQuery({ name: 'locale', required: false, type: String })
   @ApiOkResponse({ type: ExperienceInboxResponseDto })
   async getInbox(
     @CurrentActor() actor: ActorContext,
@@ -118,6 +129,8 @@ export class ExperienceCommonController {
     description:
       'Shared action contracts for citizen, business, and official personas. Presentation only; execution re-evaluates authorization.',
   })
+  @ApiQuery({ name: 'caseId', required: false, type: String })
+  @ApiQuery({ name: 'locale', required: false, type: String })
   @ApiOkResponse({ type: ExperienceActionsResponseDto })
   async getActions(
     @CurrentActor() actor: ActorContext,
@@ -135,7 +148,8 @@ export class ExperienceCommonController {
     description:
       'Confirms whether the authenticated actor may navigate to a deep link target. Does not bypass backend authorization.',
   })
-  @ApiOkResponse({ type: ExperienceDeepLinkResolveResponseDto })
+  @ApiQuery({ name: 'locale', required: false, type: String })
+  @ApiCreatedResponse({ type: ExperienceDeepLinkResolveResponseDto })
   async resolveDeepLink(
     @CurrentActor() actor: ActorContext,
     @Body() body: ExperienceDeepLinkResolveRequestDto,

@@ -4,6 +4,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
 import { Public } from '../../security/decorators/public.decorator';
 import { RouteClass } from '../../security/route-class.enum';
+import { PublicInstrumentVerificationResponseDto } from './dto/public-instrument-verification-response.dto';
 import {
   InstrumentVerificationService,
   PublicInstrumentVerificationResponse,
@@ -28,7 +29,10 @@ export class PublicInstrumentVerificationController {
   @ApiOperation({
     summary: 'Publicly verify an issued instrument by opaque verification code',
   })
-  @ApiOkResponse({ description: 'Approved non-sensitive verification fields only' })
+  @ApiOkResponse({
+    type: PublicInstrumentVerificationResponseDto,
+    description: 'Approved non-sensitive verification fields only',
+  })
   verify(
     @Param('verificationCode') verificationCode: string,
   ): Promise<PublicInstrumentVerificationResponse> {

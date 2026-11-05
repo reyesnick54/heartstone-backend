@@ -36,6 +36,14 @@ export class ProtectedProfileResponseDto {
   hasInstitutionalRelationships!: boolean;
 }
 
+export class StepUpProtectedResponseDto {
+  @ApiProperty({ enum: [true] })
+  ok!: true;
+
+  @ApiProperty()
+  sessionId!: string;
+}
+
 @ApiTags('identity-protected')
 @ControllerRouteAccess({
   routeClass: RouteClass.RESTRICTED_ADMINISTRATIVE,
@@ -103,8 +111,8 @@ export class ProtectedController {
   @ApiOperation({
     summary: 'Protected route requiring recent MFA/step-up (technical access only)',
   })
-  @ApiOkResponse({ description: 'Step-up satisfied' })
-  stepUpProtected(@CurrentSession() session: SessionContextDto): { ok: true; sessionId: string } {
+  @ApiOkResponse({ type: StepUpProtectedResponseDto, description: 'Step-up satisfied' })
+  stepUpProtected(@CurrentSession() session: SessionContextDto): StepUpProtectedResponseDto {
     return { ok: true, sessionId: session.sessionId };
   }
 }

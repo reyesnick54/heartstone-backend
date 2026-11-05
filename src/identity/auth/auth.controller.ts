@@ -1,11 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type Request } from 'express';
 
 import { ControllerRouteAccess } from '../../security/decorators/controller-route-access.decorator';
@@ -16,6 +10,7 @@ import { AuthService } from './auth.service';
 import { CurrentSession } from './decorators/current-session.decorator';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { LogoutAllResponseDto, LogoutResponseDto } from './dto/logout-response.dto';
 import { OidcLoginDto } from './dto/oidc-login.dto';
 import { ServiceLoginDto } from './dto/service-login.dto';
 import { SessionContextDto } from './dto/session-context.dto';
@@ -80,8 +75,8 @@ export class AuthController {
   @UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke the current session' })
-  @ApiOkResponse({ description: 'Session revoked' })
-  async logout(@CurrentSession() session: SessionContextDto): Promise<{ revoked: boolean }> {
+  @ApiCreatedResponse({ type: LogoutResponseDto, description: 'Session revoked' })
+  async logout(@CurrentSession() session: SessionContextDto): Promise<LogoutResponseDto> {
     await this.authService.logout(session);
     return { revoked: true };
   }
@@ -98,8 +93,8 @@ export class AuthController {
   @UseGuards(SessionAuthGuard, ClientIdentitySubstitutionGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke all sessions for the current user account' })
-  @ApiOkResponse({ description: 'Sessions revoked' })
-  async logoutAll(@CurrentSession() session: SessionContextDto): Promise<{ revokedCount: number }> {
+  @ApiCreatedResponse({ type: LogoutAllResponseDto, description: 'Sessions revoked' })
+  async logoutAll(@CurrentSession() session: SessionContextDto): Promise<LogoutAllResponseDto> {
     const revokedCount = await this.authService.logoutAllSessions(session);
     return { revokedCount };
   }

@@ -18,7 +18,7 @@ export class CitizenActionDto {
   @ApiProperty()
   priority!: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   dueAt!: string | null;
 
   @ApiProperty()
