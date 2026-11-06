@@ -71,7 +71,8 @@ to create named administrator accounts with MFA, then remove the bootstrap accou
 realm from `heartstone-realm.template.json`, and imports it on first start (an existing realm is
 left as it is). The `heartstone-web` client is public with PKCE (S256), has exact redirect URIs
 `<origin>/auth/callback`, and adds the `heartstone-api` audience to access tokens, which the backend
-requires.
+requires. Its default client scopes include `basic`: since Keycloak 25 the `sub` claim comes from
+that scope, and the backend rejects a token without `sub` ("Missing subject claim").
 
 ## Known limits
 

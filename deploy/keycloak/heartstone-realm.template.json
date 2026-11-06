@@ -52,7 +52,7 @@
           }
         }
       ],
-      "defaultClientScopes": ["web-origins", "profile", "roles", "email"],
+      "defaultClientScopes": ["basic", "web-origins", "profile", "roles", "email"],
       "optionalClientScopes": ["address", "phone", "offline_access"]
     }
   ]
