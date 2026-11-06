@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   AuthorityEvaluationOutcome,
+  Prisma,
   RecordCorrection,
   RecordCorrectionStatus,
   RecordIntegrityEventType,
@@ -27,6 +28,10 @@ export interface RequestRecordCorrectionInput {
   reassessmentRequired?: boolean;
   noticeRequired?: boolean;
   reason?: string;
+  /** Proposed replacement values. Stored as a proposal; never applied by this call. */
+  proposedChanges?: Record<string, unknown>;
+  /** Client retry key, unique per requester. A retry returns the original request. */
+  idempotencyKey?: string;
 }
 
 export interface ApproveRecordCorrectionInput {
@@ -58,27 +63,36 @@ export class RecordCorrectionService {
       throw new ForbiddenException('AI assistants cannot request material record corrections');
     }
 
+    if (input.idempotencyKey) {
+      const existing = await this.findByIdempotencyKey(input.requestedBy, input.idempotencyKey);
+      if (existing) {
+        return existing;
+      }
+    }
+
     await this.assertTargetExists(
       input.targetRecordType,
       input.targetRecordId,
       input.targetVersionId,
     );
 
-    const correction = await this.prisma.recordCorrection.create({
-      data: {
-        targetRecordType: input.targetRecordType,
-        targetRecordId: input.targetRecordId,
-        targetVersionId: input.targetVersionId,
-        requestedBy: input.requestedBy,
-        errorOrDisputeDescription: input.errorOrDisputeDescription,
-        supportingEvidenceIds: input.supportingEvidenceIds ?? [],
-        correctionAuthorityFunctionId: input.correctionAuthorityFunctionId,
-        reassessmentRequired: input.reassessmentRequired ?? false,
-        noticeRequired: input.noticeRequired ?? false,
-        reason: input.reason,
-        status: RecordCorrectionStatus.REQUESTED,
-      },
-    });
+    let correction: RecordCorrection;
+    try {
+      correction = await this.createCorrection(input);
+    } catch (error) {
+      // A concurrent retry with the same key won the insert: return that request.
+      if (
+        input.idempotencyKey &&
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        const existing = await this.findByIdempotencyKey(input.requestedBy, input.idempotencyKey);
+        if (existing) {
+          return existing;
+        }
+      }
+      throw error;
+    }
 
     await this.integrityService.append({
       recordType: 'RecordCorrection',
@@ -95,6 +109,32 @@ export class RecordCorrectionService {
     });
 
     return correction;
+  }
+
+  private findByIdempotencyKey(requestedBy: string, idempotencyKey: string) {
+    return this.prisma.recordCorrection.findUnique({
+      where: { requestedBy_idempotencyKey: { requestedBy, idempotencyKey } },
+    });
+  }
+
+  private createCorrection(input: RequestRecordCorrectionInput): Promise<RecordCorrection> {
+    return this.prisma.recordCorrection.create({
+      data: {
+        targetRecordType: input.targetRecordType,
+        targetRecordId: input.targetRecordId,
+        targetVersionId: input.targetVersionId,
+        requestedBy: input.requestedBy,
+        errorOrDisputeDescription: input.errorOrDisputeDescription,
+        supportingEvidenceIds: input.supportingEvidenceIds ?? [],
+        correctionAuthorityFunctionId: input.correctionAuthorityFunctionId,
+        reassessmentRequired: input.reassessmentRequired ?? false,
+        noticeRequired: input.noticeRequired ?? false,
+        reason: input.reason,
+        proposedChanges: (input.proposedChanges ?? {}) as Prisma.InputJsonValue,
+        idempotencyKey: input.idempotencyKey,
+        status: RecordCorrectionStatus.REQUESTED,
+      },
+    });
   }
 
   async approveCorrection(input: ApproveRecordCorrectionInput): Promise<RecordCorrection> {
@@ -264,6 +304,8 @@ export class RecordCorrectionService {
             });
       case 'MasterAdministrativeFile':
         return this.prisma.masterAdministrativeFile.findUnique({ where: { id: recordId } });
+      case 'Person':
+        return this.prisma.person.findUnique({ where: { id: recordId } });
       default:
         return null;
     }

@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../database/database.module';
 import { ActorContextModule } from '../identity/auth/context/actor-context.module';
+import { IdentityCommonModule } from '../identity/common/identity-common.module';
 import { SessionsModule } from '../identity/sessions/sessions.module';
 import { HealthcareBoundaryService } from './common/healthcare-boundary.service';
 import { HealthcareCanonicalAccessPolicyService } from './common/healthcare-canonical-access-policy.service';
 import { HealthcareFoundationAccessPolicyService } from './common/healthcare-data-access-policy.service';
+import { CitizenHealthcareConsentController } from './consent/citizen/citizen-healthcare-consent.controller';
+import { CitizenHealthcareConsentService } from './consent/citizen/citizen-healthcare-consent.service';
 import { HealthcareConsentService } from './consent/healthcare-consent.service';
 import { HealthcareConsentPolicyService } from './consent/healthcare-consent-policy.service';
 import { HealthDataRegistryService } from './data-registry/health-data-registry.service';
@@ -30,11 +33,13 @@ import { TreatmentModule } from './treatment/treatment.module';
     DatabaseModule,
     SessionsModule,
     ActorContextModule,
+    IdentityCommonModule,
     ClinicalResearchModule,
     TreatmentModule,
   ],
-  controllers: [HealthcareController],
+  controllers: [HealthcareController, CitizenHealthcareConsentController],
   providers: [
+    CitizenHealthcareConsentService,
     HealthcareBoundaryService,
     HealthcareFoundationAccessPolicyService,
     HealthcareCanonicalAccessPolicyService,

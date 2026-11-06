@@ -4916,6 +4916,11 @@ model RecordCorrection {
   noticeRequired                Boolean                    @default(false)
   status                        RecordCorrectionStatus     @default(REQUESTED)
   reason                        String?
+  /// Requested replacement values (field -> value). A proposal only; the target record is
+  /// unchanged until an authorized official approves and implements the correction.
+  proposedChanges               Json                       @default("{}")
+  /// Client retry key, unique per requester.
+  idempotencyKey                String?
   createdAt                     DateTime                   @default(now())
   updatedAt                     DateTime                   @updatedAt
   requester                     Identity                   @relation("RecordCorrectionRequester", fields: [requestedBy], references: [id])
@@ -4924,6 +4929,7 @@ model RecordCorrection {
   authorityEvaluationRecord     AuthorityEvaluationRecord? @relation(fields: [authorityEvaluationRecordId], references: [id])
   correctionAuthorityFunction   FunctionAuthorityRecord?   @relation(fields: [correctionAuthorityFunctionId], references: [id])
 
+  @@unique([requestedBy, idempotencyKey])
   @@index([targetRecordType, targetRecordId])
   @@index([status])
   @@index([requestedBy])
@@ -6757,6 +6763,8 @@ model DecisionReviewReference {
   appellantIdentityId       String?             @db.Uuid
   appellantOfficeholderId   String?             @db.Uuid
   groundsReference          String?
+  /// Grounds for review in the appellant's own words, as filed.
+  groundsStatement          String?
   interimEffect             ReviewInterimEffect @default(NONE)
   stayStatus                ReviewStayStatus    @default(NONE)
   finalDispositionReference String?
