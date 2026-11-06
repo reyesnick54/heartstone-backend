@@ -1,0 +1,298 @@
+/*
+ * HeartStone sign-in pages, layered over Keycloak's keycloak.v2 (PatternFly 5) styles.
+ * Brand: Midnight #091B29, Warm Ivory #F7F3EA, Charcoal Ink #17191B, Deep Slate #142937,
+ * Government Blue #153146. Gold #DC9E48 marks "official" only, never warnings or errors.
+ * Accessibility first: 16px+ text, visible focus, AA contrast, no meaning by colour alone.
+ */
+
+:root {
+  --hs-midnight: #091b29;
+  --hs-deep-slate: #142937;
+  --hs-gov-blue: #153146;
+  --hs-gold: #dc9e48;
+  --hs-ivory: #f7f3ea;
+  --hs-ink: #17191b;
+  --hs-ink-muted: #3e4650;
+  --hs-line: #d9d0bf;
+  --hs-surface: #ffffff;
+  --hs-info-bg: #eaf0f5;
+  /* Operational warning (not brand gold): dark amber text on pale amber. */
+  --hs-warning-bg: #fff1c2;
+  --hs-warning-border: #8a5a00;
+  --hs-warning-ink: #3b2a00;
+  --hs-focus: #153146;
+
+  --hs-font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --hs-font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+
+  --pf-v5-global--FontFamily--text: var(--hs-font-ui);
+  --pf-v5-global--FontFamily--heading: var(--hs-font-ui);
+  --pf-v5-global--FontSize--md: 1rem;
+  --pf-v5-global--Color--100: var(--hs-ink);
+  --pf-v5-global--Color--200: var(--hs-ink-muted);
+  --pf-v5-global--primary-color--100: var(--hs-midnight);
+  --pf-v5-global--primary-color--200: var(--hs-gov-blue);
+  --pf-v5-global--link--Color: var(--hs-gov-blue);
+  --pf-v5-global--link--Color--hover: var(--hs-midnight);
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--hs-midnight);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--hs-gov-blue);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--hs-gov-blue);
+  --pf-v5-c-button--m-primary--active--BackgroundColor: var(--hs-gov-blue);
+  --pf-v5-c-button--m-primary--Color: var(--hs-ivory);
+}
+
+html.hs-html,
+.login-pf body.hs-body {
+  background: var(--hs-ivory);
+  color: var(--hs-ink);
+  font-family: var(--hs-font-ui);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.hs-wrap {
+  box-sizing: border-box;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Skip link: off-screen until focused. */
+.hs-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 1000;
+  padding: 12px 16px;
+  background: var(--hs-ivory);
+  color: var(--hs-midnight);
+  font-weight: 600;
+  border: 2px solid var(--hs-midnight);
+  border-radius: 6px;
+}
+.hs-skip-link:focus {
+  top: 12px;
+}
+
+/* Who runs this service. */
+.hs-official-bar {
+  background: var(--hs-deep-slate);
+  color: var(--hs-ivory);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  padding: 6px 0;
+}
+.hs-official-bar .hs-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hs-official-bar__marker {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--hs-gold);
+}
+
+/* Development build banner (switch off with HEARTSTONE_DEV_BANNER=false). */
+.hs-dev-banner {
+  background: var(--hs-warning-bg);
+  color: var(--hs-warning-ink);
+  border-bottom: 2px solid var(--hs-warning-border);
+  padding: 10px 0;
+  font-size: 0.9375rem;
+}
+.hs-dev-banner strong {
+  font-weight: 700;
+}
+
+/* Midnight header with the government lockup; the gold rule marks it as official. */
+.hs-header {
+  background: var(--hs-midnight);
+  border-bottom: 3px solid var(--hs-gold);
+}
+.hs-header__inner {
+  display: flex;
+  align-items: center;
+  min-height: 72px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.hs-header__logo {
+  display: block;
+  height: 60px;
+  width: auto;
+  max-width: 100%;
+}
+.hs-header__name {
+  color: var(--hs-ivory);
+  font-family: var(--hs-font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Page layout: replace PatternFly's full-height background layout with a simple column. */
+.login-pf .pf-v5-c-login.hs-login {
+  min-height: 0;
+  display: block;
+  padding: 32px 16px 48px;
+  background: none;
+}
+.pf-v5-c-login__container.hs-login__container {
+  display: block;
+  max-width: 34rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+.pf-v5-c-login__main.hs-card {
+  background: var(--hs-surface);
+  border: 1px solid var(--hs-line);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(9, 27, 41, 0.06), 0 8px 24px rgba(9, 27, 41, 0.06);
+  margin: 0;
+}
+.hs-card:focus {
+  outline: none;
+}
+
+.pf-v5-c-login__main-header {
+  padding-top: 32px;
+}
+/* Keycloak keeps 30% of the header row for a language picker; give the title the full width. */
+@media (min-width: 768px) {
+  div.pf-v5-c-login__main-header {
+    grid-template-columns: 1fr auto;
+  }
+}
+#kc-page-title {
+  font-family: var(--hs-font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--hs-midnight);
+}
+
+.pf-v5-c-login__main-footer-band {
+  background: var(--hs-ivory);
+  border-top: 1px solid var(--hs-line);
+}
+
+/* Form controls: readable size and a clear required-field marker. */
+.pf-v5-c-form__label-text,
+.pf-v5-c-form__label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--hs-ink);
+}
+.pf-v5-c-form-control > input,
+.pf-v5-c-form-control > select {
+  font-size: 1rem;
+}
+/* Input outlines at 3:1 or better against white (PatternFly draws only a faint box by default). */
+.pf-v5-c-form-control {
+  --pf-v5-c-form-control--before--BorderTopColor: #5f6670;
+  --pf-v5-c-form-control--before--BorderRightColor: #5f6670;
+  --pf-v5-c-form-control--before--BorderBottomColor: #5f6670;
+  --pf-v5-c-form-control--before--BorderLeftColor: #5f6670;
+  --pf-v5-c-form-control--after--BorderBottomColor: var(--hs-midnight);
+}
+.pf-v5-c-form__label-required {
+  color: #a30000;
+}
+
+.pf-v5-c-button {
+  font-size: 1rem;
+  font-weight: 600;
+  min-height: 44px;
+}
+.pf-v5-c-button.pf-m-primary {
+  background-color: var(--hs-midnight);
+  color: var(--hs-ivory);
+}
+.pf-v5-c-button.pf-m-primary:hover {
+  background-color: var(--hs-gov-blue);
+}
+
+a {
+  color: var(--hs-gov-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a:hover {
+  color: var(--hs-midnight);
+}
+
+/* One visible focus style everywhere. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.pf-v5-c-button:focus-visible {
+  outline: 3px solid var(--hs-focus);
+  outline-offset: 2px;
+}
+.hs-skip-link:focus-visible {
+  outline: 3px solid var(--hs-gold);
+}
+
+/* "What this account is" notice on the registration page. */
+.hs-notice {
+  background: var(--hs-info-bg);
+  border-left: 4px solid var(--hs-gov-blue);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  color: var(--hs-ink);
+}
+.hs-notice__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--hs-midnight);
+}
+.hs-notice p {
+  margin: 0 0 6px;
+}
+.hs-notice p:last-child {
+  margin-bottom: 0;
+}
+
+.hs-footer {
+  box-sizing: border-box;
+  max-width: 34rem;
+  margin: 24px auto 0;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--hs-ink-muted);
+}
+.hs-footer p {
+  margin: 0 0 4px;
+}
+
+@media (max-width: 480px) {
+  .hs-header__logo {
+    height: 44px;
+  }
+  .login-pf .pf-v5-c-login.hs-login {
+    padding: 16px 0 32px;
+  }
+  .pf-v5-c-login__main.hs-card {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  #kc-page-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

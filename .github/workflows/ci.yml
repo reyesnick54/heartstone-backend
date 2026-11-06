@@ -66,8 +66,21 @@ jobs:
       - name: Docker image builds
         run: docker build --tag heartstone-backend:ci .
 
+      - name: Keycloak scripts and realm template are valid
+        run: |
+          shellcheck deploy/keycloak/*.sh
+          sed \
+            -e 's|__REDIRECT_URIS__|["https://app.example.test/auth/callback"]|' \
+            -e 's|__WEB_ORIGINS__|["https://app.example.test"]|' \
+            -e 's|__API_AUDIENCE__|heartstone-api|' \
+            -e 's|__REALM_DISPLAY_NAME__|HeartStone|' \
+            deploy/keycloak/heartstone-realm.template.json | jq empty
+
       - name: Keycloak image builds
         run: docker build --tag heartstone-keycloak:ci deploy/keycloak
+
+      - name: Keycloak image starts and applies the realm configuration
+        run: bash deploy/keycloak/smoke-test.sh heartstone-keycloak:ci
 
   test:
     name: Tests

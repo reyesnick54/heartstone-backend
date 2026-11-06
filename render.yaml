@@ -136,7 +136,35 @@ services:
       - key: KC_CACHE
         value: local
       # Space-separated https origins of the staging web apps (each gets /auth/callback).
+      # Applied to the heartstone-web client on every start (deploy/keycloak/configure-realm.sh).
       - key: HEARTSTONE_WEB_ORIGINS
+        sync: false
+      # Sign-in pages and emails: ABSEZ e-Gov Platform theme with the development-build banner.
+      - key: HEARTSTONE_THEME
+        value: heartstone-absez
+      - key: HEARTSTONE_TENANT_NAME
+        value: ABSEZ e-Gov Platform
+      - key: HEARTSTONE_REALM_DISPLAY_NAME
+        value: ABSEZ e-Gov Platform (staging)
+      - key: HEARTSTONE_DEV_BANNER
+        value: "true"
+      # Public "Get a digital ID": self-registration with email verification. Stays off until
+      # email works (KC_SMTP_PASSWORD set).
+      - key: HEARTSTONE_SELF_REGISTRATION
+        value: "true"
+      # Email through Resend (https://resend.com); the sender domain absez.org is verified there.
+      - key: KC_SMTP_HOST
+        value: smtp.resend.com
+      - key: KC_SMTP_PORT
+        value: "587"
+      - key: KC_SMTP_FROM
+        value: no-reply@absez.org
+      - key: KC_SMTP_FROM_DISPLAY_NAME
+        value: ABSEZ e-Gov Platform
+      - key: KC_SMTP_USER
+        value: resend
+      # Resend API key with sending access only. Entered in the Render dashboard, never in git.
+      - key: KC_SMTP_PASSWORD
         sync: false
 
   - type: keyvalue

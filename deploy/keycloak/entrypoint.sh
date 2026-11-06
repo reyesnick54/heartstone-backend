@@ -51,6 +51,14 @@ sed \
   /opt/keycloak/templates/heartstone-realm.template.json \
   > /opt/keycloak/data/import/heartstone-realm.json
 
-# --import-realm skips a realm that already exists, so later edits made in the admin
-# console are kept across restarts.
+# --import-realm only creates a realm that does not exist yet. configure-realm.sh then applies the
+# settings HeartStone owns (client, sign-in, email, theme) to the realm on every start, once
+# Keycloak is ready. It runs in the background, logs with a [heartstone-config] prefix, and never
+# stops Keycloak; settings it does not own keep any edits made in the admin console.
+if [[ "${HEARTSTONE_CONFIGURE_REALM:-true}" == "true" ]]; then
+  /bin/bash /opt/keycloak/bin/heartstone-configure-realm.sh &
+else
+  echo "[heartstone-config] HEARTSTONE_CONFIGURE_REALM is not true; realm configuration is not enforced."
+fi
+
 exec /opt/keycloak/bin/kc.sh start --optimized --import-realm
