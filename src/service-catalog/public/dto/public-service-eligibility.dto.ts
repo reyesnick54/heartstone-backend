@@ -2,6 +2,8 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ApplicantCategory } from '@prisma/client';
 import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 
+import { FREE_FORM_OBJECT_SCHEMA } from '../../../common/openapi/json-value.schema';
+
 export class PublicServiceEligibilityDto {
   @ApiPropertyOptional({ enum: ApplicantCategory })
   @IsOptional()
@@ -9,7 +11,9 @@ export class PublicServiceEligibilityDto {
   applicantCategory?: ApplicantCategory;
 
   @ApiPropertyOptional({
-    description: 'Non-persistent applicant attributes used for guidance only',
+    ...FREE_FORM_OBJECT_SCHEMA,
+    description:
+      'Non-persistent applicant attributes used for guidance only, keyed by eligibility attribute code',
   })
   @IsOptional()
   @IsObject()

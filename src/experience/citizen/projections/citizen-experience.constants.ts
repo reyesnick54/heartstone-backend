@@ -42,3 +42,13 @@ export const RENEWAL_ELIGIBLE_INSTRUMENT_STATUSES = [
   'VARIED',
   'EXPIRED',
 ] as const;
+
+/** Applicant-facing origin of a document. Origin describes provenance, not authenticity. */
+export const CITIZEN_DOCUMENT_ORIGINS = [
+  'SUBMITTED_BY_CITIZEN',
+  'ISSUED_BY_GOVERNMENT',
+  'EXTERNAL_AUTHORITY',
+  'OTHER',
+] as const;
+
+export type CitizenDocumentOrigin = (typeof CITIZEN_DOCUMENT_ORIGINS)[number];

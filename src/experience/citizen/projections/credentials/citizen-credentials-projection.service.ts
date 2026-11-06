@@ -6,6 +6,57 @@ import {
   CitizenAccessScope,
   CitizenAccessScopeService,
 } from '../common/citizen-access-scope.service';
+
+export interface CitizenCredentialCondition {
+  id?: string;
+  conditionType?: string;
+  status?: string;
+  description: string;
+}
+
+const CONDITION_TEXT_FIELDS = ['description', 'text', 'label', 'summary', 'condition'] as const;
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() !== '' ? value : undefined;
+}
+
+/**
+ * Normalizes recorded instrument conditions to applicant-safe items. Conditions are stored as
+ * JSON (amendment payloads, or `DecisionCondition` rows snapshotted at issuance), so only the
+ * id, type, status and text are projected; anything without readable text is skipped.
+ */
+export function normalizeCredentialConditions(raw: unknown): CitizenCredentialCondition[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const items: CitizenCredentialCondition[] = [];
+  for (const entry of raw as unknown[]) {
+    if (typeof entry === 'string') {
+      if (entry.trim() !== '') {
+        items.push({ description: entry });
+      }
+      continue;
+    }
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+      continue;
+    }
+    const record = entry as Record<string, unknown>;
+    const description = CONDITION_TEXT_FIELDS.map((field) => optionalString(record[field])).find(
+      (value) => value !== undefined,
+    );
+    if (description === undefined) {
+      continue;
+    }
+    items.push({
+      id: optionalString(record.id),
+      conditionType: optionalString(record.conditionType) ?? optionalString(record.type),
+      status: optionalString(record.status),
+      description,
+    });
+  }
+  return items;
+}
+
 export interface CitizenCredentialSummary {
   id: string;
   instrumentNumber?: string;
@@ -16,7 +67,7 @@ export interface CitizenCredentialSummary {
   effectiveFrom?: string;
   effectiveUntil?: string;
   verificationReference?: string;
-  conditions: unknown[];
+  conditions: CitizenCredentialCondition[];
   renewal?: {
     eligible: boolean;
     nextStep?: string;
@@ -209,7 +260,11 @@ export class CitizenCredentialsProjectionService {
   private toSummary(instrument: AccessibleInstrument): CitizenCredentialSummary {
     const verification = instrument.verificationRecords[0];
     const typeDef = instrument.instrumentTypeVersion?.instrumentTypeDefinition;
-    const conditions = instrument.currentVersion?.conditions ?? [];
+    const recorded = normalizeCredentialConditions(instrument.currentVersion?.conditions);
+    const conditions =
+      recorded.length > 0
+        ? recorded
+        : normalizeCredentialConditions(instrument.currentVersion?.conditionsSnapshot);
 
     return {
       id: instrument.id,
@@ -222,7 +277,7 @@ export class CitizenCredentialsProjectionService {
       effectiveUntil: instrument.effectiveUntil?.toISOString(),
       verificationReference:
         verification?.verificationCode ?? instrument.verificationCode ?? undefined,
-      conditions: Array.isArray(conditions) ? conditions : [],
+      conditions,
       renewal: this.deriveRenewalProjection(instrument),
       superseded: instrument.status === OfficialInstrumentStatus.SUPERSEDED,
       downloadPath: `/api/v1/instruments/${instrument.id}/download`,

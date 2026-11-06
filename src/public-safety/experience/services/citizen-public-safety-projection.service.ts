@@ -50,8 +50,11 @@ export class CitizenPublicSafetyProjectionService {
     });
 
     return {
-      items: reports.map((report) =>
-        this.boundary.sanitizeIncidentReportForProjection({
+      items: reports.map((report) => ({
+        id: report.id,
+        incidentReference: report.incidentReference,
+        submittedAt: report.createdAt.toISOString(),
+        ...this.boundary.sanitizeIncidentReportForProjection({
           verificationStatus: report.verificationStatus,
           summaryLabel: report.summaryLabel,
           locationDescription: report.locationDescription,
@@ -59,7 +62,7 @@ export class CitizenPublicSafetyProjectionService {
           reporterIdentityId: report.reporterIdentityId,
           viewerIdentityId: identityId,
         }),
-      ),
+      })),
     };
   }
 

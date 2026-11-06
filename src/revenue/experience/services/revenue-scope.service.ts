@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { SetupConfigurationInstallationStatus, SetupConfigurationLayer } from '@prisma/client';
 
 import { PrismaService } from '../../../database/prisma.service';
+
+/** Setup configuration key under which a jurisdiction records its default currency. */
+export const JURISDICTION_DEFAULT_CURRENCY_KEY = 'defaultCurrency';
 
 @Injectable()
 export class RevenueScopeService {
@@ -20,6 +24,33 @@ export class RevenueScopeService {
     }
 
     return account;
+  }
+
+  /**
+   * Default currency from the jurisdiction's installed setup configuration, or null when the
+   * jurisdiction has not configured one. Never falls back to a hard-coded currency.
+   */
+  async resolveJurisdictionDefaultCurrency(jurisdictionId: string): Promise<string | null> {
+    const override = await this.prisma.setupConfigurationOverride.findFirst({
+      where: {
+        configurationKey: JURISDICTION_DEFAULT_CURRENCY_KEY,
+        installation: {
+          layer: SetupConfigurationLayer.JURISDICTION,
+          jurisdictionId,
+          status: SetupConfigurationInstallationStatus.INSTALLED,
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const value = override?.overrideValue;
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const nested = (value as Record<string, unknown>).value;
+      return typeof nested === 'string' ? nested : null;
+    }
+    return null;
   }
 
   async findOrganizationTaxpayerAccount(organizationId: string) {

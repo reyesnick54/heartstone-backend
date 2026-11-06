@@ -290,10 +290,55 @@ function collectDecoratorBlock(
   return `${before}${after}`.trimEnd();
 }
 
+/**
+ * Index just past the parenthesised argument list that opens at `openIndex`, honouring nested
+ * brackets and string literals so summaries such as "List programs (non-authoritative)" do not
+ * end a decorator early. Returns -1 when the list is unterminated.
+ */
+function skipBalancedArguments(source: string, openIndex: number): number {
+  let depth = 0;
+  let quote: string | null = null;
+  for (let index = openIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (quote) {
+      if (char === '\\') {
+        index += 1;
+      } else if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+    if (char === "'" || char === '"' || char === '`') {
+      quote = char;
+    } else if (char === '(' || char === '{' || char === '[') {
+      depth += 1;
+    } else if (char === ')' || char === '}' || char === ']') {
+      depth -= 1;
+      if (depth === 0) {
+        return index + 1;
+      }
+    }
+  }
+  return -1;
+}
+
 function extractHandlerName(blockAfterDecorators: string): string {
   let remainder = blockAfterDecorators;
-  while (/^\s*@/.test(remainder)) {
-    remainder = remainder.replace(/^\s*@\w+(?:\([^)]*\)|\(\s*\{[\s\S]*?\}\s*\))[\s\S]*?\n/m, '');
+  for (;;) {
+    const decorator = /^\s*@[\w.]+/.exec(remainder);
+    if (!decorator) {
+      break;
+    }
+    let end = decorator[0].length;
+    const openParen = /^\s*\(/.exec(remainder.slice(end));
+    if (openParen) {
+      const closed = skipBalancedArguments(remainder, end + openParen[0].length - 1);
+      if (closed === -1) {
+        break;
+      }
+      end = closed;
+    }
+    remainder = remainder.slice(end);
   }
   const match = /(?:async\s+)?([A-Za-z_$][\w$]*)\s*(?:<[^>]+>)?\s*\(/.exec(remainder);
   return match?.[1] ?? 'unknown';

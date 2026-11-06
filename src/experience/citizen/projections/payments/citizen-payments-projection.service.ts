@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InvoiceStatus, Prisma } from '@prisma/client';
+import { InvoiceStatus, PaymentChannelType, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../../../database/prisma.service';
 import { PaymentIntentService } from '../../../../operational-support/financial/payment-intent.service';
@@ -14,12 +14,17 @@ export interface CitizenPaymentReceiptSummary {
   id: string;
   receiptNumber: string;
   issuedAt: string;
+  amountCents: number;
+  currency: string;
+  paymentMethod: PaymentChannelType | null;
+  paymentMethodLabel: string | null;
 }
 
 export interface CitizenPaymentRefundSummary {
   id: string;
   status: string;
   requestedAmountCents: number;
+  currency: string;
   reason: string;
 }
 
@@ -220,16 +225,28 @@ export class CitizenPaymentsProjectionService {
         paymentIntent: { invoiceId },
         status: 'SETTLED',
       },
-      include: { receipts: true },
+      include: {
+        receipts: true,
+        paymentProviderConfiguration: {
+          select: {
+            paymentChannelDefinition: { select: { channelType: true, name: true } },
+          },
+        },
+      },
     });
 
-    return transactions.flatMap((txn) =>
-      txn.receipts.map((receipt) => ({
+    return transactions.flatMap((txn) => {
+      const channel = txn.paymentProviderConfiguration.paymentChannelDefinition;
+      return txn.receipts.map((receipt) => ({
         id: receipt.id,
         receiptNumber: receipt.receiptNumber,
         issuedAt: receipt.issuedAt.toISOString(),
-      })),
-    );
+        amountCents: txn.amountCents,
+        currency: txn.currency,
+        paymentMethod: channel.channelType,
+        paymentMethodLabel: channel.name,
+      }));
+    });
   }
 
   private async loadRefunds(invoiceId: string): Promise<CitizenPaymentRefundSummary[]> {
@@ -243,6 +260,7 @@ export class CitizenPaymentsProjectionService {
         id: refund.id,
         status: refund.status,
         requestedAmountCents: refund.requestedAmountCents,
+        currency: txn.currency,
         reason: refund.reason,
       })),
     );

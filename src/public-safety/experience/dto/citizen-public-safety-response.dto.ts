@@ -22,6 +22,15 @@ export class CitizenPublicSafetyHomeResponseDto {
 }
 
 export class CitizenIncidentReportItemDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ description: 'Incident reference shown to the reporter' })
+  incidentReference!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  submittedAt!: string;
+
   @ApiProperty()
   summaryLabel!: string;
 

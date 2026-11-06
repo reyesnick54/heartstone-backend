@@ -118,14 +118,23 @@ export class CitizenVehicleApplicationItemDto {
   @ApiProperty()
   caseId!: string;
 
+  @ApiProperty({ description: 'Case reference number shown to the applicant' })
+  caseReference!: string;
+
   @ApiProperty({ enum: CaseStatus })
   caseStatus!: CaseStatus;
 
   @ApiProperty()
   applicationId!: string;
 
+  @ApiProperty({ type: String, nullable: true })
+  applicationNumber!: string | null;
+
   @ApiProperty()
   serviceCode!: string;
+
+  @ApiProperty({ description: 'Public name of the government service (display name)' })
+  serviceName!: string;
 }
 
 export class CitizenTransportationActionDto {

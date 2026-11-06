@@ -23,6 +23,8 @@ import { buildOpenApiDocument } from './openapi';
  */
 const COVERED_PREFIXES = [
   '/api/v1/experience/citizen',
+  // Applicant draft/submit/correction routes the citizen web app calls directly.
+  '/api/v1/applications',
   '/api/v1/public',
   '/api/v1/identity/auth',
   '/api/v1/identity/me',
@@ -212,6 +214,36 @@ describe('OpenAPI contract for frontend-facing surfaces', () => {
       .map(({ key }) => key);
 
     expect(unexpected).toEqual([]);
+  });
+
+  it('types applicant submission bodies and free-form JSON fields instead of empty objects', () => {
+    const schemas = (document.components?.schemas ?? {}) as Record<string, SchemaObject>;
+    const propertiesOf = (name: string) => Object.keys(schemas[name]?.properties ?? {}).sort();
+
+    expect(propertiesOf('SubmitApplicationDto')).toEqual([
+      'answers',
+      'configurationFingerprint',
+      'idempotencyKey',
+    ]);
+    expect(propertiesOf('UpdateApplicationDraftDto')).toEqual(['draftAnswers']);
+
+    const field = (schema: string, property: string) =>
+      (schemas[schema]?.properties as Record<string, SchemaObject> | undefined)?.[property];
+    /** An empty `{type: object}` is generated as `Record<string, never>` by frontend clients. */
+    const isOpenJson = (value: SchemaObject | undefined) =>
+      value !== undefined &&
+      (value.additionalProperties === true ||
+        (value.oneOf?.length ?? 0) > 0 ||
+        (value.type !== undefined && value.type !== 'object'));
+
+    expect(isOpenJson(field('PublicServiceEligibilityDto', 'attributes'))).toBe(true);
+    expect(isOpenJson(field('RenderedFormFieldSchemaDto', 'defaultValue'))).toBe(true);
+    expect(isOpenJson(field('FormConditionClauseSchemaDto', 'value'))).toBe(true);
+    expect(isOpenJson(field('SubmitApplicationDto', 'answers'))).toBe(true);
+    expect(isOpenJson(field('UpdateApplicationDraftDto', 'draftAnswers'))).toBe(true);
+    expect(field('CitizenCredentialSummaryDto', 'conditions')?.items).toEqual({
+      $ref: '#/components/schemas/CitizenCredentialConditionDto',
+    });
   });
 
   it('does not expose actor identity fields in covered request bodies', () => {

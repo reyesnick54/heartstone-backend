@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T07:22:02.054Z",
+  "generatedAt": "2026-11-06T08:29:19.973Z",
   "routeCount": 757,
   "summary": {
     "public": 27,
@@ -12331,7 +12331,7 @@
       "domain": "identity",
       "controller": "ProtectedController",
       "sourceFile": "src/identity/protected/protected.controller.ts",
-      "handler": "ApiOkResponse",
+      "handler": "stepUpProtected",
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [
@@ -12573,7 +12573,7 @@
       "domain": "identity",
       "controller": "OfficeholderLinksController",
       "sourceFile": "src/identity/officeholder-links/officeholder-links.controller.ts",
-      "handler": "ApiCreatedResponse",
+      "handler": "create",
       "technicalPermissionRequired": true,
       "permissionCode": "identity:officeholder-link:create",
       "guardCoverage": [
@@ -12924,7 +12924,7 @@
       "domain": "identity",
       "controller": "RepresentativeAuthoritiesController",
       "sourceFile": "src/identity/representative-authorities/representative-authorities.controller.ts",
-      "handler": "ApiCreatedResponse",
+      "handler": "create",
       "technicalPermissionRequired": true,
       "permissionCode": "identity:representative-authority:create",
       "guardCoverage": [
@@ -17477,7 +17477,7 @@
       "domain": "customs-trade",
       "controller": "PublicCustomsTradeVerificationController",
       "sourceFile": "src/customs-trade/verification/public-customs-trade-verification.controller.ts",
-      "handler": "ApiOkResponse",
+      "handler": "verify",
       "technicalPermissionRequired": false,
       "permissionCode": null,
       "guardCoverage": [

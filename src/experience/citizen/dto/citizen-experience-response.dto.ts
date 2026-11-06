@@ -4,9 +4,16 @@ import {
   CivilRegistryRecordStatus,
   CommunicationChannelType,
   CommunicationMessageStatus,
+  DocumentSourceType,
   InvoiceStatus,
   OfficialInstrumentStatus,
+  PaymentChannelType,
 } from '@prisma/client';
+
+import {
+  CITIZEN_DOCUMENT_ORIGINS,
+  type CitizenDocumentOrigin,
+} from '../projections/citizen-experience.constants';
 
 export class CitizenInstitutionDto {
   @ApiProperty()
@@ -59,6 +66,16 @@ export class CitizenDocumentSummaryDto {
   @ApiProperty()
   documentType!: string;
 
+  @ApiProperty({ enum: DocumentSourceType, description: 'How the document entered the platform' })
+  sourceType!: DocumentSourceType;
+
+  @ApiProperty({
+    enum: CITIZEN_DOCUMENT_ORIGINS,
+    description:
+      'SUBMITTED_BY_CITIZEN when this citizen uploaded it; ISSUED_BY_GOVERNMENT for official or system-generated documents; EXTERNAL_AUTHORITY or OTHER otherwise. Origin is not authenticity.',
+  })
+  origin!: CitizenDocumentOrigin;
+
   @ApiPropertyOptional({ type: CitizenInstitutionDto })
   originatingInstitution?: CitizenInstitutionDto;
 
@@ -89,9 +106,6 @@ export class CitizenDocumentDetailDto extends CitizenDocumentSummaryDto {
   documentNumber!: string;
 
   @ApiProperty()
-  sourceType!: string;
-
-  @ApiProperty()
   currentVersionNumber!: number;
 }
 
@@ -104,6 +118,26 @@ export class CitizenRenewalProjectionDto {
 
   @ApiPropertyOptional()
   reason?: string;
+}
+
+/**
+ * One condition attached to a credential, normalized from the current instrument version.
+ * Only applicant-safe fields are projected; internal linkage (decision ids, timestamps) is not.
+ */
+export class CitizenCredentialConditionDto {
+  @ApiPropertyOptional({ description: 'Condition id when the condition is a recorded row' })
+  id?: string;
+
+  @ApiPropertyOptional({
+    description: 'Condition type as recorded, e.g. PRECEDENT_TO_ISSUANCE or CONTINUING',
+  })
+  conditionType?: string;
+
+  @ApiPropertyOptional({ description: 'Condition status as recorded, e.g. PENDING or SATISFIED' })
+  status?: string;
+
+  @ApiProperty({ description: 'Condition text as recorded on the instrument' })
+  description!: string;
 }
 
 export class CitizenCredentialSummaryDto {
@@ -135,11 +169,11 @@ export class CitizenCredentialSummaryDto {
   verificationReference?: string;
 
   @ApiProperty({
-    type: 'array',
-    items: {},
-    description: 'Instrument conditions exactly as recorded on the current instrument version',
+    type: () => [CitizenCredentialConditionDto],
+    description:
+      'Conditions recorded on the current instrument version (amended conditions, or the decision conditions snapshotted at issuance)',
   })
-  conditions!: unknown[];
+  conditions!: CitizenCredentialConditionDto[];
 
   @ApiPropertyOptional({ type: CitizenRenewalProjectionDto })
   renewal?: CitizenRenewalProjectionDto;
@@ -185,6 +219,22 @@ export class CitizenPaymentReceiptDto {
 
   @ApiProperty()
   issuedAt!: string;
+
+  @ApiProperty({ description: 'Settled amount of the transaction this receipt evidences' })
+  amountCents!: number;
+
+  @ApiProperty({ description: 'ISO 4217 currency of the settled transaction' })
+  currency!: string;
+
+  @ApiProperty({
+    enum: PaymentChannelType,
+    nullable: true,
+    description: 'Payment channel type of the provider configuration that settled the payment',
+  })
+  paymentMethod!: PaymentChannelType | null;
+
+  @ApiProperty({ type: String, nullable: true, description: 'Configured payment channel name' })
+  paymentMethodLabel!: string | null;
 }
 
 export class CitizenPaymentRefundDto {
@@ -196,6 +246,9 @@ export class CitizenPaymentRefundDto {
 
   @ApiProperty()
   requestedAmountCents!: number;
+
+  @ApiProperty({ description: 'ISO 4217 currency of the refunded transaction' })
+  currency!: string;
 
   @ApiProperty()
   reason!: string;
@@ -322,6 +375,17 @@ export class CitizenMessageSummaryDto {
 
   @ApiProperty()
   acknowledged!: boolean;
+
+  @ApiProperty({
+    description:
+      'True once a read receipt or legal acknowledgment is recorded on a delivery to this citizen',
+  })
+  read!: boolean;
+
+  @ApiPropertyOptional({
+    description: 'When the earliest read receipt or acknowledgment was recorded',
+  })
+  readAt?: string;
 }
 
 export class CitizenMessageDeliveryDto {

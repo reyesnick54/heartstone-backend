@@ -54,6 +54,16 @@ export class CitizenEducationProjectionService {
     const studentProfileIds = await this.scope.resolveAccessibleStudentProfileIds(identityId);
     const credentials = await this.prisma.academicCredential.findMany({
       where: { studentEducationProfileId: { in: studentProfileIds } },
+      include: {
+        officialInstrument: {
+          select: {
+            instrumentType: true,
+            instrumentTypeVersion: {
+              select: { instrumentTypeDefinition: { select: { name: true } } },
+            },
+          },
+        },
+      },
       take: 50,
     });
 
@@ -61,6 +71,11 @@ export class CitizenEducationProjectionService {
       this.boundary.sanitizeCitizenPayload({
         credentialReference: credential.credentialReference,
         lifecycleStatus: credential.lifecycleStatus,
+        displayName:
+          credential.officialInstrument?.instrumentTypeVersion?.instrumentTypeDefinition.name ??
+          credential.officialInstrument?.instrumentType ??
+          null,
+        issuedAt: credential.issuedAt?.toISOString() ?? null,
       }),
     );
   }

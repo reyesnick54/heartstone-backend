@@ -376,6 +376,17 @@ export class CitizenTaxRefundSummaryDto {
 
   @ApiProperty()
   requestedAmountCents!: number;
+
+  @ApiProperty({ description: 'ISO 4217 currency recorded on the refund claim' })
+  currency!: string;
+}
+
+export class CitizenTaxBalanceByCurrencyDto {
+  @ApiProperty({ description: 'ISO 4217 currency recorded on the arrears' })
+  currency!: string;
+
+  @ApiProperty()
+  amountCents!: number;
 }
 
 export class CitizenTaxClearanceSummaryDto {
@@ -420,8 +431,22 @@ export class CitizenRevenueHomeResponseDto {
   @ApiProperty({ type: () => [CitizenTaxAssessmentSummaryDto] })
   assessments!: CitizenTaxAssessmentSummaryDto[];
 
-  @ApiProperty()
+  @ApiProperty({
+    description:
+      'Sum of outstanding arrears. Only meaningful with outstandingBalanceCurrency; see outstandingBalances when arrears span currencies.',
+  })
   outstandingBalanceCents!: number;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      "Currency of outstandingBalanceCents: the arrears' currency, or the jurisdiction's configured default currency when there are no arrears. Null when arrears span currencies or no default is configured.",
+  })
+  outstandingBalanceCurrency!: string | null;
+
+  @ApiProperty({ type: () => [CitizenTaxBalanceByCurrencyDto] })
+  outstandingBalances!: CitizenTaxBalanceByCurrencyDto[];
 
   @ApiProperty({ type: () => [CitizenTaxRefundSummaryDto] })
   refunds!: CitizenTaxRefundSummaryDto[];

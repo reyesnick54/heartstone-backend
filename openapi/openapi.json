@@ -11184,7 +11184,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationRecordDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11192,6 +11199,7 @@
             "bearer": []
           }
         ],
+        "summary": "Create a draft application for the signed-in applicant",
         "tags": [
           "application-processing-applications"
         ]
@@ -11212,7 +11220,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailRecordDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11220,6 +11235,7 @@
             "bearer": []
           }
         ],
+        "summary": "Get an application with its submissions and case (applicant or scoped official)",
         "tags": [
           "application-processing-applications"
         ]
@@ -11250,7 +11266,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationRecordDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11258,6 +11281,7 @@
             "bearer": []
           }
         ],
+        "summary": "Replace the draft answers of a DRAFT application",
         "tags": [
           "application-processing-applications"
         ]
@@ -11265,6 +11289,7 @@
     },
     "/api/v1/applications/{id}/submit": {
       "post": {
+        "description": "Validates answers against the pinned form version and opens a case. Submission records receipt only; it is not approval.",
         "operationId": "ApplicationsController_submit",
         "parameters": [
           {
@@ -11288,7 +11313,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationSubmissionResultDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11296,6 +11328,7 @@
             "bearer": []
           }
         ],
+        "summary": "Submit a DRAFT application",
         "tags": [
           "application-processing-applications"
         ]
@@ -11303,6 +11336,7 @@
     },
     "/api/v1/applications/{id}/corrections": {
       "post": {
+        "description": "Supersedes the prior submission without erasing it and returns the case to completeness review.",
         "operationId": "ApplicationsController_submitCorrection",
         "parameters": [
           {
@@ -11326,7 +11360,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationSubmissionResultDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11334,6 +11375,7 @@
             "bearer": []
           }
         ],
+        "summary": "Submit corrected answers while the case is waiting for the applicant",
         "tags": [
           "application-processing-applications"
         ]
@@ -27478,7 +27520,8 @@
           },
           "attributes": {
             "type": "object",
-            "description": "Non-persistent applicant attributes used for guidance only"
+            "additionalProperties": true,
+            "description": "Non-persistent applicant attributes used for guidance only, keyed by eligibility attribute code"
           },
           "serviceVersionId": {
             "type": "string",
@@ -31530,6 +31573,18 @@
           "isVirtual": {
             "type": "boolean"
           },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Case the appointment belongs to, when scheduled for a case"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Application the appointment belongs to, when scheduled for an application"
+          },
           "attribution": {
             "$ref": "#/components/schemas/InstitutionAttributionDto"
           },
@@ -31545,6 +31600,8 @@
           "scheduledEndsAt",
           "reasonName",
           "isVirtual",
+          "caseId",
+          "applicationId",
           "disclaimer"
         ]
       },
@@ -31594,6 +31651,18 @@
           "isVirtual": {
             "type": "boolean"
           },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Case the appointment belongs to, when scheduled for a case"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Application the appointment belongs to, when scheduled for an application"
+          },
           "attribution": {
             "$ref": "#/components/schemas/InstitutionAttributionDto"
           },
@@ -31623,6 +31692,8 @@
           "scheduledEndsAt",
           "reasonName",
           "isVirtual",
+          "caseId",
+          "applicationId",
           "disclaimer",
           "virtualMeetingUrl",
           "locationName",
@@ -31854,6 +31925,30 @@
           "documentType": {
             "type": "string"
           },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "APPLICANT_UPLOAD",
+              "OFFICIAL_UPLOAD",
+              "EXTERNAL_AUTHORITY",
+              "SYSTEM_GENERATED",
+              "SCANNED_COUNTER",
+              "EMAIL_INGEST",
+              "API_INGEST",
+              "OTHER"
+            ],
+            "description": "How the document entered the platform"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED_BY_CITIZEN",
+              "ISSUED_BY_GOVERNMENT",
+              "EXTERNAL_AUTHORITY",
+              "OTHER"
+            ],
+            "description": "SUBMITTED_BY_CITIZEN when this citizen uploaded it; ISSUED_BY_GOVERNMENT for official or system-generated documents; EXTERNAL_AUTHORITY or OTHER otherwise. Origin is not authenticity."
+          },
           "originatingInstitution": {
             "$ref": "#/components/schemas/CitizenInstitutionDto"
           },
@@ -31883,6 +31978,8 @@
           "id",
           "title",
           "documentType",
+          "sourceType",
+          "origin",
           "status",
           "integrity",
           "disclaimer"
@@ -31899,6 +31996,30 @@
           },
           "documentType": {
             "type": "string"
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "APPLICANT_UPLOAD",
+              "OFFICIAL_UPLOAD",
+              "EXTERNAL_AUTHORITY",
+              "SYSTEM_GENERATED",
+              "SCANNED_COUNTER",
+              "EMAIL_INGEST",
+              "API_INGEST",
+              "OTHER"
+            ],
+            "description": "How the document entered the platform"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED_BY_CITIZEN",
+              "ISSUED_BY_GOVERNMENT",
+              "EXTERNAL_AUTHORITY",
+              "OTHER"
+            ],
+            "description": "SUBMITTED_BY_CITIZEN when this citizen uploaded it; ISSUED_BY_GOVERNMENT for official or system-generated documents; EXTERNAL_AUTHORITY or OTHER otherwise. Origin is not authenticity."
           },
           "originatingInstitution": {
             "$ref": "#/components/schemas/CitizenInstitutionDto"
@@ -31927,9 +32048,6 @@
           "documentNumber": {
             "type": "string"
           },
-          "sourceType": {
-            "type": "string"
-          },
           "currentVersionNumber": {
             "type": "number"
           }
@@ -31938,12 +32056,37 @@
           "id",
           "title",
           "documentType",
+          "sourceType",
+          "origin",
           "status",
           "integrity",
           "disclaimer",
           "documentNumber",
-          "sourceType",
           "currentVersionNumber"
+        ]
+      },
+      "CitizenCredentialConditionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Condition id when the condition is a recorded row"
+          },
+          "conditionType": {
+            "type": "string",
+            "description": "Condition type as recorded, e.g. PRECEDENT_TO_ISSUANCE or CONTINUING"
+          },
+          "status": {
+            "type": "string",
+            "description": "Condition status as recorded, e.g. PENDING or SATISFIED"
+          },
+          "description": {
+            "type": "string",
+            "description": "Condition text as recorded on the instrument"
+          }
+        },
+        "required": [
+          "description"
         ]
       },
       "CitizenRenewalProjectionDto": {
@@ -32013,9 +32156,11 @@
             "type": "string"
           },
           "conditions": {
+            "description": "Conditions recorded on the current instrument version (amended conditions, or the decision conditions snapshotted at issuance)",
             "type": "array",
-            "items": {},
-            "description": "Instrument conditions exactly as recorded on the current instrument version"
+            "items": {
+              "$ref": "#/components/schemas/CitizenCredentialConditionDto"
+            }
           },
           "renewal": {
             "$ref": "#/components/schemas/CitizenRenewalProjectionDto"
@@ -32085,9 +32230,11 @@
             "type": "string"
           },
           "conditions": {
+            "description": "Conditions recorded on the current instrument version (amended conditions, or the decision conditions snapshotted at issuance)",
             "type": "array",
-            "items": {},
-            "description": "Instrument conditions exactly as recorded on the current instrument version"
+            "items": {
+              "$ref": "#/components/schemas/CitizenCredentialConditionDto"
+            }
           },
           "renewal": {
             "$ref": "#/components/schemas/CitizenRenewalProjectionDto"
@@ -32149,12 +32296,42 @@
           },
           "issuedAt": {
             "type": "string"
+          },
+          "amountCents": {
+            "type": "number",
+            "description": "Settled amount of the transaction this receipt evidences"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency of the settled transaction"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "CARD",
+              "BANK_TRANSFER",
+              "CASH_COUNTER",
+              "GOVERNMENT_TREASURY",
+              "MOBILE_WALLET",
+              "OTHER"
+            ],
+            "nullable": true,
+            "description": "Payment channel type of the provider configuration that settled the payment"
+          },
+          "paymentMethodLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Configured payment channel name"
           }
         },
         "required": [
           "id",
           "receiptNumber",
-          "issuedAt"
+          "issuedAt",
+          "amountCents",
+          "currency",
+          "paymentMethod",
+          "paymentMethodLabel"
         ]
       },
       "CitizenPaymentRefundDto": {
@@ -32169,6 +32346,10 @@
           "requestedAmountCents": {
             "type": "number"
           },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency of the refunded transaction"
+          },
           "reason": {
             "type": "string"
           }
@@ -32177,6 +32358,7 @@
           "id",
           "status",
           "requestedAmountCents",
+          "currency",
           "reason"
         ]
       },
@@ -32507,6 +32689,14 @@
           },
           "acknowledged": {
             "type": "boolean"
+          },
+          "read": {
+            "type": "boolean",
+            "description": "True once a read receipt or legal acknowledgment is recorded on a delivery to this citizen"
+          },
+          "readAt": {
+            "type": "string",
+            "description": "When the earliest read receipt or acknowledgment was recorded"
           }
         },
         "required": [
@@ -32515,7 +32705,8 @@
           "subject",
           "channelType",
           "status",
-          "acknowledged"
+          "acknowledged",
+          "read"
         ]
       },
       "CitizenMessageDeliveryDto": {
@@ -32595,6 +32786,14 @@
           "acknowledged": {
             "type": "boolean"
           },
+          "read": {
+            "type": "boolean",
+            "description": "True once a read receipt or legal acknowledgment is recorded on a delivery to this citizen"
+          },
+          "readAt": {
+            "type": "string",
+            "description": "When the earliest read receipt or acknowledgment was recorded"
+          },
           "body": {
             "type": "string"
           },
@@ -32615,6 +32814,7 @@
           "channelType",
           "status",
           "acknowledged",
+          "read",
           "body",
           "deliveries"
         ]
@@ -32956,7 +33156,25 @@
             ]
           },
           "value": {
-            "type": "object",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
             "description": "Comparison value (any JSON value)"
           }
         },
@@ -33050,7 +33268,25 @@
             "type": "number"
           },
           "defaultValue": {
-            "type": "object",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
             "description": "Default value (any JSON value)"
           },
           "placeholder": {
@@ -33528,15 +33764,529 @@
       },
       "CreateApplicationDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "governmentServiceVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configurationFingerprint": {
+            "type": "string"
+          },
+          "applicantCategory": {
+            "type": "string",
+            "enum": [
+              "INDIVIDUAL",
+              "CITIZEN",
+              "RESIDENT",
+              "NON_RESIDENT",
+              "BUSINESS",
+              "COMPANY",
+              "INVESTOR",
+              "EMPLOYER",
+              "EMPLOYEE",
+              "AUTHORIZED_REPRESENTATIVE",
+              "PROFESSIONAL",
+              "GOVERNMENT_ENTITY",
+              "PARTNER_ORGANIZATION",
+              "OTHER"
+            ]
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required only with a representative authority the applicant holds"
+          },
+          "representativeAuthorityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftAnswers": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "governmentServiceVersionId",
+          "formDefinitionId",
+          "formVersionId",
+          "configurationFingerprint",
+          "applicantCategory"
+        ]
+      },
+      "ApplicationSubmissionRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submissionNumber": {
+            "type": "string"
+          },
+          "sequenceNumber": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED",
+              "ACKNOWLEDGED",
+              "SUPERSEDED"
+            ]
+          },
+          "answersSnapshot": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "description": "Answers exactly as submitted (immutable snapshot)"
+          },
+          "configurationFingerprint": {
+            "type": "string"
+          },
+          "governmentServiceVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgmentReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentHash": {
+            "type": "string",
+            "description": "SHA-256 of the submitted content. Integrity only; not proof of truth."
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "submissionNumber",
+          "sequenceNumber",
+          "status",
+          "answersSnapshot",
+          "configurationFingerprint",
+          "governmentServiceVersionId",
+          "formVersionId",
+          "submittedAt",
+          "acknowledgedAt",
+          "acknowledgmentReference",
+          "contentHash",
+          "supersededAt",
+          "createdAt"
+        ]
+      },
+      "CaseRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNumber": {
+            "type": "string"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicantIdentityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "governmentServiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "governmentServiceVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "responsibleInstitutionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "responsibleDepartmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workflowVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configurationFingerprint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "INTAKE",
+              "OPEN",
+              "IN_PROGRESS",
+              "COMPLETENESS_REVIEW",
+              "WAITING_APPLICANT",
+              "SUBSTANTIVE_REVIEW",
+              "PENDING_EXTERNAL",
+              "PENDING_INTERNAL",
+              "REFERRAL_PENDING",
+              "PROFESSIONAL_REVIEW",
+              "INSPECTION",
+              "DECISION_PENDING",
+              "DECIDED",
+              "ISSUED",
+              "SAFE_HALTED",
+              "SAFE_HALT",
+              "SUSPENDED",
+              "WITHDRAWN",
+              "CLOSED",
+              "ARCHIVED"
+            ]
+          },
+          "legalStatus": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "PENDING",
+              "UNRESOLVED",
+              "EXTERNAL_STATUS_PENDING"
+            ]
+          },
+          "legalStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH",
+              "URGENT"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentCaseManagerOfficeholderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "masterAdministrativeFileReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentRegisterReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidencePacketReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "recordsClassificationReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "retentionLegalHoldReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "caseNumber",
+          "applicationId",
+          "applicantIdentityId",
+          "governmentServiceId",
+          "governmentServiceVersionId",
+          "responsibleInstitutionId",
+          "responsibleDepartmentId",
+          "workflowVersionId",
+          "configurationFingerprint",
+          "status",
+          "legalStatus",
+          "legalStatusLabel",
+          "priority",
+          "version",
+          "openedAt",
+          "closedAt",
+          "currentCaseManagerOfficeholderId",
+          "masterAdministrativeFileReference",
+          "documentRegisterReference",
+          "evidencePacketReference",
+          "recordsClassificationReference",
+          "retentionLegalHoldReference",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ApplicationDetailRecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "applicationNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "applicantIdentityId": {
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "representativeAuthorityId": {
+            "type": "string",
+            "nullable": true
+          },
+          "governmentServiceId": {
+            "type": "string"
+          },
+          "governmentServiceVersionId": {
+            "type": "string"
+          },
+          "formDefinitionId": {
+            "type": "string"
+          },
+          "formVersionId": {
+            "type": "string"
+          },
+          "configurationFingerprint": {
+            "type": "string"
+          },
+          "applicantCategory": {
+            "type": "string",
+            "enum": [
+              "INDIVIDUAL",
+              "CITIZEN",
+              "RESIDENT",
+              "NON_RESIDENT",
+              "BUSINESS",
+              "COMPANY",
+              "INVESTOR",
+              "EMPLOYER",
+              "EMPLOYEE",
+              "AUTHORIZED_REPRESENTATIVE",
+              "PROFESSIONAL",
+              "GOVERNMENT_ENTITY",
+              "PARTNER_ORGANIZATION",
+              "OTHER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED",
+              "RECEIVED",
+              "WITHDRAWN",
+              "CLOSED"
+            ]
+          },
+          "draftAnswers": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationSubmissionRecordDto"
+            }
+          },
+          "case": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CaseRecordDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "applicationNumber",
+          "applicantIdentityId",
+          "organizationId",
+          "representativeAuthorityId",
+          "governmentServiceId",
+          "governmentServiceVersionId",
+          "formDefinitionId",
+          "formVersionId",
+          "configurationFingerprint",
+          "applicantCategory",
+          "status",
+          "draftAnswers",
+          "idempotencyKey",
+          "createdAt",
+          "updatedAt",
+          "submissions",
+          "case"
+        ]
       },
       "UpdateApplicationDraftDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "draftAnswers": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Partial or complete draft answers keyed by form field key. Replaces the draft."
+          }
+        },
+        "required": [
+          "draftAnswers"
+        ]
       },
       "SubmitApplicationDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "answers": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Form answers keyed by form field key. Shape is defined by the pinned form version, not by code."
+          },
+          "configurationFingerprint": {
+            "type": "string",
+            "description": "Configuration fingerprint returned when the draft was created; submission is refused if the service configuration changed."
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Client-generated key that makes a retried submission safe. Scoped to the signed-in applicant."
+          }
+        },
+        "required": [
+          "answers",
+          "configurationFingerprint"
+        ]
+      },
+      "ApplicationSubmissionResultDto": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "submission": {
+            "$ref": "#/components/schemas/ApplicationSubmissionRecordDto"
+          },
+          "case": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CaseRecordDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "applicationId",
+          "applicationNumber",
+          "submission",
+          "case"
+        ]
       },
       "CreateCaseCommunicationDto": {
         "type": "object",
@@ -34646,6 +35396,22 @@
           "status"
         ]
       },
+      "CitizenTaxBalanceByCurrencyDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency recorded on the arrears"
+          },
+          "amountCents": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "currency",
+          "amountCents"
+        ]
+      },
       "CitizenTaxRefundSummaryDto": {
         "type": "object",
         "properties": {
@@ -34664,12 +35430,17 @@
           },
           "requestedAmountCents": {
             "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency recorded on the refund claim"
           }
         },
         "required": [
           "refundClaimId",
           "status",
-          "requestedAmountCents"
+          "requestedAmountCents",
+          "currency"
         ]
       },
       "TaxPaymentPlanRecordDto": {
@@ -34881,7 +35652,19 @@
             }
           },
           "outstandingBalanceCents": {
-            "type": "number"
+            "type": "number",
+            "description": "Sum of outstanding arrears. Only meaningful with outstandingBalanceCurrency; see outstandingBalances when arrears span currencies."
+          },
+          "outstandingBalanceCurrency": {
+            "type": "string",
+            "nullable": true,
+            "description": "Currency of outstandingBalanceCents: the arrears' currency, or the jurisdiction's configured default currency when there are no arrears. Null when arrears span currencies or no default is configured."
+          },
+          "outstandingBalances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenTaxBalanceByCurrencyDto"
+            }
           },
           "refunds": {
             "type": "array",
@@ -34924,6 +35707,8 @@
           "outstandingReturns",
           "assessments",
           "outstandingBalanceCents",
+          "outstandingBalanceCurrency",
+          "outstandingBalances",
           "refunds",
           "paymentPlans",
           "disputes",
@@ -35690,11 +36475,23 @@
               "REVOKED",
               "SUPERSEDED"
             ]
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the official instrument type issued for this credential; null until an instrument is linked"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
           "credentialReference",
-          "lifecycleStatus"
+          "lifecycleStatus",
+          "displayName",
+          "issuedAt"
         ]
       },
       "CitizenEducationEnrollmentApplicationDto": {
@@ -38965,6 +39762,10 @@
           "caseId": {
             "type": "string"
           },
+          "caseReference": {
+            "type": "string",
+            "description": "Case reference number shown to the applicant"
+          },
           "caseStatus": {
             "type": "string",
             "enum": [
@@ -38994,15 +39795,26 @@
           "applicationId": {
             "type": "string"
           },
+          "applicationNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "serviceCode": {
             "type": "string"
+          },
+          "serviceName": {
+            "type": "string",
+            "description": "Public name of the government service (display name)"
           }
         },
         "required": [
           "caseId",
+          "caseReference",
           "caseStatus",
           "applicationId",
-          "serviceCode"
+          "applicationNumber",
+          "serviceCode",
+          "serviceName"
         ]
       },
       "CitizenTransportationActionDto": {
@@ -42168,6 +42980,18 @@
       "CitizenIncidentReportItemDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "incidentReference": {
+            "type": "string",
+            "description": "Incident reference shown to the reporter"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "summaryLabel": {
             "type": "string"
           },
@@ -42190,6 +43014,9 @@
           }
         },
         "required": [
+          "id",
+          "incidentReference",
+          "submittedAt",
           "summaryLabel",
           "locationDescription",
           "verificationStatus",
