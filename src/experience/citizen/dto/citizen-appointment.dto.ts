@@ -26,6 +26,22 @@ export class CitizenAppointmentSummaryDto {
   @ApiProperty()
   isVirtual!: boolean;
 
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'Case the appointment belongs to, when scheduled for a case',
+  })
+  caseId!: string | null;
+
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'Application the appointment belongs to, when scheduled for an application',
+  })
+  applicationId!: string | null;
+
   @ApiPropertyOptional({ type: InstitutionAttributionDto })
   attribution?: InstitutionAttributionDto;
 

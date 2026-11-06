@@ -85,6 +85,22 @@ export class CitizenRevenueProjectionService {
       (sum, arrear) => sum + arrear.outstandingCents,
       0,
     );
+    const balancesByCurrency = new Map<string, number>();
+    for (const arrear of arrears) {
+      balancesByCurrency.set(
+        arrear.currency,
+        (balancesByCurrency.get(arrear.currency) ?? 0) + arrear.outstandingCents,
+      );
+    }
+    const outstandingBalances = [...balancesByCurrency.entries()].map(
+      ([currency, amountCents]) => ({ currency, amountCents }),
+    );
+    const outstandingBalanceCurrency =
+      outstandingBalances.length === 1
+        ? (outstandingBalances[0]?.currency ?? null)
+        : outstandingBalances.length === 0
+          ? await this.scope.resolveJurisdictionDefaultCurrency(account.jurisdictionId)
+          : null;
 
     return {
       generatedAt: new Date().toISOString(),
@@ -116,10 +132,13 @@ export class CitizenRevenueProjectionService {
         status: item.status,
       })),
       outstandingBalanceCents,
+      outstandingBalanceCurrency,
+      outstandingBalances,
       refunds: refundClaims.map((item) => ({
         refundClaimId: item.id,
         status: item.status,
         requestedAmountCents: item.requestedAmountCents,
+        currency: item.currency,
       })),
       paymentPlans,
       disputes: objections,

@@ -139,9 +139,12 @@ export class CitizenTransportationProjectionService {
       .filter((caseRecord) => caseRecord.governmentService.code.startsWith('TEMPLATE-TRANS'))
       .map((caseRecord) => ({
         caseId: caseRecord.id,
+        caseReference: caseRecord.caseNumber,
         caseStatus: caseRecord.status,
         applicationId: caseRecord.applicationId,
+        applicationNumber: caseRecord.application.applicationNumber,
         serviceCode: caseRecord.governmentService.code,
+        serviceName: caseRecord.governmentService.publicName,
       }));
   }
 

@@ -43,6 +43,17 @@ export class CitizenEducationCredentialItemDto {
 
   @ApiProperty({ enum: AcademicCredentialLifecycleStatus })
   lifecycleStatus!: AcademicCredentialLifecycleStatus;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Name of the official instrument type issued for this credential; null until an instrument is linked',
+  })
+  displayName!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  issuedAt!: string | null;
 }
 
 export class CitizenEducationEnrollmentApplicationDto {

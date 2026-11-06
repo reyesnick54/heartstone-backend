@@ -81,6 +81,8 @@ export class CitizenAppointmentsService {
       scheduledEndsAt: summary.scheduledEndsAt,
       reasonName: summary.reasonName,
       isVirtual: summary.isVirtual,
+      caseId: summary.caseId,
+      applicationId: summary.applicationId,
       attribution: summary.attribution,
       disclaimer: summary.disclaimer,
       virtualMeetingUrl: record.virtualMeetingUrl,
@@ -122,6 +124,8 @@ export class CitizenAppointmentsService {
     scheduledStartsAt: Date | null;
     scheduledEndsAt: Date | null;
     isVirtual: boolean;
+    caseId: string | null;
+    applicationId: string | null;
     appointmentReason: { name: string } | null;
     institution: { id: string; code: string; name: string };
     department: { id: string; name: string } | null;
@@ -135,6 +139,8 @@ export class CitizenAppointmentsService {
       scheduledEndsAt: record.scheduledEndsAt?.toISOString() ?? null,
       reasonName: record.appointmentReason?.name ?? null,
       isVirtual: record.isVirtual,
+      caseId: record.caseId,
+      applicationId: record.applicationId,
       attribution: record.governmentService
         ? {
             institutionId: record.institution.id,

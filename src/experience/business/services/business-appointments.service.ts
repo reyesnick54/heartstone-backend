@@ -59,6 +59,8 @@ export class BusinessAppointmentsService {
         scheduledEndsAt: record.scheduledEndsAt?.toISOString() ?? null,
         reasonName: record.appointmentReason?.name ?? null,
         isVirtual: record.isVirtual,
+        caseId: record.caseId,
+        applicationId: record.applicationId,
         virtualMeetingUrl: null,
         locationName: null,
         availableActions: ['VIEW'],

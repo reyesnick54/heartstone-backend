@@ -8,6 +8,8 @@ import {
   FormVersionStatus,
 } from '@prisma/client';
 
+import { jsonValueSchema } from '../../../common/openapi/json-value.schema';
+
 /*
  * OpenAPI contracts mirroring the RenderedFormSchema family in
  * ../types/form-engine.types.ts. Localized text is a map keyed by locale code.
@@ -26,7 +28,7 @@ export class FormConditionClauseSchemaDto {
   @ApiProperty({ enum: FormConditionalOperator })
   operator!: FormConditionalOperator;
 
-  @ApiPropertyOptional({ description: 'Comparison value (any JSON value)' })
+  @ApiPropertyOptional({ ...jsonValueSchema(), description: 'Comparison value (any JSON value)' })
   value?: unknown;
 }
 
@@ -114,7 +116,7 @@ export class RenderedFormFieldSchemaDto {
   @ApiProperty()
   displayOrder!: number;
 
-  @ApiPropertyOptional({ description: 'Default value (any JSON value)' })
+  @ApiPropertyOptional({ ...jsonValueSchema(), description: 'Default value (any JSON value)' })
   defaultValue?: unknown;
 
   @ApiPropertyOptional(LOCALIZED_TEXT)

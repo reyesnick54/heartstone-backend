@@ -24,7 +24,14 @@ export interface CitizenMessageSummary {
   deliveredAt?: string;
   caseId?: string;
   acknowledged: boolean;
+  read: boolean;
+  readAt?: string;
 }
+
+const READ_RECEIPT_TYPES: readonly CommunicationReceiptType[] = [
+  CommunicationReceiptType.READ_RECEIPT,
+  CommunicationReceiptType.LEGAL_ACKNOWLEDGMENT,
+];
 
 export interface CitizenMessageDetail extends CitizenMessageSummary {
   body: string;
@@ -240,10 +247,23 @@ export class CitizenMessagesProjectionService {
     );
   }
 
+  /** Earliest read receipt or legal acknowledgment, only when this citizen is a recipient. */
+  private firstReadAt(message: AccessibleMessage, scope: CitizenAccessScope): Date | undefined {
+    if (!this.recipientMatchesIdentity(message, scope)) {
+      return undefined;
+    }
+    const readTimes = message.deliveries
+      .flatMap((delivery) => delivery.receipts)
+      .filter((receipt) => READ_RECEIPT_TYPES.includes(receipt.receiptType))
+      .map((receipt) => receipt.receivedAt.getTime());
+    return readTimes.length > 0 ? new Date(Math.min(...readTimes)) : undefined;
+  }
+
   private toSummary(message: AccessibleMessage, scope: CitizenAccessScope): CitizenMessageSummary {
     const portalDelivery = message.deliveries.find(
       (d) => d.channelType === CommunicationChannelType.PORTAL,
     );
+    const readAt = this.firstReadAt(message, scope);
 
     return {
       id: message.id,
@@ -254,6 +274,8 @@ export class CitizenMessagesProjectionService {
       deliveredAt: portalDelivery?.completedAt?.toISOString(),
       caseId: message.caseId ?? undefined,
       acknowledged: this.isAcknowledged(message) && this.recipientMatchesIdentity(message, scope),
+      read: readAt !== undefined,
+      readAt: readAt?.toISOString(),
     };
   }
 

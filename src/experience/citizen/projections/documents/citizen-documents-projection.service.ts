@@ -2,11 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   DocumentAssociationTargetType,
   DocumentConfidentialityOrPrivilegeStatus,
+  DocumentSourceType,
   DocumentVersion,
   Prisma,
 } from '@prisma/client';
 
 import { PrismaService } from '../../../../database/prisma.service';
+import { type CitizenDocumentOrigin } from '../citizen-experience.constants';
 import {
   CitizenAccessScope,
   CitizenAccessScopeService,
@@ -17,6 +19,8 @@ export interface CitizenDocumentSummary {
   id: string;
   title: string;
   documentType: string;
+  sourceType: DocumentSourceType;
+  origin: CitizenDocumentOrigin;
   originatingInstitution?: { id: string; name: string };
   relatedService?: { caseId?: string; caseReference?: string; serviceName?: string };
   issueOrSubmissionDate?: string;
@@ -37,8 +41,37 @@ export interface CitizenDocumentSummary {
 
 export interface CitizenDocumentDetail extends CitizenDocumentSummary {
   documentNumber: string;
-  sourceType: string;
   currentVersionNumber: number;
+}
+
+const GOVERNMENT_ISSUED_SOURCE_TYPES: readonly DocumentSourceType[] = [
+  DocumentSourceType.OFFICIAL_UPLOAD,
+  DocumentSourceType.SYSTEM_GENERATED,
+  DocumentSourceType.SCANNED_COUNTER,
+];
+
+/**
+ * Applicant-facing provenance. A version received from this identity is the citizen's own
+ * submission regardless of how the record was labelled; origin never implies authenticity.
+ */
+export function deriveCitizenDocumentOrigin(
+  sourceType: DocumentSourceType,
+  receivedFromIdentityId: string | null,
+  viewerIdentityId: string,
+): CitizenDocumentOrigin {
+  if (receivedFromIdentityId === viewerIdentityId) {
+    return 'SUBMITTED_BY_CITIZEN';
+  }
+  if (sourceType === DocumentSourceType.APPLICANT_UPLOAD) {
+    return 'SUBMITTED_BY_CITIZEN';
+  }
+  if (GOVERNMENT_ISSUED_SOURCE_TYPES.includes(sourceType)) {
+    return 'ISSUED_BY_GOVERNMENT';
+  }
+  if (sourceType === DocumentSourceType.EXTERNAL_AUTHORITY) {
+    return 'EXTERNAL_AUTHORITY';
+  }
+  return 'OTHER';
 }
 
 type AccessibleRecord = Prisma.DocumentRecordGetPayload<{
@@ -67,7 +100,7 @@ export class CitizenDocumentsProjectionService {
   async listDocuments(identityId: string): Promise<CitizenDocumentSummary[]> {
     const scope = await this.scopeService.resolveScope(identityId);
     const records = await this.findAccessibleRecords(scope);
-    return Promise.all(records.map((record) => this.toSummary(record)));
+    return Promise.all(records.map((record) => this.toSummary(record, scope.identityId)));
   }
 
   async getDocument(identityId: string, documentId: string): Promise<CitizenDocumentDetail> {
@@ -76,7 +109,7 @@ export class CitizenDocumentsProjectionService {
     if (!record) {
       throw new NotFoundException(`Document ${documentId} not found`);
     }
-    return this.toDetail(record);
+    return this.toDetail(record, scope.identityId);
   }
 
   private async findAccessibleRecords(scope: CitizenAccessScope): Promise<AccessibleRecord[]> {
@@ -232,7 +265,10 @@ export class CitizenDocumentsProjectionService {
     };
   }
 
-  private async toSummary(record: AccessibleRecord): Promise<CitizenDocumentSummary> {
+  private async toSummary(
+    record: AccessibleRecord,
+    viewerIdentityId: string,
+  ): Promise<CitizenDocumentSummary> {
     const version = this.currentVersion(record);
     if (!version) {
       throw new Error(`Document ${record.id} has no accessible version`);
@@ -242,6 +278,12 @@ export class CitizenDocumentsProjectionService {
       id: record.id,
       title: record.title,
       documentType: record.documentType,
+      sourceType: record.sourceType,
+      origin: deriveCitizenDocumentOrigin(
+        record.sourceType,
+        version.receivedFromIdentityId,
+        viewerIdentityId,
+      ),
       originatingInstitution: record.owningInstitution ?? undefined,
       relatedService: await this.resolveRelatedService(record.associations[0]),
       issueOrSubmissionDate: version.dateReceived.toISOString(),
@@ -262,14 +304,16 @@ export class CitizenDocumentsProjectionService {
     };
   }
 
-  private async toDetail(record: AccessibleRecord): Promise<CitizenDocumentDetail> {
-    const summary = await this.toSummary(record);
+  private async toDetail(
+    record: AccessibleRecord,
+    viewerIdentityId: string,
+  ): Promise<CitizenDocumentDetail> {
+    const summary = await this.toSummary(record, viewerIdentityId);
     const version = this.currentVersion(record);
 
     return {
       ...summary,
       documentNumber: record.documentNumber,
-      sourceType: record.sourceType,
       currentVersionNumber: version?.versionNumber ?? 1,
     };
   }
