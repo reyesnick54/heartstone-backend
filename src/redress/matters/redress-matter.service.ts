@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  Prisma,
   RedressMatterStatus,
   RedressRouteVersionStatus,
   RetainedAppealAuthorityClass,
@@ -26,9 +27,13 @@ export interface FileRedressMatterInput {
   reviewRoute: string;
   reviewAuthority: string;
   groundsReference?: string;
+  /** Grounds in the appellant's own words, stored verbatim on the review reference. */
+  groundsStatement?: string;
   filedAt?: Date;
   deadline?: Date;
 }
+
+type RedressDbClient = PrismaService | Prisma.TransactionClient;
 
 @Injectable()
 export class RedressMatterService {
@@ -38,8 +43,12 @@ export class RedressMatterService {
     private readonly resourceAccess: ResourceAccessService,
   ) {}
 
-  async fileMatter(input: FileRedressMatterInput) {
-    const routeVersion = await this.prisma.redressRouteVersion.findUnique({
+  /**
+   * Files a redress matter. Pass `db` to file inside a caller's transaction (for example one
+   * that holds a duplicate-filing lock); the matter is then returned as read in that transaction.
+   */
+  async fileMatter(input: FileRedressMatterInput, db: RedressDbClient = this.prisma) {
+    const routeVersion = await db.redressRouteVersion.findUnique({
       where: { id: input.routeVersionId },
     });
 
@@ -53,7 +62,7 @@ export class RedressMatterService {
       );
     }
 
-    const challengedDecision = await this.prisma.governmentDecision.findUnique({
+    const challengedDecision = await db.governmentDecision.findUnique({
       where: { id: input.challengedDecisionId },
     });
 
@@ -64,7 +73,7 @@ export class RedressMatterService {
     const filedAt = input.filedAt ?? new Date();
     const redressMatterNumber = `${REDRESS_MATTER_NUMBER_PREFIX}-${String(Date.now())}-${input.challengedDecisionId.slice(0, 8)}`;
 
-    const reviewReference = await this.prisma.decisionReviewReference.create({
+    const reviewReference = await db.decisionReviewReference.create({
       data: {
         challengedDecisionId: input.challengedDecisionId,
         challengedInstrumentId: input.challengedInstrumentId,
@@ -75,6 +84,7 @@ export class RedressMatterService {
         appellantIdentityId: input.appellantIdentityId,
         appellantOfficeholderId: input.appellantOfficeholderId,
         groundsReference: input.groundsReference,
+        groundsStatement: input.groundsStatement,
         interimEffect: ReviewInterimEffect.NONE,
         stayStatus: ReviewStayStatus.NONE,
       },
@@ -82,7 +92,7 @@ export class RedressMatterService {
 
     this.boundary.assertFilingDoesNotAutoStay(routeVersion.automaticStayOnFiling, false);
 
-    const matter = await this.prisma.redressMatter.create({
+    const matter = await db.redressMatter.create({
       data: {
         redressMatterNumber,
         routeVersionId: input.routeVersionId,
@@ -103,7 +113,7 @@ export class RedressMatterService {
     });
 
     if (routeVersion.automaticStayOnFiling) {
-      await this.prisma.decisionReviewReference.update({
+      await db.decisionReviewReference.update({
         where: { id: reviewReference.id },
         data: {
           interimEffect: ReviewInterimEffect.FULL_STAY,
@@ -112,7 +122,7 @@ export class RedressMatterService {
       });
     }
 
-    return this.findById(matter.id);
+    return this.findById(matter.id, undefined, db);
   }
 
   async markRetainedNationalAuthority(
@@ -138,12 +148,12 @@ export class RedressMatterService {
     }
   }
 
-  async findById(id: string, session?: SessionContextDto) {
+  async findById(id: string, session?: SessionContextDto, db: RedressDbClient = this.prisma) {
     if (session) {
       await this.resourceAccess.assertVisibility(session, ScopedResourceType.REDRESS_MATTER, id);
     }
 
-    const matter = await this.prisma.redressMatter.findUnique({
+    const matter = await db.redressMatter.findUnique({
       where: { id },
       include: {
         routeVersion: true,

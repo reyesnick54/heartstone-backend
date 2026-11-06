@@ -493,6 +493,116 @@
         ]
       }
     },
+    "/api/v1/experience/citizen/healthcare/consents": {
+      "get": {
+        "operationId": "CitizenHealthcareConsentController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenHealthConsentsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List your health consents and the purposes you can consent to",
+        "tags": [
+          "citizen-healthcare-experience"
+        ]
+      },
+      "post": {
+        "description": "Grants against the consent version currently in effect for the purpose. One active consent per purpose.",
+        "operationId": "CitizenHealthcareConsentController_grant",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantCitizenHealthConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenHealthConsentGrantDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant consent for a purpose",
+        "tags": [
+          "citizen-healthcare-experience"
+        ]
+      }
+    },
+    "/api/v1/experience/citizen/healthcare/consents/{grantId}/withdraw": {
+      "post": {
+        "description": "Ends the grant from now on. The consent record and its history are kept.",
+        "operationId": "CitizenHealthcareConsentController_withdraw",
+        "parameters": [
+          {
+            "name": "grantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawCitizenHealthConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenHealthConsentGrantDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw a consent you granted",
+        "tags": [
+          "citizen-healthcare-experience"
+        ]
+      }
+    },
     "/api/v1/clinical-research/matching/preliminary": {
       "post": {
         "operationId": "ClinicalResearchController_preliminaryMatch",
@@ -11168,6 +11278,297 @@
         ]
       }
     },
+    "/api/v1/experience/citizen/cases/{caseId}/review-requests": {
+      "get": {
+        "operationId": "CitizenSelfServiceController_getReviewOverview",
+        "parameters": [
+          {
+            "name": "caseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenReviewOverviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reviewable decisions, available review routes and filed review requests for a case",
+        "tags": [
+          "citizen-experience"
+        ]
+      },
+      "post": {
+        "description": "Files a redress matter on a review route configured for the service. Duplicate filings for the same decision return 409. Filing does not suspend or reverse the decision unless the route provides for that.",
+        "operationId": "CitizenSelfServiceController_fileReviewRequest",
+        "parameters": [
+          {
+            "name": "caseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCitizenReviewRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenReviewRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request review of a decision on your own case",
+        "tags": [
+          "citizen-experience"
+        ]
+      }
+    },
+    "/api/v1/experience/citizen/profile/correction-requests": {
+      "get": {
+        "operationId": "CitizenSelfServiceController_listProfileCorrections",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenProfileCorrectionListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List your profile correction requests",
+        "tags": [
+          "citizen-experience"
+        ]
+      },
+      "post": {
+        "description": "Records a correction request for review. Your record is not changed until an authorized official approves and implements the correction.",
+        "operationId": "CitizenSelfServiceController_requestProfileCorrection",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCitizenProfileCorrectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenProfileCorrectionRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ask an official to correct your profile record",
+        "tags": [
+          "citizen-experience"
+        ]
+      }
+    },
+    "/api/v1/experience/citizen/preferences/communications": {
+      "get": {
+        "operationId": "CitizenSelfServiceController_getCommunicationPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenCommunicationPreferencesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get your communication preferences",
+        "tags": [
+          "citizen-experience"
+        ]
+      },
+      "put": {
+        "description": "Applies directly. Channels not listed are left unchanged. Legally required notices are delivered regardless.",
+        "operationId": "CitizenSelfServiceController_updateCommunicationPreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCitizenCommunicationPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenCommunicationPreferencesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update your communication preferences",
+        "tags": [
+          "citizen-experience"
+        ]
+      }
+    },
+    "/api/v1/experience/citizen/applications/{id}/documents": {
+      "post": {
+        "description": "Allowed while the application is a draft or its case is waiting for you. The file is hashed and malware-scanned; it is not verified. Re-uploading the same file returns the first upload.",
+        "operationId": "CitizenSelfServiceController_uploadApplicationDocument",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadCitizenApplicationDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenApplicationDocumentUploadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a supporting document to your own application",
+        "tags": [
+          "citizen-experience"
+        ]
+      }
+    },
+    "/api/v1/experience/citizen/messages/{id}/read": {
+      "post": {
+        "description": "Idempotent. Reading is not legal acknowledgment; use the acknowledge route where a notice requires it.",
+        "operationId": "CitizenSelfServiceController_markMessageRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenMessageReadResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record that you have read a portal message",
+        "tags": [
+          "citizen-experience"
+        ]
+      }
+    },
     "/api/v1/applications": {
       "post": {
         "operationId": "ApplicationsController_create",
@@ -12016,6 +12417,1167 @@
         ],
         "tags": [
           "application-processing-workflow"
+        ]
+      }
+    },
+    "/api/v1/evidence/records": {
+      "post": {
+        "operationId": "EvidenceController_receiveEvidence",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveEvidenceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}": {
+      "get": {
+        "operationId": "EvidenceController_getEvidence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}/verifications": {
+      "post": {
+        "operationId": "EvidenceController_recordVerification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordEvidenceVerificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}/requirement-links": {
+      "post": {
+        "operationId": "EvidenceController_linkRequirement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkEvidenceRequirementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}/purpose-acceptances": {
+      "post": {
+        "operationId": "EvidenceController_recordPurposeAcceptance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordEvidencePurposeAcceptanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}/quality-assessments/official": {
+      "post": {
+        "operationId": "EvidenceController_recordOfficialQuality",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposeEvidenceQualityAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/records/{id}/quality-assessments/ai-proposals": {
+      "post": {
+        "operationId": "EvidenceController_proposeAiQuality",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposeEvidenceQualityAssessmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/quality-assessments/{assessmentId}/finalize": {
+      "post": {
+        "operationId": "EvidenceController_finalizeQuality",
+        "parameters": [
+          {
+            "name": "assessmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/v1/evidence/ai/records/{id}/verification-proposals": {
+      "post": {
+        "operationId": "EvidenceAiController_proposeVerification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordEvidenceVerificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-ai"
+        ]
+      }
+    },
+    "/api/v1/evidence/ai/records/{id}/purpose-acceptances": {
+      "post": {
+        "operationId": "EvidenceAiController_proposePurposeAcceptance",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-ai"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets": {
+      "post": {
+        "operationId": "EvidencePacketsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEvidencePacketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new evidence packet with initial draft version",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}": {
+      "get": {
+        "operationId": "EvidencePacketsController_get",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fetch evidence packet with version history",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/versions/{versionId}": {
+      "get": {
+        "operationId": "EvidencePacketsController_getVersion",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve a historical evidence packet version",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/items": {
+      "post": {
+        "operationId": "EvidencePacketsController_addItem",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPacketItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add item to draft packet version",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/items/{itemId}": {
+      "delete": {
+        "operationId": "EvidencePacketsController_removeItem",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove item from draft packet version",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/exclusions": {
+      "post": {
+        "operationId": "EvidencePacketsController_excludeItem",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcludePacketItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record controlled exclusion with reason and authorization",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/assemble": {
+      "post": {
+        "operationId": "EvidencePacketsController_assemble",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblePacketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assemble draft packet after validation",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/validate": {
+      "post": {
+        "operationId": "EvidencePacketsController_validate",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validate packet for adverse/disputed evidence visibility",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/freeze": {
+      "post": {
+        "description": "Freezing creates an immutable snapshot. It does not approve or refuse. readyForDecisionReview may be set for future decision engine reference.",
+        "operationId": "EvidencePacketsController_freeze",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FreezePacketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Freeze assembled packet version with deterministic manifest hash",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/{packetId}/versions": {
+      "post": {
+        "operationId": "EvidencePacketsController_createVersion",
+        "parameters": [
+          {
+            "name": "packetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create new draft version from frozen packet, superseding prior version",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/evidence/packets/versions/{versionIdA}/compare/{versionIdB}": {
+      "get": {
+        "operationId": "EvidencePacketsController_compare",
+        "parameters": [
+          {
+            "name": "versionIdA",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionIdB",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Compare two packet versions",
+        "tags": [
+          "evidence-packets"
+        ]
+      }
+    },
+    "/api/v1/documents/integrity-disclaimer": {
+      "get": {
+        "operationId": "DocumentsController_getIntegrityDisclaimer",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents": {
+      "post": {
+        "operationId": "DocumentsController_createRecord",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentRecordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{id}": {
+      "get": {
+        "operationId": "DocumentsController_findRecord",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{id}/versions": {
+      "post": {
+        "operationId": "DocumentsController_uploadVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadDocumentVersionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      },
+      "get": {
+        "operationId": "DocumentsController_listVersions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/versions/{versionId}": {
+      "get": {
+        "operationId": "DocumentsController_getVersion",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/versions/{versionId}/classification": {
+      "patch": {
+        "operationId": "DocumentsController_updateClassification",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClassificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/versions/{versionId}/download": {
+      "get": {
+        "operationId": "DocumentsController_downloadVersion",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/versions/{path}/download": {
+      "get": {
+        "operationId": "DocumentsController_rejectStorageKeyDownload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/documents/associations": {
+      "post": {
+        "operationId": "DocumentsController_associate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssociateDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      },
+      "get": {
+        "operationId": "DocumentsController_listAssociations",
+        "parameters": [
+          {
+            "name": "targetType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "evidence-records-documents"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/classifications": {
+      "post": {
+        "operationId": "EvidenceRecordsController_createClassification",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/retention-schedules": {
+      "post": {
+        "operationId": "EvidenceRecordsController_createRetentionSchedule",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/legal-holds": {
+      "post": {
+        "operationId": "EvidenceRecordsController_createLegalHold",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLegalHoldDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/legal-holds/{id}/release": {
+      "post": {
+        "operationId": "EvidenceRecordsController_releaseLegalHold",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseLegalHoldDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/disposition/evaluate": {
+      "post": {
+        "operationId": "EvidenceRecordsController_evaluateDisposition",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/disposition/requests": {
+      "post": {
+        "operationId": "EvidenceRecordsController_createDispositionRequest",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
+        ]
+      }
+    },
+    "/api/v1/evidence-records/retention-schedules/{code}/history": {
+      "get": {
+        "operationId": "EvidenceRecordsController_getScheduleHistory",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "evidence-records"
         ]
       }
     },
@@ -18073,715 +19635,6 @@
         ]
       }
     },
-    "/api/v1/evidence/records": {
-      "post": {
-        "operationId": "EvidenceController_receiveEvidence",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReceiveEvidenceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}": {
-      "get": {
-        "operationId": "EvidenceController_getEvidence",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}/verifications": {
-      "post": {
-        "operationId": "EvidenceController_recordVerification",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordEvidenceVerificationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}/requirement-links": {
-      "post": {
-        "operationId": "EvidenceController_linkRequirement",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkEvidenceRequirementDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}/purpose-acceptances": {
-      "post": {
-        "operationId": "EvidenceController_recordPurposeAcceptance",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordEvidencePurposeAcceptanceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}/quality-assessments/official": {
-      "post": {
-        "operationId": "EvidenceController_recordOfficialQuality",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProposeEvidenceQualityAssessmentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/records/{id}/quality-assessments/ai-proposals": {
-      "post": {
-        "operationId": "EvidenceController_proposeAiQuality",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProposeEvidenceQualityAssessmentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/quality-assessments/{assessmentId}/finalize": {
-      "post": {
-        "operationId": "EvidenceController_finalizeQuality",
-        "parameters": [
-          {
-            "name": "assessmentId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence"
-        ]
-      }
-    },
-    "/api/v1/evidence/ai/records/{id}/verification-proposals": {
-      "post": {
-        "operationId": "EvidenceAiController_proposeVerification",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RecordEvidenceVerificationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-ai"
-        ]
-      }
-    },
-    "/api/v1/evidence/ai/records/{id}/purpose-acceptances": {
-      "post": {
-        "operationId": "EvidenceAiController_proposePurposeAcceptance",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-ai"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets": {
-      "post": {
-        "operationId": "EvidencePacketsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEvidencePacketDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new evidence packet with initial draft version",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}": {
-      "get": {
-        "operationId": "EvidencePacketsController_get",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Fetch evidence packet with version history",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/versions/{versionId}": {
-      "get": {
-        "operationId": "EvidencePacketsController_getVersion",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Retrieve a historical evidence packet version",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/items": {
-      "post": {
-        "operationId": "EvidencePacketsController_addItem",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddPacketItemDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Add item to draft packet version",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/items/{itemId}": {
-      "delete": {
-        "operationId": "EvidencePacketsController_removeItem",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "itemId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove item from draft packet version",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/exclusions": {
-      "post": {
-        "operationId": "EvidencePacketsController_excludeItem",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExcludePacketItemDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Record controlled exclusion with reason and authorization",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/assemble": {
-      "post": {
-        "operationId": "EvidencePacketsController_assemble",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssemblePacketDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Assemble draft packet after validation",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/validate": {
-      "post": {
-        "operationId": "EvidencePacketsController_validate",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Validate packet for adverse/disputed evidence visibility",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/freeze": {
-      "post": {
-        "description": "Freezing creates an immutable snapshot. It does not approve or refuse. readyForDecisionReview may be set for future decision engine reference.",
-        "operationId": "EvidencePacketsController_freeze",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FreezePacketDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Freeze assembled packet version with deterministic manifest hash",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/{packetId}/versions": {
-      "post": {
-        "operationId": "EvidencePacketsController_createVersion",
-        "parameters": [
-          {
-            "name": "packetId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create new draft version from frozen packet, superseding prior version",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
-    "/api/v1/evidence/packets/versions/{versionIdA}/compare/{versionIdB}": {
-      "get": {
-        "operationId": "EvidencePacketsController_compare",
-        "parameters": [
-          {
-            "name": "versionIdA",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "versionIdB",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Compare two packet versions",
-        "tags": [
-          "evidence-packets"
-        ]
-      }
-    },
     "/api/v1/experience/platform-admin/home": {
       "get": {
         "description": "Summarized configuration and operations information for authorized platform administrators.",
@@ -19741,458 +20594,6 @@
         "summary": "Benefit award actions with execution-time authority evaluation",
         "tags": [
           "official-benefits-experience"
-        ]
-      }
-    },
-    "/api/v1/documents/integrity-disclaimer": {
-      "get": {
-        "operationId": "DocumentsController_getIntegrityDisclaimer",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents": {
-      "post": {
-        "operationId": "DocumentsController_createRecord",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDocumentRecordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/{id}": {
-      "get": {
-        "operationId": "DocumentsController_findRecord",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/{id}/versions": {
-      "post": {
-        "operationId": "DocumentsController_uploadVersion",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadDocumentVersionDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      },
-      "get": {
-        "operationId": "DocumentsController_listVersions",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/versions/{versionId}": {
-      "get": {
-        "operationId": "DocumentsController_getVersion",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/versions/{versionId}/classification": {
-      "patch": {
-        "operationId": "DocumentsController_updateClassification",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateClassificationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/versions/{versionId}/download": {
-      "get": {
-        "operationId": "DocumentsController_downloadVersion",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/versions/{path}/download": {
-      "get": {
-        "operationId": "DocumentsController_rejectStorageKeyDownload",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/documents/associations": {
-      "post": {
-        "operationId": "DocumentsController_associate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssociateDocumentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      },
-      "get": {
-        "operationId": "DocumentsController_listAssociations",
-        "parameters": [
-          {
-            "name": "targetType",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "targetId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "evidence-records-documents"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/classifications": {
-      "post": {
-        "operationId": "EvidenceRecordsController_createClassification",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/retention-schedules": {
-      "post": {
-        "operationId": "EvidenceRecordsController_createRetentionSchedule",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/legal-holds": {
-      "post": {
-        "operationId": "EvidenceRecordsController_createLegalHold",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLegalHoldDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/legal-holds/{id}/release": {
-      "post": {
-        "operationId": "EvidenceRecordsController_releaseLegalHold",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReleaseLegalHoldDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/disposition/evaluate": {
-      "post": {
-        "operationId": "EvidenceRecordsController_evaluateDisposition",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/disposition/requests": {
-      "post": {
-        "operationId": "EvidenceRecordsController_createDispositionRequest",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
-        ]
-      }
-    },
-    "/api/v1/evidence-records/retention-schedules/{code}/history": {
-      "get": {
-        "operationId": "EvidenceRecordsController_getScheduleHistory",
-        "parameters": [
-          {
-            "name": "code",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "evidence-records"
         ]
       }
     },
@@ -22706,6 +23107,215 @@
         "required": [
           "revokedCount"
         ]
+      },
+      "CitizenHealthConsentGrantDto": {
+        "type": "object",
+        "properties": {
+          "grantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grantReference": {
+            "type": "string"
+          },
+          "consentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consentReference": {
+            "type": "string"
+          },
+          "consentType": {
+            "type": "string",
+            "enum": [
+              "TREATMENT",
+              "RESEARCH",
+              "DATA_SHARING",
+              "GUARDIAN",
+              "ADMINISTRATIVE"
+            ]
+          },
+          "consentStatus": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUPERSEDED",
+              "WITHDRAWN",
+              "EXPIRED"
+            ]
+          },
+          "purposeCode": {
+            "type": "string"
+          },
+          "purposeName": {
+            "type": "string"
+          },
+          "consentVersionCode": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "True while the grant is active, unexpired and not withdrawn"
+          },
+          "grantedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dataCategories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recipientCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "grantId",
+          "grantReference",
+          "consentId",
+          "consentReference",
+          "consentType",
+          "consentStatus",
+          "purposeCode",
+          "purposeName",
+          "consentVersionCode",
+          "isActive",
+          "grantedAt",
+          "expiresAt",
+          "withdrawnAt",
+          "dataCategories",
+          "recipientCodes"
+        ]
+      },
+      "CitizenHealthConsentPurposeDto": {
+        "type": "object",
+        "properties": {
+          "purposeCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentVersionCode": {
+            "type": "string",
+            "description": "Version currently in effect; grant against this code"
+          },
+          "legalTextRef": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reference to the legal text"
+          }
+        },
+        "required": [
+          "purposeCode",
+          "displayName",
+          "description",
+          "currentVersionCode",
+          "legalTextRef"
+        ]
+      },
+      "CitizenHealthConsentsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenHealthConsentGrantDto"
+            }
+          },
+          "availablePurposes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenHealthConsentPurposeDto"
+            }
+          },
+          "patientReferenceEstablished": {
+            "type": "boolean",
+            "description": "False when no patient reference is established for this identity yet"
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "availablePurposes",
+          "patientReferenceEstablished",
+          "disclaimer"
+        ]
+      },
+      "GrantCitizenHealthConsentDto": {
+        "type": "object",
+        "properties": {
+          "purposeCode": {
+            "type": "string",
+            "description": "Consent purpose code from GET .../consents availablePurposes"
+          },
+          "consentVersionCode": {
+            "type": "string",
+            "description": "Consent version code the citizen was shown. Must be the version currently in effect for the purpose."
+          },
+          "consentType": {
+            "type": "string",
+            "enum": [
+              "DATA_SHARING",
+              "TREATMENT"
+            ]
+          },
+          "dataCategories": {
+            "description": "Data categories the consent covers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recipientCodes": {
+            "description": "Recipient codes the consent covers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the consent lapses"
+          }
+        },
+        "required": [
+          "purposeCode",
+          "consentVersionCode",
+          "consentType"
+        ]
+      },
+      "WithdrawCitizenHealthConsentDto": {
+        "type": "object",
+        "properties": {
+          "reasonSummary": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
       },
       "ClinicalTrialCodeLabelDto": {
         "type": "object",
@@ -33762,6 +34372,596 @@
           "updatedAt"
         ]
       },
+      "CitizenReviewableDecisionDto": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionNumber": {
+            "type": "string"
+          },
+          "decisionStatus": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PENDING",
+              "FINALIZED",
+              "RECORDED",
+              "FORMALIZATION_PENDING",
+              "SIGNATURE_PENDING",
+              "SEAL_PENDING",
+              "NOTICE_PENDING",
+              "CONDITIONS_PRECEDENT_PENDING",
+              "EFFECTIVE",
+              "SUPERSEDED",
+              "SET_ASIDE",
+              "WITHDRAWN",
+              "WITHDRAWN_BY_AUTHORIZED_PROCESS"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "outcomeSummary": {
+            "type": "string",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reviewRequestAllowed": {
+            "type": "boolean",
+            "description": "False when an open request already exists for this decision"
+          }
+        },
+        "required": [
+          "decisionId",
+          "decisionNumber",
+          "decisionStatus",
+          "outcome",
+          "outcomeSummary",
+          "decidedAt",
+          "reviewRequestAllowed"
+        ]
+      },
+      "CitizenReviewRouteDto": {
+        "type": "object",
+        "properties": {
+          "routeCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "automaticStayOnFiling": {
+            "type": "boolean",
+            "description": "True only when the route configuration itself suspends the decision on filing. Filing does not otherwise stay or reverse a decision."
+          }
+        },
+        "required": [
+          "routeCode",
+          "label",
+          "description",
+          "automaticStayOnFiling"
+        ]
+      },
+      "CitizenReviewRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Redress matter reference"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FILED",
+              "UNDER_REVIEW",
+              "INTERIM_RELIEF_PENDING",
+              "DECISION_PENDING",
+              "DECIDED",
+              "IMPLEMENTATION_PENDING",
+              "IMPLEMENTATION_IN_PROGRESS",
+              "IMPLEMENTED",
+              "CLOSED",
+              "WITHDRAWN"
+            ]
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "routeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "filedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "groundsStatement": {
+            "type": "string",
+            "nullable": true
+          },
+          "interimEffect": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "PARTIAL_STAY",
+              "FULL_STAY",
+              "OPERATIONAL_CONTINUATION"
+            ]
+          },
+          "stayStatus": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "INTERIM_STAY_AUTHORIZED",
+              "STAY_DENIED",
+              "STAY_EXPIRED",
+              "STAY_LIFTED"
+            ]
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "decisionId",
+          "routeCode",
+          "filedAt",
+          "groundsStatement",
+          "interimEffect",
+          "stayStatus",
+          "disclaimer"
+        ]
+      },
+      "CitizenReviewOverviewDto": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseReference": {
+            "type": "string"
+          },
+          "reviewableDecisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenReviewableDecisionDto"
+            }
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenReviewRouteDto"
+            }
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenReviewRequestDto"
+            }
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "caseId",
+          "caseReference",
+          "reviewableDecisions",
+          "routes",
+          "requests",
+          "disclaimer"
+        ]
+      },
+      "CreateCitizenReviewRequestDto": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Decision on this case being challenged"
+          },
+          "routeCode": {
+            "type": "string",
+            "description": "Review route code from GET .../review-requests (configured on the service version the case was opened under)"
+          },
+          "groundsStatement": {
+            "type": "string",
+            "description": "Grounds for review in the citizen's own words",
+            "minLength": 20,
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "decisionId",
+          "routeCode",
+          "groundsStatement"
+        ]
+      },
+      "CitizenProfileRequestedChangesDto": {
+        "type": "object",
+        "properties": {
+          "givenName": {
+            "type": "string"
+          },
+          "familyName": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "CitizenProfileCorrectionRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "UNDER_REVIEW",
+              "APPROVED",
+              "REJECTED",
+              "IMPLEMENTED",
+              "SUPERSEDED"
+            ]
+          },
+          "requestedChanges": {
+            "$ref": "#/components/schemas/CitizenProfileRequestedChangesDto"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "supportingDocumentIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "requestedChanges",
+          "reason",
+          "supportingDocumentIds",
+          "requestedAt",
+          "disclaimer"
+        ]
+      },
+      "CitizenProfileCorrectionListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenProfileCorrectionRequestDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateCitizenProfileCorrectionDto": {
+        "type": "object",
+        "properties": {
+          "givenName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "familyName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the current record is wrong",
+            "minLength": 10,
+            "maxLength": 2000
+          },
+          "supportingDocumentIds": {
+            "description": "Document ids the citizen uploaded that support the correction",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Client retry key; a retry with the same key returns the original request",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "CitizenCommunicationPreferenceItemDto": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "SMS",
+              "PORTAL",
+              "POSTAL",
+              "IN_PERSON",
+              "GOVERNMENT_SECURE_MESSAGING",
+              "OTHER"
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string",
+            "nullable": true
+          },
+          "accessibilityRequirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isExplicit": {
+            "type": "boolean",
+            "description": "False when no preference is recorded and the default applies"
+          }
+        },
+        "required": [
+          "channelType",
+          "isEnabled",
+          "locale",
+          "accessibilityRequirements",
+          "isExplicit"
+        ]
+      },
+      "CitizenCommunicationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenCommunicationPreferenceItemDto"
+            }
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "disclaimer"
+        ]
+      },
+      "CitizenCommunicationPreferenceInputDto": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "SMS",
+              "PORTAL",
+              "POSTAL"
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string",
+            "description": "BCP 47 language tag, e.g. en or es-419",
+            "maxLength": 35
+          },
+          "accessibilityRequirements": {
+            "description": "Accessibility needs for this channel, e.g. LARGE_PRINT or SCREEN_READER",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "channelType",
+          "isEnabled"
+        ]
+      },
+      "UpdateCitizenCommunicationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenCommunicationPreferenceInputDto"
+            }
+          }
+        },
+        "required": [
+          "preferences"
+        ]
+      },
+      "UploadCitizenApplicationDocumentDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Document type label, e.g. the evidence requirement the file answers",
+            "maxLength": 200
+          },
+          "originalFilename": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "image/png",
+              "image/jpeg"
+            ]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "File content, base64-encoded. Subject to the deployment JSON body limit."
+          }
+        },
+        "required": [
+          "title",
+          "documentType",
+          "originalFilename",
+          "contentType",
+          "contentBase64"
+        ]
+      },
+      "CitizenApplicationDocumentUploadDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentNumber": {
+            "type": "string"
+          },
+          "documentVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256 of the stored bytes. Integrity only; not authenticity."
+          },
+          "malwareScanStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_SCANNED",
+              "SCAN_PENDING",
+              "CLEAN",
+              "SUSPICIOUS",
+              "MALICIOUS",
+              "SCAN_FAILED",
+              "QUARANTINED"
+            ]
+          },
+          "authenticityStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_EVALUATED",
+              "UNVERIFIED",
+              "VERIFICATION_PENDING",
+              "AUTHENTICITY_DISPUTED",
+              "VERIFICATION_FAILED"
+            ],
+            "description": "Always NOT_EVALUATED on upload; only an official can evaluate authenticity"
+          },
+          "duplicate": {
+            "type": "boolean",
+            "description": "True when the same file was already uploaded to this application by you"
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "documentId",
+          "documentNumber",
+          "documentVersionId",
+          "applicationId",
+          "title",
+          "documentType",
+          "originalFilename",
+          "contentType",
+          "sizeBytes",
+          "sha256",
+          "malwareScanStatus",
+          "authenticityStatus",
+          "duplicate",
+          "disclaimer"
+        ]
+      },
+      "CitizenMessageReadResponseDto": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "messageId",
+          "read",
+          "readAt"
+        ]
+      },
       "CreateApplicationDto": {
         "type": "object",
         "properties": {
@@ -34405,6 +35605,566 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "ReceiveEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalRecordReference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "evidenceType": {
+            "type": "string",
+            "enum": [
+              "DOCUMENT",
+              "DATA_EXTRACT",
+              "REGISTRY_RECORD",
+              "PROFESSIONAL_CERTIFICATION",
+              "PHOTOGRAPH",
+              "STATEMENT",
+              "OTHER"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "APPLICANT",
+              "THIRD_PARTY",
+              "GOVERNMENT_REGISTRY",
+              "PROFESSIONAL_BODY",
+              "INTERNAL",
+              "OTHER"
+            ]
+          },
+          "submittingParty": {
+            "type": "string"
+          },
+          "authorOrIssuingBody": {
+            "type": "string"
+          },
+          "dateCreated": {
+            "type": "string"
+          },
+          "dateReceived": {
+            "type": "string"
+          },
+          "periodCovered": {
+            "type": "string"
+          },
+          "confidentialityClassification": {
+            "type": "string"
+          },
+          "integrityReference": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "string"
+          },
+          "retentionRuleReference": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "caseId",
+          "title",
+          "evidenceType",
+          "source",
+          "submittingParty",
+          "dateReceived",
+          "confidentialityClassification",
+          "integrityReference"
+        ]
+      },
+      "RecordEvidenceVerificationDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "INTEGRITY",
+              "ISSUER",
+              "SIGNATURE",
+              "SEAL",
+              "IDENTITY",
+              "DATE",
+              "REGISTRY_MATCH",
+              "CONTENT_FACT",
+              "PROFESSIONAL",
+              "OTHER_CONTROLLED_METHOD"
+            ]
+          },
+          "whatWasVerified": {
+            "type": "string"
+          },
+          "verificationMethod": {
+            "type": "string",
+            "enum": [
+              "CHECKSUM_MATCH",
+              "DIGITAL_SIGNATURE_VALIDATION",
+              "REGISTRY_LOOKUP",
+              "ISSUER_CONFIRMATION",
+              "PROFESSIONAL_REGISTER_LOOKUP",
+              "VISUAL_INSPECTION",
+              "OTHER_CONTROLLED_METHOD",
+              "UNKNOWN"
+            ]
+          },
+          "verificationSource": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "NOT_CONFIRMED",
+              "INCONCLUSIVE",
+              "COULD_NOT_VERIFY"
+            ]
+          },
+          "verifiedByOfficeholderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalReference": {
+            "type": "string"
+          },
+          "externalAuthorityReference": {
+            "type": "string"
+          },
+          "performedAt": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "authorityEvaluationRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isAiProposed": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "category",
+          "whatWasVerified",
+          "verificationMethod",
+          "verificationSource",
+          "result",
+          "performedAt"
+        ]
+      },
+      "LinkEvidenceRequirementDto": {
+        "type": "object",
+        "properties": {
+          "checklistItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "SATISFIES",
+              "PARTIALLY_SATISFIES",
+              "DOES_NOT_SATISFY",
+              "UNDER_REVIEW",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "LINKED",
+              "UNDER_REVIEW",
+              "SATISFIED",
+              "PARTIALLY_SATISFIED",
+              "NOT_SATISFIED",
+              "SUPERSEDED",
+              "WITHDRAWN"
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveUntil": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checklistItemId",
+          "relationship"
+        ]
+      },
+      "RecordEvidencePurposeAcceptanceDto": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "COMPLETENESS",
+              "SUBSTANTIVE_REVIEW",
+              "PROFESSIONAL_REVIEW",
+              "INSPECTION",
+              "EXTERNAL_REFERRAL",
+              "FUTURE_DECISION_PACKET",
+              "COMPLIANCE",
+              "OTHER_APPROVED_PURPOSE"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "REJECTED",
+              "LIMITED"
+            ]
+          },
+          "reviewerOfficeholderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose",
+          "decision",
+          "decidedAt"
+        ]
+      },
+      "ProposeEvidenceQualityAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "criterion": {
+            "type": "string",
+            "enum": [
+              "RELEVANCE",
+              "PROVENANCE",
+              "AUTHENTICITY",
+              "COMPLETENESS",
+              "CURRENCY",
+              "INDEPENDENCE",
+              "RELIABILITY",
+              "INTEGRITY",
+              "SCOPE",
+              "FITNESS_FOR_PURPOSE"
+            ]
+          },
+          "rating": {
+            "type": "string",
+            "enum": [
+              "STRONG",
+              "ADEQUATE",
+              "WEAK",
+              "INSUFFICIENT",
+              "UNASSESSED"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          },
+          "assessedAt": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "criterion",
+          "rating",
+          "assessedAt"
+        ]
+      },
+      "CreateEvidencePacketDto": {
+        "type": "object",
+        "properties": {
+          "masterAdministrativeFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "SUBSTANTIVE_REVIEW",
+              "PROFESSIONAL_REVIEW",
+              "INSPECTION_REVIEW",
+              "EXTERNAL_REFERRAL",
+              "DECISION_SUPPORT",
+              "APPEAL_RECORD",
+              "COMPLIANCE_REVIEW",
+              "PROJECT_READINESS",
+              "OTHER_CONTROLLED_PURPOSE"
+            ]
+          },
+          "questionOrIssue": {
+            "type": "string"
+          },
+          "responsibleDepartmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalProjectReference": {
+            "type": "string",
+            "description": "Stable external project reference when purpose is PROJECT_READINESS"
+          }
+        },
+        "required": [
+          "masterAdministrativeFileId",
+          "purpose",
+          "questionOrIssue",
+          "responsibleDepartmentId"
+        ]
+      },
+      "AddPacketItemDto": {
+        "type": "object",
+        "properties": {
+          "evidenceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inclusionOrder": {
+            "type": "number"
+          },
+          "limitations": {
+            "type": "string"
+          },
+          "departmentalReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "governmentCommunicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "professionalReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceCitationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verificationRecordIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "acceptanceRecordIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "evidenceRecordId",
+          "documentVersionId"
+        ]
+      },
+      "ExcludePacketItemDto": {
+        "type": "object",
+        "properties": {
+          "evidenceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exclusionReason": {
+            "type": "string"
+          },
+          "authorizedByOfficeholderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorityEvaluationRecordId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "evidenceRecordId",
+          "exclusionReason"
+        ]
+      },
+      "AssemblePacketDto": {
+        "type": "object",
+        "properties": {
+          "evidenceCutoffAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "assembledByOfficeholderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorityEvaluationRecordId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FreezePacketDto": {
+        "type": "object",
+        "properties": {
+          "readyForDecisionReview": {
+            "type": "boolean",
+            "description": "Marks packet as ready for decision engine review. Does not create a decision outcome."
+          }
+        }
+      },
+      "CreateDocumentRecordDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UploadDocumentVersionDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateClassificationDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "AssociateDocumentDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "LegalHoldTargetDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "MASTER_ADMINISTRATIVE_FILE",
+              "CASE",
+              "DOCUMENT",
+              "EVIDENCE",
+              "EVIDENCE_PACKET",
+              "RECORD_CLASS",
+              "PRESERVATION_COLLECTION"
+            ]
+          },
+          "targetReference": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "recordsClassificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "targetType",
+          "targetReference"
+        ]
+      },
+      "CreateLegalHoldDto": {
+        "type": "object",
+        "properties": {
+          "holdNumber": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "authorityReference": {
+            "type": "string",
+            "description": "Court order, statute or instruction requiring the hold"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalHoldTargetDto"
+            }
+          }
+        },
+        "required": [
+          "holdNumber",
+          "title",
+          "authorityReference",
+          "reason",
+          "effectiveFrom",
+          "targets"
+        ]
+      },
+      "ReleaseLegalHoldDto": {
+        "type": "object",
+        "properties": {
+          "releaseAuthorityReference": {
+            "type": "string",
+            "description": "Court order or instruction authorising release"
+          },
+          "releaseReason": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "releaseAuthorityReference",
+          "releaseReason"
         ]
       },
       "BusinessOrganizationSummaryDto": {
@@ -41078,461 +42838,6 @@
         "type": "object",
         "properties": {}
       },
-      "ReceiveEvidenceDto": {
-        "type": "object",
-        "properties": {
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "documentVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "externalRecordReference": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "evidenceType": {
-            "type": "string",
-            "enum": [
-              "DOCUMENT",
-              "DATA_EXTRACT",
-              "REGISTRY_RECORD",
-              "PROFESSIONAL_CERTIFICATION",
-              "PHOTOGRAPH",
-              "STATEMENT",
-              "OTHER"
-            ]
-          },
-          "source": {
-            "type": "string",
-            "enum": [
-              "APPLICANT",
-              "THIRD_PARTY",
-              "GOVERNMENT_REGISTRY",
-              "PROFESSIONAL_BODY",
-              "INTERNAL",
-              "OTHER"
-            ]
-          },
-          "submittingParty": {
-            "type": "string"
-          },
-          "authorOrIssuingBody": {
-            "type": "string"
-          },
-          "dateCreated": {
-            "type": "string"
-          },
-          "dateReceived": {
-            "type": "string"
-          },
-          "periodCovered": {
-            "type": "string"
-          },
-          "confidentialityClassification": {
-            "type": "string"
-          },
-          "integrityReference": {
-            "type": "string"
-          },
-          "limitations": {
-            "type": "string"
-          },
-          "retentionRuleReference": {
-            "type": "string"
-          },
-          "validFrom": {
-            "type": "string"
-          },
-          "validUntil": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "caseId",
-          "title",
-          "evidenceType",
-          "source",
-          "submittingParty",
-          "dateReceived",
-          "confidentialityClassification",
-          "integrityReference"
-        ]
-      },
-      "RecordEvidenceVerificationDto": {
-        "type": "object",
-        "properties": {
-          "category": {
-            "type": "string",
-            "enum": [
-              "INTEGRITY",
-              "ISSUER",
-              "SIGNATURE",
-              "SEAL",
-              "IDENTITY",
-              "DATE",
-              "REGISTRY_MATCH",
-              "CONTENT_FACT",
-              "PROFESSIONAL",
-              "OTHER_CONTROLLED_METHOD"
-            ]
-          },
-          "whatWasVerified": {
-            "type": "string"
-          },
-          "verificationMethod": {
-            "type": "string",
-            "enum": [
-              "CHECKSUM_MATCH",
-              "DIGITAL_SIGNATURE_VALIDATION",
-              "REGISTRY_LOOKUP",
-              "ISSUER_CONFIRMATION",
-              "PROFESSIONAL_REGISTER_LOOKUP",
-              "VISUAL_INSPECTION",
-              "OTHER_CONTROLLED_METHOD",
-              "UNKNOWN"
-            ]
-          },
-          "verificationSource": {
-            "type": "string"
-          },
-          "result": {
-            "type": "string",
-            "enum": [
-              "CONFIRMED",
-              "NOT_CONFIRMED",
-              "INCONCLUSIVE",
-              "COULD_NOT_VERIFY"
-            ]
-          },
-          "verifiedByOfficeholderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "professionalReference": {
-            "type": "string"
-          },
-          "externalAuthorityReference": {
-            "type": "string"
-          },
-          "performedAt": {
-            "type": "string"
-          },
-          "limitations": {
-            "type": "string"
-          },
-          "expiresAt": {
-            "type": "string"
-          },
-          "authorityEvaluationRecordId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "isAiProposed": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "required": [
-          "category",
-          "whatWasVerified",
-          "verificationMethod",
-          "verificationSource",
-          "result",
-          "performedAt"
-        ]
-      },
-      "LinkEvidenceRequirementDto": {
-        "type": "object",
-        "properties": {
-          "checklistItemId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "relationship": {
-            "type": "string",
-            "enum": [
-              "SATISFIES",
-              "PARTIALLY_SATISFIES",
-              "DOES_NOT_SATISFY",
-              "UNDER_REVIEW",
-              "NOT_APPLICABLE"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "LINKED",
-              "UNDER_REVIEW",
-              "SATISFIED",
-              "PARTIALLY_SATISFIED",
-              "NOT_SATISFIED",
-              "SUPERSEDED",
-              "WITHDRAWN"
-            ]
-          },
-          "effectiveFrom": {
-            "type": "string"
-          },
-          "effectiveUntil": {
-            "type": "string"
-          },
-          "limitations": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "checklistItemId",
-          "relationship"
-        ]
-      },
-      "RecordEvidencePurposeAcceptanceDto": {
-        "type": "object",
-        "properties": {
-          "purpose": {
-            "type": "string",
-            "enum": [
-              "COMPLETENESS",
-              "SUBSTANTIVE_REVIEW",
-              "PROFESSIONAL_REVIEW",
-              "INSPECTION",
-              "EXTERNAL_REFERRAL",
-              "FUTURE_DECISION_PACKET",
-              "COMPLIANCE",
-              "OTHER_APPROVED_PURPOSE"
-            ]
-          },
-          "decision": {
-            "type": "string",
-            "enum": [
-              "ACCEPTED",
-              "REJECTED",
-              "LIMITED"
-            ]
-          },
-          "reviewerOfficeholderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "decidedAt": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "scope": {
-            "type": "string"
-          },
-          "limitations": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "purpose",
-          "decision",
-          "decidedAt"
-        ]
-      },
-      "ProposeEvidenceQualityAssessmentDto": {
-        "type": "object",
-        "properties": {
-          "criterion": {
-            "type": "string",
-            "enum": [
-              "RELEVANCE",
-              "PROVENANCE",
-              "AUTHENTICITY",
-              "COMPLETENESS",
-              "CURRENCY",
-              "INDEPENDENCE",
-              "RELIABILITY",
-              "INTEGRITY",
-              "SCOPE",
-              "FITNESS_FOR_PURPOSE"
-            ]
-          },
-          "rating": {
-            "type": "string",
-            "enum": [
-              "STRONG",
-              "ADEQUATE",
-              "WEAK",
-              "INSUFFICIENT",
-              "UNASSESSED"
-            ]
-          },
-          "notes": {
-            "type": "string"
-          },
-          "assessedAt": {
-            "type": "string"
-          },
-          "limitations": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "criterion",
-          "rating",
-          "assessedAt"
-        ]
-      },
-      "CreateEvidencePacketDto": {
-        "type": "object",
-        "properties": {
-          "masterAdministrativeFileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "purpose": {
-            "type": "string",
-            "enum": [
-              "SUBSTANTIVE_REVIEW",
-              "PROFESSIONAL_REVIEW",
-              "INSPECTION_REVIEW",
-              "EXTERNAL_REFERRAL",
-              "DECISION_SUPPORT",
-              "APPEAL_RECORD",
-              "COMPLIANCE_REVIEW",
-              "PROJECT_READINESS",
-              "OTHER_CONTROLLED_PURPOSE"
-            ]
-          },
-          "questionOrIssue": {
-            "type": "string"
-          },
-          "responsibleDepartmentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "externalProjectReference": {
-            "type": "string",
-            "description": "Stable external project reference when purpose is PROJECT_READINESS"
-          }
-        },
-        "required": [
-          "masterAdministrativeFileId",
-          "purpose",
-          "questionOrIssue",
-          "responsibleDepartmentId"
-        ]
-      },
-      "AddPacketItemDto": {
-        "type": "object",
-        "properties": {
-          "evidenceRecordId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "documentVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "inclusionOrder": {
-            "type": "number"
-          },
-          "limitations": {
-            "type": "string"
-          },
-          "departmentalReviewId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "governmentCommunicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "professionalReviewId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "inspectionRecordId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceCitationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "verificationRecordIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "acceptanceRecordIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "evidenceRecordId",
-          "documentVersionId"
-        ]
-      },
-      "ExcludePacketItemDto": {
-        "type": "object",
-        "properties": {
-          "evidenceRecordId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "exclusionReason": {
-            "type": "string"
-          },
-          "authorizedByOfficeholderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorityEvaluationRecordId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "evidenceRecordId",
-          "exclusionReason"
-        ]
-      },
-      "AssemblePacketDto": {
-        "type": "object",
-        "properties": {
-          "evidenceCutoffAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "assembledByOfficeholderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorityEvaluationRecordId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "FreezePacketDto": {
-        "type": "object",
-        "properties": {
-          "readyForDecisionReview": {
-            "type": "boolean",
-            "description": "Marks packet as ready for decision engine review. Does not create a decision outcome."
-          }
-        }
-      },
       "PlatformAdminCountSummaryDto": {
         "type": "object",
         "properties": {
@@ -42422,111 +43727,6 @@
         "required": [
           "profileReferenceNumber",
           "availableActions"
-        ]
-      },
-      "CreateDocumentRecordDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UploadDocumentVersionDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateClassificationDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "AssociateDocumentDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "LegalHoldTargetDto": {
-        "type": "object",
-        "properties": {
-          "targetType": {
-            "type": "string",
-            "enum": [
-              "MASTER_ADMINISTRATIVE_FILE",
-              "CASE",
-              "DOCUMENT",
-              "EVIDENCE",
-              "EVIDENCE_PACKET",
-              "RECORD_CLASS",
-              "PRESERVATION_COLLECTION"
-            ]
-          },
-          "targetReference": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "recordsClassificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notes": {
-            "type": "string",
-            "maxLength": 1000
-          }
-        },
-        "required": [
-          "targetType",
-          "targetReference"
-        ]
-      },
-      "CreateLegalHoldDto": {
-        "type": "object",
-        "properties": {
-          "holdNumber": {
-            "type": "string",
-            "maxLength": 100
-          },
-          "title": {
-            "type": "string",
-            "maxLength": 300
-          },
-          "authorityReference": {
-            "type": "string",
-            "description": "Court order, statute or instruction requiring the hold"
-          },
-          "reason": {
-            "type": "string",
-            "maxLength": 2000
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "targets": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LegalHoldTargetDto"
-            }
-          }
-        },
-        "required": [
-          "holdNumber",
-          "title",
-          "authorityReference",
-          "reason",
-          "effectiveFrom",
-          "targets"
-        ]
-      },
-      "ReleaseLegalHoldDto": {
-        "type": "object",
-        "properties": {
-          "releaseAuthorityReference": {
-            "type": "string",
-            "description": "Court order or instruction authorising release"
-          },
-          "releaseReason": {
-            "type": "string",
-            "maxLength": 2000
-          }
-        },
-        "required": [
-          "releaseAuthorityReference",
-          "releaseReason"
         ]
       },
       "AssessDecisionReadinessDto": {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CommunicationChannelType,
   CommunicationMessageStatus,
@@ -145,6 +145,82 @@ export class CitizenMessagesProjectionService {
       receivedAt: receipt.receivedAt.toISOString(),
       disclaimer: CITIZEN_MESSAGE_ACKNOWLEDGMENT_DISCLAIMER,
     };
+  }
+
+  /**
+   * Records a READ_RECEIPT on the citizen's portal delivery. Idempotent: if a read receipt or
+   * legal acknowledgment already exists, that time is returned and nothing is written. Reading
+   * is not acknowledgment; legal acknowledgment stays a separate, explicit action.
+   */
+  async markMessageRead(
+    identityId: string,
+    messageId: string,
+    sessionId?: string,
+  ): Promise<{ messageId: string; read: true; readAt: string }> {
+    const scope = await this.scopeService.resolveScope(identityId);
+    const message = await this.findAccessibleMessageById(scope, messageId);
+    if (!message) {
+      throw new NotFoundException(`Message ${messageId} not found`);
+    }
+    if (!this.recipientMatchesIdentity(message, scope)) {
+      throw new ForbiddenException({
+        message: 'Only a recipient can record that this message was read',
+        code: 'MESSAGE_NOT_ADDRESSED_TO_CITIZEN',
+      });
+    }
+
+    const alreadyReadAt = this.firstReadAt(message, scope);
+    if (alreadyReadAt) {
+      return { messageId: message.id, read: true, readAt: alreadyReadAt.toISOString() };
+    }
+
+    const recipientIds = new Set(
+      message.recipients
+        .filter(
+          (recipient) =>
+            recipient.recipientIdentityId === scope.identityId ||
+            (recipient.recipientType === 'ORGANIZATION' &&
+              scope.organizationIds.includes(recipient.recipientReference)),
+        )
+        .map((recipient) => recipient.id),
+    );
+    const portalDeliveries = message.deliveries.filter(
+      (delivery) => delivery.channelType === CommunicationChannelType.PORTAL,
+    );
+    const delivery =
+      portalDeliveries.find(
+        (candidate) =>
+          candidate.communicationRecipientId !== null &&
+          recipientIds.has(candidate.communicationRecipientId),
+      ) ?? portalDeliveries[0];
+    if (!delivery) {
+      throw new ForbiddenException({
+        message: 'This message has no portal delivery to mark as read',
+        code: 'MESSAGE_NOT_ADDRESSED_TO_CITIZEN',
+      });
+    }
+
+    const receipt = await this.prisma.communicationReceipt.create({
+      data: {
+        communicationDeliveryId: delivery.id,
+        receiptType: CommunicationReceiptType.READ_RECEIPT,
+        evidenceReference: `citizen-portal-read:${message.id}:${identityId}`,
+      },
+    });
+
+    await this.audit.record({
+      eventType: 'PROTECTED_ENDPOINT_ACCESS',
+      identityId,
+      sessionId,
+      actorIdentityId: identityId,
+      metadata: {
+        action: 'CITIZEN_MESSAGE_READ',
+        messageId: message.id,
+        receiptId: receipt.id,
+      },
+    });
+
+    return { messageId: message.id, read: true, readAt: receipt.receivedAt.toISOString() };
   }
 
   private async findAccessibleMessages(scope: CitizenAccessScope): Promise<AccessibleMessage[]> {
